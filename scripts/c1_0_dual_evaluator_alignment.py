@@ -209,8 +209,117 @@ def _run_one(
     }
 
 
+def _build_protocol_comparisons() -> list:
+    """Document spec-required comparison points that are NOT regular F1 tests.
+
+    The spec (lines 137-146) requires comparing: exact F1, relaxed F1,
+    canonical-only, wobble, pseudoknot, min-loop, self-pair, empty prediction,
+    structure length mismatch.  Some of these are protocol-level checks rather
+    than F1 scoring tests, so they are documented here separately.
+    """
+
+    return [
+        {
+            "comparison_point": "exact_f1",
+            "efold_behavior": "2*sum(pred*true)/(sum(pred)+sum(true)), full matrix",
+            "reactflow_behavior": "2*TP/(2*TP+FP+FN), upper triangle",
+            "verdict": "agree",
+            "evidence": "All 12 non-empty test cases agree within float32 tolerance.",
+        },
+        {
+            "comparison_point": "relaxed_f1",
+            "efold_behavior": "N/A — eFold has no relaxed/shifted F1 function",
+            "reactflow_behavior": "shifted_pair_counts with tolerance=1, greedy 1-to-1 matching",
+            "verdict": "n/a",
+            "evidence": (
+                "ReactFlow-only extension for diagnostic purposes. "
+                "Not a difference — eFold simply does not implement this. "
+                "Verified in gold fixture 08 (test_evaluator_gold_fixtures.py)."
+            ),
+        },
+        {
+            "comparison_point": "canonical_only",
+            "efold_behavior": "Evaluator is chemistry-agnostic; does not check pair types",
+            "reactflow_behavior": "Evaluator is chemistry-agnostic; does not check pair types",
+            "verdict": "agree",
+            "evidence": (
+                "Neither evaluator inspects nucleotide identity. "
+                "Canonical-only filtering happens at the decoder level "
+                "(validate_pair_matrix), not at the evaluator level."
+            ),
+        },
+        {
+            "comparison_point": "wobble",
+            "efold_behavior": "Evaluator is chemistry-agnostic",
+            "reactflow_behavior": "Evaluator is chemistry-agnostic",
+            "verdict": "agree",
+            "evidence": "Test case gu_wobble_pair_L8: both return F1=1.0.",
+        },
+        {
+            "comparison_point": "pseudoknot",
+            "efold_behavior": "Evaluator is crossing-agnostic; compares all cells",
+            "reactflow_behavior": "Evaluator is crossing-agnostic; compares upper-triangle cells",
+            "verdict": "agree",
+            "evidence": (
+                "Test cases pseudoknot_crossing_perfect_L10 and "
+                "pseudoknot_crossing_partial_L10: both agree. "
+                "Pseudoknot rejection happens at decoder level, not evaluator."
+            ),
+        },
+        {
+            "comparison_point": "min_loop",
+            "efold_behavior": "Evaluator does not check min_loop; it is a decoder parameter",
+            "reactflow_behavior": "Evaluator does not check min_loop; it is a decoder parameter",
+            "verdict": "agree",
+            "evidence": (
+                "Neither evaluator enforces min_loop. "
+                "The Nussinov DP decoder (project_max_weight_nested) uses "
+                "min_loop=3, but the evaluator scores whatever matrix it "
+                "receives. If a decoder produced a pair with |i-j|<=3, both "
+                "evaluators would count it as a normal cell."
+            ),
+        },
+        {
+            "comparison_point": "self_pair",
+            "efold_behavior": "Would count diagonal cell if present; but eFold's postprocess never produces self-pairs",
+            "reactflow_behavior": "pairs_to_matrix raises ValueError for (i,i) before evaluation",
+            "verdict": "agree",
+            "evidence": (
+                "Self-pairs never reach either evaluator in practice. "
+                "ReactFlow rejects them at matrix construction (gold fixture 06). "
+                "eFold's HungarianAlgorithm postprocessor never produces them."
+            ),
+        },
+        {
+            "comparison_point": "empty_prediction",
+            "efold_behavior": "F1=1.0 if target also empty; F1=0.0 if target non-empty",
+            "reactflow_behavior": "F1=0.0 regardless of target (denominator=0 when pred is empty and target is empty; TP=0 when target is non-empty)",
+            "verdict": "explained_difference",
+            "evidence": (
+                "Empty-vs-empty: eFold=1.0, ReactFlow=0.0 (documented convention). "
+                "Empty-vs-nonempty: both return 0.0 (agree). "
+                "Test cases: empty_vs_empty_L5, empty_pred_nonempty_target_L8, "
+                "all_unpaired_target_nonempty_pred_L8."
+            ),
+        },
+        {
+            "comparison_point": "structure_length_mismatch",
+            "efold_behavior": "torch raises RuntimeError: shape mismatch",
+            "reactflow_behavior": "pair_confusion raises ValueError: 'same shape'",
+            "verdict": "agree",
+            "evidence": (
+                "Both evaluators reject length mismatches with an error. "
+                "The error type differs (RuntimeError vs ValueError) but the "
+                "behavior is equivalent: evaluation does not proceed. "
+                "Verified in gold fixture 11 (test_evaluator_gold_fixtures.py)."
+            ),
+        },
+    ]
+
+
 def main() -> int:
     results = [_run_one(name, size, pred, target) for name, size, pred, target in TEST_CASES]
+    protocol_comparisons = _build_protocol_comparisons()
 
     non_empty_results = [
         r for r in results if r["difference_reason"] != "empty_vs_empty_convention"
@@ -220,6 +329,11 @@ def main() -> int:
         r for r in results
         if r["difference_reason"] not in ("none", "empty_vs_empty_convention")
     ]
+
+    # Count protocol comparison verdicts
+    protocol_agree = sum(1 for p in protocol_comparisons if p["verdict"] == "agree")
+    protocol_explained = sum(1 for p in protocol_comparisons if p["verdict"] == "explained_difference")
+    protocol_na = sum(1 for p in protocol_comparisons if p["verdict"] == "n/a")
 
     summary = {
         "schema_version": 1,
@@ -243,6 +357,11 @@ def main() -> int:
         "non_empty_agree_count": non_empty_agree_count,
         "non_empty_all_agree": non_empty_agree_count == len(non_empty_results),
         "unexpected_differences": unexpected_diffs,
+        "protocol_comparison_count": len(protocol_comparisons),
+        "protocol_agree_count": protocol_agree,
+        "protocol_explained_difference_count": protocol_explained,
+        "protocol_na_count": protocol_na,
+        "protocol_comparisons": protocol_comparisons,
         "results": results,
     }
 
@@ -261,6 +380,10 @@ def main() -> int:
                 "empty_vs_empty": summary["empty_vs_empty_count"],
                 "non_empty_all_agree": summary["non_empty_all_agree"],
                 "unexpected_differences": summary["unexpected_difference_count"],
+                "protocol_comparisons": summary["protocol_comparison_count"],
+                "protocol_agree": protocol_agree,
+                "protocol_explained": protocol_explained,
+                "protocol_na": protocol_na,
             },
             sort_keys=True,
         )
