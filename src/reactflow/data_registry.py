@@ -691,11 +691,17 @@ class DataSourceSpec:
 
     Attributes:
         name: Canonical source name (matches :attr:`DataRecord.source`).
-        cache_filename: Default cache filename under ``cache/``.
+        cache_filename: Default cache filename under ``cache/``.  Empty string
+            if the source is not yet downloaded (the loader will skip it).
         description: Human-readable description.
         has_real_profiles: Whether the source contains real probing profiles
             (vs. structure-derived proxies).
         is_windowed: Whether records are typically windowed from longer parents.
+        downloaded: Whether the source has been downloaded and is available
+            in the cache directory.  When ``False``, ``cache_filename`` may
+            still name the *intended* location, but the loader will skip it.
+        upstream_url: URL of the upstream data source (for downloader scripts).
+        upstream_license: License of the upstream data (if known).
     """
 
     name: str
@@ -703,15 +709,22 @@ class DataSourceSpec:
     description: str
     has_real_profiles: bool
     is_windowed: bool
+    downloaded: bool = True
+    upstream_url: Optional[str] = None
+    upstream_license: Optional[str] = None
 
 
 KNOWN_SOURCES: Tuple[DataSourceSpec, ...] = (
+    # --- Cached sources (present in artifacts/full_runs/.../cache/) ---
     DataSourceSpec(
         name="efold_train",
         cache_filename="efold_train.jsonl",
         description="eFold/RNAndria Dryad training set (proxy reactivity).",
         has_real_profiles=False,
         is_windowed=False,
+        downloaded=True,
+        upstream_url="https://datadryad.org/stash/dataset/doi:10.5061/dryad.8kot6hj8",
+        upstream_license="CC-BY-4.0 (Dryad)",
     ),
     DataSourceSpec(
         name="PDB",
@@ -719,6 +732,9 @@ KNOWN_SOURCES: Tuple[DataSourceSpec, ...] = (
         description="PDB-derived RNA structures (proxy reactivity).",
         has_real_profiles=False,
         is_windowed=False,
+        downloaded=True,
+        upstream_url="https://www.rcsb.org/",
+        upstream_license="PDB Data Usage Statement (public domain)",
     ),
     DataSourceSpec(
         name="ArchiveII",
@@ -726,6 +742,9 @@ KNOWN_SOURCES: Tuple[DataSourceSpec, ...] = (
         description="ArchiveII benchmark RNA structures (proxy reactivity).",
         has_real_profiles=False,
         is_windowed=False,
+        downloaded=True,
+        upstream_url="https://rna.urmc.rochester.edu/pub/archiveII/",
+        upstream_license="Academic use only (RPI)",
     ),
     DataSourceSpec(
         name="viral",
@@ -733,6 +752,7 @@ KNOWN_SOURCES: Tuple[DataSourceSpec, ...] = (
         description="Viral RNA windows (mixed real and proxy profiles).",
         has_real_profiles=True,
         is_windowed=False,
+        downloaded=True,
     ),
     DataSourceSpec(
         name="lncRNA",
@@ -740,6 +760,7 @@ KNOWN_SOURCES: Tuple[DataSourceSpec, ...] = (
         description="Long non-coding RNA windows (proxy reactivity).",
         has_real_profiles=False,
         is_windowed=True,
+        downloaded=True,
     ),
     DataSourceSpec(
         name="human_mRNA",
@@ -747,9 +768,91 @@ KNOWN_SOURCES: Tuple[DataSourceSpec, ...] = (
         description="Human mRNA 5'UTR/CDS/3'UTR windows (real DMS profiles).",
         has_real_profiles=True,
         is_windowed=True,
+        downloaded=True,
+    ),
+    # --- Registered but not-yet-downloaded sources (spec lines 248-251) ---
+    DataSourceSpec(
+        name="Rfam",
+        cache_filename="rfam.jsonl",
+        description=(
+            "Rfam family/clan annotations.  Used as metadata annotation on "
+            "other sources (via rfam_metadata.py) rather than as a standalone "
+            "sequence source.  Registered for completeness; not loaded as a "
+            "standalone cache file."
+        ),
+        has_real_profiles=False,
+        is_windowed=False,
+        downloaded=False,
+        upstream_url="https://rfam.org/",
+        upstream_license="CC-BY-4.0 (Rfam)",
+    ),
+    DataSourceSpec(
+        name="Ribonanza",
+        cache_filename="ribonanza.jsonl",
+        description=(
+            "Ribonanza RNA mapping dataset (Kaggle 2023).  Chemical mapping "
+            "data (DMS, 2A3, SHAPE) for ~2 million RNA sequences.  Metadata "
+            "registered; raw data not yet downloaded."
+        ),
+        has_real_profiles=True,
+        is_windowed=False,
+        downloaded=False,
+        upstream_url="https://www.kaggle.com/competitions/ribonanza-rna-folding",
+        upstream_license="Kaggle competition data (research use)",
+    ),
+    DataSourceSpec(
+        name="Ribonanza2",
+        cache_filename="ribonanza2.jsonl",
+        description=(
+            "Ribonanza2 RNA mapping dataset (Kaggle 2024).  Extends "
+            "Ribonanza with additional sequences and probing conditions.  "
+            "Used by RibonanzaNet2 pretraining.  Metadata registered; raw "
+            "data not yet downloaded."
+        ),
+        has_real_profiles=True,
+        is_windowed=False,
+        downloaded=False,
+        upstream_url="https://www.kaggle.com/competitions/ribonanza-rna-folding",
+        upstream_license="Kaggle competition data (research use)",
+    ),
+    DataSourceSpec(
+        name="bpRNA",
+        cache_filename="bpRNA.jsonl",
+        description=(
+            "bpRNA-1m: ~102,000 RNA sequences with secondary structure "
+            "annotations from Rfam and bpRNA-1m.  Used by RibonanzaNet2 "
+            "pretraining.  Run scripts/download_bprna_rnastralign.py to "
+            "fetch and build the manifest."
+        ),
+        has_real_profiles=False,
+        is_windowed=False,
+        downloaded=False,
+        upstream_url="https://bprna.cgrb.oregonstate.edu/",
+        upstream_license="MIT (bpRNA code) / Rfam data license",
+    ),
+    DataSourceSpec(
+        name="RNAStrAlign",
+        cache_filename="rnastralign.jsonl",
+        description=(
+            "RNAStrAlign: ~30,000 RNA secondary structures from multiple "
+            "databases (PDB, Rfam, bpRNA, etc.).  Used by RibonanzaNet2 "
+            "pretraining.  Run scripts/download_bprna_rnastralign.py to "
+            "fetch and build the manifest."
+        ),
+        has_real_profiles=False,
+        is_windowed=False,
+        downloaded=False,
+        upstream_url="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6324060/",
+        upstream_license="Public (research use)",
     ),
 )
-"""Default specs for the six existing cache JSONL files."""
+"""Specifications for all known RNA data sources (spec lines 240-251).
+
+Sources with ``downloaded=False`` are registered for provenance and audit
+purposes; the loader (``build_global_registry.py``) skips them when the
+cache file does not exist.  Use ``scripts/download_bprna_rnastralign.py``
+or future downloaders to populate the cache for these sources.
+"""
 
 
 def default_cache_dir() -> Path:

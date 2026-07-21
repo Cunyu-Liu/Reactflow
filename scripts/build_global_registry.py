@@ -112,7 +112,14 @@ def main() -> int:
     for spec in KNOWN_SOURCES:
         cache_path = args.cache_dir / spec.cache_filename
         if not cache_path.exists():
-            print(f"[build_global_registry] SKIP {spec.name}: {cache_path} not found")
+            reason = "not downloaded (registered for provenance)" if not spec.downloaded else "cache file not found"
+            print(f"[build_global_registry] SKIP {spec.name}: {cache_path} ({reason})")
+            source_stats[spec.name] = {
+                "loaded": 0,
+                "duplicates_skipped": 0,
+                "downloaded": spec.downloaded,
+                "skipped_reason": reason,
+            }
             continue
         print(f"[build_global_registry] loading {spec.name} from {cache_path}")
         source_count = 0
@@ -134,6 +141,7 @@ def main() -> int:
         source_stats[spec.name] = {
             "loaded": source_count,
             "duplicates_skipped": source_duplicates,
+            "downloaded": True,
         }
         print(f"[build_global_registry]   {spec.name}: {source_count} records "
               f"({source_duplicates} duplicates skipped)")
@@ -195,8 +203,12 @@ def main() -> int:
                 "description": s.description,
                 "has_real_profiles": s.has_real_profiles,
                 "is_windowed": s.is_windowed,
+                "downloaded": s.downloaded,
+                "upstream_url": s.upstream_url,
+                "upstream_license": s.upstream_license,
                 "loaded": source_stats.get(s.name, {}).get("loaded", 0),
                 "duplicates_skipped": source_stats.get(s.name, {}).get("duplicates_skipped", 0),
+                "skipped_reason": source_stats.get(s.name, {}).get("skipped_reason"),
             }
             for s in KNOWN_SOURCES
         ],

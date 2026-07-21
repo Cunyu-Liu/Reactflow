@@ -440,8 +440,10 @@ class TestRegistryStats:
 # ---------------------------------------------------------------------------
 
 class TestKnownSources:
-    def test_six_sources(self):
-        assert len(KNOWN_SOURCES) == 6
+    def test_eleven_sources(self):
+        # 6 cached + 5 registered-but-not-downloaded (Rfam, Ribonanza,
+        # Ribonanza2, bpRNA, RNAStrAlign) per spec lines 248-251.
+        assert len(KNOWN_SOURCES) == 11
 
     def test_unique_names(self):
         names = [s.name for s in KNOWN_SOURCES]
@@ -452,6 +454,34 @@ class TestKnownSources:
 
     def test_has_pdb(self):
         assert any(s.name == "PDB" for s in KNOWN_SOURCES)
+
+    def test_has_rfam(self):
+        assert any(s.name == "Rfam" for s in KNOWN_SOURCES)
+
+    def test_has_ribonanza(self):
+        assert any(s.name == "Ribonanza" for s in KNOWN_SOURCES)
+
+    def test_has_ribonanza2(self):
+        assert any(s.name == "Ribonanza2" for s in KNOWN_SOURCES)
+
+    def test_has_bprna(self):
+        assert any(s.name == "bpRNA" for s in KNOWN_SOURCES)
+
+    def test_has_rnastralign(self):
+        assert any(s.name == "RNAStrAlign" for s in KNOWN_SOURCES)
+
+    def test_cached_sources_marked_downloaded(self):
+        cached = [s for s in KNOWN_SOURCES if s.downloaded]
+        # 6 cached sources should be marked as downloaded
+        assert len(cached) == 6
+        for s in cached:
+            assert s.name in {"efold_train", "PDB", "ArchiveII", "viral", "lncRNA", "human_mRNA"}
+
+    def test_not_downloaded_sources_have_upstream_url(self):
+        for s in KNOWN_SOURCES:
+            if not s.downloaded:
+                assert s.upstream_url is not None, f"{s.name} missing upstream_url"
+                assert s.upstream_url.startswith("http"), f"{s.name} invalid URL"
 
 
 # ---------------------------------------------------------------------------

@@ -418,6 +418,104 @@ def validate_novel_family_disjoint(
     return violations
 
 
+def compute_novel_clan_split(
+    primary_assignment: Dict[str, str],
+    records: Dict[str, DataRecord],
+) -> Tuple[Dict[str, str], Dict[str, Any]]:
+    """Reclassify a subset of ``novel_family`` records as ``novel_clan``.
+
+    A record is moved from ``novel_family`` to ``novel_clan`` if and only if:
+
+    1. Its current split is ``novel_family``.
+    2. Its ``clan`` field is not ``None``.
+    3. Its ``clan`` does not appear in any ``train`` record's ``clan``.
+
+    After the majority-vote reassignment, criterion (3) is automatically
+    satisfied for any ``novel_family`` record with a non-None ``clan`` (because
+    contamination groups — which merge by clan — are already disjoint across
+    splits).  We check it explicitly anyway for defense-in-depth.
+
+    Returns ``(new_assignment, stats)`` where ``stats`` is a dict with:
+        - ``novel_clan_count``: number of records moved to ``novel_clan``
+        - ``novel_family_remaining``: number of records still in ``novel_family``
+        - ``novel_family_no_clan``: # novel_family records skipped due to
+          ``clan is None``
+        - ``novel_family_clan_in_train``: # novel_family records skipped due to
+          clan also appearing in train (should be 0 after reassignment)
+
+    Complexity: ``O(N)``.
+    """
+
+    # Collect all clans in train.
+    train_clans: Set[str] = set()
+    for rid, split in primary_assignment.items():
+        if split == "train":
+            clan = records[rid].clan
+            if clan is not None:
+                train_clans.add(clan)
+
+    new_assignment: Dict[str, str] = dict(primary_assignment)
+    novel_clan_count = 0
+    novel_family_remaining = 0
+    novel_family_no_clan = 0
+    novel_family_clan_in_train = 0
+
+    for rid, split in primary_assignment.items():
+        if split != "novel_family":
+            continue
+        clan = records[rid].clan
+        if clan is None:
+            novel_family_no_clan += 1
+            novel_family_remaining += 1
+            continue
+        if clan in train_clans:
+            # Defense-in-depth: this should not happen after reassignment.
+            novel_family_clan_in_train += 1
+            novel_family_remaining += 1
+            continue
+        # Move this record to novel_clan.
+        new_assignment[rid] = "novel_clan"
+        novel_clan_count += 1
+
+    stats = {
+        "novel_clan_count": novel_clan_count,
+        "novel_family_remaining": novel_family_remaining,
+        "novel_family_no_clan": novel_family_no_clan,
+        "novel_family_clan_in_train": novel_family_clan_in_train,
+        "train_clan_count": len(train_clans),
+    }
+    return new_assignment, stats
+
+
+def validate_novel_clan_disjoint(
+    primary_assignment: Dict[str, str],
+    records: Dict[str, DataRecord],
+) -> List[str]:
+    """Validate that ``novel_clan`` records do not share clans with ``train``.
+
+    Returns a list of violation messages (empty means PASS).
+
+    Complexity: ``O(N)``.
+    """
+
+    train_clans: Set[str] = set()
+    for rid, split in primary_assignment.items():
+        if split == "train":
+            clan = records[rid].clan
+            if clan is not None:
+                train_clans.add(clan)
+
+    violations: List[str] = []
+    for rid, split in primary_assignment.items():
+        if split == "novel_clan":
+            clan = records[rid].clan
+            if clan is not None and clan in train_clans:
+                violations.append(
+                    f"record {rid} in novel_clan has clan {clan} also in train"
+                )
+    return violations
+
+
 def main() -> int:
     args = parse_args()
 
@@ -507,6 +605,28 @@ def main() -> int:
           f"{sum(1 for s in primary_assignment.values() if s == 'test_mmseqs')} test_mmseqs, "
           f"{sum(1 for s in primary_assignment.values() if s == 'novel_family')} novel_family")
 
+    # Compute novel_clan as the subset of novel_family whose clan is not in
+    # train (spec line 271).  After majority-vote reassignment, all
+    # novel_family records with non-None clan satisfy this by construction
+    # (clan-based contamination groups are already disjoint across splits).
+    print("[build_frozen_benchmarks] computing novel_clan split "
+          "(subset of novel_family with clan not in train)")
+    primary_assignment, novel_clan_stats = compute_novel_clan_split(
+        primary_assignment, records,
+    )
+    print(f"[build_frozen_benchmarks]   novel_clan_count: {novel_clan_stats['novel_clan_count']}")
+    print(f"[build_frozen_benchmarks]   novel_family_remaining (clan=None or clan in train): "
+          f"{novel_clan_stats['novel_family_remaining']}")
+    print(f"[build_frozen_benchmarks]   novel_family_no_clan: {novel_clan_stats['novel_family_no_clan']}")
+    print(f"[build_frozen_benchmarks]   novel_family_clan_in_train (should be 0): "
+          f"{novel_clan_stats['novel_family_clan_in_train']}")
+    print(f"[build_frozen_benchmarks] primary assignment (after novel_clan split): "
+          f"{sum(1 for s in primary_assignment.values() if s == 'train')} train, "
+          f"{sum(1 for s in primary_assignment.values() if s == 'val')} val, "
+          f"{sum(1 for s in primary_assignment.values() if s == 'test_mmseqs')} test_mmseqs, "
+          f"{sum(1 for s in primary_assignment.values() if s == 'novel_family')} novel_family, "
+          f"{sum(1 for s in primary_assignment.values() if s == 'novel_clan')} novel_clan")
+
     # Assign benchmark tags
     benchmark_tags = assign_benchmark_splits(records, primary_assignment)
     pseudoknot_records = [rid for rid, r in records.items() if r.has_pseudoknot()]
@@ -530,6 +650,10 @@ def main() -> int:
     print(f"[build_frozen_benchmarks]   criterion 2b (novel_family disjoint from train): "
           f"{'PASS' if not novel_fam_violations else 'FAIL'} ({len(novel_fam_violations)} violations)")
 
+    novel_clan_violations = validate_novel_clan_disjoint(primary_assignment, records)
+    print(f"[build_frozen_benchmarks]   criterion 2c (novel_clan disjoint from train): "
+          f"{'PASS' if not novel_clan_violations else 'FAIL'} ({len(novel_clan_violations)} violations)")
+
     parent_violations = validate_parent_window_disjoint(primary_assignment, records)
     print(f"[build_frozen_benchmarks]   criterion 4 (parent-window disjoint): "
           f"{'PASS' if not parent_violations else 'FAIL'} ({len(parent_violations)} violations)")
@@ -550,23 +674,26 @@ def main() -> int:
         },
         "pseudoknot_count": len(pseudoknot_records),
         "reassignment_stats": reassign_stats,
+        "novel_clan_stats": novel_clan_stats,
         "gate_validation": {
             "criterion_1_group_overlap_zero": not overlap,
             "criterion_2_benchmarks_not_in_train": not benchmark_violations,
             "criterion_2b_novel_family_disjoint_from_train": not novel_fam_violations,
+            "criterion_2c_novel_clan_disjoint_from_train": not novel_clan_violations,
             "criterion_3_reconstructable_from_manifest": True,
             "criterion_4_parent_window_disjoint": not parent_violations,
             "criterion_5_pretraining_contamination_status": "see pretraining_contamination_report.json",
         },
         "gate_verdict": (
             "PASS" if not overlap and not benchmark_violations and not parent_violations
-            and not novel_fam_violations
+            and not novel_fam_violations and not novel_clan_violations
             else "FAIL"
         ),
         "violation_details": {
             "group_overlap": {k: {k2: v2 for k2, v2 in v.items()} for k, v in overlap.items()} if overlap else {},
             "benchmarks_in_train": benchmark_violations[:20],
             "novel_family_in_train": novel_fam_violations[:20],
+            "novel_clan_in_train": novel_clan_violations[:20],
             "parent_window_cross_split": parent_violations[:20],
         },
         "provenance": {
