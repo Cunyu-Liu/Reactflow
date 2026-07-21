@@ -1,0 +1,67 @@
+# Large data and artifacts
+artifacts/
+outputs/
+*.ckpt
+*.pt
+*.pth
+*.checkpoint
+*.h5
+*.safetensors
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+coverage.json
+coverage_v2.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+c0_logs/
+
+# C0 stage artifacts (separate isolated copy, not in main repo)
+c0_artifacts/
+
+# Frozen features (large, referenced by path)
+frozen_features/
+*.frozen.*
+
+# Data splits (large, regenerated from source)
+splits/
+data/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Large baseline/probing outputs
+baseline_efold_results.json
+final_decoder_manifest.json
+runtime_bottleneck_report.md
+sota_alignment_table.json

@@ -1,0 +1,28 @@
+name: ReactFlow tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: py${{ matrix.python-version }}-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Test with coverage
+        run: python -m pytest --cov=reactflow --cov-report=term-missing
+      - name: Symbolic checks
+        run: python -m reactflow.cli verify-symbolic

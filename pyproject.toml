@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reactflow"
+version = "0.1.0"
+description = "Reactivity-consistent flow-matching utilities for RNA 2D structure ensembles."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "ReactFlow contributors" }]
+dependencies = []
+
+[project.optional-dependencies]
+data = ["h5py>=3.10"]
+symbolic = ["sympy>=1.12"]
+torch = ["torch>=2.0"]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "sympy>=1.12", "h5py>=3.10"]
+
+[project.scripts]
+reactflow = "reactflow.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+branch = true
+source = ["reactflow"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90
+exclude_lines = [
+  "if __name__ == .__main__.:",
+  "pragma: no cover",
+]
