@@ -122,7 +122,7 @@ TP/FP/FN/TN on all test cases.
 
 **Artifact:** `artifacts/c1_0/efold_dual_alignment.json`
 **Script:** `scripts/c1_0_dual_evaluator_alignment.py`
-**Commit:** `793e8fcb`
+**Commits:** `793e8fcb` (initial), `c01f7a3` (enhanced with 9 protocol comparisons)
 
 ### eFold f1 function
 
@@ -140,7 +140,7 @@ operates on the full (L,L) matrix without UKN masking. This is algebraically
 equivalent to ReactFlow's upper-triangle F1 for symmetric matrices with zero
 diagonal.
 
-### Results (15 test cases)
+### F1 test case results (15 cases)
 
 | Metric | Count |
 |--------|-------|
@@ -148,6 +148,25 @@ diagonal.
 | All 3 evaluators agree | 12 |
 | Empty-vs-empty convention difference | 3 |
 | Unexpected differences | **0** |
+
+### Protocol comparison results (9 spec-required points)
+
+The spec (lines 137-146) requires comparing 9 specific aspects. All 9 are
+documented in `efold_dual_alignment.json` under `protocol_comparisons`:
+
+| # | Comparison point | Verdict | Notes |
+|---|-----------------|---------|-------|
+| 1 | exact F1 | agree | All 12 non-empty cases agree within float32 tolerance |
+| 2 | relaxed F1 | n/a | ReactFlow-only extension (shifted_f1, tolerance=1); eFold has no equivalent |
+| 3 | canonical-only | agree | Both evaluators are chemistry-agnostic; filtering happens at decoder level |
+| 4 | wobble | agree | Both evaluators are chemistry-agnostic (test case: gu_wobble_pair_L8) |
+| 5 | pseudoknot | agree | Both evaluators are crossing-agnostic (test cases: pseudoknot_crossing_*) |
+| 6 | min-loop | agree | Neither evaluator checks min_loop; it's a decoder parameter |
+| 7 | self-pair | agree | Both reject self-pairs before evaluation (gold fixture 06) |
+| 8 | empty prediction | explained_difference | Empty-vs-empty: eFold=1.0, ReactFlow=0.0 (documented convention) |
+| 9 | structure length mismatch | agree | Both raise errors (torch RuntimeError vs ReactFlow ValueError) |
+
+**Summary:** 7 agree, 1 explained difference, 1 N/A. Zero unexpected differences.
 
 **Verdict:** The evaluators are aligned. The only difference is the documented
 empty-vs-empty convention.
@@ -336,10 +355,11 @@ The problem is in one or more of:
 | Artifact | Path | Status |
 |----------|------|--------|
 | Gold fixture results | `artifacts/c1_0/evaluator_fixture_results.json` | Generated |
-| Dual alignment results | `artifacts/c1_0/efold_dual_alignment.json` | Generated |
+| Dual alignment results | `artifacts/c1_0/efold_dual_alignment.json` | Generated (9 protocol comparisons) |
 | Four-quadrant results | `artifacts/c1_0/efold_four_quadrant_results.json` | Generated |
 | Data overlap audit | `artifacts/c1_0/data_overlap_audit.json` | Generated |
-| Evaluator contract | `configs/evaluation/static_v1.yaml` | Frozen |
+| Evaluation contract (JSON) | `artifacts/c1_0/evaluation_contract.json` | Generated |
+| Evaluator contract (YAML) | `configs/evaluation/static_v1.yaml` | Frozen |
 | Gold fixture tests | `tests/test_evaluator_gold_fixtures.py` | 14/14 pass |
 | Contract tests | `tests/test_evaluator_contract.py` | 15/15 pass |
 | Audit document | `docs/c1_0_evaluator_forensic_audit.md` | This file |
@@ -354,4 +374,5 @@ The problem is in one or more of:
 | `eef07e6` | 4 | Four-quadrant localization analysis |
 | `c216599` | 5 | Data leakage and protocol conflict audit |
 | `701c2fd` | 6 | Freeze evaluator contract v1 + tests |
-| (this commit) | 7-8 | Audit document + Gate judgment |
+| `5bea5a4` | 7-8 | Audit document + evaluation_contract.json + Gate judgment |
+| `c01f7a3` | 3+ | Enhanced dual alignment with 9 protocol comparison points |
