@@ -1,0 +1,77 @@
+# Bilinear pair head baseline configuration (C1-2 pilot)
+#
+# Spec reference: ReactFlow分阶段执行提示词.md lines 377-394 (matched-capacity baselines)
+#
+# Pure single-stack model with bilinear pair scoring:
+#   s_ij = h_i^T M_sym h_j + c_pair * compat_ij
+#
+# No pair stack, no triangle updates.  Isolates the contribution of the
+# PairFormer's pair stack from generic "symmetric output head" capacity.
+
+schema_version: "1.0"
+model_type: "bilinear_pair_head"
+config_name: "bilinear_baseline"
+
+model:
+  single_dim: 256
+  max_len: 128
+  use_onehot: false
+  learnable_pos: true
+  dropout: 0.0
+  use_compatibility: true
+  compat_scale_init: 0.5
+  use_calibration: true
+  init_temperature: 1.0
+  num_single_layers: 2
+  ffn_expansion: 4
+
+# Loss configuration (same as PairFormer for fair comparison)
+loss:
+  bce_weight: 1.0
+  focal_weight: 0.5
+  soft_f1_weight: 0.5
+  dice_weight: 0.0
+  pair_count_weight: 0.1
+  symmetry_weight: 0.01
+  calibration_weight: 0.1
+  unpaired_weight: 0.5
+  focal_gamma: 2.0
+  bce_pos_weight: null
+  bce_pos_weight_auto: true
+  ece_num_bins: 15
+
+training:
+  max_len: 128
+  batch_size: 64              # smaller model -> larger batch
+  eval_batch_size: 32
+  epochs: 8
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-4
+  warmup_steps: 200
+  max_grad_norm: 1.0
+  use_amp: false
+  num_workers: 4
+  pin_memory: true
+  log_every: 20
+  eval_every_epochs: 1
+  save_every_epochs: 1
+
+data:
+  manifest_path: "artifacts/c1_1/frozen_benchmark_manifest.json"
+  cache_root: "data/cache"
+  train_split: "train"
+  val_split: "val"
+  test_split: "test_mmseqs"
+  novel_split: "novel_clan"
+  max_length: 128
+  min_length: 4
+
+decoder:
+  default_mode: "nussinov_dp"
+  threshold: 0.5
+  min_score: 0.0
+  min_loop: 3
+  allow_wobble: true
+  seq_pad_index: 5
+
+seed: 0
