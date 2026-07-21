@@ -18,6 +18,9 @@ Loss components
   reliability bins, plus a Brier score term.
 - :func:`unpaired_bce_loss` -- BCE on per-position unpaired probabilities
   against the implicit unpaired target (``1 - sum_j P_ij^*``).
+- :func:`long_range_reweighting_loss` -- distance-weighted BCE that upweights
+  long-range pairs (distance > threshold).  Configurable ablation per spec
+  line 392.
 - :func:`pairformer_loss` -- combined weighted sum of all the above.
 
 All losses accept batched inputs ``(B, L, L)`` for pair tensors and ``(B, L)``
@@ -79,6 +82,12 @@ class LossConfig:
     bce_pos_weight: Optional[float] = None
     bce_pos_weight_auto: bool = True
     ece_num_bins: int = 15
+
+    # Long-range reweighting (configurable ablation, spec line 392).
+    # Setting long_range_weight > 0 enables the ablation; 0 disables it.
+    long_range_weight: float = 0.0
+    long_range_threshold: int = 24  # pairs with |i-j| >= this are "long-range"
+    long_range_upweight_factor: float = 2.0  # multiply BCE for long-range pairs
 
     def __post_init__(self) -> None:
         if self.ece_num_bins < 1:
@@ -513,6 +522,69 @@ def unpaired_bce_loss(
 
 
 # ---------------------------------------------------------------------------
+# Long-range reweighting loss (configurable ablation, spec line 392)
+# ---------------------------------------------------------------------------
+
+
+def long_range_reweighting_loss(
+    logits: torch.Tensor,
+    targets: torch.Tensor,
+    *,
+    mask: Optional[torch.Tensor] = None,
+    distance_threshold: int = 24,
+    upweight_factor: float = 2.0,
+) -> torch.Tensor:
+    """Distance-weighted BCE that upweights long-range pairs.
+
+    Spec reference: ``ReactFlow分阶段执行提示词.md`` line 392 —
+    "long-range reweighting只作为可配置消融" (long-range reweighting only as
+    configurable ablation).
+
+    Computes per-cell BCE with logits, then multiplies the loss for cells
+    with ``|i - j| >= distance_threshold`` by ``upweight_factor``.  This
+    counteracts the model's tendency to ignore long-range pairs (which are
+    rarer and harder to learn).
+
+    Args:
+        logits: ``(B, L, L)`` pair logits.
+        targets: ``(B, L, L)`` binary target.
+        mask: optional ``(B, L)`` real-position mask.
+        distance_threshold: pairs with ``|i-j| >= threshold`` are upweighted.
+        upweight_factor: multiplier for long-range cells (e.g. 2.0 doubles
+            their BCE contribution).
+
+    Returns:
+        Scalar loss (mean over valid upper-triangle cells, with reweighting).
+
+    Complexity: ``O(B * L^2)``.
+    """
+    B, L, _ = logits.shape
+    device = logits.device
+    pair_cell_mask, _ = _pair_mask_and_diag(mask, L, device=device)
+    pair_cell_mask = pair_cell_mask & torch.isfinite(logits)
+
+    # Distance weight matrix: 1.0 for short/medium, upweight_factor for long.
+    idx = torch.arange(L, device=device)
+    dist = (idx.unsqueeze(0) - idx.unsqueeze(1)).abs()  # (L, L)
+    weight = torch.where(
+        dist >= distance_threshold,
+        torch.full_like(dist, upweight_factor, dtype=torch.float32),
+        torch.ones_like(dist, dtype=torch.float32),
+    )  # (L, L)
+    weight = weight.unsqueeze(0)  # (1, L, L)
+
+    flat_mask = pair_cell_mask.reshape(-1)
+    flat_logits = logits.reshape(-1)[flat_mask]
+    flat_targets = targets.reshape(-1)[flat_mask].to(flat_logits.dtype)
+    flat_weights = weight.expand(B, L, L).reshape(-1)[flat_mask]
+
+    loss = F.binary_cross_entropy_with_logits(
+        flat_logits, flat_targets, reduction="none"
+    )
+    return (loss * flat_weights).mean()
+
+
+# ---------------------------------------------------------------------------
 # Combined loss
 # ---------------------------------------------------------------------------
 
@@ -551,6 +623,7 @@ def pairformer_loss(
         "symmetry": torch.tensor(0.0, device=logits.device),
         "calibration": torch.tensor(0.0, device=logits.device),
         "unpaired": torch.tensor(0.0, device=logits.device),
+        "long_range": torch.tensor(0.0, device=logits.device),
     }
 
     if cfg.bce_weight > 0:
@@ -588,6 +661,13 @@ def pairformer_loss(
             output.unpaired_logit, targets, mask=mask,
         )
 
+    if cfg.long_range_weight > 0:
+        parts["long_range"] = long_range_reweighting_loss(
+            logits, targets, mask=mask,
+            distance_threshold=cfg.long_range_threshold,
+            upweight_factor=cfg.long_range_upweight_factor,
+        )
+
     total = (
         cfg.bce_weight * parts["bce"]
         + cfg.focal_weight * parts["focal"]
@@ -597,6 +677,7 @@ def pairformer_loss(
         + cfg.symmetry_weight * parts["symmetry"]
         + cfg.calibration_weight * parts["calibration"]
         + cfg.unpaired_weight * parts["unpaired"]
+        + cfg.long_range_weight * parts["long_range"]
     )
     parts["total"] = total
     return parts

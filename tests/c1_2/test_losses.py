@@ -23,6 +23,7 @@ from reactflow.losses import (
     class_balanced_bce_loss,
     dice_loss,
     focal_loss,
+    long_range_reweighting_loss,
     pair_count_reg_loss,
     pairformer_loss,
     soft_f1_loss,
@@ -66,7 +67,9 @@ def _make_pairformer_output(L: int = 6, batch: int = 1):
         num_heads_pair=2, num_heads_single=2,
     )
     model = StaticPairFormer(cfg)
-    indices = torch.tensor([[0, 1, 2, 3, 0, 1][:L]] * batch)
+    # Generate indices by cycling through ACGU (0-3) to support any L.
+    base_seq = [0, 1, 2, 3]
+    indices = torch.tensor([(base_seq * ((L + 3) // 4))[:L]] * batch)
     out = model(indices)
     return out, indices
 
@@ -335,6 +338,7 @@ class TestPairformerLoss:
         expected_keys = {
             "total", "bce", "focal", "soft_f1", "dice",
             "pair_count", "symmetry", "calibration", "unpaired",
+            "long_range",
         }
         assert set(parts.keys()) == expected_keys
 
@@ -348,10 +352,11 @@ class TestPairformerLoss:
             bce_weight=0.0, focal_weight=0.0, soft_f1_weight=0.0,
             dice_weight=0.0, pair_count_weight=0.0, symmetry_weight=0.0,
             calibration_weight=0.0, unpaired_weight=0.0,
+            long_range_weight=0.0,
         )
         parts = pairformer_loss(output, targets, config=cfg)
         # All disabled terms should be 0
-        for key in ("bce", "focal", "soft_f1", "dice", "pair_count", "symmetry", "calibration", "unpaired"):
+        for key in ("bce", "focal", "soft_f1", "dice", "pair_count", "symmetry", "calibration", "unpaired", "long_range"):
             assert parts[key].item() == 0.0
         # Total should also be 0
         assert parts["total"].item() == 0.0
@@ -366,3 +371,110 @@ class TestPairformerLoss:
         parts["total"].backward()
         # Should have gradients on the model parameters
         # (verified by checking the PairFormerOutput's logits require grad)
+
+    def test_long_range_enabled_in_combined(self):
+        """When long_range_weight > 0, the long_range component should be non-zero."""
+        output, _ = _make_pairformer_output(L=10, batch=1)
+        targets = torch.randint(0, 2, (1, 10, 10)).float()
+        targets = 0.5 * (targets + targets.transpose(1, 2))
+        for i in range(10):
+            targets[:, i, i] = 0.0
+        cfg = LossConfig(
+            bce_weight=0.0, focal_weight=0.0, soft_f1_weight=0.0,
+            dice_weight=0.0, pair_count_weight=0.0, symmetry_weight=0.0,
+            calibration_weight=0.0, unpaired_weight=0.0,
+            long_range_weight=1.0,
+        )
+        parts = pairformer_loss(output, targets, config=cfg)
+        assert parts["long_range"].item() > 0
+        assert parts["total"].item() > 0
+
+
+# ---------------------------------------------------------------------------
+# long_range_reweighting_loss
+# ---------------------------------------------------------------------------
+
+
+class TestLongRangeReweightingLoss:
+    def test_non_negative(self):
+        logits, targets, mask = _make_simple_batch(L=10)
+        loss = long_range_reweighting_loss(logits, targets, mask=mask)
+        assert loss.item() >= 0
+
+    def test_gradient_flow(self):
+        logits, targets, mask = _make_simple_batch(L=10)
+        logits = logits.detach().requires_grad_(True)
+        loss = long_range_reweighting_loss(logits, targets, mask=mask)
+        loss.backward()
+        assert logits.grad is not None
+
+    def test_upweight_factor_increases_loss(self):
+        """Higher upweight_factor should increase loss for long-range pairs."""
+        torch.manual_seed(42)
+        L = 20
+        logits = torch.randn(1, L, L)
+        logits = 0.5 * (logits + logits.transpose(1, 2))
+        for i in range(L):
+            logits[:, i, i] = 0.0
+        targets = torch.zeros(1, L, L)
+        # Put a pair at distance 10 (long-range)
+        targets[0, 0, 10] = 1.0
+        targets[0, 10, 0] = 1.0
+        mask = torch.ones(1, L, dtype=torch.bool)
+        loss_low = long_range_reweighting_loss(
+            logits, targets, mask=mask,
+            distance_threshold=5, upweight_factor=1.0,
+        )
+        loss_high = long_range_reweighting_loss(
+            logits, targets, mask=mask,
+            distance_threshold=5, upweight_factor=5.0,
+        )
+        assert loss_high.item() > loss_low.item()
+
+    def test_threshold_controls_which_pairs_upweighted(self):
+        """With threshold=100, no pairs should be upweighted (all are short-range)."""
+        torch.manual_seed(42)
+        L = 10
+        logits = torch.randn(1, L, L)
+        logits = 0.5 * (logits + logits.transpose(1, 2))
+        for i in range(L):
+            logits[:, i, i] = 0.0
+        targets = torch.zeros(1, L, L)
+        targets[0, 0, 5] = 1.0
+        targets[0, 5, 0] = 1.0
+        mask = torch.ones(1, L, dtype=torch.bool)
+        loss_reweighted = long_range_reweighting_loss(
+            logits, targets, mask=mask,
+            distance_threshold=100, upweight_factor=10.0,
+        )
+        loss_plain = long_range_reweighting_loss(
+            logits, targets, mask=mask,
+            distance_threshold=100, upweight_factor=1.0,
+        )
+        # With threshold=100, no cells are "long-range", so upweight_factor
+        # has no effect and the two losses should be equal.
+        assert abs(loss_reweighted.item() - loss_plain.item()) < 1e-6
+
+
+# ---------------------------------------------------------------------------
+# pair module import (spec line 346)
+# ---------------------------------------------------------------------------
+
+
+class TestPairModule:
+    def test_import_from_pair_module(self):
+        """The pair/ module should re-export all pair-related classes."""
+        from reactflow.pair import (
+            SymmetricPairInit,
+            TriangleMultiplicativeUpdate,
+            TriangleAttention,
+            PairTransition,
+            OuterProductMean,
+            PairToSingleAttention,
+        )
+        assert SymmetricPairInit is not None
+        assert TriangleMultiplicativeUpdate is not None
+        assert TriangleAttention is not None
+        assert PairTransition is not None
+        assert OuterProductMean is not None
+        assert PairToSingleAttention is not None
