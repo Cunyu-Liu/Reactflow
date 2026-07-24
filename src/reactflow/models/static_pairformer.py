@@ -391,6 +391,7 @@ class StaticPairFormer(nn.Module):
         self.config = config or PairFormerConfig()
         C = self.config.single_dim
         P = self.config.pair_dim
+        self.gradient_checkpointing: bool = False
 
         # Input embedding
         self.input_embedding = InputEmbedding(
@@ -462,11 +463,25 @@ class StaticPairFormer(nn.Module):
 
         # PairFormer blocks
         for block in self.blocks:
-            single, pair = block(single, pair, mask=mask)
+            if self.gradient_checkpointing and self.training:
+                import torch.utils.checkpoint as cp
+                def _run_blk(s, p, m, blk=block):
+                    return blk(s, p, mask=m)
+                single, pair = cp.checkpoint(_run_blk, single, pair, mask, use_reentrant=False)
+            else:
+                single, pair = block(single, pair, mask=mask)
 
         # Output head
         output = self.output_head(single, pair, mask=mask)
         return output
+
+    def gradient_checkpointing_enable(self) -> None:
+        """Enable gradient checkpointing to reduce memory at the cost of compute."""
+        self.gradient_checkpointing = True
+
+    def gradient_checkpointing_disable(self) -> None:
+        """Disable gradient checkpointing."""
+        self.gradient_checkpointing = False
 
     def num_parameters(self) -> int:
         """Return the total number of trainable parameters."""
