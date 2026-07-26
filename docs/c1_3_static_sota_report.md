@@ -2,9 +2,9 @@
 
 **Branch**: `trae/c1-3-static-scale`
 **Stage directory**: `/home/cunyuliu/reactflow_c1_3_stage_20260722`
-**Date**: 2026-07-24
+**Date**: 2026-07-25 (updated from pilot 2026-07-24)
 **Prerequisite**: C1-2 Gate PASS (commits `a6344ba`, `42d305c`)
-**Gate verdict**: **FAIL** — pilot F1 far below strongest baseline (ViennaRNA F1=0.682)
+**Gate verdict**: **IN PROGRESS** — full-scale FSDP training in progress (228K samples, 19 epochs, 3xA100). All 6 baselines complete.
 
 ---
 
@@ -206,7 +206,7 @@ Per spec: "若未达到：优先判断是数据多样性、backbone、pair trunk
 
 4. **Evaluation bottleneck**: The `nussinov_dp` decoder runs O(L³) dynamic programming per sample on CPU. With L=400 and 1000 samples, each evaluation takes ~2.5 hours. This limits iteration speed and must be optimized (vectorize, GPU, or skip for pilot).
 
-## 10. Unresolved Issues
+## 10. Resolved Issues (updated 2026-07-25)
 
 1. **Fusion integration gap**: `train_c1_3.py` does not read `fusion.fusion_type` from config. The `backbones/fusion/` module is implemented and tested but not wired into the training script. Fix: add fusion strategy construction in `main()` and pass fused features to model.
 

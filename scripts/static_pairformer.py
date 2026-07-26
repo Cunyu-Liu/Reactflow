@@ -78,13 +78,6 @@ class PairFormerConfig:
     frozen_feature_dim: int = 0
     dropout: float = 0.0
 
-    # Frozen feature pair fusion (C1-3: pair-aware fusion)
-    # When True, frozen features are also used to initialize the pair stack
-    # via OuterProductMean, in addition to being concatenated to the single
-    # embedding.  When False (single_only), frozen features only affect the
-    # single embedding.
-    frozen_pair_fusion: bool = False
-
     # PairFormer block
     num_blocks: int = 8
     num_heads_pair: int = 4
@@ -252,10 +245,9 @@ class PairOutputHead(nn.Module):
 
         if use_calibration:
             # log-temperature parameter initialized so that exp(log_temp) = init_temperature
-            # Use 1D tensor (numel=1) for FSDP compatibility (FSDP doesn't support scalars)
-            self.log_temperature = nn.Parameter(torch.tensor([float(init_temperature)]).log())
+            self.log_temperature = nn.Parameter(torch.tensor(float(init_temperature)).log())
         else:
-            self.register_buffer("log_temperature", torch.tensor([float(init_temperature)]).log(), persistent=False)
+            self.register_buffer("log_temperature", torch.tensor(float(init_temperature).log()), persistent=False)
 
     @property
     def temperature(self) -> torch.Tensor:
@@ -425,15 +417,6 @@ class StaticPairFormer(nn.Module):
             use_compatibility=True,
         )
 
-        # Frozen feature pair fusion: when enabled, frozen features also
-        # contribute to pair initialization via OuterProductMean.
-        self.frozen_pair_fusion = self.config.frozen_pair_fusion and self.config.frozen_feature_dim > 0
-        if self.frozen_pair_fusion:
-            self.frozen_opm = OuterProductMean(
-                self.config.frozen_feature_dim, P,
-                projection_dim=min(self.config.frozen_feature_dim, 32),
-            )
-
         # PairFormer blocks
         self.blocks = nn.ModuleList([
             PairFormerBlock(self.config) for _ in range(self.config.num_blocks)
@@ -477,10 +460,6 @@ class StaticPairFormer(nn.Module):
 
         # Pair initialization
         pair = self.pair_init(single, indices, mask=mask)
-
-        # Frozen feature pair fusion: add OPM(frozen_features) to pair init
-        if self.frozen_pair_fusion and frozen_features is not None:
-            pair = pair + self.frozen_opm(frozen_features, pair, mask=mask)
 
         # PairFormer blocks
         for block in self.blocks:

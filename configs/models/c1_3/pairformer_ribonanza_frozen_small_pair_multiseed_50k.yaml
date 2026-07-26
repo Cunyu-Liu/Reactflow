@@ -1,0 +1,121 @@
+backbone:
+  frozen_feature_dim: 384
+  frozen_features_path: /home/cunyuliu/reactflow/artifacts/full_runs/full_ablation_20260709_003012/frozen/ribonanzanet2_sharded_full
+  lora_rank: 0
+  mode: frozen
+  name: ribonanzanet2
+config_name: pairformer_ribonanza_frozen_small_pair
+curriculum:
+  balance_keys:
+  - source
+  - family
+  - clan
+  - length_bin
+  - pair_distance_bin
+  - structure_complexity
+  replay_ratio: 0.2
+  stage_epochs:
+    human_mRNA: 2
+    lncRNA: 2
+    mixed_rfam: 5
+    pdb: 3
+    pri_miRNA: 2
+    short_nested_ncRNA: 3
+    viral: 2
+  stages:
+  - short_nested_ncRNA
+  - mixed_rfam
+  - pri_miRNA
+  - pdb
+  - viral
+  - human_mRNA
+  - lncRNA
+data:
+  max_length: 512
+  min_length: 4
+  novel_split: novel
+  splits_path: /home/cunyuliu/reactflow/artifacts/full_runs/full_ablation_20260709_003012/splits/rfam_current_mmseqs_seed0
+  test_split: test
+  train_split: train
+  val_split: val
+decoder:
+  allow_wobble: true
+  default_mode: mea
+  min_loop: 3
+  min_score: 0.0
+  seq_pad_index: 5
+  threshold: 0.5
+fusion:
+  dropout: 0.0
+  fusion_type: pair_feature
+  num_backbones: 1
+  pair_dim: 96
+  single_dim: 768
+loss:
+  bce_pos_weight: null
+  bce_pos_weight_auto: true
+  bce_weight: 1.0
+  calibration_weight: 0.1
+  dice_weight: 0.0
+  ece_num_bins: 15
+  focal_gamma: 2.0
+  focal_weight: 0.5
+  long_range_threshold: 24
+  long_range_upweight_factor: 2.0
+  long_range_weight: 0.1
+  pair_count_weight: 0.1
+  soft_f1_weight: 0.5
+  symmetry_weight: 0.01
+  unpaired_weight: 0.5
+model:
+  block_dropout: 0.0
+  dropout: 0.0
+  ffn_expansion: 4
+  frozen_feature_dim: 384
+  init_temperature: 1.0
+  learnable_pos: true
+  max_len: 512
+  model_type: static_pairformer
+  num_blocks: 12
+  num_heads_pair: 12
+  num_heads_single: 12
+  num_pair_types: 0
+  num_region_labels: 0
+  outer_product_mean_dim: 16
+  pair_dim: 96
+  share_pair_init_projection: true
+  single_dim: 768
+  triangle_hidden_dim: null
+  use_calibration: true
+  use_onehot: false
+schema_version: '2.0'
+seed: 0
+training:
+  batch_size: 4
+  checkpoint_dir: artifacts/c1_3/runs/pairformer_ribonanza_frozen_small_pair_fsdp_seed{seed}
+  cosine_decay_steps: 0
+  device: cuda:0
+  early_stop_min_delta: 0.001
+  early_stop_patience: 0
+  epochs: 1
+  eval_batch_size: 4
+  eval_every: 1
+  log_interval: 100
+  lr: 0.0001
+  max_grad_norm: 1.0
+  max_train_samples: 50000
+  nan_inf_guard: true
+  num_workers: 2
+  oom_retry_max: 0
+  optimizer: adamw
+  pin_memory: true
+  resume_from: null
+  save_every: 1
+  use_bf16: true
+  use_ddp: false
+  use_flash_attention: false
+  use_fsdp: true
+  use_grad_checkpoint: true
+  warmup_steps: 1000
+  weight_decay: 0.0001
+  world_size: 3

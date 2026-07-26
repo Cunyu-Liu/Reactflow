@@ -239,8 +239,13 @@ def _finalize(counts: Dict[str, int]) -> Dict[str, float]:
 
 
 def evaluate_split(model: nn.Module, loader: DataLoader, decoder_cfg: DecoderConfig,
-                   device: torch.device, max_samples: int = 0) -> Dict[str, Any]:
-    """Evaluate with threshold, nussinov_dp, and mea decoders."""
+                   device: torch.device, max_samples: int = 0,
+                   eval_modes: Sequence[str] = ("threshold", "mea")) -> Dict[str, Any]:
+    """Evaluate with specified decoders (default: threshold + mea, skip nussinov_dp).
+
+    The nussinov_dp decoder uses O(L^3) dynamic programming on CPU and is
+    prohibitively slow for pilot evaluation.  It is skipped by default.
+    """
     model.eval()
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
@@ -259,7 +264,7 @@ def evaluate_split(model: nn.Module, loader: DataLoader, decoder_cfg: DecoderCon
             if max_samples > 0 and n_seen >= max_samples:
                 break
     results: Dict[str, Any] = {}
-    for mode in ("threshold", "nussinov_dp", "mea"):
+    for mode in eval_modes:
         counts: Dict[str, int] = {
             "tp": 0, "fp": 0, "fn": 0, "tn": 0, "tp_shifted": 0, "fp_shifted": 0,
             "fn_shifted": 0, "empty_pred": 0, "total_samples": 0,
@@ -340,6 +345,8 @@ def main() -> None:
     parser.add_argument("--checkpoint-dir", type=str, default=None)
     parser.add_argument("--batch-size", type=int, default=None, help="Override config batch_size")
     parser.add_argument("--max-len", type=int, default=None, help="Override config max_length filter")
+    parser.add_argument("--eval-decoders", type=str, default="threshold,mea",
+                        help="Comma-separated decoder modes for evaluation (default: threshold,mea)")
     args = parser.parse_args()
 
     # --- Config & seeds ---
@@ -407,25 +414,53 @@ def main() -> None:
     curriculum = CurriculumSampler(train_recs, cur_cfg)
 
     # --- Model & loss ---
-    model_cfg = PairFormerConfig(**_filter_fields(cfg["model"], PairFormerConfig))
+    model_cfg_dict = _filter_fields(cfg["model"], PairFormerConfig)
+    # Fusion integration: set frozen_pair_fusion based on fusion_type
+    fusion_type = cfg.get("fusion", {}).get("fusion_type", "single_only")
+    model_cfg_dict["frozen_pair_fusion"] = (fusion_type == "pair_feature")
+    print(f"[INFO] Fusion type: {fusion_type}, frozen_pair_fusion={model_cfg_dict['frozen_pair_fusion']}", file=sys.stderr)
+    model_cfg = PairFormerConfig(**model_cfg_dict)
     base_model = StaticPairFormer(model_cfg)
     model = BatchPairFormer(base_model)
     n_params = base_model.num_parameters()
     print(f"[INFO] Model parameters: {n_params:,}", file=sys.stderr)
     loss_cfg = LossConfig(**_filter_fields(cfg["loss"], LossConfig))
-    loss_fn = lambda output, batch: pairformer_loss(output, batch["targets"], config=loss_cfg)
+    def loss_fn(output, batch):
+        parts = pairformer_loss(output, batch["targets"], config=loss_cfg)
+        # Ensure log_temperature receives a gradient by adding a zero-weight
+        # dependency on bpp (which uses temperature).  Without this, DDP fails
+        # because log_temperature is unused in the loss.
+        parts["total"] = parts["total"] + 0.0 * output.bpp.sum()
+        return parts
 
     # --- Engine ---
     tc = _filter_fields(cfg["training"], TrainingConfig)
+    use_ddp = tc.get("use_ddp", False) and tc.get("world_size", 1) > 1
+    # When DDP is enabled, pass device="cpu" to the constructor so it doesn't
+    # move the model to cuda:0 for all ranks.  setup_distributed() will move
+    # the model to cuda:LOCAL_RANK.
+    ctor_device = torch.device("cpu") if use_ddp else device
     tc["device"], tc["seed"], tc["checkpoint_dir"] = device_str, seed, ckpt_dir
     train_cfg = TrainingConfig(**tc)
+    # Enable gradient checkpointing BEFORE DDP wrapping, since DDP wrapper
+    # doesn't expose gradient_checkpointing_enable().
+    if train_cfg.use_grad_checkpoint and hasattr(model, "gradient_checkpointing_enable"):
+        model.gradient_checkpointing_enable()
+        print("[INFO] Gradient checkpointing enabled pre-DDP", file=sys.stderr)
     val_loader = DataLoader(val_ds, batch_size=eval_bs, shuffle=False,
                             num_workers=n_workers, pin_memory=pin_mem, collate_fn=collate_fn)
     placeholder = DataLoader(train_ds, batch_size=batch_size, shuffle=True,
                              num_workers=n_workers, pin_memory=pin_mem, collate_fn=collate_fn)
-    engine = TrainingEngine(model, placeholder, val_loader, train_cfg, loss_fn, device=device)
+    engine = TrainingEngine(model, placeholder, val_loader, train_cfg, loss_fn, device=ctor_device)
     engine.setup_distributed()
     engine.setup_optimizer()
+    # After DDP setup, the engine.device is updated to cuda:LOCAL_RANK.
+    # Update the local device variable so evaluation uses the correct device.
+    device = engine.device
+    is_rank0 = (not engine._is_distributed) or (
+        torch.distributed.is_available() and torch.distributed.is_initialized()
+        and torch.distributed.get_rank() == 0
+    )
 
     # --- Training loop (manual, per-epoch curriculum sampling) ---
     history: Dict[str, List[float]] = {"train_loss": [], "val_loss": []}
@@ -480,29 +515,44 @@ def main() -> None:
         json.dump(training_results, f, indent=2, default=str)
 
     # --- Post-training evaluation ---
-    print("[INFO] Loading best checkpoint for evaluation", file=sys.stderr)
-    best = ckpt_path / "best.pt"
-    if best.exists():
-        try:
-            engine.load_checkpoint(best)
-        except Exception as e:
-            print(f"[WARN] Failed to load checkpoint: {e}; using current model", file=sys.stderr)
+    # For DDP: rank 0 only, unwrap model.module
+    # For FSDP: skip in-script evaluation (FSDP param gathering has issues with
+    #   embedding weights). Use a separate single-GPU eval script instead.
+    is_fsdp = train_cfg.use_fsdp and not train_cfg.use_ddp
+    if is_fsdp:
+        if is_rank0:
+            print("[INFO] FSDP: skipping in-script evaluation. Run eval_eval.py separately.", file=sys.stderr)
+            print(f"[INFO] Checkpoint at: {ckpt_path}/best.pt", file=sys.stderr)
+    elif not is_rank0:
+        print("[INFO] Skipping evaluation on non-rank0 process", file=sys.stderr)
     else:
-        print("[WARN] best.pt not found, using latest model", file=sys.stderr)
-    decoder_cfg = DecoderConfig(**_filter_fields(cfg.get("decoder", {}), DecoderConfig))
-    eval_splits = {"val": val_ds, "test": test_ds, "novel": novel_ds}
-    eval_results: Dict[str, Any] = {}
-    for name, ds in eval_splits.items():
-        if ds is None or len(ds) == 0:
-            print(f"[INFO] Skipping {name} (empty)", file=sys.stderr)
-            continue
-        print(f"[INFO] Evaluating on {name} ({len(ds)} samples)", file=sys.stderr)
-        loader = DataLoader(ds, batch_size=eval_bs, shuffle=False,
-                            num_workers=n_workers, pin_memory=pin_mem, collate_fn=collate_fn)
-        eval_results[name] = evaluate_split(model, loader, decoder_cfg, device, args.max_eval_samples)
-    with open(args.output_dir / "evaluation_results.json", "w", encoding="utf-8") as f:
-        json.dump(eval_results, f, indent=2, default=str)
-    print(f"[INFO] Done. Results saved to {args.output_dir}", file=sys.stderr)
+        print("[INFO] Loading best checkpoint for evaluation", file=sys.stderr)
+        best = ckpt_path / "best.pt"
+        if best.exists():
+            try:
+                engine.load_checkpoint(best)
+            except Exception as e:
+                print(f"[WARN] Failed to load checkpoint: {e}; using current model", file=sys.stderr)
+        else:
+            print("[WARN] best.pt not found, using latest model", file=sys.stderr)
+        decoder_cfg = DecoderConfig(**_filter_fields(cfg.get("decoder", {}), DecoderConfig))
+        eval_splits = {"val": val_ds, "test": test_ds, "novel": novel_ds}
+        eval_results: Dict[str, Any] = {}
+        # Unwrap DDP model for evaluation
+        eval_model = model.module if hasattr(model, "module") else model
+        for name, ds in eval_splits.items():
+            if ds is None or len(ds) == 0:
+                print(f"[INFO] Skipping {name} (empty)", file=sys.stderr)
+                continue
+            print(f"[INFO] Evaluating on {name} ({len(ds)} samples)", file=sys.stderr)
+            loader = DataLoader(ds, batch_size=eval_bs, shuffle=False,
+                                num_workers=n_workers, pin_memory=pin_mem, collate_fn=collate_fn)
+            eval_decoders = tuple(args.eval_decoders.split(","))
+            eval_results[name] = evaluate_split(eval_model, loader, decoder_cfg, device,
+                                                args.max_eval_samples, eval_modes=eval_decoders)
+        with open(args.output_dir / "evaluation_results.json", "w", encoding="utf-8") as f:
+            json.dump(eval_results, f, indent=2, default=str)
+        print(f"[INFO] Done. Results saved to {args.output_dir}", file=sys.stderr)
 
 
 if __name__ == "__main__":

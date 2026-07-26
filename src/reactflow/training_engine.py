@@ -645,6 +645,7 @@ class TrainingEngine:
             self.model = DDP(
                 self.model,
                 device_ids=[local_rank] if torch.cuda.is_available() else None,
+                find_unused_parameters=True,
             )
 
     # ------------------------------------------------------------------
@@ -857,10 +858,17 @@ class TrainingEngine:
         """Save model, optimizer, scheduler, epoch, step, and RNG state.
 
         For DDP/FSDP-wrapped models, the underlying module is unwrapped so the
-        checkpoint is portable.
+        checkpoint is portable. For FSDP, only rank 0 saves (other ranks get
+        an empty state dict from ``_model_state_dict`` and skip saving).
 
         Complexity: ``O(model_size)``.
         """
+        # For distributed training, only rank 0 saves the checkpoint
+        is_distributed = self.config.use_ddp or self.config.use_fsdp
+        if is_distributed and torch.distributed.is_initialized():
+            if torch.distributed.get_rank() != 0:
+                return  # Non-rank0 processes skip saving
+
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         rng_state: Dict[str, Any] = {
@@ -929,10 +937,29 @@ class TrainingEngine:
     def _model_state_dict(self) -> Dict[str, torch.Tensor]:
         """Return the state dict, unwrapping DDP/FSDP if present.
 
+        For FSDP, uses ``FULL_STATE_DICT`` to gather all parameters on rank 0
+        (other ranks get an empty dict). For DDP, unwraps ``.module``.
+
         Complexity: ``O(model_size)``.
         """
         model = self.model
-        if hasattr(model, "module"):  # DDP / FSDP wrap
+
+        # Check for FSDP first (isinstance is more reliable than hasattr)
+        try:
+            from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+            from torch.distributed.fsdp import StateDictType, FullStateDictConfig
+
+            if isinstance(model, FSDP):
+                full_config = FullStateDictConfig(offload_to_cpu=True, rank0_only=True)
+                with FSDP.state_dict_type(
+                    model, StateDictType.FULL_STATE_DICT, full_config
+                ):
+                    return model.state_dict()
+        except ImportError:
+            pass
+
+        # DDP wrap
+        if hasattr(model, "module"):
             return model.module.state_dict()
         return model.state_dict()
 
