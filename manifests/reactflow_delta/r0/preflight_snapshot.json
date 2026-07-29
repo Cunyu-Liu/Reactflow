@@ -1,0 +1,221 @@
+{
+  "schema_version": "reactflow-delta-r0-preflight-v1",
+  "task_id": "T-R0.1",
+  "snapshot_completed_at": "2026-07-29T13:10:30+08:00",
+  "mode": "read_only",
+  "contract": {
+    "name": "ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+    "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10",
+    "authority_basis": "The newly supplied V3 contract explicitly supersedes the V2 execution Goal."
+  },
+  "legacy_checkout": {
+    "path": "/home/cunyuliu/reactflow_c1_3_stage_20260722",
+    "repo_root": "/home/cunyuliu/reactflow_c1_3_stage_20260722",
+    "branch": "trae/c1-3-static-scale",
+    "head": "2cdf9faf02f075b6f9289e84411a1ae60ff8d45a",
+    "upstream": "origin/trae/c1-3-static-scale",
+    "tracking_ref_ahead": 0,
+    "tracking_ref_behind": 0,
+    "remote_url": "git@github.com:Cunyu-Liu/Reactflow.git",
+    "clean": false,
+    "staged_count": 0,
+    "tracked_modified_count": 8,
+    "untracked_count": 8,
+    "artifact_link": {
+      "path": "/home/cunyuliu/reactflow_c1_3_stage_20260722/artifacts",
+      "target": "/home/cunyuliu/reactflow/artifacts"
+    }
+  },
+  "protected_files": [
+    {
+      "status": "tracked_modified",
+      "path": "configs/models/c1_3/pairformer_ribonanza_frozen_small_pair_ddp.yaml",
+      "sha256": "ac5c154315ec61a5906ef71610398b7322d0cf38bdd360385a5f089ffffb2e55"
+    },
+    {
+      "status": "tracked_modified",
+      "path": "scripts/audit_c1_3_gate.py",
+      "sha256": "534e9c52bbc4bef56d3266b92d067b9061b7b4565ffd17636ec1a36ef791db41"
+    },
+    {
+      "status": "tracked_modified",
+      "path": "scripts/eval_checkpoint.py",
+      "sha256": "b99a95d4b698b72a05be793b0be1a82a97fc69d7e3841d80a2e5080557d21b9e"
+    },
+    {
+      "status": "tracked_modified",
+      "path": "scripts/generate_c1_3_reports.py",
+      "sha256": "49fcd35dc38f59a11e638ba2f7493869487ff3d3b289f47192cfdf84f1e52b3c"
+    },
+    {
+      "status": "tracked_modified",
+      "path": "scripts/generate_significance_report.py",
+      "sha256": "3bac72c9c95fa09ed4adf4a88029e45069c9892ec561fa98e8cd65a4434f983b"
+    },
+    {
+      "status": "tracked_modified",
+      "path": "scripts/launch_multiseed.sh",
+      "sha256": "44cd13054c1f279a20c29c30faf5609c7a20d1984bb963077cf9667acc0728d9"
+    },
+    {
+      "status": "tracked_modified",
+      "path": "scripts/train_c1_3.py",
+      "sha256": "b79f003c4cb541505b35608b8cdf67ca4330b39038b0836b247476bfc9b6bf51"
+    },
+    {
+      "status": "tracked_modified",
+      "path": "src/reactflow/training_engine.py",
+      "sha256": "db01c4996893ac73aea8be4d4b26285bb9930fc38dd280deb076dccaf81736d5"
+    },
+    {
+      "status": "untracked",
+      "path": "configs/models/c1_3/pairformer_ribonanza_frozen_small_pair_ddp_resume.yaml",
+      "sha256": "89a4f861e5c020ac7516a5cbe585ca39dd07973838f69ba45e582560023ee766"
+    },
+    {
+      "status": "untracked",
+      "path": "scripts/audit_c1_3_gate.py.bak_pre_strongest_fix",
+      "sha256": "c5c2e860a663826e4207f3e85980b09025aeaa5e1c8b67ec7fbf593f0aa7bc88"
+    },
+    {
+      "status": "untracked",
+      "path": "scripts/generate_significance_report.py.bak_pre_strongest",
+      "sha256": "eafa483da86c6900f2390331dc97fc7abeac42447abedc34f022a5a63bf88c94"
+    },
+    {
+      "status": "untracked",
+      "path": "scripts/launch_c1_3_full_filtered.sh",
+      "sha256": "7ab0de3bed35f70d73d853c25899cefbaeb04c1f20c107d38ab0bdd676f4ddd8"
+    },
+    {
+      "status": "untracked",
+      "path": "scripts/launch_multiseed_filtered.sh",
+      "sha256": "a6d7848dc9a7bc77197c03fd9f0059b0b4ef0b572b8b1c9162107006c32be7ca"
+    },
+    {
+      "status": "untracked",
+      "path": "scripts/train_c1_3.py.bak",
+      "sha256": "ab506e03b702d6c875781754bee1cb519f7dd95003790bd2b54b3cfe11580d8e"
+    },
+    {
+      "status": "untracked",
+      "path": "scripts/train_c1_3.py.bak_pre_filter_20260728",
+      "sha256": "ae18dc57ba4ad4cf79b9a5efd0eeff55209c4c968412adf4589cc4c18d045eb6"
+    },
+    {
+      "status": "untracked",
+      "path": "src/reactflow/training_engine.py.bak_pre_step_ckpt_20260728",
+      "sha256": "55496612dff6a8d26403a328618305c4441fa8833067369385bce871ec1589fc"
+    }
+  ],
+  "protected_workloads": [
+    {
+      "kind": "legacy_c1_3_v4_training",
+      "launcher_pid": 2353480,
+      "torchrun_pid": 2353493,
+      "rank_pids": [
+        2353828,
+        2353829,
+        2353830
+      ],
+      "started_at": "2026-07-29T08:49:01+08:00",
+      "gpu_indices": [
+        0,
+        2,
+        5
+      ],
+      "output_path": "/home/cunyuliu/reactflow/artifacts/c1_3/runs/pairformer_ribonanza_frozen_small_pair_fsdp_seed0_v4",
+      "logs": [
+        "/tmp/c1_3_v4_launch.log",
+        "/tmp/c1_3_19epoch_filtered_20260729_084900.log"
+      ],
+      "single_observation": {
+        "epoch": 0,
+        "global_step": 4201,
+        "skip_nan": false
+      },
+      "policy": "observe at contract cadence; never kill, restart, modify, or append seeds"
+    },
+    {
+      "kind": "legacy_full_checkpoint_evaluation",
+      "main_pid": 482511,
+      "worker_pids": [
+        410295,
+        410329
+      ],
+      "started_at": "2026-07-29T05:52:24+08:00",
+      "gpu_indices": [
+        4
+      ],
+      "output_path": "/home/cunyuliu/reactflow/artifacts/c1_3/eval_results_20260729_055225",
+      "policy": "observe only; do not signal or overwrite"
+    }
+  ],
+  "gpu_snapshot": {
+    "captured_at": "2026-07-29T13:05:23+08:00",
+    "driver_version": "580.126.09",
+    "cuda_version_reported_by_nvidia_smi": "13.0",
+    "model": "NVIDIA A100-PCIE-40GB",
+    "devices": [
+      {"index": 0, "memory_free_mib": 99, "utilization_percent": 100},
+      {"index": 1, "memory_free_mib": 2346, "utilization_percent": 100},
+      {"index": 2, "memory_free_mib": 2037, "utilization_percent": 100},
+      {"index": 3, "memory_free_mib": 1588, "utilization_percent": 0},
+      {"index": 4, "memory_free_mib": 7401, "utilization_percent": 100},
+      {"index": 5, "memory_free_mib": 1429, "utilization_percent": 100},
+      {"index": 6, "memory_free_mib": 38619, "utilization_percent": null},
+      {"index": 7, "memory_free_mib": 13690, "utilization_percent": null}
+    ],
+    "conflict_free_exclusive_gpu_available": false,
+    "reason": "Every device had an existing process or workload; free memory alone is not ownership."
+  },
+  "storage_snapshot": {
+    "home_total": "7.0T",
+    "home_used": "1.3T",
+    "home_available": "5.4T",
+    "home_use_percent": 20,
+    "inode_use_percent": 3,
+    "legacy_stage_size": "8.4M",
+    "shared_artifacts_size": "51G"
+  },
+  "data_inventory": {
+    "legacy_split_path": "/home/cunyuliu/reactflow/artifacts/full_runs/full_ablation_20260709_003012/splits/rfam_current_mmseqs_seed0",
+    "legacy_split_size": "600M",
+    "legacy_split_counts": {
+      "train": 228282,
+      "validation": 16606,
+      "test": 16606,
+      "novel": 46147,
+      "total": 307641
+    },
+    "legacy_frozen_features_path": "/home/cunyuliu/reactflow/artifacts/full_runs/full_ablation_20260709_003012/frozen/ribonanzanet2_sharded_full",
+    "legacy_frozen_features_size": "47G",
+    "legacy_frozen_feature_records": 208905,
+    "legacy_frozen_feature_shards": 409,
+    "legacy_feature_weight_sha256": "c94031719c8a1c70a9068d5de861f65083cdf0555a15570b3724a8d6d7750e35",
+    "scientific_boundary": "These are static/proxy records and model features, not paired experimental WT-mutant response data."
+  },
+  "historical_evidence_audit": {
+    "gate_audit_status": "FAIL",
+    "gate_checks_passed": 19,
+    "gate_checks_total": 23,
+    "multiseed_seed_count": 0,
+    "significance_test_count": 0,
+    "quick_evaluation_claim": "approximately 0.80 F1",
+    "full_validation_f1": 0.4013,
+    "eternafold_reference_f1": 0.7039,
+    "interpretation": "The quick evaluation is misleading and cannot be inherited as EPRO scientific evidence."
+  },
+  "safety_assertions": {
+    "legacy_files_modified_by_r0": false,
+    "signals_sent_to_legacy_processes": false,
+    "legacy_results_overwritten": false,
+    "learned_training_started_by_reactflow_delta": false,
+    "gpu_claim_made_from_free_memory_only": false
+  },
+  "limitations": [
+    "This is a time-bounded read-only snapshot; active process state may later change.",
+    "Four large dataset-manifest hashes were not captured because the final read-only SSH request was reset.",
+    "No R0 gate is inferred from legacy quick evaluation, smoke tests, or static/proxy data."
+  ]
+}

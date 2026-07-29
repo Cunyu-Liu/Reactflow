@@ -1,0 +1,61 @@
+{
+  "schema_version": "reactflow-delta-r0-artifact-manifest-v1",
+  "stage": "R0",
+  "status": "in_progress",
+  "generated_at": "2026-07-29T14:16:11+08:00",
+  "contract": {
+    "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+    "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+  },
+  "worktrees": {
+    "protected_legacy": "/home/cunyuliu/reactflow_c1_3_stage_20260722",
+    "quota_snapshot": "/home/cunyuliu/reactflow_delta_goal_20260729",
+    "active_clean_clone": "/mnt/cunyuliu/reactflow_delta_goal_20260729",
+    "branch": "codex/reactflow-delta-r0",
+    "active_clone_parent_head": "f29086889cdb1717667da54c0197c1a4ec0385b4"
+  },
+  "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0",
+  "evidence_classes": {
+    "legacy_run_and_results": "historical-only",
+    "r0_records": "prospective-setup-only"
+  },
+  "files": [
+    {
+      "task_id": "T-R0.1",
+      "kind": "machine_readable_preflight",
+      "repo_path": "manifests/reactflow_delta/r0/preflight_snapshot.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/preflight_snapshot.json",
+      "sha256": "80d8da7c8dee2ff8ab89033f9dcdd198b0a5143a1e7aa6bb52e3b8879921ff35"
+    },
+    {
+      "task_id": "T-R0.1",
+      "kind": "human_readable_preflight",
+      "repo_path": "reports/r0_read_only_preflight.md",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/r0_read_only_preflight.md",
+      "sha256": "978124d2ac826bf430d30daf7d026d8725d67b2b106ee4018fdaf5271000c132"
+    },
+    {
+      "task_id": "T-R0.6",
+      "kind": "frozen_contract",
+      "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+      "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+    }
+  ],
+  "pending": [
+    {
+      "task_id": "T-R0.2",
+      "reason": "Legacy v4 training remained active at the latest contract-cadence observation and must finish naturally."
+    },
+    {
+      "task_id": "T-R0.3",
+      "planned_artifact": "legacy_run_archive_manifest.json",
+      "reason": "Archival is gated on the natural end of the legacy v4 run."
+    },
+    {
+      "task_id": "T-R0.9",
+      "planned_artifact": "r0_acceptance.json",
+      "reason": "The Delta empty-package implementation and Python 3.11 targeted tests are not yet complete."
+    }
+  ],
+  "scientific_boundary": "R0 setup records and legacy historical evidence are not EPRO efficacy evidence and cannot authorize D0 until every R0 acceptance condition passes."
+}
