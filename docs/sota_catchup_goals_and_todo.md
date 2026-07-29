@@ -1,8 +1,8 @@
 > [!IMPORTANT]
-> **已由 ReactFlow-Δ V2 合同取代（2026-07-29；仅保留为历史工程资产与负结果证据）。**
+> **已由 ReactFlow-Δ EPRO V3 合同取代（2026-07-29；仅保留为历史工程资产与负结果证据）。**
 > 本文件不再是可执行 Goal，也不得用于启动训练、追加 seed、降低 Gate 或支撑新的科学主张。当前唯一有效合同为
-> `docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v2_20260729.md`
->（SHA-256：`5d2dc9e2ac0e6b8c6355791f4ff95958b2e9ab5722d2d2eba49c6578a3e87c13`）。
+> `docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md`
+>（SHA-256：`3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10`）。
 
 下面这版以 **ReactFlow 当前真实代码、实验结果和 mRNA-EditFlow 下游需求**为出发点，重新定义了静态结构预测、结构 ensemble、编辑干预与功能验证之间的关系。它不再把“堆一个 Evoformer 并达到某个单一 F1”当作终点，而是把顶刊主线收敛为一个可验证的科学问题。
 
