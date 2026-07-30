@@ -59,6 +59,21 @@ def read_schema(path: Path) -> str | None:
 
 
 def main() -> int:
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--documented-code-commit",
+        required=True,
+        help="The functional-anchor code commit this manifest documents (e.g. ed4c565).",
+    )
+    parser.add_argument(
+        "--acceptance-python",
+        default=sys.executable,
+        help="Interpreter used to regenerate the acceptance (for version recording).",
+    )
+    args = parser.parse_args()
+
     artifacts: list[dict] = []
 
     new_arts = [
@@ -125,25 +140,51 @@ def main() -> int:
     except Exception:
         commit = None
 
+    # Resolve the documented code commit (the functional-anchor implementation)
+    # to its full hash. This binds provenance to that specific code commit,
+    # independent of when the manifest is regenerated.
+    documented_commit = args.documented_code_commit
+    try:
+        documented_commit = subprocess.check_output(
+            ["git", "-C", str(REPO), "rev-parse", args.documented_code_commit],
+            text=True,
+        ).strip()
+    except Exception:
+        pass  # keep the short/arg value if resolution fails
+
+    try:
+        acc_python_version = subprocess.check_output(
+            [args.acceptance_python, "--version"], text=True
+        ).strip()
+    except Exception:
+        acc_python_version = None
+
     manifest = {
         "schema_version": SCHEMA,
         "stage": "D0-R",
         "generated_at": datetime.now(timezone.utc).astimezone().isoformat(),
         "git_commit_at_generation": commit,
+        "documented_code_commit": documented_commit,
+        "acceptance_python_interpreter": args.acceptance_python,
+        "acceptance_python_version": acc_python_version,
         "audit_method": "functional_anchor_124nt_window_offset_31",
         "code_version": {
             "module": "src/reactflow/delta/d0r_functional.py",
             "audit_script": "scripts/reactflow_delta/d0r_functional_anchor_audit.py",
             "acceptance_script": "scripts/reactflow_delta/d0r_build_functional_acceptance.py",
+            "manifest_script": "scripts/reactflow_delta/d0r_build_provenance_manifest.py",
             "tests": "tests/reactflow_delta/test_d0r_functional_anchor.py",
         },
         "boundary_note": (
             "All artifacts under artifacts/ are gitignored (tracked_in_git=false). "
             "Only this manifest and reports/d0r_data_feasibility_audit.md are tracked. "
-            "Large per-profile JSON (81M d0r_functional_anchor_audit.json, 121M "
+            "Large per-profile JSON (d0r_functional_anchor_audit.json, "
             "d0r_construct_audit.json) is regenerable intermediate data and is NOT "
-            "stored in git history; provenance is captured here via sha256 + "
-            "regeneration commands."
+            "stored in git history; provenance is captured here via sha256 + size + "
+            "regeneration commands. documented_code_commit binds this manifest to the "
+            "functional-anchor implementation commit; acceptance_python_version records "
+            "the interpreter required for acceptance regeneration (Python 3.11 per "
+            "project contract)."
         ),
         "raw_inputs": raw_inputs,
         "artifacts": artifacts,

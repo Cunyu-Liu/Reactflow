@@ -1,4 +1,6 @@
 {
+  "acceptance_python_interpreter": "/home/cunyuliu/miniconda3/envs/editflow311/bin/python",
+  "acceptance_python_version": "Python 3.11.15",
   "artifacts": [
     {
       "exists": true,
@@ -51,8 +53,8 @@
       "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_build_functional_acceptance.py --summary artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json --m2sl5-relations artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json --covsl5-relations artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json --output-dir artifacts/reactflow_delta/d0r --python <env-python> --test-dir tests/reactflow_delta --input-rdat <10 RDAT files>",
       "relative_path": "artifacts/reactflow_delta/d0r/d0r_acceptance_v2.json",
       "schema_version": "reactflow-delta-d0r-functional-acceptance-v2",
-      "sha256": "8646b5830bdb25d1e7f8a57e01758d9aed5613ce291c5f48550680edc657506d",
-      "size_bytes": 8847,
+      "sha256": "60230ef13cbdeeed1872afc5bbc8c864d058cb15e55c8bd1f5132a220c174d43",
+      "size_bytes": 10101,
       "tracked_in_git": false
     },
     {
@@ -62,8 +64,8 @@
       "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_build_functional_acceptance.py --summary artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json --m2sl5-relations artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json --covsl5-relations artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json --output-dir artifacts/reactflow_delta/d0r --python <env-python> --test-dir tests/reactflow_delta --input-rdat <10 RDAT files>",
       "relative_path": "artifacts/reactflow_delta/d0r/d0r_data_feasibility_audit.md",
       "schema_version": null,
-      "sha256": "e252b705b657c81342beb33cbeadba19f344897a780e8d08f7be1aadd6dfed3f",
-      "size_bytes": 5498,
+      "sha256": "54b60e5c136c4b505367a2b51009d0e88090721ca2d0e9d166dceebe69d90ef3",
+      "size_bytes": 6030,
       "tracked_in_git": false
     },
     {
@@ -101,15 +103,17 @@
     }
   ],
   "audit_method": "functional_anchor_124nt_window_offset_31",
-  "boundary_note": "All artifacts under artifacts/ are gitignored (tracked_in_git=false). Only this manifest and reports/d0r_data_feasibility_audit.md are tracked. Large per-profile JSON (81M d0r_functional_anchor_audit.json, 121M d0r_construct_audit.json) is regenerable intermediate data and is NOT stored in git history; provenance is captured here via sha256 + regeneration commands.",
+  "boundary_note": "All artifacts under artifacts/ are gitignored (tracked_in_git=false). Only this manifest and reports/d0r_data_feasibility_audit.md are tracked. Large per-profile JSON (d0r_functional_anchor_audit.json, d0r_construct_audit.json) is regenerable intermediate data and is NOT stored in git history; provenance is captured here via sha256 + size + regeneration commands. documented_code_commit binds this manifest to the functional-anchor implementation commit; acceptance_python_version records the interpreter required for acceptance regeneration (Python 3.11 per project contract).",
   "code_version": {
     "acceptance_script": "scripts/reactflow_delta/d0r_build_functional_acceptance.py",
     "audit_script": "scripts/reactflow_delta/d0r_functional_anchor_audit.py",
+    "manifest_script": "scripts/reactflow_delta/d0r_build_provenance_manifest.py",
     "module": "src/reactflow/delta/d0r_functional.py",
     "tests": "tests/reactflow_delta/test_d0r_functional_anchor.py"
   },
-  "generated_at": "2026-07-30T18:35:24.528366+08:00",
-  "git_commit_at_generation": "bf5c7170e647efc4c44572f48d14e8cd4aeeb332",
+  "documented_code_commit": "ed4c565ac63f31ca7526425d2bf9ce1fb3a503f3",
+  "generated_at": "2026-07-30T19:06:33.056820+08:00",
+  "git_commit_at_generation": "ed4c565ac63f31ca7526425d2bf9ce1fb3a503f3",
   "raw_inputs": [
     {
       "exists": true,
@@ -210,10 +214,10 @@
     "path": "/home/cunyuliu/reactflow_delta_goal_20260729/reports/d0r_data_feasibility_audit.md",
     "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_build_functional_acceptance.py --summary artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json --m2sl5-relations artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json --covsl5-relations artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json --output-dir artifacts/reactflow_delta/d0r --python <env-python> --test-dir tests/reactflow_delta --input-rdat <10 RDAT files>",
     "relative_path": "reports/d0r_data_feasibility_audit.md",
-    "sha256": "e252b705b657c81342beb33cbeadba19f344897a780e8d08f7be1aadd6dfed3f",
-    "size_bytes": 5498,
+    "sha256": "54b60e5c136c4b505367a2b51009d0e88090721ca2d0e9d166dceebe69d90ef3",
+    "size_bytes": 6030,
     "source_artifact": "artifacts/reactflow_delta/d0r/d0r_data_feasibility_audit.md",
-    "source_sha256": "e252b705b657c81342beb33cbeadba19f344897a780e8d08f7be1aadd6dfed3f",
+    "source_sha256": "54b60e5c136c4b505367a2b51009d0e88090721ca2d0e9d166dceebe69d90ef3",
     "tracked_in_git": true
   }
 }
