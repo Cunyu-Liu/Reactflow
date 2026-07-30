@@ -1445,3 +1445,183 @@ def build_reactivity_layers(
         "scale_factor": scale_factor,
         "normalization_method": method,
     }
+
+
+# =============================================================================
+# T-D1.8: study/probe measurement-noise estimation
+# (v3 §6.6 step 10; v3 §7.2 with-replicates, §7.3 without-replicates;
+#  v3.1 §2.2 / §4 D1 Gate — noise must not be estimated from test data)
+# =============================================================================
+
+# Minimum number of replicates required to estimate replicate-based noise.
+NOISE_ESTIMATION_MIN_REPLICATES = 2
+# Minimum number of positions with >=2 non-missing replicate values required to
+# form a replicate noise estimate.
+NOISE_ESTIMATION_MIN_OVERLAP = 2
+# Default percentile used when freezing a noise threshold from no-edit controls
+# (v3 §7.3: "noise threshold 由 controls 冻结").
+CONTROL_NOISE_THRESHOLD_PERCENTILE = 95.0
+# Minimum number of pooled |Δreactivity| values from controls required to freeze
+# a domain noise threshold.
+CONTROL_NOISE_THRESHOLD_MIN_VALUES = 10
+
+
+def estimate_replicate_noise(
+    reactivities: Iterable[Iterable[float | None]],
+    min_overlap: int = NOISE_ESTIMATION_MIN_OVERLAP,
+) -> dict[str, Any]:
+    """Estimate measurement noise from replicate disagreement (T-D1.8, v3 §7.2).
+
+    Given per-replicate reactivity arrays for the same construct, computes the
+    per-position sample variance across replicates (at positions with >= 2
+    non-missing values), then averages over positions. Returns
+    ``{"noise_std": float|None, "noise_variance": float|None, "n_positions": int,
+    "n_replicates": int}``. Missing values are excluded (v3 §6.7: missing is not
+    0). Stats are ``None`` when fewer than 2 replicates or fewer than
+    ``min_overlap`` positions have replicates. Per v3.1 §2.2 the caller must pass
+    only train+validation replicates after the split.
+    """
+
+    arrays = [list(a) for a in reactivities]
+    n_rep = len(arrays)
+    if n_rep < NOISE_ESTIMATION_MIN_REPLICATES:
+        return {"noise_std": None, "noise_variance": None, "n_positions": 0, "n_replicates": n_rep}
+    length = min((len(a) for a in arrays), default=0)
+    if length == 0:
+        return {"noise_std": None, "noise_variance": None, "n_positions": 0, "n_replicates": n_rep}
+    per_pos_vars: list[float] = []
+    for i in range(length):
+        vals = [
+            a[i]
+            for a in arrays
+            if i < len(a)
+            and a[i] is not None
+            and isinstance(a[i], (int, float))
+            and math.isfinite(a[i])
+        ]
+        if len(vals) < 2:
+            continue
+        m = sum(vals) / len(vals)
+        var = sum((v - m) ** 2 for v in vals) / (len(vals) - 1)
+        per_pos_vars.append(var)
+    n_positions = len(per_pos_vars)
+    if n_positions < min_overlap:
+        return {"noise_std": None, "noise_variance": None, "n_positions": n_positions, "n_replicates": n_rep}
+    noise_var = sum(per_pos_vars) / n_positions
+    if not math.isfinite(noise_var):
+        return {"noise_std": None, "noise_variance": None, "n_positions": n_positions, "n_replicates": n_rep}
+    return {
+        "noise_std": math.sqrt(noise_var),
+        "noise_variance": noise_var,
+        "n_positions": n_positions,
+        "n_replicates": n_rep,
+    }
+
+
+def estimate_error_variance(
+    reactivity_error: Iterable[float | None],
+) -> float | None:
+    """Estimate measurement variance from upstream REACTIVITY_ERROR (T-D1.8, §7.3).
+
+    Per v3 §7.3, when no replicates are available the measurement noise uses the
+    upstream error. RDAT ``REACTIVITY_ERROR`` values are per-position standard
+    errors; the measurement variance is the mean of squared errors over
+    non-missing positions. Returns ``None`` when no non-missing finite errors are
+    present. Missing values excluded (v3 §6.7).
+    """
+
+    errs = [
+        e
+        for e in reactivity_error
+        if e is not None and isinstance(e, (int, float)) and math.isfinite(e)
+    ]
+    if not errs:
+        return None
+    var = sum(e * e for e in errs) / len(errs)
+    if not math.isfinite(var):
+        return None
+    return var
+
+
+def freeze_control_noise_threshold(
+    control_delta_abs_values: Iterable[float],
+    percentile: float = CONTROL_NOISE_THRESHOLD_PERCENTILE,
+    min_values: int = CONTROL_NOISE_THRESHOLD_MIN_VALUES,
+) -> float | None:
+    """Freeze a noise threshold from no-edit control |Δreactivity| (T-D1.8, §7.3).
+
+    Per v3 §7.3 the noise threshold is frozen by controls. Returns the given
+    percentile (nearest-rank) of the pooled absolute Δreactivity values from
+    no-edit control pairs within a normalization domain. Returns ``None`` when
+    fewer than ``min_values`` are present (insufficient controls to freeze a
+    threshold). Per v3.1 §2.2 the caller must pass only train+validation controls
+    after the split. The threshold feeds the frozen differential caller (T-D1.9).
+    """
+
+    values = sorted(
+        v
+        for v in control_delta_abs_values
+        if v is not None and isinstance(v, (int, float)) and math.isfinite(v)
+    )
+    if len(values) < min_values:
+        return None
+    rank = max(1, math.ceil(percentile / 100.0 * len(values)))
+    rank = min(len(values), rank)
+    return values[rank - 1]
+
+
+def estimate_pair_noise(
+    wt_replicate_noise: Mapping[str, Any] | None,
+    mut_replicate_noise: Mapping[str, Any] | None,
+    wt_error_variance: float | None = None,
+    mut_error_variance: float | None = None,
+) -> dict[str, Any]:
+    """Produce per-pair replicate_noise_estimate and measurement_variance (T-D1.8).
+
+    Combines WT and mutant noise estimates into the pair-level fields required by
+    the pair schema (v3 §6.4). Member variance prefers replicate noise (v3 §7.2)
+    and falls back to upstream error variance (v3 §7.3). The pair
+    ``measurement_variance`` is the sum of member variances (variance of
+    Δr = r_m − r_w under independent measurement). ``replicate_noise_estimate`` is
+    the std of the replicate-based portion only — it is ``None`` when neither
+    member has replicate noise. Missing/None member variances are skipped (v3
+    §6.7: missing is not 0).
+
+    Returns ``{"replicate_noise_estimate": float|None, "measurement_variance":
+    float|None, "wt_variance": float|None, "mut_variance": float|None,
+    "source": str}`` where ``source`` ∈ ``{"replicate", "upstream_error",
+    "none"}``.
+    """
+
+    wt_rep_var = (
+        wt_replicate_noise.get("noise_variance") if wt_replicate_noise is not None else None
+    )
+    mut_rep_var = (
+        mut_replicate_noise.get("noise_variance") if mut_replicate_noise is not None else None
+    )
+    # Member variance: replicate if available, else upstream error (v3 §7.3).
+    wt_var = wt_rep_var if wt_rep_var is not None else wt_error_variance
+    mut_var = mut_rep_var if mut_rep_var is not None else mut_error_variance
+    # Pair measurement_variance = wt_var + mut_var (independent measurement).
+    parts = [v for v in (wt_var, mut_var) if v is not None]
+    measurement_variance: float | None = sum(parts) if parts else None
+    # replicate_noise_estimate: std of the replicate-based portion only.
+    rep_parts = [v for v in (wt_rep_var, mut_rep_var) if v is not None]
+    replicate_noise_estimate: float | None
+    if rep_parts:
+        replicate_noise_estimate = math.sqrt(sum(rep_parts))
+    else:
+        replicate_noise_estimate = None
+    if rep_parts:
+        source = "replicate"
+    elif parts:
+        source = "upstream_error"
+    else:
+        source = "none"
+    return {
+        "replicate_noise_estimate": replicate_noise_estimate,
+        "measurement_variance": measurement_variance,
+        "wt_variance": wt_var,
+        "mut_variance": mut_var,
+        "source": source,
+    }
