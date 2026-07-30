@@ -2,9 +2,11 @@
 
 **合同**: v3.1 §4 D1 Gate (增补), v3 §15 Phase D1 Gate
 **分支**: `codex/reactflow-delta-d0r`
-**最新 commit**: `55d8c1d` — feat(d1): hand-computed end-to-end fixtures for D1 pipeline (T-D1.11, v3.1 §4)
-**测试**: 496 passed (0 failed, 0 errors) — `PYTHONPATH=src python -m pytest tests/reactflow_delta/`
+**最新 commit**: (本提交) — feat(d1): pipeline executor + 数据级 Gate 报告 (T-D1.13, v3.1 §4/§7)
+**测试**: 505 passed (0 failed, 0 errors) — `PYTHONPATH=src python -m pytest tests/reactflow_delta/`
 **data.py**: 2087 lines | **schema.py**: 705 lines
+**数据级产物**: `artifacts/reactflow_delta/d1/d1_true_pair_registry.json` (7,761 条) + `d1_pipeline_summary.json`
+**executor**: `scripts/reactflow_delta/d1_pipeline_executor.py`
 
 ---
 
@@ -19,8 +21,11 @@
 | 5 | **每个 exclusion 有 machine-readable reason** | **PASS** | `test_every_exclusion_reason_in_frozen_vocabulary`：13 reasons 全部 reachable，全部 ∈ `EXCLUSION_REASONS` frozen vocab（schema.py L225-239） |
 | 6 | **不自动进入训练**（training_allowed 仍 False） | **PASS** | `test_no_training_flag_in_upgrade_output`：`evaluate_pair_upgrade` 不输出任何 training-authorization flag；D1 输出无 `training_allowed` / `training_enabled` / `auto_train` 字段 |
 | 7 | **Tier gate 不被降低** | **PASS** | `test_true_pair_honest_only_when_no_reasons`：`true_pair=True` 当且仅当 `exclusion_reasons=[]`；soft blocker（corroboration-only）保持 `primary_eligible=True` 但 `true_pair=False`；不降阈值 |
+| 8 | **数据级 Tier B 重判 (≥1,000 true_pair)** (v3.1 §7 / v3 §8) | **FAIL (数据层面)** | 7,761 候选执行后 **true_pair = 0**（全部 `parent_lineage_unverified`）；Tier B 阈值未降，诚实报告未达。实现层面 7/7 PASS，数据层面 Tier B 未达 → 见 §6 |
 
-**D1 Gate 结论**: **7/7 bullets PASS** — 实现/合同层面全部满足。
+**D1 Gate 结论**:
+- **实现/合同层面: 7/7 bullets PASS** — T-D1.1~12 全部满足。
+- **数据层面: Tier B FAIL** — 7,761 候选 0 升级为 true_pair（根因：全部 `candidate_only_pending_parent_lineage`，且 7,476 条 `annotation_only_alt_not_verifiable`）。Tier 阈值未被降低；D1 cleanup 诚实揭示了候选池无法在无 parent lineage 验证下升级，须由 D2 (RSIB-v1) 提供 lineage 验证后方可重判。
 
 ---
 
@@ -39,14 +44,15 @@
 | T-D1.9 | frozen differential caller + Δreactivity | `592d762` | 28 (test_differential_call) | ✅ |
 | T-D1.10 | quality weight + exclusion reasons + true_pair | `6d8e927` | 41 (test_pair_upgrade) | ✅ |
 | T-D1.11 | hand-computed fixtures | `55d8c1d` | 28 (test_d1_handcomputed_fixtures) | ✅ |
-| T-D1.12 | tests + commit + push + Gate report | 本报告 | 496 total | ✅ |
+| T-D1.12 | tests + commit + push + Gate report | `315ad03` | 496 total | ✅ |
+| T-D1.13 | D1 pipeline executor + 数据级 Gate (7,761 候选) | 本提交 | 9 (test_d1_pipeline_executor) + executor run (0 parse errors) | ✅ |
 
 ---
 
 ## 3. 测试套件总览
 
 ```
-496 passed in 0.76s
+505 passed in 0.74s
 ```
 
 | 测试文件 | 测试数 | 覆盖范围 |
@@ -62,10 +68,11 @@
 | test_d0r_functional_anchor.py | 26 | D0-R functional anchor |
 | test_d0r_reaudit_tierA.py | 22 | D0-R Tier A re-audit |
 | test_d0r_rdat_parser.py | 21 | D0-R RDAT parser |
+| test_d1_pipeline_executor.py | 9 | T-D1.13 executor wiring + Tier judgment |
 | test_rdat_parser.py | 15 | RDAT parser |
 | test_schema.py | 13 | schema validation |
 | 其余 (10 files) | 24 | manifests/registry/pairing/matrix/etc. |
-| **合计** | **496** | |
+| **合计** | **505** | |
 
 ---
 
@@ -129,28 +136,125 @@
 
 ---
 
-## 6. 数据级执行状态 (v3.1 §7 报告要求)
+## 6. 数据级执行结果 (v3.1 §7 / v3 §8 Tier 重判)
 
-**状态**: D1 pipeline building blocks (T-D1.1~10) 已全部实现并通过手算 fixtures 验证（496 tests pass）。**但尚未在 D0-R v2 的 7,761 个候选上实际执行 pipeline**。
+**状态**: ✅ 已在 D0-R v2 的 7,761 个候选上完整执行 D1 pipeline。
 
-v3.1 §7 要求的数据级报告项（候选总数 / true_pair 升级数 / reason 分布 / Tier B 重判等）需要构建一个 pipeline executor 来编排 T-D1.1~10 的 building blocks，对 7,761 候选逐个运行 `evaluate_pair_upgrade` 并汇总。这是 D1 的下一步执行内容。
+**Executor**: `scripts/reactflow_delta/d1_pipeline_executor.py` (T-D1.13)
+- 按 `rdat_path` 分组（48 个唯一 RDAT 文件），每文件仅解析一次（`parse_rdat`）
+- 对每条候选 relation 调用 T-D1.1~10 building blocks：`build_reactivity_layers` → `build_pair_delta_reactivity` → `estimate_error_variance` / `estimate_pair_noise` → `evaluate_pair_upgrade`
+- 解析错误: 0；profile 查找失败: 0；7,761/7,761 全部评估
 
-**当前可确认的合同层面合规**:
-- 候选总数: 7,761 (D0-R v2, 未变)
-- §5 解析器扩展 (T-D1.6 commit `616a8b2`): VERSION 别名 / v0.4,0.22,0.24 / GLYCFN 索引 annotation — forward-only 修复
-- §3.3 HIV3PR offset 修复 (T-D1.3 commit `1d5e4e5`): substitution verification 中实现
-- `training_allowed`: 仍为 `False`（D1 不自动进入训练，v3.1 §7.1）
+**产物**:
+- `artifacts/reactflow_delta/d1/d1_true_pair_registry.json` (7,761 条，每条含 `exclusion_reasons` / `primary_eligible` / `true_pair` / `pair_quality_weight` / `quality_factors` / Δreactivity 摘要 / `caller_status`)
+- `artifacts/reactflow_delta/d1/d1_pipeline_summary.json` (聚合统计 + Tier 重判)
+
+### 6.1 候选总数与升级数
+
+| 指标 | 值 |
+|---|---|
+| 候选总数 (D0-R v2) | 7,761 |
+| `primary_eligible` 数 | 0 |
+| **`true_pair` 升级数** | **0** |
+| `caller_status` 分布 | `no_replicate_continuous_only` × 7,761 (v3 §7.3: 无 replicate → 仅连续 Δr，不输出 significant-changer) |
+
+### 6.2 exclusion_reasons 分布
+
+**按 reason (per-reason 计数，一条候选可有多个 reason)**:
+
+| reason | 计数 | 占比 |
+|---|---|---|
+| `parent_lineage_unverified` | 7,761 | 100.0% |
+| `annotation_only_alt_not_verifiable` | 7,476 | 96.3% |
+| `comparable_positions_below_60pct` | 101 | 1.3% |
+
+**按 reason 集合 (per-set 计数)**:
+
+| reason 集合 | 计数 |
+|---|---|
+| `{annotation_only_alt_not_verifiable, parent_lineage_unverified}` | 7,375 |
+| `{parent_lineage_unverified}` | 285 |
+| `{annotation_only_alt_not_verifiable, comparable_positions_below_60pct, parent_lineage_unverified}` | 101 |
+
+**根因分析**: 全部 7,761 候选的 `lineage_status = "candidate_only_pending_parent_lineage_and_functional_region_validation"` → `parent_lineage_verified=False` → 触发 `parent_lineage_unverified` (非 soft blocker → 同时阻断 `primary_eligible` 与 `true_pair`)。其中 7,476 条 `alt_not_verified=True` → 额外触发 `annotation_only_alt_not_verifiable`；101 条可比位置 < 60% → 额外触发 `comparable_positions_below_60pct`。285 条 `alt_not_verified=False` 仅因 lineage 未验证而未升级。
+
+### 6.3 study / parent / owner 分布 (升级后 = 升级前，0 升级)
+
+候选级分布（升级后无变化，true_pair 分布为空集）:
+
+| study (citation_doi) | 候选数 | | parent_prefix | 候选数 |
+|---|---|---|---|---|
+| 10.1038/s41592-020-0878-9 | 4,528 | | (31 个唯一 parent_prefix) | — |
+| 10.1073/pnas.1619897114 | 1,771 | | | |
+| 10.1073/pnas.2320493121 | 640 | | **owner** | **候选数** |
+| 10.1038/s41588-021-00830-1 | 394 | | Kalli Kappel | 4,528 |
+| 10.1073/pnas.1313039111 | 220 | | Rhiju Das | 2,001 |
+| 10.1038/s41594-021-00653-y | 143 | | rui huang | 640 |
+| 10.7554/eLife.07600 | 55 | | Gun Woo Byeon | 394 |
+| 10.1038/s41591-022-01908-x | 10 | | Ivan Zheludev | 143 |
+| | | | Clarence Cheng | 55 |
+
+- 候选级 study 数: 8 | 候选级 parent 数: 31 | 候选级 owner 数: 6
+- **true_pair 级 study 数: 0 | true_pair 级 parent 数: 0 | true_pair 级 owner 数: 0**
+
+### 6.4 probe / condition / in-vivo-in-vitro 分布
+
+| modifier (probe) | 候选数 |
+|---|---|
+| unknown | 5,311 |
+| DMS | 2,165 |
+| SHAPE | 120 |
+| nomod | 110 |
+| 1M7 | 55 |
+
+- `condition_match_status`: 全部 `match`（WT 与 mutant 同属一个 RDAT 文件、共享 modifier → v3 §6.5 condition 耦合满足）
+- `in_vivo_in_vitro_mixed`: 全部 `False`（D1 pool 为 RMDB in-vitro）
+- `probe_eligible_unchanged`: 全部 `True`（同文件内 probe 一致）
+- `normalization_domain_compatible`: 全部 `True`（同 rmdb_id / study）
+
+### 6.5 Tier A/B/C 重判 (用 true_pair 数，v3.1 §7: 禁止用候选数冒充)
+
+| Tier | 基数 | 阈值 | 结果 |
+|---|---|---|---|
+| **Tier A** | true_pair: 0 (study=0, parent=0) | ≥5 study / ≥20 parent / ≥5,000 pair | **FAIL** |
+| **Tier B** | true_pair: 0 | ≥1,000 true_pair | **FAIL** |
+| **Tier C** | true_pair: 0 | ≥ Tier B | **FAIL** |
+
+> 候选级参考（**非** D1 Gate 基数）: 8 study / 31 parent / 7,761 candidate (D0-R v2 Tier A 候选级达标，但 D1 须以 true_pair 重判 → 全部 FAIL)。
+
+### 6.6 §5 / §3.3 修复尝试结果
+
+| 修复项 | 实现 | 数据级效果 |
+|---|---|---|
+| **§5 解析器扩展** (T-D1.6, commit `616a8b2`) | VERSION 别名 / v0.4,0.22,0.24 / GLYCFN 索引 annotation — forward-only | 48 个 RDAT 文件全部 `parse_status=ok`，0 parse error；解析器扩展使全部 7,761 候选可被 pipeline 处理 |
+| **§3.3 HIV3PR offset 修复** (T-D1.3, commit `1d5e4e5`) | `verify_substitution` 中 genome-numbering offset | `substitution_verified=True` 对 285 条候选生效（`alt_not_verified=False`），但仅靠序列验证无法清除 `parent_lineage_unverified` → 0 升级 |
+
+**结论**: §5/§3.3 修复在解析/验证层面生效（0 parse error，285 条序列验证通过），但**未能使任何候选达到 true_pair**，因为 `parent_lineage_unverified` 是全部候选的阻断 reason，须由 D2 (RSIB-v1) 提供 parent lineage 验证后才能清除。
+
+### 6.7 `training_allowed` 状态
+
+`training_allowed`: 仍为 `False`（v3.1 §7.1）。D1 pipeline executor 不输出任何 training-authorization flag；Tier B 未达 → 不自动进入 M0。
 
 ---
 
-## 7. 下一步
+## 7. D1 Gate 总结与下一步
 
-1. **构建 D1 pipeline executor**: 编排 T-D1.1~10 building blocks，对 7,761 D0-R v2 候选逐个运行 → 产出 true_pair registry + exclusion_reasons 分布
-2. **数据级 D1 Gate 报告**: 候选总数 / 升级数 / reason 分布 / study-parent-owner 分布 / Tier A/B/C 重判 / 是否达到 Tier B (≥1,000 true_pair)
-3. **D1 Gate 完整评审**: 合同层面 7/7 PASS + 数据层面 Tier B 判定 → 项目决策者审核
-4. **D2 前置**: D1 Gate 通过后不自动进入 M0；须先完成 D2 (RSIB-v1 + 数据 Gate)
+### 7.1 D1 Gate 双层判定
+
+| 层面 | 结果 |
+|---|---|
+| 实现/合同层面 (v3.1 §4 七 bullets) | **7/7 PASS** |
+| 数据层面 (v3 §8 Tier 重判) | **Tier A/B/C 全 FAIL** (true_pair=0/7,761) |
+
+**核心发现**: D1 cleanup-only 诚实揭示——D0-R v2 的 7,761 个候选**全部**为 `candidate_only_pending_parent_lineage`，在无 parent lineage 验证下**无法升级为 true_pair**。这不是 D1 的失败，而是 D1 的**正确输出**: 它证明 Tier B (≥1,000 true_pair) 无法用候选数冒充，必须通过 D2 提供 lineage 验证后重判。Tier 阈值未被降低，`training_allowed` 仍为 False。
+
+### 7.2 下一步 (D2 前置)
+
+1. **D2 (RSIB-v1)**: 提供 parent lineage 验证 + functional region validation → 清除 `parent_lineage_unverified` reason → 重跑 D1 pipeline executor → 重新判定 Tier B
+2. **不自动进入 M0**: D1 Gate 数据层面 Tier B FAIL → 项目决策者审核是否进入 D2
+3. **executor 复用**: `d1_pipeline_executor.py` 已支持重跑——D2 提供 lineage 验证后，更新 `lineage_status` 字段即可重算 true_pair 数
 
 ---
 
-*生成时间: 2026-07-30*
-*commit: 55d8c1d | branch: codex/reactflow-delta-d0r | push: origin/codex/reactflow-delta-d0r*
+*生成时间: 2026-07-31*
+*commit: (本提交) | branch: codex/reactflow-delta-d0r | push: origin/codex/reactflow-delta-d0r*
