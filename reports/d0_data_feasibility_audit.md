@@ -44,3 +44,10 @@ This is a public-data feasibility audit only. It reports parsed-artifact evidenc
 ## Stop rule
 
 D1 and any learned training are blocked. No metric threshold is lowered; resolving the documented data/provenance gaps is required before a new gate decision.
+
+## Version control
+
+- Evidence-generating commit: `a79fd073dd1d28ab8b2a2554efd6e8050e52550d`
+- Branch: `codex/reactflow-delta-r0`
+- Push status: `verified_pushed` to `origin/codex/reactflow-delta-r0`
+- The companion immutable D0 acceptance certificate records hashes for this report, the data summary, parser results, and the v3 contract.

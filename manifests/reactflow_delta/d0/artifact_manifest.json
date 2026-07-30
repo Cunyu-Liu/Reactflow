@@ -1,13 +1,13 @@
 {
   "schema_version": "reactflow-delta-d0-artifact-manifest-v1",
   "stage": "D0",
-  "status": "in_progress_no_training",
+  "status": "complete_gate_not_passed_no_advance",
   "contract": {
     "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T14:07:15+08:00",
+  "last_updated_at": "2026-07-30T14:15:19+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
     "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
@@ -18,7 +18,9 @@
     "T-D0.7": "1b9f32396b8b9d5e297e44aa8cce18d98b24035c",
     "T-D0.8": "e8bfa4fb66bee124b3a38530d97850387fd5bed3",
     "T-D0.9": "de4f5134f8db90970f25c90ee7bfb9ae3e4ff775",
-    "T-D0.10": "169778e9687387ec3dcc0bdd903c36ab0acedea4"
+    "T-D0.10": "169778e9687387ec3dcc0bdd903c36ab0acedea4",
+    "T-D0.11": "a79fd073dd1d28ab8b2a2554efd6e8050e52550d",
+    "T-D0.12": "a79fd073dd1d28ab8b2a2554efd6e8050e52550d"
   },
   "files": [
     {
@@ -291,11 +293,28 @@
       "parser_fixture_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/parser_fixture_results.json",
       "parser_fixture_sha256": "f3af7976b900d04cb2b55e8ac77391f8b7128810808a3b365c5a4c47d02648a8",
       "report_repo_path": "reports/d0_data_feasibility_audit.md",
-      "report_sha256_before_final_commit_record": "71fe27561ae78c4e637ecea122b947d9798225cc248e7b2d6f1d91bbc0a80a17",
+      "report_sha256_at_evidence_commit": "71fe27561ae78c4e637ecea122b947d9798225cc248e7b2d6f1d91bbc0a80a17",
+      "report_sha256_with_version_control": "b424e5fb47023c4a35c676c4061b40a2d1a776abde0e415422be688ecbdc4c16",
       "highest_currently_supported": "below_Tier_B_audit_only",
       "d1_allowed": false,
       "learned_training_started": false,
       "scientific_status": "D1 and learned training blocked; no threshold lowered"
+    },
+    {
+      "task_id": "T-D0.12",
+      "kind": "fail_closed_d0_acceptance_certificate",
+      "repo_paths": ["src/reactflow/delta/acceptance.py", "scripts/reactflow_delta/record_d0_acceptance.py", "tests/reactflow_delta/test_acceptance.py"],
+      "sha256": {
+        "src/reactflow/delta/acceptance.py": "c3f080f8146bee245a5265e4a7d3a75e7ba35988f321661a123b71fb763c5676",
+        "scripts/reactflow_delta/record_d0_acceptance.py": "56f3d855261d8167a535704cfc96dc69e85f0be295ae558c179334fa66a118ed",
+        "tests/reactflow_delta/test_acceptance.py": "afc69df2af5090e512dc7edf318792da988221251455d73acfebf42a8cf7da1f"
+      },
+      "acceptance_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/d0_acceptance_a79fd073.json",
+      "acceptance_artifact_sha256": "48cf7006d7b040ce4e6fb4ffa904f0fe25ece68d4d7c172463d3a9cf2a4d80b9",
+      "acceptance_status": "complete_gate_not_passed_no_advance",
+      "d1_allowed": false,
+      "learned_training_started": false,
+      "scientific_status": "D0 closure is a non-advancing availability/provenance finding, not a final scientific conclusion"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
