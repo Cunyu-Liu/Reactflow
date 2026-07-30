@@ -1837,3 +1837,251 @@ def build_pair_delta_reactivity(
         "fdr_threshold_p": call["fdr_threshold_p"],
         "caller_status": call["caller_status"],
     }
+
+
+# =============================================================================
+# T-D1.10: pair quality weight + exclusion reasons + true_pair upgrade
+# (v3.1 §3 pair eligibility; v3 §6.4 pair schema; integrates T-D1.1~9).
+# =============================================================================
+
+# Exclusion reasons that block true_pair upgrade but NOT primary_eligible
+# (v3.1 §3.1). All other reasons in EXCLUSION_REASONS block both.
+UPGRADE_BLOCKER_EXCLUSION_REASONS = frozenset({
+    "sequence_based_no_independent_corroboration",
+})
+
+# Quality-weight factor scaling points (v3.1 §3.2).
+QUALITY_SNR_FULL_FACTOR_AT = 10.0
+QUALITY_COVERAGE_FULL_FACTOR_AT = 30.0
+QUALITY_NO_REPLICATE_FACTOR = 0.8
+QUALITY_UNKNOWN_SIGNAL_FACTOR = 0.5
+
+
+def _clamp01(value: float) -> float:
+    """Clamp a numeric value to the closed interval [0.0, 1.0]."""
+    if value < 0.0:
+        return 0.0
+    if value > 1.0:
+        return 1.0
+    return value
+
+
+def collect_exclusion_reasons(
+    *,
+    edit_type: str,
+    edit_count: int,
+    condition_match_status: str,
+    substitution_verified: bool,
+    has_wt_anchor: bool,
+    normalization_domain_compatible: bool,
+    parent_lineage_verified: bool,
+    in_vivo_in_vitro_mixed: bool,
+    comparable_fraction: float | None = None,
+    probe_eligible_unchanged: bool | None = None,
+    annotation_ref_verified: bool | None = None,
+    is_annotation_only: bool = False,
+    is_sequence_based: bool = False,
+    has_independent_corroboration: bool = True,
+) -> list[str]:
+    """Collect the frozen exclusion-reason set for a pair (v3.1 §3.1, §4 D1 Gate).
+
+    Reasons are drawn from the frozen ``EXCLUSION_REASONS`` vocabulary. The
+    returned list is the sorted unique set so callers always see a stable,
+    machine-readable reason vector. Per v3.1 §4 every rejection must carry at
+    least one reason; per v3.1 §2.2 the reason logic is frozen (no
+    train-time tuning).
+    """
+
+    reasons: set[str] = set()
+
+    # edit_type / edit_count (schema.py L668 invariant ties indel → reason).
+    if edit_type != "substitution":
+        reasons.add("indel_not_substitution")
+    elif edit_count != 1:
+        reasons.add("edit_count_not_one")
+
+    # WT anchor: a substitution pair needs a wild-type anchor construct.
+    if not has_wt_anchor:
+        reasons.add("no_wt_anchor")
+
+    # Substitution verifiability: annotation-only pairs cannot have their
+    # alt allele verified by sequencing; otherwise flag as not verifiable.
+    if not substitution_verified:
+        if is_annotation_only:
+            reasons.add("annotation_only_alt_not_verifiable")
+        else:
+            reasons.add("substitution_not_verifiable")
+
+    # Annotation reference mismatch (only when explicitly checked and false).
+    if annotation_ref_verified is False:
+        reasons.add("annotation_ref_mismatch")
+
+    # Condition mismatch (schema.py L672 invariant ties status → reason).
+    if condition_match_status == "mismatch":
+        reasons.add("condition_mismatch")
+
+    # Probe eligibility (only when explicitly checked and false).
+    if probe_eligible_unchanged is False:
+        reasons.add("probe_mismatch")
+
+    # Comparable-position fraction below the 60% minimum (T-D1.5 constant).
+    if comparable_fraction is not None and comparable_fraction < COMPARABLE_MIN_FRACTION:
+        reasons.add("comparable_positions_below_60pct")
+
+    # Normalization-domain compatibility (T-D1.7).
+    if not normalization_domain_compatible:
+        reasons.add("normalization_domain_unknown")
+
+    # Parent lineage (T-D1.6).
+    if not parent_lineage_verified:
+        reasons.add("parent_lineage_unverified")
+
+    # in_vivo / in_vitro mixing within a pair (T-D1.7 domain field).
+    if in_vivo_in_vitro_mixed:
+        reasons.add("in_vivo_in_vitro_mixed")
+
+    # Sequence-based edit without independent corroboration: a soft blocker
+    # for true_pair upgrade but not for primary_eligible (v3.1 §3.1).
+    if is_sequence_based and not has_independent_corroboration:
+        reasons.add("sequence_based_no_independent_corroboration")
+
+    return sorted(reasons)
+
+
+def determine_primary_eligible(exclusion_reasons: list[str]) -> bool:
+    """Return True iff no exclusion reason blocks primary eligibility.
+
+    Only ``UPGRADE_BLOCKER_EXCLUSION_REASONS`` (corroboration-only) are soft:
+    they keep a pair primary-eligible. Any other reason makes the pair
+    ineligible. An empty reason list is trivially eligible (v3.1 §3.1).
+    """
+    return all(
+        r in UPGRADE_BLOCKER_EXCLUSION_REASONS for r in exclusion_reasons
+    )
+
+
+def determine_true_pair(
+    exclusion_reasons: list[str], primary_eligible: bool
+) -> bool:
+    """Return True iff the pair is a clean true_pair: eligible and no reasons.
+
+    Per v3.1 §3.3 a true_pair must have zero exclusion reasons (the
+    corroboration-only soft blocker still disqualifies true_pair status).
+    """
+    return primary_eligible and not exclusion_reasons
+
+
+def compute_pair_quality_weight(
+    *,
+    comparable_fraction: float | None = None,
+    snr: float | None = None,
+    coverage_mean: float | None = None,
+    missing_fraction: float | None = None,
+    has_replicates: bool = False,
+) -> dict[str, Any]:
+    """Compute the pair quality weight as a product of clamped factors.
+
+    Factors (v3.1 §3.2): comparable fraction, signal-to-noise, coverage,
+    replicate presence, and (1 - missing fraction). Each factor is clamped to
+    [0, 1]; unknown inputs default to ``QUALITY_UNKNOWN_SIGNAL_FACTOR`` (0.5)
+    so that an unknown signal does not silently inflate the weight. The
+    no-replicate penalty is ``QUALITY_NO_REPLICATE_FACTOR`` (0.8). The product
+    is clamped to [0, 1] (schema.py L648 requires a non-negative number).
+    """
+
+    f_comp = _clamp01(comparable_fraction) if comparable_fraction is not None else QUALITY_UNKNOWN_SIGNAL_FACTOR
+    f_snr = (
+        _clamp01(snr / QUALITY_SNR_FULL_FACTOR_AT)
+        if snr is not None
+        else QUALITY_UNKNOWN_SIGNAL_FACTOR
+    )
+    f_cov = (
+        _clamp01(coverage_mean / QUALITY_COVERAGE_FULL_FACTOR_AT)
+        if coverage_mean is not None
+        else QUALITY_UNKNOWN_SIGNAL_FACTOR
+    )
+    f_rep = 1.0 if has_replicates else QUALITY_NO_REPLICATE_FACTOR
+    f_miss = (
+        _clamp01(1.0 - missing_fraction)
+        if missing_fraction is not None
+        else QUALITY_UNKNOWN_SIGNAL_FACTOR
+    )
+
+    weight = _clamp01(f_comp * f_snr * f_cov * f_rep * f_miss)
+    return {
+        "pair_quality_weight": weight,
+        "factors": {
+            "comparable": f_comp,
+            "snr": f_snr,
+            "coverage": f_cov,
+            "replicate": f_rep,
+            "missing": f_miss,
+        },
+    }
+
+
+def evaluate_pair_upgrade(
+    *,
+    edit_type: str,
+    edit_count: int,
+    condition_match_status: str,
+    substitution_verified: bool,
+    has_wt_anchor: bool,
+    normalization_domain_compatible: bool,
+    parent_lineage_verified: bool,
+    in_vivo_in_vitro_mixed: bool,
+    comparable_fraction: float | None = None,
+    probe_eligible_unchanged: bool | None = None,
+    annotation_ref_verified: bool | None = None,
+    is_annotation_only: bool = False,
+    is_sequence_based: bool = False,
+    has_independent_corroboration: bool = True,
+    snr: float | None = None,
+    coverage_mean: float | None = None,
+    missing_fraction: float | None = None,
+    has_replicates: bool = False,
+) -> dict[str, Any]:
+    """Top-level pair upgrade evaluator integrating T-D1.1~9 (v3.1 §3, §4).
+
+    Returns the four pair-schema fields tied to D1 eligibility:
+    ``exclusion_reasons`` (sorted frozen-vocabulary list),
+    ``primary_eligible`` (bool), ``true_pair`` (bool), and
+    ``pair_quality_weight`` (number in [0, 1]) plus the per-factor breakdown.
+    Callers must still ensure the remaining pair-schema invariants from
+    schema.py L668/L672 (edit_type/condition coupling) hold at the construct
+    level — this function emits the matching reasons when those inputs are
+    passed truthfully.
+    """
+
+    reasons = collect_exclusion_reasons(
+        edit_type=edit_type,
+        edit_count=edit_count,
+        condition_match_status=condition_match_status,
+        substitution_verified=substitution_verified,
+        has_wt_anchor=has_wt_anchor,
+        normalization_domain_compatible=normalization_domain_compatible,
+        parent_lineage_verified=parent_lineage_verified,
+        in_vivo_in_vitro_mixed=in_vivo_in_vitro_mixed,
+        comparable_fraction=comparable_fraction,
+        probe_eligible_unchanged=probe_eligible_unchanged,
+        annotation_ref_verified=annotation_ref_verified,
+        is_annotation_only=is_annotation_only,
+        is_sequence_based=is_sequence_based,
+        has_independent_corroboration=has_independent_corroboration,
+    )
+    primary_eligible = determine_primary_eligible(reasons)
+    true_pair = determine_true_pair(reasons, primary_eligible)
+    qw = compute_pair_quality_weight(
+        comparable_fraction=comparable_fraction,
+        snr=snr,
+        coverage_mean=coverage_mean,
+        missing_fraction=missing_fraction,
+        has_replicates=has_replicates,
+    )
+    return {
+        "exclusion_reasons": reasons,
+        "primary_eligible": primary_eligible,
+        "true_pair": true_pair,
+        "pair_quality_weight": qw["pair_quality_weight"],
+        "quality_factors": qw["factors"],
+    }
