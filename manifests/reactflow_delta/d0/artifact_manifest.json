@@ -7,14 +7,15 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T13:36:40+08:00",
+  "last_updated_at": "2026-07-30T13:48:41+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
     "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
     "T-D0.3": "1beed04af9d53f4259f3edbc68783669e34e9e5b",
     "T-D0.4": "148dc2add8526c687fa89a1dbccefbaea0cfa20f",
     "T-D0.5": "940d1a9411c8cb034e3ac814e4129f741a23882a",
-    "T-D0.6": "9158f2214c81888c88ad6b25fe18820c2a273276"
+    "T-D0.6": "9158f2214c81888c88ad6b25fe18820c2a273276",
+    "T-D0.7": "1b9f32396b8b9d5e297e44aa8cce18d98b24035c"
   },
   "files": [
     {
@@ -202,6 +203,31 @@
       "source_registry_sha256_after_append": "8fad72fc9b8cb2a2cf317fa23f7e7c810d584ce90589b2b54865e083cf66cbc4",
       "same_condition_single_edit_pair_count": null,
       "scientific_status": "unknown because no immutable raw Ribonanza table was acquired"
+    },
+    {
+      "task_id": "T-D0.8",
+      "kind": "candidate_pair_registry_builder",
+      "repo_paths": ["src/reactflow/delta/registry.py", "scripts/reactflow_delta/build_pair_registry.py", "tests/reactflow_delta/test_registry.py", ".gitignore"],
+      "sha256": {
+        "src/reactflow/delta/registry.py": "f19f9c3deb66c6c9b268e13dfc30da917a613b6c8f016ea439e9f508452ecb2a",
+        "scripts/reactflow_delta/build_pair_registry.py": "c7ef97e8e7ac169bd32c659df4d61242ffe4e9ed31e452a72efd9bc79a76500a",
+        "tests/reactflow_delta/test_registry.py": "c73796a7bd177979881897b546d1f268c86b4f4d161965da3ca30ea40524f83c",
+        ".gitignore": "7e69cc903838f713b989337b99a142399d8c4f59fd3d30d1fd52f0e0c24acb38"
+      },
+      "parquet_runtime": "pyarrow 25.0.0 in /mnt/cunyuliu/reactflow_delta_runtime_py311"
+    },
+    {
+      "task_id": "T-D0.8",
+      "kind": "candidate_registry_outputs_not_committed_as_data",
+      "construct_candidates_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/construct_candidates.parquet",
+      "construct_candidates_sha256": "6ac19d10502cdf8e4f6c9c3641bf159532065c355dfaec7885406fe1fc5e3be4",
+      "construct_candidate_row_count": 5175,
+      "pair_candidates_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/pair_candidates.parquet",
+      "pair_candidates_sha256": "a7ea8d6a31353a4b4923cd96bd689ee56b3ad79f32ae099d4781f589552b5766",
+      "pair_candidate_row_count": 0,
+      "registry_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/candidate_pair_registry_6fixtures.json",
+      "registry_artifact_sha256": "bb213ba866dce0095c566bcfbfc4aa28653bddfdad9b1d5454cdade623ba393a",
+      "scientific_status": "RMDB candidate count=0; Ribonanza and total candidate counts remain unknown; no normalization attempted"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
