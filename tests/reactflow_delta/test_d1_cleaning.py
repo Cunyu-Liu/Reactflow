@@ -7,8 +7,14 @@ import pytest
 from reactflow.delta.data import (
     COMPARABLE_MIN_FRACTION,
     CONDITION_MATCH_FIELDS,
+    NO_PROBE_CONTROL_NAMES,
+    REPLICATE_CONSTRUCT_IDENTITY_FIELDS,
+    REPLICATE_PAIR_IDENTITY_FIELDS,
     build_position_masks,
     check_comparable_positions,
+    classify_control_pair,
+    classify_no_edit_pair,
+    identify_replicate_groups,
     match_conditions,
     verify_annotation_ref,
     verify_substitution,
@@ -597,3 +603,319 @@ class TestComparablePositions:
         assert chk2["comparable_position_count"] == 5
         assert chk2["is_comparable"] is False
         assert chk2["exclusion_reason"] == "comparable_positions_below_60pct"
+
+
+# ============================================================
+# T-D1.6: replicate / no-edit / control identification (§6.6 step 8)
+# ============================================================
+
+
+class TestClassifyNoEditPair:
+    """T-D1.6: no-edit control detection (v3 §6.6 step 8, §7.3)."""
+
+    def test_edit_count_zero_is_no_edit(self):
+        # Explicit edit_count=0 → no-edit, trusted over sequence comparison.
+        result = classify_no_edit_pair("ACGU", "GCGU", edit_count=0)
+        assert result["is_no_edit"] is True
+        assert result["edit_count"] == 0
+        assert result["determined_from"] == "edit_count"
+        assert result["reason"] == "edit_count_zero"
+
+    def test_identical_sequences_are_no_edit(self):
+        result = classify_no_edit_pair("ACGU", "ACGU")
+        assert result["is_no_edit"] is True
+        assert result["determined_from"] == "sequence"
+        assert result["reason"] == "sequences_identical"
+        assert result["edit_count"] == 0
+
+    def test_t_to_u_normalized_before_comparison(self):
+        # DNA-typed "ACGT" must equal "ACGU" after T→U normalization.
+        result = classify_no_edit_pair("ACGT", "ACGU")
+        assert result["is_no_edit"] is True
+        assert result["determined_from"] == "sequence"
+
+    def test_different_sequences_not_no_edit(self):
+        result = classify_no_edit_pair("GACGU", "GGCGU")
+        assert result["is_no_edit"] is False
+        assert result["determined_from"] is None
+        assert result["reason"] is None
+
+    def test_single_substitution_not_no_edit(self):
+        # A real single-sub candidate (edit_count=1) is not a no-edit control.
+        result = classify_no_edit_pair("GACGU", "GGCGU", edit_count=1)
+        assert result["is_no_edit"] is False
+        assert result["edit_count"] == 1
+
+    def test_none_sequences_with_no_edit_count(self):
+        # Annotation-only candidates may lack sequences; rely on edit_count.
+        result = classify_no_edit_pair(None, None, edit_count=0)
+        assert result["is_no_edit"] is True
+        assert result["determined_from"] == "edit_count"
+
+    def test_none_sequences_without_edit_count_not_no_edit(self):
+        result = classify_no_edit_pair(None, None)
+        assert result["is_no_edit"] is False
+        assert result["edit_count"] is None
+
+    def test_edit_count_zero_precedence_over_differing_sequences(self):
+        # edit_count=0 wins even if (hypothetically) sequences differ — the
+        # count is the authoritative signal for annotation-only candidates.
+        result = classify_no_edit_pair("AAAA", "GGGG", edit_count=0)
+        assert result["is_no_edit"] is True
+        assert result["determined_from"] == "edit_count"
+
+    def test_one_none_sequence_not_no_edit(self):
+        result = classify_no_edit_pair("ACGU", None, edit_count=1)
+        assert result["is_no_edit"] is False
+
+
+class TestClassifyControlPair:
+    """T-D1.6: control classification (no-edit and/or no-probe)."""
+
+    def test_no_edit_pair_with_probe_is_no_edit_control(self):
+        result = classify_control_pair("ACGU", "ACGU", "DMS")
+        assert result["is_control"] is True
+        assert result["control_type"] == "no_edit"
+        assert result["is_no_edit"] is True
+        assert result["is_no_probe"] is False
+        assert result["reasons"] == ["sequences_identical"]
+
+    def test_no_probe_pair_is_no_probe_control(self):
+        # nomod probe → background measurement, even if sequences differ.
+        result = classify_control_pair("GACGU", "GGCGU", "nomod", edit_count=1)
+        assert result["is_control"] is True
+        assert result["control_type"] == "no_probe"
+        assert result["is_no_edit"] is False
+        assert result["is_no_probe"] is True
+        assert result["reasons"] == ["no_probe_control"]
+
+    def test_none_probe_is_no_probe_control(self):
+        result = classify_control_pair("GACGU", "GGCGU", "none", edit_count=1)
+        assert result["is_control"] is True
+        assert result["control_type"] == "no_probe"
+        assert result["is_no_probe"] is True
+
+    def test_no_edit_and_no_probe_is_combined_control(self):
+        result = classify_control_pair("ACGU", "ACGU", "nomod")
+        assert result["is_control"] is True
+        assert result["control_type"] == "no_edit_and_no_probe"
+        assert result["is_no_edit"] is True
+        assert result["is_no_probe"] is True
+        assert result["reasons"] == ["sequences_identical", "no_probe_control"]
+
+    def test_edited_probed_pair_is_not_control(self):
+        result = classify_control_pair("GACGU", "GGCGU", "DMS", edit_count=1)
+        assert result["is_control"] is False
+        assert result["control_type"] is None
+        assert result["reasons"] == []
+
+    def test_shape_class_probed_pair_is_not_control(self):
+        # 2A3 is a real probe (SHAPE-class), not a no-probe control.
+        result = classify_control_pair("GACGU", "GGCGU", "2A3", edit_count=1)
+        assert result["is_control"] is False
+        assert result["is_no_probe"] is False
+
+    def test_unknown_probe_is_not_no_probe_control(self):
+        # Unknown probe is NOT a no-probe control (it's an unrecognized probe,
+        # handled separately by T-D1.10). Only NOMOD/NONE are no-probe controls.
+        result = classify_control_pair("GACGU", "GGCGU", "kethoxal", edit_count=1)
+        assert result["is_control"] is False
+        assert result["is_no_probe"] is False
+
+    def test_edit_count_zero_makes_no_edit_control(self):
+        result = classify_control_pair("AAAA", "GGGG", "DMS", edit_count=0)
+        assert result["is_control"] is True
+        assert result["control_type"] == "no_edit"
+        assert result["is_no_edit"] is True
+
+    def test_no_probe_control_names_constant(self):
+        # NO_PROBE_CONTROL_NAMES = {NOMOD, NONE} (the empty-eligibility probes).
+        assert NO_PROBE_CONTROL_NAMES == frozenset({"NOMOD", "NONE"})
+
+
+class TestIdentifyReplicateGroups:
+    """T-D1.6: replicate group identification (v3.1 §3.1 corroboration)."""
+
+    def test_two_same_identity_different_id_are_replicates(self):
+        constructs = [
+            {"construct_id": "c1", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+            {"construct_id": "c2", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+        ]
+        result = identify_replicate_groups(constructs)
+        assert result["replicate_group_count"] == 1
+        assert result["replicate_record_ids"] == {"c1", "c2"}
+        assert result["record_to_replicate_count"]["c1"] == 2
+        assert result["record_to_replicate_count"]["c2"] == 2
+
+    def test_unique_identity_is_not_replicate(self):
+        constructs = [
+            {"construct_id": "c1", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+            {"construct_id": "c2", "parent_id": "P2", "sequence_normalized": "GGGG",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+        ]
+        result = identify_replicate_groups(constructs)
+        assert result["replicate_group_count"] == 0
+        assert result["replicate_record_ids"] == set()
+        assert result["record_to_replicate_count"]["c1"] == 0
+        assert result["record_to_replicate_count"]["c2"] == 0
+
+    def test_different_condition_not_replicate(self):
+        # Same parent + sequence but different probe → NOT a replicate
+        # (condition must exact-match per v3 §6.5).
+        constructs = [
+            {"construct_id": "c1", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+            {"construct_id": "c2", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "CMCT", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+        ]
+        result = identify_replicate_groups(constructs)
+        assert result["replicate_group_count"] == 0
+
+    def test_missing_id_field_skipped(self):
+        constructs = [
+            {"construct_id": "c1", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+            {"parent_id": "P1", "sequence_normalized": "ACGU",  # no construct_id
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+        ]
+        result = identify_replicate_groups(constructs)
+        assert result["replicate_group_count"] == 0
+        assert len(result["skipped"]) == 1
+
+    def test_three_members_in_one_group(self):
+        constructs = [
+            {"construct_id": f"c{i}", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"}
+            for i in range(3)
+        ]
+        result = identify_replicate_groups(constructs)
+        assert result["replicate_group_count"] == 1
+        assert result["replicate_record_ids"] == {"c0", "c1", "c2"}
+        assert result["record_to_replicate_count"]["c0"] == 3
+
+    def test_duplicate_id_deduped(self):
+        # The same construct_id appearing twice must NOT inflate the count.
+        constructs = [
+            {"construct_id": "c1", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+            {"construct_id": "c1", "parent_id": "P1", "sequence_normalized": "ACGU",
+             "probe": "DMS", "probe_protocol": None, "temperature": None,
+             "ligand": None, "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+        ]
+        result = identify_replicate_groups(constructs)
+        assert result["replicate_group_count"] == 0
+        assert result["record_to_replicate_count"]["c1"] == 0
+
+    def test_pair_level_identity_with_list_fields(self):
+        # Pair-level key uses edit_positions/wt_alleles/mut_alleles (lists),
+        # which must be converted to tuples for hashing.
+        pairs = [
+            {"pair_id": "p1", "parent_id": "P1", "edit_positions": [3],
+             "wt_alleles": ["A"], "mut_alleles": ["G"], "probe": "DMS",
+             "probe_protocol": None, "temperature": None, "ligand": None,
+             "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+            {"pair_id": "p2", "parent_id": "P1", "edit_positions": [3],
+             "wt_alleles": ["A"], "mut_alleles": ["G"], "probe": "DMS",
+             "probe_protocol": None, "temperature": None, "ligand": None,
+             "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+            {"pair_id": "p3", "parent_id": "P1", "edit_positions": [5],
+             "wt_alleles": ["C"], "mut_alleles": ["U"], "probe": "DMS",
+             "probe_protocol": None, "temperature": None, "ligand": None,
+             "ligand_concentration": None, "buffer": None,
+             "in_vivo_in_vitro": "in_vitro"},
+        ]
+        result = identify_replicate_groups(
+            pairs, key_fields=REPLICATE_PAIR_IDENTITY_FIELDS, id_field="pair_id"
+        )
+        # p1 and p2 share the same edit identity → replicate group of size 2.
+        # p3 has a different edit → singleton.
+        assert result["replicate_group_count"] == 1
+        assert result["replicate_record_ids"] == {"p1", "p2"}
+        assert result["record_to_replicate_count"]["p1"] == 2
+        assert result["record_to_replicate_count"]["p3"] == 0
+
+    def test_replicate_spans_studies(self):
+        # study_id is deliberately excluded from the identity key (v3.1 §3.1):
+        # the same parent/edit/condition measured in two studies is a replicate.
+        constructs = [
+            {"construct_id": "c1", "study_id": "S1", "parent_id": "P1",
+             "sequence_normalized": "ACGU", "probe": "DMS", "probe_protocol": None,
+             "temperature": None, "ligand": None, "ligand_concentration": None,
+             "buffer": None, "in_vivo_in_vitro": "in_vitro"},
+            {"construct_id": "c2", "study_id": "S2", "parent_id": "P1",
+             "sequence_normalized": "ACGU", "probe": "DMS", "probe_protocol": None,
+             "temperature": None, "ligand": None, "ligand_concentration": None,
+             "buffer": None, "in_vivo_in_vitro": "in_vitro"},
+        ]
+        result = identify_replicate_groups(constructs)
+        assert result["replicate_group_count"] == 1
+        assert result["replicate_record_ids"] == {"c1", "c2"}
+
+    def test_identity_fields_constants(self):
+        # Construct identity = parent_id + sequence + 7 condition fields.
+        assert REPLICATE_CONSTRUCT_IDENTITY_FIELDS == (
+            "parent_id", "sequence_normalized",
+        ) + CONDITION_MATCH_FIELDS
+        # Pair identity adds edit positions + alleles.
+        assert REPLICATE_PAIR_IDENTITY_FIELDS[:4] == (
+            "parent_id", "edit_positions", "wt_alleles", "mut_alleles",
+        )
+        # Neither identity includes study_id (replicates span studies).
+        assert "study_id" not in REPLICATE_CONSTRUCT_IDENTITY_FIELDS
+        assert "study_id" not in REPLICATE_PAIR_IDENTITY_FIELDS
+
+    def test_empty_input(self):
+        result = identify_replicate_groups([])
+        assert result["replicate_group_count"] == 0
+        assert result["replicate_record_ids"] == set()
+        assert result["groups"] == {}
+
+
+class TestReplicateNoEditIntegration:
+    """T-D1.6: integration with verify_substitution (§6.6 steps 4→8)."""
+
+    def test_single_sub_candidate_is_not_control(self):
+        # A verified single-substitution candidate under DMS is neither no-edit
+        # nor a no-probe control → eligible for true_pair upgrade path.
+        verify = verify_substitution("GACGU", "GGCGU")
+        assert verify["edit_count"] == 1
+        ctrl = classify_control_pair(
+            "GACGU", "GGCGU", "DMS", edit_count=verify["edit_count"]
+        )
+        assert ctrl["is_control"] is False
+        assert ctrl["control_type"] is None
+
+    def test_identical_pair_is_no_edit_control(self):
+        verify = verify_substitution("GACGU", "GACGU")
+        assert verify["edit_count"] == 0
+        ctrl = classify_control_pair(
+            "GACGU", "GACGU", "DMS", edit_count=verify["edit_count"]
+        )
+        assert ctrl["is_control"] is True
+        assert ctrl["control_type"] == "no_edit"

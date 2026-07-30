@@ -990,3 +990,215 @@ def build_probe_eligibility_unchanged_mask(
         "eligibility_changed_count": len(changed_positions),
         "eligibility_changed_positions": changed_positions,
     }
+
+
+# --- T-D1.6: Replicate / no-edit / control identification (v3 §6.6 step 8) ---
+
+# Construct-level identity fields for replicate grouping. Two constructs that
+# share all these fields are measurements of the same biological sample under
+# the same condition; if they are distinct measurement instances they are
+# replicates (v3.1 §3.1 "同一 parent 的 replicate"). ``parent_id`` anchors the
+# RNA family/construct origin, ``sequence_normalized`` anchors the molecule,
+# and the seven condition fields are the T-D1.2 CONDITION_MATCH_FIELDS (v3
+# §6.5 condition exact-match).
+REPLICATE_CONSTRUCT_IDENTITY_FIELDS: tuple[str, ...] = (
+    "parent_id",
+    "sequence_normalized",
+) + CONDITION_MATCH_FIELDS
+
+# Pair-level identity fields = construct identity + edit identity. Two pairs
+# sharing all these fields are replicate measurements of the same WT→mut
+# substitution under the same condition, providing the independent
+# corroboration referenced by v3.1 §3.1/§3.2. ``study_id`` is deliberately
+# excluded: replicates of the same parent may span studies, and the
+# same-study independent-profile/condition path is a separate corroboration
+# route judged by T-D1.10.
+REPLICATE_PAIR_IDENTITY_FIELDS: tuple[str, ...] = (
+    "parent_id",
+    "edit_positions",
+    "wt_alleles",
+    "mut_alleles",
+) + CONDITION_MATCH_FIELDS
+
+# No-probe control probe names (v3 §7.3 "noise threshold 由 controls 冻结").
+# These are the probes whose eligible-base set is empty in
+# PROBE_ELIGIBLE_BASES (NOMOD / NONE); they measure background reactivity
+# without chemical probing and serve as no-probe controls.
+NO_PROBE_CONTROL_NAMES = frozenset({"NOMOD", "NONE"})
+
+
+def classify_no_edit_pair(
+    wt_sequence: str | None,
+    mut_sequence: str | None,
+    *,
+    edit_count: int | None = None,
+) -> dict[str, Any]:
+    """Classify a WT/mutant pair as a no-edit control (T-D1.6, v3 §6.6 step 8).
+
+    A no-edit control is a pair where WT and mutant are identical
+    (``edit_count == 0``) — a deliberate WT-vs-WT measurement used to
+    characterize measurement noise (v3 §7.3 "noise threshold 由 controls
+    冻结"; §6.3 no-edit identity). The D1 v1 candidate scope requires
+    ``edit_count == 1`` (v3 §6.5), so no-edit controls are never candidate
+    pairs; this classifier identifies them among the full profile set so
+    T-D1.8 can use them for noise-threshold freezing.
+
+    Classification precedence:
+      1. If ``edit_count`` is explicitly ``0`` → no-edit (trusted over
+         sequence comparison, which may be unavailable for annotation-only
+         candidates).
+      2. Else if both sequences are available and equal after T→U
+         normalization (v3 §6.6 step 3) → no-edit.
+      3. Else → not no-edit.
+
+    Returns ``{is_no_edit, edit_count, determined_from, reason}``.
+    """
+    if edit_count == 0:
+        return {
+            "is_no_edit": True,
+            "edit_count": 0,
+            "determined_from": "edit_count",
+            "reason": "edit_count_zero",
+        }
+    if wt_sequence is not None and mut_sequence is not None:
+        if _normalize_rna(wt_sequence) == _normalize_rna(mut_sequence):
+            return {
+                "is_no_edit": True,
+                "edit_count": 0,
+                "determined_from": "sequence",
+                "reason": "sequences_identical",
+            }
+    return {
+        "is_no_edit": False,
+        "edit_count": edit_count,
+        "determined_from": None,
+        "reason": None,
+    }
+
+
+def classify_control_pair(
+    wt_sequence: str | None,
+    mut_sequence: str | None,
+    probe: str | None,
+    *,
+    edit_count: int | None = None,
+) -> dict[str, Any]:
+    """Classify a pair as a control (T-D1.6, v3 §6.6 step 8).
+
+    A pair is a control if it is a no-edit pair (WT==mutant) and/or a no-probe
+    pair (probe ∈ {nomod, none}). No-edit pairs characterize measurement noise
+    (v3 §7.3); no-probe pairs characterize background reactivity. Controls
+    feed T-D1.8 noise-threshold freezing and the ``replicate_control_subset``
+    (v3 §9.2, frozen in T-D2.5). The WT/mutant probe is shared per v3 §6.5
+    (enforced by T-D1.2), so a single ``probe`` argument is used.
+
+    Returns ``{is_control, control_type, is_no_edit, is_no_probe, reasons}``
+    where ``control_type`` is one of ``"no_edit"``, ``"no_probe"``,
+    ``"no_edit_and_no_probe"``, or ``None``; ``reasons`` is the (possibly
+    empty) list of machine-readable control reasons.
+    """
+    no_edit = classify_no_edit_pair(wt_sequence, mut_sequence, edit_count=edit_count)
+    normalized = normalize_probe(probe)
+    is_no_probe = normalized in NO_PROBE_CONTROL_NAMES
+    is_no_edit = no_edit["is_no_edit"]
+    reasons: list[str] = []
+    if is_no_edit:
+        reasons.append(no_edit["reason"])
+    if is_no_probe:
+        reasons.append("no_probe_control")
+    if is_no_edit and is_no_probe:
+        control_type = "no_edit_and_no_probe"
+    elif is_no_edit:
+        control_type = "no_edit"
+    elif is_no_probe:
+        control_type = "no_probe"
+    else:
+        control_type = None
+    return {
+        "is_control": control_type is not None,
+        "control_type": control_type,
+        "is_no_edit": is_no_edit,
+        "is_no_probe": is_no_probe,
+        "reasons": reasons,
+    }
+
+
+def _identity_key(
+    record: Mapping[str, Any], key_fields: tuple[str, ...]
+) -> tuple:
+    """Build a hashable identity-key tuple from ``key_fields`` of ``record``.
+
+    List values (e.g. ``edit_positions``, ``wt_alleles``) are converted to
+    tuples so the key is hashable; missing fields default to ``None``.
+    """
+    parts: list[Any] = []
+    for f in key_fields:
+        v = record.get(f)
+        if isinstance(v, list):
+            v = tuple(v)
+        parts.append(v)
+    return tuple(parts)
+
+
+def identify_replicate_groups(
+    records: Iterable[Mapping[str, Any]],
+    *,
+    key_fields: tuple[str, ...] = REPLICATE_CONSTRUCT_IDENTITY_FIELDS,
+    id_field: str = "construct_id",
+) -> dict[str, Any]:
+    """Identify replicate groups among records (T-D1.6, v3 §6.6 step 8).
+
+    Groups records by their identity key (``key_fields``). A group with
+    ≥2 distinct record ids is a *replicate group*: its members are
+    independent measurements of the same biological sample under the same
+    condition (v3.1 §3.1 "同一 parent 的 replicate"). These replicate groups
+    provide the independent corroboration required for true_pair upgrade
+    (v3.1 §3.1/§3.2) and the replicate-based measurement noise for T-D1.8 /
+    the frozen differential caller in T-D1.9.
+
+    ``key_fields`` defaults to :data:`REPLICATE_CONSTRUCT_IDENTITY_FIELDS`
+    (construct-level); pass :data:`REPLICATE_PAIR_IDENTITY_FIELDS` for
+    pair-level replicate identification. Records missing ``id_field`` are
+    skipped (recorded in ``skipped``) rather than silently merged.
+
+    Returns:
+      - ``replicate_group_count``: number of groups with ≥2 distinct members.
+      - ``replicate_record_ids``: set of record ids belonging to a replicate
+        group.
+      - ``groups``: ``{identity_key_tuple: [record_ids]}`` for every group.
+      - ``record_to_group``: ``{record_id: identity_key_tuple}``.
+      - ``record_to_replicate_count``: ``{record_id: int}`` — group size for
+        replicate-group members, else 0.
+      - ``skipped``: list of records missing ``id_field``.
+    """
+    groups: dict[tuple, list[Any]] = {}
+    record_to_group: dict[Any, tuple] = {}
+    skipped: list[Mapping[str, Any]] = []
+    for rec in records:
+        rid = rec.get(id_field)
+        if rid is None:
+            skipped.append(rec)
+            continue
+        key = _identity_key(rec, key_fields)
+        groups.setdefault(key, []).append(rid)
+        record_to_group[rid] = key
+    replicate_record_ids: set[Any] = set()
+    record_to_replicate_count: dict[Any, int] = {}
+    replicate_group_count = 0
+    for members in groups.values():
+        distinct = list(dict.fromkeys(members))  # dedupe, preserve order
+        if len(distinct) >= 2:
+            replicate_group_count += 1
+            for rid in distinct:
+                replicate_record_ids.add(rid)
+                record_to_replicate_count[rid] = len(distinct)
+        else:
+            record_to_replicate_count[distinct[0]] = 0
+    return {
+        "replicate_group_count": replicate_group_count,
+        "replicate_record_ids": replicate_record_ids,
+        "groups": groups,
+        "record_to_group": record_to_group,
+        "record_to_replicate_count": record_to_replicate_count,
+        "skipped": skipped,
+    }
