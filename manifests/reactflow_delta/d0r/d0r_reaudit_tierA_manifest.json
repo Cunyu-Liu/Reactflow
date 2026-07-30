@@ -5,9 +5,9 @@
     "summary": "artifacts/reactflow_delta/d0r/d0r_reaudit_tierA_summary.json"
   },
   "artifacts_sha256": {
-    "audit": "6b211a4e7862a4665431e48ffc44266d34a9d14a14ec2f30b232b1e5a4f5bbdb",
-    "relations": "628f1bdf28ddeac121fb8bfbb5c286dfa2b72b45fe25621450891fdf33f0e357",
-    "summary": "417c22c58d02c8c019c896e52e6deceb5970273a5da59c64c3703f3e01ed6744"
+    "audit": "00884617954ecb69b76f37862d7998fff33093ccf6887b9c7acc0a59cd952e11",
+    "relations": "1c5451a8f29cd3a4cbc4e41a47e46a4fe91288f9ae58d163bc265f17378f4d28",
+    "summary": "40fb8e8b5c4c07d7c682b73457fc359b1b1465476ed92ed3d593d7536abb4e89"
   },
   "distinct_owners": 6,
   "distinct_parents": 31,
@@ -1386,17 +1386,17 @@
       ]
     },
     {
-      "bytes": null,
+      "bytes": 590246,
       "citation_doi": "10.1073/pnas.1619897114",
       "construct_count_metadata": 204,
-      "download_status": "missing",
+      "download_status": "downloaded",
       "filename": "TRP4P6_DMS_0007.rdat",
-      "http_status": 0,
+      "http_status": 200,
       "owner": "Clarence Cheng",
-      "raw_path": null,
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0007.rdat",
       "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0007.rdat",
       "rmdb_id": "TRP4P6_DMS_0007",
-      "sha256": null,
+      "sha256": "337ffa4ebf180836de9ad8ad1c845326cdc720be07f3d56a48d41ae3b9adbab4",
       "tierA_signals": [
         "mutate_and_map"
       ]
@@ -1642,11 +1642,11 @@
       ]
     }
   ],
-  "downloaded_failed": 1,
-  "downloaded_ok": 100,
+  "downloaded_failed": 0,
+  "downloaded_ok": 101,
   "files_audited": 72,
-  "generated_at": "2026-07-30T20:16:18.898947+08:00",
-  "parse_errors": 28,
+  "generated_at": "2026-07-30T20:44:30.607067+08:00",
+  "parse_errors": 29,
   "re_d1_allowed": false,
   "re_tier_judgment": "Tier A",
   "re_triage_decision": "reaudit_qualified_to_propose_v3_1_non_learning_d1_cleanup_only",

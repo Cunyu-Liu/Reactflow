@@ -135,10 +135,10 @@ recorded as such and must be upgraded in D1 before any pair claim.
 | Metric | Value |
 |---|---|
 | Tier A entries selected | 101 |
-| Downloaded OK | 100 |
-| Download failed | 1 (`TRP4P6_DMS_0007`) |
+| Downloaded OK | 101 |
+| Download failed | 0 |
 | Files parsed OK | 72 |
-| Parse errors (honest) | 28 |
+| Parse errors (honest) | 29 |
 | **Total candidate single-mutant pairs** | **7,761** |
 | Distinct studies (owner, doi) | 8 |
 | Distinct parents (rmdb_id prefix) | 31 |
@@ -179,12 +179,14 @@ Tier A requires >=5 studies AND >=20 parents AND >=5,000 pairs. Observed
 (31 distinct parents total; full per-parent and per-file breakdowns in
 `artifacts/reactflow_delta/d0r/d0r_reaudit_tierA_summary.json`.)
 
-## Parse Errors (28, honest forward-only)
+## Parse Errors (29, honest forward-only)
 
 | Error type | Count | Files |
 |---|---|---|
-| `RDAT_VERSION != 0.34` (not accepted in D0) | 26 | `BSUGLY_DMS_0003..0014` (12, v0.4), `TRP4P6_DMS_0002..0014` excl. 0007 (12, v0.22/v0.24/VERSION-key), `CBAG4P_DMS_0003..0004` (2) |
+| `RDAT_VERSION != 0.34` (not accepted in D0) | 27 | `BSUGLY_DMS_0003..0014` (12, v0.4), `TRP4P6_DMS_0002..0014` (13, v0.22/v0.24/VERSION-key incl. re-downloaded 0007), `CBAG4P_DMS_0003..0004` (2) |
 | `invalid indexed annotation key` | 2 | `GLYCFN_KNK_0001`, `GLYCFN_KNK_0002` |
+
+Note: `TRP4P6_DMS_0007` was re-downloaded successfully (HTTP 200, 590 KB) after the initial network failure, but still fails parsing with the same VERSION-key issue (file uses `VERSION` header key, parser expects `RDAT_VERSION`). This is a parser-compatibility fix for D1, not a download problem.
 
 These are recorded, not silently dropped. The version-gated files can be
 revisited in D1 if the parser is extended to accept later RDAT versions.
