@@ -792,3 +792,201 @@ def check_comparable_positions(
         "is_comparable": is_comparable,
         "exclusion_reason": exclusion,
     }
+
+
+# --- T-D1.5: Probe eligibility masks (v3 §6.6 step 7, v3.1 §4 probe_mismatch) ---
+
+# Mapping from a *normalized* chemical-probe name to the frozenset of RNA bases
+# it can modify. Used by build_probe_eligibility_mask (construct-level, schema
+# field ``probe_eligibility_mask``) and build_probe_eligibility_unchanged_mask
+# (pair-level, schema field ``probe_eligibility_unchanged_mask``).
+#
+# Per v3 §6.6 step 7 ("构建 probe eligibility"), a position is probe-eligible
+# iff its RNA base is in the probe's eligible-base set; the pair-level
+# eligibility-unchanged mask is then ``1`` where WT and mutant share the same
+# eligibility at that position. The §12.1 main endpoint restricts regression
+# to unedited + aligned + eligibility-unchanged + valid positions and excludes
+# edited / eligibility-changed positions, so these masks gate every downstream
+# Δreactivity computation.
+#
+# Chemistry (verified against RDAT ``ANNOTATION modifier:X`` conventions and
+# the published DMS-MaP / SHAPE-MaP literature):
+#   - DMS  (dimethyl sulfate)      → N1-A, N3-C        → {A, C}
+#   - CMCT (1-cyclohexyl-3-(2-morpholinoethyl)carbodiimide) → N1-G, N3-U → {G, U}
+#   - SHAPE-class acylates the ribose 2'-OH, sequence-independent → {A,C,G,U}.
+#     Members normalized to "SHAPE": 1M7, NMIA, SHAPE, 2A3 (2A3 = 2-aminopyridine-
+#     3-carboxylic acid imidazolide; Marinus et al. 2021 NAR).
+#   - nomod / none → control, no probe → empty set (mask all 0).
+# Any probe not in this table is treated as "UNKNOWN": the mask is set to
+# ``None`` and ``probe_known`` is ``False``. The pipeline does NOT raise —
+# T-D1.10 decides how the candidate pair is routed (v3.1 §4 has no
+# ``probe_unknown`` exclusion reason; such pairs are typically routed to
+# ``parent_lineage_unverified`` or kept as ``candidate_only``).
+PROBE_ELIGIBLE_BASES: dict[str, frozenset[str]] = {
+    "DMS": frozenset({"A", "C"}),
+    "CMCT": frozenset({"G", "U"}),
+    "SHAPE": frozenset({"A", "C", "G", "U"}),
+    "NOMOD": frozenset(),
+    "NONE": frozenset(),
+}
+
+# Aliases (case-insensitive) collapsed into a single canonical key. All
+# SHAPE-class reagents acylate the 2'-OH universally and share the same
+# eligible-base set, so they map to "SHAPE".
+_PROBE_ALIASES: dict[str, str] = {
+    "1M7": "SHAPE",
+    "NMIA": "SHAPE",
+    "SHAPE": "SHAPE",
+    "2A3": "SHAPE",
+    "DMS": "DMS",
+    "CMCT": "CMCT",
+    "NOMOD": "NOMOD",
+    "NONE": "NONE",
+}
+
+
+def normalize_probe(probe: str | None) -> str:
+    """Normalize a chemical-probe name (T-D1.5).
+
+    Uppercases, strips whitespace, and collapses the SHAPE-class reagents
+    (1M7, NMIA, SHAPE, 2A3) to the single canonical key ``"SHAPE"``. Returns
+    ``"UNKNOWN"`` for ``None``/empty input or any probe not present in
+    :data:`_PROBE_ALIASES`. The result is always a key of
+    :data:`PROBE_ELIGIBLE_BASES` or the literal ``"UNKNOWN"``.
+    """
+    if probe is None:
+        return "UNKNOWN"
+    key = probe.strip().upper()
+    if not key:
+        return "UNKNOWN"
+    return _PROBE_ALIASES.get(key, "UNKNOWN")
+
+
+def build_probe_eligibility_mask(
+    sequence: str | None, probe: str | None
+) -> dict[str, Any]:
+    """Build the construct-level probe-eligibility mask (T-D1.5, v3 §6.6 step 7).
+
+    For each 0-indexed position of ``sequence`` the mask is ``1`` if the RNA
+    base at that position belongs to the probe's eligible-base set, else
+    ``0``. The sequence is T→U normalized first (v3 §6.6 step 3, via
+    :func:`_normalize_rna`) so DNA-typed header sequences are handled
+    defensively.
+
+    Returns a dict with:
+      - ``mask``: list[int] of 0/1, or ``None`` if the probe is unknown or the
+        sequence is ``None``.
+      - ``normalized_probe``: the canonical probe key (or ``"UNKNOWN"``).
+      - ``probe_known``: ``True`` iff the probe is recognized.
+      - ``eligible_base_count``: number of eligible positions (``None`` when
+        the mask is ``None``).
+
+    For an unknown probe the function does **not** raise; downstream callers
+    (T-D1.10) decide how to route the candidate.
+    """
+    normalized = normalize_probe(probe)
+    probe_known = normalized != "UNKNOWN"
+    if not probe_known:
+        return {
+            "mask": None,
+            "normalized_probe": normalized,
+            "probe_known": False,
+            "eligible_base_count": None,
+        }
+    eligible_bases = PROBE_ELIGIBLE_BASES[normalized]
+    if sequence is None:
+        return {
+            "mask": None,
+            "normalized_probe": normalized,
+            "probe_known": True,
+            "eligible_base_count": None,
+        }
+    seq = _normalize_rna(sequence)
+    mask = [1 if base in eligible_bases else 0 for base in seq]
+    return {
+        "mask": mask,
+        "normalized_probe": normalized,
+        "probe_known": True,
+        "eligible_base_count": sum(mask),
+    }
+
+
+def build_probe_eligibility_unchanged_mask(
+    wt_sequence: str | None, mut_sequence: str | None, probe: str | None
+) -> dict[str, Any]:
+    """Build the pair-level probe-eligibility-unchanged mask (T-D1.5).
+
+    Implements v3 §6.6 step 7 at the pair level: for each 0-indexed position
+    the mask is ``1`` where WT and mutant have the *same* probe eligibility
+    (both eligible or both ineligible), and ``0`` where eligibility changed
+    (i.e. an edit toggled eligibility). The mask aligns with the pair-schema
+    field ``probe_eligibility_unchanged_mask`` (T-D1.1, schema.py).
+
+    Per v3 §6.5 the WT and mutant share the same probe (enforced by T-D1.2
+    ``condition_match_status``); the single ``probe`` argument is therefore
+    used for both. Eligibility can only change at edited positions, because an
+    unedited position carries the same base (hence the same eligibility) in WT
+    and mutant — so the unchanged mask is ``1`` at every unedited position and
+    may be ``0`` only at edit positions.
+
+    Returns a dict with:
+      - ``mask``: list[int] of 0/1, or ``None`` if the probe is unknown or
+        either sequence is ``None``.
+      - ``normalized_probe``: canonical probe key (or ``"UNKNOWN"``).
+      - ``probe_known``: ``True`` iff the probe is recognized.
+      - ``eligibility_changed_count``: number of positions with an eligibility
+        change (``None`` when the mask is ``None``).
+      - ``eligibility_changed_positions``: sorted 0-indexed positions where
+        eligibility changed (empty list, or ``None`` when the mask is
+        ``None``).
+
+    This function does **not** emit a pair-level exclusion reason. Eligibility
+    change is a *per-position* mask, not a pair-level exclusion; the pair-level
+    ``probe_mismatch`` exclusion (v3.1 §4) is assigned by T-D1.10 based on the
+    T-D1.2 ``condition_match_status``. A ``ValueError`` is raised on unequal
+    sequence lengths as a defensive guard (T-D1.3 ``verify_substitution``
+    guarantees equal length for every D1 v1 pair).
+    """
+    normalized = normalize_probe(probe)
+    probe_known = normalized != "UNKNOWN"
+    if not probe_known:
+        return {
+            "mask": None,
+            "normalized_probe": normalized,
+            "probe_known": False,
+            "eligibility_changed_count": None,
+            "eligibility_changed_positions": None,
+        }
+    if wt_sequence is None or mut_sequence is None:
+        return {
+            "mask": None,
+            "normalized_probe": normalized,
+            "probe_known": True,
+            "eligibility_changed_count": None,
+            "eligibility_changed_positions": None,
+        }
+    wt_n = _normalize_rna(wt_sequence)
+    mut_n = _normalize_rna(mut_sequence)
+    if len(wt_n) != len(mut_n):
+        raise ValueError(
+            f"wt_sequence length {len(wt_n)} != mut_sequence length "
+            f"{len(mut_n)} (probe-eligibility-unchanged requires equal-length "
+            "sequences; T-D1.3 verify_substitution must precede this call for "
+            "D1 v1 pairs)"
+        )
+    eligible_bases = PROBE_ELIGIBLE_BASES[normalized]
+    mask: list[int] = []
+    changed_positions: list[int] = []
+    for i, (wb, mb) in enumerate(zip(wt_n, mut_n)):
+        if (wb in eligible_bases) == (mb in eligible_bases):
+            mask.append(1)
+        else:
+            mask.append(0)
+            changed_positions.append(i)
+    return {
+        "mask": mask,
+        "normalized_probe": normalized,
+        "probe_known": True,
+        "eligibility_changed_count": len(changed_positions),
+        "eligibility_changed_positions": changed_positions,
+    }
