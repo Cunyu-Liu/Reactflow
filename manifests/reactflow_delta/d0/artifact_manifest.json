@@ -7,7 +7,7 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T13:54:09+08:00",
+  "last_updated_at": "2026-07-30T13:59:13+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
     "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
@@ -16,7 +16,8 @@
     "T-D0.5": "940d1a9411c8cb034e3ac814e4129f741a23882a",
     "T-D0.6": "9158f2214c81888c88ad6b25fe18820c2a273276",
     "T-D0.7": "1b9f32396b8b9d5e297e44aa8cce18d98b24035c",
-    "T-D0.8": "e8bfa4fb66bee124b3a38530d97850387fd5bed3"
+    "T-D0.8": "e8bfa4fb66bee124b3a38530d97850387fd5bed3",
+    "T-D0.9": "de4f5134f8db90970f25c90ee7bfb9ae3e4ff775"
   },
   "files": [
     {
@@ -249,6 +250,27 @@
       "rmdb_candidate_pair_count": 0,
       "ribonanza_pair_count": null,
       "scientific_status": "five observed RMDB zero strata and one distinct Ribonanza unknown-not-acquired row"
+    },
+    {
+      "task_id": "T-D0.10",
+      "kind": "pair_relation_taxonomy_auditor",
+      "repo_paths": ["src/reactflow/delta/relations.py", "scripts/reactflow_delta/audit_pair_relations.py", "tests/reactflow_delta/test_relations.py"],
+      "sha256": {
+        "src/reactflow/delta/relations.py": "e7ce4c33770f25a7cf912d55c411495519dc6240dd4df80af345f279503dec2e",
+        "scripts/reactflow_delta/audit_pair_relations.py": "d4b2759eab5504b68e9fc3731fe5b27cee9055a4754e7c1b76344d01623e2afd",
+        "tests/reactflow_delta/test_relations.py": "e5819ed286c4347bb05f99c2b6bbecdf4c32af37ba73756d2364206a3bc087c8"
+      }
+    },
+    {
+      "task_id": "T-D0.10",
+      "kind": "pair_relation_audit",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/pair_relation_audit_6fixtures.json",
+      "sha256": "09fe744680deddd92d8a945b32f3a8b4034b6b14283f08f6f7cfdcdb5ff3d0b8",
+      "true_pair_count": 0,
+      "designed_neighbour_count": 0,
+      "synthetic_pair_count": 0,
+      "same_sequence_replicate_group_count": 7,
+      "scientific_status": "no pair candidates were classified; constructs and replicates were not promoted"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
