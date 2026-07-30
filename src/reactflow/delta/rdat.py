@@ -1,9 +1,23 @@
-"""Small fail-closed RDAT 0.34 parser for D0 provenance and construct audit."""
+"""Fail-closed RDAT 0.34 parser for D0/D0-R provenance and construct audit.
+
+D0-R extensions (backward-compatible):
+  * Per-profile indexed ``SEQUENCE:N`` lines (in addition to the global header).
+  * Per-profile ``sequence:`` annotation token (M2-seq style, e.g. M2SL5).
+  * Mutation encoding parsed from ``name:`` annotation tokens.
+  * WT anchor identification (``mutation:WT`` annotation or name without a
+    mutation suffix).
+  * Edit-set computation from per-profile sequence vs WT anchor, restricted to
+    the SEQPOS window when available.
+  * Functional-RNA vs adapter/barcode separation: edits inside the SEQPOS window
+    that are NOT explained by the name-encoded mutation are reported as
+    ``unexplained_edits`` (likely barcode/adapter), not auto-rejected.
+"""
 
 from __future__ import annotations
 
 import json
 import math
+import re
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +25,16 @@ from .manifests import sha256_file
 
 
 RDAT_CONSTRUCT_PARSE_MANIFEST_SCHEMA_VERSION = "reactflow-delta-rdat-construct-parse-manifest-v1"
+D0R_PARSED_PROFILE_SCHEMA_VERSION = "reactflow-delta-d0r-parsed-profile-v1"
+
+_RNA_BASES = set("ACGU")
+_RNA_SEQUENCE = re.compile(r"^[ACGU]+$")
+# Mutation tokens in name annotations: <pos><ref>-<mut>  e.g. 0G-A, 78C-T
+# Accept both RNA (ACGU) and DNA (ACGT) bases since construct names often use
+# DNA encoding (oligos are ordered as DNA) even though sequences are RNA.
+_NAME_MUTATION = re.compile(r"(?<![A-Za-z])(\d+)([ACGUT])-([ACGUT])(?![A-Za-z])")
+# WT marker in name (no mutation suffix)
+_WT_NAME_HINTS = ("_wt", "-wt", "wildtype", "wild-type")
 
 
 class RdatParseError(ValueError):
@@ -30,8 +54,9 @@ def parse_rdat(path: str | Path) -> dict[str, Any]:
     seqpos: list[str] | None = None
     reactivity: dict[int, list[float | None]] = {}
     reactivity_error: dict[int, list[float | None]] = {}
+    profile_sequences: dict[int, str] = {}  # D0-R: SEQUENCE:N per-profile lines
 
-    for line_number, raw_line in enumerate(source.read_text(encoding="utf-8").splitlines(), 1):
+    for line_number, raw_line in enumerate(source.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
         if not raw_line.strip():
             continue
         fields = raw_line.split("\t")
@@ -68,6 +93,14 @@ def parse_rdat(path: str | Path) -> dict[str, Any]:
             if len(values) != 1 or not values[0]:
                 raise RdatParseError(f"header {key} requires one non-empty value")
             headers[key] = values[0]
+        elif key.startswith("SEQUENCE:"):
+            # D0-R: per-profile indexed sequence line SEQUENCE:N
+            index = _parse_index(key, line_number)
+            if index in profile_sequences:
+                raise RdatParseError(f"duplicate SEQUENCE index {index}")
+            if len(values) != 1 or not values[0]:
+                raise RdatParseError(f"SEQUENCE:{index} requires one non-empty value")
+            profile_sequences[index] = values[0]
         elif key.startswith(("TRACE:", "READS:")):
             continue
         else:
@@ -91,13 +124,28 @@ def parse_rdat(path: str | Path) -> dict[str, Any]:
         errors = reactivity_error.get(index)
         if errors is not None and len(errors) != len(seqpos):
             raise RdatParseError(f"REACTIVITY_ERROR:{index} length does not match SEQPOS")
+        annotation = data_annotations.get(index, {})
+        # D0-R: prefer SEQUENCE:N line, fall back to sequence: annotation token
+        profile_sequence = profile_sequences.get(index)
+        sequence_source = "sequence_indexed_line" if index in profile_sequences else None
+        if profile_sequence is None:
+            seq_values = annotation.get("sequence", [])
+            if len(seq_values) == 1 and _RNA_SEQUENCE.fullmatch(seq_values[0]):
+                profile_sequence = seq_values[0]
+                sequence_source = "annotation_sequence_token"
+        name_values = annotation.get("name", [])
+        profile_name = name_values[0] if len(name_values) == 1 else None
         profiles.append(
             {
                 "index": index,
-                "annotation": data_annotations.get(index, {}),
+                "annotation": annotation,
                 "reactivity": values,
                 "reactivity_error": errors,
                 "missing_reactivity_count": sum(value is None for value in values),
+                # D0-R additions
+                "profile_sequence": profile_sequence,
+                "profile_sequence_source": sequence_source,
+                "profile_name": profile_name,
             }
         )
     orphan_annotation_indices = sorted(set(data_annotations) - set(reactivity))
@@ -111,6 +159,210 @@ def parse_rdat(path: str | Path) -> dict[str, Any]:
         "profiles": profiles,
         "orphan_annotation_indices": orphan_annotation_indices,
     }
+
+
+# ---------------------------------------------------------------------------
+# D0-R: mutation encoding, WT anchor, edit-set computation
+# ---------------------------------------------------------------------------
+
+
+def parse_mutations_from_name(name: str | None) -> list[dict[str, Any]]:
+    """Parse mutation encoding from a profile ``name:`` annotation token.
+
+    Supports single and multi-mutation encodings like:
+      ``SL5_SARS_CoV_2_0G-A_5pad6_w53barcode`` -> [{position:0, ref:G, mut:A}]
+      ``SL5_MERS_GCadded_78C-T_86G-C_0pad0_w53barcode`` -> [{78,C,T},{86,G,C}]
+
+    Positions are 0-indexed relative to the functional RNA domain (the meaning
+    of "position 0" depends on the construct design, e.g. after 5' padding).
+    """
+
+    if not name:
+        return []
+    matches = _NAME_MUTATION.findall(name)
+    return [
+        {"position": int(pos), "ref": ref, "mut": mut, "encoding": f"{pos}{ref}-{mut}"}
+        for pos, ref, mut in matches
+    ]
+
+
+def is_wt_profile(profile: dict[str, Any]) -> bool:
+    """Identify a WT anchor profile.
+
+    A profile is WT if it has an explicit ``mutation:WT`` annotation, OR if its
+    name lacks a mutation-encoding suffix (no ``<pos><ref>-<mut>`` tokens).
+    """
+
+    annotation = profile.get("annotation") or {}
+    mutation_values = annotation.get("mutation", [])
+    if mutation_values:
+        return any(v.strip().upper() == "WT" for v in mutation_values)
+    name = profile.get("profile_name")
+    if name:
+        lower = name.lower()
+        if any(hint in lower for hint in _WT_NAME_HINTS):
+            return True
+        return not parse_mutations_from_name(name)
+    # no annotation and no name: cannot establish WT
+    return False
+
+
+def seqpos_to_indices(seqpos: list[str]) -> list[int]:
+    """Extract integer positions from SEQPOS tokens like ``X27``, ``A1``.
+
+    Returns an empty list if any token is non-integer after stripping a leading
+    single-letter nucleotide prefix. Positions are 1-indexed (RDAT convention).
+    """
+
+    indices: list[int] = []
+    for token in seqpos:
+        digits = re.sub(r"^[ACGUNX]", "", token)
+        if digits.isdigit():
+            indices.append(int(digits))
+    return indices
+
+
+def compute_edit_set(
+    mutant_seq: str | None,
+    wt_seq: str | None,
+    seqpos_indices: list[int] | None = None,
+) -> dict[str, Any]:
+    """Compute the edit set between a mutant and WT profile sequence.
+
+    If ``seqpos_indices`` is provided, edits are partitioned into
+    ``functional_edits`` (positions within the SEQPOS window) and
+    ``flanking_edits`` (positions outside, likely adapter/barcode).
+
+    Returns ``edit_count`` = total edits, ``functional_edit_count``, and the
+    edit lists. Returns ``status`` = ``"skipped"`` if either sequence is missing
+    or lengths differ.
+    """
+
+    if not mutant_seq or not wt_seq:
+        return {
+            "status": "skipped",
+            "reason": "missing_mutant_or_wt_sequence",
+            "edits": [],
+            "edit_count": 0,
+            "functional_edits": [],
+            "functional_edit_count": 0,
+            "flanking_edits": [],
+            "flanking_edit_count": 0,
+        }
+    if len(mutant_seq) != len(wt_seq):
+        return {
+            "status": "skipped",
+            "reason": "length_mismatch",
+            "mutant_length": len(mutant_seq),
+            "wt_length": len(wt_seq),
+            "edits": [],
+            "edit_count": 0,
+            "functional_edits": [],
+            "functional_edit_count": 0,
+            "flanking_edits": [],
+            "flanking_edit_count": 0,
+        }
+    edits: list[dict[str, Any]] = []
+    for i, (m, w) in enumerate(zip(mutant_seq, wt_seq)):
+        if m != w:
+            edits.append({"position_1indexed": i + 1, "wt_base": w, "mutant_base": m})
+    functional_set = set(seqpos_indices) if seqpos_indices else set()
+    functional_edits = [e for e in edits if e["position_1indexed"] in functional_set] if functional_set else list(edits)
+    flanking_edits = [e for e in edits if e["position_1indexed"] not in functional_set] if functional_set else []
+    return {
+        "status": "computed",
+        "edits": edits,
+        "edit_count": len(edits),
+        "functional_edits": functional_edits,
+        "functional_edit_count": len(functional_edits),
+        "flanking_edits": flanking_edits,
+        "flanking_edit_count": len(flanking_edits),
+    }
+
+
+def classify_profile_edit(
+    profile: dict[str, Any],
+    wt_profile: dict[str, Any],
+    seqpos_indices: list[int],
+) -> dict[str, Any]:
+    """Classify a profile's edit relationship to the WT anchor.
+
+    Combines the name-encoded mutation with the computed edit set to produce a
+    candidate classification. Does NOT confirm lineage — that requires D1.
+    """
+
+    name_mutations = parse_mutations_from_name(profile.get("profile_name"))
+    edit_info = compute_edit_set(
+        profile.get("profile_sequence"),
+        wt_profile.get("profile_sequence"),
+        seqpos_indices,
+    )
+    # Determine if the name-encoded mutation count matches the functional edits
+    name_mutation_count = len(name_mutations)
+    functional_edit_count = edit_info["functional_edit_count"]
+
+    if name_mutation_count == 0 and functional_edit_count == 0:
+        edit_class = "no_edit_vs_wt"
+    elif name_mutation_count == 1 and functional_edit_count == 1:
+        # Name says single mutation AND exactly 1 functional edit matches.
+        edit_class = "candidate_single_from_name"
+    elif name_mutation_count == 1 and functional_edit_count > 1:
+        # Name says single mutation but many functional edits -> cross-parent.
+        edit_class = "name_sequence_mismatch_likely_cross_parent"
+    elif name_mutation_count > 1 and functional_edit_count == name_mutation_count:
+        edit_class = "candidate_multi_from_name"
+    elif name_mutation_count > 1 and functional_edit_count > name_mutation_count:
+        edit_class = "name_sequence_mismatch_likely_cross_parent"
+    elif name_mutation_count == 0 and functional_edit_count == 1:
+        edit_class = "candidate_single_from_sequence_only"
+    elif name_mutation_count == 0 and functional_edit_count > 1:
+        edit_class = "multi_edit_no_name_encoding"
+    else:
+        edit_class = "name_sequence_mismatch"
+
+    return {
+        "profile_index": profile["index"],
+        "profile_name": profile.get("profile_name"),
+        "name_encoded_mutations": name_mutations,
+        "name_encoded_mutation_count": name_mutation_count,
+        "edit_set": edit_info,
+        "edit_class": edit_class,
+        "wt_profile_index": wt_profile["index"],
+        "wt_profile_name": wt_profile.get("profile_name"),
+        "lineage_status": "candidate_only_unverified",
+    }
+
+
+def find_wt_anchor(profiles: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Find the WT anchor profile among parsed profiles.
+
+    Preference order:
+      1. Explicit ``mutation:WT`` annotation.
+      2. Name without mutation suffix (and not containing WT hints).
+      3. First profile with a valid per-profile sequence.
+
+    Returns ``None`` if no candidate is found.
+    """
+
+    for profile in profiles:
+        annotation = profile.get("annotation") or {}
+        mutation_values = annotation.get("mutation", [])
+        if any(v.strip().upper() == "WT" for v in mutation_values):
+            if profile.get("profile_sequence"):
+                return profile
+    for profile in profiles:
+        name = profile.get("profile_name")
+        if name and profile.get("profile_sequence") and not parse_mutations_from_name(name):
+            return profile
+    for profile in profiles:
+        if profile.get("profile_sequence"):
+            return profile
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Original D0 helpers (unchanged for backward compatibility)
+# ---------------------------------------------------------------------------
 
 
 def _parse_index(key: str, line_number: int) -> int:
