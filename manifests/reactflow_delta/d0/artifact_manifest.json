@@ -7,10 +7,12 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T12:45:38+08:00",
+  "last_updated_at": "2026-07-30T13:07:20+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
-    "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa"
+    "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
+    "T-D0.3": "1beed04af9d53f4259f3edbc68783669e34e9e5b",
+    "T-D0.4": "148dc2add8526c687fa89a1dbccefbaea0cfa20f"
   },
   "files": [
     {
@@ -116,6 +118,33 @@
       "fixture_count": 6,
       "fixture_counts_by_filename_candidate_category": {"m2_named_candidate": 3, "variant_or_library_named_candidate": 3},
       "scientific_status": "byte-verified only; RDAT parsing remains pending"
+    },
+    {
+      "task_id": "T-D0.5",
+      "kind": "fail_closed_rdat_construct_parser",
+      "repo_paths": ["src/reactflow/delta/rdat.py", "scripts/reactflow_delta/parse_rdat_constructs.py", "tests/reactflow_delta/test_rdat_parser.py"],
+      "sha256": {
+        "src/reactflow/delta/rdat.py": "70f76469462c87832be80991ce76a74abeee99d6d177a8cd2db6e1834928db11",
+        "scripts/reactflow_delta/parse_rdat_constructs.py": "6cbb16d0bc359dccad69a4aac714cf1431a4a738a99bdf07e2d95ccdd59ca061",
+        "tests/reactflow_delta/test_rdat_parser.py": "c06db9ca27d2c599d180820ac8ce8215f0afcafd1b1241dd5b68b50f745e7d8b"
+      },
+      "parser_scope": "RDAT 0.34 structural validation, profile annotations, and missing-value counts only; no reactivity imputation"
+    },
+    {
+      "task_id": "T-D0.5",
+      "kind": "byte_verified_rdat_construct_parse_manifest",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rdat_construct_parse_manifest_6fixtures.json",
+      "sha256": "e3b9d5a18ca337c3ae599a128f294fdaa26db51ada133ee2351a990117ef399e",
+      "fixture_count": 6,
+      "profile_counts_by_fixture": {"SPINACH_M2G4_0001.rdat": 160, "M2SL5_2A3_0000.rdat": 2499, "M2SL5_DMS_0000.rdat": 2499, "ETERNA_TOD_0000.rdat": 3, "ETERNA_R42_0004.rdat": 6, "ETERNA_R42_0005.rdat": 8},
+      "scientific_status": "structural parse only; no construct, pair, tier, or model claim"
+    },
+    {
+      "task_id": "T-D0.5",
+      "kind": "retained_duplicate_parse_artifact_with_noncanonical_filename",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rdat_construct_parse_manifest_20260730T131600+0800.json",
+      "sha256": "e3b9d5a18ca337c3ae599a128f294fdaa26db51ada133ee2351a990117ef399e",
+      "administrative_note": "Retained without deletion because its manually supplied filename timestamp is not reliable; canonical artifact above has no timestamp in its filename."
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
