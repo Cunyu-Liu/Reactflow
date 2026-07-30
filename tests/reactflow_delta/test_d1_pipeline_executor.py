@@ -130,18 +130,53 @@ def test_evaluate_one_annotation_only_unverified_lineage_blocks_upgrade():
     }
 
 
-def test_evaluate_one_verified_substitution_still_blocked_by_lineage():
-    # alt_not_verified=False → substitution_verified=True, but lineage still
-    # pending → only parent_lineage_unverified remains (mirrors the 285 cases).
+def test_evaluate_one_annotation_only_concrete_alt_blocked_by_section_3_2():
+    # v3.1 §3.2: annotation-only candidates require per-profile sequence
+    # evidence to verify the substitution. A concrete annotated alt (the
+    # 285-case shape) is NOT sequence-verified, so
+    # annotation_only_alt_not_verifiable still applies; lineage still
+    # pending (no D2 artifact) adds parent_lineage_unverified.
     wt = _make_profile([0.1, 0.2, 0.3])
     mut = _make_profile([0.5, 0.6, 0.7])
     rel = _make_relation(alt_not_verified=False)
     res = mod._evaluate_one(rel, {1: wt, 2: mut}, None)
 
-    assert res["exclusion_reasons"] == ["parent_lineage_unverified"]
-    assert res["substitution_verified"] is True
+    assert res["exclusion_reasons"] == [
+        "annotation_only_alt_not_verifiable",
+        "parent_lineage_unverified",
+    ]
+    assert res["substitution_verified"] is False
     assert res["primary_eligible"] is False
     assert res["true_pair"] is False
+    assert res["parent_lineage_source"] == "d0r_v2_lineage_status"
+
+
+def test_evaluate_one_d2_lineage_clears_parent_lineage_unverified():
+    # D2 lineage verification artifact marks the candidate's parent lineage
+    # as verified → parent_lineage_unverified is cleared. The annotation-only
+    # §3.2 blocker remains (no per-profile sequence).
+    wt = _make_profile([0.1, 0.2, 0.3])
+    mut = _make_profile([0.5, 0.6, 0.7])
+    rel = _make_relation(alt_not_verified=False)
+    rel["rdat_sha256"] = "sha-test-1"
+    lineage_lookup = {("sha-test-1", 1, 2): True}
+    res = mod._evaluate_one(rel, {1: wt, 2: mut}, None, lineage_lookup)
+
+    assert "parent_lineage_unverified" not in res["exclusion_reasons"]
+    assert res["parent_lineage_verified"] is True
+    assert res["parent_lineage_source"] == "d2_lineage_verification"
+    # Annotation-only §3.2 blocker still blocks true_pair.
+    assert res["exclusion_reasons"] == ["annotation_only_alt_not_verifiable"]
+    assert res["true_pair"] is False
+
+
+def test_evaluate_one_d2_lineage_absent_falls_back_to_d0r_status():
+    # No lineage_lookup → conservative D0-R v2 rule (candidate_only_pending
+    # → unverified). Mirrors the pre-D2 run.
+    rel = _make_relation()
+    res = mod._evaluate_one(rel, {}, None, None)
+    assert res["parent_lineage_verified"] is False
+    assert res["parent_lineage_source"] == "d0r_v2_lineage_status"
 
 
 def test_evaluate_one_missing_profile_records_no_wt_anchor():

@@ -103,8 +103,17 @@ def _evaluate_one(
     relation: dict,
     profile_map: dict[int, dict],
     file_audit: dict | None,
+    lineage_lookup: dict[tuple[str, int, int], bool] | None = None,
 ) -> dict:
-    """Run the full T-D1.1~10 pipeline on one candidate relation."""
+    """Run the full T-D1.1~10 pipeline on one candidate relation.
+
+    ``lineage_lookup`` is the D2 parent-lineage verification map keyed by
+    ``(rdat_sha256, wt_profile_index, mutant_profile_index)``. When present,
+    ``parent_lineage_verified`` is taken from the D2 artifact (forward-only
+    upgrade over the conservative D0-R v2 ``lineage_status`` label). When
+    absent, the D0-R v2 conservative rule is used (``lineage_status`` does
+    not start with ``candidate_only_pending``).
+    """
     rdat_path = relation["rdat_path"]
     wt_idx = relation["wt_profile_index"]
     mut_idx = relation["mutant_profile_index"]
@@ -114,7 +123,13 @@ def _evaluate_one(
     is_annotation_only = "annotation_only" in audit_method
     is_sequence_based = "functional_anchor" in audit_method or "functional_window" in audit_method
     alt_not_verified = bool(matched.get("alt_not_verified", True))
-    substitution_verified = not alt_not_verified
+    # v3.1 §3.2: annotation-only candidates require per-profile sequence
+    # evidence (or same-parent replicate) to verify the substitution. D0-R v2
+    # annotation-only candidates carry encoding_source="annotation" (no
+    # per-profile sequence), so the substitution is NOT sequence-verified
+    # even when the annotated alt is a concrete base. Only sequence-based
+    # candidates can reach substitution_verified=True via alt_not_verified.
+    substitution_verified = (not is_annotation_only) and (not alt_not_verified)
     edit_count = int(relation.get("annotation_mutation_count") or 0)
 
     # Profile lookup
@@ -233,11 +248,19 @@ def _evaluate_one(
     # RDAT / rmdb_id / study → same domain (T-D1.7).
     normalization_domain_compatible = True
 
-    # parent_lineage_verified: D0-R v2 marks every candidate as
-    # "candidate_only_pending_parent_lineage_..." → False for all (T-D1.6).
-    parent_lineage_verified = relation.get("lineage_status", "").startswith(
-        "candidate_only_pending"
-    ) is False  # → False for all candidates
+    # parent_lineage_verified (T-D1.6 / T-D2.1): when a D2 lineage-
+    # verification artifact is supplied, use the forward-only D2 verdict
+    # (same-RDAT parenthood + header-SEQUENCE ref verification). Otherwise
+    # fall back to the conservative D0-R v2 rule: a candidate whose
+    # ``lineage_status`` still starts with ``candidate_only_pending`` is
+    # treated as unverified.
+    lineage_key = (relation.get("rdat_sha256", ""), wt_idx, mut_idx)
+    if lineage_lookup is not None and lineage_key in lineage_lookup:
+        parent_lineage_verified = bool(lineage_lookup[lineage_key])
+    else:
+        parent_lineage_verified = relation.get("lineage_status", "").startswith(
+            "candidate_only_pending"
+        ) is False
 
     in_vivo_in_vitro_mixed = False  # D1 pool is in-vitro RMDB only
 
@@ -280,6 +303,11 @@ def _evaluate_one(
         "has_wt_anchor": has_wt_anchor,
         "normalization_domain_compatible": normalization_domain_compatible,
         "parent_lineage_verified": parent_lineage_verified,
+        "parent_lineage_source": (
+            "d2_lineage_verification"
+            if lineage_lookup is not None and lineage_key in lineage_lookup
+            else "d0r_v2_lineage_status"
+        ),
         "in_vivo_in_vitro_mixed": in_vivo_in_vitro_mixed,
         "is_annotation_only": is_annotation_only,
         "is_sequence_based": is_sequence_based,
@@ -382,6 +410,16 @@ def main(argv: list[str] | None = None) -> int:
         "--out-dir",
         default="artifacts/reactflow_delta/d1",
     )
+    parser.add_argument(
+        "--lineage-verification",
+        default=None,
+        help=(
+            "Optional D2 lineage-verification artifact "
+            "(artifacts/reactflow_delta/d2/d2_lineage_verification.json). "
+            "When supplied, parent_lineage_verified is taken from the D2 "
+            "verdict (forward-only upgrade over D0-R v2 lineage_status)."
+        ),
+    )
     args = parser.parse_args(argv)
 
     relations_path = Path(args.relations)
@@ -392,6 +430,27 @@ def main(argv: list[str] | None = None) -> int:
         rel_doc = json.load(f)
     relations = rel_doc["relations"]
     print(f"[d1] loaded {len(relations)} candidate relations from {relations_path}")
+
+    # Optional D2 parent-lineage verification artifact (T-D2.1). Keyed by
+    # (rdat_sha256, wt_profile_index, mutant_profile_index) → bool.
+    lineage_lookup: dict[tuple[str, int, int], bool] | None = None
+    if args.lineage_verification:
+        lv_path = Path(args.lineage_verification)
+        with lv_path.open() as f:
+            lv_doc = json.load(f)
+        lineage_lookup = {
+            (
+                v["rdat_sha256"],
+                int(v["wt_profile_index"]),
+                int(v["mutant_profile_index"]),
+            ): bool(v["parent_lineage_verified"])
+            for v in lv_doc.get("verifications", [])
+        }
+        verified = sum(1 for v in lineage_lookup.values() if v)
+        print(
+            f"[d1] loaded D2 lineage verification from {lv_path} "
+            f"({len(lineage_lookup)} entries, {verified} verified)"
+        )
 
     # Group by rdat_path so each RDAT is parsed at most once.
     by_path: dict[str, list[dict]] = defaultdict(list)
@@ -414,11 +473,11 @@ def main(argv: list[str] | None = None) -> int:
             # Emit a minimal registry entry per relation so the candidate
             # total still accounts for them (forward-only: no deletion).
             for rel in rels_for_file:
-                registry.append(_evaluate_one(rel, {}, None))
+                registry.append(_evaluate_one(rel, {}, None, lineage_lookup))
             continue
         file_cache[rdat_path] = profile_map
         for rel in rels_for_file:
-            registry.append(_evaluate_one(rel, profile_map, file_audit))
+            registry.append(_evaluate_one(rel, profile_map, file_audit, lineage_lookup))
 
     # ---- Aggregates ----
     tp_count = sum(1 for r in registry if r["true_pair"])
@@ -444,6 +503,12 @@ def main(argv: list[str] | None = None) -> int:
         "candidate_total": len(registry),
         "true_pair_count": tp_count,
         "primary_eligible_count": pe_count,
+        "parent_lineage_source": (
+            "d2_lineage_verification"
+            if lineage_lookup is not None
+            else "d0r_v2_lineage_status"
+        ),
+        "_d2_lineage_applied": lineage_lookup is not None,
         "reason_distribution_per_reason": dict(reason_counter.most_common()),
         "reason_distribution_per_set": dict(reason_set_counter.most_common()),
         "study_distribution_candidates": _dist("citation_doi"),
