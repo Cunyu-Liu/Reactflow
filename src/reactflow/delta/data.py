@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 import json
@@ -42,6 +43,7 @@ RMDB_FILENAME_RULES = {
     "variant_or_library_named_candidate": re.compile(r"(?:^|_)(?:ETERNA|OK[0-9]|LIB)(?:_|[0-9]|$)", re.IGNORECASE),
     "explicit_rescue_or_compensatory_named_candidate": re.compile(r"rescue|compens", re.IGNORECASE),
 }
+RDAT_FIXTURE_MANIFEST_SCHEMA_VERSION = "reactflow-delta-rdat-fixture-manifest-v1"
 RMDB_FIXTURE_SELECTIONS = {
     "m2_named_candidate": (
         "SPINACH_M2G4_0001.rdat",
@@ -280,6 +282,70 @@ def _flatten_release_assets(releases: list[dict[str, Any]]) -> list[dict[str, An
                 raise ValueError("release asset browser_download_url must be HTTPS")
             assets.append({"release_tag": tag_name, "name": name, "bytes": size, "upstream_sha256": digest.removeprefix("sha256:"), "browser_download_url": url})
     return assets
+
+
+def build_rdat_fixture_manifest(candidate_manifest_path: str | Path, fixture_dir: str | Path) -> dict[str, Any]:
+    """Verify a fixed RDAT fixture set against release-index SHA-256 values.
+
+    Verification establishes only byte-level fixture provenance. It deliberately
+    does not parse RDAT content or infer experiment class, construct identity,
+    normalization, or a WT-single-mutant pair.
+    """
+
+    candidate_path = Path(candidate_manifest_path)
+    candidate_manifest = _load_json_object(candidate_path)
+    fixtures = candidate_manifest.get("fixture_selection")
+    if not isinstance(fixtures, list) or not fixtures:
+        raise ValueError("candidate manifest must contain a non-empty fixture_selection")
+
+    directory = Path(fixture_dir)
+    if not directory.is_dir():
+        raise FileNotFoundError(f"fixture directory is missing: {directory}")
+    partials = sorted(directory.glob("*.part"))
+    if partials:
+        raise ValueError(f"fixture directory contains incomplete downloads: {partials}")
+
+    verified = []
+    expected_names = set()
+    for fixture in fixtures:
+        if not isinstance(fixture, dict):
+            raise ValueError("fixture selection item must be an object")
+        name = fixture.get("name")
+        expected_sha256 = fixture.get("upstream_sha256")
+        expected_bytes = fixture.get("bytes")
+        category = fixture.get("candidate_category")
+        if not isinstance(name, str) or Path(name).name != name or not name.endswith(".rdat"):
+            raise ValueError("fixture name must be a plain .rdat filename")
+        if not isinstance(expected_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_sha256):
+            raise ValueError(f"fixture {name} lacks an upstream SHA-256")
+        if isinstance(expected_bytes, bool) or not isinstance(expected_bytes, int) or expected_bytes < 0:
+            raise ValueError(f"fixture {name} has invalid byte count")
+        if not isinstance(category, str) or not category:
+            raise ValueError(f"fixture {name} lacks a candidate category")
+        path = directory / name
+        if not path.is_file():
+            raise FileNotFoundError(f"fixture is missing: {path}")
+        observed_sha256 = sha256_file(path)
+        observed_bytes = path.stat().st_size
+        if observed_sha256 != expected_sha256:
+            raise ValueError(f"fixture SHA-256 mismatch: {name}")
+        if observed_bytes != expected_bytes:
+            raise ValueError(f"fixture byte count mismatch: {name}")
+        expected_names.add(name)
+        verified.append({"candidate_category": category, "name": name, "path": str(path.resolve()), "bytes": observed_bytes, "sha256": observed_sha256, "status": "verified_against_release_index", "rdat_confirmation_pending": True})
+
+    observed_names = {path.name for path in directory.glob("*.rdat")}
+    if observed_names != expected_names:
+        raise ValueError("fixture directory .rdat filenames do not exactly match the frozen selection")
+    return {
+        "schema_version": RDAT_FIXTURE_MANIFEST_SCHEMA_VERSION,
+        "stage": "D0",
+        "input_candidate_manifest": {"path": str(candidate_path.resolve()), "sha256": sha256_file(candidate_path)},
+        "fixture_directory": str(directory.resolve()),
+        "fixtures": verified,
+        "fixture_counts_by_candidate_category": dict(sorted(Counter(item["candidate_category"] for item in verified).items())),
+        "scientific_boundary": "All fixtures are byte-verified but await RDAT parsing. No entry has been confirmed as a specific experiment class, construct, or pair.",
+    }
 
 
 def _file_provenance(path: Path) -> dict[str, Any]:

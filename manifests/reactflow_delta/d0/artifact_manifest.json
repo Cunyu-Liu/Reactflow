@@ -96,6 +96,26 @@
         "explicit_rescue_or_compensatory_named": 0
       },
       "scientific_status": "unconfirmed until entry metadata and RDAT parsing"
+    },
+    {
+      "task_id": "T-D0.4",
+      "kind": "rdat_fixture_byte_verifier",
+      "repo_paths": ["src/reactflow/delta/data.py", "scripts/reactflow_delta/verify_rdat_fixtures.py", "tests/reactflow_delta/test_rdat_fixtures.py"],
+      "sha256": {
+        "src/reactflow/delta/data.py": "dfc0bdc950c9322976c4b9dc90d7f14d7a54c10287a015e24b51a9098c5ff700",
+        "scripts/reactflow_delta/verify_rdat_fixtures.py": "0740447aba4402b06c7a6835bd3f2f039d912f04017bc06206774757d323bfe3",
+        "tests/reactflow_delta/test_rdat_fixtures.py": "6eaefa83e01610b54ac59070cc4b0624069c1406fc79261fb2a950774f588080"
+      }
+    },
+    {
+      "task_id": "T-D0.4",
+      "kind": "byte_verified_rdat_fixture_manifest",
+      "repo_path": "data_registry/rdat_fixture_manifest.json",
+      "sha256": "52b2ebf7235e4b742e7c5d40903834a319e3dc1ade921b684e1a8a560dddcc53",
+      "raw_fixture_directory": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800",
+      "fixture_count": 6,
+      "fixture_counts_by_filename_candidate_category": {"m2_named_candidate": 3, "variant_or_library_named_candidate": 3},
+      "scientific_status": "byte-verified only; RDAT parsing remains pending"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."

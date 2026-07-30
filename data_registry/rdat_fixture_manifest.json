@@ -1,0 +1,70 @@
+{
+  "fixture_counts_by_candidate_category": {
+    "m2_named_candidate": 3,
+    "variant_or_library_named_candidate": 3
+  },
+  "fixture_directory": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800",
+  "fixtures": [
+    {
+      "bytes": 542576,
+      "candidate_category": "m2_named_candidate",
+      "name": "SPINACH_M2G4_0001.rdat",
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/SPINACH_M2G4_0001.rdat",
+      "rdat_confirmation_pending": true,
+      "sha256": "a2423ec5c4d80b64bb400f0f5b812003b7fe5fab09fe67800352a71509712d31",
+      "status": "verified_against_release_index"
+    },
+    {
+      "bytes": 7863387,
+      "candidate_category": "m2_named_candidate",
+      "name": "M2SL5_2A3_0000.rdat",
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/M2SL5_2A3_0000.rdat",
+      "rdat_confirmation_pending": true,
+      "sha256": "6a2fded3673735c8daa92512ae3f86bc3e4187bb18db78e2c56fcff3d45a4c8b",
+      "status": "verified_against_release_index"
+    },
+    {
+      "bytes": 7863713,
+      "candidate_category": "m2_named_candidate",
+      "name": "M2SL5_DMS_0000.rdat",
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/M2SL5_DMS_0000.rdat",
+      "rdat_confirmation_pending": true,
+      "sha256": "590638963adbde972cc77c70aeb07ff4240d9885be9baffbb0f65ef40243ab85",
+      "status": "verified_against_release_index"
+    },
+    {
+      "bytes": 7065,
+      "candidate_category": "variant_or_library_named_candidate",
+      "name": "ETERNA_TOD_0000.rdat",
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/ETERNA_TOD_0000.rdat",
+      "rdat_confirmation_pending": true,
+      "sha256": "e1534b2819eed88173afb1415cd07e93e5aafe673fbc4a912bb4257df2dd093b",
+      "status": "verified_against_release_index"
+    },
+    {
+      "bytes": 11522,
+      "candidate_category": "variant_or_library_named_candidate",
+      "name": "ETERNA_R42_0004.rdat",
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/ETERNA_R42_0004.rdat",
+      "rdat_confirmation_pending": true,
+      "sha256": "d656c5a8bcdb2a685be17bb79f97b834e93827094fdc15acfbb9544a124b1ccd",
+      "status": "verified_against_release_index"
+    },
+    {
+      "bytes": 14443,
+      "candidate_category": "variant_or_library_named_candidate",
+      "name": "ETERNA_R42_0005.rdat",
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/ETERNA_R42_0005.rdat",
+      "rdat_confirmation_pending": true,
+      "sha256": "51dc259f51134a63b64871e133140b5d2a0b838cf5cc9ec839c9954b28ff9292",
+      "status": "verified_against_release_index"
+    }
+  ],
+  "input_candidate_manifest": {
+    "path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/rmdb_filename_candidates.json",
+    "sha256": "345170bf131889a866345ea0ade7020466eff52d791b312d207bdd4f228ff925"
+  },
+  "schema_version": "reactflow-delta-rdat-fixture-manifest-v1",
+  "scientific_boundary": "All fixtures are byte-verified but await RDAT parsing. No entry has been confirmed as a specific experiment class, construct, or pair.",
+  "stage": "D0"
+}
