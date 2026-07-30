@@ -7,7 +7,7 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T13:29:31+08:00",
+  "last_updated_at": "2026-07-30T13:36:40+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
     "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
@@ -181,6 +181,27 @@
       "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rmdb_construct_audit_6fixtures_noncanonical_quoted_path.json",
       "sha256": "d8829ab89e405f4a13fa95ba040ebfeabf1f7d1ac97f084a540fceef9ff4a504",
       "administrative_note": "The first D0.6 write had literal quote characters in its relative path. Its byte-identical output was moved without deletion to this clearly marked noncanonical retention path; the canonical audit artifact above is the normative reference."
+    },
+    {
+      "task_id": "T-D0.7",
+      "kind": "ribonanza_availability_auditor",
+      "repo_paths": ["src/reactflow/delta/availability.py", "scripts/reactflow_delta/audit_ribonanza_availability.py", "tests/reactflow_delta/test_availability.py"],
+      "sha256": {
+        "src/reactflow/delta/availability.py": "a7f8222a5e06c43b2e490e048b42ac6810f31907312bd013eeeb753501e218ff",
+        "scripts/reactflow_delta/audit_ribonanza_availability.py": "af6dc6fb914cf135e801176ce3d23b2137cb334602327dfb5df2541b1c3e976f",
+        "tests/reactflow_delta/test_availability.py": "6fdcbe59ab7f07ae54334ff8fa313aa2a55322c89b0dfaf14867d272d9e60bd5"
+      },
+      "network_scope": "HTTP HEAD probes only; no Ribonanza raw payload download"
+    },
+    {
+      "task_id": "T-D0.7",
+      "kind": "ribonanza_unavailability_report",
+      "repo_path": "data_registry/ribonanza_availability.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/ribonanza_availability.json",
+      "sha256": "437a9371ea85e80c52a9cb4477859e6c1de2f52f5632c6d7dc1aec1536712e83",
+      "source_registry_sha256_after_append": "8fad72fc9b8cb2a2cf317fa23f7e7c810d584ce90589b2b54865e083cf66cbc4",
+      "same_condition_single_edit_pair_count": null,
+      "scientific_status": "unknown because no immutable raw Ribonanza table was acquired"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
