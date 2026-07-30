@@ -19,6 +19,10 @@
     "legacy_run_and_results": "historical-only",
     "r0_records": "prospective-setup-only"
   },
+  "last_updated_at": "2026-07-30T11:37:53+08:00",
+  "task_commits": {
+    "T-R0.8": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
+  },
   "files": [
     {
       "task_id": "T-R0.1",
@@ -39,6 +43,22 @@
       "kind": "frozen_contract",
       "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
       "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+    },
+    {
+      "task_id": "T-R0.8",
+      "kind": "contract_provenance_helper",
+      "repo_path": "src/reactflow/delta/manifests.py",
+      "sha256": "8b56c2afe86f60396273301d15808543d00da22937dd02f7c47ca0198de10025",
+      "git_commit": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
+    },
+    {
+      "task_id": "T-R0.9",
+      "kind": "targeted_import_and_contract_test",
+      "repo_path": "tests/reactflow_delta/test_manifests.py",
+      "sha256": "4f60500dc2c9c2e2b79afe1d6247abecd18ff25b90bafced0945e315f3690bd1",
+      "precheck_runtime": "Python 3.10.20",
+      "precheck_result": "3 passed; not R0 acceptance because V3 requires Python 3.11",
+      "git_commit": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
     }
   ],
   "pending": [
@@ -53,8 +73,8 @@
     },
     {
       "task_id": "T-R0.9",
-      "planned_artifact": "r0_acceptance.json",
-      "reason": "The Delta empty-package implementation and Python 3.11 targeted tests are not yet complete."
+      "planned_artifact": "r0_python311_import_acceptance.json",
+      "reason": "The isolated Python 3.11 environment is provisioning. Python 3.10.20 prechecks passed but are not accepted as the V3-required Python 3.11 result."
     }
   ],
   "scientific_boundary": "R0 setup records and legacy historical evidence are not EPRO efficacy evidence and cannot authorize D0 until every R0 acceptance condition passes."
