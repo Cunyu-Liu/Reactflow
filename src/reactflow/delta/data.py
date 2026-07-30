@@ -1625,3 +1625,215 @@ def estimate_pair_noise(
         "mut_variance": mut_var,
         "source": source,
     }
+
+
+# =============================================================================
+# T-D1.9: frozen differential caller
+# (v3 §6.6 step 12 — generate Δreactivity; §7.1 Δr = r_m − r_w;
+#  §7.2 replicate-aware caller with FDR; §7.3 no-replicate continuous-only)
+# =============================================================================
+
+# Default FDR level for the replicate-aware differential caller (v3 §7.2).
+DIFFERENTIAL_FDR_ALPHA = 0.05
+
+
+def _normal_cdf(x: float) -> float:
+    """Standard normal CDF via ``math.erf`` (T-D1.9 helper)."""
+
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+
+def _benjamini_hochberg(
+    p_values: list[float], alpha: float
+) -> tuple[float | None, set[int]]:
+    """Benjamini–Hochberg FDR procedure (T-D1.9 helper, v3 §7.2).
+
+    Returns ``(threshold_p, rejected_indices)`` where ``threshold_p`` is the
+    largest sorted p-value satisfying p_(k) ≤ k/m·α (None if none rejected) and
+    ``rejected_indices`` are the 0-indexed positions of rejected hypotheses.
+    """
+
+    m = len(p_values)
+    if m == 0:
+        return None, set()
+    order = sorted(range(m), key=lambda i: p_values[i])
+    sorted_p = [p_values[i] for i in order]
+    last_k = 0
+    for k in range(1, m + 1):
+        if sorted_p[k - 1] <= (k / m) * alpha:
+            last_k = k
+    rejected = set(order[:last_k]) if last_k > 0 else set()
+    threshold_p = sorted_p[last_k - 1] if last_k > 0 else None
+    return threshold_p, rejected
+
+
+def compute_delta_reactivity(
+    wt_reactivity: Iterable[float | None],
+    mut_reactivity: Iterable[float | None],
+) -> list[float | None]:
+    """Per-position Δr = r_m − r_w (T-D1.9, v3 §6.6 step 12, §7.1).
+
+    The continuous experimental response is the primary label (v3 §7.1).
+    Positions where either value is missing or non-finite yield ``None`` (v3
+    §6.7: missing must not be treated as 0). Length is the minimum of the two
+    arrays; equal-length WT/mutant constructs (v3 §6.5) are the D1 upgrade path.
+    """
+
+    wt = list(wt_reactivity)
+    mut = list(mut_reactivity)
+    n = min(len(wt), len(mut))
+    delta: list[float | None] = []
+    for i in range(n):
+        w = wt[i]
+        m = mut[i]
+        if (
+            w is None
+            or m is None
+            or not isinstance(w, (int, float))
+            or not isinstance(m, (int, float))
+            or not math.isfinite(w)
+            or not math.isfinite(m)
+        ):
+            delta.append(None)
+        else:
+            delta.append(m - w)
+    return delta
+
+
+def frozen_differential_call(
+    delta_reactivity: Iterable[float | None],
+    noise_threshold: float | None = None,
+    measurement_variance: float | None = None,
+    has_replicates: bool = False,
+    fdr_alpha: float = DIFFERENTIAL_FDR_ALPHA,
+) -> dict[str, Any]:
+    """Frozen differential caller (T-D1.9, v3 §7.2/§7.3, §6.6 step 12).
+
+    Calls significant changers per position using a *frozen* noise threshold
+    (T-D1.8, not learned from test — v3.1 §2.2). The threshold is frozen before
+    the split (step 14 / D2).
+
+    - With replicates and a frozen ``noise_threshold`` (v3 §7.2): a position is
+      significant when ``|Δr| > noise_threshold`` (replicate-aware caller).
+    - Without replicates (v3 §7.3): only the continuous Δr is produced; **no**
+      significant-changer claim is made (``significant_mask`` is all zeros).
+    - With replicates and ``measurement_variance``: per-position z-scores and a
+      Benjamini–Hochberg FDR call at ``fdr_alpha`` (v3 §7.2: output differential
+      regions and FDR) are also returned as auxiliary metadata.
+
+    Returns ``{"significant_mask": list[int], "significant_count": int,
+    "z_scores": list[float|None], "fdr_significant_mask": list[int],
+    "fdr_threshold_p": float|None, "caller_status": str}`` where ``caller_status``
+    ∈ ``{"replicate_aware", "no_replicate_continuous_only", "no_threshold"}``.
+    """
+
+    delta = list(delta_reactivity)
+    n = len(delta)
+    # --- z-scores (auxiliary, when per-pair measurement_variance available) ---
+    z_scores: list[float | None] = [None] * n
+    if (
+        measurement_variance is not None
+        and isinstance(measurement_variance, (int, float))
+        and math.isfinite(measurement_variance)
+        and measurement_variance > 0
+    ):
+        std = math.sqrt(measurement_variance)
+        for i, v in enumerate(delta):
+            if (
+                v is not None
+                and isinstance(v, (int, float))
+                and math.isfinite(v)
+            ):
+                z_scores[i] = v / std
+    # --- frozen-threshold significance (primary caller) ---
+    if has_replicates and noise_threshold is not None and isinstance(
+        noise_threshold, (int, float)
+    ) and math.isfinite(noise_threshold):
+        significant_mask = [
+            1 if (
+                v is not None
+                and isinstance(v, (int, float))
+                and math.isfinite(v)
+                and abs(v) > noise_threshold
+            )
+            else 0
+            for v in delta
+        ]
+        caller_status = "replicate_aware"
+    elif not has_replicates:
+        significant_mask = [0] * n
+        caller_status = "no_replicate_continuous_only"
+    else:
+        significant_mask = [0] * n
+        caller_status = "no_threshold"
+    significant_count = sum(significant_mask)
+    # --- BH-FDR (auxiliary, v3 §7.2; only with replicates) ---
+    fdr_significant_mask = [0] * n
+    fdr_threshold_p: float | None = None
+    if has_replicates:
+        p_values: list[float] = []
+        idx_map: list[int] = []  # positions with finite z
+        for i, z in enumerate(z_scores):
+            if z is not None and isinstance(z, (int, float)) and math.isfinite(z):
+                p_values.append(2.0 * (1.0 - _normal_cdf(abs(z))))
+                idx_map.append(i)
+        if p_values:
+            fdr_threshold_p, rejected = _benjamini_hochberg(p_values, fdr_alpha)
+            for local_i in rejected:
+                fdr_significant_mask[idx_map[local_i]] = 1
+    return {
+        "significant_mask": significant_mask,
+        "significant_count": significant_count,
+        "z_scores": z_scores,
+        "fdr_significant_mask": fdr_significant_mask,
+        "fdr_threshold_p": fdr_threshold_p,
+        "caller_status": caller_status,
+    }
+
+
+def build_pair_delta_reactivity(
+    wt_reactivity_raw: Iterable[float | None],
+    mut_reactivity_raw: Iterable[float | None],
+    wt_reactivity_normalized: Iterable[float | None] | None = None,
+    mut_reactivity_normalized: Iterable[float | None] | None = None,
+    noise_threshold: float | None = None,
+    measurement_variance: float | None = None,
+    has_replicates: bool = False,
+    fdr_alpha: float = DIFFERENTIAL_FDR_ALPHA,
+) -> dict[str, Any]:
+    """Build the pair Δreactivity layers + frozen differential call (T-D1.9).
+
+    Computes ``delta_reactivity_raw`` (always) and ``delta_reactivity_normalized``
+    (when normalized layers are provided; v3 §6.4 pair schema), then runs the
+    frozen differential caller on the normalized layer (preferred) or the raw
+    layer. Returns a dict with the pair-schema Δreactivity arrays and the caller
+    output. Per v3 §6.7 missing values are propagated, never treated as 0; per
+    v3.1 §2.2 the frozen threshold must come from train+validation only.
+    """
+
+    delta_raw = compute_delta_reactivity(wt_reactivity_raw, mut_reactivity_raw)
+    if wt_reactivity_normalized is not None and mut_reactivity_normalized is not None:
+        delta_normalized = compute_delta_reactivity(
+            wt_reactivity_normalized, mut_reactivity_normalized
+        )
+        call_input = delta_normalized
+    else:
+        delta_normalized = None
+        call_input = delta_raw
+    call = frozen_differential_call(
+        call_input,
+        noise_threshold=noise_threshold,
+        measurement_variance=measurement_variance,
+        has_replicates=has_replicates,
+        fdr_alpha=fdr_alpha,
+    )
+    return {
+        "delta_reactivity_raw": delta_raw,
+        "delta_reactivity_normalized": delta_normalized,
+        "significant_mask": call["significant_mask"],
+        "significant_count": call["significant_count"],
+        "z_scores": call["z_scores"],
+        "fdr_significant_mask": call["fdr_significant_mask"],
+        "fdr_threshold_p": call["fdr_threshold_p"],
+        "caller_status": call["caller_status"],
+    }
