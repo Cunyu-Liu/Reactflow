@@ -1,7 +1,7 @@
 {
   "schema_version": "reactflow-delta-r0-artifact-manifest-v1",
   "stage": "R0",
-  "status": "awaiting_final_clean_audit",
+  "status": "accepted_for_d0_with_explicit_user_authorized_r0_2_exception",
   "generated_at": "2026-07-29T14:16:11+08:00",
   "contract": {
     "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
@@ -24,7 +24,7 @@
     "user_authorized_exception": "direct SIGTERM stop of the named old C1-3 v4 task",
     "exception_scope": "only the named legacy task; no restart, no new seed, no scientific claim"
   },
-  "last_updated_at": "2026-07-30T12:07:27+08:00",
+  "last_updated_at": "2026-07-30T12:14:40+08:00",
   "task_commits": {
     "T-R0.8": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479",
     "T-R0.9_source": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
@@ -94,13 +94,15 @@
       "sha256": "a7551117d563c25954642a2b291d7a2f32f5621f92ca38a13f6fb3d01c6e7c5e",
       "runtime": "Python 3.11.15",
       "result": "3 passed"
-    }
-  ],
-  "pending": [
+    },
     {
       "task_id": "R0-GATE",
-      "reason": "A focused commit/push and a post-commit Python 3.11 test plus clean-worktree audit remain before R0 may be accepted."
+      "kind": "external_final_acceptance_certificate",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/r0_acceptance_5771e534.json",
+      "sha256": "29e32c9d28706ccf7f5202419cd0819881a2adaf971579132914c1a9190ec1ab",
+      "verification_commit": "5771e534cb2421e163307d4c7bde535270443661"
     }
   ],
+  "pending": [],
   "scientific_boundary": "R0 setup records and legacy historical evidence are not EPRO efficacy evidence and cannot authorize D0 until every R0 acceptance condition passes."
 }
