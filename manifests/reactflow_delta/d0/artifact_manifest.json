@@ -7,7 +7,7 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T13:11:37+08:00",
+  "last_updated_at": "2026-07-30T13:25:59+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
     "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
@@ -146,6 +146,40 @@
       "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rdat_construct_parse_manifest_20260730T131600+0800.json",
       "sha256": "e3b9d5a18ca337c3ae599a128f294fdaa26db51ada133ee2351a990117ef399e",
       "administrative_note": "Retained without deletion because its manually supplied filename timestamp is not reliable; canonical artifact above has no timestamp in its filename."
+    },
+    {
+      "task_id": "T-D0.6",
+      "kind": "fail_closed_rmdb_construct_and_replicate_auditor",
+      "repo_paths": ["src/reactflow/delta/pairing.py", "scripts/reactflow_delta/audit_rmdb_constructs.py", "scripts/reactflow_delta/parse_rmdb.py", "tests/reactflow_delta/test_pairing.py"],
+      "sha256": {
+        "src/reactflow/delta/pairing.py": "67a07637ea7a9e7210097f1f1420322a2a4cc1a081b1ccdc8acde19ef873a804",
+        "scripts/reactflow_delta/audit_rmdb_constructs.py": "3ec4eac875d733fd5d9caf60831b53fa2f360306b60ca9b3bc310c5bcb762dbf",
+        "scripts/reactflow_delta/parse_rmdb.py": "7b3e5b7fe148bdeda8c6750510409e7ba94478e8c871541a2c2a57be7911c979",
+        "tests/reactflow_delta/test_pairing.py": "cb8faa596fdb7c99c5f95945f9e926394696c1f1534836965a8b25b33f182b8d"
+      },
+      "parser_scope": "explicit mutation labels, endpoint identity, parent masking, same-sequence repeats, and pair ineligibility only"
+    },
+    {
+      "task_id": "T-D0.6",
+      "kind": "rmdb_construct_audit",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rmdb_construct_audit_6fixtures.json",
+      "sha256": "d8829ab89e405f4a13fa95ba040ebfeabf1f7d1ac97f084a540fceef9ff4a504",
+      "scope": "six frozen byte-verified RDAT fixtures only",
+      "profile_record_count": 5175,
+      "explicit_wt_profile_count": 1,
+      "single_site_endpoint_unknown_profile_count": 159,
+      "confirmed_single_mutant_profile_count": 0,
+      "confirmed_double_mutant_profile_count": 0,
+      "same_sequence_replicate_group_count": 7,
+      "pair_eligible_profile_count": 0,
+      "scientific_status": "no true WT-mutant pair is established in this fixture scope"
+    },
+    {
+      "task_id": "T-D0.6",
+      "kind": "retained_noncanonical_construct_audit_artifact",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rmdb_construct_audit_6fixtures_noncanonical_quoted_path.json",
+      "sha256": "d8829ab89e405f4a13fa95ba040ebfeabf1f7d1ac97f084a540fceef9ff4a504",
+      "administrative_note": "The first D0.6 write had literal quote characters in its relative path. Its byte-identical output was moved without deletion to this clearly marked noncanonical retention path; the canonical audit artifact above is the normative reference."
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
