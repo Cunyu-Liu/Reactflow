@@ -1,0 +1,33 @@
+{
+  "schema_version": "reactflow-delta-d0-artifact-manifest-v1",
+  "stage": "D0",
+  "status": "in_progress_no_training",
+  "contract": {
+    "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+    "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+  },
+  "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
+  "last_updated_at": "2026-07-30T12:24:37+08:00",
+  "task_commits": {},
+  "files": [
+    {
+      "task_id": "T-D0.1",
+      "kind": "source_registry_schema",
+      "repo_path": "data_registry/source_registry.schema.json",
+      "sha256": "7fe820d1a1bbd6f74f35534911bdc71779bbda5a39be6bdb2faedf5fc00c26b7"
+    },
+    {
+      "task_id": "T-D0.1",
+      "kind": "fail_closed_schema_validator",
+      "repo_path": "src/reactflow/delta/schema.py",
+      "sha256": "fa609f818cd22963efecdc07a9430d4e47308c831b2701014d235a8b5ca5d0ac"
+    },
+    {
+      "task_id": "T-D0.1",
+      "kind": "schema_failure_tests",
+      "repo_path": "tests/reactflow_delta/test_schema.py",
+      "sha256": "e26a6cbb20dcb2ac6ef54a8740ee23fd0f9473c9a854885e317be152f41e03a1"
+    }
+  ],
+  "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
+}

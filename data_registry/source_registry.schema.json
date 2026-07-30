@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reactflow-delta-source-registry-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bytes", "download_status", "license", "missing_reasons", "parser_version",
+    "publication_doi", "publication_pmid", "raw_path", "record_id", "retrieved_at",
+    "schema_version", "sha256", "source", "source_tier", "source_type",
+    "source_url", "source_version", "upstream_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "reactflow-delta-source-registry-v1"},
+    "record_id": {"type": "string", "minLength": 1},
+    "source": {"type": "string", "minLength": 1},
+    "source_version": {"type": ["string", "null"]},
+    "source_url": {"type": ["string", "null"]},
+    "publication_doi": {"type": ["string", "null"]},
+    "publication_pmid": {"type": ["string", "null"]},
+    "license": {"type": ["string", "null"]},
+    "retrieved_at": {"type": "string", "format": "date-time"},
+    "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "bytes": {"type": ["integer", "null"], "minimum": 0},
+    "upstream_id": {"type": "string", "minLength": 1},
+    "raw_path": {"type": ["string", "null"]},
+    "parser_version": {"type": ["string", "null"]},
+    "download_status": {"enum": ["downloaded", "failed", "metadata_only", "planned", "unavailable"]},
+    "source_tier": {"enum": ["A", "B", "C"]},
+    "source_type": {"enum": ["other_public", "ribonanza", "rmdb"]},
+    "missing_reasons": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}}
+  }
+}
