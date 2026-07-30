@@ -1,7 +1,7 @@
 {
   "schema_version": "reactflow-delta-r0-artifact-manifest-v1",
   "stage": "R0",
-  "status": "in_progress",
+  "status": "awaiting_final_clean_audit",
   "generated_at": "2026-07-29T14:16:11+08:00",
   "contract": {
     "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
@@ -19,9 +19,15 @@
     "legacy_run_and_results": "historical-only",
     "r0_records": "prospective-setup-only"
   },
-  "last_updated_at": "2026-07-30T11:37:53+08:00",
+  "legacy_termination_override": {
+    "default_contract_rule": "wait for natural completion; do not kill, restart, or append a seed",
+    "user_authorized_exception": "direct SIGTERM stop of the named old C1-3 v4 task",
+    "exception_scope": "only the named legacy task; no restart, no new seed, no scientific claim"
+  },
+  "last_updated_at": "2026-07-30T12:07:27+08:00",
   "task_commits": {
-    "T-R0.8": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
+    "T-R0.8": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479",
+    "T-R0.9_source": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
   },
   "files": [
     {
@@ -53,28 +59,47 @@
     },
     {
       "task_id": "T-R0.9",
-      "kind": "targeted_import_and_contract_test",
+      "kind": "targeted_import_and_contract_test_source",
       "repo_path": "tests/reactflow_delta/test_manifests.py",
       "sha256": "4f60500dc2c9c2e2b79afe1d6247abecd18ff25b90bafced0945e315f3690bd1",
       "precheck_runtime": "Python 3.10.20",
       "precheck_result": "3 passed; not R0 acceptance because V3 requires Python 3.11",
       "git_commit": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
+    },
+    {
+      "task_id": "T-R0.3",
+      "kind": "historical_only_archive_manifest",
+      "repo_path": "manifests/reactflow_delta/r0/legacy_c1_3_v4_archive_manifest.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/legacy_c1_3_v4_archive_manifest.json",
+      "sha256": "847ea2a879b7f6922edd862391367b00c2673231d119d8d408e2f7c6dcef0fab"
+    },
+    {
+      "task_id": "T-R0.3",
+      "kind": "historical_only_raw_launch_log",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/legacy_c1_3_v4_launch.log",
+      "sha256": "4e18b652b330a0e7370c19693daf3bb142a958ba229322d487d0b5e211edcf56",
+      "line_count": 879
+    },
+    {
+      "task_id": "T-R0.3",
+      "kind": "historical_only_human_readable_report",
+      "repo_path": "reports/r0_legacy_c1_3_v4_archive.md",
+      "sha256": "01af199c224cbf812fba02f97c4ce52847418c55aad6d37898af0073f9d0691e"
+    },
+    {
+      "task_id": "T-R0.9",
+      "kind": "python311_import_and_contract_acceptance",
+      "repo_path": "manifests/reactflow_delta/r0/r0_python311_import_acceptance.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/r0_python311_import_acceptance.json",
+      "sha256": "a7551117d563c25954642a2b291d7a2f32f5621f92ca38a13f6fb3d01c6e7c5e",
+      "runtime": "Python 3.11.15",
+      "result": "3 passed"
     }
   ],
   "pending": [
     {
-      "task_id": "T-R0.2",
-      "reason": "Legacy v4 training remained active at the latest contract-cadence observation and must finish naturally."
-    },
-    {
-      "task_id": "T-R0.3",
-      "planned_artifact": "legacy_run_archive_manifest.json",
-      "reason": "Archival is gated on the natural end of the legacy v4 run."
-    },
-    {
-      "task_id": "T-R0.9",
-      "planned_artifact": "r0_python311_import_acceptance.json",
-      "reason": "The isolated Python 3.11 environment is provisioning. Python 3.10.20 prechecks passed but are not accepted as the V3-required Python 3.11 result."
+      "task_id": "R0-GATE",
+      "reason": "A focused commit/push and a post-commit Python 3.11 test plus clean-worktree audit remain before R0 may be accepted."
     }
   ],
   "scientific_boundary": "R0 setup records and legacy historical evidence are not EPRO efficacy evidence and cannot authorize D0 until every R0 acceptance condition passes."
