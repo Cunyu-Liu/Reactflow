@@ -1,0 +1,1658 @@
+{
+  "artifacts_paths": {
+    "audit": "artifacts/reactflow_delta/d0r/d0r_reaudit_tierA_audit.json",
+    "relations": "artifacts/reactflow_delta/d0r/d0r_reaudit_tierA_relations.json",
+    "summary": "artifacts/reactflow_delta/d0r/d0r_reaudit_tierA_summary.json"
+  },
+  "artifacts_sha256": {
+    "audit": "6b211a4e7862a4665431e48ffc44266d34a9d14a14ec2f30b232b1e5a4f5bbdb",
+    "relations": "628f1bdf28ddeac121fb8bfbb5c286dfa2b72b45fe25621450891fdf33f0e357",
+    "summary": "417c22c58d02c8c019c896e52e6deceb5970273a5da59c64c3703f3e01ed6744"
+  },
+  "distinct_owners": 6,
+  "distinct_parents": 31,
+  "distinct_studies": 8,
+  "download_manifest_records": [
+    {
+      "bytes": 456401,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 252,
+      "download_status": "downloaded",
+      "filename": "243RNA_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/243RNA_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/243RNA_DMS_0000.rdat",
+      "rmdb_id": "243RNA_DMS_0000",
+      "sha256": "bf81baa51bb2acf6514bf092702e0467f83c8ab14fea63f13e85f28fb2f512ec",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 522224,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 227,
+      "download_status": "downloaded",
+      "filename": "ADOCBL_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ADOCBL_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/ADOCBL_DMS_0000.rdat",
+      "rmdb_id": "ADOCBL_DMS_0000",
+      "sha256": "71e336f1e8644c93682d285cf997aeee6b117a2cf2499e793bbe6a8d81f5c6d0",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 522256,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 227,
+      "download_status": "downloaded",
+      "filename": "ADOCBL_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ADOCBL_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/ADOCBL_DMS_0001.rdat",
+      "rmdb_id": "ADOCBL_DMS_0001",
+      "sha256": "754e5d6bd5394c2fc8c45b23836754abc8bd4133bfa7d57c05d4d037fd4b3c7a",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 522219,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 227,
+      "download_status": "downloaded",
+      "filename": "ADOCBL_DMS_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ADOCBL_DMS_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/ADOCBL_DMS_0002.rdat",
+      "rmdb_id": "ADOCBL_DMS_0002",
+      "sha256": "23ffff6b428556c5e2db179bba8cdcefc1e1ec43d14f2eede6ec95218ff8f1f7",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 522251,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 227,
+      "download_status": "downloaded",
+      "filename": "ADOCBL_DMS_0003.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ADOCBL_DMS_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/ADOCBL_DMS_0003.rdat",
+      "rmdb_id": "ADOCBL_DMS_0003",
+      "sha256": "e317c9311b9fc2d8939cd40b896267a9923ec1f1664316801be3156cea15dbe8",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 292250,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 201,
+      "download_status": "downloaded",
+      "filename": "ATPAMP_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ATPAMP_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/ATPAMP_DMS_0000.rdat",
+      "rmdb_id": "ATPAMP_DMS_0000",
+      "sha256": "6cdb1e09aad7306abbebdc7cc7298614edb7e7465c02dac4efb968dc7f7ee621",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 292214,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 201,
+      "download_status": "downloaded",
+      "filename": "ATPAPO_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ATPAPO_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/ATPAPO_DMS_0000.rdat",
+      "rmdb_id": "ATPAPO_DMS_0000",
+      "sha256": "cfa975ea31c34732251b06e689e1ebd1fd2146891035080529b62dff28aebe04",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 435043,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0003.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0003.rdat",
+      "rmdb_id": "BSUGLY_DMS_0003",
+      "sha256": "e658b5db6a87efebff2ce28633ffabbcc5266717b082e6bfbaa1b6974023800f",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 434248,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0004.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0004.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0004.rdat",
+      "rmdb_id": "BSUGLY_DMS_0004",
+      "sha256": "5a5c5293aeca27e28d28d08dcb01246bd8bfebdb45ecffefa9762870f26fca28",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 433293,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0005.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0005.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0005.rdat",
+      "rmdb_id": "BSUGLY_DMS_0005",
+      "sha256": "20d5d6142ac783e891d26def4ebd828577062f69ded74ed5cd7d547a8d453030",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 435033,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0006.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0006.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0006.rdat",
+      "rmdb_id": "BSUGLY_DMS_0006",
+      "sha256": "9caf47c86a0ebd39cff6b361f159d6e1a72868fb7f88ef005b626a29af0151b6",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 435153,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0007.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0007.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0007.rdat",
+      "rmdb_id": "BSUGLY_DMS_0007",
+      "sha256": "774b5c6b3c30e60e36b98b407ff1a16310a254e7c6818b2ba827ba54f38af96f",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 436139,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0008.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0008.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0008.rdat",
+      "rmdb_id": "BSUGLY_DMS_0008",
+      "sha256": "eed3b2e4c0da71a588332d9e2f99a641a1369f26fe4abebde7f916f66d6592ab",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 434363,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0009.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0009.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0009.rdat",
+      "rmdb_id": "BSUGLY_DMS_0009",
+      "sha256": "e9b3432ecafc0ce350cb5f936c230482f27b4ae3313fb4e66bcdbc9cf0a8640b",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 434078,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0010.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0010.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0010.rdat",
+      "rmdb_id": "BSUGLY_DMS_0010",
+      "sha256": "5311cf0b03f007de44aecb1bd9f796dd115db02b7ec32ddec3d073a543be7844",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 436661,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0011.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0011.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0011.rdat",
+      "rmdb_id": "BSUGLY_DMS_0011",
+      "sha256": "67541178fb65538bab48fe8b2c23b904e510f127541ed77cfbee80cfb9b7a679",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 435633,
+      "citation_doi": "",
+      "construct_count_metadata": 266,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0012.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0012.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0012.rdat",
+      "rmdb_id": "BSUGLY_DMS_0012",
+      "sha256": "fc5201e918773840c7c7e2a6db4f706b99d87aeeeedf26b8afcac413333cf555",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 373975,
+      "citation_doi": "",
+      "construct_count_metadata": 247,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0013.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0013.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0013.rdat",
+      "rmdb_id": "BSUGLY_DMS_0013",
+      "sha256": "f069e5b26de9b52758d1bae976cff9fbcdfc3dbf9314b4f240a9d0534fe60205",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 377086,
+      "citation_doi": "",
+      "construct_count_metadata": 247,
+      "download_status": "downloaded",
+      "filename": "BSUGLY_DMS_0014.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/BSUGLY_DMS_0014.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/BSUGLY_DMS_0014.rdat",
+      "rmdb_id": "BSUGLY_DMS_0014",
+      "sha256": "46ef5deab2ec5821573b5009975cfe45b4d0bafc0015a0975ee746cb56f89f3c",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 185345,
+      "citation_doi": "",
+      "construct_count_metadata": 165,
+      "download_status": "downloaded",
+      "filename": "CBAG4P_DMS_0003.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/CBAG4P_DMS_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/CBAG4P_DMS_0003.rdat",
+      "rmdb_id": "CBAG4P_DMS_0003",
+      "sha256": "a751f4b1bb2c1065b4d09d0a2361c66e045157a2dad9dec7abd681537e5263f8",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 185436,
+      "citation_doi": "",
+      "construct_count_metadata": 165,
+      "download_status": "downloaded",
+      "filename": "CBAG4P_DMS_0004.rdat",
+      "http_status": 200,
+      "owner": "Eric Strobel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/CBAG4P_DMS_0004.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/CBAG4P_DMS_0004.rdat",
+      "rmdb_id": "CBAG4P_DMS_0004",
+      "sha256": "bb2e2129a7d483fe6cd171cd659181b7bb6acbde5110a08dfe94f0d21edf33ff",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 443081,
+      "citation_doi": "10.7554/eLife.07600",
+      "construct_count_metadata": 130,
+      "download_status": "downloaded",
+      "filename": "CL1LIG_1M7_0001.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/CL1LIG_1M7_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/CL1LIG_1M7_0001.rdat",
+      "rmdb_id": "CL1LIG_1M7_0001",
+      "sha256": "dfc910553bb3a6658730154a940c12e79af92cff3f767817478b69a9f5608b52",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 1077100,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 198,
+      "download_status": "downloaded",
+      "filename": "COVSL5_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/COVSL5_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/COVSL5_DMS_0001.rdat",
+      "rmdb_id": "COVSL5_DMS_0001",
+      "sha256": "df5e74b3163a5822b54ac73dfe5b08711b015ef7f9731aeb8284bf6827ce77d3",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 430899,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 126,
+      "download_status": "downloaded",
+      "filename": "COVSL5_DMS_0002.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/COVSL5_DMS_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/COVSL5_DMS_0002.rdat",
+      "rmdb_id": "COVSL5_DMS_0002",
+      "sha256": "df12a85c1d2d848066effcec3080c2c23301631135cbc51d38bb72dc86efb021",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1078897,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 198,
+      "download_status": "downloaded",
+      "filename": "COVSL5_NOM_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/COVSL5_NOM_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/COVSL5_NOM_0001.rdat",
+      "rmdb_id": "COVSL5_NOM_0001",
+      "sha256": "1093f5c8131c642357733849a0e5728cdb631ff1590c1570ce67fc88a3e7b1a3",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 427914,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 126,
+      "download_status": "downloaded",
+      "filename": "COVSL5_NOM_0002.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/COVSL5_NOM_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/COVSL5_NOM_0002.rdat",
+      "rmdb_id": "COVSL5_NOM_0002",
+      "sha256": "6eecd4008163d9119e11becbc918ec7190aff0866d90a2370953299a4ebfe2cf",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 792816,
+      "citation_doi": "10.1038/s41588-021-00830-1",
+      "construct_count_metadata": 199,
+      "download_status": "downloaded",
+      "filename": "CSDE1_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Gun Woo Byeon",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/CSDE1_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/CSDE1_DMS_0000.rdat",
+      "rmdb_id": "CSDE1_DMS_0000",
+      "sha256": "fef0d9f44954e9678910bb25d66d1007deb237f2476a54e6233a6c2da2a074ab",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 793063,
+      "citation_doi": "10.1038/s41588-021-00830-1",
+      "construct_count_metadata": 199,
+      "download_status": "downloaded",
+      "filename": "CSDE1_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "Gun Woo Byeon",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/CSDE1_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/CSDE1_DMS_0001.rdat",
+      "rmdb_id": "CSDE1_DMS_0001",
+      "sha256": "e7d43062e320ce274b9b873e198117dcec68c1fcdbe6fec43a934410b9794ecc",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 131894,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 134,
+      "download_status": "downloaded",
+      "filename": "DPRGLN_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/DPRGLN_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/DPRGLN_DMS_0000.rdat",
+      "rmdb_id": "DPRGLN_DMS_0000",
+      "sha256": "6de4e11c7df58ebb1f4a816e0058eec8d64e8ae76cb6f4dadbf5a0baf9ead26e",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 2150801,
+      "citation_doi": "10.1073/pnas.1313039111",
+      "construct_count_metadata": 112,
+      "download_status": "downloaded",
+      "filename": "ETBSTR_SHP_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ETBSTR_SHP_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETBSTR_SHP_0002.rdat",
+      "rmdb_id": "ETBSTR_SHP_0002",
+      "sha256": "7d4721d0fcffcf660365d85a829228b0bb6235faf6d4cf2f3ff36082921146bb",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 263896,
+      "citation_doi": "10.1073/pnas.1313039111",
+      "construct_count_metadata": 113,
+      "download_status": "downloaded",
+      "filename": "ETBSTR_SHP_0003.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ETBSTR_SHP_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETBSTR_SHP_0003.rdat",
+      "rmdb_id": "ETBSTR_SHP_0003",
+      "sha256": "892a44d50ec19c33d3dc352e682e585f4a6f259a0dbe700394f65e691ac8b422",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 309682,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 207,
+      "download_status": "downloaded",
+      "filename": "ETERNA3_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ETERNA3_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA3_DMS_0000.rdat",
+      "rmdb_id": "ETERNA3_DMS_0000",
+      "sha256": "e4459fb5c9c66232b6eb910319f87c22d5033aee71e60912a350c3a703c03d41",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 411089,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 239,
+      "download_status": "downloaded",
+      "filename": "FNKTAPO_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/FNKTAPO_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/FNKTAPO_DMS_0000.rdat",
+      "rmdb_id": "FNKTAPO_DMS_0000",
+      "sha256": "9f67c8fb6d9ee3a64b0c508c84a965d35a8cd79ee6d2cf53aa477ea484a28eb5",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 411105,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 239,
+      "download_status": "downloaded",
+      "filename": "FNKTGLY_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/FNKTGLY_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/FNKTGLY_DMS_0000.rdat",
+      "rmdb_id": "FNKTGLY_DMS_0000",
+      "sha256": "fe9187e237be760c8863766c6eb857e25f69024157359b79afd279cb9fc1bb41",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 617745,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 247,
+      "download_status": "downloaded",
+      "filename": "GIR1RZ_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/GIR1RZ_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/GIR1RZ_DMS_0000.rdat",
+      "rmdb_id": "GIR1RZ_DMS_0000",
+      "sha256": "4494debab2adfd85c56b284269edb153acba6e0d34b8aff5fa6211d02876ce27",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 617740,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 247,
+      "download_status": "downloaded",
+      "filename": "GIR1RZ_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/GIR1RZ_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/GIR1RZ_DMS_0001.rdat",
+      "rmdb_id": "GIR1RZ_DMS_0001",
+      "sha256": "510a979e148dd768fcc26bd7b1db06612419107705463a593157468e7b0a0215",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 545317,
+      "citation_doi": "10.1021/ja2093508",
+      "construct_count_metadata": 33,
+      "download_status": "downloaded",
+      "filename": "GLYCFN_KNK_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/GLYCFN_KNK_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/GLYCFN_KNK_0001.rdat",
+      "rmdb_id": "GLYCFN_KNK_0001",
+      "sha256": "5ccb01fe9fe55fd90570c3cde33c4a5528e9244c8e5aff3bcd16eba20ba46e21",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2r_rescue"
+      ]
+    },
+    {
+      "bytes": 2489778,
+      "citation_doi": "10.1021/ja2093508",
+      "construct_count_metadata": 129,
+      "download_status": "downloaded",
+      "filename": "GLYCFN_KNK_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/GLYCFN_KNK_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/GLYCFN_KNK_0002.rdat",
+      "rmdb_id": "GLYCFN_KNK_0002",
+      "sha256": "6add03c6a6a06e1ee9ed43490e3d657db7a29b49f496d099363e8d6f5c4abc0c",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 1196147,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 410,
+      "download_status": "downloaded",
+      "filename": "HC16APO_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HC16APO_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HC16APO_DMS_0000.rdat",
+      "rmdb_id": "HC16APO_DMS_0000",
+      "sha256": "198f61803b87d4504210ec84520115a9092e774411be8a1a7539c1431e8fe30e",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1248813,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 419,
+      "download_status": "downloaded",
+      "filename": "HC16PRO_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HC16PRO_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HC16PRO_DMS_0000.rdat",
+      "rmdb_id": "HC16PRO_DMS_0000",
+      "sha256": "81f0903e5d6ef9fb8fd35f259366a56b225dd381f31172d36c9b2ed7faa78757",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1392815,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 263,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_DMS_0001.rdat",
+      "rmdb_id": "HIV3PR_DMS_0001",
+      "sha256": "a9b0dcb7adae1d1fef70efc6c1d851f264a42eca995f704532a67b8f7e066d04",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1392865,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 263,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_DMS_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_DMS_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_DMS_0002.rdat",
+      "rmdb_id": "HIV3PR_DMS_0002",
+      "sha256": "346c8c3376f40cdef5cad9aeda92d85dbc41b4b43ebfa5b3466899cec8403f77",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1611801,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 283,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_DMS_0003.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_DMS_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_DMS_0003.rdat",
+      "rmdb_id": "HIV3PR_DMS_0003",
+      "sha256": "824ffcb0f935a9f42e4e44b82f473cd36a2e8e2995b9d1a6d3fb09168d2d2ba7",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1611890,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 283,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_DMS_0004.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_DMS_0004.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_DMS_0004.rdat",
+      "rmdb_id": "HIV3PR_DMS_0004",
+      "sha256": "2f2461c4d9e18c33c5134e7379012fa81350f5bf87551240735e08ebaeb0485f",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1392752,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 263,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_NMD_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_NMD_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_NMD_0001.rdat",
+      "rmdb_id": "HIV3PR_NMD_0001",
+      "sha256": "8c11b7e1f3ef742bd4946db77ce7c14ee06c3cfa6968e25477861c766138e088",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1392685,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 263,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_NMD_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_NMD_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_NMD_0002.rdat",
+      "rmdb_id": "HIV3PR_NMD_0002",
+      "sha256": "d3de48959be7327515b12f8541855e35521043d90825f3433219ed2950a97ebc",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1611697,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 283,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_NMD_0003.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_NMD_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_NMD_0003.rdat",
+      "rmdb_id": "HIV3PR_NMD_0003",
+      "sha256": "f411580a0f961ec4faab336521202884cbbb12977707ca38abf86084b6815642",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1611697,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 283,
+      "download_status": "downloaded",
+      "filename": "HIV3PR_NMD_0004.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/HIV3PR_NMD_0004.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HIV3PR_NMD_0004.rdat",
+      "rmdb_id": "HIV3PR_NMD_0004",
+      "sha256": "9c679fc4dd3b42a37302f670eccb39c33e0f1f44dfa65939c780cee84cca65f0",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 1344855,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 435,
+      "download_status": "downloaded",
+      "filename": "L21RNA_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/L21RNA_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/L21RNA_DMS_0000.rdat",
+      "rmdb_id": "L21RNA_DMS_0000",
+      "sha256": "39c4c1ee62998ca41ae83e2385e4c6fd6d34f8e47a2f0b934614a3da8c71c245",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 153825,
+      "citation_doi": "10.1038/s41594-021-00653-y",
+      "construct_count_metadata": 145,
+      "download_status": "downloaded",
+      "filename": "NOMOD_FSE_0507.rdat",
+      "http_status": 200,
+      "owner": "Ivan Zheludev",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/NOMOD_FSE_0507.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/NOMOD_FSE_0507.rdat",
+      "rmdb_id": "NOMOD_FSE_0507",
+      "sha256": "d232cd5aca4613d947288b283f92185f2ee3d529f3c60a6d929233607d83956c",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 39369,
+      "citation_doi": "10.1038/s41591-022-01908-x",
+      "construct_count_metadata": 61,
+      "download_status": "downloaded",
+      "filename": "PSL2IAV_1M7_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/PSL2IAV_1M7_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/PSL2IAV_1M7_0001.rdat",
+      "rmdb_id": "PSL2IAV_1M7_0001",
+      "sha256": "65faa3e6d346eb545f79b91d94d1949acd9bda2b9c093d83450bdf4519b088f7",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 500355,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 264,
+      "download_status": "downloaded",
+      "filename": "RB1UTR_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/RB1UTR_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/RB1UTR_DMS_0000.rdat",
+      "rmdb_id": "RB1UTR_DMS_0000",
+      "sha256": "8572f98656d9cf092f1f564133cd7844bd1d17bb60895f82206dcdb6b7b0056b",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 721067,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 267,
+      "download_status": "downloaded",
+      "filename": "RNASEP_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/RNASEP_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/RNASEP_DMS_0000.rdat",
+      "rmdb_id": "RNASEP_DMS_0000",
+      "sha256": "4d90c0b47e7e5dc17cf2ded210c04dd922d315ae34a6187bfb3e83fd581c4d3c",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 721053,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 267,
+      "download_status": "downloaded",
+      "filename": "RNASEP_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/RNASEP_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/RNASEP_DMS_0001.rdat",
+      "rmdb_id": "RNASEP_DMS_0001",
+      "sha256": "e07d4a0d4b209f05b95e27c33e948d73528ea8609c8f6078530cba59d1430f3c",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 721048,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 267,
+      "download_status": "downloaded",
+      "filename": "RNASEP_DMS_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/RNASEP_DMS_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/RNASEP_DMS_0002.rdat",
+      "rmdb_id": "RNASEP_DMS_0002",
+      "sha256": "cfb41bb5cfd9f13dfb05ad773f4c43aeaecd279d1d362ba37549c5533353e908",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 325428,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 77,
+      "download_status": "downloaded",
+      "filename": "RNASEP_RSQ_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/RNASEP_RSQ_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/RNASEP_RSQ_0000.rdat",
+      "rmdb_id": "RNASEP_RSQ_0000",
+      "sha256": "eea5c0d7c9c4b7f099278871f22057dbbbd49989813a52c79b731dac6f6e2f99",
+      "tierA_signals": [
+        "m2_seq",
+        "m2r_rescue"
+      ]
+    },
+    {
+      "bytes": 264326,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 191,
+      "download_status": "downloaded",
+      "filename": "SAM4APO_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SAM4APO_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/SAM4APO_DMS_0000.rdat",
+      "rmdb_id": "SAM4APO_DMS_0000",
+      "sha256": "31b49ecfd28c9fb34a4c8cf9879f034146d17154851d8f13f9df3d595d0e2e5a",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 264188,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 191,
+      "download_status": "downloaded",
+      "filename": "SAM4SAM_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SAM4SAM_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/SAM4SAM_DMS_0000.rdat",
+      "rmdb_id": "SAM4SAM_DMS_0000",
+      "sha256": "64683c9a4a3eeae8a8c106fcf99ed5563bc69a5b94b5ba8ec9183760a290d121",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 810999,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 337,
+      "download_status": "downloaded",
+      "filename": "SCARNA6_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SCARNA6_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/SCARNA6_DMS_0000.rdat",
+      "rmdb_id": "SCARNA6_DMS_0000",
+      "sha256": "1f45fcfca5dc798412c83e47b3ec777ac0c5312ab048e2910b0ba28d5f7157b7",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 410847,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 125,
+      "download_status": "downloaded",
+      "filename": "SL5CV2_2A3_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5CV2_2A3_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5CV2_2A3_0001.rdat",
+      "rmdb_id": "SL5CV2_2A3_0001",
+      "sha256": "6749bcbcc686b14a95593d55081b7b7b29cf69bfabe0d23a1db0adc3d2a298ed",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 410853,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 125,
+      "download_status": "downloaded",
+      "filename": "SL5CV2_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5CV2_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5CV2_DMS_0001.rdat",
+      "rmdb_id": "SL5CV2_DMS_0001",
+      "sha256": "477d8a17d3dc2b270a11acecf643071837657a3b2276581aab83d8add700b8f4",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 410839,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 125,
+      "download_status": "downloaded",
+      "filename": "SL5CV2_NOM_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5CV2_NOM_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5CV2_NOM_0001.rdat",
+      "rmdb_id": "SL5CV2_NOM_0001",
+      "sha256": "137aa1ded199e51a68baf434e7339693cd286e004d302d81ec1172791696c4a8",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 410838,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 125,
+      "download_status": "downloaded",
+      "filename": "SL5CV2_NOM_0002.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5CV2_NOM_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5CV2_NOM_0002.rdat",
+      "rmdb_id": "SL5CV2_NOM_0002",
+      "sha256": "6b5d935a94d2d15131b649160232c3a99c2ffa22dcf8bd7d5636d0727ea6f97c",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446916,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5HKU_2A3_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5HKU_2A3_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5HKU_2A3_0001.rdat",
+      "rmdb_id": "SL5HKU_2A3_0001",
+      "sha256": "cdb9f71399dd80c925ba59555448a0ac51be02c90fb8ba4300a76b0b2b4233a7",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446923,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5HKU_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5HKU_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5HKU_DMS_0001.rdat",
+      "rmdb_id": "SL5HKU_DMS_0001",
+      "sha256": "4b00f5a911f2ba8af09dc68dacc5454d87afe3b2e2a60abb7e23fdea31ec1fa3",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446854,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5HKU_NOM_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5HKU_NOM_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5HKU_NOM_0001.rdat",
+      "rmdb_id": "SL5HKU_NOM_0001",
+      "sha256": "3919e9ec065a1ef68cc831b878214648892fdf60908bee51f15ca88138f52bd7",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446852,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5HKU_NOM_0002.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5HKU_NOM_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5HKU_NOM_0002.rdat",
+      "rmdb_id": "SL5HKU_NOM_0002",
+      "sha256": "7b4ce178089037fdfc07d1ea02590f18aa9ee7ba9668386877653ffdcef920d8",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446914,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5MER_2A3_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5MER_2A3_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5MER_2A3_0001.rdat",
+      "rmdb_id": "SL5MER_2A3_0001",
+      "sha256": "1ddf574cfd474d09a94b9f463f94ae18ab29405462f06c49f8626f889c82e647",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446942,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5MER_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5MER_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5MER_DMS_0001.rdat",
+      "rmdb_id": "SL5MER_DMS_0001",
+      "sha256": "f95b11fd0bb7ba9db40de582c586b22a2d598b8bcb252b7ad053655d6c68be37",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446856,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5MER_NOM_0001.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5MER_NOM_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5MER_NOM_0001.rdat",
+      "rmdb_id": "SL5MER_NOM_0001",
+      "sha256": "3d2bc35c9f4fda3a67e3fc1b14cb9a85b1206e5a23d5450243a68b527a621bb7",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 446854,
+      "citation_doi": "10.1073/pnas.2320493121",
+      "construct_count_metadata": 136,
+      "download_status": "downloaded",
+      "filename": "SL5MER_NOM_0002.rdat",
+      "http_status": 200,
+      "owner": "rui huang",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/SL5MER_NOM_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/SL5MER_NOM_0002.rdat",
+      "rmdb_id": "SL5MER_NOM_0002",
+      "sha256": "0a8c974288cc5e62f344466d8c221e5126681bcb455192773a8e16cab1ce134e",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 51649,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 17,
+      "download_status": "downloaded",
+      "filename": "TODEX_1M7_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TODEX_1M7_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/TODEX_1M7_0000.rdat",
+      "rmdb_id": "TODEX_1M7_0000",
+      "sha256": "7b079ba04b6cde9fea74b055e66218780de07b65db2ab4a02ba41dafd7ca6f4e",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 51651,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 17,
+      "download_status": "downloaded",
+      "filename": "TODEX_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TODEX_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/TODEX_DMS_0000.rdat",
+      "rmdb_id": "TODEX_DMS_0000",
+      "sha256": "2a597de8277f0965543340210381b0ff6debe4f406c67a445571460c355cc2b5",
+      "tierA_signals": [
+        "riboSNitch_snp"
+      ]
+    },
+    {
+      "bytes": 73743,
+      "citation_doi": "10.1021/acs.biochem.0c00020",
+      "construct_count_metadata": 1,
+      "download_status": "downloaded",
+      "filename": "TODS7_MUT_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TODS7_MUT_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/TODS7_MUT_0001.rdat",
+      "rmdb_id": "TODS7_MUT_0001",
+      "sha256": "97d1c08435de5053546d55f32dee794fa65ca6d15e7597d12aeb68abb3bb60df",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 69879,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 82,
+      "download_status": "downloaded",
+      "filename": "TPPRSW_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TPPRSW_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/TPPRSW_DMS_0000.rdat",
+      "rmdb_id": "TPPRSW_DMS_0000",
+      "sha256": "0a44b1e170d67dd1535ca042cd402e25b0adbd9c7426bc62180a8db1bccfed22",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 69916,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 82,
+      "download_status": "downloaded",
+      "filename": "TPPRSW_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TPPRSW_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/TPPRSW_DMS_0001.rdat",
+      "rmdb_id": "TPPRSW_DMS_0001",
+      "sha256": "0e6bd1e33f0bc85e7775c363086ec469e8f1a7fcd40ae291e09f1752046be85e",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 69874,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 82,
+      "download_status": "downloaded",
+      "filename": "TPPRSW_DMS_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TPPRSW_DMS_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/TPPRSW_DMS_0002.rdat",
+      "rmdb_id": "TPPRSW_DMS_0002",
+      "sha256": "8d1f6e88cd451386f6cf2141f0adc1d0af07c3da31623acfffabad22b6596dea",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 69911,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 82,
+      "download_status": "downloaded",
+      "filename": "TPPRSW_DMS_0003.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TPPRSW_DMS_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/TPPRSW_DMS_0003.rdat",
+      "rmdb_id": "TPPRSW_DMS_0003",
+      "sha256": "438eae1d8925633ab9b49c78fd89aa88d3bfc78ae0385e91f2ef59e8d7c6ec0e",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 69893,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 82,
+      "download_status": "downloaded",
+      "filename": "TPPRSW_DMS_0004.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TPPRSW_DMS_0004.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/TPPRSW_DMS_0004.rdat",
+      "rmdb_id": "TPPRSW_DMS_0004",
+      "sha256": "39f0fab68bb214dfaa5968ca1550406b332295bd8f303a9f4b67bb5df861a9dd",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 69930,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 82,
+      "download_status": "downloaded",
+      "filename": "TPPRSW_DMS_0005.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TPPRSW_DMS_0005.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/TPPRSW_DMS_0005.rdat",
+      "rmdb_id": "TPPRSW_DMS_0005",
+      "sha256": "b50cc5c9b39a9e817024e27ef3ab74deab5a27dd0335d630bfb2d189aa00335b",
+      "tierA_signals": [
+        "mutate_and_map",
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 305069,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 161,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0002.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0002.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0002.rdat",
+      "rmdb_id": "TRP4P6_DMS_0002",
+      "sha256": "674e99ea0ba85b4982f708696506a6e8d78dd539045eb27bfacc23a23da6124c",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 305102,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 161,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0003.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0003.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0003.rdat",
+      "rmdb_id": "TRP4P6_DMS_0003",
+      "sha256": "47e28d27379649579b86b24dba24c66f00663124c0408f4952813a8312adfaa1",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 305715,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 161,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0004.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0004.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0004.rdat",
+      "rmdb_id": "TRP4P6_DMS_0004",
+      "sha256": "9efa979eed00cd77dfc672236fbef2b2eea589a05dc9846482656ffb09aec235",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590193,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0005.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0005.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0005.rdat",
+      "rmdb_id": "TRP4P6_DMS_0005",
+      "sha256": "f75bafebd4e56e362fba740a27af8ef0ec59df752dc18fdcbc06395fbc3cdbfe",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590188,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0006.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0006.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0006.rdat",
+      "rmdb_id": "TRP4P6_DMS_0006",
+      "sha256": "0141895ef83e8580013dd2400775bf9fee24af65e9e94d1d39ee78e839e38255",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": null,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "missing",
+      "filename": "TRP4P6_DMS_0007.rdat",
+      "http_status": 0,
+      "owner": "Clarence Cheng",
+      "raw_path": null,
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0007.rdat",
+      "rmdb_id": "TRP4P6_DMS_0007",
+      "sha256": null,
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590245,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0008.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0008.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0008.rdat",
+      "rmdb_id": "TRP4P6_DMS_0008",
+      "sha256": "fba4e4bcf74014cee605e9549fa96962aaafeefe1bc934254d0f755053099a74",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590181,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0009.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0009.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0009.rdat",
+      "rmdb_id": "TRP4P6_DMS_0009",
+      "sha256": "72f2e980b23b8b7d29f82de23e8f916256f1593207b4039909cae5e752e9cdec",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590172,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0010.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0010.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0010.rdat",
+      "rmdb_id": "TRP4P6_DMS_0010",
+      "sha256": "cf525dd9c0ece84abb600384b9b9b54750ade6e60146f6a9e2a45feb6caf1114",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590254,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0011.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0011.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0011.rdat",
+      "rmdb_id": "TRP4P6_DMS_0011",
+      "sha256": "e9c7a4f1e21905d5b4a90e3648543714359928db866c32817031654ae51f3d42",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590255,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0012.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0012.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0012.rdat",
+      "rmdb_id": "TRP4P6_DMS_0012",
+      "sha256": "e353ea7abdb780f723ab0b6b32fe065dec0a90b82ca595ec47b790b5418c6089",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 590120,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0013.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0013.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0013.rdat",
+      "rmdb_id": "TRP4P6_DMS_0013",
+      "sha256": "51b331f88a2def7326a4e041d08dd87c5cab0c9a732e23558c69469af79656dd",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 373357,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 162,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0014.rdat",
+      "http_status": 200,
+      "owner": "Clarence Cheng",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0014.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0014.rdat",
+      "rmdb_id": "TRP4P6_DMS_0014",
+      "sha256": "66fc15d733deafef7cf796ca9458d68223064af69ec10600bb65882797493148",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 422605,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0015.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0015.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0015.rdat",
+      "rmdb_id": "TRP4P6_DMS_0015",
+      "sha256": "74db69acec32e3b26ae3b3023272f0727628d8b32c7cda2f47c5bf5c9147adff",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 422605,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 204,
+      "download_status": "downloaded",
+      "filename": "TRP4P6_DMS_0016.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/TRP4P6_DMS_0016.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/TRP4P6_DMS_0016.rdat",
+      "rmdb_id": "TRP4P6_DMS_0016",
+      "sha256": "f5903c2dbfd5a32e590ff4a9defc1e5f7261154486c064ea959ac4390affee91",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 401049,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 236,
+      "download_status": "downloaded",
+      "filename": "U1SNRNA_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/U1SNRNA_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/U1SNRNA_DMS_0000.rdat",
+      "rmdb_id": "U1SNRNA_DMS_0000",
+      "sha256": "61f73df9e097ac62b426bbe85053a0e103f64fd8ef51b8039c4bf90072120820",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 657035,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 303,
+      "download_status": "downloaded",
+      "filename": "VCKTAPO_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/VCKTAPO_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/VCKTAPO_DMS_0000.rdat",
+      "rmdb_id": "VCKTAPO_DMS_0000",
+      "sha256": "f2ee36cc8cd14d665df564d020c02cdc5d4ab348348d91b4439c6d8e0106d955",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 657019,
+      "citation_doi": "10.1038/s41592-020-0878-9",
+      "construct_count_metadata": 303,
+      "download_status": "downloaded",
+      "filename": "VCKTGLY_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Kalli Kappel",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/VCKTGLY_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/VCKTGLY_DMS_0000.rdat",
+      "rmdb_id": "VCKTGLY_DMS_0000",
+      "sha256": "c681350733dfc0127175c8848224361b5179a6a34fe2bb2c495d31c59b2fdea0",
+      "tierA_signals": [
+        "m2_seq"
+      ]
+    },
+    {
+      "bytes": 378391,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 193,
+      "download_status": "downloaded",
+      "filename": "YDAORS_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/YDAORS_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/YDAORS_DMS_0000.rdat",
+      "rmdb_id": "YDAORS_DMS_0000",
+      "sha256": "57559bb38f6741b181ba668d48b72d407e47e47295dca85c705a99672f615f4c",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 378414,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 193,
+      "download_status": "downloaded",
+      "filename": "YDAORS_DMS_0001.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/YDAORS_DMS_0001.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-riboswitches/YDAORS_DMS_0001.rdat",
+      "rmdb_id": "YDAORS_DMS_0001",
+      "sha256": "16f1b2d80ae2612a16967979cca0ed1c2a9d1e34d901674ab5a282d9b3cc834b",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    },
+    {
+      "bytes": 211791,
+      "citation_doi": "10.1073/pnas.1619897114",
+      "construct_count_metadata": 144,
+      "download_status": "downloaded",
+      "filename": "ZIKAXR_DMS_0000.rdat",
+      "http_status": 200,
+      "owner": "Rhiju Das",
+      "raw_path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730/ZIKAXR_DMS_0000.rdat",
+      "rdat_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/ZIKAXR_DMS_0000.rdat",
+      "rmdb_id": "ZIKAXR_DMS_0000",
+      "sha256": "daadfc7556ce85dc2bfec87a74993913fb9bfb126fc3f42060fa78b1f2054c11",
+      "tierA_signals": [
+        "mutate_and_map"
+      ]
+    }
+  ],
+  "downloaded_failed": 1,
+  "downloaded_ok": 100,
+  "files_audited": 72,
+  "generated_at": "2026-07-30T20:16:18.898947+08:00",
+  "parse_errors": 28,
+  "re_d1_allowed": false,
+  "re_tier_judgment": "Tier A",
+  "re_triage_decision": "reaudit_qualified_to_propose_v3_1_non_learning_d1_cleanup_only",
+  "schema_version": "reactflow-delta-d0r-reaudit-tierA-manifest-v1",
+  "scientific_boundary": "Read-only D0 re-audit. Candidate relations are unverified (candidate_only_pending_parent_lineage_and_functional_region_validation, true_pair=False). No pair, tier, or model claim. D1 not authorized (v3.1 contract not published). Previous D0-R v1 results preserved.",
+  "stage": "D0-R v2 re-audit",
+  "tierA_entries_selected": 101,
+  "total_candidate_single_mutant_pairs": 7761
+}
