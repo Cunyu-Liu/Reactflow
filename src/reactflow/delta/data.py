@@ -363,3 +363,63 @@ def _validate_retrieved_at(value: str) -> None:
         raise ValueError("retrieved_at must be ISO-8601") from exc
     if parsed.tzinfo is None:
         raise ValueError("retrieved_at must include a timezone")
+
+# ============================================================================
+# D1 Cleaning pipeline (v3 §6.6, Phase D1 T-D1.2–T-D1.10)
+#
+# All D1 cleaning functions are added here per v3.0 §15 Phase D1 file map
+# ("Modify: src/reactflow/delta/data.py"). Each T-D1 step adds focused,
+# tested functions that implement one stage of the v3 §6.6 14-step cleaning
+# order.
+# ============================================================================
+
+# --- T-D1.2: Condition exact matching (v3 §6.5, §6.6 step 5) ---
+
+# The construct fields that define an experimental condition. WT and mutant
+# must be identical on ALL of these (both-null counts as identical, since
+# within a single RDAT file the absence of a field means the same experiment).
+CONDITION_MATCH_FIELDS = (
+    "probe",
+    "probe_protocol",
+    "temperature",
+    "ligand",
+    "ligand_concentration",
+    "buffer",
+    "in_vivo_in_vitro",
+)
+
+
+def match_conditions(
+    wt_construct: Mapping[str, Any],
+    mut_construct: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Check exact condition match between WT and mutant constructs (T-D1.2).
+
+    Per v3 §6.5, WT and mutant must have identical experimental conditions
+    (probe, temperature, ligand, buffer, etc.) except for the edit itself.
+    Both-null counts as a match: within a single RDAT file the absence of a
+    condition field means the same experimental context for both profiles.
+
+    Returns a dict with:
+      - ``condition_match_fields``: list of field names that matched (for the
+        pair schema field of the same name).
+      - ``condition_match_status``: ``"exact_match"`` or ``"mismatch"`` (for
+        the pair schema field of the same name).
+      - ``mismatched_fields``: list of field names that differed (extra
+        diagnostic, used by T-D1.10 to assign exclusion reasons).
+    """
+    matched: list[str] = []
+    mismatched: list[str] = []
+    for field in CONDITION_MATCH_FIELDS:
+        wt_val = wt_construct.get(field)
+        mut_val = mut_construct.get(field)
+        if wt_val == mut_val:
+            matched.append(field)
+        else:
+            mismatched.append(field)
+    status = "exact_match" if not mismatched else "mismatch"
+    return {
+        "condition_match_fields": matched,
+        "condition_match_status": status,
+        "mismatched_fields": mismatched,
+    }
