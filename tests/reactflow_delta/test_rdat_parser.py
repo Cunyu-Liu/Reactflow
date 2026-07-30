@@ -88,3 +88,144 @@ def test_construct_parse_manifest_fails_closed_on_fixture_checksum_change(tmp_pa
     manifest_path.write_text(json.dumps({"schema_version": "reactflow-delta-rdat-fixture-manifest-v1", "fixtures": [{"name": "fixture.rdat", "path": str(fixture), "sha256": "0" * 64, "candidate_category": "candidate", "status": "verified_against_release_index"}]}))
     with pytest.raises(RdatParseError, match="checksum"):
         build_rdat_construct_parse_manifest(manifest_path)
+
+
+# ---------------------------------------------------------------------------
+# D1 §5 parser extensions (v3.1 forward-only)
+# ---------------------------------------------------------------------------
+
+
+class TestVersionAlias:
+    """§5.1: VERSION as alias for RDAT_VERSION (TRP4P6 files)."""
+
+    def test_version_aliased_to_rdat_version(self, tmp_path: Path) -> None:
+        path = _write(
+            tmp_path / "alias.rdat",
+            "\n".join([
+                "VERSION\t0.34", "NAME\tx", "SEQUENCE\tAC", "OFFSET\t0",
+                "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2",
+            ]),
+        )
+        document = parse_rdat(path)
+        assert document["headers"]["RDAT_VERSION"] == "0.34"
+        assert document["headers"]["VERSION"] == "0.34"
+
+    def test_version_and_rdat_version_agree(self, tmp_path: Path) -> None:
+        path = _write(
+            tmp_path / "both.rdat",
+            "\n".join([
+                "VERSION\t0.34", "RDAT_VERSION\t0.34",
+                "NAME\tx", "SEQUENCE\tAC", "OFFSET\t0",
+                "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2",
+            ]),
+        )
+        document = parse_rdat(path)
+        assert document["headers"]["RDAT_VERSION"] == "0.34"
+
+    def test_version_and_rdat_version_conflict_raises(self, tmp_path: Path) -> None:
+        path = _write(
+            tmp_path / "conflict.rdat",
+            "\n".join([
+                "VERSION\t0.34", "RDAT_VERSION\t0.4",
+                "NAME\tx", "SEQUENCE\tAC", "OFFSET\t0",
+                "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2",
+            ]),
+        )
+        with pytest.raises(RdatParseError, match="conflicting"):
+            parse_rdat(path)
+
+
+class TestAcceptedRdatVersions:
+    """§5.2: accept RDAT_VERSION 0.4 / 0.22 / 0.24."""
+
+    @pytest.mark.parametrize("version", ["0.4", "0.22", "0.24"])
+    def test_accepted_version_parses(self, tmp_path: Path, version: str) -> None:
+        path = _write(
+            tmp_path / f"v{version}.rdat",
+            "\n".join([
+                f"RDAT_VERSION\t{version}", "NAME\tx", "SEQUENCE\tAC",
+                "OFFSET\t0", "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2",
+            ]),
+        )
+        document = parse_rdat(path)
+        assert document["headers"]["RDAT_VERSION"] == version
+
+    def test_version_0_33_still_rejected(self, tmp_path: Path) -> None:
+        path = _write(
+            tmp_path / "bad.rdat",
+            "\n".join([
+                "RDAT_VERSION\t0.33", "NAME\tx", "SEQUENCE\tAC",
+                "OFFSET\t0", "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2",
+            ]),
+        )
+        with pytest.raises(RdatParseError, match="not accepted"):
+            parse_rdat(path)
+
+
+class TestSpaceSeparatedFields:
+    """§5.3: GLYCFN-style files use spaces instead of tabs."""
+
+    def test_space_separated_file_parses(self, tmp_path: Path) -> None:
+        # Minimal GLYCFN-style file: spaces instead of tabs everywhere.
+        path = _write(
+            tmp_path / "glycfn.rdat",
+            "\n".join([
+                "RDAT_VERSION 0.24",
+                "NAME glycine riboswitch, F. nucleatum",
+                "SEQUENCE ggaaauaaUCGGAUGAAGAUAUGAGGAGAGA",
+                "STRUCTURE .........(((......)))......",
+                "OFFSET -17",
+                "SEQPOS -16 -15 -14 0 1 2 3 4 5",
+                "ANNOTATION\ttemperature:24C\tmodifier:DMS",
+                "ANNOTATION_DATA:1 modifier:DMS",
+                "ANNOTATION_DATA:2 mutation:WT modifier:DMS",
+                "REACTIVITY:1 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9",
+                "REACTIVITY:2 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8",
+            ]),
+        )
+        document = parse_rdat(path)
+        assert document["headers"]["RDAT_VERSION"] == "0.24"
+        assert document["headers"]["NAME"] == "glycine riboswitch, F. nucleatum"
+        assert len(document["seqpos"]) == 9
+        assert len(document["profiles"]) == 2
+        assert document["profiles"][0]["reactivity"] == [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        # ANNOTATION line still uses tabs → annotation tokens parsed correctly
+        assert document["global_annotations"][0]["temperature"] == ["24C"]
+        # ANNOTATION_DATA uses spaces → tokens parsed correctly
+        assert document["profiles"][0]["annotation"]["modifier"] == ["DMS"]
+        assert document["profiles"][1]["annotation"]["mutation"] == ["WT"]
+
+    def test_space_separated_name_with_spaces_preserved(self, tmp_path: Path) -> None:
+        path = _write(
+            tmp_path / "name.rdat",
+            "\n".join([
+                "RDAT_VERSION 0.34",
+                "NAME some rna with multiple words",
+                "SEQUENCE ACGU",
+                "OFFSET 0",
+                "SEQPOS A1 C2 G3 U4",
+                "REACTIVITY:1 0.1 0.2 0.3 0.4",
+            ]),
+        )
+        document = parse_rdat(path)
+        assert document["headers"]["NAME"] == "some rna with multiple words"
+
+    def test_mixed_tab_and_space_lines(self, tmp_path: Path) -> None:
+        # ANNOTATION uses tabs, ANNOTATION_DATA uses spaces (real GLYCFN pattern)
+        path = _write(
+            tmp_path / "mixed.rdat",
+            "\n".join([
+                "RDAT_VERSION 0.24",
+                "NAME\tx",
+                "SEQUENCE\tACGU",
+                "OFFSET\t0",
+                "SEQPOS A1 C2 G3 U4",
+                "ANNOTATION\tmodifier:DMS\tchemical:MgCl2:10mM",
+                "ANNOTATION_DATA:1 modifier:DMS chemical:glycine:10mM",
+                "REACTIVITY:1 0.1 0.2 0.3 0.4",
+            ]),
+        )
+        document = parse_rdat(path)
+        assert document["global_annotations"][0]["chemical"] == ["MgCl2:10mM"]
+        assert document["profiles"][0]["annotation"]["modifier"] == ["DMS"]
+        assert document["profiles"][0]["annotation"]["chemical"] == ["glycine:10mM"]

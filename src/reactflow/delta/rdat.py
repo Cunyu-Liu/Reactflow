@@ -1,4 +1,4 @@
-"""Fail-closed RDAT 0.34 parser for D0/D0-R provenance and construct audit.
+"""Fail-closed RDAT parser for D0/D0-R provenance and construct audit.
 
 D0-R extensions (backward-compatible):
   * Per-profile indexed ``SEQUENCE:N`` lines (in addition to the global header).
@@ -11,6 +11,15 @@ D0-R extensions (backward-compatible):
   * Functional-RNA vs adapter/barcode separation: edits inside the SEQPOS window
     that are NOT explained by the name-encoded mutation are reported as
     ``unexplained_edits`` (likely barcode/adapter), not auto-rejected.
+
+D1 parser extensions (v3.1 §5, forward-only):
+  * §5.1: ``VERSION`` header accepted as alias for ``RDAT_VERSION`` (TRP4P6).
+  * §5.2: ``RDAT_VERSION`` 0.4 / 0.22 / 0.24 accepted in addition to 0.34
+    (BSUGLY, CBAG4P, GLYCFN).
+  * §5.3: Space-separated field handling for legacy files that use spaces
+    instead of tabs (GLYCFN_KNK_0001/0002). When a line has no tab character,
+    fields are split on whitespace; single-value headers (NAME, SEQUENCE, etc.)
+    are re-joined with a single space.
 """
 
 from __future__ import annotations
@@ -26,6 +35,10 @@ from .manifests import sha256_file
 
 RDAT_CONSTRUCT_PARSE_MANIFEST_SCHEMA_VERSION = "reactflow-delta-rdat-construct-parse-manifest-v1"
 D0R_PARSED_PROFILE_SCHEMA_VERSION = "reactflow-delta-d0r-parsed-profile-v1"
+
+# D1 §5.2: accepted RDAT versions. 0.34 is the D0 canonical version; 0.4, 0.22,
+# and 0.24 are forward-only additions for BSUGLY, CBAG4P, and GLYCFN files.
+_ACCEPTED_RDAT_VERSIONS = frozenset({"0.34", "0.4", "0.22", "0.24"})
 
 _RNA_BASES = set("ACGU")
 _RNA_SEQUENCE = re.compile(r"^[ACGU]+$")
@@ -59,7 +72,13 @@ def parse_rdat(path: str | Path) -> dict[str, Any]:
     for line_number, raw_line in enumerate(source.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
         if not raw_line.strip():
             continue
-        fields = raw_line.split("\t")
+        # D1 §5.3: GLYCFN and other legacy files use spaces instead of tabs.
+        # When no tab is present, split on whitespace. Single-value headers
+        # (NAME, SEQUENCE, etc.) are re-joined downstream.
+        if "\t" in raw_line:
+            fields = raw_line.split("\t")
+        else:
+            fields = raw_line.split()
         key = fields[0].strip()
         values = [value.strip() for value in fields[1:]]
         if key == "COMMENT":
@@ -87,12 +106,17 @@ def parse_rdat(path: str | Path) -> dict[str, Any]:
             if index in reactivity:
                 raise RdatParseError(f"duplicate REACTIVITY index {index}")
             reactivity[index] = _numeric_values(values, key)
-        elif key in {"RDAT_VERSION", "NAME", "SEQUENCE", "STRUCTURE", "OFFSET"}:
+        elif key in {"RDAT_VERSION", "VERSION", "NAME", "SEQUENCE", "STRUCTURE", "OFFSET"}:
             if key in headers:
                 raise RdatParseError(f"duplicate header {key}")
-            if len(values) != 1 or not values[0]:
+            if not values:
                 raise RdatParseError(f"header {key} requires one non-empty value")
-            headers[key] = values[0]
+            # D1 §5.3: space-separated files may yield multiple tokens for NAME
+            # (e.g., "NAME glycine riboswitch, F. nucleatum"); re-join them.
+            header_value = values[0] if len(values) == 1 else " ".join(values)
+            if not header_value:
+                raise RdatParseError(f"header {key} requires one non-empty value")
+            headers[key] = header_value
         elif key.startswith("SEQUENCE:"):
             # D0-R: per-profile indexed sequence line SEQUENCE:N
             index = _parse_index(key, line_number)
@@ -106,8 +130,23 @@ def parse_rdat(path: str | Path) -> dict[str, Any]:
         else:
             headers.setdefault(f"unknown:{key}", "\t".join(values))
 
-    if headers.get("RDAT_VERSION") != "0.34":
-        raise RdatParseError("only RDAT_VERSION 0.34 is accepted in D0")
+    # D1 §5.1: VERSION is an alias for RDAT_VERSION (TRP4P6 files use VERSION
+    # instead of RDAT_VERSION). If both are present they must agree.
+    if "VERSION" in headers and "RDAT_VERSION" not in headers:
+        headers["RDAT_VERSION"] = headers["VERSION"]
+    elif "VERSION" in headers and "RDAT_VERSION" in headers:
+        if headers["VERSION"] != headers["RDAT_VERSION"]:
+            raise RdatParseError(
+                f"conflicting VERSION ({headers['VERSION']!r}) and "
+                f"RDAT_VERSION ({headers['RDAT_VERSION']!r})"
+            )
+
+    # D1 §5.2: accept RDAT_VERSION 0.34 (D0 canonical), 0.4, 0.22, 0.24.
+    if headers.get("RDAT_VERSION") not in _ACCEPTED_RDAT_VERSIONS:
+        raise RdatParseError(
+            f"RDAT_VERSION {headers.get('RDAT_VERSION')!r} is not accepted; "
+            f"accepted versions: {sorted(_ACCEPTED_RDAT_VERSIONS)}"
+        )
     for required in ("NAME", "SEQUENCE", "OFFSET"):
         if required not in headers:
             raise RdatParseError(f"missing required header {required}")
