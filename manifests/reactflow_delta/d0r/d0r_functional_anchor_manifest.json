@@ -1,0 +1,219 @@
+{
+  "artifacts": [
+    {
+      "exists": true,
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/d0r_functional_anchor_audit.json",
+      "regenerable": true,
+      "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_functional_anchor_audit.py --m2sl5-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800 --paper-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800 --output-dir artifacts/reactflow_delta/d0r",
+      "relative_path": "artifacts/reactflow_delta/d0r/d0r_functional_anchor_audit.json",
+      "schema_version": "reactflow-delta-d0r-functional-anchor-audit-v1",
+      "sha256": "5a50dc068aa172b27762b709b5df830f3b6a11cdc0352fc2643b605d79b0f031",
+      "size_bytes": 84448877,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json",
+      "regenerable": true,
+      "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_functional_anchor_audit.py --m2sl5-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800 --paper-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800 --output-dir artifacts/reactflow_delta/d0r",
+      "relative_path": "artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json",
+      "schema_version": "reactflow-delta-d0r-functional-candidate-relations-v1",
+      "sha256": "e780eaac7943669ba6039eff2bfe060d2b4f2857c89c080cc30b4026276153a7",
+      "size_bytes": 819716,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json",
+      "regenerable": true,
+      "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_functional_anchor_audit.py --m2sl5-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800 --paper-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800 --output-dir artifacts/reactflow_delta/d0r",
+      "relative_path": "artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json",
+      "schema_version": "reactflow-delta-d0r-functional-candidate-relations-v1",
+      "sha256": "590056f2d97034d783fa63fc71d2b1d77297b7ec3a97b9aec7cd71275c4ecaa0",
+      "size_bytes": 825,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json",
+      "regenerable": true,
+      "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_functional_anchor_audit.py --m2sl5-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800 --paper-dir /mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800 --output-dir artifacts/reactflow_delta/d0r",
+      "relative_path": "artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json",
+      "schema_version": "reactflow-delta-d0r-functional-anchor-audit-v1",
+      "sha256": "331403befda6f4bdaa4c76c6fe16a79f0b076f297f65d9c02da5b22289150d2b",
+      "size_bytes": 3372,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/d0r_acceptance_v2.json",
+      "regenerable": true,
+      "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_build_functional_acceptance.py --summary artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json --m2sl5-relations artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json --covsl5-relations artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json --output-dir artifacts/reactflow_delta/d0r --python <env-python> --test-dir tests/reactflow_delta --input-rdat <10 RDAT files>",
+      "relative_path": "artifacts/reactflow_delta/d0r/d0r_acceptance_v2.json",
+      "schema_version": "reactflow-delta-d0r-functional-acceptance-v2",
+      "sha256": "8646b5830bdb25d1e7f8a57e01758d9aed5613ce291c5f48550680edc657506d",
+      "size_bytes": 8847,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/d0r_data_feasibility_audit.md",
+      "regenerable": true,
+      "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_build_functional_acceptance.py --summary artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json --m2sl5-relations artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json --covsl5-relations artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json --output-dir artifacts/reactflow_delta/d0r --python <env-python> --test-dir tests/reactflow_delta --input-rdat <10 RDAT files>",
+      "relative_path": "artifacts/reactflow_delta/d0r/d0r_data_feasibility_audit.md",
+      "schema_version": null,
+      "sha256": "e252b705b657c81342beb33cbeadba19f344897a780e8d08f7be1aadd6dfed3f",
+      "size_bytes": 5498,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "note": "preexisting D0-R construct audit (SEQPOS-based); not regenerated by functional-anchor task",
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/d0r_construct_audit.json",
+      "regenerable": false,
+      "relative_path": "artifacts/reactflow_delta/d0r/d0r_construct_audit.json",
+      "schema_version": "reactflow-delta-d0r-construct-audit-v1",
+      "sha256": "358dd168233939db5d458f9b5931f3f99eef0b746c4aa73a5989916c05e3b564",
+      "size_bytes": 126711751,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "note": "preexisting D0-R acceptance v1 (SEQPOS-based); superseded by d0r_acceptance_v2.json, preserved per handoff",
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/d0r_acceptance.json",
+      "regenerable": false,
+      "relative_path": "artifacts/reactflow_delta/d0r/d0r_acceptance.json",
+      "schema_version": "reactflow-delta-d0r-acceptance-v1",
+      "sha256": "9e3819ae477def29095c1f97dba098b33e78c595a3f822f0df0ac4f72ea9aaa6",
+      "size_bytes": 3219,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "note": "preexisting SEQPOS-based candidate relations; preserved as historical evidence, not overwritten",
+      "path": "/home/cunyuliu/reactflow_delta_goal_20260729/artifacts/reactflow_delta/d0r/m2sl5_candidate_relations.json",
+      "regenerable": false,
+      "relative_path": "artifacts/reactflow_delta/d0r/m2sl5_candidate_relations.json",
+      "schema_version": "reactflow-delta-d0r-candidate-relations-v1",
+      "sha256": "cabd5ba298acb686f19b7b24067170ad198134e36fcd1ea10e8dfbef4a28b601",
+      "size_bytes": 707217,
+      "tracked_in_git": false
+    }
+  ],
+  "audit_method": "functional_anchor_124nt_window_offset_31",
+  "boundary_note": "All artifacts under artifacts/ are gitignored (tracked_in_git=false). Only this manifest and reports/d0r_data_feasibility_audit.md are tracked. Large per-profile JSON (81M d0r_functional_anchor_audit.json, 121M d0r_construct_audit.json) is regenerable intermediate data and is NOT stored in git history; provenance is captured here via sha256 + regeneration commands.",
+  "code_version": {
+    "acceptance_script": "scripts/reactflow_delta/d0r_build_functional_acceptance.py",
+    "audit_script": "scripts/reactflow_delta/d0r_functional_anchor_audit.py",
+    "module": "src/reactflow/delta/d0r_functional.py",
+    "tests": "tests/reactflow_delta/test_d0r_functional_anchor.py"
+  },
+  "generated_at": "2026-07-30T18:35:24.528366+08:00",
+  "git_commit_at_generation": "bf5c7170e647efc4c44572f48d14e8cd4aeeb332",
+  "raw_inputs": [
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/M2SL5_2A3_0000.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "6a2fded3673735c8daa92512ae3f86bc3e4187bb18db78e2c56fcff3d45a4c8b",
+      "size_bytes": 7863387,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800/M2SL5_DMS_0000.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "590638963adbde972cc77c70aeb07ff4240d9885be9baffbb0f65ef40243ab85",
+      "size_bytes": 7863713,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/COVSL5_DMS_0001.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "df5e74b3163a5822b54ac73dfe5b08711b015ef7f9731aeb8284bf6827ce77d3",
+      "size_bytes": 1077100,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/COVSL5_DMS_0002.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "df12a85c1d2d848066effcec3080c2c23301631135cbc51d38bb72dc86efb021",
+      "size_bytes": 430899,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/COVSL5_NOM_0001.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "1093f5c8131c642357733849a0e5728cdb631ff1590c1570ce67fc88a3e7b1a3",
+      "size_bytes": 1078897,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/COVSL5_NOM_0002.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "6eecd4008163d9119e11becbc918ec7190aff0866d90a2370953299a4ebfe2cf",
+      "size_bytes": 427914,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/SL5CV2_2A3_0001.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "6749bcbcc686b14a95593d55081b7b7b29cf69bfabe0d23a1db0adc3d2a298ed",
+      "size_bytes": 410847,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/SL5CV2_DMS_0001.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "477d8a17d3dc2b270a11acecf643071837657a3b2276581aab83d8add700b8f4",
+      "size_bytes": 410853,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/SL5CV2_NOM_0001.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "137aa1ded199e51a68baf434e7339693cd286e004d302d81ec1172791696c4a8",
+      "size_bytes": 410839,
+      "tracked_in_git": false
+    },
+    {
+      "exists": true,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/paper_accession_38427602_20260730T143800+0800/SL5CV2_NOM_0002.rdat",
+      "regeneration_command": "python scripts/reactflow_delta/d0r_download_assets.py (RMDB download with sha256 verification)",
+      "relative_path": null,
+      "sha256": "6b5d935a94d2d15131b649160232c3a99c2ffa22dcf8bd7d5636d0727ea6f97c",
+      "size_bytes": 410838,
+      "tracked_in_git": false
+    }
+  ],
+  "schema_version": "reactflow-delta-d0r-functional-anchor-provenance-manifest-v1",
+  "scientific_boundary": "Provenance manifest only. No pair, tier, or model claim. Candidate relations are unverified (candidate_only_pending_parent_lineage_and_functional_region_validation, true_pair=false).",
+  "stage": "D0-R",
+  "tracked_report": {
+    "exists": true,
+    "path": "/home/cunyuliu/reactflow_delta_goal_20260729/reports/d0r_data_feasibility_audit.md",
+    "regeneration_command": "PYTHONPATH=src python scripts/reactflow_delta/d0r_build_functional_acceptance.py --summary artifacts/reactflow_delta/d0r/d0r_functional_anchor_summary.json --m2sl5-relations artifacts/reactflow_delta/d0r/m2sl5_functional_candidate_relations.json --covsl5-relations artifacts/reactflow_delta/d0r/covsl5_sl5cv2_candidate_relations.json --output-dir artifacts/reactflow_delta/d0r --python <env-python> --test-dir tests/reactflow_delta --input-rdat <10 RDAT files>",
+    "relative_path": "reports/d0r_data_feasibility_audit.md",
+    "sha256": "e252b705b657c81342beb33cbeadba19f344897a780e8d08f7be1aadd6dfed3f",
+    "size_bytes": 5498,
+    "source_artifact": "artifacts/reactflow_delta/d0r/d0r_data_feasibility_audit.md",
+    "source_sha256": "e252b705b657c81342beb33cbeadba19f344897a780e8d08f7be1aadd6dfed3f",
+    "tracked_in_git": true
+  }
+}
