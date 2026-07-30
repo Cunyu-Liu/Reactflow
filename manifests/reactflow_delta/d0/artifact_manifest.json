@@ -7,7 +7,7 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T13:59:13+08:00",
+  "last_updated_at": "2026-07-30T14:07:15+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
     "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
@@ -17,7 +17,8 @@
     "T-D0.6": "9158f2214c81888c88ad6b25fe18820c2a273276",
     "T-D0.7": "1b9f32396b8b9d5e297e44aa8cce18d98b24035c",
     "T-D0.8": "e8bfa4fb66bee124b3a38530d97850387fd5bed3",
-    "T-D0.9": "de4f5134f8db90970f25c90ee7bfb9ae3e4ff775"
+    "T-D0.9": "de4f5134f8db90970f25c90ee7bfb9ae3e4ff775",
+    "T-D0.10": "169778e9687387ec3dcc0bdd903c36ab0acedea4"
   },
   "files": [
     {
@@ -271,6 +272,30 @@
       "synthetic_pair_count": 0,
       "same_sequence_replicate_group_count": 7,
       "scientific_status": "no pair candidates were classified; constructs and replicates were not promoted"
+    },
+    {
+      "task_id": "T-D0.11",
+      "kind": "fail_closed_feasibility_synthesizer",
+      "repo_paths": ["src/reactflow/delta/feasibility.py", "scripts/reactflow_delta/build_d0_feasibility_report.py", "tests/reactflow_delta/test_feasibility.py"],
+      "sha256": {
+        "src/reactflow/delta/feasibility.py": "3ad150b25c859afc949d7650e921b7554560e5e1e946103ba828354265358c3d",
+        "scripts/reactflow_delta/build_d0_feasibility_report.py": "7ee642080963b29d19671c21df9dcbb92dfee786e801d70d2552330f7d54db91",
+        "tests/reactflow_delta/test_feasibility.py": "074f172e7faac5930e2f8afc71b475531884e308f2f715717800f9150fcba85b"
+      }
+    },
+    {
+      "task_id": "T-D0.11",
+      "kind": "d0_feasibility_outputs",
+      "summary_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/data_feasibility_summary.json",
+      "summary_sha256": "22397ffc11eba6fa3e344ee90aadbd5dfe96e33d76068a4a07d2a5413c94d97b",
+      "parser_fixture_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/parser_fixture_results.json",
+      "parser_fixture_sha256": "f3af7976b900d04cb2b55e8ac77391f8b7128810808a3b365c5a4c47d02648a8",
+      "report_repo_path": "reports/d0_data_feasibility_audit.md",
+      "report_sha256_before_final_commit_record": "71fe27561ae78c4e637ecea122b947d9798225cc248e7b2d6f1d91bbc0a80a17",
+      "highest_currently_supported": "below_Tier_B_audit_only",
+      "d1_allowed": false,
+      "learned_training_started": false,
+      "scientific_status": "D1 and learned training blocked; no threshold lowered"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
