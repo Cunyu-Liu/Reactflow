@@ -5,7 +5,10 @@ from __future__ import annotations
 import pytest
 
 from reactflow.delta.data import (
+    COMPARABLE_MIN_FRACTION,
     CONDITION_MATCH_FIELDS,
+    build_position_masks,
+    check_comparable_positions,
     match_conditions,
     verify_annotation_ref,
     verify_substitution,
@@ -354,3 +357,243 @@ class TestVerifyAnnotationRefHIV3PROffset:
         r = verify_annotation_ref(genome_pos, ref, self.HIV3PR_SEQ_PREFIX, self.HIV3PR_OFFSET)
         assert r["ref_verified"] is True
         assert r["ref_match_index"] == "genome_numbering_offset"
+
+
+class TestPositionMasks:
+    """T-D1.4: unchanged/changed position masks (v3 §6.6 step 6, §6.4)."""
+
+    def test_single_edit_middle(self):
+        r = build_position_masks([2], 5)
+        assert r["unchanged_position_mask"] == [1, 1, 0, 1, 1]
+        assert r["changed_position_mask"] == [0, 0, 1, 0, 0]
+        assert r["unchanged_position_count"] == 4
+        assert r["changed_position_count"] == 1
+
+    def test_no_edits(self):
+        r = build_position_masks([], 4)
+        assert r["unchanged_position_mask"] == [1, 1, 1, 1]
+        assert r["changed_position_mask"] == [0, 0, 0, 0]
+        assert r["unchanged_position_count"] == 4
+        assert r["changed_position_count"] == 0
+
+    def test_all_edits(self):
+        r = build_position_masks([0, 1, 2], 3)
+        assert r["unchanged_position_mask"] == [0, 0, 0]
+        assert r["changed_position_mask"] == [1, 1, 1]
+        assert r["unchanged_position_count"] == 0
+        assert r["changed_position_count"] == 3
+
+    def test_multiple_edits(self):
+        r = build_position_masks([1, 4], 6)
+        assert r["unchanged_position_mask"] == [1, 0, 1, 1, 0, 1]
+        assert r["changed_position_mask"] == [0, 1, 0, 0, 1, 0]
+        assert r["unchanged_position_count"] == 4
+        assert r["changed_position_count"] == 2
+
+    def test_edit_at_boundaries(self):
+        r = build_position_masks([0, 4], 5)
+        assert r["unchanged_position_mask"] == [0, 1, 1, 1, 0]
+        assert r["changed_position_mask"] == [1, 0, 0, 0, 1]
+
+    def test_zero_length(self):
+        r = build_position_masks([], 0)
+        assert r["unchanged_position_mask"] == []
+        assert r["changed_position_mask"] == []
+        assert r["unchanged_position_count"] == 0
+        assert r["changed_position_count"] == 0
+
+    def test_masks_are_complements(self):
+        """changed mask must be the exact complement of unchanged mask."""
+        r = build_position_masks([1, 3, 5], 8)
+        for u, c in zip(r["unchanged_position_mask"], r["changed_position_mask"]):
+            assert u + c == 1
+
+    def test_out_of_range_raises(self):
+        with pytest.raises(ValueError, match="out of range"):
+            build_position_masks([3], 3)
+
+    def test_negative_position_raises(self):
+        with pytest.raises(ValueError, match="out of range"):
+            build_position_masks([-1], 3)
+
+    def test_bool_position_rejected(self):
+        """bool is an int subclass; True/False must not silently become 1/0."""
+        with pytest.raises(ValueError, match="plain int"):
+            build_position_masks([True], 3)
+
+    def test_non_int_position_rejected(self):
+        with pytest.raises(ValueError, match="plain int"):
+            build_position_masks([1.0], 3)
+
+    def test_negative_length_raises(self):
+        with pytest.raises(ValueError, match="non-negative"):
+            build_position_masks([], -1)
+
+    def test_duplicate_positions_collapse(self):
+        """Duplicate edit positions are idempotent (set semantics)."""
+        r = build_position_masks([2, 2], 5)
+        assert r["changed_position_mask"] == [0, 0, 1, 0, 0]
+        assert r["changed_position_count"] == 1
+
+    def test_from_verify_substitution_output(self):
+        """Integration: verify_substitution edit_positions feed build_position_masks."""
+        wt = "ACGUGCAC"
+        mut = "ACGAGCAC"  # single sub at index 3 (U->A)
+        v = verify_substitution(wt, mut)
+        assert v["is_substitution_single"] is True
+        assert v["edit_positions"] == [3]
+        m = build_position_masks(v["edit_positions"], len(wt))
+        assert m["unchanged_position_mask"] == [1, 1, 1, 0, 1, 1, 1, 1]
+        assert m["changed_position_mask"] == [0, 0, 0, 1, 0, 0, 0, 0]
+        assert m["unchanged_position_count"] == 7
+
+
+class TestComparablePositions:
+    """T-D1.4: >=60% comparable-positions check (v3 §6.5, v3.1 §4)."""
+
+    def test_all_valid_no_masks_passes(self):
+        """Default (no missingness info) -> all unedited comparable -> passes."""
+        unchanged = [1, 1, 0, 1, 1]
+        r = check_comparable_positions(unchanged)
+        assert r["unchanged_position_count"] == 4
+        assert r["comparable_position_count"] == 4
+        assert r["comparable_fraction"] == 1.0
+        assert r["is_comparable"] is True
+        assert r["exclusion_reason"] is None
+        assert r["comparable_position_mask"] == [1, 1, 0, 1, 1]
+
+    def test_explicit_all_valid_passes(self):
+        unchanged = [1, 1, 0, 1, 1]
+        r = check_comparable_positions(unchanged, [1, 1, 1, 1, 1], [1, 1, 1, 1, 1])
+        assert r["is_comparable"] is True
+        assert r["comparable_fraction"] == 1.0
+
+    def test_exactly_60pct_passes(self):
+        """Boundary: 3/5 = 0.60 -> is_comparable True (>=)."""
+        unchanged = [1, 1, 1, 1, 1, 0]  # 5 unedited
+        wt = [1, 1, 1, 0, 0, 1]  # 3 of the 5 unedited valid
+        mut = [1, 1, 1, 1, 1, 1]
+        r = check_comparable_positions(unchanged, wt, mut)
+        assert r["comparable_position_count"] == 3
+        assert r["unchanged_position_count"] == 5
+        assert r["comparable_fraction"] == 0.6
+        assert r["is_comparable"] is True
+        assert r["exclusion_reason"] is None
+
+    def test_just_below_60pct_fails(self):
+        """2/5 = 0.40 < 0.60 -> exclusion."""
+        unchanged = [1, 1, 1, 1, 1, 0]  # 5 unedited
+        wt = [1, 1, 0, 0, 0, 1]  # 2 of the 5 unedited valid
+        mut = [1, 1, 1, 1, 1, 1]
+        r = check_comparable_positions(unchanged, wt, mut)
+        assert r["comparable_position_count"] == 2
+        assert r["comparable_fraction"] == 0.4
+        assert r["is_comparable"] is False
+        assert r["exclusion_reason"] == "comparable_positions_below_60pct"
+        assert r["exclusion_reason"] in EXCLUSION_REASONS
+
+    def test_high_fraction_passes(self):
+        """4/5 = 0.80 -> passes."""
+        unchanged = [1, 1, 1, 1, 1, 0]
+        wt = [1, 1, 1, 1, 0, 1]
+        mut = [1, 1, 1, 1, 1, 1]
+        r = check_comparable_positions(unchanged, wt, mut)
+        assert r["comparable_fraction"] == 0.8
+        assert r["is_comparable"] is True
+
+    def test_no_unchanged_positions_fails(self):
+        """All edited -> 0 unedited -> fraction 0.0 -> not comparable."""
+        unchanged = [0, 0, 0]
+        r = check_comparable_positions(unchanged)
+        assert r["unchanged_position_count"] == 0
+        assert r["comparable_fraction"] == 0.0
+        assert r["is_comparable"] is False
+        assert r["exclusion_reason"] == "comparable_positions_below_60pct"
+
+    def test_edited_position_never_comparable(self):
+        """Even if valid in both profiles, an edited position is not comparable."""
+        unchanged = [1, 0, 1, 1, 1]  # 4 unedited, 1 edited at idx 1
+        wt = [1, 1, 1, 1, 1]
+        mut = [1, 1, 1, 1, 1]
+        r = check_comparable_positions(unchanged, wt, mut)
+        # idx 1 is edited -> not comparable even though valid
+        assert r["comparable_position_mask"] == [1, 0, 1, 1, 1]
+        assert r["comparable_position_count"] == 4
+        assert r["is_comparable"] is True
+
+    def test_wt_missing_excludes_position(self):
+        unchanged = [1, 1, 1, 1, 1]  # 5 unedited
+        wt = [1, 1, 1, 0, 0]  # 3 valid -> 3/5 = 0.6 boundary
+        mut = [1, 1, 1, 1, 1]
+        r = check_comparable_positions(unchanged, wt, mut)
+        assert r["comparable_position_count"] == 3
+        assert r["comparable_fraction"] == 0.6
+        assert r["is_comparable"] is True
+
+    def test_mut_missing_excludes_position(self):
+        unchanged = [1, 1, 1, 1, 1]
+        wt = [1, 1, 1, 1, 1]
+        mut = [1, 1, 0, 0, 0]  # 2 valid -> 2/5 = 0.4
+        r = check_comparable_positions(unchanged, wt, mut)
+        assert r["comparable_position_count"] == 2
+        assert r["is_comparable"] is False
+
+    def test_both_missing_excludes_position(self):
+        unchanged = [1, 1, 1, 1]
+        wt = [1, 0, 1, 1]
+        mut = [1, 1, 0, 1]  # idx 1 wt-missing, idx 2 mut-missing -> 2 comparable
+        r = check_comparable_positions(unchanged, wt, mut)
+        assert r["comparable_position_count"] == 2
+        assert r["comparable_fraction"] == 0.5
+        assert r["is_comparable"] is False
+
+    def test_wt_mask_length_mismatch_raises(self):
+        with pytest.raises(ValueError, match="wt_valid_mask length"):
+            check_comparable_positions([1, 1, 0, 1, 1], [1, 1, 1, 1], None)
+
+    def test_mut_mask_length_mismatch_raises(self):
+        with pytest.raises(ValueError, match="mut_valid_mask length"):
+            check_comparable_positions([1, 1, 0, 1, 1], None, [1, 1, 1])
+
+    def test_invalid_unchanged_value_raises(self):
+        with pytest.raises(ValueError, match="unchanged_position_mask entries"):
+            check_comparable_positions([1, 2, 0, 1])
+
+    def test_invalid_valid_mask_value_raises(self):
+        with pytest.raises(ValueError, match="valid mask entries"):
+            check_comparable_positions([1, 1, 0, 1], [1, 5, 1, 1], None)
+
+    def test_custom_min_fraction(self):
+        """A higher threshold (0.9) rejects a 0.8 fraction."""
+        unchanged = [1, 1, 1, 1, 1, 0]  # 5 unedited
+        wt = [1, 1, 1, 1, 0, 1]  # 4 valid -> 4/5 = 0.8
+        mut = [1, 1, 1, 1, 1, 1]
+        r = check_comparable_positions(unchanged, wt, mut, min_fraction=0.9)
+        assert r["comparable_fraction"] == 0.8
+        assert r["is_comparable"] is False
+        assert r["exclusion_reason"] == "comparable_positions_below_60pct"
+
+    def test_default_min_fraction_constant(self):
+        """The default min_fraction equals the frozen COMPARABLE_MIN_FRACTION."""
+        assert COMPARABLE_MIN_FRACTION == 0.60
+
+    def test_integration_substitution_masks_comparable(self):
+        """End-to-end: verify_substitution -> build_position_masks -> check."""
+        wt_seq = "ACGUGCACGT"  # 10 nt
+        mut_seq = "ACGAGCACGT"  # sub at index 3 U->A
+        v = verify_substitution(wt_seq, mut_seq)
+        masks = build_position_masks(v["edit_positions"], len(wt_seq))
+        # 9 unedited, all valid (no missingness) -> 9/9 = 1.0
+        chk = check_comparable_positions(masks["unchanged_position_mask"])
+        assert chk["unchanged_position_count"] == 9
+        assert chk["comparable_fraction"] == 1.0
+        assert chk["is_comparable"] is True
+        # Now simulate missingness: 4 of 9 unedited invalid -> 5/9 ~ 0.556 < 0.6
+        wt_valid = [1, 1, 1, 1, 0, 0, 0, 0, 1, 1]  # idx 4-7 invalid
+        mut_valid = [1] * 10
+        chk2 = check_comparable_positions(
+            masks["unchanged_position_mask"], wt_valid, mut_valid
+        )
+        assert chk2["comparable_position_count"] == 5
+        assert chk2["is_comparable"] is False
+        assert chk2["exclusion_reason"] == "comparable_positions_below_60pct"

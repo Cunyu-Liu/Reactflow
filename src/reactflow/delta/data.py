@@ -646,3 +646,149 @@ def verify_annotation_ref(
             result["actual_base"] = seq[diag_idx0]
             break
     return result
+
+
+# --- T-D1.4: Alignment masks + comparable-positions check (v3 §6.6 step 6) ---
+
+# Minimum fraction of unedited positions that must be comparable (have valid
+# reactivity in both WT and mutant) for a pair to enter the D1 v1 scope
+# (v3 §6.5: "至少 60% 未编辑位置可比"; v3.1 §4 exclusion reason
+# ``comparable_positions_below_60pct``).
+COMPARABLE_MIN_FRACTION = 0.60
+
+
+def build_position_masks(edit_positions: Iterable[int], length: int) -> dict[str, Any]:
+    """Build unchanged/changed position masks from edit positions (T-D1.4).
+
+    Implements v3 §6.6 step 6 ("构建 alignment") for the D1 v1 substitution-only
+    scope: given the 0-indexed edit positions (from :func:`verify_substitution`)
+    and the alignment length, produce the two complementary 0/1 masks required
+    by the pair schema (v3 §6.4):
+
+      - ``unchanged_position_mask``: ``1`` where WT and mutant agree (unedited),
+        ``0`` where edited.
+      - ``changed_position_mask``: ``1`` where edited, ``0`` where unchanged
+        (the exact complement).
+
+    Masks are 0-indexed and align with the 0-indexed ``edit_positions`` and
+    with the ``array`` of ``integer enum [0, 1]`` pair-schema fields frozen in
+    T-D1.1 (schema.py). For the D1 v1 equal-length substitution scope the
+    alignment length equals ``len(wt_sequence) == len(mut_sequence)`` and the
+    CIGAR is the trivial ``<N>M`` already produced by
+    :func:`verify_substitution`; this function does not re-derive the CIGAR.
+
+    The distance-band masks (``local_mask`` / ``mid_mask`` / ``remote_mask``)
+    are *not* produced here: they are distance bins relative to the edit site
+    and belong to v3 §6.6 step 13 (physical features), with boundaries frozen
+    per v3 §9.3 / T-D2.7 (no test data). They are deferred to a later D1 task.
+
+    Returns a dict with:
+      - ``unchanged_position_mask``: list[int] of 0/1, length ``length``.
+      - ``changed_position_mask``: list[int] of 0/1, length ``length``.
+      - ``unchanged_position_count``: int (number of 1s in unchanged mask).
+      - ``changed_position_count``: int (number of 1s in changed mask).
+    """
+
+    if length < 0:
+        raise ValueError(f"length must be non-negative, got {length}")
+    positions = list(edit_positions)
+    for pos in positions:
+        # bool is a subclass of int; reject it so True/False are not silently
+        # treated as positions 1/0.
+        if isinstance(pos, bool) or not isinstance(pos, int):
+            raise ValueError(f"edit position must be a plain int, got {pos!r}")
+        if pos < 0 or pos >= length:
+            raise ValueError(f"edit position {pos} out of range [0, {length})")
+    edited = set(positions)
+    unchanged = [0 if i in edited else 1 for i in range(length)]
+    changed = [1 if i in edited else 0 for i in range(length)]
+    return {
+        "unchanged_position_mask": unchanged,
+        "changed_position_mask": changed,
+        "unchanged_position_count": sum(unchanged),
+        "changed_position_count": sum(changed),
+    }
+
+
+def check_comparable_positions(
+    unchanged_position_mask: Iterable[int],
+    wt_valid_mask: Iterable[int] | None = None,
+    mut_valid_mask: Iterable[int] | None = None,
+    *,
+    min_fraction: float = COMPARABLE_MIN_FRACTION,
+) -> dict[str, Any]:
+    """Check the >=60% comparable-positions D1 v1 scope rule (T-D1.4).
+
+    Implements v3 §6.5 ("至少 60% 未编辑位置可比") and produces the
+    ``comparable_positions_below_60pct`` exclusion reason (v3.1 §4). A position
+    is *comparable* when it is unedited (``unchanged_position_mask[i] == 1``)
+    AND has valid reactivity in both WT and mutant (``wt_valid_mask[i] == 1``
+    and ``mut_valid_mask[i] == 1``). The comparable fraction is
+    ``comparable_count / unchanged_count``; the pair enters the D1 v1 scope
+    only when this fraction is ``>= min_fraction`` (default 0.60).
+
+    The valid masks come from v3 §6.6 step 9 (missingness/SNR/coverage), which
+    runs after this step in the full pipeline. To keep this function callable
+    both before and after step 9, ``wt_valid_mask`` / ``mut_valid_mask``
+    default to ``None`` meaning "no missingness information available; treat
+    every position as valid". Callers that have real missingness data MUST
+    pass the step-9 valid masks to get an honest comparable fraction.
+
+    Returns a dict with:
+      - ``comparable_position_mask``: list[int] of 0/1 (1 where unedited AND
+        valid in both WT and mutant), same length as the unchanged mask.
+      - ``comparable_position_count``: int (number of comparable positions).
+      - ``unchanged_position_count``: int (denominator: unedited positions).
+      - ``comparable_fraction``: float in [0.0, 1.0]. When
+        ``unchanged_position_count == 0`` the fraction is ``0.0`` (no unedited
+        positions to compare -> not comparable).
+      - ``is_comparable``: bool, ``comparable_fraction >= min_fraction``.
+      - ``exclusion_reason``: ``"comparable_positions_below_60pct"`` when not
+        comparable, else ``None``.
+    """
+
+    unchanged = [int(x) for x in unchanged_position_mask]
+    n = len(unchanged)
+    for v in unchanged:
+        if v not in (0, 1):
+            raise ValueError(f"unchanged_position_mask entries must be 0/1, got {v!r}")
+    if wt_valid_mask is None:
+        wt_valid = [1] * n
+    else:
+        wt_valid = [int(x) for x in wt_valid_mask]
+        if len(wt_valid) != n:
+            raise ValueError(
+                f"wt_valid_mask length {len(wt_valid)} != unchanged mask length {n}"
+            )
+    if mut_valid_mask is None:
+        mut_valid = [1] * n
+    else:
+        mut_valid = [int(x) for x in mut_valid_mask]
+        if len(mut_valid) != n:
+            raise ValueError(
+                f"mut_valid_mask length {len(mut_valid)} != unchanged mask length {n}"
+            )
+    for v in wt_valid + mut_valid:
+        if v not in (0, 1):
+            raise ValueError(f"valid mask entries must be 0/1, got {v!r}")
+
+    comparable = [
+        1 if (u == 1 and w == 1 and m == 1) else 0
+        for u, w, m in zip(unchanged, wt_valid, mut_valid)
+    ]
+    unchanged_count = sum(unchanged)
+    comparable_count = sum(comparable)
+    if unchanged_count > 0:
+        fraction = comparable_count / unchanged_count
+    else:
+        fraction = 0.0
+    is_comparable = fraction >= min_fraction
+    exclusion = None if is_comparable else "comparable_positions_below_60pct"
+    return {
+        "comparable_position_mask": comparable,
+        "comparable_position_count": comparable_count,
+        "unchanged_position_count": unchanged_count,
+        "comparable_fraction": fraction,
+        "is_comparable": is_comparable,
+        "exclusion_reason": exclusion,
+    }
