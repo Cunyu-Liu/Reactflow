@@ -170,6 +170,119 @@ def test_evaluate_one_low_comparable_fraction_adds_reason():
 
 
 # ---------------------------------------------------------------------------
+# _evaluate_one — v3.1 §必须输出: three-layer reactivity + Δreactivity
+# arrays + noise estimate fields persisted in the registry entry
+# ---------------------------------------------------------------------------
+
+# Fields required by v3.1 §必须输出 / pair schema (schema.py REQUIRED_PAIR_FIELDS).
+_THREE_LAYER_FIELDS = (
+    "wt_reactivity_raw",
+    "wt_reactivity_upstream",
+    "wt_reactivity_project",
+    "wt_normalization_method",
+    "mut_reactivity_raw",
+    "mut_reactivity_upstream",
+    "mut_reactivity_project",
+    "mut_normalization_method",
+)
+_DELTA_ARRAY_FIELDS = ("delta_reactivity_raw", "delta_reactivity_normalized")
+_NOISE_FIELDS = (
+    "replicate_noise_estimate",
+    "measurement_variance",
+    "noise_wt_variance",
+    "noise_mut_variance",
+    "noise_source",
+)
+
+
+def test_evaluate_one_persists_three_layer_reactivity_when_profile_ok():
+    wt = _make_profile([0.1, 0.2, 0.3, 0.4])
+    mut = _make_profile([0.5, 0.6, 0.7, 0.8])
+    rel = _make_relation(alt_not_verified=True)
+    res = mod._evaluate_one(rel, {1: wt, 2: mut}, None)
+
+    # All three-layer keys present and non-null (profile lookup succeeded).
+    for field in _THREE_LAYER_FIELDS:
+        assert field in res, f"missing field: {field}"
+        assert res[field] is not None, f"field should be non-null: {field}"
+
+    # WT three-layer values match the input reactivity (raw == upstream for
+    # normalization_method=None; project == z-score of upstream).
+    assert res["wt_reactivity_raw"] == [0.1, 0.2, 0.3, 0.4]
+    assert res["wt_reactivity_upstream"] == [0.1, 0.2, 0.3, 0.4]
+    assert res["mut_reactivity_raw"] == [0.5, 0.6, 0.7, 0.8]
+    assert res["wt_normalization_method"] == "unknown"
+    assert res["mut_normalization_method"] == "unknown"
+    # project layer length matches raw length (z-score applied per-element).
+    assert len(res["wt_reactivity_project"]) == 4
+    assert len(res["mut_reactivity_project"]) == 4
+
+
+def test_evaluate_one_persists_delta_reactivity_arrays_when_profile_ok():
+    wt = _make_profile([0.1, 0.2, 0.3, 0.4])
+    mut = _make_profile([0.5, 0.6, 0.7, 0.8])
+    rel = _make_relation(alt_not_verified=True)
+    res = mod._evaluate_one(rel, {1: wt, 2: mut}, None)
+
+    for field in _DELTA_ARRAY_FIELDS:
+        assert field in res, f"missing field: {field}"
+        assert res[field] is not None, f"field should be non-null: {field}"
+    # Δr = r_mut − r_wt = 0.4 at every position (float-approx: 0.6−0.2 etc).
+    assert res["delta_reactivity_raw"] == pytest.approx([0.4, 0.4, 0.4, 0.4])
+    assert len(res["delta_reactivity_normalized"]) == 4
+
+
+def test_evaluate_one_persists_noise_fields_when_profile_ok():
+    # reactivity_error provided → upstream_error path (v3 §7.3).
+    wt = _make_profile([0.1, 0.2, 0.3, 0.4], reactivity_error=[0.01, 0.01, 0.01, 0.01])
+    mut = _make_profile([0.5, 0.6, 0.7, 0.8], reactivity_error=[0.02, 0.02, 0.02, 0.02])
+    rel = _make_relation(alt_not_verified=True)
+    res = mod._evaluate_one(rel, {1: wt, 2: mut}, None)
+
+    for field in _NOISE_FIELDS:
+        assert field in res, f"missing field: {field}"
+    # No replicates → replicate_noise_estimate is None, but measurement_variance
+    # comes from upstream REACTIVITY_ERROR (wt_var + mut_var > 0).
+    assert res["replicate_noise_estimate"] is None
+    assert res["measurement_variance"] is not None
+    assert res["measurement_variance"] > 0
+    assert res["noise_source"] == "upstream_error"
+    assert res["noise_wt_variance"] is not None
+    assert res["noise_mut_variance"] is not None
+
+
+def test_evaluate_one_noise_fields_null_when_no_error_and_no_replicate():
+    wt = _make_profile([0.1, 0.2, 0.3, 0.4])  # no reactivity_error
+    mut = _make_profile([0.5, 0.6, 0.7, 0.8])
+    rel = _make_relation(alt_not_verified=True)
+    res = mod._evaluate_one(rel, {1: wt, 2: mut}, None)
+
+    # No replicates and no upstream error → all noise fields null, source "none".
+    assert res["replicate_noise_estimate"] is None
+    assert res["measurement_variance"] is None
+    assert res["noise_wt_variance"] is None
+    assert res["noise_mut_variance"] is None
+    assert res["noise_source"] == "none"
+    # But three-layer + delta arrays still populated (profile lookup ok).
+    assert res["wt_reactivity_raw"] is not None
+    assert res["delta_reactivity_raw"] is not None
+
+
+def test_evaluate_one_all_new_fields_null_when_profile_lookup_fails():
+    # No profile map → profile_lookup_ok=False → all new fields null.
+    rel = _make_relation()
+    res = mod._evaluate_one(rel, {}, None)
+
+    for field in _THREE_LAYER_FIELDS + _DELTA_ARRAY_FIELDS:
+        assert res[field] is None, f"field should be null on no-profile: {field}"
+    assert res["replicate_noise_estimate"] is None
+    assert res["measurement_variance"] is None
+    assert res["noise_source"] is None
+    assert res["wt_normalization_method"] is None
+    assert res["mut_normalization_method"] is None
+
+
+# ---------------------------------------------------------------------------
 # _tier_judgment — true_pair=0 fails all tiers; thresholds not lowered
 # ---------------------------------------------------------------------------
 

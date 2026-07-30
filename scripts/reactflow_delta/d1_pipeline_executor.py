@@ -136,6 +136,26 @@ def _evaluate_one(
     coverage_mean: float | None = None  # RDAT carries no read-coverage field
     has_replicates = False  # single profiles; replicate identification is D2
 
+    # Three-layer reactivity + Δreactivity arrays + noise estimate fields
+    # (v3.1 §必须输出: raw/upstream/normalized 三层 + measurement noise 估计).
+    # Default to None for the no-profile branch; populated below when the
+    # profile lookup succeeds.
+    wt_reactivity_raw: list | None = None
+    wt_reactivity_upstream: list | None = None
+    wt_reactivity_project: list | None = None
+    wt_normalization_method: str | None = None
+    mut_reactivity_raw: list | None = None
+    mut_reactivity_upstream: list | None = None
+    mut_reactivity_project: list | None = None
+    mut_normalization_method: str | None = None
+    delta_reactivity_raw: list | None = None
+    delta_reactivity_normalized: list | None = None
+    replicate_noise_estimate: float | None = None
+    measurement_variance: float | None = None
+    noise_wt_variance: float | None = None
+    noise_mut_variance: float | None = None
+    noise_source: str | None = None
+
     if profile_lookup_ok:
         wt_raw = wt_profile["reactivity"]
         mut_raw = mut_profile["reactivity"]
@@ -145,6 +165,16 @@ def _evaluate_one(
         # file; RDAT reactivity is already the upstream-provided layer).
         wt_layers = build_reactivity_layers(wt_raw, normalization_method=None)
         mut_layers = build_reactivity_layers(mut_raw, normalization_method=None)
+
+        # Persist the three-layer reactivity for WT and mutant (v3.1 §必须输出).
+        wt_reactivity_raw = wt_layers["reactivity_raw"]
+        wt_reactivity_upstream = wt_layers["reactivity_upstream"]
+        wt_reactivity_project = wt_layers["reactivity_project"]
+        wt_normalization_method = wt_layers["normalization_method"]
+        mut_reactivity_raw = mut_layers["reactivity_raw"]
+        mut_reactivity_upstream = mut_layers["reactivity_upstream"]
+        mut_reactivity_project = mut_layers["reactivity_project"]
+        mut_normalization_method = mut_layers["normalization_method"]
 
         # Δreactivity on raw + (trivially same) normalized layer.
         pair_delta = build_pair_delta_reactivity(
@@ -157,6 +187,10 @@ def _evaluate_one(
             has_replicates=has_replicates,
         )
         caller_status = pair_delta["caller_status"]
+
+        # Persist the pair-schema Δreactivity arrays (v3.1 §必须输出).
+        delta_reactivity_raw = pair_delta["delta_reactivity_raw"]
+        delta_reactivity_normalized = pair_delta["delta_reactivity_normalized"]
 
         delta = pair_delta["delta_reactivity_raw"]
         abs_deltas = [abs(v) for v in delta if isinstance(v, (int, float)) and math.isfinite(v)]
@@ -172,6 +206,14 @@ def _evaluate_one(
         wt_var = estimate_error_variance(wt_err) if wt_err else None
         mut_var = estimate_error_variance(mut_err) if mut_err else None
         pair_noise = estimate_pair_noise(None, None, wt_var, mut_var)
+
+        # Persist the pair-schema noise fields (v3.1 §必须输出).
+        replicate_noise_estimate = pair_noise["replicate_noise_estimate"]
+        measurement_variance = pair_noise["measurement_variance"]
+        noise_wt_variance = pair_noise["wt_variance"]
+        noise_mut_variance = pair_noise["mut_variance"]
+        noise_source = pair_noise["source"]
+
         mvar = pair_noise["measurement_variance"]
         mean_abs = delta_summary["mean_abs_delta"]
         if (
@@ -251,6 +293,22 @@ def _evaluate_one(
         "has_replicates": has_replicates,
         "delta_reactivity_summary": delta_summary,
         "caller_status": caller_status,
+        # v3.1 §必须输出: three-layer reactivity + Δreactivity arrays + noise
+        "wt_reactivity_raw": wt_reactivity_raw,
+        "wt_reactivity_upstream": wt_reactivity_upstream,
+        "wt_reactivity_project": wt_reactivity_project,
+        "wt_normalization_method": wt_normalization_method,
+        "mut_reactivity_raw": mut_reactivity_raw,
+        "mut_reactivity_upstream": mut_reactivity_upstream,
+        "mut_reactivity_project": mut_reactivity_project,
+        "mut_normalization_method": mut_normalization_method,
+        "delta_reactivity_raw": delta_reactivity_raw,
+        "delta_reactivity_normalized": delta_reactivity_normalized,
+        "replicate_noise_estimate": replicate_noise_estimate,
+        "measurement_variance": measurement_variance,
+        "noise_wt_variance": noise_wt_variance,
+        "noise_mut_variance": noise_mut_variance,
+        "noise_source": noise_source,
         "exclusion_reasons": upgrade["exclusion_reasons"],
         "primary_eligible": upgrade["primary_eligible"],
         "true_pair": upgrade["true_pair"],

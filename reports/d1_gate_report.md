@@ -146,7 +146,7 @@
 - 解析错误: 0；profile 查找失败: 0；7,761/7,761 全部评估
 
 **产物**:
-- `artifacts/reactflow_delta/d1/d1_true_pair_registry.json` (7,761 条，每条含 `exclusion_reasons` / `primary_eligible` / `true_pair` / `pair_quality_weight` / `quality_factors` / Δreactivity 摘要 / `caller_status`)
+- `artifacts/reactflow_delta/d1/d1_true_pair_registry.json` (7,761 条，每条含 `exclusion_reasons` / `primary_eligible` / `true_pair` / `pair_quality_weight` / `quality_factors` / Δreactivity 摘要 / `caller_status`；以及 v3.1 §必须输出 的完整 pair-schema 字段：WT/mut 三层 reactivity `wt_reactivity_raw`/`wt_reactivity_upstream`/`wt_reactivity_project`/`mut_reactivity_raw`/`mut_reactivity_upstream`/`mut_reactivity_project` + `wt_normalization_method`/`mut_normalization_method`、Δreactivity 数组 `delta_reactivity_raw`/`delta_reactivity_normalized`、measurement noise 估计 `replicate_noise_estimate`/`measurement_variance`/`noise_wt_variance`/`noise_mut_variance`/`noise_source`。profile_lookup_ok=True 时这些字段非空，否则为 null)
 - `artifacts/reactflow_delta/d1/d1_pipeline_summary.json` (聚合统计 + Tier 重判)
 
 ### 6.1 候选总数与升级数
