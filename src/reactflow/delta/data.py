@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Iterable, Mapping
 from datetime import datetime
+import difflib
 import json
 from pathlib import Path
 import re
@@ -423,3 +424,225 @@ def match_conditions(
         "condition_match_status": status,
         "mismatched_fields": mismatched,
     }
+
+
+# --- T-D1.3: Substitution verification (v3 §6.6 step 4, v3.1 §3.1/§3.3) ---
+
+# T (DNA) is normalized to U per v3 §6.6 step 3 before substitution
+# verification (v3.1 §3.1: "DNA→RNA T→U 规范后" verify). The verify_substitution
+# path normalizes defensively so the comparison is always on RNA coordinates.
+
+
+def _normalize_rna(seq: str | None) -> str | None:
+    """Normalize a sequence to RNA (T → U) for substitution verification.
+
+    Per v3 §6.6 step 3, sequences are T/U normalized before edit verification.
+    This helper applies the same normalization defensively so that callers do
+    not need to pre-normalize. Returns ``None`` if the input is ``None``.
+    """
+
+    if seq is None:
+        return None
+    return seq.replace("T", "U").replace("t", "u")
+
+
+def _cigar_from_sequences(wt: str, mut: str) -> str:
+    """Build a SAM-like CIGAR string from two sequences.
+
+    For equal-length sequences (the D1 v1 substitution-only scope, v3 §2.3 /
+    v3.1 §2.3) this is the trivial ``<N>M``. For unequal-length sequences
+    (indel case, deferred in D1 v1 and always excluded) a best-effort global
+    alignment CIGAR is produced via :class:`difflib.SequenceMatcher` so the
+    ``alignment_cigar`` pair-schema field stays honest and non-empty.
+    """
+
+    if len(wt) == len(mut):
+        return f"{len(wt)}M"
+    sm = difflib.SequenceMatcher(None, wt, mut, autojunk=False)
+    parts: list[str] = []
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        n = max(i2 - i1, j2 - j1)
+        if n == 0:
+            continue
+        if tag == "equal":
+            parts.append(f"{n}M")
+        elif tag == "replace":
+            parts.append(f"{n}M")
+        elif tag == "delete":
+            parts.append(f"{n}D")
+        elif tag == "insert":
+            parts.append(f"{n}I")
+    return "".join(parts) or f"{len(wt)}M"
+
+
+def verify_substitution(
+    wt_sequence: str | None,
+    mut_sequence: str | None,
+) -> dict[str, Any]:
+    """Verify a single-substitution edit between WT and mutant sequences (T-D1.3).
+
+    Implements v3.1 §3.1 sequence-based substitution verification: after
+    DNA→RNA (T→U) normalization, compares two sequences and detects whether
+    they differ by exactly one substitution. Equal length is required for a
+    substitution (v3.1 §2.3: WT/mutant 等长); unequal length is an indel and
+    is excluded with ``indel_not_substitution`` (indels are deferred in D1 v1).
+
+    Returns a dict with the pair-schema edit fields:
+      - ``edit_type``: ``"substitution"`` (equal length) / ``"insertion"`` /
+        ``"deletion"`` (unequal length). Always one of EDIT_TYPES.
+      - ``edit_count``: number of differing positions (0 for identical / indel
+        excluded pairs reports the substitution count, 0 when unverifiable).
+      - ``edit_positions``: 0-indexed positions that differ (aligns with the
+        0-indexed mask arrays in the pair schema).
+      - ``wt_alleles`` / ``mut_alleles``: bases at the differing positions.
+      - ``alignment_cigar``: SAM-like CIGAR (non-empty, schema-required).
+      - ``is_substitution_single``: True iff exactly one substitution
+        (``edit_count == 1`` and equal length).
+      - ``exclusion_reason``: a single EXCLUSION_REASONS value when the pair is
+        not a single substitution, else ``None``. Values:
+          * ``substitution_not_verifiable`` — a sequence is missing/empty;
+          * ``indel_not_substitution`` — unequal length (insertion/deletion);
+          * ``edit_count_not_one`` — 0 edits (no-edit control) or >1 edits.
+    """
+
+    wt_n = _normalize_rna(wt_sequence)
+    mut_n = _normalize_rna(mut_sequence)
+
+    # Unverifiable: missing or empty sequence (cannot establish the edit).
+    if not wt_n or not mut_n:
+        return {
+            "edit_type": "substitution",
+            "edit_count": 0,
+            "edit_positions": [],
+            "wt_alleles": [],
+            "mut_alleles": [],
+            "alignment_cigar": _cigar_from_sequences(wt_n or "", mut_n or ""),
+            "is_substitution_single": False,
+            "exclusion_reason": "substitution_not_verifiable",
+        }
+
+    # Indel: unequal length (deferred in D1 v1, always excluded).
+    if len(wt_n) != len(mut_n):
+        edit_type = "insertion" if len(mut_n) > len(wt_n) else "deletion"
+        return {
+            "edit_type": edit_type,
+            "edit_count": 0,
+            "edit_positions": [],
+            "wt_alleles": [],
+            "mut_alleles": [],
+            "alignment_cigar": _cigar_from_sequences(wt_n, mut_n),
+            "is_substitution_single": False,
+            "exclusion_reason": "indel_not_substitution",
+        }
+
+    # Equal length: collect substitution positions (0-indexed).
+    cigar = f"{len(wt_n)}M"
+    edit_positions: list[int] = []
+    wt_alleles: list[str] = []
+    mut_alleles: list[str] = []
+    for i, (w, m) in enumerate(zip(wt_n, mut_n)):
+        if w != m:
+            edit_positions.append(i)
+            wt_alleles.append(w)
+            mut_alleles.append(m)
+    edit_count = len(edit_positions)
+    is_single = edit_count == 1
+    exclusion = None if is_single else "edit_count_not_one"
+    return {
+        "edit_type": "substitution",
+        "edit_count": edit_count,
+        "edit_positions": edit_positions,
+        "wt_alleles": wt_alleles,
+        "mut_alleles": mut_alleles,
+        "alignment_cigar": cigar,
+        "is_substitution_single": is_single,
+        "exclusion_reason": exclusion,
+    }
+
+
+def verify_annotation_ref(
+    encoded_position_1indexed: int,
+    encoded_ref: str,
+    header_sequence: str | None,
+    offset: int = 0,
+) -> dict[str, Any]:
+    """Verify an annotation-encoded ref base against the header SEQUENCE (T-D1.3).
+
+    Implements v3.1 §3.3 HIV3PR genome-numbering offset fix. Some RDAT files
+    (e.g. ``HIV3PR_DMS_*``, 8 files) encode mutation annotations in genome
+    numbering rather than construct-local 1-indexed positions: the RDAT
+    ``OFFSET`` header gives the genome coordinate of construct position 1, so
+    an annotation like ``G8932X`` with ``OFFSET 8931`` refers to construct
+    position 1 (index 0). The D0-R audit recorded these as
+    ``annotation_ref_mismatch`` (historical evidence, preserved); D1 re-verifies
+    the ref using the correct genome-numbering offset so the candidate can be
+    re-classified (it still needs per-profile sequence or replicate
+    corroboration to upgrade per §3.2 — the offset fix alone does NOT upgrade).
+
+    Verification order (first match wins):
+      1. Construct-local 1-indexed: ``index = pos - 1`` (annotation already
+         construct-local, the common case).
+      2. Genome-numbering offset: ``index = pos - 1 - offset`` (HIV3PR case,
+         only attempted when ``offset > 0``).
+
+    Both the encoded ref and the header sequence are T→U normalized before
+    comparison (v3.1 §3.1: verify after DNA→RNA normalization).
+
+    Returns a dict with:
+      - ``ref_verified``: bool.
+      - ``ref_match_index``: ``"construct_local_1indexed"`` /
+        ``"genome_numbering_offset"`` / ``None``.
+      - ``construct_local_position_1indexed``: the resolved construct-local
+        1-indexed position when verified, else ``None``.
+      - ``actual_base``: the header base at the resolved index (RNA), or
+        ``None`` if out of range.
+      - ``exclusion_reason``: ``"annotation_ref_mismatch"`` when not verified,
+        else ``None``.
+    """
+
+    seq = _normalize_rna(header_sequence)
+    ref = _normalize_rna(encoded_ref)
+
+    result: dict[str, Any] = {
+        "ref_verified": False,
+        "ref_match_index": None,
+        "construct_local_position_1indexed": None,
+        "actual_base": None,
+        "exclusion_reason": "annotation_ref_mismatch",
+    }
+    if not seq or not ref:
+        return result
+
+    def _try_index(idx0: int, match_label: str) -> bool:
+        if 0 <= idx0 < len(seq) and seq[idx0] == ref:
+            result["ref_verified"] = True
+            result["ref_match_index"] = match_label
+            result["construct_local_position_1indexed"] = idx0 + 1
+            result["actual_base"] = seq[idx0]
+            result["exclusion_reason"] = None
+            return True
+        return False
+
+    # 1. Construct-local 1-indexed (common case).
+    if _try_index(encoded_position_1indexed - 1, "construct_local_1indexed"):
+        return result
+
+    # 2. Genome-numbering offset (HIV3PR: annotation uses genome coords,
+    #    subtract OFFSET to recover the construct-local index).
+    if offset and offset > 0:
+        if _try_index(encoded_position_1indexed - 1 - offset, "genome_numbering_offset"):
+            return result
+
+    # No match: record the actual base at the most relevant in-range index for
+    # diagnosis. Prefer the genome-offset index (HIV3PR-relevant, where the
+    # annotation actually points), then the construct-local index.
+    diag_indices = (
+        [encoded_position_1indexed - 1 - offset, encoded_position_1indexed - 1]
+        if (offset and offset > 0)
+        else [encoded_position_1indexed - 1]
+    )
+    for diag_idx0 in diag_indices:
+        if 0 <= diag_idx0 < len(seq):
+            result["actual_base"] = seq[diag_idx0]
+            break
+    return result
