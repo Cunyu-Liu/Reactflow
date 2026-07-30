@@ -7,7 +7,7 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T13:48:41+08:00",
+  "last_updated_at": "2026-07-30T13:54:09+08:00",
   "task_commits": {
     "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
     "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
@@ -15,7 +15,8 @@
     "T-D0.4": "148dc2add8526c687fa89a1dbccefbaea0cfa20f",
     "T-D0.5": "940d1a9411c8cb034e3ac814e4129f741a23882a",
     "T-D0.6": "9158f2214c81888c88ad6b25fe18820c2a273276",
-    "T-D0.7": "1b9f32396b8b9d5e297e44aa8cce18d98b24035c"
+    "T-D0.7": "1b9f32396b8b9d5e297e44aa8cce18d98b24035c",
+    "T-D0.8": "e8bfa4fb66bee124b3a38530d97850387fd5bed3"
   },
   "files": [
     {
@@ -228,6 +229,26 @@
       "registry_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/candidate_pair_registry_6fixtures.json",
       "registry_artifact_sha256": "bb213ba866dce0095c566bcfbfc4aa28653bddfdad9b1d5454cdade623ba393a",
       "scientific_status": "RMDB candidate count=0; Ribonanza and total candidate counts remain unknown; no normalization attempted"
+    },
+    {
+      "task_id": "T-D0.9",
+      "kind": "source_study_parent_probe_condition_pair_matrix_builder",
+      "repo_paths": ["src/reactflow/delta/matrix.py", "scripts/reactflow_delta/build_source_pair_matrix.py", "tests/reactflow_delta/test_matrix.py"],
+      "sha256": {
+        "src/reactflow/delta/matrix.py": "92b53f5bf1fd9b515525357dc1191f7fb36db3c6d58a50d55629c7b9f4d709e6",
+        "scripts/reactflow_delta/build_source_pair_matrix.py": "a5864ca4538da09c32fee9cd0de41a67c2c53f024a093167b8e342e35fb0aded",
+        "tests/reactflow_delta/test_matrix.py": "21867d67f29e2602783f1223bc6665d9eb4e2e1b4d24b88e8aa6a52bac25b352"
+      }
+    },
+    {
+      "task_id": "T-D0.9",
+      "kind": "source_study_parent_probe_condition_pair_matrix",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/source_study_parent_probe_condition_pair_matrix.json",
+      "sha256": "3ab96ae1dba9d4a744228791e779704d6fd4363f577bc80e6c933e13ab6ffdd7",
+      "observed_rmdb_matrix_row_count": 5,
+      "rmdb_candidate_pair_count": 0,
+      "ribonanza_pair_count": null,
+      "scientific_status": "five observed RMDB zero strata and one distinct Ribonanza unknown-not-acquired row"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
