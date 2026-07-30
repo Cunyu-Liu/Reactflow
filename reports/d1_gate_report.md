@@ -2,8 +2,8 @@
 
 **合同**: v3.1 §4 D1 Gate (增补), v3 §15 Phase D1 Gate
 **分支**: `codex/reactflow-delta-d0r`
-**最新 commit**: (本提交) — feat(d1): pipeline executor + 数据级 Gate 报告 (T-D1.13, v3.1 §4/§7)
-**测试**: 505 passed (0 failed, 0 errors) — `PYTHONPATH=src python -m pytest tests/reactflow_delta/`
+**最新 commit**: `6e29bdf` — feat(d1): persist three-layer reactivity + noise + delta arrays in true_pair registry (T-D1.13, v3.1 §必须输出)；本提交为文档一致性修订
+**测试**: 510 passed (0 failed, 0 errors) — `PYTHONPATH=src python -m pytest tests/reactflow_delta/`
 **data.py**: 2087 lines | **schema.py**: 705 lines
 **数据级产物**: `artifacts/reactflow_delta/d1/d1_true_pair_registry.json` (7,761 条) + `d1_pipeline_summary.json`
 **executor**: `scripts/reactflow_delta/d1_pipeline_executor.py`
@@ -45,14 +45,14 @@
 | T-D1.10 | quality weight + exclusion reasons + true_pair | `6d8e927` | 41 (test_pair_upgrade) | ✅ |
 | T-D1.11 | hand-computed fixtures | `55d8c1d` | 28 (test_d1_handcomputed_fixtures) | ✅ |
 | T-D1.12 | tests + commit + push + Gate report | `315ad03` | 496 total | ✅ |
-| T-D1.13 | D1 pipeline executor + 数据级 Gate (7,761 候选) | 本提交 | 9 (test_d1_pipeline_executor) + executor run (0 parse errors) | ✅ |
+| T-D1.13 | D1 pipeline executor + 数据级 Gate (7,761 候选) | `6e29bdf` | 14 (test_d1_pipeline_executor) + executor run (0 parse errors) | ✅ |
 
 ---
 
 ## 3. 测试套件总览
 
 ```
-505 passed in 0.74s
+510 passed in 0.66s
 ```
 
 | 测试文件 | 测试数 | 覆盖范围 |
@@ -68,11 +68,11 @@
 | test_d0r_functional_anchor.py | 26 | D0-R functional anchor |
 | test_d0r_reaudit_tierA.py | 22 | D0-R Tier A re-audit |
 | test_d0r_rdat_parser.py | 21 | D0-R RDAT parser |
-| test_d1_pipeline_executor.py | 9 | T-D1.13 executor wiring + Tier judgment |
+| test_d1_pipeline_executor.py | 14 | T-D1.13 executor wiring + Tier judgment + v3.1 §必须输出 字段持久化 |
 | test_rdat_parser.py | 15 | RDAT parser |
 | test_schema.py | 13 | schema validation |
-| 其余 (10 files) | 24 | manifests/registry/pairing/matrix/etc. |
-| **合计** | **505** | |
+| 其余 (10 files) | 26 | manifests/registry/pairing/matrix/etc. |
+| **合计** | **510** | (实际运行数；`--collect-only` 汇总 508，差 2 项为运行时参数化测试) |
 
 ---
 
@@ -146,7 +146,7 @@
 - 解析错误: 0；profile 查找失败: 0；7,761/7,761 全部评估
 
 **产物**:
-- `artifacts/reactflow_delta/d1/d1_true_pair_registry.json` (7,761 条，每条含 `exclusion_reasons` / `primary_eligible` / `true_pair` / `pair_quality_weight` / `quality_factors` / Δreactivity 摘要 / `caller_status`；以及 v3.1 §必须输出 的完整 pair-schema 字段：WT/mut 三层 reactivity `wt_reactivity_raw`/`wt_reactivity_upstream`/`wt_reactivity_project`/`mut_reactivity_raw`/`mut_reactivity_upstream`/`mut_reactivity_project` + `wt_normalization_method`/`mut_normalization_method`、Δreactivity 数组 `delta_reactivity_raw`/`delta_reactivity_normalized`、measurement noise 估计 `replicate_noise_estimate`/`measurement_variance`/`noise_wt_variance`/`noise_mut_variance`/`noise_source`。profile_lookup_ok=True 时这些字段非空，否则为 null)
+- `artifacts/reactflow_delta/d1/d1_true_pair_registry.json` (7,761 条，每条含 `exclusion_reasons` / `primary_eligible` / `true_pair` / `pair_quality_weight` / `quality_factors` / Δreactivity 摘要 / `caller_status`；以及 v3.1 §必须输出 的完整 pair-schema 字段：WT/mut 三层 reactivity `wt_reactivity_raw`/`wt_reactivity_upstream`/`wt_reactivity_project`/`mut_reactivity_raw`/`mut_reactivity_upstream`/`mut_reactivity_project` + `wt_normalization_method`/`mut_normalization_method`、Δreactivity 数组 `delta_reactivity_raw`/`delta_reactivity_normalized`、measurement noise 估计 `replicate_noise_estimate`/`measurement_variance`/`noise_wt_variance`/`noise_mut_variance`/`noise_source`。空值语义：profile_lookup_ok=True 时三层 reactivity / normalization_method / Δreactivity 数组均非空 (7,761/7,761)；噪声字段按设计可 null —— `replicate_noise_estimate` 全部 7,761 条为 null (D1 pool 无 replicate)，`measurement_variance`/`noise_wt_variance`/`noise_mut_variance` 各 6,846 条为 null (无上游 REACTIVITY_ERROR)，`noise_source` 分布 = {`none`: 6,846, `upstream_error`: 915}；profile_lookup_ok=False 时全部新字段为 null)
 - `artifacts/reactflow_delta/d1/d1_pipeline_summary.json` (聚合统计 + Tier 重判)
 
 ### 6.1 候选总数与升级数
