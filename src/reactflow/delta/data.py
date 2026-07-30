@@ -7,6 +7,7 @@ from collections.abc import Iterable, Mapping
 from datetime import datetime
 import difflib
 import json
+import math
 from pathlib import Path
 import re
 from typing import Any
@@ -1201,4 +1202,246 @@ def identify_replicate_groups(
         "record_to_group": record_to_group,
         "record_to_replicate_count": record_to_replicate_count,
         "skipped": skipped,
+    }
+
+
+# =============================================================================
+# T-D1.7: raw / upstream / project-normalized reactivity layers
+# (v3 §6.6 step 11 — freeze normalization domain; v3 §6.7 prohibitions;
+#  v3.1 §4 D1 Gate — normalization_domain_unknown exclusion reason)
+# =============================================================================
+
+# Allowed values for a construct's ``normalization_method`` field (v3 §6.3).
+#   raw               — no normalization; reactivity_upstream == reactivity_raw
+#   2-8_percent       — per-construct 2-8% normalization (top 2-8% mean scaling)
+#   boxplot_95th      — per-construct 95th-percentile scaling (boxplot style)
+#   upstream_provided — depositors normalized upstream; upstream == raw
+#   project_zscore    — cross-study z-score within a frozen normalization domain
+#   unknown           — domain could not be frozen → exclusion reason
+NORMALIZATION_METHODS = frozenset({
+    "raw",
+    "2-8_percent",
+    "boxplot_95th",
+    "upstream_provided",
+    "project_zscore",
+    "unknown",
+})
+
+# Fields that define a frozen normalization domain (v3 §6.6 step 11). Constructs
+# in the same domain share study, probe chemistry, probe protocol and in
+# vivo/in vitro context; only within a domain may cross-construct
+# (project-level) normalization such as z-scoring be applied. The domain is
+# *frozen* at step 11, before the train/validation/test split (step 14 / D2);
+# per v3.1 §2.2 and v3 §6.7, post-split the z-score stats are re-fitted on
+# train+validation members only (test must not feed normalization).
+NORMALIZATION_DOMAIN_FIELDS = ("study_id", "probe", "probe_protocol", "in_vivo_in_vitro")
+# Domain fields that are nullable: None is a valid domain component (e.g. a
+# protocol-agnostic domain), not an "unknown domain" trigger.
+NORMALIZATION_DOMAIN_NULLABLE_FIELDS = frozenset({"probe_protocol"})
+# Domain fields that must be present and non-empty; missing any → unknown domain.
+NORMALIZATION_DOMAIN_REQUIRED_FIELDS = frozenset(
+    set(NORMALIZATION_DOMAIN_FIELDS) - NORMALIZATION_DOMAIN_NULLABLE_FIELDS
+)
+
+# 2-8% normalization percentile window (RMDB convention): take the mean of the
+# non-missing values whose rank falls in [92nd, 98th] percentile and divide
+# every non-missing value by it (nearest-rank method).
+NORMALIZATION_2_8_LOW_PERCENTILE = 92.0
+NORMALIZATION_2_8_HIGH_PERCENTILE = 98.0
+
+
+def identify_normalization_domain(record: Mapping[str, Any]) -> tuple[Any, ...]:
+    """Return the frozen normalization-domain key for a construct record (T-D1.7).
+
+    The domain is the tuple of ``NORMALIZATION_DOMAIN_FIELDS`` values. For
+    nullable fields (``probe_protocol``) ``None`` is a valid domain component.
+    If any *required* domain field is missing, ``None`` or empty, the domain
+    cannot be frozen and the empty tuple ``()`` is returned; callers must record
+    exclusion reason ``normalization_domain_unknown`` (v3.1 §4 D1 Gate). Domains
+    are frozen at v3 §6.6 step 11, before the split (step 14 / D2).
+    """
+
+    key: list[Any] = []
+    for field in NORMALIZATION_DOMAIN_FIELDS:
+        value = record.get(field)
+        if field in NORMALIZATION_DOMAIN_NULLABLE_FIELDS:
+            key.append(value)
+            continue
+        if value is None or value == "":
+            return ()
+        key.append(value)
+    return tuple(key)
+
+
+def build_normalization_domains(
+    records: Iterable[Mapping[str, Any]],
+) -> dict[tuple[Any, ...], dict[str, Any]]:
+    """Group construct records by frozen normalization domain (T-D1.7).
+
+    Returns ``domain_key -> {"construct_ids": [...], "count": int}``. Records
+    with an unfrozen domain (any required domain field missing) are collected
+    under the empty-tuple key ``()`` so callers can flag them with
+    ``normalization_domain_unknown``.
+    """
+
+    domains: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for rec in records:
+        key = identify_normalization_domain(rec)
+        bucket = domains.setdefault(key, {"construct_ids": [], "count": 0})
+        cid = rec.get("construct_id")
+        if cid is not None:
+            bucket["construct_ids"].append(cid)
+        bucket["count"] += 1
+    return domains
+
+
+def check_normalization_domain_compatible(
+    wt_record: Mapping[str, Any],
+    mut_record: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Check whether a WT/mutant pair shares a frozen normalization domain (T-D1.7).
+
+    A pair may only be project-normalized together when both members fall in the
+    same frozen domain. Returns ``{"compatible": bool, "domain": tuple, "reason":
+    str}``. ``reason`` is ``""`` when compatible, otherwise one of
+    ``"wt_domain_unknown"``, ``"mut_domain_unknown"``, ``"domain_mismatch"``.
+    """
+
+    wt_domain = identify_normalization_domain(wt_record)
+    mut_domain = identify_normalization_domain(mut_record)
+    if not wt_domain:
+        return {"compatible": False, "domain": (), "reason": "wt_domain_unknown"}
+    if not mut_domain:
+        return {"compatible": False, "domain": (), "reason": "mut_domain_unknown"}
+    if wt_domain != mut_domain:
+        return {"compatible": False, "domain": (), "reason": "domain_mismatch"}
+    return {"compatible": True, "domain": wt_domain, "reason": ""}
+
+
+def normalize_2_8_percent(
+    reactivity: Iterable[float | None],
+) -> tuple[list[float | None], float | None]:
+    """Apply per-construct 2-8% normalization (T-D1.7 upstream layer).
+
+    Collects the non-missing (non-None, finite) values, sorts them, takes the
+    mean of those whose nearest-rank percentile falls in [92nd, 98th], and
+    divides every non-missing value by that mean. Missing values are preserved
+    as ``None`` (v3 §6.7: missing must not be treated as 0). Returns
+    ``(normalized, scale_factor)``; ``scale_factor`` is ``None`` (and the input
+    is returned unchanged) when there are fewer than 2 non-missing values or the
+    window is degenerate.
+    """
+
+    values = list(reactivity)
+    finite = [v for v in values if v is not None and isinstance(v, (int, float)) and math.isfinite(v)]
+    if len(finite) < 2:
+        return list(values), None
+    finite_sorted = sorted(finite)
+    n = len(finite_sorted)
+    lo_rank = max(1, math.ceil(NORMALIZATION_2_8_LOW_PERCENTILE / 100.0 * n))
+    hi_rank = min(n, math.ceil(NORMALIZATION_2_8_HIGH_PERCENTILE / 100.0 * n))
+    if hi_rank < lo_rank:
+        return list(values), None
+    window = finite_sorted[lo_rank - 1 : hi_rank]
+    scale_factor = sum(window) / len(window)
+    if scale_factor == 0 or not math.isfinite(scale_factor):
+        return list(values), None
+    normalized = [None if v is None else v / scale_factor for v in values]
+    return normalized, scale_factor
+
+
+def compute_domain_zscore_stats(
+    reactivities: Iterable[Iterable[float | None]],
+) -> dict[str, Any]:
+    """Compute mean/std of non-missing reactivity across a domain (T-D1.7).
+
+    Pools all non-missing (non-None, finite) values across the given per-construct
+    reactivity arrays (the domain members) and returns
+    ``{"mean": float|None, "std": float|None, "count": int}`` (sample std, ddof=1).
+    Per v3.1 §2.2 and v3 §6.7 the caller MUST pass only train+validation
+    reactivities after the split (D2); at D1 the domain is frozen over all
+    candidates because no split exists yet. Returns ``None`` stats when fewer
+    than 2 values are present.
+    """
+
+    pooled: list[float] = []
+    for arr in reactivities:
+        for v in arr:
+            if v is not None and isinstance(v, (int, float)) and math.isfinite(v):
+                pooled.append(float(v))
+    count = len(pooled)
+    if count < 2:
+        return {"mean": None, "std": None, "count": count}
+    mean = sum(pooled) / count
+    var = sum((v - mean) ** 2 for v in pooled) / (count - 1)
+    std = math.sqrt(var)
+    if not math.isfinite(std):
+        return {"mean": None, "std": None, "count": count}
+    return {"mean": mean, "std": std, "count": count}
+
+
+def apply_zscore_normalization(
+    reactivity: Iterable[float | None],
+    mean: float | None,
+    std: float | None,
+) -> list[float | None]:
+    """Apply project-level z-score normalization to one construct (T-D1.7).
+
+    ``(v - mean) / std`` for non-missing values; missing values are preserved as
+    ``None`` (v3 §6.7). If ``mean`` or ``std`` is ``None``, non-finite or the std
+    is zero, the input is returned unchanged (the project-normalized layer
+    cannot be formed and falls back to the upstream layer).
+    """
+
+    values = list(reactivity)
+    if (
+        mean is None
+        or std is None
+        or std == 0
+        or not isinstance(mean, (int, float))
+        or not isinstance(std, (int, float))
+        or not math.isfinite(mean)
+        or not math.isfinite(std)
+    ):
+        return list(values)
+    return [None if v is None else (v - mean) / std for v in values]
+
+
+def build_reactivity_layers(
+    raw_reactivity: Iterable[float | None],
+    normalization_method: str | None,
+    domain_mean: float | None = None,
+    domain_std: float | None = None,
+) -> dict[str, Any]:
+    """Build the raw / upstream / project-normalized reactivity layers (T-D1.7).
+
+    Returns a dict with keys:
+      - ``reactivity_raw``: the input values (list, None preserved)
+      - ``reactivity_upstream``: per-construct normalized layer (2-8% when method
+        is ``"2-8_percent"``; identical to raw for ``"raw"``/``"upstream_provided"``
+        and as a fail-safe for unrecognized methods)
+      - ``reactivity_project``: cross-study z-score layer from domain stats
+        (identical to upstream when domain stats are unavailable)
+      - ``scale_factor``: the 2-8% scale factor (or ``None``)
+      - ``normalization_method``: the recorded method (or ``"unknown"``)
+
+    Per v3 §6.7 missing values are never treated as 0 and propagate through
+    every layer. Per v3.1 §2.2 domain stats must come from train+validation only
+    (enforced by the caller, not here).
+    """
+
+    raw_list = list(raw_reactivity)
+    method = normalization_method or "unknown"
+    scale_factor: float | None = None
+    if method == "2-8_percent":
+        upstream, scale_factor = normalize_2_8_percent(raw_list)
+    else:
+        upstream = list(raw_list)
+    project = apply_zscore_normalization(upstream, domain_mean, domain_std)
+    return {
+        "reactivity_raw": raw_list,
+        "reactivity_upstream": upstream,
+        "reactivity_project": project,
+        "scale_factor": scale_factor,
+        "normalization_method": method,
     }
