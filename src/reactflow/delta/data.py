@@ -6,6 +6,7 @@ from collections.abc import Iterable, Mapping
 from datetime import datetime
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 from .manifests import sha256_file
@@ -33,6 +34,26 @@ RMDB_METADATA_SPECS = (
     ("rdat_specification.html", "rdat-specification", "https://rmdb.stanford.edu/deposit/specs/"),
     ("rmdb_about.html", "rmdb-about-license", "https://rmdb.stanford.edu/about/"),
 )
+
+RMDB_CANDIDATE_MANIFEST_SCHEMA_VERSION = "reactflow-delta-rmdb-candidate-manifest-v1"
+RMDB_FILENAME_RULES = {
+    "m2_named_candidate": re.compile(r"(?:^|_)M2(?:[A-Z0-9_]|$)", re.IGNORECASE),
+    "m2r_named_unconfirmed": re.compile(r"M2R", re.IGNORECASE),
+    "variant_or_library_named_candidate": re.compile(r"(?:^|_)(?:ETERNA|OK[0-9]|LIB)(?:_|[0-9]|$)", re.IGNORECASE),
+    "explicit_rescue_or_compensatory_named_candidate": re.compile(r"rescue|compens", re.IGNORECASE),
+}
+RMDB_FIXTURE_SELECTIONS = {
+    "m2_named_candidate": (
+        "SPINACH_M2G4_0001.rdat",
+        "M2SL5_2A3_0000.rdat",
+        "M2SL5_DMS_0000.rdat",
+    ),
+    "variant_or_library_named_candidate": (
+        "ETERNA_TOD_0000.rdat",
+        "ETERNA_R42_0004.rdat",
+        "ETERNA_R42_0005.rdat",
+    ),
+}
 
 
 def build_rmdb_metadata_registry(
@@ -130,6 +151,69 @@ def write_json_document(path: str | Path, document: Mapping[str, Any]) -> None:
         handle.write("\n")
 
 
+def build_rmdb_filename_candidate_manifest(release_index_path: str | Path) -> dict[str, Any]:
+    """Create a pre-RDAT candidate manifest from immutable release asset metadata.
+
+    Filename matches are deliberately only candidate labels. They must be
+    confirmed or rejected by entry metadata and RDAT content before an entry is
+    called mutate-and-map, M2-seq, rescue, variant-library, construct, or pair.
+    """
+
+    path = Path(release_index_path)
+    releases = _load_json_list(path)
+    assets = _flatten_release_assets(releases)
+    categories = []
+    for category, rule in RMDB_FILENAME_RULES.items():
+        matches = [asset for asset in assets if rule.search(asset["name"])]
+        categories.append(
+            {
+                "candidate_category": category,
+                "classification_basis": "strict filename rule only",
+                "rule": rule.pattern,
+                "candidate_count": len(matches),
+                "candidate_assets": matches,
+                "rdat_confirmation_required": True,
+            }
+        )
+
+    selected_fixtures = []
+    asset_by_name = {asset["name"]: asset for asset in assets}
+    for category, names in RMDB_FIXTURE_SELECTIONS.items():
+        for name in names:
+            if name not in asset_by_name:
+                raise ValueError(f"frozen fixture selection is absent from release index: {name}")
+            selected_fixtures.append(
+                {
+                    "candidate_category": category,
+                    "selection_basis": "smallest fixed set of three strict filename candidates",
+                    "rdat_confirmation_required": True,
+                    **asset_by_name[name],
+                }
+            )
+
+    explicit_rescue = next(
+        category for category in categories if category["candidate_category"] == "explicit_rescue_or_compensatory_named_candidate"
+    )
+    return {
+        "schema_version": RMDB_CANDIDATE_MANIFEST_SCHEMA_VERSION,
+        "stage": "D0",
+        "input_release_index": {
+            "path": str(path.resolve()),
+            "sha256": sha256_file(path),
+        },
+        "categories": categories,
+        "fixture_selection": selected_fixtures,
+        "unresolved_absences": [
+            {
+                "candidate_category": "explicit_rescue_or_compensatory_named_candidate",
+                "candidate_count": explicit_rescue["candidate_count"],
+                "action": "Do not substitute near-matching names. Search entry metadata and RDAT annotations before declaring rescue availability.",
+            }
+        ],
+        "scientific_boundary": "This is a filename-based discovery manifest only. It contains no confirmed experiment class, construct count, WT-single-mutant pair count, tier decision, or learned training result.",
+    }
+
+
 def _load_json_object(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -168,6 +252,34 @@ def _summarize_releases(releases: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         )
     return summary
+
+
+def _flatten_release_assets(releases: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    assets: list[dict[str, Any]] = []
+    for release in releases:
+        tag_name = release.get("tag_name")
+        if not isinstance(tag_name, str) or not tag_name:
+            raise ValueError("release tag_name must be a non-empty string")
+        release_assets = release.get("assets", [])
+        if not isinstance(release_assets, list):
+            raise ValueError("release assets must be a list")
+        for asset in release_assets:
+            if not isinstance(asset, dict):
+                raise ValueError("release asset must be an object")
+            name = asset.get("name")
+            size = asset.get("size")
+            digest = asset.get("digest")
+            url = asset.get("browser_download_url")
+            if not isinstance(name, str) or not name.endswith(".rdat"):
+                raise ValueError("release asset name must end with .rdat")
+            if isinstance(size, bool) or not isinstance(size, int) or size < 0:
+                raise ValueError("release asset size must be a non-negative integer")
+            if not isinstance(digest, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+                raise ValueError("release asset digest must be a SHA-256 value")
+            if not isinstance(url, str) or not url.startswith("https://"):
+                raise ValueError("release asset browser_download_url must be HTTPS")
+            assets.append({"release_tag": tag_name, "name": name, "bytes": size, "upstream_sha256": digest.removeprefix("sha256:"), "browser_download_url": url})
+    return assets
 
 
 def _file_provenance(path: Path) -> dict[str, Any]:

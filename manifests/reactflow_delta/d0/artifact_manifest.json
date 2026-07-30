@@ -7,9 +7,10 @@
     "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
   },
   "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
-  "last_updated_at": "2026-07-30T12:35:22+08:00",
+  "last_updated_at": "2026-07-30T12:45:38+08:00",
   "task_commits": {
-    "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6"
+    "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
+    "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa"
   },
   "files": [
     {
@@ -34,7 +35,8 @@
       "task_id": "T-D0.2",
       "kind": "rmdb_metadata_registry_builder",
       "repo_path": "src/reactflow/delta/data.py",
-      "sha256": "49236c4f4f40e29d58494773f632f702c92bf5cb995adc628ac082ddb6d66bd1"
+      "sha256": "49236c4f4f40e29d58494773f632f702c92bf5cb995adc628ac082ddb6d66bd1",
+      "git_commit": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa"
     },
     {
       "task_id": "T-D0.2",
@@ -65,6 +67,35 @@
       "release_count": 5,
       "advertised_release_asset_bytes": 12513787682,
       "scope": "release/index/format/license metadata only; no RDAT payloads"
+    },
+    {
+      "task_id": "T-D0.3",
+      "kind": "filename_only_candidate_builder",
+      "repo_path": "src/reactflow/delta/data.py",
+      "sha256": "7a246764e3d96bfc3b0d92ccc4c948126f87e6d437c0cd917f4b5f9180279137"
+    },
+    {
+      "task_id": "T-D0.3",
+      "kind": "filename_only_candidate_cli_and_tests",
+      "repo_paths": ["scripts/reactflow_delta/classify_rmdb_candidates.py", "tests/reactflow_delta/test_rmdb_candidates.py"],
+      "sha256": {
+        "scripts/reactflow_delta/classify_rmdb_candidates.py": "f624a365a5da3176a8979ba06c3f87d9ab6bd5e59184f0a028f3e714631fc363",
+        "tests/reactflow_delta/test_rmdb_candidates.py": "40f7555f119dbd4ffe83133adf0460df9a7673e60bf4e8fa02563750d67c31f1"
+      }
+    },
+    {
+      "task_id": "T-D0.3",
+      "kind": "rmdb_filename_candidate_manifest",
+      "repo_path": "data_registry/rmdb_filename_candidates.json",
+      "sha256": "345170bf131889a866345ea0ade7020466eff52d791b312d207bdd4f228ff925",
+      "fixture_selection_count": 6,
+      "strict_filename_candidate_counts": {
+        "m2_named": 15,
+        "m2r_unconfirmed": 11,
+        "variant_or_library_named": 108,
+        "explicit_rescue_or_compensatory_named": 0
+      },
+      "scientific_status": "unconfirmed until entry metadata and RDAT parsing"
     }
   ],
   "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
