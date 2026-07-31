@@ -62,7 +62,7 @@ class PairData:
     pair_id: str
     parent: str
     split: str
-    features: torch.Tensor  # (n, 5)
+    features: torch.Tensor  # (n, 10): 5 WT thermo + 5 delta_thermo (M0-R)
     edges: torch.Tensor  # (2, n_edges)
     edge_features: torch.Tensor  # (n_edges, 3)
     edit_pos: int  # 0-indexed
@@ -80,11 +80,15 @@ def load_parent_thermo(npz_path: str) -> dict[str, np.ndarray]:
 
 
 def build_pair_data(pair_meta: dict, parent_thermo: dict[str, np.ndarray],
-                    pair_record) -> PairData:
+                    pair_record, delta_thermo_arr: np.ndarray) -> PairData:
     """Build per-pair tensors from manifest metadata + parent thermo + PairRecord.
 
     ``pair_record`` is a PairRecord from evaluate.load_split_pairs (provides
     delta_true, endpoint_mask, edit_arr_idx, pair_quality_weight).
+
+    ``delta_thermo_arr`` is the (n, 5) per-position delta_thermo feature array
+    (mutant_mean(3 alt bases) - wt, in array coordinates) from
+    build_m0r_features.py. Concatenated to WT features -> (n, 10) (M0-R, v3.4 §2.2).
     """
 
     n = pair_meta["aligned_length"]
@@ -92,24 +96,32 @@ def build_pair_data(pair_meta: dict, parent_thermo: dict[str, np.ndarray],
     edit_arr_idx = pair_meta["edit_arr_idx"]
     seq_length = int(parent_thermo["seq_length"])
 
-    # Per-position features (n, 5).
+    # Per-position WT features (n, 5).
     unpaired = parent_thermo["unpaired_prob"]  # (seq_length,)
     entropy = parent_thermo["positional_entropy_bits"]
     bpp_paired = parent_thermo["bpp_paired_prob"]
 
-    features = np.zeros((n, 5), dtype=np.float32)
+    wt_features = np.zeros((n, 5), dtype=np.float32)
     for i in range(n):
         sp = seq_positions[i]
         if sp is not None and 1 <= sp <= seq_length:
             idx = sp - 1  # 0-indexed
-            features[i, 0] = float(unpaired[idx])
-            features[i, 1] = float(entropy[idx])
-            features[i, 2] = float(bpp_paired[idx])
-            features[i, 3] = float(sp) / float(seq_length)  # normalized pos
-            features[i, 4] = abs(sp - pair_meta["edit_pos_1indexed"]) / float(seq_length)
+            wt_features[i, 0] = float(unpaired[idx])
+            wt_features[i, 1] = float(entropy[idx])
+            wt_features[i, 2] = float(bpp_paired[idx])
+            wt_features[i, 3] = float(sp) / float(seq_length)  # normalized pos
+            wt_features[i, 4] = abs(sp - pair_meta["edit_pos_1indexed"]) / float(seq_length)
         else:
             # Missing position: zero features.
-            features[i, 4] = 1.0  # max distance
+            wt_features[i, 4] = 1.0  # max distance
+
+    # Concatenate delta_thermo (n, 5, array coords) -> (n, 10).
+    if delta_thermo_arr.shape != (n, 5):
+        raise ValueError(
+            f"delta_thermo shape mismatch for pair {pair_meta['pair_id']}: "
+            f"expected ({n}, 5), got {delta_thermo_arr.shape}"
+        )
+    features = np.concatenate([wt_features, delta_thermo_arr], axis=1)
 
     # Build edges in array coordinates.
     # 1. Sequence-adjacent edges.
@@ -192,6 +204,15 @@ def load_dataset(config: dict, split: str = "train") -> list[PairData]:
         npz_path = os.path.join(parent_thermo_dir, os.path.basename(info["npz_path"]))
         parent_cache[parent] = load_parent_thermo(npz_path)
 
+    # Load delta_thermo features (M0-R, v3.4 §2.2): mutant_mean(3 alts) - wt,
+    # per-pair (n, 5) in array coordinates, produced by build_m0r_features.py.
+    mutant_thermo_path = config["data"]["mutant_thermo_path"]
+    mt_npz = np.load(mutant_thermo_path, allow_pickle=True)
+    delta_thermo_by_pid: dict[str, np.ndarray] = {
+        str(pid): np.asarray(dt, dtype=np.float32)
+        for pid, dt in zip(mt_npz["pair_ids"], mt_npz["delta_thermo"])
+    }
+
     # Load PairRecords via evaluate.py (for delta_true, endpoint_mask).
     # We need rdat_loader for seq_positions, but we already have them in the
     # manifest. However, load_split_pairs uses rdat_loader to fill seq_positions.
@@ -212,9 +233,13 @@ def load_dataset(config: dict, split: str = "train") -> list[PairData]:
         pid = pm["pair_id"]
         if pid not in record_by_pid:
             continue
+        if pid not in delta_thermo_by_pid:
+            raise KeyError(
+                f"pair {pid} missing from mutant_thermo features ({mutant_thermo_path})"
+            )
         parent = pm["parent"]
         thermo = parent_cache[parent]
-        pd = build_pair_data(pm, thermo, record_by_pid[pid])
+        pd = build_pair_data(pm, thermo, record_by_pid[pid], delta_thermo_by_pid[pid])
         dataset.append(pd)
 
     return dataset

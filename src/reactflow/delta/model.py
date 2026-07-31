@@ -43,9 +43,15 @@ import torch.nn.functional as F
 
 MODEL_SCHEMA_VERSION = "reactflow-delta-m0-model-v1"
 
-# Thermo feature dimension (unpaired_prob, positional_entropy, bpp_paired_prob,
-# normalized_seq_pos, distance_from_edit).
-THERMO_FEAT_DIM = 5
+# Thermo feature dimension. First 5 are WT thermo features, next 5 are delta
+# thermo features (mutant_mean(3 alt bases) - wt), giving the encoder
+# mutation-effect information (M0-R fix, v3.4 §2.2):
+#   0. unpaired_prob            5. delta_unpaired_prob
+#   1. positional_entropy_bits  6. delta_positional_entropy_bits
+#   2. bpp_paired_prob          7. delta_bpp_paired_prob
+#   3. normalized_seq_pos       8. delta_mfe_energy
+#   4. distance_from_edit       9. delta_pf_energy
+THERMO_FEAT_DIM = 10
 
 # Observation basis size (identity, softplus, tanh, cubic-soft).
 N_BASIS = 4
@@ -107,14 +113,21 @@ class MonotoneHead(nn.Module):
 
 
 class ThermoEncoder(nn.Module):
-    """Maps per-position WT thermo features to latent state ``z_w``.
+    """Maps per-position thermo features to latent state ``z_w``.
 
-    Input features (per position):
-      0. unpaired_prob
-      1. positional_entropy_bits (normalized)
-      2. bpp_paired_prob
-      3. normalized_seq_pos (position / seq_length, in [0, 1])
-      4. normalized_distance_from_edit (|pos - edit_pos| / seq_length)
+    Input features (per position), 10 dims total (M0-R, v3.4 §2.2):
+      WT thermo (0-4):
+        0. unpaired_prob
+        1. positional_entropy_bits (normalized)
+        2. bpp_paired_prob
+        3. normalized_seq_pos (position / seq_length, in [0, 1])
+        4. normalized_distance_from_edit (|pos - edit_pos| / seq_length)
+      Delta thermo (5-9), = mutant_mean(3 alt bases) - wt:
+        5. delta_unpaired_prob
+        6. delta_positional_entropy_bits
+        7. delta_bpp_paired_prob
+        8. delta_mfe_energy (broadcast scalar)
+        9. delta_pf_energy (broadcast scalar)
 
     For EPRO-0: fixed linear map (no learned parameters).
     For EPRO-Lite: learned MLP.

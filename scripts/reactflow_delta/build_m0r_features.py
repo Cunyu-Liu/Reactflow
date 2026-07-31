@@ -129,6 +129,50 @@ def map_seq_array_to_delta(
     return out
 
 
+def resolve_edit_sequence_position(
+    wt_sequence: str,
+    edit_pos_1indexed: int,
+    encoded_ref: str,
+    offset: int,
+) -> tuple[int, str]:
+    """Resolve the actual 1-indexed SEQUENCE position of the edit.
+
+    Most RDATs encode mutation annotations in construct-local 1-indexed
+    coordinates (``ref_match_index="construct_local_1indexed"``): the annotation
+    position indexes directly into the SEQUENCE. A few RDATs (v3.1 §3.3) use
+    genome/numbering coordinates and require the RDAT ``OFFSET`` header to
+    recover the construct-local index (``ref_match_index="offset_adjusted"``).
+
+    Replicates ``d0r_reaudit_tierA.py`` verification order: try construct-local
+    first (``pos - 1``), then ``pos - 1 + offset``. Both sequence and ref are
+    T→U normalized before comparison.
+
+    Returns ``(seq_pos_1indexed, ref_match_index)``. Raises ``ValueError`` if
+    the ref base cannot be verified at either position.
+    """
+
+    wt = wt_sequence.upper().replace("T", "U")
+    ref = encoded_ref.upper().replace("T", "U")
+    pos0 = edit_pos_1indexed - 1
+
+    # 1. Construct-local 1-indexed (common case, 1417/1509 pairs).
+    if 0 <= pos0 < len(wt) and wt[pos0] == ref:
+        return edit_pos_1indexed, "construct_local_1indexed"
+
+    # 2. Offset-adjusted (annotation uses numbering coords; add OFFSET).
+    if offset:
+        pos0_off = edit_pos_1indexed - 1 + offset
+        if 0 <= pos0_off < len(wt) and wt[pos0_off] == ref:
+            return edit_pos_1indexed + offset, "offset_adjusted"
+
+    actual = wt[pos0] if 0 <= pos0 < len(wt) else "?"
+    raise ValueError(
+        f"Could not verify encoded_ref={encoded_ref!r} for edit_pos={edit_pos_1indexed} "
+        f"(construct_local base={actual!r}, offset={offset}). RDAT SEQUENCE does "
+        f"not match the annotation at either position."
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--m0-manifest", required=True, help="Path to m0_pair_manifest.json")
@@ -185,8 +229,13 @@ def main() -> None:
 
     print(f"  resolved {len(rdat_full_paths)} RDAT full paths", flush=True)
 
-    # Load WT sequences
+    # Load WT sequences + RDAT OFFSET header per parent.
+    # OFFSET is needed to resolve the actual SEQUENCE position of the edit for
+    # ``offset_adjusted`` pairs (v3.1 §3.3): some RDATs encode mutation
+    # annotations in genome/numbering coordinates, so the annotation position
+    # must be adjusted by OFFSET to index into the SEQUENCE.
     wt_sequences: dict[str, str] = {}  # parent -> wt_seq
+    parent_offsets: dict[str, int] = {}  # parent -> RDAT OFFSET header value
     rdat_cache: dict[str, dict] = {}  # rdat_path -> parsed doc
     for parent, rdat_bn in parent_to_rdat.items():
         rdat_path = rdat_full_paths.get(rdat_bn)
@@ -203,7 +252,15 @@ def main() -> None:
             rdat_cache[str(rdat_path)] = parse_rdat(str(rdat_path))
         doc = rdat_cache[str(rdat_path)]
         wt_sequences[parent] = doc["headers"]["SEQUENCE"]
-        print(f"  {parent[:40]}: wt_seq len={len(wt_sequences[parent])}", flush=True)
+        try:
+            parent_offsets[parent] = int(doc["headers"].get("OFFSET", "0") or "0")
+        except (ValueError, TypeError):
+            parent_offsets[parent] = 0
+        print(
+            f"  {parent[:40]}: wt_seq len={len(wt_sequences[parent])} "
+            f"offset={parent_offsets[parent]}",
+            flush=True,
+        )
 
     # ------------------------------------------------------------------
     # Step 2: load WT thermo per parent (from M0 parent_thermo npz)
@@ -237,6 +294,7 @@ def main() -> None:
     delta_thermo_list: list[np.ndarray] = []
     n_cache_hits = 0
     n_cache_misses = 0
+    ref_match_index_counts: dict[str, int] = {}
 
     for idx, pm in enumerate(per_pair):
         parent = pm["parent"]
@@ -248,14 +306,26 @@ def main() -> None:
         parent_sha = per_parent[parent]["parent_sha256"]
         seq_length = wt_thermo[parent]["seq_length"]
 
-        cache_key = f"{parent_sha}:{edit_pos_1idx}:{encoded_ref}"
+        # Resolve the actual SEQUENCE position of the edit. For most pairs the
+        # annotation position indexes directly into the SEQUENCE
+        # (construct_local); for 92 offset_adjusted pairs (6 RDATs) the RDAT
+        # OFFSET header must be applied (v3.1 §3.3). build_mutant_sequences
+        # verifies wt[seq_pos-1]==encoded_ref, so the resolved position must be
+        # passed (NOT the raw annotation position).
+        wt_seq = wt_sequences[parent]
+        offset_val = parent_offsets[parent]
+        mut_pos_1idx, ref_match_index = resolve_edit_sequence_position(
+            wt_seq, edit_pos_1idx, encoded_ref, offset_val
+        )
+        ref_match_index_counts[ref_match_index] = ref_match_index_counts.get(ref_match_index, 0) + 1
+
+        cache_key = f"{parent_sha}:{mut_pos_1idx}:{encoded_ref}"
         if cache_key in mut_thermo_cache:
             mut_thermo = mut_thermo_cache[cache_key]
             n_cache_hits += 1
         else:
-            wt_seq = wt_sequences[parent]
             mut_thermo = compute_mutant_thermo_marginal(
-                wt_seq, edit_pos_1idx, encoded_ref, args.temperature
+                wt_seq, mut_pos_1idx, encoded_ref, args.temperature
             )
             mut_thermo_cache[cache_key] = mut_thermo
             n_cache_misses += 1
@@ -373,11 +443,13 @@ def main() -> None:
         "feature_names": feat_names,
         "feature_stats": feat_stats,
         "correlation_with_delta_true": correlations,
+        "ref_match_index_counts": ref_match_index_counts,
         "notes": [
             "delta_thermo = mutant_thermo_mean(3 alts) - wt_thermo, per-position",
             "mfe/pf are whole-molecule scalars broadcast to all positions",
             "correlation_with_delta_true: per-position Pearson r between feature and delta_true (masked)",
             "positive |r| > 0.05 indicates the feature carries mutation-effect signal",
+            "ref_match_index_counts: construct_local_1indexed = annotation pos indexes SEQUENCE directly; offset_adjusted = RDAT OFFSET applied (v3.1 §3.3)",
         ],
         "provenance": {
             "tool": get_tool_version(),

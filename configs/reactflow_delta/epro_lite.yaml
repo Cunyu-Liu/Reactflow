@@ -53,6 +53,7 @@ data:
   parent_thermo_dir: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/parent_thermo"
   registry_path: "artifacts/reactflow_delta/d2r/d1_true_pair_registry.json"
   split_path: "artifacts/reactflow_delta/ph0/split_members.json"
+  mutant_thermo_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r/mutant_thermo_features.npz"
 
 # Pre-registered improvement threshold (M0 Gate).
 # Strongest independent baseline: static_reactivity Skill = -0.0068
