@@ -104,6 +104,7 @@ def _evaluate_one(
     profile_map: dict[int, dict],
     file_audit: dict | None,
     lineage_lookup: dict[tuple[str, int, int], bool] | None = None,
+    evidence_lookup: dict[tuple[str, int, int], dict] | None = None,
 ) -> dict:
     """Run the full T-D1.1~10 pipeline on one candidate relation.
 
@@ -113,6 +114,14 @@ def _evaluate_one(
     upgrade over the conservative D0-R v2 ``lineage_status`` label). When
     absent, the D0-R v2 conservative rule is used (``lineage_status`` does
     not start with ``candidate_only_pending``).
+
+    ``evidence_lookup`` (D2-R, v3.1 §3.2) is the same-parent replicate
+    evidence map keyed by ``(rdat_sha256, wt_profile_index,
+    mutant_profile_index)``. When a candidate's entry has
+    ``status=="evidence_found"`` and ``evidence_type=="same_parent_replicate"``,
+    ``has_replicate_corroboration=True`` is passed to ``evaluate_pair_upgrade``
+    so the annotation-only §3.2 blocker is suppressed (replicate substitutes
+    for alt resolution). Default None preserves the pre-D2-R behavior.
     """
     rdat_path = relation["rdat_path"]
     wt_idx = relation["wt_profile_index"]
@@ -131,6 +140,28 @@ def _evaluate_one(
     # candidates can reach substitution_verified=True via alt_not_verified.
     substitution_verified = (not is_annotation_only) and (not alt_not_verified)
     edit_count = int(relation.get("annotation_mutation_count") or 0)
+
+    # D2-R (v3.1 §3.2): same-parent replicate corroboration lookup. The
+    # manifest is keyed by (rdat_sha256, wt_idx, mut_idx); a candidate is
+    # corroborated iff status=="evidence_found" AND evidence_type==
+    # "same_parent_replicate". Per §3.2 the replicate path substitutes for
+    # alt resolution (the "or" in §3.2); substitution_verified stays False.
+    rdat_sha = relation.get("rdat_sha256", "")
+    evidence_entry: dict | None = None
+    has_replicate_corroboration = False
+    if evidence_lookup is not None and rdat_sha:
+        evidence_entry = evidence_lookup.get((rdat_sha, wt_idx, mut_idx))
+    if evidence_entry is not None:
+        if (
+            evidence_entry.get("status") == "evidence_found"
+            and evidence_entry.get("evidence_type") == "same_parent_replicate"
+        ):
+            has_replicate_corroboration = True
+    evidence_source = (
+        "d2r_same_parent_replicate"
+        if has_replicate_corroboration
+        else ("d2r_manifest_no_evidence" if evidence_entry is not None else "none")
+    )
 
     # Profile lookup
     wt_profile = profile_map.get(wt_idx)
@@ -279,6 +310,7 @@ def _evaluate_one(
         is_annotation_only=is_annotation_only,
         is_sequence_based=is_sequence_based,
         has_independent_corroboration=True,  # default; is_sequence_based=False
+        has_replicate_corroboration=has_replicate_corroboration,  # D2-R §3.2
         snr=snr,
         coverage_mean=coverage_mean,
         missing_fraction=comp_stats["missing_fraction"],
@@ -311,6 +343,8 @@ def _evaluate_one(
         "in_vivo_in_vitro_mixed": in_vivo_in_vitro_mixed,
         "is_annotation_only": is_annotation_only,
         "is_sequence_based": is_sequence_based,
+        "has_replicate_corroboration": has_replicate_corroboration,
+        "evidence_source": evidence_source,
         "profile_lookup_ok": profile_lookup_ok,
         "comparable_fraction": comp_stats["comparable_fraction"],
         "missing_fraction": comp_stats["missing_fraction"],
@@ -420,6 +454,18 @@ def main(argv: list[str] | None = None) -> int:
             "verdict (forward-only upgrade over D0-R v2 lineage_status)."
         ),
     )
+    parser.add_argument(
+        "--evidence-manifest",
+        default=None,
+        help=(
+            "Optional D2-R evidence manifest "
+            "(artifacts/reactflow_delta/d2r/d2r_evidence_manifest.json). "
+            "When supplied, same-parent replicate corroboration "
+            "(status=evidence_found, evidence_type=same_parent_replicate) "
+            "is passed to evaluate_pair_upgrade (v3.1 §3.2 D2-R: replicate "
+            "substitutes for alt resolution on annotation-only candidates)."
+        ),
+    )
     args = parser.parse_args(argv)
 
     relations_path = Path(args.relations)
@@ -452,6 +498,34 @@ def main(argv: list[str] | None = None) -> int:
             f"({len(lineage_lookup)} entries, {verified} verified)"
         )
 
+    # Optional D2-R same-parent replicate evidence manifest (v3.1 §3.2).
+    # Keyed by (rdat_sha256, wt_profile_index, mutant_profile_index) →
+    # {status, evidence_type, ...}. Only status="evidence_found" with
+    # evidence_type="same_parent_replicate" triggers corroboration.
+    evidence_lookup: dict[tuple[str, int, int], dict] | None = None
+    if args.evidence_manifest:
+        em_path = Path(args.evidence_manifest)
+        with em_path.open() as f:
+            em_doc = json.load(f)
+        evidence_lookup = {
+            (
+                c["rdat_sha256"],
+                int(c["wt_profile_index"]),
+                int(c["mutant_profile_index"]),
+            ): c
+            for c in em_doc.get("candidates", [])
+        }
+        ev_count = sum(
+            1
+            for c in evidence_lookup.values()
+            if c.get("status") == "evidence_found"
+            and c.get("evidence_type") == "same_parent_replicate"
+        )
+        print(
+            f"[d1] loaded D2-R evidence manifest from {em_path} "
+            f"({len(evidence_lookup)} entries, {ev_count} corroborated)"
+        )
+
     # Group by rdat_path so each RDAT is parsed at most once.
     by_path: dict[str, list[dict]] = defaultdict(list)
     for rel in relations:
@@ -473,11 +547,15 @@ def main(argv: list[str] | None = None) -> int:
             # Emit a minimal registry entry per relation so the candidate
             # total still accounts for them (forward-only: no deletion).
             for rel in rels_for_file:
-                registry.append(_evaluate_one(rel, {}, None, lineage_lookup))
+                registry.append(
+                    _evaluate_one(rel, {}, None, lineage_lookup, evidence_lookup)
+                )
             continue
         file_cache[rdat_path] = profile_map
         for rel in rels_for_file:
-            registry.append(_evaluate_one(rel, profile_map, file_audit, lineage_lookup))
+            registry.append(
+                _evaluate_one(rel, profile_map, file_audit, lineage_lookup, evidence_lookup)
+            )
 
     # ---- Aggregates ----
     tp_count = sum(1 for r in registry if r["true_pair"])
@@ -497,6 +575,7 @@ def main(argv: list[str] | None = None) -> int:
         return dict(c.most_common())
 
     tp_registry = [r for r in registry if r["true_pair"]]
+    corroborated_count = sum(1 for r in registry if r.get("has_replicate_corroboration"))
     summary = {
         "schema_version": "reactflow-delta-d1-pipeline-summary-v1",
         "stage": "D1 cleanup-only pipeline executor",
@@ -509,6 +588,9 @@ def main(argv: list[str] | None = None) -> int:
             else "d0r_v2_lineage_status"
         ),
         "_d2_lineage_applied": lineage_lookup is not None,
+        "_d2r_evidence_manifest_applied": evidence_lookup is not None,
+        "replicate_corroborated_count": corroborated_count,
+        "evidence_source_distribution": _dist("evidence_source"),
         "reason_distribution_per_reason": dict(reason_counter.most_common()),
         "reason_distribution_per_set": dict(reason_set_counter.most_common()),
         "study_distribution_candidates": _dist("citation_doi"),

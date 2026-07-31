@@ -1882,6 +1882,7 @@ def collect_exclusion_reasons(
     is_annotation_only: bool = False,
     is_sequence_based: bool = False,
     has_independent_corroboration: bool = True,
+    has_replicate_corroboration: bool = False,
 ) -> list[str]:
     """Collect the frozen exclusion-reason set for a pair (v3.1 §3.1, §4 D1 Gate).
 
@@ -1890,6 +1891,15 @@ def collect_exclusion_reasons(
     machine-readable reason vector. Per v3.1 §4 every rejection must carry at
     least one reason; per v3.1 §2.2 the reason logic is frozen (no
     train-time tuning).
+
+    ``has_replicate_corroboration`` (v3.1 §3.2, D2-R): when True, an
+    annotation-only candidate is corroborated by a same-parent replicate
+    identified under T-D1.6 grouping (cross-file, same NAME, same
+    FULL_CONDITION, non-identical mutant reactivity). Per v3.1 §3.2 the two
+    upgrade paths — per-profile sequence evidence OR same-parent replicate
+    — are an "or": replicate corroboration substitutes for alt resolution,
+    so ``annotation_only_alt_not_verifiable`` is suppressed. Default False
+    preserves the pre-D2-R behavior.
     """
 
     reasons: set[str] = set()
@@ -1906,9 +1916,14 @@ def collect_exclusion_reasons(
 
     # Substitution verifiability: annotation-only pairs cannot have their
     # alt allele verified by sequencing; otherwise flag as not verifiable.
+    # v3.1 §3.2 (D2-R): when same-parent replicate corroboration is supplied,
+    # it substitutes for alt resolution and suppresses the annotation-only
+    # blocker. The substitution_verified flag itself remains False (the alt
+    # is not resolved to a concrete base); the replicate path is independent.
     if not substitution_verified:
         if is_annotation_only:
-            reasons.add("annotation_only_alt_not_verifiable")
+            if not has_replicate_corroboration:
+                reasons.add("annotation_only_alt_not_verifiable")
         else:
             reasons.add("substitution_not_verifiable")
 
@@ -2036,6 +2051,7 @@ def evaluate_pair_upgrade(
     is_annotation_only: bool = False,
     is_sequence_based: bool = False,
     has_independent_corroboration: bool = True,
+    has_replicate_corroboration: bool = False,
     snr: float | None = None,
     coverage_mean: float | None = None,
     missing_fraction: float | None = None,
@@ -2068,6 +2084,7 @@ def evaluate_pair_upgrade(
         is_annotation_only=is_annotation_only,
         is_sequence_based=is_sequence_based,
         has_independent_corroboration=has_independent_corroboration,
+        has_replicate_corroboration=has_replicate_corroboration,
     )
     primary_eligible = determine_primary_eligible(reasons)
     true_pair = determine_true_pair(reasons, primary_eligible)
