@@ -136,7 +136,8 @@ class ThermoEncoder(nn.Module):
     """
 
     def __init__(self, feat_dim: int = THERMO_FEAT_DIM, latent_dim: int = 64,
-                 hidden_dim: int = 512, n_layers: int = 3, learned: bool = True):
+                 hidden_dim: int = 512, n_layers: int = 3, learned: bool = True,
+                 dropout: float = 0.0):
         super().__init__()
         self.learned = learned
         self.latent_dim = latent_dim
@@ -147,6 +148,8 @@ class ThermoEncoder(nn.Module):
             for _ in range(n_layers):
                 layers.append(nn.Linear(d_in, hidden_dim))
                 layers.append(nn.GELU())
+                if dropout > 0.0:
+                    layers.append(nn.Dropout(dropout))
                 d_in = hidden_dim
             layers.append(nn.Linear(d_in, latent_dim))
             self.mlp = nn.Sequential(*layers)
@@ -190,7 +193,7 @@ class ForcingModule(nn.Module):
 
     def __init__(self, latent_dim: int = 64, local_window: int = 3,
                  hidden_dim: int = 512, learned: bool = True,
-                 delta_thermo_dim: int = 5):
+                 delta_thermo_dim: int = 5, dropout: float = 0.0):
         super().__init__()
         self.latent_dim = latent_dim
         self.local_window = local_window
@@ -202,13 +205,20 @@ class ForcingModule(nn.Module):
             # delta_thermo provides mutation-effect signal that does NOT collapse
             # on OOD parents (physical prior, not learned encoder output).
             context_dim = (latent_dim + delta_thermo_dim) * (2 * local_window + 1)
-            self.correction_net = nn.Sequential(
+            corr_layers: list[nn.Module] = [
                 nn.Linear(context_dim, hidden_dim),
                 nn.GELU(),
+            ]
+            if dropout > 0.0:
+                corr_layers.append(nn.Dropout(dropout))
+            corr_layers.extend([
                 nn.Linear(hidden_dim, hidden_dim),
                 nn.GELU(),
-                nn.Linear(hidden_dim, 2 * local_window + 1),
-            )
+            ])
+            if dropout > 0.0:
+                corr_layers.append(nn.Dropout(dropout))
+            corr_layers.append(nn.Linear(hidden_dim, 2 * local_window + 1))
+            self.correction_net = nn.Sequential(*corr_layers)
             # Initialize correction net to small non-zero outputs (learnable).
             for m in self.correction_net.modules():
                 if isinstance(m, nn.Linear):
@@ -585,6 +595,7 @@ class EPROConfig:
     switch_enabled: bool = False  # EPRO-Lite: no switch or single global gate
     probe: str = "DMS"  # only DMS in this dataset
     delta_thermo_dim: int = 5  # M0-R2: delta_thermo features driving correction_net
+    dropout: float = 0.0  # M0-R2-R2: regularization for 500-epoch overfitting control
 
 
 class EPROModel(nn.Module):
@@ -614,6 +625,7 @@ class EPROModel(nn.Module):
             hidden_dim=config.hidden_dim,
             n_layers=config.n_encoder_layers,
             learned=learned,
+            dropout=config.dropout,
         )
         self.forcing = ForcingModule(
             latent_dim=config.latent_dim,
@@ -621,6 +633,7 @@ class EPROModel(nn.Module):
             hidden_dim=config.hidden_dim,
             learned=learned,
             delta_thermo_dim=config.delta_thermo_dim,
+            dropout=config.dropout,
         )
         self.susceptibility = SusceptibilityModule(
             latent_dim=config.latent_dim,

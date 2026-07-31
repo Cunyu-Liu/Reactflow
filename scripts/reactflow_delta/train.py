@@ -428,6 +428,7 @@ def run_training(config: dict, mode: str, output_dir: str) -> dict[str, Any]:
         rho_max=config["model"]["rho_max"],
         neumann_iter=config["model"]["neumann_iter"],
         switch_enabled=config["model"]["switch_enabled"],
+        dropout=config["model"].get("dropout", 0.0),
     )
     model = EPROModel(model_config).to(device)
     param_count = model.param_count()

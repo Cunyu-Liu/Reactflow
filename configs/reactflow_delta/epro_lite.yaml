@@ -10,6 +10,7 @@ model:
   rho_max: 0.95
   neumann_iter: 10
   switch_enabled: false  # EPRO-Lite: no switch or single global gate
+  dropout: 0.15  # M0-R2-R2: regularization for 500-epoch overfitting control
 
 loss:
   type: "mse"  # MSE for overfit (direct gradient); pilot uses student_t override
@@ -26,8 +27,8 @@ optimizer:
   type: "adam"
   lr: 5.0e-4
   small_batch_lr: 1.0e-4  # lower lr for 8-pair stability (prevents divergence)
-  pilot_lr: 1.0e-4  # stable lr for full-dataset pilot
-  weight_decay: 1.0e-5
+  pilot_lr: 5.0e-5  # M0-R2-R2: lowered from 1e-4 to slow overfitting
+  weight_decay: 1.0e-4  # M0-R2-R2: 10x stronger regularization for 500-epoch run
   grad_clip: 1.0
 
 scheduler:
@@ -42,7 +43,7 @@ training:
   overfit_batch_size: 1  # T-M0.4 single-sample overfit
   overfit_n_pairs: 1
   small_batch_n_pairs: 8  # T-M0.5
-  pilot_max_epochs: 200  # T-M0.6 (100→200: MSE needs more epochs to converge on 1184 pairs)
+  pilot_max_epochs: 500  # M0-R2-R2: 200→500 (user override of preregistration; stronger reg compensates)
   log_every: 10
   eval_every: 20
   save_dir: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/checkpoints"
