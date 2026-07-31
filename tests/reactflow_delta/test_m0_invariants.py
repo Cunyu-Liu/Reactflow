@@ -37,6 +37,9 @@ def make_random_batch(n: int = 30, n_edges: int = 10, seed: int = 0) -> dict:
     features = torch.randn(n, 5) * 0.5 + 0.5
     features[:, 3] = torch.rand(n)
     features[:, 4] = torch.rand(n)
+    # M0-R2: append 5 delta_thermo columns for the encoder (features stays (n, 10)).
+    delta_thermo = torch.randn(n, 5) * 0.3
+    features = torch.cat([features, delta_thermo], dim=1)  # (n, 10)
 
     edges_list = []
     edge_feats_list = []
@@ -59,6 +62,7 @@ def make_random_batch(n: int = 30, n_edges: int = 10, seed: int = 0) -> dict:
     mask = torch.ones(n, dtype=torch.bool)
     return {
         "features": features,
+        "delta_thermo": delta_thermo,
         "edit_pos": n // 2,
         "edges": edges,
         "edge_features": edge_features,

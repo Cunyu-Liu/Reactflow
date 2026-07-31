@@ -24,8 +24,10 @@ Because all 1509 pairs carry ``encoded_alt="X"`` (mutant sequences not
 constructible), the mutant endpoint ``z_m`` is implicit. We parameterize the
 *endpoint difference* ``delta = z_w - z_m`` directly:
 
-  * EPRO-0: ``delta`` is a fixed hand-crafted bump at the edit position.
-  * EPRO-Lite: ``delta = fixed_base + learned_correction(features, context)``.
+  * EPRO-0: ``delta = 0`` (no learned correction; deterministic baseline).
+  * EPRO-Lite (M0-R2, v3.5): ``delta = correction_net(concat(z_w, delta_thermo))``,
+    NO positive bump, can be positive or negative (breaks non-negativity chain
+    at the delta ring).
 
 The symmetric background is then ``z_bar = Sym(z_w, z_m) = Sym(z_w, z_w - delta)``,
 which is well-defined and swap-invariant by construction.
@@ -180,21 +182,26 @@ class ForcingModule(nn.Module):
       * Swap: delta -> -delta => z_sum unchanged, z_abs_diff unchanged, b -> -b.
       * Leakage: mask zeroes off-support forcing.
 
-    For EPRO-0: delta is a fixed Gaussian bump at the edit position.
-    For EPRO-Lite: delta = fixed_bump + learned_correction.
+    For EPRO-0: delta = 0 (no learned correction; deterministic baseline).
+    For EPRO-Lite (M0-R2, v3.5): delta = correction_net(concat(z_w, delta_thermo)),
+        NO positive bump, can be positive or negative (v3.5 §1.2, removes
+        non-negativity bias that caused M0-R pred_min=0.0).
     """
 
     def __init__(self, latent_dim: int = 64, local_window: int = 3,
-                 hidden_dim: int = 512, learned: bool = True):
+                 hidden_dim: int = 512, learned: bool = True,
+                 delta_thermo_dim: int = 5):
         super().__init__()
         self.latent_dim = latent_dim
         self.local_window = local_window
         self.learned = learned
+        self.delta_thermo_dim = delta_thermo_dim
 
         if learned:
-            # Learned correction: takes local context (z_w in window + edit features)
-            # and outputs a correction to delta on the window.
-            context_dim = latent_dim * (2 * local_window + 1)
+            # M0-R2: correction_net input = concat(z_w[window], delta_thermo[window])
+            # delta_thermo provides mutation-effect signal that does NOT collapse
+            # on OOD parents (physical prior, not learned encoder output).
+            context_dim = (latent_dim + delta_thermo_dim) * (2 * local_window + 1)
             self.correction_net = nn.Sequential(
                 nn.Linear(context_dim, hidden_dim),
                 nn.GELU(),
@@ -209,8 +216,9 @@ class ForcingModule(nn.Module):
                     nn.init.zeros_(m.bias)
 
     def forward(self, z_w: torch.Tensor, edit_pos: int, n: int,
-                mask: torch.Tensor) -> torch.Tensor:
-        """Compute forcing vector b.
+                mask: torch.Tensor,
+                delta_thermo: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+        """Compute forcing vector b and endpoint difference delta.
 
         Parameters
         ----------
@@ -218,44 +226,62 @@ class ForcingModule(nn.Module):
         edit_pos : int — 0-indexed edit position.
         n : int — sequence length.
         mask : (n,) bool — support mask (True where forcing is allowed).
+        delta_thermo : (n, delta_thermo_dim) | None — per-position delta_thermo
+            features (M0-R2, required when learned=True). None for EPRO-0.
 
         Returns
         -------
         b : (n, latent_dim) — forcing vector (same dim as z_w for response).
+        delta : (n, latent_dim) — endpoint difference z_w - z_m (for kernel/observation).
         """
 
         lo = max(0, edit_pos - self.local_window)
         hi = min(n, edit_pos + self.local_window + 1)
         window_size = hi - lo
 
-        # Fixed Gaussian bump on the window (EPRO-0 base, small).
-        positions = torch.arange(lo, hi, dtype=z_w.dtype, device=z_w.device)
-        sigma = max(self.local_window, 1)
-        bump = torch.exp(-0.5 * ((positions - edit_pos) / sigma) ** 2)  # (window,)
-
-        # delta on the window: small fixed bump + learned correction.
-        delta_window = bump.unsqueeze(-1) * 0.1  # (window, latent_dim) * small base
+        # M0-R2 (v3.5 §1.2): NO positive bump. delta = correction_net(context),
+        # fully learned, can be positive or negative. This breaks the
+        # non-negativity chain at the delta ring (b = w_sym * delta, w_sym >= 0,
+        # so delta < 0 => b < 0 => can predict negative delta_r).
+        delta_window = torch.zeros(window_size, z_w.shape[-1],
+                                   dtype=z_w.dtype, device=z_w.device)
 
         if self.learned:
-            # Learned correction from local context (full magnitude, can be negative).
-            context = z_w[lo:hi].flatten()  # (window * latent_dim,)
-            expected = self.latent_dim * (2 * self.local_window + 1)
-            if context.shape[0] < expected:
-                pad = torch.zeros(expected - context.shape[0], dtype=z_w.dtype, device=z_w.device)
-                context = torch.cat([context, pad])
+            if delta_thermo is None:
+                raise ValueError(
+                    "delta_thermo required when learned=True (M0-R2, v3.5 §2.2). "
+                    "Pass None only for EPRO-0 (learned=False)."
+                )
+            # z_w context (learned latent, may collapse on OOD parents).
+            z_context = z_w[lo:hi].flatten()  # (window * latent_dim,)
+            expected_z = self.latent_dim * (2 * self.local_window + 1)
+            if z_context.shape[0] < expected_z:
+                pad = torch.zeros(expected_z - z_context.shape[0],
+                                  dtype=z_w.dtype, device=z_w.device)
+                z_context = torch.cat([z_context, pad])
+            # delta_thermo context (physical prior, does NOT collapse on OOD).
+            d_context = delta_thermo[lo:hi].flatten()  # (window * delta_thermo_dim,)
+            expected_d = self.delta_thermo_dim * (2 * self.local_window + 1)
+            if d_context.shape[0] < expected_d:
+                pad = torch.zeros(expected_d - d_context.shape[0],
+                                  dtype=delta_thermo.dtype, device=delta_thermo.device)
+                d_context = torch.cat([d_context, pad])
+            context = torch.cat([z_context, d_context])  # (expected_z + expected_d,)
             correction = self.correction_net(context)  # (window,)
             if correction.shape[0] < window_size:
-                pad = torch.zeros(window_size - correction.shape[0], dtype=correction.dtype, device=correction.device)
+                pad = torch.zeros(window_size - correction.shape[0],
+                                  dtype=correction.dtype, device=correction.device)
                 correction = torch.cat([correction, pad])
             elif correction.shape[0] > window_size:
                 correction = correction[:window_size]
-            delta_window = delta_window + correction.unsqueeze(-1) * 1.0  # full magnitude
+            # NO bump addition; delta fully from correction_net, can be negative.
+            delta_window = correction.unsqueeze(-1) * 1.0  # (window, latent_dim)
 
         # Scatter delta to full-length vector.
         delta = torch.zeros_like(z_w)  # (n, latent_dim)
         delta[lo:hi] = delta_window
 
-        # Symmetric weight w_sym from z_w and delta.
+        # Symmetric weight w_sym from z_w and delta (UNCHANGED, v3.5 §2.3 item 13).
         # z_sum = z_w + z_m = z_w + (z_w - delta) = 2*z_w - delta (symmetric)
         # z_abs_diff = |delta| (symmetric)
         z_sum = 2.0 * z_w - delta
@@ -268,7 +294,7 @@ class ForcingModule(nn.Module):
         b = w_sym * delta  # (n, latent_dim)
         b = b * mask.unsqueeze(-1).to(b.dtype)  # zero outside support
 
-        return b
+        return b, delta
 
 
 # ---------------------------------------------------------------------------
@@ -558,6 +584,7 @@ class EPROConfig:
     neumann_iter: int = 50
     switch_enabled: bool = False  # EPRO-Lite: no switch or single global gate
     probe: str = "DMS"  # only DMS in this dataset
+    delta_thermo_dim: int = 5  # M0-R2: delta_thermo features driving correction_net
 
 
 class EPROModel(nn.Module):
@@ -593,6 +620,7 @@ class EPROModel(nn.Module):
             local_window=config.local_window,
             hidden_dim=config.hidden_dim,
             learned=learned,
+            delta_thermo_dim=config.delta_thermo_dim,
         )
         self.susceptibility = SusceptibilityModule(
             latent_dim=config.latent_dim,
@@ -624,6 +652,8 @@ class EPROModel(nn.Module):
             - edges: (2, n_edges) — contact + sequence-adjacent edges.
             - edge_features: (n_edges, 3) — (bpp, seq_dist, contact_weight).
             - mask: (n,) — True for real positions (not padding).
+            - delta_thermo: (n, delta_thermo_dim) — per-position delta_thermo
+              features driving correction_net (M0-R2, v3.5 §2.2).
 
         Returns
         -------
@@ -639,36 +669,16 @@ class EPROModel(nn.Module):
         edit_pos = batch["edit_pos"]
         edges = batch["edges"]  # (2, n_edges)
         edge_features = batch["edge_features"]  # (n_edges, 3)
+        delta_thermo = batch["delta_thermo"]  # (n, delta_thermo_dim) M0-R2
         n = features.shape[0]
 
         # 1. Encode thermo features -> z_w.
         z_w = self.encoder(features.unsqueeze(0)).squeeze(0)  # (n, latent_dim)
 
-        # 2. Compute forcing b (delta is internal to forcing module).
+        # 2. Compute forcing b and delta (M0-R2: forcing returns both;
+        #    NO duplicate bump/delta computation here, v3.5 §1.2).
         mask = batch.get("mask", torch.ones(n, dtype=torch.bool, device=features.device))
-        b = self.forcing(z_w, edit_pos, n, mask)  # (n, latent_dim)
-
-        # delta = z_w - z_m; for kernel we need delta. Reconstruct from forcing.
-        lo = max(0, edit_pos - self.config.local_window)
-        hi = min(n, edit_pos + self.config.local_window + 1)
-        positions = torch.arange(lo, hi, dtype=z_w.dtype, device=z_w.device)
-        sigma = max(self.config.local_window, 1)
-        bump = torch.exp(-0.5 * ((positions - edit_pos) / sigma) ** 2)
-        delta = torch.zeros_like(z_w)
-        delta[lo:hi] = bump.unsqueeze(-1) * 0.1  # small base (matches forcing)
-        if self.is_lite:
-            context = z_w[lo:hi].flatten()
-            expected = self.config.latent_dim * (2 * self.config.local_window + 1)
-            if context.shape[0] < expected:
-                pad = torch.zeros(expected - context.shape[0], dtype=z_w.dtype, device=z_w.device)
-                context = torch.cat([context, pad])
-            correction = self.forcing.correction_net(context)
-            if correction.shape[0] < (hi - lo):
-                pad = torch.zeros(hi - lo - correction.shape[0], dtype=correction.dtype, device=correction.device)
-                correction = torch.cat([correction, pad])
-            elif correction.shape[0] > (hi - lo):
-                correction = correction[:hi - lo]
-            delta[lo:hi] = delta[lo:hi] + correction.unsqueeze(-1) * 1.0  # full magnitude
+        b, delta = self.forcing(z_w, edit_pos, n, mask, delta_thermo)  # (n, latent_dim) each
 
         # 3. Susceptibility: K, h_lin.
         h_lin, K = self.susceptibility(z_w, delta, edges, edge_features, b, n)

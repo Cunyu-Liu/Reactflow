@@ -62,7 +62,8 @@ class PairData:
     pair_id: str
     parent: str
     split: str
-    features: torch.Tensor  # (n, 10): 5 WT thermo + 5 delta_thermo (M0-R)
+    features: torch.Tensor  # (n, 10): 5 WT thermo + 5 delta_thermo (M0-R, encoder input)
+    delta_thermo: torch.Tensor  # (n, 5): delta_thermo features, forcing input (M0-R2, v3.5 §2.2)
     edges: torch.Tensor  # (2, n_edges)
     edge_features: torch.Tensor  # (n_edges, 3)
     edit_pos: int  # 0-indexed
@@ -176,6 +177,7 @@ def build_pair_data(pair_meta: dict, parent_thermo: dict[str, np.ndarray],
         parent=pair_meta["parent"],
         split=pair_meta["split"],
         features=torch.tensor(features, dtype=torch.float32),
+        delta_thermo=torch.tensor(delta_thermo_arr, dtype=torch.float32),
         edges=edges,
         edge_features=edge_features,
         edit_pos=edit_arr_idx if edit_arr_idx is not None else 0,
@@ -269,6 +271,7 @@ def train_one_epoch(model: EPROModel, dataset: list[PairData], loss_fn,
 
         batch = {
             "features": pd.features.to(device),
+            "delta_thermo": pd.delta_thermo.to(device),
             "edit_pos": pd.edit_pos,
             "edges": pd.edges.to(device),
             "edge_features": pd.edge_features.to(device),
@@ -321,6 +324,7 @@ def evaluate_model(model: EPROModel, dataset: list[PairData],
     for pd in dataset:
         batch = {
             "features": pd.features.to(device),
+            "delta_thermo": pd.delta_thermo.to(device),
             "edit_pos": pd.edit_pos,
             "edges": pd.edges.to(device),
             "edge_features": pd.edge_features.to(device),
