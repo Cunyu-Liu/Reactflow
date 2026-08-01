@@ -505,6 +505,7 @@ def load_split_pairs(
     split_members_path: str | Path,
     thermo_manifest_path: str | Path | None = None,
     rdat_loader=None,
+    include_annotation_only: bool = False,
 ) -> list[PairRecord]:
     """Load ``PairRecord`` objects for a named split.
 
@@ -548,7 +549,21 @@ def load_split_pairs(
 
     records: list[PairRecord] = []
     for entry in registry_doc["registry"]:
-        if not entry.get("true_pair"):
+        is_true = entry.get("true_pair")
+        is_safe_anno = (
+            not is_true
+            and include_annotation_only
+            and entry.get("exclusion_reasons") == ["annotation_only_alt_not_verifiable"]
+            and entry.get("parent_lineage_verified") is True
+            and entry.get("has_wt_anchor") is True
+            and entry.get("comparable_fraction", 0) >= 0.6
+            and entry.get("normalization_domain_compatible") is True
+            and entry.get("condition_match_status") == "match"
+            and entry.get("in_vivo_in_vitro_mixed") is False
+            and entry.get("edit_count") == 1
+            and entry.get("edit_type") == "substitution"
+        )
+        if not is_true and not is_safe_anno:
             continue
         pid = _pair_id_from_entry(entry)
         if pid not in split_pids:

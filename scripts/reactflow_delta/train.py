@@ -224,6 +224,7 @@ def load_dataset(config: dict, split: str = "train") -> list[PairData]:
         split,
         registry_path=registry_path,
         split_members_path=split_path,
+        include_annotation_only=config.get("data", {}).get("include_annotation_only_pairs", False),
     )
     record_by_pid = {r.pair_id: r for r in records}
 
