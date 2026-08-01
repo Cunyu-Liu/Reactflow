@@ -294,6 +294,11 @@ def train_one_epoch(model: EPROModel, dataset: list[PairData], loss_fn,
             loss = loss_fn(mu, target, valid_mask, weight=pd.pair_quality_weight)
         else:
             loss = loss_fn(mu, target, valid_mask, measurement_variance=meas_var)
+        # M0-R2-R3: L1/MAE term to break NLL sigma-collapse pathology
+        l1_weight = config["loss"].get("l1_weight", 0.0)
+        if l1_weight > 0 and valid_mask.sum() > 0:
+            mae_loss = (mu - target).abs()[valid_mask].mean()
+            loss = loss + l1_weight * mae_loss
 
         if torch.isfinite(loss) and loss.requires_grad:
             loss.backward()

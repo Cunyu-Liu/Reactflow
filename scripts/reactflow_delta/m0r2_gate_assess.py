@@ -30,8 +30,8 @@ import train as trainmod  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = REPO_ROOT / "configs/reactflow_delta/epro_lite.yaml"
-CKPT_PATH = Path("/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r2/pilot_v2/best_checkpoint.pt")
-TRAIN_LOG_PATH = Path("/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r2/pilot_v2/train_log.json")
+CKPT_PATH = Path("/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r2/pilot_v3/best_checkpoint.pt")
+TRAIN_LOG_PATH = Path("/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r2/pilot_v3/train_log.json")
 ARTIFACT_DIR = REPO_ROOT / "artifacts/reactflow_delta/m0r2"
 INVARIANT_AUDIT = Path("/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r2/invariant_audit.json")
 
@@ -359,7 +359,7 @@ def main():
     training_run = {
         "schema_version": "reactflow-delta-m0r2-training-run-v1",
         "stage": "M0-R2",
-        "run_id": "pilot_v2",
+        "run_id": "pilot_v3",
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "status": status,
         "config": {
@@ -406,7 +406,7 @@ def main():
         failure = {
             "schema_version": "reactflow-delta-m0r2-failure-record-v1",
             "stage": "M0-R2",
-            "run_id": "pilot_v2",
+            "run_id": "pilot_v3",
             "created_at_utc": datetime.now(timezone.utc).isoformat(),
             "status": "FAILED",
             "gate": "M0-R2 Gate (v3.5 §5.1): all 8 bullets must pass",
