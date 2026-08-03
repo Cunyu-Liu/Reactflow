@@ -187,6 +187,18 @@ def main() -> None:
         unique_utrs = unique_utrs[: args.max_sequences]
         print(f"  limited to {args.max_sequences} sequences", flush=True)
 
+    # Filter to most common length (handle variable-length UTRs)
+    from collections import Counter
+    len_counts = Counter(len(u) for u in unique_utrs)
+    most_common_len, most_common_count = len_counts.most_common(1)[0]
+    if len(len_counts) > 1:
+        skipped = len(unique_utrs) - most_common_count
+        print(f"  WARNING: {skipped} sequences with non-standard length skipped "
+              f"(most common: {most_common_len}nt, all lengths: {dict(sorted(len_counts.items()))})",
+              flush=True)
+        unique_utrs = [u for u in unique_utrs if len(u) == most_common_len]
+        print(f"  {len(unique_utrs)} sequences after filtering", flush=True)
+
     # Compute thermo features
     print("Computing thermo features...", flush=True)
     features = compute_thermo_features(
