@@ -1,0 +1,311 @@
+schema_version: reactflow_delta.active_contract.v1
+manifest_id: reactflow_delta_v4_data_first_draft_20260803
+project_task_id: reactflow_delta
+created_at: "2026-08-03T12:18:59Z"
+
+authority:
+  pointer_role: SINGLE_ACTIVE_AUTHORITY
+  manifest_repo_path: configs/reactflow_delta/active_contract.yaml
+  current_phase: RECOVERY_CONTRACT_REWRITE
+  conflict_policy: FAIL_CLOSED
+  precedence:
+    - ACTIVE_CONTRACT_MANIFEST
+    - V4_CONTRACT_DOCUMENT
+    - RUN_MANIFEST
+    - HISTORICAL_DOCUMENTS
+
+active_contract:
+  id: reactflow_delta_v4_data_first
+  version: v4_data_first
+  path: docs/contracts/ReactFlowDelta科研合同_v4_data_first.md
+  sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+  hash_mode: RAW_FILE_BYTES
+  hash_status: VERIFIED
+  document_status: DRAFT
+  supersedes:
+    - contract_id: reactflow_delta_v3_epro_20260729
+      path: docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md
+      authority_disposition: SUPERSEDED_HISTORICAL_ONLY
+      supersession_effective_when: V4_ACTIVE_AUTHORIZED
+      preservation_status: PRESERVE_UNCHANGED
+      sha256: 3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10
+    - contract_id: reactflow_delta_v3_1_d1cleanup_20260730
+      path: docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_1_D1Cleanup_20260730.md
+      authority_disposition: SUPERSEDED_HISTORICAL_ONLY
+      supersession_effective_when: V4_ACTIVE_AUTHORIZED
+      preservation_status: PRESERVE_UNCHANGED
+      sha256: 09d646aef8b0dddf789ee860e0e14499fb56aab654afecf9140f2d2448d1c091
+    - contract_id: reactflow_delta_v3_2_d2r_20260731
+      path: docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_2_D2R_20260731.md
+      authority_disposition: SUPERSEDED_HISTORICAL_ONLY
+      supersession_effective_when: V4_ACTIVE_AUTHORIZED
+      preservation_status: PRESERVE_UNCHANGED
+      sha256: ad9d439d1e9bf3b85bb19088b2d9a2f7df520bf214e3fe1d93300cc6ccabdc39
+    - contract_id: reactflow_delta_v3_3_training_authorization
+      path: docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_3_TrainingAuth_20260731.md
+      authority_disposition: NEVER_VALIDLY_AUTHORIZED
+      preservation_status: PRESERVE_AS_FOUND
+      identity_status: UNTRACKED_OBSERVED
+      signature_status: UNSIGNED
+      sha256: 9a38b220ecb6f324cf8a33b19bd30bfa98ada1112df0db440d9c1bc67ecf4f45
+    - contract_id: reactflow_delta_v3_4
+      path: docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_4_M0R_20260731.md
+      authority_disposition: NEVER_VALIDLY_AUTHORIZED
+      preservation_status: PRESERVE_AS_FOUND
+      signature_status: UNSIGNED
+      sha256: b1669ed553cf868f2a725e9315a707a5961af173c83746e8f25db00c8a122d35
+    - contract_id: reactflow_delta_v3_5
+      path: docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_5_M0R2_20260731.md
+      authority_disposition: NEVER_VALIDLY_AUTHORIZED
+      preservation_status: PRESERVE_AS_FOUND
+      signature_status: UNSIGNED
+      sha256: 12cf38c256712d5f619090d16b3d1b9d44da729f951dfdb9d456c7a3d5d7d39a
+
+authorization:
+  status: DRAFT_AWAITING_USER_SIGNOFF
+  approval_status: NOT_PROVIDED
+  signed_by: null
+  signed_at: null
+  approval_record: null
+  approved_contract_sha256: null
+  approval_scope: null
+  allowed_phases:
+    - PILOT_CLOSURE
+  runnable_phases: []
+  training_allowed: false
+  full_data_recall_allowed: false
+  new_split_allowed: false
+  confirmatory_test_access_allowed: false
+  cross_project_export_allowed: false
+  new_wet_lab_allowed: false
+
+bindings:
+  repository_root: /home/cunyuliu/reactflow_delta_goal_20260729
+  git_commit: 6515667020184fa6e5f8dc70acd199b2c3a8fbcb
+  git_commit_semantics: PREFLIGHT_BASE_COMMIT_NOT_TRAINING_AUTHORIZATION
+  head_policy: DESCENDANT_GOVERNANCE_ONLY
+  worktree_policy: DIRTY_ALLOWED_FOR_PILOT_CLOSURE_ONLY
+  data_manifest_sha256: null
+  split_manifest_sha256: null
+  config_sha256: null
+  exposure_ledger_sha256: null
+  test_status: DEVELOPMENT_CONSUMED
+
+phase_graph:
+  - phase_id: RECOVERY_CONTRACT_REWRITE
+    dependencies: []
+    lifecycle_status: RUNNING
+    gate_result: NOT_RUN
+    evidence_class: ENGINEERING_ONLY
+    execution_authorized: false
+    training_required: false
+    next_on_pass:
+      - STOP_AWAIT_D0X_AUTHORITY_AMENDMENT
+    next_on_fail:
+      - STOP_PRESERVE_EVIDENCE
+
+  - phase_id: PILOT_CLOSURE
+    dependencies: []
+    lifecycle_status: TERMINAL
+    gate_result: PASS
+    evidence_class: DEVELOPMENT_ONLY
+    completion_marker: DEVELOPMENT_CLOSED
+    evidence_report_path: docs/audits/reactflow_delta_pilot_closure_20260803.md
+    execution_authorized: false
+    rerun_allowed: false
+    training_required: false
+    next_on_pass:
+      - STOP_AWAIT_USER_SIGNOFF
+    next_on_fail:
+      - STOP_PRESERVE_EVIDENCE
+
+  - phase_id: D0-X
+    dependencies:
+      - RECOVERY_CONTRACT_REWRITE
+      - PILOT_CLOSURE
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: DATA_QUALIFICATION_ONLY
+    execution_authorized: false
+    training_required: false
+    next_on_pass:
+      - D1-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: D1-X
+    dependencies:
+      - D0-X
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: DATA_QUALIFICATION_ONLY
+    execution_authorized: false
+    training_required: false
+    next_on_pass:
+      - D2-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: D2-X
+    dependencies:
+      - D1-X
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: DATA_QUALIFICATION_ONLY
+    execution_authorized: false
+    training_required: false
+    next_on_pass:
+      - PH0-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: PH0-X
+    dependencies:
+      - D2-X
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: DATA_QUALIFICATION_ONLY
+    execution_authorized: false
+    training_required: false
+    next_on_pass:
+      - B0-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: B0-X
+    dependencies:
+      - PH0-X
+    required_gate: TIER_B_PLUS
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: BENCHMARK_QUALIFICATION_ONLY
+    execution_authorized: false
+    training_required: true
+    next_on_pass:
+      - O0-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: O0-X
+    dependencies:
+      - B0-X
+    required_gate: TIER_B_PLUS
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: ENGINEERING_ONLY
+    execution_authorized: false
+    training_required: true
+    next_on_pass:
+      - M0-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: M0-X
+    dependencies:
+      - O0-X
+    required_gate: TIER_B_PLUS
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: DEVELOPMENT_ONLY
+    execution_authorized: false
+    training_required: true
+    development_window:
+      maximum_days: 28
+      maximum_scientific_iterations: 6
+      stop_on_first_limit: true
+    next_on_pass:
+      - E0-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: E0-X
+    dependencies:
+      - M0-X
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: CONFIRMATORY_ELIGIBLE
+    execution_authorized: false
+    training_required: false
+    next_on_pass:
+      - P0-X
+    next_on_fail:
+      - REPORT-X
+
+  - phase_id: REPORT-X
+    dependencies: []
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: ENGINEERING_ONLY
+    execution_authorized: false
+    training_required: false
+    entry_condition:
+      mode: ANY_OF_TERMINAL_FAIL
+      phase_ids:
+        - D0-X
+        - D1-X
+        - D2-X
+        - PH0-X
+        - B0-X
+        - O0-X
+        - M0-X
+        - E0-X
+      upstream_failure_manifest_required: true
+      upstream_finalizer_required: true
+      upstream_checksum_ledger_required: true
+      upstream_terminal_sentinel_required: true
+      separate_authority_amendment_required: true
+    next_on_pass:
+      - STOP_AWAIT_EXPLICIT_NEXT_CONTRACT
+    next_on_fail:
+      - STOP_PRESERVE_EVIDENCE
+
+  - phase_id: P0-X
+    dependencies:
+      - E0-X
+    lifecycle_status: PLANNED
+    gate_result: NOT_RUN
+    evidence_class: CONFIRMATORY_ELIGIBLE
+    execution_authorized: false
+    training_required: false
+    next_on_pass:
+      - STOP_AWAIT_EXPLICIT_NEXT_CONTRACT
+    next_on_fail:
+      - STOP_PRESERVE_EVIDENCE
+
+gate_catalog:
+  TIER_B_PLUS:
+    status: NOT_RUN
+  TIER_A_PLUS:
+    status: NOT_RUN
+  E0-X:
+    status: NOT_RUN
+  UNCERTAINTY_CALIBRATION:
+    status: NOT_RUN
+  OOD_ABSTENTION:
+    status: NOT_RUN
+
+cross_project_export:
+  interface_id: reactflow_delta__mrna_editflow_authority_v1
+  interface_path: docs/contracts/interfaces/ReactFlowDelta_mRNAEditFlow_authority_interface_v1.md
+  interface_sha256: 65f847e7d799789d50652f6ccb8558cd62e6743ec36551ea51bf5720ce8cec52
+  interface_hash_status: VERIFIED
+  status: REACTFLOW_DELTA_ORACLE_NOT_AUTHORIZED
+  required_gate_ids:
+    - E0-X
+    - UNCERTAINTY_CALIBRATION
+    - OOD_ABSTENTION
+  automatic_activation: false
+
+integrity:
+  hash_algorithm: SHA256
+  file_hash_mode: RAW_FILE_BYTES
+  embedded_manifest_sha256: FORBIDDEN_SELF_REFERENCE
+  detached_bundle_ledger_path: configs/reactflow_delta/active_contract.bundle.sha256
+  detached_bundle_ledger_status: PENDING_BUNDLE_FINALIZATION
+  bundle_member_paths:
+    - docs/contracts/ReactFlowDelta科研合同_v4_data_first.md
+    - configs/reactflow_delta/active_contract.yaml
+    - docs/contracts/interfaces/ReactFlowDelta_mRNAEditFlow_authority_interface_v1.md
+    - docs/audits/reactflow_delta_pilot_closure_20260803.md
+  bundle_excludes:
+    - configs/reactflow_delta/active_contract.bundle.sha256
