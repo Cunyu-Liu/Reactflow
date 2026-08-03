@@ -51,12 +51,12 @@ training:
   device: "cuda"  # GPU required (CPU silent fallback = stop)
 
 data:
-  manifest_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/expanded_v2/m0_pair_manifest_expanded.json"
+  manifest_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/m0_pair_manifest.json"
   parent_thermo_dir: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/parent_thermo"
-  registry_path: "artifacts/reactflow_delta/d1_all/d1_true_pair_registry.json"
-  split_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/expanded_split_members_v2.json"
+  registry_path: "artifacts/reactflow_delta/d2r/d1_true_pair_registry.json"
+  split_path: "artifacts/reactflow_delta/ph0/split_members.json"
   include_annotation_only_pairs: true
-  mutant_thermo_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/expanded_v2/mutant_thermo_features_expanded.npz"
+  mutant_thermo_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/expanded/mutant_thermo_features_expanded.npz"
   clip_delta_true: 5.0
   normalize_per_parent: true  # scale each parent to mean_abs~1 (skill is scale-invariant)  # remove extreme outliers (some parents have delta up to 13655)
 
