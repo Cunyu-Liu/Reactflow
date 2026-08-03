@@ -40,6 +40,29 @@ def test_parser_preserves_nan_as_missing_and_mutation_annotation(tmp_path: Path)
     assert document["global_annotations"][0]["experimentType"] == ["MutateAndMap"]
 
 
+def test_parser_treats_empty_inf_na_as_missing(tmp_path: Path) -> None:
+    # _numeric_values: empty strings, Inf, -Inf, N/A, NA are treated as missing
+    # (None), not parse errors. Same handling as NaN.
+    path = _write(
+        tmp_path / "edge.rdat",
+        "\n".join([
+            "RDAT_VERSION\t0.34",
+            "NAME\tedge",
+            "SEQUENCE\tACGU",
+            "OFFSET\t0",
+            "SEQPOS\tA1\tC2\tG3\tU4",
+            "REACTIVITY:1\t0.1\t\tInf\tN/A",
+        ]),
+    )
+    document = parse_rdat(path)
+    reactivity = document["profiles"][0]["reactivity"]
+    assert reactivity[0] == 0.1
+    assert reactivity[1] is None  # empty string
+    assert reactivity[2] is None  # Inf
+    assert reactivity[3] is None  # N/A
+    assert document["profiles"][0]["missing_reactivity_count"] == 3
+
+
 def test_parser_fails_closed_on_profile_length_mismatch(tmp_path: Path) -> None:
     path = _write(
         tmp_path / "bad.rdat",
@@ -52,9 +75,9 @@ def test_parser_fails_closed_on_profile_length_mismatch(tmp_path: Path) -> None:
 def test_parser_fails_closed_on_unknown_rdat_version(tmp_path: Path) -> None:
     path = _write(
         tmp_path / "bad-version.rdat",
-        "\n".join(["RDAT_VERSION\t0.33", "NAME\tx", "SEQUENCE\tAC", "OFFSET\t0", "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2"]),
+        "\n".join(["RDAT_VERSION\t0.99", "NAME\tx", "SEQUENCE\tAC", "OFFSET\t0", "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2"]),
     )
-    with pytest.raises(RdatParseError, match="0.34"):
+    with pytest.raises(RdatParseError, match="not accepted"):
         parse_rdat(path)
 
 
@@ -136,9 +159,9 @@ class TestVersionAlias:
 
 
 class TestAcceptedRdatVersions:
-    """§5.2: accept RDAT_VERSION 0.4 / 0.22 / 0.24."""
+    """§5.2: accept RDAT_VERSION 0.4 / 0.22 / 0.24 / 0.33 / 0.32."""
 
-    @pytest.mark.parametrize("version", ["0.4", "0.22", "0.24"])
+    @pytest.mark.parametrize("version", ["0.4", "0.22", "0.24", "0.33", "0.32"])
     def test_accepted_version_parses(self, tmp_path: Path, version: str) -> None:
         path = _write(
             tmp_path / f"v{version}.rdat",
@@ -150,16 +173,16 @@ class TestAcceptedRdatVersions:
         document = parse_rdat(path)
         assert document["headers"]["RDAT_VERSION"] == version
 
-    def test_version_0_33_still_rejected(self, tmp_path: Path) -> None:
+    def test_version_0_33_now_accepted(self, tmp_path: Path) -> None:
         path = _write(
-            tmp_path / "bad.rdat",
+            tmp_path / "v033.rdat",
             "\n".join([
                 "RDAT_VERSION\t0.33", "NAME\tx", "SEQUENCE\tAC",
                 "OFFSET\t0", "SEQPOS\tA1\tC2", "REACTIVITY:1\t0.1\t0.2",
             ]),
         )
-        with pytest.raises(RdatParseError, match="not accepted"):
-            parse_rdat(path)
+        document = parse_rdat(path)
+        assert document["headers"]["RDAT_VERSION"] == "0.33"
 
 
 class TestSpaceSeparatedFields:

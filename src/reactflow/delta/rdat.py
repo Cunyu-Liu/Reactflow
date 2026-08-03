@@ -38,7 +38,9 @@ D0R_PARSED_PROFILE_SCHEMA_VERSION = "reactflow-delta-d0r-parsed-profile-v1"
 
 # D1 §5.2: accepted RDAT versions. 0.34 is the D0 canonical version; 0.4, 0.22,
 # and 0.24 are forward-only additions for BSUGLY, CBAG4P, and GLYCFN files.
-_ACCEPTED_RDAT_VERSIONS = frozenset({"0.34", "0.4", "0.22", "0.24"})
+# 0.33 and 0.32 are accepted after format verification (same structure as 0.34,
+# used by ETERNA_R78 and 16S/5S rRNA MAPseeker files).
+_ACCEPTED_RDAT_VERSIONS = frozenset({"0.34", "0.4", "0.22", "0.24", "0.33", "0.32"})
 
 _RNA_BASES = set("ACGU")
 _RNA_SEQUENCE = re.compile(r"^[ACGU]+$")
@@ -433,15 +435,18 @@ def _annotation_map(values: list[str]) -> dict[str, list[str]]:
 def _numeric_values(values: list[str], key: str) -> list[float | None]:
     result: list[float | None] = []
     for value in values:
-        if value.lower() == "nan":
+        stripped = value.strip()
+        if stripped.lower() in ("nan", "", "n/a", "na"):
             result.append(None)
             continue
         try:
-            number = float(value)
+            number = float(stripped)
         except ValueError as exc:
             raise RdatParseError(f"non-numeric value in {key}: {value!r}") from exc
         if not math.isfinite(number):
-            raise RdatParseError(f"non-finite non-NaN value in {key}: {value!r}")
+            # Inf/-Inf treated as None (missing data) rather than parse error
+            result.append(None)
+            continue
         result.append(number)
     return result
 
