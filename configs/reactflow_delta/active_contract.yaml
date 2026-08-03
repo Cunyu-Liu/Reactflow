@@ -1,15 +1,15 @@
 schema_version: reactflow_delta.active_contract.v1
-manifest_id: reactflow_delta_v4_recovery_final_authority_epoch_2_20260803
+manifest_id: reactflow_delta_v4_d0x_authority_epoch_3_20260803
 project_task_id: reactflow_delta
 created_at: "2026-08-03T23:08:38+08:00"
 
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  authority_epoch: 2
+  authority_epoch: 3
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
-  current_phase: null
-  current_authority_state: STOP_AWAIT_D0X_AUTHORITY_AMENDMENT
-  current_runnable_phase: null
+  current_phase: D0-X
+  current_authority_state: D0X_AUTHORIZED
+  current_runnable_phase: D0-X
   conflict_policy: FAIL_CLOSED
   precedence:
     - ACTIVE_CONTRACT_MANIFEST
@@ -25,7 +25,7 @@ active_contract:
   hash_mode: RAW_FILE_BYTES
   hash_status: VERIFIED
   raw_document_declared_status: DRAFT_AWAITING_USER_SIGNOFF
-  effective_authority_status: V4_ACTIVE_AUTHORIZED_GOVERNANCE_ONLY
+  effective_authority_status: ACTIVE_D0X_ONLY
   effective_authority_basis:
     approval_record_sha256: c8b20a7eccf0ac582f316a82e2015fac981128de7a9e041c96a85be4231f7109
     recovery_finalization_receipt_sha256: de01062d3cc93c3367e8860978433ca4c0423410fb1e3f9ad0d7f710198d16bf
@@ -70,7 +70,7 @@ active_contract:
       sha256: 12cf38c256712d5f619090d16b3d1b9d44da729f951dfdb9d456c7a3d5d7d39a
 
 authorization:
-  status: V4_ACTIVE_AUTHORIZED_GOVERNANCE_ONLY
+  status: ACTIVE_D0X_ONLY
   approval_status: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
   signed_by: null
   signed_at: null
@@ -82,10 +82,12 @@ authorization:
     - V4_SIGNOFF
     - RECOVERY_TERMINALIZATION_IF_ALL_ACCEPTANCE_TESTS_PASS
     - CONDITIONAL_D0X_ONLY_AUTHORITY
-  allowed_phases: []
-  runnable_phases: []
+  allowed_phases:
+    - D0-X
+  runnable_phases:
+    - D0-X
   training_allowed: false
-  full_data_recall_allowed: false
+  full_data_recall_allowed: true
   new_split_allowed: false
   confirmatory_test_access_allowed: false
   cross_project_export_allowed: false
@@ -93,10 +95,11 @@ authorization:
 
 bindings:
   repository_root: /home/cunyuliu/reactflow_delta_goal_20260729
-  git_commit: 9e668e85c9332b75de41fc03af23b273a5097a71
-  git_commit_semantics: RECOVERY_FINALIZER_SOURCE_PARENT
+  git_commit: d63f4c2fda683065040a91decc3a9febb1ecb2c2
+  execution_source_commit: d63f4c2fda683065040a91decc3a9febb1ecb2c2
+  git_commit_semantics: EXECUTABLE_SOURCE_PARENT_OF_D0X_AUTHORITY_HEAD
   head_policy: EXACTLY_ONE_FOCUSED_NON_MERGE_AUTHORITY_CHILD
-  worktree_policy: TRACKED_CLEAN_PREEXISTING_UNTRACKED_PRESERVED
+  worktree_policy: D0X_EXECUTION_REQUIRES_ISOLATED_CLEAN_WORKTREE
   recovery_amendment_path: docs/contracts/amendments/reactflow_delta_v4_recovery_finalization_20260803.yaml
   recovery_amendment_sha256: 6aa8e08351e1586203a719f4a6d3c99bf7626e6117d85f40ad6e33eef6ad3840
   recovery_finalization_receipt_path: manifests/reactflow_delta/recovery_v4_finalization_receipt_20260803.yaml
@@ -105,16 +108,30 @@ bindings:
   recovery_external_checksum_ledger_sha256: 17a927d9e6713ed876162bc78a53868496164e8bdb285626402e90cb7eada3f8
   recovery_external_terminal_sentinel_sha256: 88c6027774500f1a0126e656f4c9f323e439f04b310b915d43d12efbea5da09e
   historical_recovery_receipt_commit: 940697de985dbd7425112babd2d429e81ddde4cb
+  d0x_amendment_path: docs/contracts/amendments/reactflow_delta_v4_d0x_only_20260803.yaml
+  d0x_amendment_sha256: 4e1ff468b3fd630a0e524e457d9f8f172f46ddf20940ff1dc87606d071b4bccf
+  source_universe_manifest_path: data_registry/d0x/source_universe_v1.yaml
+  source_universe_manifest_sha256: b8aabd83a4eab37d86baa4c47d1b4f8b7116cdf6e2018b96c9d68229078c6df1
+  config_path: configs/reactflow_delta/d0x_recall_v1.yaml
+  config_sha256: 214716e6fd51d583d935105799ba78278ede7fd3b2dde3d49d19a72596bf4b4f
+  license_policy_path: configs/reactflow_delta/d0x_license_policy_v1.yaml
+  license_policy_sha256: f03f11beebe2e8371b9ec241c0d847cf019e804afc629237f076467f01201965
+  parser_fixture_manifest_path: tests/fixtures/reactflow_delta/d0x/fixture_manifest.yaml
+  parser_fixture_manifest_sha256: 8f44b9abf8b3f9ef4d12498cb652c992628ef3fcf699cb533fccc2f361ac2bbb
+  initial_exposure_ledger_path: data_registry/d0x/initial_exposure_ledger.yaml
+  exposure_ledger_sha256: a4196b27878dbb4d26ebd4154c1d6571634cb8fe02d405f22c15b3faedf1821b
+  test_access_ledger_path: data_registry/d0x/test_access_ledger.yaml
+  test_access_ledger_sha256: 8a8f28ea5e45688c83ea0cd674d15bc2b0b40e12b946b5f53236823b4b20ee73
   data_manifest_sha256: null
   split_manifest_sha256: null
   config_sha256: null
   exposure_ledger_sha256: null
   test_status: DEVELOPMENT_CONSUMED
   phase_specific_binding_status:
-    data_manifest: NOT_APPLICABLE_RECOVERY_PRECEDES_D0X
-    split_manifest: NOT_APPLICABLE_RECOVERY_PRECEDES_SPLIT
-    config: NOT_APPLICABLE_NO_EXECUTABLE_PHASE
-    exposure_ledger: NOT_APPLICABLE_RECOVERY_PRECEDES_DATA_USE
+    data_manifest: NOT_APPLICABLE_D0X_CREATES_RECALL_MANIFEST
+    split_manifest: NOT_APPLICABLE_D0X_PRECEDES_SPLIT
+    training_dataset: NOT_APPLICABLE_D0X_PRECEDES_TRAINING
+    pretraining_checkpoint: NOT_APPLICABLE_D0X_PRECEDES_PRETRAINING
 
 phase_graph:
   - phase_id: RECOVERY_CONTRACT_REWRITE
@@ -158,7 +175,8 @@ phase_graph:
     lifecycle_status: PLANNED
     gate_result: NOT_RUN
     evidence_class: DATA_QUALIFICATION_ONLY
-    execution_authorized: false
+    execution_authorized: true
+    rerun_allowed: true
     training_required: false
     next_on_pass:
       - STOP_AWAIT_D1X_AUTHORITY_AMENDMENT
@@ -332,23 +350,27 @@ integrity:
   hash_algorithm: SHA256
   file_hash_mode: RAW_FILE_BYTES
   embedded_manifest_sha256: FORBIDDEN_SELF_REFERENCE
-  detached_bundle_ledger_path: configs/reactflow_delta/authority_epoch_2.bundle.sha256
+  detached_bundle_ledger_path: configs/reactflow_delta/authority_epoch_3.bundle.sha256
   detached_bundle_ledger_status: REQUIRED_AND_VERIFIED_BY_SENTINEL
-  authority_sentinel_path: configs/reactflow_delta/authority_epoch_2.sentinel.yaml
+  authority_sentinel_path: configs/reactflow_delta/authority_epoch_3.sentinel.yaml
   bundle_member_paths:
     - configs/reactflow_delta/active_contract.yaml
     - docs/approvals/reactflow_delta_v4_approval_20260803.yaml
     - docs/approvals/reactflow_delta_v4_d0x_approval_context_20260803.md
     - docs/audits/reactflow_delta_pilot_closure_20260803.md
+    - docs/audits/reactflow_delta_d0x_authority_20260803.md
     - docs/audits/reactflow_delta_v4_recovery_finalization_report_20260803.md
     - docs/audits/reactflow_delta_v4_recovery_manual_audit_20260803.md
     - docs/contracts/ReactFlowDelta科研合同_v4_data_first.md
-    - docs/contracts/amendments/reactflow_delta_v4_recovery_finalization_20260803.yaml
+    - docs/contracts/amendments/reactflow_delta_v4_d0x_only_20260803.yaml
     - docs/contracts/interfaces/ReactFlowDelta_mRNAEditFlow_authority_interface_v1.md
-    - manifests/reactflow_delta/recovery_v4_finalization_receipt_20260803.yaml
-    - scripts/reactflow_delta/finalize_recovery_v4.py
-    - scripts/reactflow_delta/validate_recovery_v4.py
-    - tests/reactflow_delta/test_recovery_authority_v4.py
+    - data_registry/d0x/initial_exposure_ledger.yaml
+    - data_registry/d0x/source_universe_v1.yaml
+    - data_registry/d0x/test_access_ledger.yaml
+    - configs/reactflow_delta/d0x_license_policy_v1.yaml
+    - configs/reactflow_delta/d0x_recall_v1.yaml
+    - scripts/reactflow_delta/d0x_validate_authority.py
+    - tests/fixtures/reactflow_delta/d0x/fixture_manifest.yaml
   bundle_excludes:
-    - configs/reactflow_delta/authority_epoch_2.bundle.sha256
-    - configs/reactflow_delta/authority_epoch_2.sentinel.yaml
+    - configs/reactflow_delta/authority_epoch_3.bundle.sha256
+    - configs/reactflow_delta/authority_epoch_3.sentinel.yaml

@@ -1,0 +1,38 @@
+schema_version: reactflow_delta.authority_sentinel.v1
+sentinel_id: reactflow_delta_d0x_authority_epoch_3
+sentinel_status: D0X_AUTHORITY_READY_IF_GIT_HEAD_POLICY_PASSES
+authority_epoch: 3
+created_at: "2026-08-03T23:15:00+08:00"
+contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approval_record_sha256: c8b20a7eccf0ac582f316a82e2015fac981128de7a9e041c96a85be4231f7109
+d0x_amendment_sha256: 4e1ff468b3fd630a0e524e457d9f8f172f46ddf20940ff1dc87606d071b4bccf
+source_universe_manifest_sha256: b8aabd83a4eab37d86baa4c47d1b4f8b7116cdf6e2018b96c9d68229078c6df1
+active_manifest_sha256: ad16e013a63ae4f4fc7bb040d3d8d41d95d479dfdd8e55faed177ebe4b536add
+detached_ledger_path: configs/reactflow_delta/authority_epoch_3.bundle.sha256
+detached_ledger_sha256: 2d8588af071bc7537bc1fdc5e11094378454831dc1f2e7d2f8e8a05a4c655b48
+git_expectation:
+  execution_source_commit: d63f4c2fda683065040a91decc3a9febb1ecb2c2
+  required_head_first_parent: d63f4c2fda683065040a91decc3a9febb1ecb2c2
+  required_head_parent_count: 1
+  merge_commit_allowed: false
+  allowed_changed_paths:
+    - configs/reactflow_delta/active_contract.yaml
+    - configs/reactflow_delta/authority_epoch_3.bundle.sha256
+    - configs/reactflow_delta/authority_epoch_3.sentinel.yaml
+    - docs/audits/reactflow_delta_d0x_authority_20260803.md
+    - docs/contracts/amendments/reactflow_delta_v4_d0x_only_20260803.yaml
+permissions:
+  d0_x_allowed: true
+  full_data_recall_allowed: true
+  training_allowed: false
+  d1_x_allowed: false
+  new_split_allowed: false
+  confirmatory_test_access_allowed: false
+  cross_project_export_allowed: false
+  new_wet_lab_allowed: false
+  push_allowed: false
+  pull_request_allowed: false
+runtime_precondition: ISOLATED_CLEAN_WORKTREE_REQUIRED_BEFORE_NETWORK_OR_RAW_ACCESS
+terminal_run_consumes_authority: true
+embedded_self_sha256: FORBIDDEN
+
