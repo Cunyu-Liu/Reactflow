@@ -198,9 +198,23 @@ def main() -> int:
     parser.add_argument("--output-summary", type=Path, required=True)
     parser.add_argument("--frozen-at", required=True)
     parser.add_argument("--rmdb-commit", required=True)
+    parser.add_argument(
+        "--payload-dir",
+        type=Path,
+        help="Read pre-fetched, TLS-verified <release-tag>.json payloads instead of networking",
+    )
     args = parser.parse_args()
     registry_ids = _load_registry_ids(args.registry)
-    payloads = [_fetch_release(tag) for tag in RELEASE_TAGS]
+    if args.payload_dir is None:
+        payloads = [_fetch_release(tag) for tag in RELEASE_TAGS]
+    else:
+        payloads = []
+        for tag in RELEASE_TAGS:
+            raw = (args.payload_dir / f"{tag}.json").read_bytes()
+            payload = json.loads(raw)
+            if not isinstance(payload, dict):
+                raise SnapshotError(f"prefetched release payload is not an object: {tag}")
+            payloads.append((raw, payload))
     records, summary = normalize_release_payloads(
         payloads,
         registry_ids=registry_ids,
