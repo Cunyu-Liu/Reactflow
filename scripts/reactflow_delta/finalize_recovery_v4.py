@@ -72,11 +72,20 @@ def assert_clean_and_protected(root: Path, expected_source_commit: str) -> None:
         raise RuntimeError("tracked worktree is dirty")
     if subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=root).returncode != 0:
         raise RuntimeError("staged worktree is dirty")
-    observed = {
-        line[3:]
-        for line in git_text(root, "status", "--porcelain=v1", "--untracked-files=all").splitlines()
-        if line.startswith("?? ")
-    }
+    status_bytes = subprocess.check_output(
+        ["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
+        cwd=root,
+    )
+    observed: set[str] = set()
+    for entry in status_bytes.split(b"\0"):
+        if not entry:
+            continue
+        if not entry.startswith(b"?? "):
+            raise RuntimeError(
+                "tracked/staged status appeared after clean checks: "
+                + entry.decode("utf-8", errors="backslashreplace")
+            )
+        observed.add(entry[3:].decode("utf-8", errors="strict"))
     if observed != set(PROTECTED_UNTRACKED):
         raise RuntimeError(
             f"untracked inventory drift: expected={sorted(PROTECTED_UNTRACKED)}, observed={sorted(observed)}"
