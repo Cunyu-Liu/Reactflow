@@ -1,0 +1,9 @@
+schema_version: reactflow_delta.exposure_ledger.v1
+ledger_id: reactflow_delta_d0x_initial_exposure_20260803
+status: DENY_BY_DEFAULT_NOT_RUN
+delta_test_labels_accessed: false
+held_out_profiles_inspected: false
+pretraining_overlap_audit_status: NOT_RUN
+cross_project_reuse_authorized: false
+events: []
+

@@ -1,0 +1,69 @@
+schema_version: reactflow_delta.d0x_license_policy.v1
+policy_id: reactflow_delta_d0x_license_policy_20260803_v1
+created_at: "2026-08-03T23:08:38+08:00"
+default_rule: FAIL_CLOSED_WHEN_LICENSE_OR_ACTION_PERMISSION_UNKNOWN
+actions:
+  - METADATA_SNAPSHOT
+  - RAW_DOWNLOAD
+  - INTERNAL_PARSE
+  - MODEL_TRAINING_USE
+  - REDISTRIBUTION
+source_policies:
+  RMDB:
+    license_id: CC0-1.0
+    evidence_uris:
+      - https://rmdb.stanford.edu/about/
+      - https://github.com/DasLab/rmdb.github.io
+    evidence_status: PRIMARY_OFFICIAL_LOCATED
+    metadata_snapshot: ALLOWED
+    raw_download: ALLOWED_IF_FROZEN_ASSET_AND_HASH_MATCH
+    internal_parse: ALLOWED
+    model_training_use: ALLOWED_ONLY_AFTER_D1X_ROLE_AND_EXPOSURE_AUDIT
+    redistribution: ALLOWED_WITH_PROVENANCE_AND_CITATION
+  CLASS_SNITCH:
+    license_id: null
+    evidence_status: SOURCE_SPECIFIC_AUDIT_REQUIRED
+    metadata_snapshot: ALLOWED
+    raw_download: UNKNOWN_BLOCKED
+    internal_parse: UNKNOWN_BLOCKED
+    model_training_use: FORBIDDEN_EXTERNAL_EVAL_ONLY
+    redistribution: UNKNOWN_BLOCKED
+  RIBONANZA:
+    license_id: SOURCE_VARIANT_DEPENDENT
+    evidence_status: KAGGLE_AND_POSTCOMPETITION_TERMS_REQUIRE_SEPARATE_AUDIT
+    metadata_snapshot: ALLOWED
+    raw_download: UNKNOWN_BLOCKED
+    internal_parse: UNKNOWN_BLOCKED
+    model_training_use: UNKNOWN_BLOCKED
+    redistribution: UNKNOWN_BLOCKED
+  GEO_SRA:
+    license_id: ACCESSION_SPECIFIC
+    evidence_status: PER_ACCESSION_AUDIT_REQUIRED
+    metadata_snapshot: ALLOWED
+    raw_download: UNKNOWN_BLOCKED_UNTIL_ACCESSION_AUDIT
+    internal_parse: UNKNOWN_BLOCKED_UNTIL_ACCESSION_AUDIT
+    model_training_use: UNKNOWN_BLOCKED
+    redistribution: UNKNOWN_BLOCKED
+  PAPER_SUPPLEMENTS:
+    license_id: ITEM_SPECIFIC
+    evidence_status: PER_ITEM_AUDIT_REQUIRED
+    metadata_snapshot: ALLOWED
+    raw_download: UNKNOWN_BLOCKED_UNTIL_ITEM_AUDIT
+    internal_parse: UNKNOWN_BLOCKED_UNTIL_ITEM_AUDIT
+    model_training_use: UNKNOWN_BLOCKED
+    redistribution: UNKNOWN_BLOCKED
+  ETERNA_OPENKNOT:
+    license_id: SOURCE_ROUTE_DEPENDENT
+    evidence_status: RMDB_MIRRORS_FOLLOW_RMDB_OTHERWISE_PER_ITEM_AUDIT
+    metadata_snapshot: ALLOWED
+    raw_download: CONDITIONAL
+    internal_parse: CONDITIONAL
+    model_training_use: UNKNOWN_BLOCKED_OUTSIDE_RMDB
+    redistribution: UNKNOWN_BLOCKED_OUTSIDE_RMDB
+enforcement:
+  license_restricted_disposition: LICENSE_RESTRICTED
+  unknown_permission_is_false_for_execution: true
+  restricted_or_unknown_raw_must_not_enter_git: true
+  permission_for_metadata_does_not_imply_permission_for_raw_or_training: true
+  source_terms_must_be_refrozen_at_execution: true
+

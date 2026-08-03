@@ -1,0 +1,38 @@
+schema_version: reactflow_delta.d0x_parser_fixture_manifest.v1
+fixture_bundle_id: d0x_parser_fixtures_20260803_v1
+parser_path: src/reactflow/delta/d0x.py
+parser_sha256: 4ad55085937a6385a3339c3eb2848be5f014142c46583cc2704a3ed3d7c1b697
+scientific_boundary: D0X_CANDIDATE_INVENTORY_ONLY_NOT_CANONICAL_DATA
+fixtures:
+  - path: tests/fixtures/reactflow_delta/d0x/exact_profile_override.rdat
+    sha256: 11936ef44ac4e41388d097c73d65622c1e0b701b547e9b6949c62e201cc6a408
+    expected_result: PASS
+    required_assertions:
+      - RAW_MUTATION_C13G_RETAINED
+      - EXACT_REF_C_ALT_G_PROFILE_SEQUENCE_VERIFIED
+      - PROFILE_ANNOTATION_OVERRIDES_CONSTRUCT_WITH_TRACE
+  - path: tests/fixtures/reactflow_delta/d0x/mixed_dispositions_and_orphans.rdat
+    sha256: 5bc00d849dc1acae5f9a4e963d44a244143e3d2914573d93e0ceb2f5307aa31b
+    expected_result: PASS_WITH_EXPLICIT_EXCLUSIONS
+    required_assertions:
+      - LATENT_ALT_X_RETAINED
+      - MULTI_EDIT_RETAINED
+      - INVALID_TOKEN_EXPLICITLY_EXCLUDED
+      - MISSING_MUTATION_EXPLICITLY_EXCLUDED
+      - ORPHAN_ANNOTATION_SEQUENCE_ERROR_ACCOUNTED
+      - SILENT_DROP_COUNT_ZERO
+  - path: tests/fixtures/reactflow_delta/d0x/malformed_seqpos.rdat
+    sha256: 3e0738f24382dc111205161228e9f42649f21d84d72d6fbd7b6b03bb0d069804
+    expected_result: FAIL_CLOSED
+    required_error_class: D0XContractError
+    required_error_contains: malformed SEQPOS
+  - path: tests/fixtures/reactflow_delta/d0x/duplicate_profile_index.rdat
+    sha256: bea350218605917e023ba348dc007bd381686b2c298a72ecdf5d8da0d396a2b5
+    expected_result: FAIL_CLOSED
+    required_error_class: D0XContractError
+    required_error_contains: duplicate REACTIVITY index
+acceptance_test:
+  path: tests/reactflow_delta/test_d0x_contract_parser.py
+  sha256: bfb362465ac8378b340a99959fabba9ddf3cd9caf148bc539abdfa3f607a650d
+  command: python3 -m unittest tests/reactflow_delta/test_d0x_contract_parser.py -v
+  status: NOT_RUN_UNTIL_COMMITTED_SOURCE_PREFLIGHT
