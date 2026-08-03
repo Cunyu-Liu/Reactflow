@@ -1,0 +1,54 @@
+schema_version: reactflow_delta.authority_sentinel.v1
+sentinel_id: reactflow_delta_recovery_authority_epoch_1
+sentinel_status: RECOVERY_AUTHORITY_READY_IF_GIT_HEAD_POLICY_PASSES
+authority_epoch: 1
+created_at: "2026-08-03T22:40:15+08:00"
+contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approval_record_sha256: c8b20a7eccf0ac582f316a82e2015fac981128de7a9e041c96a85be4231f7109
+recovery_terminal_manifest_sha256: c40c2f02d6a104359daa4b3ef46c47a55517c03bc5996a5de9265b2b1390f17b
+active_manifest_sha256: 16f7867454cbcb8bddfeafb9d91f54a04e2eabfd1e0aeafa99d33c097b5b2ea5
+detached_ledger_path: configs/reactflow_delta/authority_epoch_1.bundle.sha256
+detached_ledger_sha256: 78d38faa16e6feaf5fac02b702ad142286abc102dd0c32ee288bb9615273bfaf
+git_expectation:
+  authority_source_parent: 10e52412a1612667993209e56117b1608a084297
+  required_head_first_parent: 10e52412a1612667993209e56117b1608a084297
+  required_head_parent_count: 1
+  merge_commit_allowed: false
+  actual_authority_head_commit: null
+  actual_head_binding_method: VERIFIED_AT_RUNTIME_NOT_EMBEDDED
+  allowed_changed_paths:
+    - configs/reactflow_delta/active_contract.yaml
+    - configs/reactflow_delta/authority_epoch_1.bundle.sha256
+    - configs/reactflow_delta/authority_epoch_1.sentinel.yaml
+    - docs/approvals/reactflow_delta_v4_approval_20260803.yaml
+    - docs/approvals/reactflow_delta_v4_d0x_approval_context_20260803.md
+    - docs/audits/reactflow_delta_v4_recovery_acceptance_20260803.md
+    - manifests/reactflow_delta/recovery_v4_terminal_manifest_20260803.yaml
+preexisting_untracked_inventory:
+  policy: PRESERVE_BYTES_AND_PATHS_NOT_IMPORTABLE
+  members:
+    - path: analyze_best_ckpt.py
+      sha256: a2673d5a7cae7f1b3243840bb204464d2b9d33eb42dbf5ab99250c257863f9d8
+    - path: analyze_r2.py
+      sha256: 5bca8ae2890e7d5c310bc93f5611a6320b3058cecaf9d89e1376c9c5582a7794
+    - path: configs/reactflow_delta/epro_lite_v2.yaml.bak
+      sha256: 8690a59c6e368cec63bf92feaaf3883c105f22c4f763204489a1b64c66f05062
+    - path: docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_3_TrainingAuth_20260731.md
+      sha256: 9a38b220ecb6f324cf8a33b19bd30bfa98ada1112df0db440d9c1bc67ecf4f45
+    - path: docs/d2r_methodology.md
+      sha256: ff5cbcc8a52223b6e8dcfb51f2cf1a587ee84e3ab6cd822ae0392c1418eaeaaf
+    - path: scripts/reactflow_delta/m0r2_gate_assess.py.bak_v1
+      sha256: 5969a318547c528625b4ca0d0cafa7fafcbf67046eac5e3b4738eb81ad3a6257
+permissions:
+  full_data_recall_allowed: false
+  training_allowed: false
+  d1_x_allowed: false
+  new_split_allowed: false
+  confirmatory_test_access_allowed: false
+  cross_project_export_allowed: false
+  new_wet_lab_allowed: false
+  push_allowed: false
+  pull_request_allowed: false
+cryptographic_signature: null
+signature_status: NOT_PROVIDED_NOT_ASSERTED
+embedded_self_sha256: FORBIDDEN
