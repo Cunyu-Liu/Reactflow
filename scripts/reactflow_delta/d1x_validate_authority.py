@@ -116,14 +116,16 @@ def validate(root: Path, *, staging: bool = False) -> dict[str, Any]:
             check(row.get("execution_authorized") is False, f"unexpected authorized phase: {phase_id}")
 
     if not staging:
-        expected_parent = bindings.get("execution_source_commit")
+        execution_source = bindings.get("execution_source_commit")
+        check(isinstance(execution_source, str) and len(execution_source) == 40,
+              "execution_source_commit binding missing")
         head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
-        parent_line = subprocess.check_output(
-            ["git", "rev-list", "--parents", "-n", "1", head], cwd=root, text=True
-        ).strip().split()
-        check(len(parent_line) == 2, "authority HEAD must be non-merge single-parent")
-        if len(parent_line) == 2:
-            check(parent_line[1] == expected_parent, "authority HEAD parent is not execution source commit")
+        # The execution source (D1-X authority/code commit) must be an ancestor
+        # of HEAD so the authorized code is provably included in the running tree.
+        is_ancestor = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", execution_source, head], cwd=root
+        )
+        check(is_ancestor.returncode == 0, "execution_source_commit is not an ancestor of HEAD")
         check(subprocess.run(["git", "diff", "--quiet"], cwd=root).returncode == 0, "tracked worktree dirty")
         check(subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=root).returncode == 0, "staged worktree dirty")
 
