@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Fail-closed D2-X authority preflight; performs no network or data access.
 
-Mirrors the D1-X validator for the D2-X split/exposure authority epoch 6.
-Verifies that only D2-X is runnable, that D1-X is PASS, that the D2-X
-amendment/approval hashes are bound and intact, and that the governance Git
-state is clean.  No data access, no training, no split mutation.
+Mirrors the D1-X validator for the D2-X split/exposure REBUILD authority
+epoch 8 (publication-level grouping).  Verifies that only D2-X is runnable,
+that D1-X is PASS, that the D2-X rebuild amendment/approval hashes are bound
+and intact, and that the governance Git state is clean.  No data access, no
+training, no split mutation.
 """
 
 from __future__ import annotations
@@ -77,7 +78,7 @@ def validate(root: Path, *, staging: bool = False) -> dict[str, Any]:
 
     bindings = active.get("bindings", {})
     required = {
-        "d2x_amendment": "d2x_amendment_sha256",
+        "d2x_rebuild_amendment": "d2x_rebuild_amendment_sha256",
         "d1x_amendment": "d1x_amendment_sha256",
         "d0x_amendment": "d0x_amendment_sha256",
         "source_universe_manifest": "source_universe_manifest_sha256",
@@ -103,7 +104,7 @@ def validate(root: Path, *, staging: bool = False) -> dict[str, Any]:
             except ValueError:
                 errors.append(f"bound path escapes repository: {relative}")
 
-    check(bindings.get("d2x_run_id") == "d2x_split_20260804_v1", "d2x_run_id mismatch")
+    check(bindings.get("d2x_run_id") == "d2x_split_publication_v1", "d2x_run_id mismatch")
 
     phases = {row.get("phase_id"): row for row in active.get("phase_graph", [])}
     check(phases.get("RECOVERY_CONTRACT_REWRITE", {}).get("gate_result") == "PASS", "Recovery not PASS")
@@ -130,7 +131,7 @@ def validate(root: Path, *, staging: bool = False) -> dict[str, Any]:
     if errors:
         raise ValueError("; ".join(errors))
     return {
-        "schema_version": "reactflow_delta.d2x_authority_preflight.v1",
+        "schema_version": "reactflow_delta.d2x_rebuild_authority_preflight.v1",
         "status": "PASS",
         "staging_mode": staging,
         "network_or_data_access_performed": False,

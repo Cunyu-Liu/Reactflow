@@ -90,6 +90,44 @@ class BuildSplitTest(unittest.TestCase):
             self.assertTrue(out["test_access_ledger"]["append_only"])
             self.assertFalse(any(e["sample_level_labels_read"] for e in out["test_access_ledger"]["entries"]))
 
+    def test_publication_grouping_same_split(self):
+        # CIDGMP and TRP4P6 share publication pmid_25303992 (NAR 2014) and MUST
+        # reside in the SAME split (validation) to guarantee zero cross-split
+        # publication-level leakage (contract §10).
+        with tempfile.TemporaryDirectory() as d:
+            records = [
+                _rec("CIDGMP", "CCCC" * 10, "CIDGMP_SHP_0002"),
+                _rec("TRP4P6", "GGGG" * 10, "TRP4P6_SHP_0003"),
+                _rec("16SFWJ", "AAAA" * 10, "16SFWJ_1M7_0001"),
+            ]
+            pairs = (
+                [_pair("CIDGMP", "SHP_0002", i) for i in range(1, 5)]
+                + [_pair("TRP4P6", "SHP_0003", i) for i in range(1, 4)]
+                + [_pair("16SFWJ", "1M7_0001", i) for i in range(1, 105)]
+            )
+            out = build_split(records, pairs, Path(d))
+            split = out["split_manifest"]
+            self.assertEqual(split["assignment"]["CIDGMP"], "validation")
+            self.assertEqual(split["assignment"]["TRP4P6"], "validation")
+            self.assertEqual(split["validation_studies"], ["CIDGMP", "TRP4P6"])
+            self.assertFalse(out["exposure_audit"]["publication_level"]["leakage_cross_split"])
+            self.assertEqual(out["exposure_audit"]["publication_level"]["distinct_publications"], 2)
+
+    def test_publication_no_leak_across_splits(self):
+        # A single publication must never span multiple splits.
+        with tempfile.TemporaryDirectory() as d:
+            records = [
+                _rec("CIDGMP", "CCCC" * 10, "CIDGMP_SHP_0002"),
+                _rec("16SFWJ", "AAAA" * 10, "16SFWJ_1M7_0001"),
+            ]
+            pairs = (
+                [_pair("CIDGMP", "SHP_0002", i) for i in range(1, 5)]
+                + [_pair("16SFWJ", "1M7_0001", i) for i in range(1, 105)]
+            )
+            out = build_split(records, pairs, Path(d))
+            self.assertFalse(out["exposure_audit"]["publication_level"]["leakage_cross_split"])
+            self.assertTrue(out["exposure_audit"]["overlap_zero"])
+
 
 if __name__ == "__main__":
     unittest.main()

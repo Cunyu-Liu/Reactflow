@@ -1,14 +1,14 @@
 schema_version: reactflow_delta.active_contract.v1
-manifest_id: reactflow_delta_v4_ph0x_authority_epoch_7_20260804
+manifest_id: reactflow_delta_v4_d2x_rebuild_authority_epoch_8_20260804
 project_task_id: reactflow_delta
 created_at: '2026-08-03T23:08:38+08:00'
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  authority_epoch: 7
+  authority_epoch: 8
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
-  current_phase: PH0-X
-  current_authority_state: PH0X_AUTHORIZED
-  current_runnable_phase: PH0-X
+  current_phase: D2-X
+  current_authority_state: D2X_REBUILD_AUTHORIZED
+  current_runnable_phase: D2-X
   conflict_policy: FAIL_CLOSED
   precedence:
   - ACTIVE_CONTRACT_MANIFEST
@@ -67,38 +67,37 @@ active_contract:
     signature_status: UNSIGNED
     sha256: 12cf38c256712d5f619090d16b3d1b9d44da729f951dfdb9d456c7a3d5d7d39a
 authorization:
-  status: ACTIVE_PH0X_ONLY
+  status: ACTIVE_D2X_REBUILD_ONLY
   approval_status: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
   signed_by: null
   signed_at: null
   cryptographic_signature_status: NOT_PROVIDED_NOT_ASSERTED
-  approval_record: docs/approvals/reactflow_delta_v4_ph0x_approval_20260804.yaml
-  approval_record_sha256: 674947a561fb3ebc9dd91709f8d82a22a00fa6caf868a2b9faa0275bc4723ced
+  approval_record: docs/approvals/reactflow_delta_v4_d2x_rebuild_approval_20260804.yaml
+  approval_record_sha256: 967a4d32a7d667182e2d6b5d5415588e2af9bb7bd3ea99f6364aa094e4762e11
   approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
   approval_scope:
   - V4_SIGNOFF
-  - CONDITIONAL_D1X_ONLY_AUTHORITY
+  - CONDITIONAL_D2X_REBUILD_ONLY_AUTHORITY
   allowed_phases:
   - D0-X
   - D1-X
   - D2-X
-  - PH0-X
   runnable_phases:
-  - PH0-X
+  - D2-X
   training_allowed: false
   full_data_recall_allowed: true
-  new_split_allowed: false
+  new_split_allowed: true
   confirmatory_test_access_allowed: false
   cross_project_export_allowed: false
   new_wet_lab_allowed: false
   blind_test_aggregate_allowed: true
 bindings:
   repository_root: /home/cunyuliu/reactflow_delta_goal_20260729
-  git_commit: adafd53f1565b7ea9a434443dda9b50360dbd561
-  execution_source_commit: adafd53f1565b7ea9a434443dda9b50360dbd561
-  git_commit_semantics: PH0X_AUTHORITY_SOURCE_PARENT
+  git_commit: a7fafe4c8b9ed803814e67f3932d3baf0b3def77
+  execution_source_commit: a7fafe4c8b9ed803814e67f3932d3baf0b3def77
+  git_commit_semantics: D2X_REBUILD_AUTHORITY_SOURCE_PARENT
   head_policy: EXACTLY_ONE_FOCUSED_NON_MERGE_AUTHORITY_CHILD
-  worktree_policy: D1X_EXECUTION_REQUIRES_ISOLATED_CLEAN_WORKTREE
+  worktree_policy: D2X_REBUILD_EXECUTION_REQUIRES_ISOLATED_CLEAN_WORKTREE
   recovery_amendment_path: docs/contracts/amendments/reactflow_delta_v4_recovery_finalization_20260803.yaml
   recovery_amendment_sha256: 6aa8e08351e1586203a719f4a6d3c99bf7626e6117d85f40ad6e33eef6ad3840
   recovery_finalization_receipt_path: manifests/reactflow_delta/recovery_v4_finalization_receipt_20260803.yaml
@@ -136,14 +135,16 @@ bindings:
   d1x_terminal_manifest_sha256: bd29a4f679d376ca27c9cc83b3bb9d1ce2903d98de66caba626650d42f55d9e3
   d1x_terminal_checksum_ledger_sha256: e19d169f524cd00453b28fc18c14f1bca7af03a32d2c8f6e589b7f5405911de1
   d1x_terminal_sentinel_sha256: 7a4aaeda5968c2dcfafa98fe53f149643a7eb53bbce6c9e06019f45d37437074
-  d2x_amendment_path: docs/contracts/amendments/reactflow_delta_v4_d2x_20260804.yaml
-  d2x_amendment_sha256: ea2df625e38d601f227b3ef2126a6e50f06e49d2ff903370ba6573cf6a56c5c4
-  d2x_approval_record_sha256: 89464f472bdb1e6501f8b96ab67d131c52a07d5906ace92d20da83fe279ae82a
-  d2x_run_id: d2x_split_20260804_v1
-  d2x_terminal_manifest_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d2x/d2x_finalize_20260804T0000+0800/terminal_manifest.yaml
-  d2x_terminal_manifest_sha256: f0cd1295d61cf5b65102a76fc5ff761496a995bd093fdfef5243120090d90a93
-  d2x_terminal_checksum_ledger_sha256: c445cfe0dec125ed1dd7305c8e17bbd45ac45c3c484f18dd296914e7914b650f
-  d2x_terminal_sentinel_sha256: 10c65d8e1010fdafcd21f7b8649037592586c6e83e2b9b12dd000b3b1f7535d5
+  d2x_amendment_path: docs/contracts/amendments/reactflow_delta_v4_d2x_rebuild_20260804.yaml
+  d2x_amendment_sha256: 2ebd0f283817ba9631fccf8e1c306e72e5ac3390e38d7db5aa9e9a7a362c8280
+  d2x_rebuild_amendment_path: docs/contracts/amendments/reactflow_delta_v4_d2x_rebuild_20260804.yaml
+  d2x_rebuild_amendment_sha256: 2ebd0f283817ba9631fccf8e1c306e72e5ac3390e38d7db5aa9e9a7a362c8280
+  d2x_approval_record_sha256: 967a4d32a7d667182e2d6b5d5415588e2af9bb7bd3ea99f6364aa094e4762e11
+  d2x_run_id: d2x_split_publication_v1
+  d2x_terminal_manifest_path: null
+  d2x_terminal_manifest_sha256: null
+  d2x_terminal_checksum_ledger_sha256: null
+  d2x_terminal_sentinel_sha256: null
   ph0x_amendment_path: docs/contracts/amendments/reactflow_delta_v4_ph0x_20260804.yaml
   ph0x_amendment_sha256: 55db7461e0c868d75f316d9b091f666a8c09eb9050ce5e7775ece60154dc349b
   ph0x_approval_record_sha256: 674947a561fb3ebc9dd91709f8d82a22a00fa6caf868a2b9faa0275bc4723ced
@@ -214,26 +215,27 @@ phase_graph:
 - phase_id: D2-X
   dependencies:
   - D1-X
-  lifecycle_status: TERMINAL
-  gate_result: PASS
+  lifecycle_status: RUNNING
+  gate_result: NOT_RUN
   evidence_class: DATA_QUALIFICATION_ONLY
-  execution_authorized: false
+  execution_authorized: true
   training_required: false
   next_on_pass:
   - PH0-X
   next_on_fail:
   - REPORT-X
-  rerun_allowed: false
-  evidence_manifest_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d2x/d2x_finalize_20260804T0000+0800/terminal_manifest.yaml
-  evidence_manifest_sha256: f0cd1295d61cf5b65102a76fc5ff761496a995bd093fdfef5243120090d90a93
-  terminal_sentinel_status: D2X_CLOSED
+  rerun_allowed: true
+  execution_mode: PUBLICATION_LEVEL_REBUILD
+  evidence_manifest_path: null
+  evidence_manifest_sha256: null
+  terminal_sentinel_status: D2X_REBUILD_IN_PROGRESS
 - phase_id: PH0-X
   dependencies:
   - D2-X
-  lifecycle_status: RUNNING
+  lifecycle_status: PLANNED
   gate_result: NOT_RUN
   evidence_class: DATA_QUALIFICATION_ONLY
-  execution_authorized: true
+  execution_authorized: false
   training_required: false
   next_on_pass:
   - B0-X

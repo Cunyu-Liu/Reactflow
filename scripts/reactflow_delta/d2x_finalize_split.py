@@ -23,13 +23,13 @@ from typing import Any
 import yaml
 
 
-D2X_FINALIZER_SCHEMA = "reactflow_delta.d2x_finalizer.v1"
+D2X_FINALIZER_SCHEMA = "reactflow_delta.d2x_rebuild_finalizer.v1"
 D2X_AUTHORITY_VALIDATOR = "scripts/reactflow_delta/d2x_validate_authority.py"
 D2X_AUDIT_SCRIPT = "scripts/reactflow_delta/d2x_audit_split.py"
 D2X_TESTS = [
     "tests/reactflow_delta/test_d2x_split.py",
 ]
-MANUAL_AUDIT_PATH = "docs/audits/reactflow_delta_d2x_manual_audit_20260804.md"
+MANUAL_AUDIT_PATH = "docs/audits/reactflow_delta_d2x_rebuild_manual_audit_20260804.md"
 
 
 def sha256_file(path: Path) -> str:
@@ -127,6 +127,8 @@ def run_finalizer(
                 "all_studies_assigned_nonempty_splits",
                 "pair_counts_reconcile",
                 "overlap_zero_and_no_near_dup_leak",
+                "no_publication_leak_and_distinct_publications_ge_3",
+                "independent_publications_ge_3",
                 "tier_candidate_present_test_unconsumed",
                 "test_seal_and_ledger_no_sample_access",
                 "blind_certificate_aggregate_only",
@@ -177,7 +179,7 @@ def run_finalizer(
 
         # ---- terminal manifest ----
         terminal_manifest = {
-            "schema_version": "reactflow_delta.d2x_terminal.v1",
+            "schema_version": "reactflow_delta.d2x_rebuild_terminal.v1",
             "manifest_id": output_root.name,
             "phase_id": "D2-X",
             "lifecycle_status": "TERMINAL",
@@ -217,11 +219,12 @@ def run_finalizer(
                 "status": "WRITTEN_AFTER_LEDGER",
             },
             "scientific_boundary": (
-                "D2-X split/exposure frozen; TIER_B_PLUS_DATA_CANDIDATE only. "
+                "D2-X publication-level split/exposure frozen; "
+                "TIER_B_PLUS_DATA_CANDIDATE only. "
                 "Full Tier B+ requires PH0-X; full Tier A+ requires B0-X. "
                 "PH0-X not started. Test remains sealed."
             ),
-            "terminal_route": "STOP_AWAIT_PH0X_AUTHORITY_AMENDMENT",
+            "terminal_route": "STOP_AWAIT_PH0X_REBUILD_AUTHORITY_AMENDMENT",
         }
         write_yaml(staging / "terminal_manifest.yaml", terminal_manifest)
 
@@ -235,7 +238,7 @@ def run_finalizer(
         )
         (staging / "SHA256SUMS").write_text(ledger_text, encoding="utf-8")
         sentinel = {
-            "schema_version": "reactflow_delta.d2x_terminal_sentinel.v1",
+            "schema_version": "reactflow_delta.d2x_rebuild_terminal_sentinel.v1",
             "sentinel_id": output_root.name,
             "status": "D2X_CLOSED",
             "phase_id": "D2-X",
