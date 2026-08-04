@@ -1,0 +1,62 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_d1x_draft_20260804
+amendment_status: ACTIVE_AUTHORIZED
+authority_epoch: 5
+created_at: "2026-08-04T00:00:00+08:00"
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_d1x_approval_20260804.yaml
+  approval_record_sha256: null
+  scope: CONDITIONAL_D1X_ONLY_AUTHORITY
+  scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
+  external_identity_status: NOT_VERIFIED
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+prerequisites:
+  d0x_terminal_manifest_sha256: bb4b3cf822b6084f784a55ba8c820d177579307a88cc08f18cb486c47c0374bc
+  d0x_terminal_sentinel_sha256: a157a4e28d13837b41c35a761796b78c06b5f6b4c365109cb0c864fe978a5794
+  d0x_checksum_ledger_sha256: 4355f29b4d4acd2c8fa1e7469a83915c2ac91dd3090f058ca21e25233e3a757f
+  d0x_inventory_audit_sha256: 81678203825f567081e1186e6711407279ddb1c404d5ab3add966a6b4f4deb73
+  d0x_artifact_inventory_sha256: 42401d689fc6e19461e58573f35e4436c1fced120a070e759461babc8bb0cefb
+  d0x_closure_commit: ee9d656
+  d0x_gate_result: PASS
+  d0x_evidence_class: DATA_QUALIFICATION_ONLY
+grant:
+  phase_id: D1-X
+  authorization_kind: SINGLE_PHASE_CANONICALIZATION_ONLY
+  allowed_actions:
+    - READ_ONLY_PREFLIGHT
+    - D0X_CANDIDATE_INVENTORY_READ
+    - PROFILE_LEVEL_CANONICALIZATION
+    - EXACT_REF_ALT_COORDINATE_VERIFICATION
+    - PARENT_LINEAGE_AND_DESIGN_GROUP_SEPARATION
+    - CONDITION_MATCH_AUDIT
+    - RAW_UPSTREAM_TRAIN_FROZEN_LAYER_RETENTION
+    - MISSING_INVALID_UNMEASURED_NULL_MASK_REASON
+    - PROVISIONAL_ROLE_ASSIGNMENT
+    - NOISE_AND_TAIL_AUDIT
+    - CONTROLS_ONLY_NORMALIZATION_AND_SCALE_FITTING
+  explicit_denials:
+    - D2_X_SPLIT_BUILD
+    - TRAINING_DATASET_FINALIZATION
+    - MODEL_OR_BASELINE_TRAINING
+    - CONFIRMATORY_TEST_UNSEAL
+    - TEST_OUTCOME_FITTING
+    - CROSS_PROJECT_EXPORT
+    - WET_LAB
+    - PULL_REQUEST
+    - PUSH_IS_GOVERNED_BY_USER_INSTRUCTION_9
+run_authorization:
+  authorization_token_id: d1x_canonicalization_20260804_v1
+  maximum_primary_run_count: 1
+  maximum_concurrent_runs: 1
+  same_run_checkpoint_resume_allowed: true
+  terminal_run_consumes_authority: true
+  run_id_must_be: d1x_canonicalization_20260804_v1
+  isolated_clean_worktree_required_before_execution: true
+terminal_routes:
+  on_pass: STOP_AWAIT_D2X_AUTHORITY_AMENDMENT
+  on_fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+  automatic_downstream_unlock: false
+embedded_self_sha256: FORBIDDEN

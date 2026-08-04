@@ -1,0 +1,26 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_d1x_approval_20260804
+project_task_id: reactflow_delta
+approved_at: "2026-08-04T00:00:00+08:00"
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: "按 D1-X 草案继续执行"
+approval_kind: D1X_AUTHORITY_ACTIVATION
+approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approved_amendment_path: docs/contracts/amendments/reactflow_delta_v4_d1x_20260804.yaml
+approved_amendment_sha256: 3353a3814b01a5c428282e5698e0b10b12191b5e7dcb80fa25c23a128668a1f2
+approval_scope:
+  - SINGLE_PHASE_CANONICALIZATION_ONLY
+  - D1X_EXACT_CANONICALIZATION_AND_CLEANING
+  - run_id: d1x_canonicalization_20260804_v1
+explicit_denials:
+  - D2_X_SPLIT_BUILD
+  - TRAINING_DATASET_FINALIZATION
+  - MODEL_OR_BASELINE_TRAINING
+  - CONFIRMATORY_TEST_UNSEAL
+  - TEST_OUTCOME_FITTING
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PULL_REQUEST
+signature_status: NOT_PROVIDED_NOT_ASSERTED
+external_identity_status: NOT_VERIFIED
+scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
