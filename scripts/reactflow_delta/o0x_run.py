@@ -246,6 +246,10 @@ def _make_overfit_model(device: str, local_window: int = 50) -> EPROModel:
 def check_tiny_overfit(device: str, epochs: int = 800, lr: float = 1e-4,
                        n_pairs: int = 8, grad_clip: float = 1.0,
                        local_window: int = 50) -> dict:
+    # Deterministic model init (contract 15.2 bullet 5): seed RNG before
+    # constructing the model so repeated runs give the same optimization path.
+    torch.manual_seed(0)
+    np.random.seed(0)
     model = _make_overfit_model(device, local_window=local_window)
     model.train()
     opt = torch.optim.Adam(model.parameters(), lr=lr)
@@ -397,9 +401,14 @@ def run(device: str, epochs: int, lr: float) -> dict:
         registry["fail_reason"] = "CUDA unavailable; fallback=0 violated"
         return registry
 
-    passed = all(
-        c.get("pass", False) for c in registry["checks"].values()
-    ) and registry["checks"]["invariant_suite"]["all_pass"]
+    # invariant_suite reports all_pass (not a per-item "pass" key); the other
+    # checks report "pass". Aggregate both explicitly.
+    invariant_ok = bool(registry["checks"]["invariant_suite"]["all_pass"])
+    other_ok = all(
+        c.get("pass", False)
+        for k, c in registry["checks"].items() if k != "invariant_suite"
+    )
+    passed = invariant_ok and other_ok
     registry["gate_result"] = "PASS" if passed else "FAIL"
     return registry
 
@@ -415,7 +424,10 @@ def main() -> int:
     args.out_json.write_text(json.dumps(reg, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
                              encoding="utf-8")
     print(json.dumps({"gate_result": reg["gate_result"],
-                      "checks": {k: v.get("pass") for k, v in reg["checks"].items()}}))
+                      "checks": {
+                          k: (v.get("all_pass") if k == "invariant_suite" else v.get("pass"))
+                          for k, v in reg["checks"].items()
+                      }}))
     return 0 if reg["gate_result"] == "PASS" else 1
 
 
