@@ -94,9 +94,9 @@ authorization:
   blind_test_aggregate_allowed: true
 bindings:
   repository_root: /home/cunyuliu/reactflow_delta_goal_20260729
-  git_commit: 48cf5758dfcd1880e9ca29be53652e124b9a47ee
-  execution_source_commit: 48cf5758dfcd1880e9ca29be53652e124b9a47ee
-  git_commit_semantics: D2X_AUTHORITY_SOURCE_PARENT
+  git_commit: adafd53f1565b7ea9a434443dda9b50360dbd561
+  execution_source_commit: adafd53f1565b7ea9a434443dda9b50360dbd561
+  git_commit_semantics: PH0X_AUTHORITY_SOURCE_PARENT
   head_policy: EXACTLY_ONE_FOCUSED_NON_MERGE_AUTHORITY_CHILD
   worktree_policy: D1X_EXECUTION_REQUIRES_ISOLATED_CLEAN_WORKTREE
   recovery_amendment_path: docs/contracts/amendments/reactflow_delta_v4_recovery_finalization_20260803.yaml
