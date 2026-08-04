@@ -2,9 +2,9 @@ schema_version: reactflow_delta.authority_epoch_sentinel.v1
 authority_epoch: 6
 current_authority_state: D2X_AUTHORIZED
 current_phase: D2-X
-active_manifest_sha256: 8c85a2e9666b1b19fb4768a8726bd44a707d0d4d185ccb47e9c6a7f9631fc37f
+active_manifest_sha256: ca0ea8f6d2342c05422d9c782c423ef196e8cc74d5f9cc118f530c2c3de1d150
 bundle_ledger_path: configs/reactflow_delta/authority_epoch_6.bundle.sha256
-bundle_ledger_sha256: 99cd274e737e7ad7bb31644441548d651d9104eba4eab8b4c548d1f935696955
+bundle_ledger_sha256: efb916be2a150bde6ef9b19d0a5d775a35f34ce461d5c525148491a7276b4651
 created_at: '2026-08-04T12:30:00+08:00'
 emitted_after: BUNDLE_LEDGER
 embedded_self_sha256: FORBIDDEN

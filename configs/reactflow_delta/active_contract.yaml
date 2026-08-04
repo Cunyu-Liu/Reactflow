@@ -92,9 +92,9 @@ authorization:
   new_wet_lab_allowed: false
 bindings:
   repository_root: /home/cunyuliu/reactflow_delta_goal_20260729
-  git_commit: 05d026393a9fc7595c079c3cfefa5afdc170b903
-  execution_source_commit: 05d026393a9fc7595c079c3cfefa5afdc170b903
-  git_commit_semantics: D1X_AUTHORITY_SOURCE_PARENT
+  git_commit: 48cf5758dfcd1880e9ca29be53652e124b9a47ee
+  execution_source_commit: 48cf5758dfcd1880e9ca29be53652e124b9a47ee
+  git_commit_semantics: D2X_AUTHORITY_SOURCE_PARENT
   head_policy: EXACTLY_ONE_FOCUSED_NON_MERGE_AUTHORITY_CHILD
   worktree_policy: D1X_EXECUTION_REQUIRES_ISOLATED_CLEAN_WORKTREE
   recovery_amendment_path: docs/contracts/amendments/reactflow_delta_v4_recovery_finalization_20260803.yaml
