@@ -411,7 +411,10 @@ class SusceptibilityModule(nn.Module):
                              n_iter: int = 20) -> torch.Tensor:
         """Estimate spectral radius via power iteration (differentiable)."""
 
-        v = torch.randn(n, dtype=dtype, device=device)
+        # Deterministic start vector (contract §15.2 bullet 5: disable random
+        # power iteration ranking).  A fixed vector avoids RNG dependence so
+        # repeated eval on the same checkpoint/input is bitwise reproducible.
+        v = torch.ones(n, dtype=dtype, device=device)
         v = v / (v.norm() + 1e-12)
         for _ in range(n_iter):
             v = K @ v
@@ -683,6 +686,14 @@ class EPROModel(nn.Module):
         edges = batch["edges"]  # (2, n_edges)
         edge_features = batch["edge_features"]  # (n_edges, 3)
         delta_thermo = batch["delta_thermo"]  # (n, delta_thermo_dim) M0-R2
+
+        # Edge-case sanitization (contract 15.4 NaN/Inf edge cases): replace
+        # non-finite inputs with 0 at the forward boundary so a NaN/Inf input
+        # cannot propagate into the operator state. This is an engineering
+        # guard at the system boundary, not a scientific behavior change.
+        features = torch.nan_to_num(features, nan=0.0, posinf=0.0, neginf=0.0)
+        edge_features = torch.nan_to_num(edge_features, nan=0.0, posinf=0.0, neginf=0.0)
+        delta_thermo = torch.nan_to_num(delta_thermo, nan=0.0, posinf=0.0, neginf=0.0)
         n = features.shape[0]
 
         # 1. Encode thermo features -> z_w.
