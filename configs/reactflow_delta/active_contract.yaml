@@ -1,5 +1,5 @@
 schema_version: reactflow_delta.active_contract.v1
-manifest_id: reactflow_delta_v4_d2x_authority_epoch_6_20260804
+manifest_id: reactflow_delta_v4_d2x_terminal_20260804
 project_task_id: reactflow_delta
 created_at: '2026-08-03T23:08:38+08:00'
 authority:
@@ -7,7 +7,7 @@ authority:
   authority_epoch: 6
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
   current_phase: D2-X
-  current_authority_state: D2X_AUTHORIZED
+  current_authority_state: D2X_TERMINAL_AWAIT_PH0X_AMENDMENT
   current_runnable_phase: D2-X
   conflict_policy: FAIL_CLOSED
   precedence:
@@ -67,7 +67,7 @@ active_contract:
     signature_status: UNSIGNED
     sha256: 12cf38c256712d5f619090d16b3d1b9d44da729f951dfdb9d456c7a3d5d7d39a
 authorization:
-  status: ACTIVE_D2X_ONLY
+  status: CLOSED_D2X_AWAIT_PH0X_AMENDMENT
   approval_status: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
   signed_by: null
   signed_at: null
@@ -82,8 +82,7 @@ authorization:
   - D0-X
   - D1-X
   - D2-X
-  runnable_phases:
-  - D2-X
+  runnable_phases: []
   training_allowed: false
   full_data_recall_allowed: true
   new_split_allowed: true
@@ -138,6 +137,10 @@ bindings:
   d2x_amendment_sha256: ea2df625e38d601f227b3ef2126a6e50f06e49d2ff903370ba6573cf6a56c5c4
   d2x_approval_record_sha256: 89464f472bdb1e6501f8b96ab67d131c52a07d5906ace92d20da83fe279ae82a
   d2x_run_id: d2x_split_20260804_v1
+  d2x_terminal_manifest_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d2x/d2x_finalize_20260804T0000+0800/terminal_manifest.yaml
+  d2x_terminal_manifest_sha256: f0cd1295d61cf5b65102a76fc5ff761496a995bd093fdfef5243120090d90a93
+  d2x_terminal_checksum_ledger_sha256: c445cfe0dec125ed1dd7305c8e17bbd45ac45c3c484f18dd296914e7914b650f
+  d2x_terminal_sentinel_sha256: 10c65d8e1010fdafcd21f7b8649037592586c6e83e2b9b12dd000b3b1f7535d5
 phase_graph:
 - phase_id: RECOVERY_CONTRACT_REWRITE
   dependencies: []
@@ -204,16 +207,19 @@ phase_graph:
 - phase_id: D2-X
   dependencies:
   - D1-X
-  lifecycle_status: RUNNING
-  gate_result: NOT_RUN
+  lifecycle_status: TERMINAL
+  gate_result: PASS
   evidence_class: DATA_QUALIFICATION_ONLY
-  execution_authorized: true
+  execution_authorized: false
   training_required: false
   next_on_pass:
   - PH0-X
   next_on_fail:
   - REPORT-X
-  rerun_allowed: true
+  rerun_allowed: false
+  evidence_manifest_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d2x/d2x_finalize_20260804T0000+0800/terminal_manifest.yaml
+  evidence_manifest_sha256: f0cd1295d61cf5b65102a76fc5ff761496a995bd093fdfef5243120090d90a93
+  terminal_sentinel_status: D2X_CLOSED
 - phase_id: PH0-X
   dependencies:
   - D2-X
