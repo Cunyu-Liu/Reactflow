@@ -204,6 +204,8 @@ def _canonicalize_profile(
     if is_wt:
         status = "WT_CONTROL_CANDIDATE"
         data_role = None
+    elif len(edits) > 1:
+        status, exclusion, data_role = "MULTI_EDIT", "MULTI_EDIT", "RESCUE_MULTI_EDIT"
     elif kinds == {"EXACT_SINGLE_SUBSTITUTION"} and edits:
         e = edits[0]
         verify = _verify_mutation(seq, e, offset)
@@ -225,8 +227,6 @@ def _canonicalize_profile(
             status, exclusion, data_role = "LATENT_ALT", "LATENT_ALT", "AUXILIARY_LATENT_ALT"
         else:
             status, exclusion, data_role = "VERIFIED_EXACT_SINGLE_SUBSTITUTION", None, "PRIMARY_EXACT_DELTA"
-    elif len(edits) > 1:
-        status, exclusion, data_role = "MULTI_EDIT", "MULTI_EDIT", "RESCUE_MULTI_EDIT"
     elif d0x_status == "MULTIPLE_MUTATION_ANNOTATION_VALUES":
         status, exclusion, data_role = "MULTI_EDIT", "MULTI_EDIT", "RESCUE_MULTI_EDIT"
     elif d0x_status == "LATENT_ALT_X_REF_CHECKED":
