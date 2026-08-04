@@ -1,0 +1,37 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_m0x_approval_20260804
+project_task_id: reactflow_delta
+approved_at: "2026-08-04T20:30:00+08:00"
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: >-
+  1、签署 2、可用 3、先只执行 EPRO_DEV_01-02 两轮，根据结果再决定后续预算 4、确认。请开始
+approval_kind: M0X_AUTHORITY_ACTIVATION
+approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approved_amendment_path: docs/contracts/amendments/reactflow_delta_v4_m0x_20260804.yaml
+approved_amendment_sha256: null
+approval_scope:
+  - SINGLE_PHASE_CONTROLLED_DEVELOPMENT_ONLY
+  - M0X_CONTROLLED_DEVELOPMENT
+  - window_id: m0x_dev_window_20260804
+  - binds_o0x_closure: o0x_finalize_20260804T2000+0800
+  - binds_o0x_commit: 3de1abf
+  - tier_limit: TIER_B_PLUS
+  - capacity_ceiling_params: 250000
+  - approved_iterations: EPRO_DEV_01, EPRO_DEV_02
+  - pretraining_arm_B: ENABLED
+  - plan_doc: docs/plans/reactflow_delta_m0x_execution_plan_20260804.md
+explicit_denials:
+  - EPRO_LITE_GT_250K
+  - HISTORICAL_4_46M_MODEL
+  - SEALED_TEST_UNSEAL
+  - TEST_OUTCOME_FITTING
+  - SEED_RETRY
+  - OVER_CAPACITY
+  - OVERWRITE_FAILURE
+  - CONFIRMATORY_TEST_UNSEAL
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PULL_REQUEST
+signature_status: NOT_PROVIDED_NOT_ASSERTED
+external_identity_status: NOT_VERIFIED
+scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY

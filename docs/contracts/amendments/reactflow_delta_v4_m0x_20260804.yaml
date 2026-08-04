@@ -1,0 +1,91 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_m0x_20260804
+amendment_status: ACTIVE_AUTHORIZED
+authority_epoch: 12
+created_at: "2026-08-04T20:30:00+08:00"
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+supersedes_amendment:
+  amendment_id: reactflow_delta_v4_o0x_20260804
+  superseded_authority_epoch: 11
+  superseded_o0x_run_id: o0x_operator_engineering_20260804_v1
+  supersession_reason: >-
+    O0X_CLOSED_PROCEED_TO_M0X. The epoch-11 O0-X amendment (operator engineering)
+    reached terminal PASS (run o0x_operator_engineering_20260804_v1, closure
+    o0x_finalize_20260804T2000+0800, gate_result PASS, invariant suite 45/45,
+    real CUDA forward/backward fallback=0, tiny-subset overfit <1% of constant
+    baseline, deterministic eval bitwise equal). This amendment consumes that
+    closure as prerequisite and authorizes the M0-X Controlled Development phase
+    (contract section 20.10) on the frozen D2-X publication split and the frozen
+    B0-X strong baseline. M0-X is DEVELOPMENT_ONLY: it compares EPRO-Small,
+    matched generic, and from-scratch/pretraining arms (50k-250k params) under a
+    fixed seed and controlled development window. It does NOT exceed Tier B+
+    capacity (no EPRO-Lite), does NOT touch the sealed test split, and follows
+    the limited-changes / window rules of contract section 17.
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_m0x_approval_20260804.yaml
+  approval_record_sha256: null
+  scope: SINGLE_PHASE_CONTROLLED_DEVELOPMENT_ONLY
+  scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
+  external_identity_status: NOT_VERIFIED
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+prerequisites:
+  o0x_terminal_manifest_sha256: 815168cc826684817680c3ce8ea046e563266fd443da878d45732f8b07a9e2d0
+  o0x_terminal_sentinel_sha256: 43d38016bb47148ae674ef162e5d16584b6fcff68c4e5969c9226aa643fe786b
+  o0x_checksum_ledger_sha256: 2e34297c93e4d0c800bf119de651900a6d011aa0b1063e26aa60f4e1b0cd5158
+  o0x_closure_commit: 3de1abf
+  o0x_gate_result: PASS
+  b0x_gate_result: PASS
+  ph0x_gate_result: PASS
+  d2x_gate_result: PASS
+  d1x_gate_result: PASS
+  tier_b_plus_data_candidate: true
+  tier_a_plus_data_ready: false
+grant:
+  phase_id: M0-X
+  authorization_kind: SINGLE_PHASE_CONTROLLED_DEVELOPMENT_ONLY
+  tier_limit: TIER_B_PLUS
+  capacity_ceiling_params: 250000
+  capacity_floor_params: 50000
+  allowed_actions:
+    - READ_ONLY_PREFLIGHT
+    - DEVELOPMENT_TRAINING_50K_250K
+    - MATCHED_GENERIC_TRAINING
+    - FROM_SCRATCH_ARM_A
+    - PRETRAINING_ARM_B
+    - EVALUATION_AND_VALIDATION
+    - CLUSTER_CI_AND_PERMUTATION
+    - CALIBRATION_NESTED_FIT
+    - UNIQUE_CANDIDATE_SELECTION
+    - FINALIZER_AND_CHECKSUM_LEDGER
+    - TERMINAL_SENTINEL_WRITE
+  explicit_denials:
+    - EPRO_LITE_GT_250K
+    - HISTORICAL_4_46M_MODEL
+    - SEALED_TEST_UNSEAL
+    - TEST_OUTCOME_FITTING
+    - SEED_RETRY
+    - OVER_CAPACITY
+    - OVERWRITE_FAILURE
+    - CONFIRMATORY_TEST_UNSEAL
+    - CROSS_PROJECT_EXPORT
+    - WET_LAB
+    - PULL_REQUEST
+    - PUSH_IS_GOVERNED_BY_USER_INSTRUCTION_9
+run_authorization:
+  authorization_token_id: m0x_dev_window_20260804
+  maximum_primary_run_count: 6
+  maximum_concurrent_runs: 1
+  same_run_checkpoint_resume_allowed: true
+  terminal_run_consumes_authority: true
+  window_maximum_iterations: 6
+  window_deadline_days: 28
+  gpu_required: true
+  cuda_fallback_zero: true
+  fixed_development_seed: true
+terminal_routes:
+  on_pass: STOP_AWAIT_E0X_AUTHORITY_AMENDMENT
+  on_fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+  automatic_downstream_unlock: false
+embedded_self_sha256: FORBIDDEN
