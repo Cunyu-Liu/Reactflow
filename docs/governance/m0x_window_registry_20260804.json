@@ -5,8 +5,8 @@
   "window_started_at_utc": "2026-08-04T12:17:14Z",
   "window_deadline_utc": "2026-09-01T12:17:14Z",
   "maximum_iterations": 6,
-  "consumed_iterations": 1,
-  "remaining_iterations": 5,
+  "consumed_iterations": 2,
+  "remaining_iterations": 4,
   "iterations": [
     {
       "iteration_id": "EPRO_DEV_01",
@@ -16,6 +16,16 @@
       "prediction_changing": true,
       "counts_as_iteration": true,
       "evidence_sha256": "b1a1b2b9e06eef1976021104e315f357196747b5e7138d60480720e938196a3c",
+      "status": "FAIL"
+    },
+    {
+      "iteration_id": "EPRO_DEV_02",
+      "run_id": "epro_dev_02_20260804",
+      "hypothesis_id": "m0x_h02_pretrain_arm",
+      "change_category": "static_pretraining_arm_comparison",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "evidence_sha256": "e33406beb94dcba6d374f2ab80a415c8190e6aea3092878560b3a320a40d8521",
       "status": "FAIL"
     }
   ],
