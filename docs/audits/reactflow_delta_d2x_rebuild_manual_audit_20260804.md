@@ -39,7 +39,7 @@ at publication level.
 | RNAPZ5 | pmid_25883046 (RNA 2015) | train |
 | TBWND | pmid_26566145 (PLoS CB 2015) | train |
 
-Distinct publications: 7. Independent publication units: >=3 (7). No single
+Distinct publications: 8. Independent publication units: >=3 (8). No single
 publication spans multiple splits.
 
 ## 3. Audit scope and results
@@ -54,10 +54,10 @@ publication spans multiple splits.
 | 6 | overlap_zero (design-lineage/exact-seq/near-dup) | PASS |
 | 7 | no near-dup leakage | PASS |
 | 8 | **no publication leakage** (no single pub spans splits) | PASS |
-| 9 | **distinct publications >= 3** | PASS (7) |
+| 9 | **distinct publications >= 3** | PASS (8) |
 | 10 | tier schema v1 | PASS |
 | 11 | tier_b_plus_data_candidate present | PASS (candidate) |
-| 12 | **independent publications >= 3** | PASS (7) |
+| 12 | **independent publications >= 3** | PASS (8) |
 | 13 | test_is_unconsumed | PASS |
 | 14 | test seal SEALED | PASS |
 | 15 | ledger append-only, no sample-level access | PASS |
@@ -67,7 +67,7 @@ publication spans multiple splits.
 ## 4. Tier B+ candidate checklist (changers deferred to PH0-X)
 
 - studies_ge_3: PASS (9 studies)
-- independent_publications_ge_3: PASS (7)
+- independent_publications_ge_3: PASS (8)
 - parents_ge_10: PASS (42 parents)
 - pairs_ge_1000: PASS (4472 primary pairs)
 - test_study_ge_100_pairs: PASS (test=408)
