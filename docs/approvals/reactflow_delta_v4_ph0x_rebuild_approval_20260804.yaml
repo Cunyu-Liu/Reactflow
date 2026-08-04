@@ -1,0 +1,29 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_ph0x_rebuild_approval_20260804
+project_task_id: reactflow_delta
+approved_at: "2026-08-04T17:00:00+08:00"
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: "执行这么快？再检查一下。然后起草 PH0-X 权威修正案，直接开始执行。"
+approval_kind: PH0X_REBUILD_AUTHORITY_ACTIVATION
+approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approved_amendment_path: docs/contracts/amendments/reactflow_delta_v4_ph0x_rebuild_20260804.yaml
+approved_amendment_sha256: null
+approval_scope:
+  - SINGLE_PHASE_IDENTIFIABILITY_RELIABILITY_ONLY
+  - PH0X_IDENTIFIABILITY_AND_RELIABILITY
+  - run_id: ph0x_identifiability_20260804_v1
+  - binds_d2x_closure: d2x_finalize_publication_20260804T1600+0800
+explicit_denials:
+  - B0_X_STRONG_BASELINE_QUALIFICATION
+  - MODEL_OR_BASELINE_TRAINING
+  - TEST_THRESHOLD_FITTING
+  - OUTCOME_PERCENTILE_NOISE
+  - MODEL_GENERATED_LABELS
+  - CONFIRMATORY_TEST_UNSEAL
+  - TEST_OUTCOME_FITTING
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PULL_REQUEST
+signature_status: NOT_PROVIDED_NOT_ASSERTED
+external_identity_status: NOT_VERIFIED
+scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY

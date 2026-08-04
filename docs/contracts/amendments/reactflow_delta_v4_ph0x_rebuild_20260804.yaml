@@ -1,0 +1,88 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_ph0x_rebuild_20260804
+amendment_status: ACTIVE_AUTHORIZED
+authority_epoch: 9
+created_at: "2026-08-04T17:00:00+08:00"
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+supersedes_amendment:
+  amendment_id: reactflow_delta_v4_ph0x_20260804
+  superseded_authority_epoch: 7
+  superseded_ph0x_run_id: ph0x_identifiability_20260804_v1
+  supersession_reason: >-
+    PH0X_REBIND_AFTER_D2X_PUBLICATION_LEVEL_REBUILD. The epoch-7 PH0-X
+    amendment was bound to the epoch-6 D2-X closure, which was voided and
+    rebuilt at publication level (epoch 8, run d2x_split_publication_v1,
+    closure d2x_finalize_publication_20260804T1600+0800). This amendment
+    re-binds PH0-X to the new publication-level D2-X closure and re-authorizes
+    the PH0-X identifiability/reliability phase on the corrected split.
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_ph0x_rebuild_approval_20260804.yaml
+  approval_record_sha256: null
+  scope: CONDITIONAL_PH0X_ONLY_AUTHORITY
+  scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
+  external_identity_status: NOT_VERIFIED
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+prerequisites:
+  d2x_terminal_manifest_sha256: bd05230460214791b7730f9549ad0f7ee29cd349858759e0a463270592d8e1d9
+  d2x_terminal_sentinel_sha256: f90b6c1c999fac6204b9d4b4e91dc6b09b3cc4021caf7bf454f238fb92f813f8
+  d2x_checksum_ledger_sha256: 5c8961f377144054f0850a5189f3b137900124c4290a35a853412c3d7d25a849
+  d2x_artifact_inventory_sha256: 3c185a45be9c6734e4990cf9d95e635036649a07d2fc8278e05b205a2cce6258
+  d2x_split_manifest_sha256: 3dfb934443651abac81e4f11d15c5045c4831f69bad00241a478056542bd47bd
+  d2x_exposure_audit_sha256: d8526652d0e44c14ad5b278c5308d3a1452a2f4d0bbf9606e7621cd12bca2c06
+  d2x_tier_candidate_sha256: 7f74a229338d94a3e41a0809018e47e1744dcbf5c768c5114553d3100b566eb1
+  d2x_test_seal_sha256: 7507bae461b34dafc9284bc28384b8a754e6fe294fa6fd80e12d3843e72dd463
+  d2x_blind_viability_certificate_sha256: d500a4b9c2d43ff8a86f19e5150bc55b56f8ec78a5d35eadf9ae892ca1617b89
+  d2x_closure_commit: 9f239501ba2323ded799292ffc32ed70d8f97dab
+  d2x_gate_result: PASS
+  d1x_gate_result: PASS
+  d1x_terminal_manifest_sha256: bd29a4f679d376ca27c9cc83b3bb9d1ce2903d98de66caba626650d42f55d9e3
+  d1x_terminal_sentinel_sha256: 7a4aaeda5968c2dcfafa98fe53f149643a7eb53bbce6c9e06019f45d37437074
+  d1x_checksum_ledger_sha256: e19d169f524cd00453b28fc18c14f1bca7af03a32d2c8f6e589b7f5405911de1
+  d1x_canonical_records_sha256: af34147d636c248ac8d14ae4a4c349aa71dcef4d0e2f4926701cb6c506c6fb6f
+  d1x_primary_pairs_sha256: 92c90492f9907177f373faefcbff73fa702f95d533b198ac7dd387aa34ddb875
+  d1x_canonicalization_summary_sha256: c039c67dd4a74e767b528f79aad180c6d62d541135576fac00ac99899d21f635
+  d1x_closure_commit: 8f8e90a
+  d1x_evidence_class: DATA_QUALIFICATION_ONLY
+grant:
+  phase_id: PH0-X
+  authorization_kind: SINGLE_PHASE_IDENTIFIABILITY_RELIABILITY_ONLY
+  allowed_actions:
+    - READ_ONLY_PREFLIGHT
+    - D1X_CANONICAL_RECORDS_READ
+    - D2X_SPLIT_MANIFEST_READ
+    - REPLICATE_BLOCK_AND_NOISE_MODELING
+    - ICC_RELIABILITY_ESTIMATION
+    - TRAINING_ONLY_CHANGER_CALLER_FREEZE
+    - GROUP_AWARE_PERMUTATION
+    - MEASUREMENT_ERROR_SENSITIVITY
+    - CHANGER_COUNT_AGGREGATION
+    - BLIND_TEST_CERTIFICATE_AGGREGATE_ONLY
+    - TIER_B_PLUS_UPGRADE_TO_PASS
+    - TIER_A_PLUS_DATA_READY_MAINTENANCE
+  explicit_denials:
+    - B0_X_STRONG_BASELINE_QUALIFICATION
+    - MODEL_OR_BASELINE_TRAINING
+    - TEST_THRESHOLD_FITTING
+    - OUTCOME_PERCENTILE_NOISE
+    - MODEL_GENERATED_LABELS
+    - CONFIRMATORY_TEST_UNSEAL
+    - TEST_OUTCOME_FITTING
+    - CROSS_PROJECT_EXPORT
+    - WET_LAB
+    - PULL_REQUEST
+    - PUSH_IS_GOVERNED_BY_USER_INSTRUCTION_9
+run_authorization:
+  authorization_token_id: ph0x_identifiability_20260804_v1
+  maximum_primary_run_count: 1
+  maximum_concurrent_runs: 1
+  same_run_checkpoint_resume_allowed: true
+  terminal_run_consumes_authority: true
+  run_id_must_be: ph0x_identifiability_20260804_v1
+  isolated_clean_worktree_required_before_execution: true
+terminal_routes:
+  on_pass: STOP_AWAIT_B0X_AUTHORITY_AMENDMENT
+  on_fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+  automatic_downstream_unlock: false
+embedded_self_sha256: FORBIDDEN
