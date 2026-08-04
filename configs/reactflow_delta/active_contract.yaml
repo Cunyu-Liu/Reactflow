@@ -7,7 +7,7 @@ authority:
   authority_epoch: 11
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
   current_phase: O0-X
-  current_authority_state: O0X_AUTHORIZED
+  current_authority_state: O0X_CLOSED_AWAIT_M0X
   current_runnable_phase: O0-X
   conflict_policy: FAIL_CLOSED
   precedence:
@@ -290,16 +290,19 @@ phase_graph:
   dependencies:
   - B0-X
   required_gate: TIER_B_PLUS
-  lifecycle_status: RUNNING
-  gate_result: NOT_RUN
+  lifecycle_status: TERMINAL
+  gate_result: PASS
   evidence_class: ENGINEERING_ONLY
-  execution_authorized: true
+  execution_authorized: false
   training_required: true
   next_on_pass:
   - M0-X
   next_on_fail:
   - REPORT-X
   run_id: o0x_operator_engineering_20260804_v1
+  evidence_manifest_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/o0x/o0x_finalize_20260804T2000+0800/terminal_manifest.yaml
+  evidence_manifest_sha256: 815168cc826684817680c3ce8ea046e563266fd443da878d45732f8b07a9e2d0
+  terminal_sentinel_status: O0X_CLOSED
 - phase_id: M0-X
   dependencies:
   - O0-X
