@@ -1,0 +1,24 @@
+{
+  "schema_version": "reactflow_delta.m0x_window_registry.v1",
+  "window_id": "m0x_dev_window_20260804",
+  "authorization_sha256": "e6ceb774a35cf624c2fa82699be3a2d823326af1abe696591eb098fad9fc8ec7",
+  "window_started_at_utc": "2026-08-04T12:17:14Z",
+  "window_deadline_utc": "2026-09-01T12:17:14Z",
+  "maximum_iterations": 6,
+  "consumed_iterations": 1,
+  "remaining_iterations": 5,
+  "iterations": [
+    {
+      "iteration_id": "EPRO_DEV_01",
+      "run_id": "epro_dev_01_20260804",
+      "hypothesis_id": "m0x_h01_frozen_fromscratch",
+      "change_category": "baseline_matched_comparison",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "evidence_sha256": "b1a1b2b9e06eef1976021104e315f357196747b5e7138d60480720e938196a3c",
+      "status": "FAIL"
+    }
+  ],
+  "scientific_boundary": "DEVELOPMENT_ONLY. Tier B+ (50k-250k params). No EPRO-Lite, no test access, fixed development seed, no seed retry, no capacity overshoot.",
+  "signed_amendment_sha256": "e6ceb774a35cf624c2fa82699be3a2d823326af1abe696591eb098fad9fc8ec7"
+}
