@@ -6,9 +6,9 @@ authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
   authority_epoch: 10
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
-  current_phase: B0-X
-  current_authority_state: B0X_AUTHORIZED
-  current_runnable_phase: B0-X
+  current_phase: O0-X
+  current_authority_state: B0X_CLOSED_AWAIT_O0X
+  current_runnable_phase: O0-X
   conflict_policy: FAIL_CLOSED
   precedence:
   - ACTIVE_CONTRACT_MANIFEST
@@ -67,7 +67,7 @@ active_contract:
     signature_status: UNSIGNED
     sha256: 12cf38c256712d5f619090d16b3d1b9d44da729f951dfdb9d456c7a3d5d7d39a
 authorization:
-  status: ACTIVE_B0X_ONLY
+  status: ACTIVE_B0X_CLOSED
   approval_status: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
   signed_by: null
   signed_at: null
@@ -84,8 +84,7 @@ authorization:
   - D2-X
   - PH0-X
   - B0-X
-  runnable_phases:
-  - B0-X
+  runnable_phases: []
   training_allowed: true
   full_data_recall_allowed: true
   new_split_allowed: false
@@ -162,6 +161,10 @@ bindings:
   b0x_approval_record_path: docs/approvals/reactflow_delta_v4_b0x_approval_20260804.yaml
   b0x_approval_record_sha256: c44e3dafdb4e39716c65429f4869b330d4c2edf21abf7e2e6bb84f05aff984ab
   b0x_run_id: b0x_strong_baseline_20260804_v1
+  b0x_terminal_manifest_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/b0x/b0x_finalize_20260804T1900+0800/terminal_manifest.yaml
+  b0x_terminal_manifest_sha256: 2500fc66dd92184f8915497aa94dd11fa69a53170ee974efcdd58f1f28d9516b
+  b0x_terminal_checksum_ledger_sha256: 4eb641ae6f135ead8e4374e106c12f961897eab0b33132186b3a826b2b8aa077
+  b0x_terminal_sentinel_sha256: e8bfca70e9282dde6e492af71e653618784da757c7211b149d820c489524647e
 phase_graph:
 - phase_id: RECOVERY_CONTRACT_REWRITE
   dependencies: []
@@ -262,15 +265,18 @@ phase_graph:
   dependencies:
   - PH0-X
   required_gate: TIER_B_PLUS
-  lifecycle_status: RUNNING
-  gate_result: NOT_RUN
+  lifecycle_status: TERMINAL
+  gate_result: PASS
   evidence_class: BENCHMARK_QUALIFICATION_ONLY
-  execution_authorized: true
+  execution_authorized: false
   training_required: true
   next_on_pass:
   - O0-X
   next_on_fail:
   - REPORT-X
+  evidence_manifest_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/b0x/b0x_finalize_20260804T1900+0800/terminal_manifest.yaml
+  evidence_manifest_sha256: 2500fc66dd92184f8915497aa94dd11fa69a53170ee974efcdd58f1f28d9516b
+  terminal_sentinel_status: B0X_CLOSED
 - phase_id: O0-X
   dependencies:
   - B0-X
