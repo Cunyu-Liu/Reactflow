@@ -1,14 +1,14 @@
 schema_version: reactflow_delta.active_contract.v1
-manifest_id: reactflow_delta_v4_d1x_terminal_20260804
+manifest_id: reactflow_delta_v4_d2x_authority_epoch_6_20260804
 project_task_id: reactflow_delta
 created_at: '2026-08-03T23:08:38+08:00'
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  authority_epoch: 5
+  authority_epoch: 6
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
-  current_phase: D1-X
-  current_authority_state: D1X_TERMINAL_AWAIT_D2X_AMENDMENT
-  current_runnable_phase: D1-X
+  current_phase: D2-X
+  current_authority_state: D2X_AUTHORIZED
+  current_runnable_phase: D2-X
   conflict_policy: FAIL_CLOSED
   precedence:
   - ACTIVE_CONTRACT_MANIFEST
@@ -67,13 +67,13 @@ active_contract:
     signature_status: UNSIGNED
     sha256: 12cf38c256712d5f619090d16b3d1b9d44da729f951dfdb9d456c7a3d5d7d39a
 authorization:
-  status: CLOSED_D1X_AWAIT_D2X_AMENDMENT
+  status: ACTIVE_D2X_ONLY
   approval_status: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
   signed_by: null
   signed_at: null
   cryptographic_signature_status: NOT_PROVIDED_NOT_ASSERTED
-  approval_record: docs/approvals/reactflow_delta_v4_d1x_approval_20260804.yaml
-  approval_record_sha256: ba6782c654e5928f508405ee36a9c1ee4b9942666b365614ce04f6aa4d5b5624
+  approval_record: docs/approvals/reactflow_delta_v4_d2x_approval_20260804.yaml
+  approval_record_sha256: 89464f472bdb1e6501f8b96ab67d131c52a07d5906ace92d20da83fe279ae82a
   approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
   approval_scope:
   - V4_SIGNOFF
@@ -81,10 +81,12 @@ authorization:
   allowed_phases:
   - D0-X
   - D1-X
-  runnable_phases: []
+  - D2-X
+  runnable_phases:
+  - D2-X
   training_allowed: false
   full_data_recall_allowed: true
-  new_split_allowed: false
+  new_split_allowed: true
   confirmatory_test_access_allowed: false
   cross_project_export_allowed: false
   new_wet_lab_allowed: false
@@ -132,6 +134,10 @@ bindings:
   d1x_terminal_manifest_sha256: bd29a4f679d376ca27c9cc83b3bb9d1ce2903d98de66caba626650d42f55d9e3
   d1x_terminal_checksum_ledger_sha256: e19d169f524cd00453b28fc18c14f1bca7af03a32d2c8f6e589b7f5405911de1
   d1x_terminal_sentinel_sha256: 7a4aaeda5968c2dcfafa98fe53f149643a7eb53bbce6c9e06019f45d37437074
+  d2x_amendment_path: docs/contracts/amendments/reactflow_delta_v4_d2x_20260804.yaml
+  d2x_amendment_sha256: ea2df625e38d601f227b3ef2126a6e50f06e49d2ff903370ba6573cf6a56c5c4
+  d2x_approval_record_sha256: 89464f472bdb1e6501f8b96ab67d131c52a07d5906ace92d20da83fe279ae82a
+  d2x_run_id: d2x_split_20260804_v1
 phase_graph:
 - phase_id: RECOVERY_CONTRACT_REWRITE
   dependencies: []
@@ -198,15 +204,16 @@ phase_graph:
 - phase_id: D2-X
   dependencies:
   - D1-X
-  lifecycle_status: PLANNED
+  lifecycle_status: RUNNING
   gate_result: NOT_RUN
   evidence_class: DATA_QUALIFICATION_ONLY
-  execution_authorized: false
+  execution_authorized: true
   training_required: false
   next_on_pass:
   - PH0-X
   next_on_fail:
   - REPORT-X
+  rerun_allowed: true
 - phase_id: PH0-X
   dependencies:
   - D2-X

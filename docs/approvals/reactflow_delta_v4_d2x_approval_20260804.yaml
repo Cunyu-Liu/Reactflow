@@ -1,0 +1,26 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_d2x_approval_20260804
+project_task_id: reactflow_delta
+approved_at: "2026-08-04T12:30:00+08:00"
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: "好的，请帮我起草 D2-X 权威修正案，直接开始执行。"
+approval_kind: D2X_AUTHORITY_ACTIVATION
+approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approved_amendment_path: docs/contracts/amendments/reactflow_delta_v4_d2x_20260804.yaml
+approved_amendment_sha256: ea2df625e38d601f227b3ef2126a6e50f06e49d2ff903370ba6573cf6a56c5c4
+approval_scope:
+  - SINGLE_PHASE_SPLIT_EXPOSURE_ONLY
+  - D2X_SPLIT_EXPOSURE_AND_DATA_TIER_CANDIDATE_FREEZE
+  - run_id: d2x_split_20260804_v1
+explicit_denials:
+  - PH0_X_IDENTIFIABILITY_CALLER_FIT
+  - TRAINING_DATASET_FINALIZATION
+  - MODEL_OR_BASELINE_TRAINING
+  - CONFIRMATORY_TEST_UNSEAL
+  - TEST_OUTCOME_FITTING
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PULL_REQUEST
+signature_status: NOT_PROVIDED_NOT_ASSERTED
+external_identity_status: NOT_VERIFIED
+scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
