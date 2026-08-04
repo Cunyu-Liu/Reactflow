@@ -72,18 +72,55 @@ def _replicate_noise_std(profiles: list[list[float]]):
     return math.sqrt(var)
 
 
+CLUSTER_WINDOW = 15
+
+
 def _max_cluster(weights: list[float], eligible: list[int]) -> float:
-    """Max over contiguous eligible runs of sqrt(sum of squared weights)."""
+    """Local sliding-window max-cluster: max over contiguous windows of up to
+    CLUSTER_WINDOW eligible positions of sqrt(sum of squared weights)."""
     best = 0.0
-    cur = 0.0
-    for i, w in enumerate(weights):
-        if eligible[i] and _finite(w):
-            cur += w * w
-            if cur > best:
-                best = cur
-        else:
-            cur = 0.0
+    n = len(weights)
+    i = 0
+    while i < n:
+        if not eligible[i] or not _finite(weights[i]):
+            i += 1
+            continue
+        window_sum = 0.0
+        cnt = 0
+        j = i
+        while j < n and eligible[j] and _finite(weights[j]) and cnt < CLUSTER_WINDOW:
+            window_sum += weights[j] * weights[j]
+            cnt += 1
+            j += 1
+            if window_sum > best:
+                best = window_sum
+        i = j
     return math.sqrt(best)
+
+
+def _max_cluster_span(weights: list[float], eligible: list[int]) -> tuple[float, list[int]]:
+    """Local sliding-window max-cluster with positions: returns the winning
+    window (<= CLUSTER_WINDOW contiguous eligible positions) and its statistic."""
+    best = 0.0
+    best_run: list[int] = []
+    n = len(weights)
+    i = 0
+    while i < n:
+        if not eligible[i] or not _finite(weights[i]):
+            i += 1
+            continue
+        window_sum = 0.0
+        run: list[int] = []
+        j = i
+        while j < n and eligible[j] and _finite(weights[j]) and len(run) < CLUSTER_WINDOW:
+            window_sum += weights[j] * weights[j]
+            run.append(j)
+            j += 1
+            if window_sum > best:
+                best = window_sum
+                best_run = list(run)
+        i = j
+    return math.sqrt(best), best_run
 
 
 def compute_eligible_mask(record: dict) -> list[int]:
