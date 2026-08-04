@@ -4,10 +4,10 @@ project_task_id: reactflow_delta
 created_at: '2026-08-03T23:08:38+08:00'
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  authority_epoch: 10
+  authority_epoch: 11
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
   current_phase: O0-X
-  current_authority_state: B0X_CLOSED_AWAIT_O0X
+  current_authority_state: O0X_AUTHORIZED
   current_runnable_phase: O0-X
   conflict_policy: FAIL_CLOSED
   precedence:
@@ -67,13 +67,13 @@ active_contract:
     signature_status: UNSIGNED
     sha256: 12cf38c256712d5f619090d16b3d1b9d44da729f951dfdb9d456c7a3d5d7d39a
 authorization:
-  status: ACTIVE_B0X_CLOSED
+  status: ACTIVE_O0X
   approval_status: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
   signed_by: null
   signed_at: null
   cryptographic_signature_status: NOT_PROVIDED_NOT_ASSERTED
-  approval_record: docs/approvals/reactflow_delta_v4_ph0x_rebuild_approval_20260804.yaml
-  approval_record_sha256: b09c246c8b530dfa503b9439dff5d5bdad6cecd5948dad35d05bb4099cdbfcce
+  approval_record: docs/approvals/reactflow_delta_v4_o0x_approval_20260804.yaml
+  approval_record_sha256: beea3847f98e16f5d5fc35176922d1866f0f4627e7d57ece7db2f0add99e2983
   approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
   approval_scope:
   - V4_SIGNOFF
@@ -84,7 +84,9 @@ authorization:
   - D2-X
   - PH0-X
   - B0-X
-  runnable_phases: []
+  - O0-X
+  runnable_phases:
+  - O0-X
   training_allowed: true
   full_data_recall_allowed: true
   new_split_allowed: false
@@ -165,6 +167,13 @@ bindings:
   b0x_terminal_manifest_sha256: 2500fc66dd92184f8915497aa94dd11fa69a53170ee974efcdd58f1f28d9516b
   b0x_terminal_checksum_ledger_sha256: 4eb641ae6f135ead8e4374e106c12f961897eab0b33132186b3a826b2b8aa077
   b0x_terminal_sentinel_sha256: e8bfca70e9282dde6e492af71e653618784da757c7211b149d820c489524647e
+  o0x_amendment_path: docs/contracts/amendments/reactflow_delta_v4_o0x_20260804.yaml
+  o0x_amendment_sha256: a27261927ea6b172c3f09a959c9e7884067105ba7f5c3500527fc70b2ac896a7
+  o0x_approval_record_path: docs/approvals/reactflow_delta_v4_o0x_approval_20260804.yaml
+  o0x_approval_record_sha256: beea3847f98e16f5d5fc35176922d1866f0f4627e7d57ece7db2f0add99e2983
+  o0x_run_id: o0x_operator_engineering_20260804_v1
+  o0x_plan_doc_path: docs/plans/reactflow_delta_o0x_execution_plan_20260804.md
+  o0x_plan_doc_sha256: e26c2f8e4127de06a5e9c3471c9e7c6eb0ed94e7cd727e2eea880801d110219c
 phase_graph:
 - phase_id: RECOVERY_CONTRACT_REWRITE
   dependencies: []
@@ -281,15 +290,16 @@ phase_graph:
   dependencies:
   - B0-X
   required_gate: TIER_B_PLUS
-  lifecycle_status: PLANNED
+  lifecycle_status: RUNNING
   gate_result: NOT_RUN
   evidence_class: ENGINEERING_ONLY
-  execution_authorized: false
+  execution_authorized: true
   training_required: true
   next_on_pass:
   - M0-X
   next_on_fail:
   - REPORT-X
+  run_id: o0x_operator_engineering_20260804_v1
 - phase_id: M0-X
   dependencies:
   - O0-X
