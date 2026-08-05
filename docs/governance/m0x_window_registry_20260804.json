@@ -4,9 +4,9 @@
   "authorization_sha256": "e6ceb774a35cf624c2fa82699be3a2d823326af1abe696591eb098fad9fc8ec7",
   "window_started_at_utc": "2026-08-04T12:17:14Z",
   "window_deadline_utc": "2026-09-01T12:17:14Z",
-  "maximum_iterations": 6,
-  "consumed_iterations": 2,
-  "remaining_iterations": 4,
+  "maximum_iterations": null,
+  "consumed_iterations": 4,
+  "remaining_iterations": "UNLIMITED_PER_AMENDMENT_EPOCH13",
   "iterations": [
     {
       "iteration_id": "EPRO_DEV_01",
@@ -27,8 +27,51 @@
       "counts_as_iteration": true,
       "evidence_sha256": "e33406beb94dcba6d374f2ab80a415c8190e6aea3092878560b3a320a40d8521",
       "status": "FAIL"
+    },
+    {
+      "iteration_id": "EPRO_DEV_03",
+      "run_id": "epro_dev_03_20260805",
+      "hypothesis_id": "m0x_h03_scale_pretrain_calib",
+      "change_category": "scaled_capacity_pretrain_multilayer_calibration",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "evidence_sha256": "bfd8171d8a5b9f88eb7323a3fadc25e45d40769290d9e10cbb0c11f790a54ecd",
+      "outcome": "FAIL",
+      "auprc_arm_a": 0.4219,
+      "auprc_arm_b": 0.4257,
+      "auprc_p2_baseline": 0.6936,
+      "auprc_gain_ci_low_vs_p2": -0.3037,
+      "note": "collapsed constant predictions; scaling+pretrain+calib did not resolve collapse"
+    },
+    {
+      "iteration_id": "EPRO_DEV_04",
+      "run_id": "epro_dev_04_20260805",
+      "hypothesis_id": "m0x_h04_changer_classifier",
+      "change_category": "direct_changer_classifier_focal_loss",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "status": "PASS",
+      "auprc_changer_classifier": 0.7344129736741765,
+      "auprc_p2_baseline": 0.6935987036031102,
+      "auprc_wt_only": 0.6748415894316261,
+      "auprc_gain_point_vs_p2": 0.040814270071066305,
+      "auprc_gain_ci_low_vs_p2": 0.014912052232671336,
+      "auprc_gain_ci_high_vs_p2": 0.1402788382830027,
+      "param_count": 141313,
+      "note": "direct changer classifier (36-dim B0-X+delta_thermo -> MLP 141k) with focal loss; beats P2 baseline, CI low>0"
     }
   ],
   "scientific_boundary": "DEVELOPMENT_ONLY. Tier B+ (50k-250k params). No EPRO-Lite, no test access, fixed development seed, no seed retry, no capacity overshoot.",
-  "signed_amendment_sha256": "e6ceb774a35cf624c2fa82699be3a2d823326af1abe696591eb098fad9fc8ec7"
+  "signed_amendment_sha256": "e6ceb774a35cf624c2fa82699be3a2d823326af1abe696591eb098fad9fc8ec7",
+  "iteration_limit": "UNLIMITED_PER_AMENDMENT_EPOCH13",
+  "scope_expansion": {
+    "amendment_id": "reactflow_delta_v4_m0x_epro_scope_20260805",
+    "amendment_epoch": 13,
+    "applied_at_utc": "2026-08-05T07:55:12Z",
+    "capacity_ceiling": "EXPANDED to largest single-card-trainable model",
+    "iteration_window": "SUSPENDED until model beats P2 baseline",
+    "gpu_budget": "single full GPU (40G)",
+    "data_budget": "all train+val"
+  },
+  "last_updated_utc": "2026-08-05T07:55:12Z"
 }
