@@ -5,7 +5,7 @@
   "window_started_at_utc": "2026-08-04T12:17:14Z",
   "window_deadline_utc": "2026-09-01T12:17:14Z",
   "maximum_iterations": null,
-  "consumed_iterations": 4,
+  "consumed_iterations": 6,
   "remaining_iterations": "UNLIMITED_PER_AMENDMENT_EPOCH13",
   "iterations": [
     {
@@ -59,6 +59,28 @@
       "auprc_gain_ci_high_vs_p2": 0.1402788382830027,
       "param_count": 141313,
       "note": "direct changer classifier (36-dim B0-X+delta_thermo -> MLP 141k) with focal loss; beats P2 baseline, CI low>0"
+    },
+    {
+      "iteration_id": "EPRO_DEV_05",
+      "run_id": "epro_dev_05_20260805",
+      "hypothesis_id": "m0x_h05_epro_changer_classifier",
+      "change_category": "EPRO_backbone_changer_classifier_end_to_end_long_training",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "status": "RUNNING",
+      "registered_at_utc": "2026-08-05T08:36:13Z",
+      "note": "EPRO structure backbone + focal changer head; large capacity; long training; single-method calibration; published ViennaRNA baseline"
+    },
+    {
+      "iteration_id": "EPRO_DEV_06",
+      "run_id": "epro_dev_06_20260805",
+      "hypothesis_id": "m0x_h06_structure_aware_changer",
+      "change_category": "structure_aware_contact_graph_feature_injection_on_proven_classifier",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "status": "RUNNING",
+      "registered_at_utc": "2026-08-05T13:43:56Z",
+      "note": "flat MLP changer classifier + structure-aware contact-graph features; long training with convergence/generalization tracking; single-method calibration; published ViennaRNA baseline"
     }
   ],
   "scientific_boundary": "DEVELOPMENT_ONLY. Tier B+ (50k-250k params). No EPRO-Lite, no test access, fixed development seed, no seed retry, no capacity overshoot.",
@@ -73,5 +95,5 @@
     "gpu_budget": "single full GPU (40G)",
     "data_budget": "all train+val"
   },
-  "last_updated_utc": "2026-08-05T07:55:12Z"
+  "last_updated_utc": "2026-08-05T13:43:56Z"
 }
