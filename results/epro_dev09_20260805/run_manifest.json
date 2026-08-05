@@ -1,0 +1,80 @@
+{
+  "authority_amendment": "reactflow_delta_v4_m0x_epro_scope_20260805 (epoch 13)",
+  "comparison_table": {
+    "dev06_reference": {
+      "study_macro_auprc": 0.7353243279593717
+    },
+    "mutation_context_changer": {
+      "calibration_selected_method": "isotonic_pava",
+      "improved_vs_dev06": false,
+      "param_count": 145153,
+      "point_gain_vs_dev06": -0.029314388927048962,
+      "study_macro_auprc": 0.7060099390323228,
+      "study_macro_auprc_calibrated": 0.8676793350693373
+    },
+    "p2_paired_baseline": {
+      "study_macro_auprc": 0.36043061005867627
+    },
+    "wt_only": {
+      "study_macro_auprc": 0.3355611505638539
+    }
+  },
+  "created_at_utc": "2026-08-05T16:23:01.421016+00:00",
+  "data": {
+    "changer_frac": 0.5239759531010791,
+    "feat_dim": 51,
+    "pooled_train_positions": 535620,
+    "test_accessed": false,
+    "test_sealed": true,
+    "train_pairs": 3874,
+    "validation_pairs": 190
+  },
+  "dev_definitions": {
+    "calibration": "single-method fit on train, Brier/logloss/ECE on val",
+    "changer_definition": "|delta_true| > CHANGER_TOL * pair_scale",
+    "changer_tol": 0.05,
+    "score": "sigmoid P(changer)",
+    "study_macro_auprc": "mean over studies of per-study AP over eligible positions"
+  },
+  "evaluation": {
+    "dev06_reference": {
+      "study_macro_auprc": 0.7353243279593717
+    },
+    "mutation_context_changer": {
+      "best_epoch": 189,
+      "improved_vs_dev06": false,
+      "point_gain_vs_dev06": -0.029314388927048962,
+      "study_macro_auprc": 0.7060099390323228,
+      "study_macro_auprc_calibrated": 0.8676793350693373
+    },
+    "p2_paired_baseline": {
+      "study_macro_auprc": 0.36043061005867627
+    },
+    "wt_only": {
+      "study_macro_auprc": 0.3355611505638539
+    }
+  },
+  "hypothesis_id": "m0x_h09_mutation_context_changer",
+  "iteration_id": "EPRO_DEV_09",
+  "model": {
+    "mutation_context_changer": {
+      "config": {
+        "batch_size": 4096,
+        "dropout": 0.1,
+        "epochs": 300,
+        "focal_alpha_pos": 0.47602404689892086,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "feat_dim": 51,
+      "feature_spec": "B0-X(31)+delta_thermo(5)+contact_graph(6)+mutation_context(dist/mut_pos/is_mut/near_mut/bpp_to_mut/ref_allele=9)",
+      "param_count": 145153
+    }
+  },
+  "run_id": "epro_dev_09_20260805",
+  "schema_version": "reactflow_delta.m0x_run_manifest.v1",
+  "seed": 20260804,
+  "warning": "NOT_FINAL"
+}

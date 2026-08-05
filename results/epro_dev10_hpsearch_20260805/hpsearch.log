@@ -1,0 +1,43 @@
+GPU: NVIDIA A100-PCIE-40GB free=24.2GB total=42.4GB
+[data] train=3516 validation=548 (test SEALED)
+[features] building B0-X + delta_thermo + structure-aware...
+[features] done in 1339s
+[data] pooled train positions=471344 feat_dim=42 changer_frac=0.5383
+[cfg] {'hidden': 192, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> val_auprc=0.7327@9 (194s) params=82,561
+[cfg] {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> val_auprc=0.7321@9 (189s) params=142,849
+[cfg] {'hidden': 384, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> val_auprc=0.7288@29 (194s) params=312,577
+[cfg] {'hidden': 256, 'layers': 2, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> val_auprc=0.7412@9 (176s) params=77,057
+[cfg] {'hidden': 256, 'layers': 4, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> val_auprc=0.7376@9 (207s) params=208,641
+[cfg] {'hidden': 256, 'layers': 3, 'dropout': 0.0, 'lr': 0.001, 'focal_gamma': 2.0} -> val_auprc=0.7367@9 (201s) params=142,849
+[cfg] {'hidden': 256, 'layers': 3, 'dropout': 0.2, 'lr': 0.001, 'focal_gamma': 2.0} -> val_auprc=0.7326@219 (202s) params=142,849
+[cfg] {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.0003, 'focal_gamma': 2.0} -> val_auprc=0.7435@39 (196s) params=142,849
+[cfg] {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.003, 'focal_gamma': 2.0} -> val_auprc=0.7293@79 (200s) params=142,849
+[cfg] {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 1.0} -> val_auprc=0.7222@9 (202s) params=142,849
+[cfg] {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 3.0} -> val_auprc=0.7377@39 (195s) params=142,849
+
+=== HP SEARCH RESULTS ===
+  {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.0003, 'focal_gamma': 2.0} -> 0.7435
+  {'hidden': 256, 'layers': 2, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> 0.7412
+  {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 3.0} -> 0.7377
+  {'hidden': 256, 'layers': 4, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> 0.7376
+  {'hidden': 256, 'layers': 3, 'dropout': 0.0, 'lr': 0.001, 'focal_gamma': 2.0} -> 0.7367
+  {'hidden': 192, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> 0.7327
+  {'hidden': 256, 'layers': 3, 'dropout': 0.2, 'lr': 0.001, 'focal_gamma': 2.0} -> 0.7326
+  {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> 0.7321
+  {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.003, 'focal_gamma': 2.0} -> 0.7293
+  {'hidden': 384, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 2.0} -> 0.7288
+  {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.001, 'focal_gamma': 1.0} -> 0.7222
+
+Best: {'hidden': 256, 'layers': 3, 'dropout': 0.1, 'lr': 0.0003, 'focal_gamma': 2.0} -> 0.7435 (dev06 ref 0.7353)
+Traceback (most recent call last):
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/m0x_epro_hpsearch.py", line 315, in <module>
+    raise SystemExit(main())
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/m0x_epro_hpsearch.py", line 271, in main
+    gain = _auprc_gain_bootstrap(best["changed"],
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/m0x_epro_hpsearch.py", line 182, in _auprc_gain_bootstrap
+    real = _study_macro_auprc(changed_a) - _study_macro_auprc(changed_b)
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/m0x_epro_hpsearch.py", line 114, in _study_macro_auprc
+    s = np.concatenate([r["score"] for r in recs])
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/m0x_epro_hpsearch.py", line 114, in <listcomp>
+    s = np.concatenate([r["score"] for r in recs])
+KeyError: 'score'

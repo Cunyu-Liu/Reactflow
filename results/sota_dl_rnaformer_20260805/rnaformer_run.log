@@ -1,0 +1,6 @@
+[data] validation pairs=190 (test SEALED, train NOT used)
+[model] loading RNAformer 32M (intra-family fine-tuned)...
+[model] loaded in 12s
+[rnaformer] 20/190 pairs in 1123s
+[rnaformer] 40/190 pairs in 1431s
+[rnaformer] 60/190 pairs in 2460s

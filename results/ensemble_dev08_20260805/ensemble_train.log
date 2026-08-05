@@ -1,0 +1,22 @@
+GPU: NVIDIA A100-PCIE-40GB MIG 1g.5gb free=3.6GB total=5.1GB
+[data] train=3874 validation=190 (test SEALED)
+[features] building B0-X + delta_thermo + structure-aware...
+[features] built in 986s
+[cache] saved /tmp/feature_cache_dev08.npz
+[data] pooled train positions=535,620 feat_dim=42 changer_frac=0.5240 alpha_pos=0.476
+[seed 1/7] seed=20260804 val_auprc=0.7015 @69
+[seed 2/7] seed=40521608 val_auprc=0.7014 @9
+[seed 3/7] seed=60782412 val_auprc=0.6989 @189
+[seed 4/7] seed=81043216 val_auprc=0.7002 @169
+[seed 5/7] seed=101304020 val_auprc=0.7046 @9
+[seed 6/7] seed=121564824 val_auprc=0.6978 @79
+[seed 7/7] seed=141825628 val_auprc=0.7047 @279
+
+[ensemble] mean-of-seeds study-macro AUPRC = 0.7032
+
+=== COMPARISON ===
+ensemble(n=7) auprc=0.7032 cal=0.8726
+dev06 ref              auprc=0.7353
+p2_paired              auprc=0.6936
+point_gain_vs_dev06 = -0.0322  improved=False
+manifest: results/ensemble_dev08_20260805/run_manifest.json

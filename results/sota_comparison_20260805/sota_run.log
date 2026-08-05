@@ -1,0 +1,25 @@
+[data] validation pairs=190 (test SEALED, train NOT used)
+[eternafold] folded 190 pairs in 3s
+[eternafold] val study-macro AUPRC = 0.4518
+[mxfold2] folded 190 pairs in 1927s
+[mxfold2] val study-macro AUPRC = 0.4244
+[contrafold] folded 190 pairs in 3s
+[contrafold] val study-macro AUPRC = 0.4530
+
+=== HORIZONTAL COMPARISON TABLE (横向对比表) ===
+method                              auprc  notes
+structure_aware_changer            0.7353
+p2_paired_baseline                 0.6936
+wt_only                            0.6748
+vienna_physics_published           0.4534
+contrafold                         0.4530
+eternafold                         0.4518
+mxfold2                            0.4244
+
+Point gain of our structure-aware classifier vs published SOTA:
+  vs eternafold  : +0.2835
+  vs mxfold2     : +0.3109
+  vs contrafold  : +0.2824
+  vs vienna_physics: +0.2819
+  vs p2_paired(ours): +0.0417
+manifest: results/sota_comparison_20260805/sota_comparison_manifest.json

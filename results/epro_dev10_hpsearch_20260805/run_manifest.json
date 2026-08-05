@@ -1,0 +1,275 @@
+{
+  "authority_amendment": "reactflow_delta_v4_m0x_epro_scope_20260805 (epoch 13)",
+  "best": {
+    "best_epoch": 39,
+    "config": {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.0003
+    },
+    "param_count": 142849,
+    "study_macro_auprc": 0.7435
+  },
+  "comparison_table": {
+    "structure_aware_dev06": {
+      "study_macro_auprc": 0.7353243279593717
+    },
+    "structure_aware_hpsearch": {
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.0003
+      },
+      "study_macro_auprc": 0.7435
+    }
+  },
+  "created_at_utc": "2026-08-05T18:15:29.284191+00:00",
+  "data": {
+    "feat_dim": 42,
+    "pooled_train_positions": 471344,
+    "test_accessed": false,
+    "test_sealed": true,
+    "train_pairs": 3516,
+    "validation_pairs": 548
+  },
+  "dev06_reference": {
+    "study_macro_auprc": 0.7353243279593717
+  },
+  "grid": [
+    {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.0003
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 2,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 3.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 4,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.0,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 192,
+      "layers": 3,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.2,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.003
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 2.0,
+      "hidden": 384,
+      "layers": 3,
+      "lr": 0.001
+    },
+    {
+      "dropout": 0.1,
+      "focal_gamma": 1.0,
+      "hidden": 256,
+      "layers": 3,
+      "lr": 0.001
+    }
+  ],
+  "hypothesis_id": "m0x_h10_hpsearch_changer",
+  "improved_vs_dev06": true,
+  "iteration_id": "EPRO_DEV_10",
+  "point_gain_vs_dev06": 0.008175672040628301,
+  "results": [
+    {
+      "best_epoch": 39,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.0003
+      },
+      "param_count": 142849,
+      "study_macro_auprc": 0.7435,
+      "train_s": 196
+    },
+    {
+      "best_epoch": 9,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 2,
+        "lr": 0.001
+      },
+      "param_count": 77057,
+      "study_macro_auprc": 0.7412,
+      "train_s": 176
+    },
+    {
+      "best_epoch": 39,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 3.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "param_count": 142849,
+      "study_macro_auprc": 0.7377,
+      "train_s": 195
+    },
+    {
+      "best_epoch": 9,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 4,
+        "lr": 0.001
+      },
+      "param_count": 208641,
+      "study_macro_auprc": 0.7376,
+      "train_s": 207
+    },
+    {
+      "best_epoch": 9,
+      "config": {
+        "dropout": 0.0,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "param_count": 142849,
+      "study_macro_auprc": 0.7367,
+      "train_s": 201
+    },
+    {
+      "best_epoch": 9,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 192,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "param_count": 82561,
+      "study_macro_auprc": 0.7327,
+      "train_s": 194
+    },
+    {
+      "best_epoch": 219,
+      "config": {
+        "dropout": 0.2,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "param_count": 142849,
+      "study_macro_auprc": 0.7326,
+      "train_s": 202
+    },
+    {
+      "best_epoch": 9,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "param_count": 142849,
+      "study_macro_auprc": 0.7321,
+      "train_s": 189
+    },
+    {
+      "best_epoch": 79,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.003
+      },
+      "param_count": 142849,
+      "study_macro_auprc": 0.7293,
+      "train_s": 200
+    },
+    {
+      "best_epoch": 29,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 2.0,
+        "hidden": 384,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "param_count": 312577,
+      "study_macro_auprc": 0.7288,
+      "train_s": 194
+    },
+    {
+      "best_epoch": 9,
+      "config": {
+        "dropout": 0.1,
+        "focal_gamma": 1.0,
+        "hidden": 256,
+        "layers": 3,
+        "lr": 0.001
+      },
+      "param_count": 142849,
+      "study_macro_auprc": 0.7222,
+      "train_s": 202
+    }
+  ],
+  "run_id": "epro_dev_10_hpsearch_20260805",
+  "schema_version": "reactflow_delta.m0x_run_manifest.v1",
+  "seed": 20260804,
+  "split": "publication (train 3516 / val 548)",
+  "warning": "NOT_FINAL"
+}

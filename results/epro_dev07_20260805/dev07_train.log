@@ -1,0 +1,41 @@
+GPU: NVIDIA A100-PCIE-40GB MIG 1g.5gb free=4.7GB total=5.1GB
+[data] train=3874 validation=190 (test SEALED)
+[baseline] running wt_only + p2_paired on train+val...
+[features] building B0-X + delta_thermo + structure-aware + multi-scale context...
+[features] done in 1253s
+[data] train positions=535,620 feat_dim=46 changer_frac=0.5240 alpha_pos(auto)=0.476
+[model] SequenceContextChanger params=153,857
+[train] epoch 5/120 loss=0.0721 val_auprc=0.6958 train_auprc=0.7873 gap=0.0916 best=0.6958@4 (8s)
+[train] epoch 10/120 loss=0.0696 val_auprc=0.6948 train_auprc=0.8030 gap=0.1082 best=0.6958@4 (15s)
+[train] epoch 15/120 loss=0.0684 val_auprc=0.6932 train_auprc=0.8102 gap=0.1170 best=0.6958@4 (23s)
+[train] epoch 20/120 loss=0.0666 val_auprc=0.6966 train_auprc=0.8224 gap=0.1258 best=0.6966@19 (31s)
+[train] epoch 25/120 loss=0.0654 val_auprc=0.6941 train_auprc=0.8312 gap=0.1371 best=0.6966@19 (38s)
+[train] epoch 30/120 loss=0.0646 val_auprc=0.6977 train_auprc=0.8369 gap=0.1392 best=0.6977@29 (50s)
+[train] epoch 35/120 loss=0.0635 val_auprc=0.6907 train_auprc=0.8430 gap=0.1523 best=0.6977@29 (59s)
+[train] epoch 40/120 loss=0.0626 val_auprc=0.6893 train_auprc=0.8480 gap=0.1587 best=0.6977@29 (73s)
+[train] epoch 45/120 loss=0.0620 val_auprc=0.6913 train_auprc=0.8521 gap=0.1608 best=0.6977@29 (96s)
+[train] epoch 50/120 loss=0.0611 val_auprc=0.6921 train_auprc=0.8564 gap=0.1643 best=0.6977@29 (105s)
+[train] epoch 55/120 loss=0.0607 val_auprc=0.6934 train_auprc=0.8594 gap=0.1660 best=0.6977@29 (114s)
+[train] epoch 60/120 loss=0.0600 val_auprc=0.6949 train_auprc=0.8618 gap=0.1668 best=0.6977@29 (129s)
+[train] epoch 65/120 loss=0.0596 val_auprc=0.6908 train_auprc=0.8646 gap=0.1739 best=0.6977@29 (159s)
+[train] epoch 70/120 loss=0.0592 val_auprc=0.7005 train_auprc=0.8667 gap=0.1662 best=0.7005@69 (198s)
+[train] epoch 75/120 loss=0.0587 val_auprc=0.6966 train_auprc=0.8686 gap=0.1720 best=0.7005@69 (230s)
+[train] epoch 80/120 loss=0.0584 val_auprc=0.6926 train_auprc=0.8701 gap=0.1775 best=0.7005@69 (238s)
+[train] epoch 85/120 loss=0.0581 val_auprc=0.6964 train_auprc=0.8705 gap=0.1742 best=0.7005@69 (247s)
+[train] epoch 90/120 loss=0.0578 val_auprc=0.6961 train_auprc=0.8722 gap=0.1761 best=0.7005@69 (255s)
+[train] epoch 95/120 loss=0.0577 val_auprc=0.6968 train_auprc=0.8730 gap=0.1762 best=0.7005@69 (263s)
+[train] epoch 100/120 loss=0.0575 val_auprc=0.6978 train_auprc=0.8734 gap=0.1756 best=0.7005@69 (271s)
+[train] epoch 105/120 loss=0.0574 val_auprc=0.6974 train_auprc=0.8737 gap=0.1762 best=0.7005@69 (296s)
+[train] epoch 110/120 loss=0.0573 val_auprc=0.6967 train_auprc=0.8738 gap=0.1771 best=0.7005@69 (323s)
+[train] epoch 115/120 loss=0.0573 val_auprc=0.6971 train_auprc=0.8739 gap=0.1768 best=0.7005@69 (352s)
+[train] epoch 120/120 loss=0.0573 val_auprc=0.6970 train_auprc=0.8739 gap=0.1769 best=0.7005@69 (403s)
+
+=== COMPARISON TABLE ===
+sequence_context params=153,857 auprc=0.7005 train=0.8667 gap=0.1662 cal=0.7005
+dev06_ref                    auprc=0.7353
+p2_paired         params=6,273 auprc=0.6936
+wt_only           params=31 auprc=0.6906
+
+calibration selected=raw
+PASS = False (auprc_gain_ci_low_vs_p2=-0.0001)
+manifest: results/epro_dev07_20260805/run_manifest.json
