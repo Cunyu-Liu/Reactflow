@@ -1,0 +1,38 @@
+contract_schema: reactflow_delta.contract.v4
+amendment_id: reactflow_delta_v4_m0x_epro_scope_20260805
+amendment_epoch: 13
+previous_amendment: reactflow_delta_v4_m0x_20260804
+authorization_status: ACTIVE_AUTHORIZED
+amendment_kind: M0X_EPRO_SCOPE_EXPANSION_CONTINUATION
+amendment_summary: >-
+  User explicitly authorized immediate execution of EPRO_DEV_03 and continuation
+  of M0-X EPRO controlled development with: (1) full single-GPU budget (40G),
+  (2) all train+validation data, (3) model capacity scaled up to the largest
+  single-card-trainable size, (4) iteration limit removed (continue until the
+  model beats the P2 WT-anchored baseline on validation changer detection),
+  (5) multi-layer calibration (temperature + isotonic), (6) pretraining arm B
+  enabled and extended. Test split remains SEALED and is never used for training.
+  GPU 4 exclusion remains REQUIRED.
+supersedes_capacity_ceiling: >-
+  Tier B+ ceiling of 250k params is EXPANDED for this continuation to the largest
+  single-card-trainable model, per explicit user instruction. This does not
+  restore EPRO-Lite historical 4.46M claim; it authorizes NEW larger-capacity
+  development runs only.
+supersedes_iteration_window: >-
+  The 28-day/6-iteration window limit is SUSPENDED per explicit user instruction;
+  development continues until the model beats the P2 baseline, then M0-X gate is
+  re-judged against contract criteria.
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_m0x_epro_scope_20260805.yaml
+  approval_record_sha256: bc7342087af9947ed62a8e6edd6a76e4743620724ece41f7a0a5f649805f4efc
+  scope: SINGLE_PHASE_CONTROLLED_DEVELOPMENT_CONTINUATION
+  signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+  external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
+invariants_unchanged:
+- test_split_sealed: true
+- test_not_used_for_training: true
+- cross_project_export: false
+- wet_lab: false
+- gpu4_exclusion: REQUIRED
+- no_fabricated_data: true
+- no_seed_retry_gaming: true
