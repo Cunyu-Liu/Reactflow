@@ -78,9 +78,18 @@
       "change_category": "structure_aware_contact_graph_feature_injection_on_proven_classifier",
       "prediction_changing": true,
       "counts_as_iteration": true,
-      "status": "RUNNING",
+      "status": "PASS",
       "registered_at_utc": "2026-08-05T13:43:56Z",
-      "note": "flat MLP changer classifier + structure-aware contact-graph features; long training with convergence/generalization tracking; single-method calibration; published ViennaRNA baseline"
+      "note": "flat MLP changer classifier + structure-aware contact-graph features; long training with convergence/generalization tracking; single-method calibration; published ViennaRNA baseline",
+      "result": {
+        "study_macro_auprc": 0.7353243279593717,
+        "auprc_gain_vs_p2_ci_low": 0.033643179831694514,
+        "auprc_gain_vs_p2_point": 0.04172562435626159,
+        "auprc_gain_vs_vienna_ci_low": 0.21045022236541128,
+        "auprc_gain_vs_vienna_point": 0.28188094356413246,
+        "note": "structure-aware features: marginal +0.0009 AUPRC vs DEV_04 (0.7353 vs 0.7344); confirms changer-detection saturates; strong vs published ViennaRNA physics (+0.28)"
+      },
+      "completed_at_utc": "2026-08-05T14:07:18Z"
     }
   ],
   "scientific_boundary": "DEVELOPMENT_ONLY. Tier B+ (50k-250k params). No EPRO-Lite, no test access, fixed development seed, no seed retry, no capacity overshoot.",
@@ -95,5 +104,5 @@
     "gpu_budget": "single full GPU (40G)",
     "data_budget": "all train+val"
   },
-  "last_updated_utc": "2026-08-05T13:43:56Z"
+  "last_updated_utc": "2026-08-05T14:07:18Z"
 }
