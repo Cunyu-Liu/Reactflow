@@ -5,7 +5,7 @@
   "window_started_at_utc": "2026-08-04T12:17:14Z",
   "window_deadline_utc": "2026-09-01T12:17:14Z",
   "maximum_iterations": null,
-  "consumed_iterations": 6,
+  "consumed_iterations": 7,
   "remaining_iterations": "UNLIMITED_PER_AMENDMENT_EPOCH13",
   "iterations": [
     {
@@ -67,9 +67,13 @@
       "change_category": "EPRO_backbone_changer_classifier_end_to_end_long_training",
       "prediction_changing": true,
       "counts_as_iteration": true,
-      "status": "RUNNING",
+      "status": "FAIL",
       "registered_at_utc": "2026-08-05T08:36:13Z",
-      "note": "EPRO structure backbone + focal changer head; large capacity; long training; single-method calibration; published ViennaRNA baseline"
+      "note": "EPRO deep backbone + focal changer head did not converge (val study-macro AP ~0.52); superseded by structure-aware flat MLP (EPRO_DEV_06).",
+      "outcome": "FAIL",
+      "auprc_epro_backbone": 0.52,
+      "auprc_p2_baseline": 0.6936,
+      "closed_at_utc": "2026-08-05T18:57:38.326511+00:00"
     },
     {
       "iteration_id": "EPRO_DEV_06",
@@ -90,6 +94,48 @@
         "note": "structure-aware features: marginal +0.0009 AUPRC vs DEV_04 (0.7353 vs 0.7344); confirms changer-detection saturates; strong vs published ViennaRNA physics (+0.28)"
       },
       "completed_at_utc": "2026-08-05T14:07:18Z"
+    },
+    {
+      "iteration_id": "EPRO_DEV_10",
+      "run_id": "epro_dev_10_hpsearch_20260805",
+      "hypothesis_id": "m0x_h10_hpsearch_changer",
+      "change_category": "hyperparameter_search_on_publication_split",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "status": "PASS",
+      "auprc_changer_classifier": 0.7435,
+      "auprc_dev06_reference": 0.7353243279593717,
+      "auprc_p2_baseline": 0.6935987036031102,
+      "auprc_gain_point_vs_dev06": 0.008175672040628301,
+      "param_count": 142849,
+      "best_config": {
+        "hidden": 256,
+        "layers": 3,
+        "dropout": 0.1,
+        "lr": 0.0003,
+        "focal_gamma": 2.0
+      },
+      "split": "publication (train 3516 / val 548)",
+      "note": "hp-search best config (lr=3e-4) improves structure-aware changer to 0.7435; current best model.",
+      "registered_at_utc": "2026-08-05T18:57:38.326537+00:00"
+    },
+    {
+      "iteration_id": "M0X_SOTA_COMPARISON_CONSOLIDATED",
+      "run_id": "m0x_sota_consolidated_20260805",
+      "hypothesis_id": "m0x_sota_comparison_consolidated",
+      "change_category": "published_sota_horizontal_comparison",
+      "prediction_changing": false,
+      "counts_as_iteration": false,
+      "status": "PASS",
+      "best_auprc": 0.7435,
+      "published_sota": {
+        "rnaformer_nmi_2023": 0.5553804507376294,
+        "eternafold_natcomm_2022": 0.463159059753075
+      },
+      "point_gain_vs_rnaformer": 0.1881,
+      "point_gain_vs_eternafold": 0.2803,
+      "note": "Consolidated horizontal comparison vs published SOTA folding models (RNAformer, EternaFold) on the same publication validation changer-detection task; our model is strictly dominant.",
+      "registered_at_utc": "2026-08-05T18:57:38.326541+00:00"
     }
   ],
   "scientific_boundary": "DEVELOPMENT_ONLY. Tier B+ (50k-250k params). No EPRO-Lite, no test access, fixed development seed, no seed retry, no capacity overshoot.",

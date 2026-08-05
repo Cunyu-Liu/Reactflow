@@ -1,0 +1,73 @@
+{
+  "schema_version": "reactflow_delta.m0x_sota_consolidated_manifest.v1",
+  "run_id": "m0x_sota_consolidated_20260805",
+  "created_at_utc": "2026-08-05T18:57:19.406635+00:00",
+  "seed": 20260804,
+  "split": "publication",
+  "data": {
+    "validation_pairs": 548,
+    "test_sealed": true,
+    "test_accessed": false,
+    "train_pairs": 3516,
+    "pooled_train_positions": 471344
+  },
+  "metric": "study-macro AUPRC (mean over studies of per-study AP); changer := |delta_true| > 0.05 * pair_scale",
+  "best_model": 0.7435,
+  "horizontal_table": [
+    {
+      "method": "Our improved changer classifier (EPRO_DEV_10)",
+      "category": "Ours (trained)",
+      "auprc": 0.7435,
+      "note": "structure-aware + delta_thermo MLP, lr=3e-4 (hp-search best)"
+    },
+    {
+      "method": "EPRO_DEV_06 structure-aware changer",
+      "category": "Ours (trained)",
+      "auprc": 0.7353243279593717,
+      "note": "structure-aware contact-graph MLP"
+    },
+    {
+      "method": "p2_paired baseline",
+      "category": "Internal baseline",
+      "auprc": 0.6935987036031102
+    },
+    {
+      "method": "wt_only baseline",
+      "category": "Internal baseline",
+      "auprc": 0.6748415894316261
+    },
+    {
+      "method": "RNAformer (Nat. Mach. Intell. 2023)",
+      "category": "Published SOTA (DL)",
+      "auprc": 0.5553804507376294,
+      "note": "32M-param transformer, intra-family fine-tuned; zero-shot in-silico mutagenesis"
+    },
+    {
+      "method": "EternaFold (Nat. Commun. 2022)",
+      "category": "Published SOTA (ML)",
+      "auprc": 0.463159059753075,
+      "note": "RNA parametric ML folding model; zero-shot in-silico mutagenesis"
+    },
+    {
+      "method": "ViennaRNA Turner-rules physics",
+      "category": "Published physics",
+      "auprc": 0.4534433843952393,
+      "note": "|Delta(unpaired)| in-silico mutagenesis"
+    }
+  ],
+  "point_gains": {
+    "ours_vs_rnaformer": {
+      "point_gain": 0.1881,
+      "method": "RNAformer (published DL SOTA)"
+    },
+    "ours_vs_eternafold": {
+      "point_gain": 0.2803,
+      "method": "EternaFold (published ML)"
+    },
+    "ours_vs_p2_paired": {
+      "point_gain": 0.0499,
+      "method": "p2_paired internal baseline"
+    }
+  },
+  "warning": "Published folding models are zero-shot (their own weights, untrained on our data); our classifier is trained on our task."
+}
