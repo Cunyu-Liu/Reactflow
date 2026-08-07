@@ -1,0 +1,9 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_sentinel.v1",
+  "iteration_id": "EPRO_DEV_01",
+  "run_id": "epro_dev_01_20260804",
+  "overall": "FAIL",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "finalizer": "results/m0x_iteration_closure_20260807/EPRO_DEV_01/finalizer.json",
+  "note": null
+}

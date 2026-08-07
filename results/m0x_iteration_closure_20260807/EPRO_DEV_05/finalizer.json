@@ -1,0 +1,24 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_finalizer.v1",
+  "iteration_id": "EPRO_DEV_05",
+  "run_id": "epro_dev_05_20260805",
+  "parent_run_id": null,
+  "hypothesis_id": "m0x_h05_epro_changer_classifier",
+  "change_category": "EPRO_backbone_changer_classifier_end_to_end_long_training",
+  "prediction_changing": true,
+  "counts_as_iteration": true,
+  "status": "FAIL",
+  "evidence_sha256": null,
+  "evidence_class": "DEVELOPMENT_ONLY",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "gate_status": "ITERATION_LEVEL",
+  "phase_gate_claim": false,
+  "checksum_ledger": {
+    "status": "REFERENTIAL_REGISTRY_HASH",
+    "evidence_sha256": null,
+    "note": "backfill references the frozen registry evidence hash; original per-run artifact hashes are not re-derived"
+  },
+  "backfilled_at_utc": "2026-08-07T05:34:36.369844+00:00",
+  "note": "EPRO deep backbone + focal changer head did not converge (val study-macro AP ~0.52); superseded by structure-aware flat MLP (EPRO_DEV_06).",
+  "honesty_note": "Iteration-level DEVELOPMENT_ONLY closure record. Does NOT assert M0-X phase-gate PASS (\u00a720.10/\u00a79)."
+}

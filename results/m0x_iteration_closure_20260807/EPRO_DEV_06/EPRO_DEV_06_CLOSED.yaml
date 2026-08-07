@@ -1,0 +1,9 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_sentinel.v1",
+  "iteration_id": "EPRO_DEV_06",
+  "run_id": "epro_dev_06_20260805",
+  "overall": "PASS",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "finalizer": "results/m0x_iteration_closure_20260807/EPRO_DEV_06/finalizer.json",
+  "note": "flat MLP changer classifier + structure-aware contact-graph features; long training with convergence/generalization tracking; single-method calibration; published ViennaRNA baseline"
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_finalizer.v1",
+  "iteration_id": "EPRO_DEV_03",
+  "run_id": "epro_dev_03_20260805",
+  "parent_run_id": null,
+  "hypothesis_id": "m0x_h03_scale_pretrain_calib",
+  "change_category": "scaled_capacity_pretrain_multilayer_calibration",
+  "prediction_changing": true,
+  "counts_as_iteration": true,
+  "status": "FAIL",
+  "evidence_sha256": "bfd8171d8a5b9f88eb7323a3fadc25e45d40769290d9e10cbb0c11f790a54ecd",
+  "evidence_class": "DEVELOPMENT_ONLY",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "gate_status": "ITERATION_LEVEL",
+  "phase_gate_claim": false,
+  "checksum_ledger": {
+    "status": "REFERENTIAL_REGISTRY_HASH",
+    "evidence_sha256": "bfd8171d8a5b9f88eb7323a3fadc25e45d40769290d9e10cbb0c11f790a54ecd",
+    "note": "backfill references the frozen registry evidence hash; original per-run artifact hashes are not re-derived"
+  },
+  "backfilled_at_utc": "2026-08-07T05:34:36.369844+00:00",
+  "note": "collapsed constant predictions; scaling+pretrain+calib did not resolve collapse",
+  "honesty_note": "Iteration-level DEVELOPMENT_ONLY closure record. Does NOT assert M0-X phase-gate PASS (\u00a720.10/\u00a79)."
+}

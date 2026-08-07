@@ -1,0 +1,24 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_finalizer.v1",
+  "iteration_id": "EPRO_DEV_10",
+  "run_id": "epro_dev_10_hpsearch_20260805",
+  "parent_run_id": null,
+  "hypothesis_id": "m0x_h10_hpsearch_changer",
+  "change_category": "hyperparameter_search_on_publication_split",
+  "prediction_changing": true,
+  "counts_as_iteration": true,
+  "status": "PASS",
+  "evidence_sha256": null,
+  "evidence_class": "DEVELOPMENT_ONLY",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "gate_status": "ITERATION_LEVEL",
+  "phase_gate_claim": false,
+  "checksum_ledger": {
+    "status": "REFERENTIAL_REGISTRY_HASH",
+    "evidence_sha256": null,
+    "note": "backfill references the frozen registry evidence hash; original per-run artifact hashes are not re-derived"
+  },
+  "backfilled_at_utc": "2026-08-07T05:34:36.369844+00:00",
+  "note": "hp-search best config (lr=3e-4) improves structure-aware changer to 0.7435; current best model.",
+  "honesty_note": "Iteration-level DEVELOPMENT_ONLY closure record. Does NOT assert M0-X phase-gate PASS (\u00a720.10/\u00a79)."
+}

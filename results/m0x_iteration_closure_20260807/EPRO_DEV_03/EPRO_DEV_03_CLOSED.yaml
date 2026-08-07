@@ -1,0 +1,9 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_sentinel.v1",
+  "iteration_id": "EPRO_DEV_03",
+  "run_id": "epro_dev_03_20260805",
+  "overall": "FAIL",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "finalizer": "results/m0x_iteration_closure_20260807/EPRO_DEV_03/finalizer.json",
+  "note": "collapsed constant predictions; scaling+pretrain+calib did not resolve collapse"
+}

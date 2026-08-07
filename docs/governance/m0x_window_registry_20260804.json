@@ -41,7 +41,8 @@
       "auprc_arm_b": 0.4257,
       "auprc_p2_baseline": 0.6936,
       "auprc_gain_ci_low_vs_p2": -0.3037,
-      "note": "collapsed constant predictions; scaling+pretrain+calib did not resolve collapse"
+      "note": "collapsed constant predictions; scaling+pretrain+calib did not resolve collapse",
+      "status": "FAIL"
     },
     {
       "iteration_id": "EPRO_DEV_04",
