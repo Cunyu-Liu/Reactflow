@@ -1,0 +1,43 @@
+{
+  "schema": "reactflow_delta.m0x_dev12_checksum_ledger.v1",
+  "iteration_id": "EPRO_DEV_12_REGRESSION",
+  "run_id": "epro_dev12_regression_std_20260807",
+  "files": {
+    "run_manifest": {
+      "path": "results/epro_dev12_regression_std_20260807c_big/run_manifest.json",
+      "sha256": "13a95659d28c79be7625ae18a5bd35100b06c91dae2f9c4d989cc9aef1554c0a"
+    },
+    "best_model": {
+      "path": "results/epro_dev12_regression_std_20260807c_big/best_model.pt",
+      "sha256": "5cd3e9c18f8c103cc51447014d4ad93951a44626dcdb3683663bb0f59802e9a6"
+    },
+    "predictions": {
+      "path": "results/epro_dev12_regression_std_20260807c_big/predictions.npz",
+      "sha256": "f1172c55f5b4115673fe2938958b94bad27cdb890515be627a15cd5f11a1ca37"
+    },
+    "feature_analysis": {
+      "path": "results/dev12_feature_analysis_20260807/feature_analysis.json",
+      "sha256": "dc52d71bc6291fc115ad2e9f3b9653d5895d84a3d7e19ed78027655f409fd18e"
+    },
+    "pair_agg_diagnosis": {
+      "path": "results/dev12_pair_agg_20260807/pair_aggregation_diagnosis.json",
+      "sha256": "6d74d002e5414644b0991f9b4bd67a2ca2a14b49592646edbe7da070f79c23cf"
+    },
+    "calibration_compare": {
+      "path": "results/dev12_calibration_20260807/calibration_comparison.json",
+      "sha256": "916e0cefc82a3743fb7f3f1c1419986130e76561c8d4323a94a32c979e0327b8"
+    },
+    "calibration_viz_panels": {
+      "path": "results/dev12_calibration_viz_20260807/calibration_panels.json",
+      "sha256": "82b1d1b9d4a19ec4a9cbe0b691f7f38e0a8155305f218a6cc0014f2cb3c757bb"
+    },
+    "unified_zmax_compare": {
+      "path": "results/sota_pairlevel_v6_zmax_20260807/unified_zmax_compare.json",
+      "sha256": "78825517209577b5df310ca5e262a2d487508eaa9766aaaaf7565106004f9c09"
+    }
+  },
+  "missing": [],
+  "ledger_self": {
+    "schema": "reactflow_delta.m0x_dev12_acceptance.v1"
+  }
+}

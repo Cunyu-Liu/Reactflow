@@ -5,7 +5,7 @@
   "window_started_at_utc": "2026-08-04T12:17:14Z",
   "window_deadline_utc": "2026-09-01T12:17:14Z",
   "maximum_iterations": null,
-  "consumed_iterations": 7,
+  "consumed_iterations": 8,
   "remaining_iterations": "UNLIMITED_PER_AMENDMENT_EPOCH13",
   "iterations": [
     {
@@ -120,6 +120,24 @@
       "registered_at_utc": "2026-08-05T18:57:38.326537+00:00"
     },
     {
+      "iteration_id": "EPRO_DEV_12_REGRESSION",
+      "run_id": "epro_dev12_regression_std_20260807",
+      "hypothesis_id": "m0x_h12_delta_magnitude_regression",
+      "change_category": "regression_head_delta_scale_target + within_pair_z_max_burden_proxy",
+      "prediction_changing": true,
+      "counts_as_iteration": true,
+      "status": "PASS",
+      "model": "DeltaMagnitudeRegressor (linear head, MAE on delta/scale)",
+      "param_count": 810497,
+      "best_val_skill_wmae": -0.5088733650657298,
+      "best_epoch": 89,
+      "raw_burden_spearman": -0.2846846055904591,
+      "zmax_burden_spearman": 0.40769510834647277,
+      "zmax_ndcg10": 0.3255510524869875,
+      "horizontal_rank": "2nd of 7 (behind efold) on unified within_pair_z_max proxy",
+      "note": "supervised delta-magnitude regression head; scale-standardized delta/scale target; within_pair_z_max restores positive continuous-burden correlation vs raw mean-burden; test SEALED"
+    },
+    {
       "iteration_id": "M0X_SOTA_COMPARISON_CONSOLIDATED",
       "run_id": "m0x_sota_consolidated_20260805",
       "hypothesis_id": "m0x_sota_comparison_consolidated",
@@ -150,5 +168,5 @@
     "gpu_budget": "single full GPU (40G)",
     "data_budget": "all train+val"
   },
-  "last_updated_utc": "2026-08-05T14:07:18Z"
+  "last_updated_utc": "2026-08-07T00:00:00Z"
 }
