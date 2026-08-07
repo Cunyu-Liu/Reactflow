@@ -1,0 +1,632 @@
+{
+  "schema_version": "reactflow_delta.split_v2_manifest.v1",
+  "split_yaml": {
+    "path": "/home/cunyuliu/reactflow_delta_goal_20260729/configs/reactflow_delta/split_v2.yaml",
+    "sha256": "90c123b755e277743950e776b79808408df73ee227c35281af5afeb7a2ceabd7"
+  },
+  "overlap_report": {
+    "path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d2x_v2/overlap_report.json",
+    "sha256": "4784ae2803a48e12946d0de92265392318d8f1925a5e76d35bf8a10631cc656c"
+  },
+  "pair_counts": {
+    "DEVELOPMENT_CONSUMED": 408,
+    "train": 5405,
+    "validation": 572,
+    "test": 1576
+  },
+  "distinct_publications": 21,
+  "distinct_studies": 22,
+  "distinct_parents": 75,
+  "distinct_lineages": 39,
+  "distinct_families": 5,
+  "new_test_studies": [
+    "SL5CV2",
+    "SL5HKU",
+    "SL5MER"
+  ],
+  "retired_test_studies": [
+    "16SFWJ"
+  ],
+  "group_atom_table": {
+    "16SFWJ_1M7_0001": {
+      "study": "16SFWJ",
+      "parent": "16SFWJ_1M7_0001",
+      "lineage": "b3cb41686fb5f3404b2fb6e56b3bf0cf7d02a7bf75389393351f9103a5d2062c",
+      "family": "data-rna-structures",
+      "publication": "pmid_25183835",
+      "role": "DEVELOPMENT_CONSUMED"
+    },
+    "16SFWJ_DMS_0001": {
+      "study": "16SFWJ",
+      "parent": "16SFWJ_DMS_0001",
+      "lineage": "b3cb41686fb5f3404b2fb6e56b3bf0cf7d02a7bf75389393351f9103a5d2062c",
+      "family": "data-rna-structures",
+      "publication": "pmid_25183835",
+      "role": "DEVELOPMENT_CONSUMED"
+    },
+    "16SFWJ_NMIA_0001": {
+      "study": "16SFWJ",
+      "parent": "16SFWJ_NMIA_0001",
+      "lineage": "b3cb41686fb5f3404b2fb6e56b3bf0cf7d02a7bf75389393351f9103a5d2062c",
+      "family": "data-rna-structures",
+      "publication": "pmid_25183835",
+      "role": "DEVELOPMENT_CONSUMED"
+    },
+    "16SFWJ_RSQ_0001": {
+      "study": "16SFWJ",
+      "parent": "16SFWJ_RSQ_0001",
+      "lineage": "b3cb41686fb5f3404b2fb6e56b3bf0cf7d02a7bf75389393351f9103a5d2062c",
+      "family": "data-rna-structures",
+      "publication": "pmid_25183835",
+      "role": "DEVELOPMENT_CONSUMED"
+    },
+    "5SRRNA_SHP_0002": {
+      "study": "5SRRNA",
+      "parent": "5SRRNA_SHP_0002",
+      "lineage": "6f3b055a723a3a09bf385302517bf928c5b3de88feb029ec6df9ad5607d49daf",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:5SRRNA",
+      "role": "train"
+    },
+    "ADD140_1M7_0001": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0001",
+      "lineage": "67a0abadc13f3d60e9b6162cedcbf826a8672be520b4a433598a331c045eb2b2",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0002": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0002",
+      "lineage": "67a0abadc13f3d60e9b6162cedcbf826a8672be520b4a433598a331c045eb2b2",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0003": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0003",
+      "lineage": "a4ee3a9f8be0f8d3cda3dd5e191ef6245d03c1da8f55cbd5e2aef2e342023d8e",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0004": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0004",
+      "lineage": "a4ee3a9f8be0f8d3cda3dd5e191ef6245d03c1da8f55cbd5e2aef2e342023d8e",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0005": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0005",
+      "lineage": "14c147f8ba47ea66f474f46788dfabcd51ed50d0d83c36805990f55a8558805f",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0006": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0006",
+      "lineage": "14c147f8ba47ea66f474f46788dfabcd51ed50d0d83c36805990f55a8558805f",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0007": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0007",
+      "lineage": "556f90199080b358708175c3086c8884d21e733314a9b6d77806385d2ee77025",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0008": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0008",
+      "lineage": "556f90199080b358708175c3086c8884d21e733314a9b6d77806385d2ee77025",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0009": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0009",
+      "lineage": "0ee8e21af46ccd9d7cf9d3d43af552933f68bf023b0aa8cfc9bd0864eb31245f",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0010": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0010",
+      "lineage": "0ee8e21af46ccd9d7cf9d3d43af552933f68bf023b0aa8cfc9bd0864eb31245f",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0011": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0011",
+      "lineage": "c24a35fd5f5e791ce84977b4f7027d4d8a4a8e1e94797fa0ae919876a4b8d576",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0012": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0012",
+      "lineage": "c24a35fd5f5e791ce84977b4f7027d4d8a4a8e1e94797fa0ae919876a4b8d576",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0013": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0013",
+      "lineage": "6697a7024397e7f7f3657df1573203d2a7016ea6992ec900a04ec428e68560da",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_1M7_0014": {
+      "study": "ADD140",
+      "parent": "ADD140_1M7_0014",
+      "lineage": "6697a7024397e7f7f3657df1573203d2a7016ea6992ec900a04ec428e68560da",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_LCK_0001": {
+      "study": "ADD140",
+      "parent": "ADD140_LCK_0001",
+      "lineage": "b0589454bc1612f4882d74644d65d0df9a57e8bd148c8e8c3575fcb4cf4e30fb",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_LCK_0002": {
+      "study": "ADD140",
+      "parent": "ADD140_LCK_0002",
+      "lineage": "5bf470cf7d29668c225ab5e3b227a486e3c12d308a24bbb4f8feab572548620c",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_LCK_0003": {
+      "study": "ADD140",
+      "parent": "ADD140_LCK_0003",
+      "lineage": "558f15b670ab96b314fca957a100d61a12fe596aa479477e36bb995cce81e497",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_LCK_0004": {
+      "study": "ADD140",
+      "parent": "ADD140_LCK_0004",
+      "lineage": "3d7a88e716404c9a963e0228eac38e89986c3eb59faf85431e8552bb12f3b185",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_LCK_0005": {
+      "study": "ADD140",
+      "parent": "ADD140_LCK_0005",
+      "lineage": "427a9e87061c49e69c1e2d9523973000ce3824d4fc4d128d6012ef777845c175",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_LCK_0006": {
+      "study": "ADD140",
+      "parent": "ADD140_LCK_0006",
+      "lineage": "49299e8591eace530c60a3cf8331e851461959891d1807a473a05bb7fd16f008",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_RSQ_0001": {
+      "study": "ADD140",
+      "parent": "ADD140_RSQ_0001",
+      "lineage": "67a0abadc13f3d60e9b6162cedcbf826a8672be520b4a433598a331c045eb2b2",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADD140_RSQ_0002": {
+      "study": "ADD140",
+      "parent": "ADD140_RSQ_0002",
+      "lineage": "67a0abadc13f3d60e9b6162cedcbf826a8672be520b4a433598a331c045eb2b2",
+      "family": "data-riboswitches",
+      "publication": "pmid_29446752",
+      "role": "train"
+    },
+    "ADDRSW_SHP_0002": {
+      "study": "ADDRSW",
+      "parent": "ADDRSW_SHP_0002",
+      "lineage": "eb6ca462ea9a1e5b13820ba22dcb0944c02a34d2ad87debd41eb89f081df1557",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:ADDRSW",
+      "role": "train"
+    },
+    "ADDRSW_SHP_0003": {
+      "study": "ADDRSW",
+      "parent": "ADDRSW_SHP_0003",
+      "lineage": "eb6ca462ea9a1e5b13820ba22dcb0944c02a34d2ad87debd41eb89f081df1557",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:ADDRSW",
+      "role": "train"
+    },
+    "ADDRSW_SHP_0004": {
+      "study": "ADDRSW",
+      "parent": "ADDRSW_SHP_0004",
+      "lineage": "eb6ca462ea9a1e5b13820ba22dcb0944c02a34d2ad87debd41eb89f081df1557",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:ADDRSW",
+      "role": "train"
+    },
+    "AGSARNA_1M7_0001": {
+      "study": "AGSARNA",
+      "parent": "AGSARNA_1M7_0001",
+      "lineage": "dce21f0f8f956970598aaa93a942e624f06f46675a819b8b33fed241719f6ea0",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:AGSARNA",
+      "role": "train"
+    },
+    "AGSARNA_1M7_0005": {
+      "study": "AGSARNA",
+      "parent": "AGSARNA_1M7_0005",
+      "lineage": "dce21f0f8f956970598aaa93a942e624f06f46675a819b8b33fed241719f6ea0",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:AGSARNA",
+      "role": "train"
+    },
+    "CIDGMP_SHP_0002": {
+      "study": "CIDGMP",
+      "parent": "CIDGMP_SHP_0002",
+      "lineage": "7ad4808619c0c1941e5e7d0486422264b23c527d0f5b493fff259bbdbae9bb75",
+      "family": "data-riboswitches",
+      "publication": "pmid_25303992",
+      "role": "validation"
+    },
+    "CIDGMP_SHP_0003": {
+      "study": "CIDGMP",
+      "parent": "CIDGMP_SHP_0003",
+      "lineage": "bd49efae8d82c4653c24703add6e3dcc5fffdf2d45fd45a3450dd2d0755dae19",
+      "family": "data-riboswitches",
+      "publication": "pmid_25303992",
+      "role": "validation"
+    },
+    "CL1LIG_1M7_0001": {
+      "study": "CL1LIG",
+      "parent": "CL1LIG_1M7_0001",
+      "lineage": "fc4c79c514b6fa59ce48b0eec845ed9d05c388a20ed38eaaf1aeac3817dbeaed",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:CL1LIG",
+      "role": "train"
+    },
+    "ETBSTR_SHP_0002": {
+      "study": "ETBSTR",
+      "parent": "ETBSTR_SHP_0002",
+      "lineage": "dff3568bdbb6176248c2e477fd16e20be835dd575271883fabfc6202fcce0cbf",
+      "family": "data-eterna",
+      "publication": "pmid_24469816",
+      "role": "train"
+    },
+    "ETBSTR_SHP_0003": {
+      "study": "ETBSTR",
+      "parent": "ETBSTR_SHP_0003",
+      "lineage": "6db7a1d5955376d52429b45940b8a71f21884261a6d73475f3c7e33a3aed9aed",
+      "family": "data-eterna",
+      "publication": "pmid_24469816",
+      "role": "train"
+    },
+    "GLYCFN_SHP_0002": {
+      "study": "GLYCFN",
+      "parent": "GLYCFN_SHP_0002",
+      "lineage": "99fdb4a038202a51b8571a7baea6e8674803d275cb412722f24b34420534d41b",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:GLYCFN",
+      "role": "train"
+    },
+    "GLYCFN_SHP_0003": {
+      "study": "GLYCFN",
+      "parent": "GLYCFN_SHP_0003",
+      "lineage": "99fdb4a038202a51b8571a7baea6e8674803d275cb412722f24b34420534d41b",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:GLYCFN",
+      "role": "train"
+    },
+    "GLYCFN_SHP_0004": {
+      "study": "GLYCFN",
+      "parent": "GLYCFN_SHP_0004",
+      "lineage": "99fdb4a038202a51b8571a7baea6e8674803d275cb412722f24b34420534d41b",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:GLYCFN",
+      "role": "train"
+    },
+    "GLYCFN_SHP_0005": {
+      "study": "GLYCFN",
+      "parent": "GLYCFN_SHP_0005",
+      "lineage": "99fdb4a038202a51b8571a7baea6e8674803d275cb412722f24b34420534d41b",
+      "family": "data-riboswitches",
+      "publication": "UNKNOWN_PUBLICATION:GLYCFN",
+      "role": "train"
+    },
+    "HC16M2R_1M7_0001": {
+      "study": "HC16M2R",
+      "parent": "HC16M2R_1M7_0001",
+      "lineage": "200d6d367e38e14ea653f5e25ddc6070db71ac4d8496fee6a60f35b4785114a4",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:HC16M2R",
+      "role": "train"
+    },
+    "MDLOOP_CMC_0001": {
+      "study": "MDLOOP",
+      "parent": "MDLOOP_CMC_0001",
+      "lineage": "48b083e34dcaabb0a292a65ed820a3e0227e93993d69033e81211b0eb4d1693f",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:MDLOOP",
+      "role": "train"
+    },
+    "MDLOOP_CMC_0002": {
+      "study": "MDLOOP",
+      "parent": "MDLOOP_CMC_0002",
+      "lineage": "48b083e34dcaabb0a292a65ed820a3e0227e93993d69033e81211b0eb4d1693f",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:MDLOOP",
+      "role": "train"
+    },
+    "MDLOOP_DMS_0001": {
+      "study": "MDLOOP",
+      "parent": "MDLOOP_DMS_0001",
+      "lineage": "48b083e34dcaabb0a292a65ed820a3e0227e93993d69033e81211b0eb4d1693f",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:MDLOOP",
+      "role": "train"
+    },
+    "MDLOOP_DMS_0002": {
+      "study": "MDLOOP",
+      "parent": "MDLOOP_DMS_0002",
+      "lineage": "48b083e34dcaabb0a292a65ed820a3e0227e93993d69033e81211b0eb4d1693f",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:MDLOOP",
+      "role": "train"
+    },
+    "MDLOOP_NMD_0002": {
+      "study": "MDLOOP",
+      "parent": "MDLOOP_NMD_0002",
+      "lineage": "48b083e34dcaabb0a292a65ed820a3e0227e93993d69033e81211b0eb4d1693f",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:MDLOOP",
+      "role": "train"
+    },
+    "MDLOOP_SHP_0002": {
+      "study": "MDLOOP",
+      "parent": "MDLOOP_SHP_0002",
+      "lineage": "48b083e34dcaabb0a292a65ed820a3e0227e93993d69033e81211b0eb4d1693f",
+      "family": "data-general",
+      "publication": "UNKNOWN_PUBLICATION:MDLOOP",
+      "role": "train"
+    },
+    "PSL2IAV_1M7_0001": {
+      "study": "PSL2IAV",
+      "parent": "PSL2IAV_1M7_0001",
+      "lineage": "7d45a14f120f30c04a10a86b422d5f5a799cf72216bfed8b2507aa06b6f978d8",
+      "family": "data-rna-structures",
+      "publication": "pmid_35982307",
+      "role": "train"
+    },
+    "PSL2IAV_RSQ_0001": {
+      "study": "PSL2IAV",
+      "parent": "PSL2IAV_RSQ_0001",
+      "lineage": "7d45a14f120f30c04a10a86b422d5f5a799cf72216bfed8b2507aa06b6f978d8",
+      "family": "data-rna-structures",
+      "publication": "pmid_35982307",
+      "role": "train"
+    },
+    "RNAPZ18_1M7_0000": {
+      "study": "RNAPZ18",
+      "parent": "RNAPZ18_1M7_0000",
+      "lineage": "cb81302ab7c2cfdd220debe8abb6b772ec6dd11670b42cf0dbb9088a9e9ba3da",
+      "family": "data-puzzle",
+      "publication": "pub_RNAPuzzle18_daslab",
+      "role": "train"
+    },
+    "RNAPZ5_1M7_0002": {
+      "study": "RNAPZ5",
+      "parent": "RNAPZ5_1M7_0002",
+      "lineage": "127d706da9d7933d24ffeb3655349bff804ffcb82f0f3357c06036089ef0b11f",
+      "family": "data-puzzle",
+      "publication": "pmid_25883046",
+      "role": "train"
+    },
+    "RNAPZ5_DMS_0002": {
+      "study": "RNAPZ5",
+      "parent": "RNAPZ5_DMS_0002",
+      "lineage": "127d706da9d7933d24ffeb3655349bff804ffcb82f0f3357c06036089ef0b11f",
+      "family": "data-puzzle",
+      "publication": "pmid_25883046",
+      "role": "train"
+    },
+    "RNAPZ5_NMD_0002": {
+      "study": "RNAPZ5",
+      "parent": "RNAPZ5_NMD_0002",
+      "lineage": "127d706da9d7933d24ffeb3655349bff804ffcb82f0f3357c06036089ef0b11f",
+      "family": "data-puzzle",
+      "publication": "pmid_25883046",
+      "role": "train"
+    },
+    "RNAPZ5_RSQ_0001": {
+      "study": "RNAPZ5",
+      "parent": "RNAPZ5_RSQ_0001",
+      "lineage": "94f04db207b8d6a178635063ab84d2aa0f87aac6720029ec14df4c0cc1a72ce7",
+      "family": "data-puzzle",
+      "publication": "pmid_25883046",
+      "role": "train"
+    },
+    "RNAPZ6_1M7_0002": {
+      "study": "RNAPZ6",
+      "parent": "RNAPZ6_1M7_0002",
+      "lineage": "066932961e680953df09669dcdee8e49302583f86cafc66104e5d04ad174c865",
+      "family": "data-puzzle",
+      "publication": "UNKNOWN_PUBLICATION:RNAPZ6",
+      "role": "train"
+    },
+    "RNASEP_RSQ_0000": {
+      "study": "RNASEP",
+      "parent": "RNASEP_RSQ_0000",
+      "lineage": "af11cfa5b380382cf9f68038ba64db53ebd8386b6eb3632e13ef289ca6a20d66",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:RNASEP",
+      "role": "train"
+    },
+    "SL5CV2_2A3_0001": {
+      "study": "SL5CV2",
+      "parent": "SL5CV2_2A3_0001",
+      "lineage": "c4831095f71f9f0e2c51a5f2f455b67c1b095f36131e704ec34921881cb7ba37",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5CV2",
+      "role": "test"
+    },
+    "SL5CV2_DMS_0001": {
+      "study": "SL5CV2",
+      "parent": "SL5CV2_DMS_0001",
+      "lineage": "c4831095f71f9f0e2c51a5f2f455b67c1b095f36131e704ec34921881cb7ba37",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5CV2",
+      "role": "test"
+    },
+    "SL5CV2_NOM_0001": {
+      "study": "SL5CV2",
+      "parent": "SL5CV2_NOM_0001",
+      "lineage": "c4831095f71f9f0e2c51a5f2f455b67c1b095f36131e704ec34921881cb7ba37",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5CV2",
+      "role": "test"
+    },
+    "SL5CV2_NOM_0002": {
+      "study": "SL5CV2",
+      "parent": "SL5CV2_NOM_0002",
+      "lineage": "c4831095f71f9f0e2c51a5f2f455b67c1b095f36131e704ec34921881cb7ba37",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5CV2",
+      "role": "test"
+    },
+    "SL5HKU_2A3_0001": {
+      "study": "SL5HKU",
+      "parent": "SL5HKU_2A3_0001",
+      "lineage": "440e3aa4f4dbaa249537830dd68c86c5be342389accc0d0ef1d8faa4d0cbd26c",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5HKU",
+      "role": "test"
+    },
+    "SL5HKU_DMS_0001": {
+      "study": "SL5HKU",
+      "parent": "SL5HKU_DMS_0001",
+      "lineage": "440e3aa4f4dbaa249537830dd68c86c5be342389accc0d0ef1d8faa4d0cbd26c",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5HKU",
+      "role": "test"
+    },
+    "SL5HKU_NOM_0001": {
+      "study": "SL5HKU",
+      "parent": "SL5HKU_NOM_0001",
+      "lineage": "440e3aa4f4dbaa249537830dd68c86c5be342389accc0d0ef1d8faa4d0cbd26c",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5HKU",
+      "role": "test"
+    },
+    "SL5HKU_NOM_0002": {
+      "study": "SL5HKU",
+      "parent": "SL5HKU_NOM_0002",
+      "lineage": "440e3aa4f4dbaa249537830dd68c86c5be342389accc0d0ef1d8faa4d0cbd26c",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5HKU",
+      "role": "test"
+    },
+    "SL5MER_2A3_0001": {
+      "study": "SL5MER",
+      "parent": "SL5MER_2A3_0001",
+      "lineage": "571b081ec151a526ff6a69149957100ce14a9550629236a1c0609d41fe01cbab",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5MER",
+      "role": "test"
+    },
+    "SL5MER_DMS_0001": {
+      "study": "SL5MER",
+      "parent": "SL5MER_DMS_0001",
+      "lineage": "571b081ec151a526ff6a69149957100ce14a9550629236a1c0609d41fe01cbab",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5MER",
+      "role": "test"
+    },
+    "SL5MER_NOM_0001": {
+      "study": "SL5MER",
+      "parent": "SL5MER_NOM_0001",
+      "lineage": "571b081ec151a526ff6a69149957100ce14a9550629236a1c0609d41fe01cbab",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5MER",
+      "role": "test"
+    },
+    "SL5MER_NOM_0002": {
+      "study": "SL5MER",
+      "parent": "SL5MER_NOM_0002",
+      "lineage": "571b081ec151a526ff6a69149957100ce14a9550629236a1c0609d41fe01cbab",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SL5MER",
+      "role": "test"
+    },
+    "SRPDIV_DMS_0001": {
+      "study": "SRPDIV",
+      "parent": "SRPDIV_DMS_0001",
+      "lineage": "a1967ecf07fa378cffdf1583db81ed73bed0cc3021f5497f8637389f889306e2",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:SRPDIV",
+      "role": "train"
+    },
+    "TRNAPH_SHP_0002": {
+      "study": "TRNAPH",
+      "parent": "TRNAPH_SHP_0002",
+      "lineage": "d8d2091580baa9d48d668c6620a532ea6c8881f8f019dcc409a659322cc3e10e",
+      "family": "data-rna-structures",
+      "publication": "UNKNOWN_PUBLICATION:TRNAPH",
+      "role": "train"
+    },
+    "TRP4P6_R1J_0001": {
+      "study": "TRP4P6",
+      "parent": "TRP4P6_R1J_0001",
+      "lineage": "1d5781c3605613f00b1164434aa65f3304dd2adf75a66c11bbb0f9f4b2bf1c2f",
+      "family": "data-rna-structures",
+      "publication": "pmid_25303992",
+      "role": "validation"
+    },
+    "TRP4P6_RSQ_0001": {
+      "study": "TRP4P6",
+      "parent": "TRP4P6_RSQ_0001",
+      "lineage": "6cbaa39ddf87e795d77b3b2d7b7ac45ab7b2f200f2a2c711299a80cff220ed32",
+      "family": "data-rna-structures",
+      "publication": "pmid_25303992",
+      "role": "validation"
+    },
+    "TRP4P6_SHP_0002": {
+      "study": "TRP4P6",
+      "parent": "TRP4P6_SHP_0002",
+      "lineage": "870dd316208409d080054977ec20e4e23a89047e6ae87922ae9893f52cc2a43d",
+      "family": "data-rna-structures",
+      "publication": "pmid_25303992",
+      "role": "validation"
+    },
+    "TRP4P6_SHP_0003": {
+      "study": "TRP4P6",
+      "parent": "TRP4P6_SHP_0003",
+      "lineage": "870dd316208409d080054977ec20e4e23a89047e6ae87922ae9893f52cc2a43d",
+      "family": "data-rna-structures",
+      "publication": "pmid_25303992",
+      "role": "validation"
+    }
+  }
+}

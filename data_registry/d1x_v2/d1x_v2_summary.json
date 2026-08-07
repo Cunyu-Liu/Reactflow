@@ -1,0 +1,23 @@
+{
+  "canonical_records": 4446697,
+  "disposition_reason_counts": {
+    "LENGTH_MISMATCH": 11309,
+    "UNPARSEABLE": 321
+  },
+  "dispositions": 11630,
+  "eligibility_code_counts_all_records": {
+    "EDITED_SITE": 23165,
+    "ELIGIBLE": 424442798,
+    "MISSING_REACTIVITY": 83999812
+  },
+  "frozen_asset_count": 1024,
+  "parsed_file_count": 648,
+  "per_asset_status": {
+    "LENGTH_MISMATCH": 11309,
+    "NO_USABLE_PROFILE": 0,
+    "PARSED": 648,
+    "UNPARSEABLE": 321
+  },
+  "primary_pairs": 7961,
+  "schema_version": "reactflow_delta.d1x_v2_summary.v1"
+}
