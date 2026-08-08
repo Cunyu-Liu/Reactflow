@@ -1,0 +1,221 @@
+{
+  "schema": "reactflow_delta.phase3.benchmark_resource.consolidated.v1",
+  "run_id": "phase3_diagnostic_20260809",
+  "authority_epoch": 18,
+  "phase": "PHASE3-BENCHMARK-RESOURCE",
+  "purpose": "Per-publication evidence table for resource/negative-result paper: caller coverage (NO_CALL), label shift (changers rate), and magnitude signal-vs-noise (fraction below 1x replicate noise).",
+  "sources": {
+    "caller": "results/phase3_benchmark_resource_20260809/benchmark_resource_report.json",
+    "noise_floor": "results/phase3_noise_floor_20260809/noise_floor_report.json"
+  },
+  "summary": {
+    "n_publications": 18,
+    "n_pairs_total": 6385,
+    "n_pairs_nocall_total": 3204,
+    "pooled_nocall_rate": 0.5018010963194989,
+    "pooled_fraction_pos_below_1x_noise": 0.4474977859352338,
+    "caller_global_icc": 0.6862539532602251,
+    "overall_feature_mean_abs_smd": 0.32709499614106285
+  },
+  "per_publication": [
+    {
+      "publication": "pmid_29446752",
+      "n_pairs": 2366,
+      "n_called": 2366,
+      "n_nocall": 0,
+      "nocall_rate": 0.0,
+      "changers_rate": 0.760777683854607,
+      "n_with_noise": 2366,
+      "pos_total": 297119,
+      "fraction_pos_below_1x_noise": 0.41780229470346897
+    },
+    {
+      "publication": "pmid_25883046",
+      "n_pairs": 638,
+      "n_called": 68,
+      "n_nocall": 570,
+      "nocall_rate": 0.8934169278996865,
+      "changers_rate": 1.0,
+      "n_with_noise": 68,
+      "pos_total": 12716,
+      "fraction_pos_below_1x_noise": 0.3746461151305442
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:GLYCFN",
+      "n_pairs": 632,
+      "n_called": 0,
+      "n_nocall": 632,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 632,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "pmid_25303992",
+      "n_pairs": 572,
+      "n_called": 52,
+      "n_nocall": 520,
+      "nocall_rate": 0.9090909090909091,
+      "changers_rate": 0.8846153846153846,
+      "n_with_noise": 471,
+      "pos_total": 7566,
+      "fraction_pos_below_1x_noise": 0.14948453608247422
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:MDLOOP",
+      "n_pairs": 468,
+      "n_called": 0,
+      "n_nocall": 468,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 0,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "pmid_25183835",
+      "n_pairs": 408,
+      "n_called": 110,
+      "n_nocall": 298,
+      "nocall_rate": 0.7303921568627451,
+      "changers_rate": 0.9363636363636364,
+      "n_with_noise": 298,
+      "pos_total": 32077,
+      "fraction_pos_below_1x_noise": 0.6605044112604046
+    },
+    {
+      "publication": "pmid_24469816",
+      "n_pairs": 220,
+      "n_called": 220,
+      "n_nocall": 0,
+      "nocall_rate": 0.0,
+      "changers_rate": 0.5,
+      "n_with_noise": 110,
+      "pos_total": 12321,
+      "fraction_pos_below_1x_noise": 0.17068419771122473
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:ADDRSW",
+      "n_pairs": 213,
+      "n_called": 0,
+      "n_nocall": 213,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 213,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:RNAPZ6",
+      "n_pairs": 190,
+      "n_called": 0,
+      "n_nocall": 190,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 0,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:CL1LIG",
+      "n_pairs": 128,
+      "n_called": 128,
+      "n_nocall": 0,
+      "nocall_rate": 0.0,
+      "changers_rate": 0.8828125,
+      "n_with_noise": 0,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "pmid_35982307",
+      "n_pairs": 127,
+      "n_called": 68,
+      "n_nocall": 59,
+      "nocall_rate": 0.4645669291338583,
+      "changers_rate": 1.0,
+      "n_with_noise": 68,
+      "pos_total": 3142,
+      "fraction_pos_below_1x_noise": 0.0006365372374283895
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:5SRRNA",
+      "n_pairs": 120,
+      "n_called": 0,
+      "n_nocall": 120,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 120,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:TRNAPH",
+      "n_pairs": 78,
+      "n_called": 0,
+      "n_nocall": 78,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 78,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "pub_RNAPuzzle18_daslab",
+      "n_pairs": 71,
+      "n_called": 71,
+      "n_nocall": 0,
+      "nocall_rate": 0.0,
+      "changers_rate": 0.971830985915493,
+      "n_with_noise": 0,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:HC16M2R",
+      "n_pairs": 62,
+      "n_called": 62,
+      "n_nocall": 0,
+      "nocall_rate": 0.0,
+      "changers_rate": 0.04838709677419355,
+      "n_with_noise": 62,
+      "pos_total": 24614,
+      "fraction_pos_below_1x_noise": 0.8532136182660275
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:RNASEP",
+      "n_pairs": 36,
+      "n_called": 36,
+      "n_nocall": 0,
+      "nocall_rate": 0.0,
+      "changers_rate": 0.4166666666666667,
+      "n_with_noise": 0,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:SRPDIV",
+      "n_pairs": 32,
+      "n_called": 0,
+      "n_nocall": 32,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 0,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:AGSARNA",
+      "n_pairs": 24,
+      "n_called": 0,
+      "n_nocall": 24,
+      "nocall_rate": 1.0,
+      "changers_rate": null,
+      "n_with_noise": 0,
+      "pos_total": 0,
+      "fraction_pos_below_1x_noise": null
+    }
+  ],
+  "adjudicated_at_utc": "2026-08-08T20:24:43.744876+00:00"
+}
