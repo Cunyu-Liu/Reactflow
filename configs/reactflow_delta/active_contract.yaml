@@ -1,14 +1,14 @@
 schema_version: reactflow_delta.active_contract.v1
-manifest_id: reactflow_delta_v4_rebuild_authority_epoch_17_routeB_finalize_20260808
+manifest_id: reactflow_delta_v4_rebuild_authority_epoch_18_phase3_20260808
 project_task_id: reactflow_delta
 created_at: '2026-08-03T23:08:38+08:00'
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  authority_epoch: 17
+  authority_epoch: 18
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
-  current_phase: CONDITIONAL-MAGNITUDE
-  current_authority_state: CONDITIONAL_MAGNITUDE_EPOCH17_ENDPOINT_V5_GO_TERMINAL
-  current_runnable_phase: CONDITIONAL-MAGNITUDE
+  current_phase: PHASE3-ARCH
+  current_authority_state: PHASE3_ARCH_EPOCH18_ENDPOINT_V5_AUTHORIZED
+  current_runnable_phase: PHASE3-ARCH
   conflict_policy: FAIL_CLOSED
   precedence:
   - ACTIVE_CONTRACT_MANIFEST
@@ -83,7 +83,7 @@ authorization:
   - REBUILD-P1
   - REBUILD-P2
   runnable_phases:
-  - CONDITIONAL-MAGNITUDE
+  - PHASE3-ARCH
   training_allowed: true
   full_data_recall_allowed: true
   new_split_allowed: false
@@ -91,10 +91,10 @@ authorization:
   cross_project_export_allowed: false
   new_wet_lab_allowed: false
   blind_test_aggregate_allowed: true
-  rebuild_epoch: 17
+  rebuild_epoch: 18
   rebuild_contract_path: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
-  rebuild_amendment_path: docs/contracts/amendments/reactflow_delta_v4_epoch17_endpoint_v5_conditional_magnitude_20260808.yaml
-  rebuild_approval_record_path: docs/approvals/reactflow_delta_v4_epoch17_endpoint_v5_conditional_magnitude_approval_20260808.yaml
+  rebuild_amendment_path: docs/contracts/amendments/reactflow_delta_v4_epoch18_phase3_20260808.yaml
+  rebuild_approval_record_path: docs/approvals/reactflow_delta_v4_epoch18_phase3_approval_20260808.yaml
   gpu_policy: USE_FREE_VRAM_ANY_GPU_NO_EXCLUSIVITY
   endpoint_version: endpoint_v5
 bindings:
@@ -433,6 +433,43 @@ phase_graph:
   authority_epoch: 17
   verdict_path: results/p2_v5_magnitude_20260808/P2v5_magnitude_verdict.json
   run_id: p2_v5_magnitude_20260808
+- phase_id: PHASE3-ARCH
+  dependencies:
+  - CONDITIONAL-MAGNITUDE
+  lifecycle_status: RUNNING
+  gate_result: NOT_RUN
+  execution_authorized: true
+  training_required: true
+  gpu_required: true
+  metric_semantics: CONDITIONAL_WMAE_SKILL
+  authority_epoch: 18
+  endpoint: endpoint_v5
+  budget_and_stop_rules:
+    schemes:
+    - pair_v1_conditional_magnitude_head (primary)
+    - exact_alt_v1_generic_interaction
+    - epro_v2_repaired_nonlocal_propagation
+    seeds:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    selection: preregistered best by mean conditional WMAE skill on development outer
+      folds
+    capacity_matching: per-scheme params/FLOPs/train-time matched to capacity-matched
+      generic
+    one_capability_at_a_time: true
+    max_iteration_rounds_per_scheme: 2
+    paired_ablation: 5 seeds paired; 5-fold paired CI
+    stop_rules:
+    - scheme with development outer-fold CI low <= 0 vs capacity-matched generic retires
+      immediately
+    - if all schemes fail, use simplest generic and pivot to benchmark/resource route;
+      NO dev13+ free search
+    - no post-hoc aggregation; no test/held-out tuning
+    gpu_required: true
+    cuda_unavailable_policy: STOP_AND_PRESERVE_EVIDENCE (no CPU silent fallback)
 gate_catalog:
   TIER_B_PLUS:
     status: PASS
@@ -459,9 +496,9 @@ integrity:
   hash_algorithm: SHA256
   file_hash_mode: RAW_FILE_BYTES
   embedded_manifest_sha256: FORBIDDEN_SELF_REFERENCE
-  detached_bundle_ledger_path: configs/reactflow_delta/authority_epoch_17.bundle.sha256
+  detached_bundle_ledger_path: configs/reactflow_delta/authority_epoch_18.bundle.sha256
   detached_bundle_ledger_status: REQUIRED_AND_VERIFIED_BY_SENTINEL
-  authority_sentinel_path: configs/reactflow_delta/authority_epoch_17.sentinel.yaml
+  authority_sentinel_path: configs/reactflow_delta/authority_epoch_18.sentinel.yaml
   bundle_member_paths:
   - configs/reactflow_delta/active_contract.yaml
   - docs/approvals/reactflow_delta_v4_approval_20260803.yaml

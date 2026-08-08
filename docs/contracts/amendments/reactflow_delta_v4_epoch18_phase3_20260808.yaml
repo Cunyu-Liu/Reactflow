@@ -1,0 +1,75 @@
+contract_schema: reactflow_delta.contract.v4
+amendment_id: reactflow_delta_v4_epoch18_phase3_20260808
+amendment_epoch: 18
+previous_amendment: reactflow_delta_v4_epoch17_endpoint_v5_conditional_magnitude_20260808
+authorization_status: ACTIVE_AUTHORIZED
+amendment_kind: PHASE3_MODEL_ARCHITECTURE_ITERATION
+amendment_summary: 'Phase 3 model architecture iteration (contract §Phase 3) after
+  the P2 conditional-magnitude learnability GO (epoch 17, endpoint_v5). Primary scheme
+  (方案一) = conditional-magnitude pair head, evaluated against a capacity-matched generic
+  baseline under nested leave-one-publication-out, 5 deterministic seeds. Only contract-listed
+  capabilities are tested: pair-level alignment, exact-alt x WT-state generic interaction,
+  and controlled nonlocal propagation. Endpoint_v5 input/output frozen; primary endpoint_v4
+  STOP preserved (epoch 16).'
+phase3_budget_and_stop_rules:
+  schemes:
+  - pair_v1_conditional_magnitude_head (primary)
+  - exact_alt_v1_generic_interaction
+  - epro_v2_repaired_nonlocal_propagation
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  selection: preregistered best by mean conditional WMAE skill on development outer
+    folds
+  capacity_matching: per-scheme params/FLOPs/train-time matched to capacity-matched
+    generic
+  one_capability_at_a_time: true
+  max_iteration_rounds_per_scheme: 2
+  paired_ablation: 5 seeds paired; 5-fold paired CI
+  stop_rules:
+  - scheme with development outer-fold CI low <= 0 vs capacity-matched generic retires
+    immediately
+  - if all schemes fail, use simplest generic and pivot to benchmark/resource route;
+    NO dev13+ free search
+  - no post-hoc aggregation; no test/held-out tuning
+  gpu_required: true
+  cuda_unavailable_policy: STOP_AND_PRESERVE_EVIDENCE (no CPU silent fallback)
+acceptance_criteria:
+  candidate_beats_capacity_matched_generic_ci_low_gt_0: true
+  ablations_match_preregistered_direction: true
+  no_gradient_or_convergence_failure: true
+  gain_exceeds_seed_variance: true
+  no_post_hoc_aggregation: true
+amendment_routes:
+  phase: PHASE3-ARCH
+  gate: PHASE3_DEVELOPMENT_WINNER
+  primary_verdict_preserved: ENDPOINT_V4_PRIMARY_STOP_FROZEN
+  endpoint: endpoint_v5_frozen
+  training: PHASE3_LOOCV_GPU
+  module_new:
+  - reactflow_delta/models/pair_v1.py
+  - reactflow_delta/models/exact_alt_v1.py
+  - reactflow_delta/models/epro_v2.py
+  - reactflow_delta/train_v2.py
+  - reactflow_delta/samplers.py
+  - tests/reactflow_delta/test_model_invariants_v2.py
+invariants_unchanged:
+  test_split_sealed: true
+  test_not_used_for_training: true
+  cross_project_export: false
+  wet_lab: false
+  no_fabricated_data: true
+  no_seed_retry_gaming: true
+  no_hide_failure: true
+  no_lower_gate: true
+  primary_v4_stop_preserved: true
+  baseline_train_fold_only: true
+  no_certified_untouched_confirmatory_publications: true
+  confirmatory_test_access: false
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_epoch18_phase3_approval_20260808.yaml
+  signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+  external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
