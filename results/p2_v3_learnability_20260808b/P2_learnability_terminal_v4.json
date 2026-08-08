@@ -1,0 +1,36 @@
+{
+  "adjudicated_at_utc": "2026-08-08T09:55:09.850425+00:00",
+  "authority_epoch": 16,
+  "best_paired_bootstrap_delta_ci": {
+    "ci_high": 0.5,
+    "ci_low": -0.08333333333333337,
+    "n_boot": 1000,
+    "point": 0.21814980932570613
+  },
+  "endpoint": "endpoint_v4",
+  "estimand_status": "IDENTIFIABLE",
+  "excluded_constant_label_publications": [
+    "pmid_25883046",
+    "pmid_35982307"
+  ],
+  "gate": "P2_LEARNABILITY",
+  "gate_result": "STOP",
+  "non_degenerate_publications": [
+    "UNKNOWN_PUBLICATION:CL1LIG",
+    "UNKNOWN_PUBLICATION:HC16M2R",
+    "UNKNOWN_PUBLICATION:RNASEP",
+    "pmid_24469816",
+    "pmid_25183835",
+    "pmid_25303992",
+    "pmid_29446752",
+    "pub_RNAPuzzle18_daslab"
+  ],
+  "permutation_status": "DEGENERATE_NO_POWER",
+  "phase": "REBUILD-P2",
+  "primary_metric": "MACRO_OVER_NON_DEGENERATE_PUBLICATIONS",
+  "run_id": "p2_v3_learnability_20260808b",
+  "schema": "reactflow_delta.p2_learnability_terminal.v4",
+  "state": "TERMINAL",
+  "summary": "P2 learnability re-adjudication under endpoint_v4 (non-degenerate macro). Estimand now IDENTIFIABLE (calibration v3 + degeneracy v4 artifacts fixed), but best learned model increment over trivial baseline is small (+0.0298) and its paired publication-block bootstrap delta CI lower bound (-0.0833) does NOT exclude 0 => incremental cross-publication learnability on the primary binary-changer estimand NOT established. Publication-block permutation is degenerate (unique block sizes, no power). Verdict: STOP (fail-closed). Per contract \u00a713.2 R6 / \u00a713.4, Phase 3 architecture iteration remains BLOCKED.",
+  "verdict_path": "P2_learnability_verdict_v4.json"
+}

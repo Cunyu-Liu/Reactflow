@@ -1,0 +1,35 @@
+contract_schema: reactflow_delta.contract.v4
+amendment_id: reactflow_delta_v4_epoch16_endpoint_v4_non_degenerate_macro_20260808
+amendment_epoch: 16
+previous_amendment: reactflow_delta_v4_epoch15_caller_v3_20260808
+authorization_status: ACTIVE_AUTHORIZED
+amendment_kind: ENDPOINT_V4_NON_DEGENERATE_MACRO_ROUTE_A
+amendment_summary: 'Route A (user explicit grant, epoch 16). Relaxes ONLY the PRIMARY
+  metric degeneracy policy of the P2 learnability gate: endpoint_v4 computes publication-macro
+  AUPRC over NON-DEGENERATE (mixed-label) publications, with constant-label publications
+  explicitly listed and excluded (no silent dropping). This addresses the R5/P2_v3
+  UNIDENTIFIABLE verdict: 8/10 eligible publications show strong per-pub AP but 2
+  constant-label publications (pmid_25883046, pmid_35982307) triggered the frozen
+  evaluate_v2 fail-closed macro. unit/label/score/mask/information-permission/caller
+  UNCHANGED from endpoint_v3. Recomputes the P2 gate metric from existing held-out
+  predictions (no retraining), re-adjudicates P2_LEARNABILITY_GO/STOP.'
+amendment_routes:
+  phase_2_gate: P2_LEARNABILITY_GO_OR_STOP_METHOD_ROUTE
+  metric_change: MACRO_OVER_NON_DEGENERATE_PUBLICATIONS_ONLY
+  recompute: FROM_EXISTING_HELDOUT_PREDICTIONS_NO_RETRAIN
+invariants_unchanged:
+  test_split_sealed: true
+  test_not_used_for_training: true
+  cross_project_export: false
+  wet_lab: false
+  no_fabricated_data: true
+  no_seed_retry_gaming: true
+  no_hide_failure: true
+  no_lower_gate: true
+  unit_label_score_unchanged: true
+  caller_unchanged: true
+  excluded_publications_documented: true
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_epoch16_endpoint_v4_approval_20260808.yaml
+  signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+  external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
