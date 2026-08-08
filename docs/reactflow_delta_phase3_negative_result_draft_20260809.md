@@ -53,7 +53,9 @@ response 是否可被跨 publication 预测；若可，pair-aware 与受控非�
 
 ### 3.3 magnitude 信号近 replicate 噪声底
 - **44.7%** 的 (pair, position) 突变效应 **低于 1× within-WT replicate 噪声**；**61.95%** 低于
-  1.96× 噪声。ratio 稳健中位数 1.23。
+  1.96× 噪声。ratio 稳健中位数 1.23（p25 0.41, p75 3.65）。
+- 分布重右尾（部分 replicate position 近零方差 → 极端 ratio，p99~1e15）；故只用稳健分位数与
+  计数比例作结论，不使用均值（该重尾由近零方差 position 造成，不影响 below-1x 计数）。
 - **29.7%** 的 pair 无噪声估计（WT 为 singleton，无 ≥2 replicate）。
 - 主导 publication pmid_29446752（占被评估 positions 的 ~76%）41.8% below-1x；
   其余可评估 publication 达 66–85%。

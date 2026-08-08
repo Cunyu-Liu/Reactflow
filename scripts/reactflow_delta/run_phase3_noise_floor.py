@@ -166,10 +166,19 @@ def main():
     pair_level_ratio = np.asarray(pair_level_ratio, dtype=np.float64)
 
     def _q(a):
-        return {"n": int(len(a)), "mean": float(a.mean()) if len(a) else None,
-                "median": float(np.median(a)) if len(a) else None,
-                "p25": float(np.percentile(a, 25)) if len(a) else None,
-                "p75": float(np.percentile(a, 75)) if len(a) else None}
+        a = np.asarray(a, dtype=np.float64)
+        a = a[np.isfinite(a)]
+        if len(a) == 0:
+            return None
+        # Heavy right tail from (near-)zero-variance replicate positions -> robust
+        # percentiles are the defensible summary; raw/clipped means are meaningless.
+        return {"n": int(len(a)),
+                "median": float(np.median(a)),
+                "p25": float(np.percentile(a, 25)),
+                "p75": float(np.percentile(a, 75)),
+                "p90": float(np.percentile(a, 90)),
+                "p95": float(np.percentile(a, 95)),
+                "p99": float(np.percentile(a, 99))}
 
     report = {
         "schema": "reactflow_delta.phase3.benchmark_resource.noise_floor.v1",

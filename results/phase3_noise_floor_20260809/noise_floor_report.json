@@ -12,20 +12,24 @@
     "fraction_pairs_without_noise_est": 0.29741581832419733,
     "pair_position_ratio_distribution": {
       "n": 389555,
-      "mean": 120896971028336.14,
       "median": 1.2261904761904705,
       "p25": 0.4071562828802877,
-      "p75": 3.653119217019718
+      "p75": 3.653119217019718,
+      "p90": 16.152216772227188,
+      "p95": 146.02105263158202,
+      "p99": 1873911776151863.8
     },
     "fraction_pair_position_below_1x_noise": 0.4474977859352338,
     "fraction_pair_position_below_1.96x_noise": 0.6195325435432737,
     "n_pair_position_with_noise": 389555,
     "pair_mean_ratio_distribution": {
       "n": 3030,
-      "mean": 60605273876663.66,
       "median": 1.4175498703987244,
       "p25": 0.8777340973697565,
-      "p75": 2.328946185293634
+      "p75": 2.328946185293634,
+      "p90": 5.027537846613524,
+      "p95": 482882044528122.3,
+      "p99": 1407216790945272.5
     }
   },
   "per_publication": {
@@ -193,5 +197,5 @@
     }
   },
   "notes": "Target magnitude is identical to `pair_magnitude` (mean |mut-wt| over eligible positions). If a large share of effects are below the within-WT replicate std, the magnitude signal is at/below measurement noise and no model can produce a stable within-publication increment over trivial/generic, consistent with all three Phase 3 schemes failing the CI-lower-bound>0 gate.",
-  "adjudicated_at_utc": "2026-08-08T20:22:01.971690+00:00"
+  "adjudicated_at_utc": "2026-08-08T20:27:24.718450+00:00"
 }
