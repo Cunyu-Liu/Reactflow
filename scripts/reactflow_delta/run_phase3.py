@@ -55,6 +55,8 @@ def _feat_flags(variant):
 
 
 def _pos_dim_for(variant):
+    if variant == "trivial":
+        return 0
     return 7 if _feat_flags(variant)[0] else 5
 
 
@@ -222,7 +224,8 @@ def main():
 
         for v in VARIANT_ORDER:
             if v == "trivial":
-                Xtr_v = Xte_v = None
+                Xtr_v = np.zeros((len(tr_ch), 1), dtype=np.float32)
+                Xte_v = np.zeros((len(he_ch), 1), dtype=np.float32)
             else:
                 Xtr_v = np.stack([fx[v][pid] for pid in tr_ch])
                 Xte_v = np.stack([fx[v][pid] for pid in he_ch])
