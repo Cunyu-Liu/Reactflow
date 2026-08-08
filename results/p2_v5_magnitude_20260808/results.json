@@ -1,0 +1,436 @@
+{
+  "authority_epoch": 17,
+  "endpoint": "endpoint_v5",
+  "fold_info": {
+    "UNKNOWN_PUBLICATION:5SRRNA": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:ADDRSW": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:AGSARNA": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:CL1LIG": {
+      "n_held_changers": 113,
+      "n_train_changers": 2282,
+      "seconds": 1597.8
+    },
+    "UNKNOWN_PUBLICATION:GLYCFN": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:HC16M2R": {
+      "n_held_changers": 3,
+      "n_train_changers": 2387,
+      "seconds": 2042.2
+    },
+    "UNKNOWN_PUBLICATION:MDLOOP": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:RNAPZ6": {
+      "n_held_changers": 0,
+      "n_train_changers": 2380
+    },
+    "UNKNOWN_PUBLICATION:RNASEP": {
+      "n_held_changers": 15,
+      "n_train_changers": 2380,
+      "seconds": 2161.9
+    },
+    "UNKNOWN_PUBLICATION:SRPDIV": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:TRNAPH": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "pmid_24469816": {
+      "n_held_changers": 110,
+      "n_train_changers": 2280,
+      "seconds": 1714.1
+    },
+    "pmid_25183835": {
+      "n_held_changers": 298,
+      "n_train_changers": 2292,
+      "seconds": 1926.4
+    },
+    "pmid_25303992": {
+      "n_held_changers": 58,
+      "n_train_changers": 2523,
+      "seconds": 1845.9
+    },
+    "pmid_25883046": {
+      "n_held_changers": 68,
+      "n_train_changers": 2324,
+      "seconds": 1807.0
+    },
+    "pmid_29446752": {
+      "n_held_changers": 1792,
+      "n_train_changers": 587,
+      "seconds": 1635.0
+    },
+    "pmid_35982307": {
+      "n_held_changers": 68,
+      "n_train_changers": 2324,
+      "seconds": 1646.5
+    },
+    "pub_RNAPuzzle18_daslab": {
+      "n_held_changers": 69,
+      "n_train_changers": 2326,
+      "seconds": 1497.6
+    }
+  },
+  "metric": "conditional WMAE skill",
+  "models": [
+    "trivial",
+    "linear",
+    "gbm",
+    "p2_mlp",
+    "deepsets"
+  ],
+  "n_distinct_publications": 18,
+  "n_pool_pairs": 6385,
+  "n_pool_studies": 19,
+  "publication_studies": {
+    "UNKNOWN_PUBLICATION:5SRRNA": [
+      "5SRRNA"
+    ],
+    "UNKNOWN_PUBLICATION:ADDRSW": [
+      "ADDRSW"
+    ],
+    "UNKNOWN_PUBLICATION:AGSARNA": [
+      "AGSARNA"
+    ],
+    "UNKNOWN_PUBLICATION:CL1LIG": [
+      "CL1LIG"
+    ],
+    "UNKNOWN_PUBLICATION:GLYCFN": [
+      "GLYCFN"
+    ],
+    "UNKNOWN_PUBLICATION:HC16M2R": [
+      "HC16M2R"
+    ],
+    "UNKNOWN_PUBLICATION:MDLOOP": [
+      "MDLOOP"
+    ],
+    "UNKNOWN_PUBLICATION:RNAPZ6": [
+      "RNAPZ6"
+    ],
+    "UNKNOWN_PUBLICATION:RNASEP": [
+      "RNASEP"
+    ],
+    "UNKNOWN_PUBLICATION:SRPDIV": [
+      "SRPDIV"
+    ],
+    "UNKNOWN_PUBLICATION:TRNAPH": [
+      "TRNAPH"
+    ],
+    "pmid_24469816": [
+      "ETBSTR"
+    ],
+    "pmid_25183835": [
+      "16SFWJ"
+    ],
+    "pmid_25303992": [
+      "CIDGMP",
+      "TRP4P6"
+    ],
+    "pmid_25883046": [
+      "RNAPZ5"
+    ],
+    "pmid_29446752": [
+      "ADD140"
+    ],
+    "pmid_35982307": [
+      "PSL2IAV"
+    ],
+    "pub_RNAPuzzle18_daslab": [
+      "RNAPZ18"
+    ]
+  },
+  "publications": [
+    "UNKNOWN_PUBLICATION:5SRRNA",
+    "UNKNOWN_PUBLICATION:ADDRSW",
+    "UNKNOWN_PUBLICATION:AGSARNA",
+    "UNKNOWN_PUBLICATION:CL1LIG",
+    "UNKNOWN_PUBLICATION:GLYCFN",
+    "UNKNOWN_PUBLICATION:HC16M2R",
+    "UNKNOWN_PUBLICATION:MDLOOP",
+    "UNKNOWN_PUBLICATION:RNAPZ6",
+    "UNKNOWN_PUBLICATION:RNASEP",
+    "UNKNOWN_PUBLICATION:SRPDIV",
+    "UNKNOWN_PUBLICATION:TRNAPH",
+    "pmid_24469816",
+    "pmid_25183835",
+    "pmid_25303992",
+    "pmid_25883046",
+    "pmid_29446752",
+    "pmid_35982307",
+    "pub_RNAPuzzle18_daslab"
+  ],
+  "run_id": "p2_v5_magnitude_20260808",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "table": {
+    "deepsets:0": {
+      "ci_high": 0.7994065561878972,
+      "ci_low": 0.3792680447455682,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.7012959860898564,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.4096500065871923
+    },
+    "deepsets:1": {
+      "ci_high": 0.7818657339813527,
+      "ci_low": 0.346192402384362,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.6771982322003781,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.44269825696166154
+    },
+    "deepsets:2": {
+      "ci_high": 0.7531170415909618,
+      "ci_low": 0.33348549143717565,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.6526586613817368,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.4763524259027168
+    },
+    "deepsets:3": {
+      "ci_high": 0.8150997042952963,
+      "ci_low": 0.3438850572557425,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.6962808669900188,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.41652786385261925
+    },
+    "deepsets:4": {
+      "ci_high": 0.7665508892830062,
+      "ci_low": 0.323234737835169,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.6568627695793102,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.4705868088683661
+    },
+    "gbm:0": {
+      "ci_high": 0.5571244381582232,
+      "ci_low": 0.26290275540695374,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3189649056000391,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9339882221702519
+    },
+    "gbm:1": {
+      "ci_high": 0.5595664009227219,
+      "ci_low": 0.2614895305988437,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3189649056000391,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9339882221702519
+    },
+    "gbm:2": {
+      "ci_high": 0.5563489279539808,
+      "ci_low": 0.26298456905173795,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3189649056000391,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9339882221702519
+    },
+    "gbm:3": {
+      "ci_high": 0.559374315476661,
+      "ci_low": 0.2632477973594878,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3189649056000391,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9339882221702519
+    },
+    "gbm:4": {
+      "ci_high": 0.5586224890062488,
+      "ci_low": 0.26252104243067087,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3189649056000391,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9339882221702519
+    },
+    "linear:0": {
+      "ci_high": 0.4859288896894769,
+      "ci_low": 0.2573561889821383,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3084524923294414,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9484052034125698
+    },
+    "linear:1": {
+      "ci_high": 0.4885590093822739,
+      "ci_low": 0.25650236519154,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3084524923294414,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9484052034125698
+    },
+    "linear:2": {
+      "ci_high": 0.49348180877245407,
+      "ci_low": 0.2562262794637101,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3084524923294414,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9484052034125698
+    },
+    "linear:3": {
+      "ci_high": 0.48472982771859296,
+      "ci_low": 0.2572657590617239,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3084524923294414,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9484052034125698
+    },
+    "linear:4": {
+      "ci_high": 0.4828377309601236,
+      "ci_low": 0.25871189507073145,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.3084524923294414,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.9484052034125698
+    },
+    "p2_mlp:0": {
+      "ci_high": 0.6668744256634096,
+      "ci_low": 0.3286007252427219,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.596425584732944,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.5534718456187362
+    },
+    "p2_mlp:1": {
+      "ci_high": 0.6927174069073296,
+      "ci_low": 0.34522598647466474,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.6141337803013375,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.5291863921483255
+    },
+    "p2_mlp:2": {
+      "ci_high": 0.6722883044581636,
+      "ci_low": 0.3387792638751723,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.6042159725226581,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.5427879168439016
+    },
+    "p2_mlp:3": {
+      "ci_high": 0.66438024619789,
+      "ci_low": 0.32632101820827586,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.5858345878219071,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.5679965983918153
+    },
+    "p2_mlp:4": {
+      "ci_high": 0.7151289895442553,
+      "ci_low": 0.31487618299974507,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.6086340002264533,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 0.5367289253550677
+    },
+    "trivial:0": {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.0,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 1.371424512261237
+    },
+    "trivial:1": {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.0,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 1.371424512261237
+    },
+    "trivial:2": {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.0,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 1.371424512261237
+    },
+    "trivial:3": {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.0,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 1.371424512261237
+    },
+    "trivial:4": {
+      "ci_high": 0.0,
+      "ci_low": 0.0,
+      "n_changers": 2594,
+      "n_publications": 10,
+      "permutation_p": 1.0,
+      "skill": 0.0,
+      "wmae_baseline": 1.371424512261237,
+      "wmae_model": 1.371424512261237
+    }
+  }
+}

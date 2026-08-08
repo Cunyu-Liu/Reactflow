@@ -1,0 +1,18 @@
+{
+  "adjudicated_at_utc": "2026-08-08T16:00:40.760058+00:00",
+  "authority_epoch": 17,
+  "best_ci_low_min": 0.323234737835169,
+  "best_model": "deepsets",
+  "best_skill_mean": 0.67685930324826,
+  "endpoint": "endpoint_v5",
+  "estimand_status": "IDENTIFIABLE",
+  "gate": "P2_CONDITIONAL_MAGNITUDE",
+  "gate_result": "GO",
+  "phase": "CONDITIONAL-MAGNITUDE",
+  "primary_metric": "CONDITIONAL_WMAE_SKILL",
+  "run_id": "p2_v5_magnitude_20260808",
+  "schema": "reactflow_delta.p2v5_magnitude_terminal.v1",
+  "state": "TERMINAL",
+  "summary": "Conditional-magnitude learnability under endpoint_v5. Best learned model deepsets mean skill=0.6769 bootstrap CI low=0.3232. Verdict: GO (fail-closed).",
+  "verdict_path": "P2v5_magnitude_verdict.json"
+}
