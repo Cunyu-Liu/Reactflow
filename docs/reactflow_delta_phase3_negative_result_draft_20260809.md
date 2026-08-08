@@ -72,6 +72,18 @@ response 是否可被跨 publication 预测；若可，pair-aware 与受控非�
 
 三种方案全部在 paired publication-block bootstrap 的 CI 下界 >0 门槛下不胜同容量 generic。
 
+### 3.6 负结果在 publication 层一致（uniformity check）
+以方案三为例，对每个 held-out publication 计算 EPRO vs generic 的 skill 差
+（LOOCV 下 per-publication skill = per-fold skill；`run_phase3_per_pub_skill.py`，
+`results/phase3_per_pub_skill_20260809/per_pub_skill.json`）：
+
+- 9 个可分析 publication 中，EPRO **在所有 5 seeds 都胜 generic 的只有 2 个**（pmid_25883046 340
+  对、RNASEP 75 对，均小样本），且非跨 publication 一致。
+- 最大 publication（pmid_29446752，8960 对）diff=+0.017，仅 60% seed 为正（不显著）。
+- overall diff mean = **−0.020**（EPRO 平均略差）；min −0.56，max +0.76。
+- 结论：没有任何 publication 给出 EPRO 相对 generic 稳定、跨 seed 一致的增益——负结果在
+  publication 层一致，非仅 aggregate 假象。
+
 ## 4. Discussion / 解释
 
 三条独立证据链共同解释架构负结果，且都落在数据/测量层而非「模型不够复杂」：
