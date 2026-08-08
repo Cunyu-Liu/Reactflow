@@ -414,13 +414,15 @@ phase_graph:
   terminal_manifest_path: results/p2_v3_learnability_20260808b/P2_learnability_terminal_v4.json
   endpoint: endpoint_v4
 - phase_id: POSITION-GRANULARITY
-  lifecycle_status: RUNNING
+  lifecycle_status: SUPERSEDED_UNSELECTED
   gate_result: NOT_RUN
-  execution_authorized: true
+  execution_authorized: false
   training_required: true
   gpu_required: true
   metric_semantics: PUBLICATION_MACRO_POSITION_AUPRC
   authority_epoch: 17
+  note: Route C (position granularity) superseded by Route B (conditional magnitude)
+    GO; artifacts kept in docs/contracts/amendments/_unselected_routeC_epoch17/
 - phase_id: CONDITIONAL-MAGNITUDE
   lifecycle_status: TERMINAL
   gate_result: GO
