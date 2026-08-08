@@ -27,7 +27,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 REPO = Path(__file__).resolve().parent.parent.parent
-RUN_DIR = REPO / "results/p2_v3_learnability_20260808"
+RUN_DIR = REPO / "results/p2_v3_learnability_20260808b"
 SEEDS = [0, 1, 2, 3, 4]
 ALPHA = 0.05
 N_SEED_REQUIRED = 5
@@ -67,7 +67,8 @@ def main():
     # --- (c) incremental skill over trivial baseline ----------------------
     # trivial AUPRC ~ positive prevalence (constant predictor => AUPRC=prevalence)
     if "trivial" in ident and ident["trivial"]["n_seeds"] > 0:
-        baseline_mean = float(sum(ident["trivial"]["auprc_seeds"]) / ident["trivial"]["n_seeds"])
+        _tv = [v for v in ident["trivial"]["auprc_seeds"] if isinstance(v, (int, float))]
+        baseline_mean = float(sum(_tv) / len(_tv)) if _tv else None
     else:
         baseline_mean = None
 
@@ -88,7 +89,7 @@ def main():
                 delta = float(metric) - float(baseline_mean)
             seeds_delta.append(delta)
         per_model[m] = {
-            "auprc_mean": float(sum(ident[m]["auprc_seeds"]) / ident[m]["n_seeds"]) if ident[m]["n_seeds"] else None,
+            "auprc_mean": (float(sum(v for v in ident[m]["auprc_seeds"] if isinstance(v, (int, float))) / len([v for v in ident[m]["auprc_seeds"] if isinstance(v, (int, float))])) if ident[m]["auprc_seeds"] and any(isinstance(v, (int, float)) for v in ident[m]["auprc_seeds"]) else None),
             "delta_over_trivial_mean": (
                 float(sum(d for d in seeds_delta if d is not None) / len([d for d in seeds_delta if d is not None]))
                 if any(d is not None for d in seeds_delta) else None),
