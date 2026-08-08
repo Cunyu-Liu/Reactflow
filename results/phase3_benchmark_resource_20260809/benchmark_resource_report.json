@@ -1,0 +1,270 @@
+{
+  "schema": "reactflow_delta.phase3.benchmark_resource.v1",
+  "run_id": "phase3_benchmark_resource_20260809",
+  "authority_epoch": 18,
+  "phase": "PHASE3-BENCHMARK-RESOURCE",
+  "route": "benchmark/resource/negative-result (Phase 3 fail-closed disposition)",
+  "purpose": "Diagnose why no Phase 3 architecture scheme beat the same-capacity generic: caller reliability, publication label shift, feature domain shift.",
+  "caller_reliability": {
+    "global_icc": 0.6862539532602251,
+    "structure_ok": true,
+    "n_replicate_groups": 64,
+    "group_icc_distribution": {
+      "n": 35,
+      "mean": 0.686253953260225,
+      "median": 0.82689343533556,
+      "p10": 0.06239507052232049,
+      "p90": 1.0,
+      "min": -0.03417973978953268,
+      "max": 1.0
+    },
+    "n_groups_icc_above_threshold": 27,
+    "n_pairs_total": 6385,
+    "n_pairs_called": 3181,
+    "n_pairs_nocall": 3204,
+    "fraction_nocall": 0.5018010963194989,
+    "overall_changers_rate": 0.7529078906004402,
+    "icc_threshold": 0.5
+  },
+  "publication_label_shift": {
+    "n_publications": 18,
+    "n_publications_with_called_pairs": 10,
+    "changers_rate_distribution": {
+      "n": 10,
+      "mean": 0.7401453954189982,
+      "median": 0.8837139423076923,
+      "p10": 0.3798387096774194,
+      "p90": 1.0,
+      "min": 0.04838709677419355,
+      "max": 1.0
+    },
+    "changers_rate_max_min_ratio": 20.666666666666668,
+    "per_publication": {
+      "UNKNOWN_PUBLICATION:5SRRNA": {
+        "n": 120,
+        "called": 0,
+        "changers": 0,
+        "nocall": 120,
+        "changers_rate": null
+      },
+      "UNKNOWN_PUBLICATION:ADDRSW": {
+        "n": 213,
+        "called": 0,
+        "changers": 0,
+        "nocall": 213,
+        "changers_rate": null
+      },
+      "UNKNOWN_PUBLICATION:AGSARNA": {
+        "n": 24,
+        "called": 0,
+        "changers": 0,
+        "nocall": 24,
+        "changers_rate": null
+      },
+      "UNKNOWN_PUBLICATION:CL1LIG": {
+        "n": 128,
+        "called": 128,
+        "changers": 113,
+        "nocall": 0,
+        "changers_rate": 0.8828125
+      },
+      "UNKNOWN_PUBLICATION:GLYCFN": {
+        "n": 632,
+        "called": 0,
+        "changers": 0,
+        "nocall": 632,
+        "changers_rate": null
+      },
+      "UNKNOWN_PUBLICATION:HC16M2R": {
+        "n": 62,
+        "called": 62,
+        "changers": 3,
+        "nocall": 0,
+        "changers_rate": 0.04838709677419355
+      },
+      "UNKNOWN_PUBLICATION:MDLOOP": {
+        "n": 468,
+        "called": 0,
+        "changers": 0,
+        "nocall": 468,
+        "changers_rate": null
+      },
+      "UNKNOWN_PUBLICATION:RNAPZ6": {
+        "n": 190,
+        "called": 0,
+        "changers": 0,
+        "nocall": 190,
+        "changers_rate": null
+      },
+      "UNKNOWN_PUBLICATION:RNASEP": {
+        "n": 36,
+        "called": 36,
+        "changers": 15,
+        "nocall": 0,
+        "changers_rate": 0.4166666666666667
+      },
+      "UNKNOWN_PUBLICATION:SRPDIV": {
+        "n": 32,
+        "called": 0,
+        "changers": 0,
+        "nocall": 32,
+        "changers_rate": null
+      },
+      "UNKNOWN_PUBLICATION:TRNAPH": {
+        "n": 78,
+        "called": 0,
+        "changers": 0,
+        "nocall": 78,
+        "changers_rate": null
+      },
+      "pmid_24469816": {
+        "n": 220,
+        "called": 220,
+        "changers": 110,
+        "nocall": 0,
+        "changers_rate": 0.5
+      },
+      "pmid_25183835": {
+        "n": 408,
+        "called": 110,
+        "changers": 103,
+        "nocall": 298,
+        "changers_rate": 0.9363636363636364
+      },
+      "pmid_25303992": {
+        "n": 572,
+        "called": 52,
+        "changers": 46,
+        "nocall": 520,
+        "changers_rate": 0.8846153846153846
+      },
+      "pmid_25883046": {
+        "n": 638,
+        "called": 68,
+        "changers": 68,
+        "nocall": 570,
+        "changers_rate": 1.0
+      },
+      "pmid_29446752": {
+        "n": 2366,
+        "called": 2366,
+        "changers": 1800,
+        "nocall": 0,
+        "changers_rate": 0.760777683854607
+      },
+      "pmid_35982307": {
+        "n": 127,
+        "called": 68,
+        "changers": 68,
+        "nocall": 59,
+        "changers_rate": 1.0
+      },
+      "pub_RNAPuzzle18_daslab": {
+        "n": 71,
+        "called": 71,
+        "changers": 69,
+        "nocall": 0,
+        "changers_rate": 0.971830985915493
+      }
+    }
+  },
+  "feature_domain_shift": {
+    "method": "standardized mean difference of generic [WT,Mut,cond] features per publication vs pool training mean",
+    "per_publication_mean_abs_smd": {
+      "pmid_24469816": {
+        "n": 220,
+        "mean_abs_smd": 0.7065829634666443,
+        "max_abs_smd": 4.143856525421143
+      },
+      "UNKNOWN_PUBLICATION:SRPDIV": {
+        "n": 32,
+        "mean_abs_smd": 0.5621844530105591,
+        "max_abs_smd": 9.571481704711914
+      },
+      "UNKNOWN_PUBLICATION:AGSARNA": {
+        "n": 24,
+        "mean_abs_smd": 0.5470249056816101,
+        "max_abs_smd": 5.6903486251831055
+      },
+      "UNKNOWN_PUBLICATION:HC16M2R": {
+        "n": 62,
+        "mean_abs_smd": 0.4560656249523163,
+        "max_abs_smd": 6.175498008728027
+      },
+      "UNKNOWN_PUBLICATION:RNASEP": {
+        "n": 36,
+        "mean_abs_smd": 0.3746480643749237,
+        "max_abs_smd": 2.3122546672821045
+      },
+      "UNKNOWN_PUBLICATION:RNAPZ6": {
+        "n": 190,
+        "mean_abs_smd": 0.3517597019672394,
+        "max_abs_smd": 1.0157711505889893
+      },
+      "UNKNOWN_PUBLICATION:5SRRNA": {
+        "n": 120,
+        "mean_abs_smd": 0.34179431200027466,
+        "max_abs_smd": 1.6468696594238281
+      },
+      "UNKNOWN_PUBLICATION:MDLOOP": {
+        "n": 468,
+        "mean_abs_smd": 0.3358745276927948,
+        "max_abs_smd": 1.9584251642227173
+      },
+      "UNKNOWN_PUBLICATION:TRNAPH": {
+        "n": 78,
+        "mean_abs_smd": 0.3314047157764435,
+        "max_abs_smd": 1.6468696594238281
+      },
+      "UNKNOWN_PUBLICATION:CL1LIG": {
+        "n": 128,
+        "mean_abs_smd": 0.31225502490997314,
+        "max_abs_smd": 1.476194143295288
+      },
+      "pub_RNAPuzzle18_daslab": {
+        "n": 71,
+        "mean_abs_smd": 0.2642437815666199,
+        "max_abs_smd": 0.9625997543334961
+      },
+      "UNKNOWN_PUBLICATION:ADDRSW": {
+        "n": 213,
+        "mean_abs_smd": 0.23319773375988007,
+        "max_abs_smd": 1.6468696594238281
+      },
+      "pmid_25183835": {
+        "n": 408,
+        "mean_abs_smd": 0.20583505928516388,
+        "max_abs_smd": 1.4206217527389526
+      },
+      "pmid_25303992": {
+        "n": 572,
+        "mean_abs_smd": 0.19420866668224335,
+        "max_abs_smd": 1.3946655988693237
+      },
+      "pmid_29446752": {
+        "n": 2366,
+        "mean_abs_smd": 0.1851467788219452,
+        "max_abs_smd": 0.9313868284225464
+      },
+      "pmid_35982307": {
+        "n": 127,
+        "mean_abs_smd": 0.17773406207561493,
+        "max_abs_smd": 1.037157416343689
+      },
+      "UNKNOWN_PUBLICATION:GLYCFN": {
+        "n": 632,
+        "mean_abs_smd": 0.16967599093914032,
+        "max_abs_smd": 1.6468696594238281
+      },
+      "pmid_25883046": {
+        "n": 638,
+        "mean_abs_smd": 0.13807356357574463,
+        "max_abs_smd": 0.8012760877609253
+      }
+    },
+    "overall_mean_abs_smd": 0.32709499614106285,
+    "n_publications": 18
+  },
+  "notes": "Frozen GLOBAL caller fitted on all pool training studies (diagnostic only, not the per-fold caller used in the scheme runs). global ICC / NO_CALL fraction characterize caller label reliability; publication changers-rate and feature SMD characterize domain shift. If reliability is low or shift is large, no within-publication architecture increment can be detected, consistent with all three Phase 3 schemes failing the CI-lower-bound>0 gate.",
+  "adjudicated_at_utc": "2026-08-08T20:18:29.333072+00:00"
+}
