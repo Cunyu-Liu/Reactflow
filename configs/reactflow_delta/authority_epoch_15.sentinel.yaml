@@ -1,0 +1,11 @@
+schema_version: reactflow_delta.authority_epoch_sentinel.v1
+authority_epoch: 15
+current_authority_state: REBUILD_P2_AUTHORIZED
+current_phase: REBUILD-P2
+active_manifest_sha256: 149642ff3e2e43351e6ad9996e2ae9fe2908a6f56a322da45c245030229dd84e
+bundle_ledger_path: configs/reactflow_delta/authority_epoch_15.bundle.sha256
+bundle_ledger_sha256: 67ca7a0f2ef403bb7bfab62ee90d8df4354d7b742580f7291dbc433abd3dbb00
+created_at: '2026-08-08T18:00:00+08:00'
+emitted_after: BUNDLE_LEDGER
+embedded_self_sha256: FORBIDDEN
+legacy_m0x: TERMINALIZED_FAIL_NO_PASS_SENTINEL

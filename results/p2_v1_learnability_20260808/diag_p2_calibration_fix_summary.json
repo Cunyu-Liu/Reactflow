@@ -1,0 +1,167 @@
+{
+  "n_rec_index": 7802,
+  "n_pairs": 6385,
+  "pool_studies": [
+    "16SFWJ",
+    "5SRRNA",
+    "ADD140",
+    "ADDRSW",
+    "AGSARNA",
+    "CIDGMP",
+    "CL1LIG",
+    "ETBSTR",
+    "GLYCFN",
+    "HC16M2R",
+    "MDLOOP",
+    "PSL2IAV",
+    "RNAPZ18",
+    "RNAPZ5",
+    "RNAPZ6",
+    "RNASEP",
+    "SRPDIV",
+    "TRNAPH",
+    "TRP4P6"
+  ],
+  "A_per_study_scale": {
+    "per_study_median": {
+      "RNAPZ5": 1.429,
+      "SRPDIV": 1.75375,
+      "MDLOOP": 15.5226,
+      "HC16M2R": 4.07725,
+      "RNAPZ18": 1.4417,
+      "RNASEP": 0.0004,
+      "CL1LIG": 3.3356,
+      "CIDGMP": 117.3186,
+      "TRP4P6": 1.3189,
+      "ETBSTR": 3.2526,
+      "ADD140": 0.4253,
+      "PSL2IAV": 0.58095,
+      "AGSARNA": 0.19311,
+      "ADDRSW": 11.2382,
+      "RNAPZ6": 3.4505,
+      "TRNAPH": 10.91315,
+      "5SRRNA": 10.0031,
+      "16SFWJ": 1.29135,
+      "GLYCFN": 0.556
+    },
+    "per_study_mad": {
+      "RNAPZ5": 1.3875,
+      "SRPDIV": 1.3208,
+      "MDLOOP": 12.2987,
+      "HC16M2R": 3.58125,
+      "RNAPZ18": 1.28335,
+      "RNASEP": 0.0004,
+      "CL1LIG": 2.7971,
+      "CIDGMP": 113.4833,
+      "TRP4P6": 1.3189,
+      "ETBSTR": 2.71,
+      "ADD140": 0.2758,
+      "PSL2IAV": 0.48435,
+      "AGSARNA": 0.19311,
+      "ADDRSW": 10.8964,
+      "RNAPZ6": 2.49285,
+      "TRNAPH": 6.67095,
+      "5SRRNA": 8.5487,
+      "16SFWJ": 1.23455,
+      "GLYCFN": 0.4693
+    },
+    "spread_before_norm": {
+      "median_range": [
+        0.0004,
+        117.3186
+      ],
+      "median_spread_ratio": 293296.5,
+      "mad_range": [
+        0.0004,
+        113.4833
+      ],
+      "mad_spread_ratio": 283708.25,
+      "n_studies": 19
+    },
+    "spread_after_norm": {
+      "median_range": [
+        0.0,
+        0.0
+      ],
+      "mad_range": [
+        1.0,
+        1.0
+      ],
+      "note": "per-study (r-median)/MAD maps every study to median 0, MAD 1 by construction; spread ratio -> 1.0"
+    }
+  },
+  "n_replicate_groups_ge2": 64,
+  "B_error_recalibration": {
+    "n_positions_ratio": 4935,
+    "empirical_sd_over_reported_err": {
+      "median": 2.2747758980093513,
+      "mean": 7.951281894666624,
+      "p90": 18.636502461985295,
+      "frac_gt_1": 0.6826747720364742,
+      "frac_gt_5": 0.30942249240121583,
+      "max": 641.9999999999999
+    },
+    "wt_wt_abs_z_reported_err": {
+      "median": 2.527084690968093,
+      "mean": 5.423478341781491,
+      "p99": 46.491012888615785,
+      "max": 388.02484617611793
+    },
+    "wt_wt_abs_z_empirical_scatter": {
+      "median": 0.11339724142566138,
+      "mean": 0.46785917184318493,
+      "p99": 4.00951084270633,
+      "max": 14.282856857085664,
+      "note": "if errors were well-calibrated, WT-WT |z| ~ half-normal(0,1): median~0.67, p99~2.58"
+    }
+  },
+  "C_corrected_null": {
+    "n_null_profiles": 136524,
+    "null_median": 5.1662476477646475,
+    "null_q95": 11.194533159568612,
+    "note": "frozen caller_v2 pooled null median was ~44; a well-calibrated null has q95 ~ few units"
+  },
+  "n_pairs_usable": 6385,
+  "C_corrected_labels_with_icc_gate": {
+    "n_units": 6385,
+    "changer": 2392,
+    "nonchanger": 789,
+    "no_call": 3204,
+    "changer_fraction_of_called": 0.7519647909462434,
+    "n_publications_total": 18,
+    "n_publications_with_changer": 10,
+    "frac_publications_with_changer": 0.5555555555555556
+  },
+  "C_corrected_labels_without_icc_gate": {
+    "n_units": 6385,
+    "changer": 2599,
+    "nonchanger": 892,
+    "no_call": 2894,
+    "changer_fraction_of_called": 0.7444858206817531,
+    "n_publications_total": 18,
+    "n_publications_with_changer": 10,
+    "frac_publications_with_changer": 0.5555555555555556
+  },
+  "D_learnability_signal": {
+    "pairs_with_any_eligible_pos": 3491,
+    "pairs_with_ge1_eligible_signif_pos": 2983,
+    "frac_pairs_with_ge1_signif_pos": 0.8544829561730163,
+    "corrected_statistic_changers": {
+      "n": 2392,
+      "median": 113.41759597806217,
+      "mean": 4488346007543502.5,
+      "q25": 32.43200312102759,
+      "q75": 563.2500000000622
+    },
+    "corrected_statistic_nonchangers": {
+      "n": 789,
+      "median": 4.370292036590198,
+      "mean": 4.838699635428961,
+      "q25": 3.282205643975213,
+      "q75": 5.663806296150182
+    },
+    "null_q95_reference": 11.194533159568612,
+    "note": "separability = changers should sit clearly above the corrected-null q95 and above nonchanger statistic"
+  },
+  "global_reliability": 0.686253953260225
+}
