@@ -81,3 +81,19 @@ paired publication-block bootstrap CI 下界 > 0 为成功门槛（§12 Phase 3 
 
 结论：Phase 3 的负结果由数据/测量层属性解释，而非「模型不够复杂」。这支持合同预注册的
 **benchmark/resource/negative-result 路线**，且不应继续架构自由搜索。
+
+### 5.3 决定性诊断——magnitude 目标 vs replicate 噪声底（`run_phase3_noise_floor.py`）
+
+`results/phase3_noise_floor_20260809/noise_floor_report.json`。对 conditional-magnitude 目标
+（= `pair_magnitude` 的 mean |mut−WT| over eligible positions），与 **within-WT replicate 噪声**
+（per-position std across ≥2 replicates, train_frozen reactivity）比较：
+
+- **44.7%** 的 (pair, position) 突变效应 **低于 1× replicate 噪声 std**；**61.95%** 低于 1.96× 噪声
+  （~95% 噪声区间）。ratio 稳健中位数 1.23（效应平均仅 ~1.2× 噪声）。
+- **29.7%** 的 pair 无噪声估计（WT 为 singleton，无 ≥2 replicate 组）；仅 41 个 replicate 组有噪声。
+- 主导 publication 分解（pos_total 占比 ~76% 的 pmid_29446752 为 41.8% below-1x，pmid_25183835 66.1%，
+  HC16M2R 85.3%）。
+
+**结论：** conditional-magnitude 的逐 position 突变效应有近一半位于/低于 replicate 测量噪声底。
+在如此噪声底之上，任何同容量模型都无法产生稳定、可跨 publication 复现的 magnitude 增量——
+这与三种架构全部 CI 下界 ≤0 完全一致。这构成 benchmark/resource/negative-result 论文的核心证据。

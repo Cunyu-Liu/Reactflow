@@ -1,0 +1,197 @@
+{
+  "schema": "reactflow_delta.phase3.benchmark_resource.noise_floor.v1",
+  "run_id": "phase3_noise_floor_20260809",
+  "authority_epoch": 18,
+  "phase": "PHASE3-BENCHMARK-RESOURCE",
+  "question": "Is the conditional-magnitude target |mut-WT| over eligible positions above the within-WT replicate noise floor?",
+  "noise_floor": {
+    "definition": "per-position std across >=2 within-WT replicates (train_frozen reactivity)",
+    "n_replicate_groups_with_noise": 41,
+    "n_pairs": 6385,
+    "n_pairs_without_noise_est": 1899,
+    "fraction_pairs_without_noise_est": 0.29741581832419733,
+    "pair_position_ratio_distribution": {
+      "n": 389555,
+      "mean": 120896971028336.14,
+      "median": 1.2261904761904705,
+      "p25": 0.4071562828802877,
+      "p75": 3.653119217019718
+    },
+    "fraction_pair_position_below_1x_noise": 0.4474977859352338,
+    "fraction_pair_position_below_1.96x_noise": 0.6195325435432737,
+    "n_pair_position_with_noise": 389555,
+    "pair_mean_ratio_distribution": {
+      "n": 3030,
+      "mean": 60605273876663.66,
+      "median": 1.4175498703987244,
+      "p25": 0.8777340973697565,
+      "p75": 2.328946185293634
+    }
+  },
+  "per_publication": {
+    "UNKNOWN_PUBLICATION:5SRRNA": {
+      "n": 120,
+      "with_noise": 120,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:ADDRSW": {
+      "n": 213,
+      "with_noise": 213,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:AGSARNA": {
+      "n": 24,
+      "with_noise": 0,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:CL1LIG": {
+      "n": 128,
+      "with_noise": 0,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:GLYCFN": {
+      "n": 632,
+      "with_noise": 632,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:HC16M2R": {
+      "n": 62,
+      "with_noise": 62,
+      "pos_total": 24614,
+      "pos_below_1x": 21001,
+      "fraction_pos_below_1x": 0.8532136182660275,
+      "pair_with_noise": 62,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:MDLOOP": {
+      "n": 468,
+      "with_noise": 0,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:RNAPZ6": {
+      "n": 190,
+      "with_noise": 0,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:RNASEP": {
+      "n": 36,
+      "with_noise": 0,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:SRPDIV": {
+      "n": 32,
+      "with_noise": 0,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "UNKNOWN_PUBLICATION:TRNAPH": {
+      "n": 78,
+      "with_noise": 78,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    },
+    "pmid_24469816": {
+      "n": 220,
+      "with_noise": 110,
+      "pos_total": 12321,
+      "pos_below_1x": 2103,
+      "fraction_pos_below_1x": 0.17068419771122473,
+      "pair_with_noise": 110,
+      "pair_entirely_below_1x": 0
+    },
+    "pmid_25183835": {
+      "n": 408,
+      "with_noise": 298,
+      "pos_total": 32077,
+      "pos_below_1x": 21187,
+      "fraction_pos_below_1x": 0.6605044112604046,
+      "pair_with_noise": 298,
+      "pair_entirely_below_1x": 0
+    },
+    "pmid_25303992": {
+      "n": 572,
+      "with_noise": 471,
+      "pos_total": 7566,
+      "pos_below_1x": 1131,
+      "fraction_pos_below_1x": 0.14948453608247422,
+      "pair_with_noise": 58,
+      "pair_entirely_below_1x": 0
+    },
+    "pmid_25883046": {
+      "n": 638,
+      "with_noise": 68,
+      "pos_total": 12716,
+      "pos_below_1x": 4764,
+      "fraction_pos_below_1x": 0.3746461151305442,
+      "pair_with_noise": 68,
+      "pair_entirely_below_1x": 0
+    },
+    "pmid_29446752": {
+      "n": 2366,
+      "with_noise": 2366,
+      "pos_total": 297119,
+      "pos_below_1x": 124137,
+      "fraction_pos_below_1x": 0.41780229470346897,
+      "pair_with_noise": 2366,
+      "pair_entirely_below_1x": 1
+    },
+    "pmid_35982307": {
+      "n": 127,
+      "with_noise": 68,
+      "pos_total": 3142,
+      "pos_below_1x": 2,
+      "fraction_pos_below_1x": 0.0006365372374283895,
+      "pair_with_noise": 68,
+      "pair_entirely_below_1x": 0
+    },
+    "pub_RNAPuzzle18_daslab": {
+      "n": 71,
+      "with_noise": 0,
+      "pos_total": 0,
+      "pos_below_1x": 0,
+      "fraction_pos_below_1x": null,
+      "pair_with_noise": 0,
+      "pair_entirely_below_1x": 0
+    }
+  },
+  "notes": "Target magnitude is identical to `pair_magnitude` (mean |mut-wt| over eligible positions). If a large share of effects are below the within-WT replicate std, the magnitude signal is at/below measurement noise and no model can produce a stable within-publication increment over trivial/generic, consistent with all three Phase 3 schemes failing the CI-lower-bound>0 gate.",
+  "adjudicated_at_utc": "2026-08-08T20:22:01.971690+00:00"
+}
