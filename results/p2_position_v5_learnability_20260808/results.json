@@ -1,0 +1,977 @@
+{
+  "Z_CUT": 2.0,
+  "authority_epoch": 17,
+  "endpoint": "endpoint_v5",
+  "fold_stats": {
+    "UNKNOWN_PUBLICATION:CL1LIG": {
+      "held_pos_rate": 0.36982303857803345,
+      "n_held_pos": 21248,
+      "n_train_pos": 434897,
+      "seconds": 142.2,
+      "train_pos_rate": 0.2576265037059784
+    },
+    "UNKNOWN_PUBLICATION:HC16M2R": {
+      "held_pos_rate": 0.020029252395033836,
+      "n_held_pos": 24614,
+      "n_train_pos": 431531,
+      "seconds": 61.3,
+      "train_pos_rate": 0.2767031788825989
+    },
+    "UNKNOWN_PUBLICATION:RNASEP": {
+      "held_pos_rate": 0.14082098007202148,
+      "n_held_pos": 8770,
+      "n_train_pos": 447375,
+      "seconds": 171.5,
+      "train_pos_rate": 0.2652450501918793
+    },
+    "pmid_24469816": {
+      "held_pos_rate": 0.25800949335098267,
+      "n_held_pos": 24627,
+      "n_train_pos": 431518,
+      "seconds": 97.6,
+      "train_pos_rate": 0.26312923431396484
+    },
+    "pmid_25183835": {
+      "held_pos_rate": 0.2042633593082428,
+      "n_held_pos": 44472,
+      "n_train_pos": 411673,
+      "seconds": 56.6,
+      "train_pos_rate": 0.26918208599090576
+    },
+    "pmid_25303992": {
+      "held_pos_rate": 0.6430790424346924,
+      "n_held_pos": 10302,
+      "n_train_pos": 445843,
+      "seconds": 29.4,
+      "train_pos_rate": 0.25406700372695923
+    },
+    "pmid_25883046": {
+      "held_pos_rate": 0.2954545319080353,
+      "n_held_pos": 12716,
+      "n_train_pos": 443429,
+      "seconds": 54.8,
+      "train_pos_rate": 0.26191791892051697
+    },
+    "pmid_29446752": {
+      "held_pos_rate": 0.26189589500427246,
+      "n_held_pos": 300482,
+      "n_train_pos": 155663,
+      "seconds": 45.8,
+      "train_pos_rate": 0.2647000253200531
+    },
+    "pmid_35982307": {
+      "held_pos_rate": 0.9989858269691467,
+      "n_held_pos": 3944,
+      "n_train_pos": 452201,
+      "seconds": 55.2,
+      "train_pos_rate": 0.2564324140548706
+    },
+    "pub_RNAPuzzle18_daslab": {
+      "held_pos_rate": 0.3738430440425873,
+      "n_held_pos": 4970,
+      "n_train_pos": 451175,
+      "seconds": 55.1,
+      "train_pos_rate": 0.26163017749786377
+    }
+  },
+  "fold_timing": {
+    "UNKNOWN_PUBLICATION:5SRRNA": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 149.0,
+      "skipped": true
+    },
+    "UNKNOWN_PUBLICATION:ADDRSW": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 127.7,
+      "skipped": true
+    },
+    "UNKNOWN_PUBLICATION:AGSARNA": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 121.4,
+      "skipped": true
+    },
+    "UNKNOWN_PUBLICATION:CL1LIG": {
+      "n_held_pos": 21248,
+      "n_train_pos": 434897,
+      "seconds": 19168.4
+    },
+    "UNKNOWN_PUBLICATION:GLYCFN": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 70.4,
+      "skipped": true
+    },
+    "UNKNOWN_PUBLICATION:HC16M2R": {
+      "n_held_pos": 24614,
+      "n_train_pos": 431531,
+      "seconds": 11811.0
+    },
+    "UNKNOWN_PUBLICATION:MDLOOP": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 158.0,
+      "skipped": true
+    },
+    "UNKNOWN_PUBLICATION:RNAPZ6": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 171.4,
+      "skipped": true
+    },
+    "UNKNOWN_PUBLICATION:RNASEP": {
+      "n_held_pos": 8770,
+      "n_train_pos": 447375,
+      "seconds": 17952.0
+    },
+    "UNKNOWN_PUBLICATION:SRPDIV": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 75.0,
+      "skipped": true
+    },
+    "UNKNOWN_PUBLICATION:TRNAPH": {
+      "n_held_pos": 0,
+      "n_train_pos": 456145,
+      "seconds": 101.0,
+      "skipped": true
+    },
+    "pmid_24469816": {
+      "n_held_pos": 24627,
+      "n_train_pos": 431518,
+      "seconds": 11232.9
+    },
+    "pmid_25183835": {
+      "n_held_pos": 44472,
+      "n_train_pos": 411673,
+      "seconds": 717.9
+    },
+    "pmid_25303992": {
+      "n_held_pos": 10302,
+      "n_train_pos": 445843,
+      "seconds": 6623.1
+    },
+    "pmid_25883046": {
+      "n_held_pos": 12716,
+      "n_train_pos": 443429,
+      "seconds": 569.4
+    },
+    "pmid_29446752": {
+      "n_held_pos": 300482,
+      "n_train_pos": 155663,
+      "seconds": 295.8
+    },
+    "pmid_35982307": {
+      "n_held_pos": 3944,
+      "n_train_pos": 452201,
+      "seconds": 516.4
+    },
+    "pub_RNAPuzzle18_daslab": {
+      "n_held_pos": 4970,
+      "n_train_pos": 451175,
+      "seconds": 579.8
+    }
+  },
+  "go_by_model": {
+    "gbm": {
+      "all_seeds_go": false,
+      "criteria_by_seed": {
+        "0": {},
+        "1": {},
+        "2": {},
+        "3": {},
+        "4": {}
+      },
+      "n_seeds_go": 0,
+      "seed_go": {
+        "0": false,
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false
+      }
+    },
+    "logistic": {
+      "all_seeds_go": false,
+      "criteria_by_seed": {
+        "0": {},
+        "1": {},
+        "2": {},
+        "3": {},
+        "4": {}
+      },
+      "n_seeds_go": 0,
+      "seed_go": {
+        "0": false,
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false
+      }
+    },
+    "p2_mlp": {
+      "all_seeds_go": false,
+      "criteria_by_seed": {
+        "0": {},
+        "1": {},
+        "2": {},
+        "3": {},
+        "4": {}
+      },
+      "n_seeds_go": 0,
+      "seed_go": {
+        "0": false,
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false
+      }
+    }
+  },
+  "models": [
+    "trivial",
+    "logistic",
+    "gbm",
+    "p2_mlp"
+  ],
+  "n_distinct_publications": 18,
+  "n_pool_pairs": 6385,
+  "per_model": {
+    "gbm": {
+      "0": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": -1.530929230815492e-06,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04469414547078603,
+          "upper": 0.11202898734810803
+        },
+        "degenerate_publications": [],
+        "delta": 0.044694145470786095,
+        "metric": 0.3669029591494549,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "1": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": -0.004927713173881122,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.041358757880961425,
+          "upper": 0.09870573059794222
+        },
+        "degenerate_publications": [],
+        "delta": 0.04135875788096144,
+        "metric": 0.36356757155963026,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "2": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0011105997131771752,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04445205308273485,
+          "upper": 0.09788094111512397
+        },
+        "degenerate_publications": [],
+        "delta": 0.04445205308273481,
+        "metric": 0.36666086676140364,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "3": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.003376163472168986,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04462510041894299,
+          "upper": 0.106059990772291
+        },
+        "degenerate_publications": [],
+        "delta": 0.04462510041894302,
+        "metric": 0.36683391409761185,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "4": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": -0.001052713640966102,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04051278577762193,
+          "upper": 0.09334701687918326
+        },
+        "degenerate_publications": [],
+        "delta": 0.04051278577762196,
+        "metric": 0.3627215994562908,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      }
+    },
+    "logistic": {
+      "0": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.005522467644515581,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04229477981769665,
+          "upper": 0.09549333234400185
+        },
+        "degenerate_publications": [],
+        "delta": 0.04229477981769669,
+        "metric": 0.3645035934963655,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "1": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0015207471158361278,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04229477981769665,
+          "upper": 0.0937310430675258
+        },
+        "degenerate_publications": [],
+        "delta": 0.04229477981769669,
+        "metric": 0.3645035934963655,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "2": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.003867149654668971,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04229477981769665,
+          "upper": 0.0919769002621998
+        },
+        "degenerate_publications": [],
+        "delta": 0.04229477981769669,
+        "metric": 0.3645035934963655,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "3": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.006335128485165396,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04229477981769665,
+          "upper": 0.09737147852427552
+        },
+        "degenerate_publications": [],
+        "delta": 0.04229477981769669,
+        "metric": 0.3645035934963655,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "4": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0048394294964806015,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04229477981769665,
+          "upper": 0.09559854183170473
+        },
+        "degenerate_publications": [],
+        "delta": 0.04229477981769669,
+        "metric": 0.3645035934963655,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      }
+    },
+    "p2_mlp": {
+      "0": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.000980137455768517,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.03899466377703526,
+          "upper": 0.09940234570658757
+        },
+        "degenerate_publications": [],
+        "delta": 0.03899466377703531,
+        "metric": 0.36120347745570414,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "1": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0004353925336628775,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04026568664826268,
+          "upper": 0.09173202972022484
+        },
+        "degenerate_publications": [],
+        "delta": 0.04026568664826269,
+        "metric": 0.3624745003269315,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "2": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": -0.000588303621462706,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.038466750845832134,
+          "upper": 0.09537702805671726
+        },
+        "degenerate_publications": [],
+        "delta": 0.038466750845832176,
+        "metric": 0.360675564524501,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "3": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.006317205758892564,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04761313830571949,
+          "upper": 0.11356016954543431
+        },
+        "degenerate_publications": [],
+        "delta": 0.047613138305719505,
+        "metric": 0.36982195198438833,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "4": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0020068712720388683,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.04143695031017001,
+          "upper": 0.09517292276430768
+        },
+        "degenerate_publications": [],
+        "delta": 0.04143695031016997,
+        "metric": 0.3636457639888388,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      }
+    },
+    "trivial": {
+      "0": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.0,
+          "upper": 0.0
+        },
+        "degenerate_publications": [],
+        "delta": 0.0,
+        "metric": 0.3222088136786688,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "1": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.0,
+          "upper": 0.0
+        },
+        "degenerate_publications": [],
+        "delta": 0.0,
+        "metric": 0.3222088136786688,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "2": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.0,
+          "upper": 0.0
+        },
+        "degenerate_publications": [],
+        "delta": 0.0,
+        "metric": 0.3222088136786688,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "3": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.0,
+          "upper": 0.0
+        },
+        "degenerate_publications": [],
+        "delta": 0.0,
+        "metric": 0.3222088136786688,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      },
+      "4": {
+        "ci": {
+          "alpha": 0.05,
+          "lower": 0.0,
+          "n_boot": 1000,
+          "n_pub": 10,
+          "point": 0.0,
+          "upper": 0.0
+        },
+        "degenerate_publications": [],
+        "delta": 0.0,
+        "metric": 0.3222088136786688,
+        "metric_identifiable": true,
+        "n_non_degenerate": 10,
+        "permutation_p": 1.0,
+        "trivial_metric": 0.3222088136786688
+      }
+    }
+  },
+  "pre_registered_thresholds": {
+    "Z_CUT": 2.0,
+    "alpha": 0.05,
+    "go_requires": [
+      "delta>0",
+      "ci_low>0",
+      "perm_p<0.05",
+      "n_ndeg>=5"
+    ],
+    "min_non_degenerate_pubs": 5,
+    "n_boot": 1000,
+    "n_perm": 1000,
+    "n_seeds": 5
+  },
+  "publications": [
+    "UNKNOWN_PUBLICATION:5SRRNA",
+    "UNKNOWN_PUBLICATION:ADDRSW",
+    "UNKNOWN_PUBLICATION:AGSARNA",
+    "UNKNOWN_PUBLICATION:CL1LIG",
+    "UNKNOWN_PUBLICATION:GLYCFN",
+    "UNKNOWN_PUBLICATION:HC16M2R",
+    "UNKNOWN_PUBLICATION:MDLOOP",
+    "UNKNOWN_PUBLICATION:RNAPZ6",
+    "UNKNOWN_PUBLICATION:RNASEP",
+    "UNKNOWN_PUBLICATION:SRPDIV",
+    "UNKNOWN_PUBLICATION:TRNAPH",
+    "pmid_24469816",
+    "pmid_25183835",
+    "pmid_25303992",
+    "pmid_25883046",
+    "pmid_29446752",
+    "pmid_35982307",
+    "pub_RNAPuzzle18_daslab"
+  ],
+  "route": "Route C position-granularity",
+  "run_id": "p2_position_v5_learnability_20260808",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "table": {
+    "gbm:0": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": -1.530929230815492e-06,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04469414547078603,
+        "upper": 0.11202898734810803
+      },
+      "degenerate_publications": [],
+      "delta": 0.044694145470786095,
+      "metric": 0.3669029591494549,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "gbm:1": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": -0.004927713173881122,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.041358757880961425,
+        "upper": 0.09870573059794222
+      },
+      "degenerate_publications": [],
+      "delta": 0.04135875788096144,
+      "metric": 0.36356757155963026,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "gbm:2": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0011105997131771752,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04445205308273485,
+        "upper": 0.09788094111512397
+      },
+      "degenerate_publications": [],
+      "delta": 0.04445205308273481,
+      "metric": 0.36666086676140364,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "gbm:3": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.003376163472168986,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04462510041894299,
+        "upper": 0.106059990772291
+      },
+      "degenerate_publications": [],
+      "delta": 0.04462510041894302,
+      "metric": 0.36683391409761185,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "gbm:4": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": -0.001052713640966102,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04051278577762193,
+        "upper": 0.09334701687918326
+      },
+      "degenerate_publications": [],
+      "delta": 0.04051278577762196,
+      "metric": 0.3627215994562908,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "logistic:0": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.005522467644515581,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04229477981769665,
+        "upper": 0.09549333234400185
+      },
+      "degenerate_publications": [],
+      "delta": 0.04229477981769669,
+      "metric": 0.3645035934963655,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "logistic:1": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0015207471158361278,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04229477981769665,
+        "upper": 0.0937310430675258
+      },
+      "degenerate_publications": [],
+      "delta": 0.04229477981769669,
+      "metric": 0.3645035934963655,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "logistic:2": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.003867149654668971,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04229477981769665,
+        "upper": 0.0919769002621998
+      },
+      "degenerate_publications": [],
+      "delta": 0.04229477981769669,
+      "metric": 0.3645035934963655,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "logistic:3": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.006335128485165396,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04229477981769665,
+        "upper": 0.09737147852427552
+      },
+      "degenerate_publications": [],
+      "delta": 0.04229477981769669,
+      "metric": 0.3645035934963655,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "logistic:4": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0048394294964806015,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04229477981769665,
+        "upper": 0.09559854183170473
+      },
+      "degenerate_publications": [],
+      "delta": 0.04229477981769669,
+      "metric": 0.3645035934963655,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "p2_mlp:0": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.000980137455768517,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.03899466377703526,
+        "upper": 0.09940234570658757
+      },
+      "degenerate_publications": [],
+      "delta": 0.03899466377703531,
+      "metric": 0.36120347745570414,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "p2_mlp:1": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0004353925336628775,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04026568664826268,
+        "upper": 0.09173202972022484
+      },
+      "degenerate_publications": [],
+      "delta": 0.04026568664826269,
+      "metric": 0.3624745003269315,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "p2_mlp:2": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": -0.000588303621462706,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.038466750845832134,
+        "upper": 0.09537702805671726
+      },
+      "degenerate_publications": [],
+      "delta": 0.038466750845832176,
+      "metric": 0.360675564524501,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "p2_mlp:3": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.006317205758892564,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04761313830571949,
+        "upper": 0.11356016954543431
+      },
+      "degenerate_publications": [],
+      "delta": 0.047613138305719505,
+      "metric": 0.36982195198438833,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "p2_mlp:4": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0020068712720388683,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.04143695031017001,
+        "upper": 0.09517292276430768
+      },
+      "degenerate_publications": [],
+      "delta": 0.04143695031016997,
+      "metric": 0.3636457639888388,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "trivial:0": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.0,
+        "upper": 0.0
+      },
+      "degenerate_publications": [],
+      "delta": 0.0,
+      "metric": 0.3222088136786688,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "trivial:1": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.0,
+        "upper": 0.0
+      },
+      "degenerate_publications": [],
+      "delta": 0.0,
+      "metric": 0.3222088136786688,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "trivial:2": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.0,
+        "upper": 0.0
+      },
+      "degenerate_publications": [],
+      "delta": 0.0,
+      "metric": 0.3222088136786688,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "trivial:3": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.0,
+        "upper": 0.0
+      },
+      "degenerate_publications": [],
+      "delta": 0.0,
+      "metric": 0.3222088136786688,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    },
+    "trivial:4": {
+      "ci": {
+        "alpha": 0.05,
+        "lower": 0.0,
+        "n_boot": 1000,
+        "n_pub": 10,
+        "point": 0.0,
+        "upper": 0.0
+      },
+      "degenerate_publications": [],
+      "delta": 0.0,
+      "metric": 0.3222088136786688,
+      "metric_identifiable": true,
+      "n_non_degenerate": 10,
+      "permutation_p": 1.0,
+      "trivial_metric": 0.3222088136786688
+    }
+  },
+  "verdict": "STOP"
+}
