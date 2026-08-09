@@ -1,0 +1,105 @@
+{
+  "schema_version": "reactflow_delta.asset_disposition_v3.v1",
+  "generated_by": "scripts/reactflow_delta/build_asset_disposition_v3.py",
+  "description": "Asset-level disposition ledger: one row per frozen RMDB asset.",
+  "row_key": "asset_id",
+  "row_count_expected": 1024,
+  "fields": [
+    {
+      "name": "asset_id",
+      "type": "integer",
+      "description": "Frozen RMDB asset identifier (unique primary key).",
+      "required": true
+    },
+    {
+      "name": "source_url_or_accession",
+      "type": "string",
+      "description": "Source URL or accession of the raw asset.",
+      "required": true
+    },
+    {
+      "name": "source_accession",
+      "type": "string",
+      "description": "RMDB source accession (file base name without .rdat).",
+      "required": true
+    },
+    {
+      "name": "asset_name",
+      "type": "string",
+      "description": "Asset file name (e.g. <acc>.rdat).",
+      "required": true
+    },
+    {
+      "name": "asset_sha256",
+      "type": "string",
+      "description": "SHA-256 of the raw .rdat file if present on disk, else UNKNOWN_NOT_ASSERTED. Never fabricated.",
+      "required": true
+    },
+    {
+      "name": "parser_version",
+      "type": "string",
+      "description": "Parser/canonicalization version that produced the disposition.",
+      "required": true
+    },
+    {
+      "name": "asset_parse_status",
+      "type": "string",
+      "description": "PARSE_SUCCESS or explicit PARSE_FAIL_* category; never empty.",
+      "required": true
+    },
+    {
+      "name": "n_profiles",
+      "type": "string",
+      "description": "Number of distinct profiles for the asset from canonical_records_v2 (NOT_RUN if the 39GB count has not been produced).",
+      "required": true
+    },
+    {
+      "name": "n_records",
+      "type": "string",
+      "description": "Number of canonical records for the asset from canonical_records_v2 (NOT_RUN if the 39GB count has not been produced).",
+      "required": true
+    },
+    {
+      "name": "n_exact_pairs",
+      "type": "string",
+      "description": "Number of primary exact-delta pairs for the asset (NOT_RUN if not counted).",
+      "required": true
+    },
+    {
+      "name": "profile_failure_rows",
+      "type": "integer",
+      "description": "Count of LENGTH_MISMATCH PROFILE rows for the asset (a profile count, never an asset count).",
+      "required": true
+    },
+    {
+      "name": "unique_failure_reason",
+      "type": "string",
+      "description": "Single most common profile parse failure reason, or the asset's own disposition if PARSE_FAIL, else NONE.",
+      "required": true
+    },
+    {
+      "name": "failure_recoverability",
+      "type": "string",
+      "description": "RECOVERABLE / UNRECOVERABLE / NOT_APPLICABLE.",
+      "required": true
+    },
+    {
+      "name": "license_status",
+      "type": "string",
+      "description": "License status carried through from d0x_v2 (VERIFIED_CC0_RMDB).",
+      "required": true
+    },
+    {
+      "name": "citation_resolution_status",
+      "type": "string",
+      "description": "RESOLVED / UNRESOLVED_PUBLICATION / AMBIGUOUS from the accession registry.",
+      "required": true
+    },
+    {
+      "name": "notes",
+      "type": "string",
+      "description": "Brief human-readable notes.",
+      "required": false
+    }
+  ]
+}

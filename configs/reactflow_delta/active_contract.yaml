@@ -1,20 +1,23 @@
 schema_version: reactflow_delta.active_contract.v1
-manifest_id: reactflow_delta_v4_rebuild_authority_epoch_19_phase3_closure_20260809
+manifest_id: reactflow_delta_v4_authority_epoch_20_benchmark_v3_20260809
 project_task_id: reactflow_delta
 created_at: '2026-08-03T23:08:38+08:00'
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  authority_epoch: 19
+  authority_epoch: 20
   manifest_repo_path: configs/reactflow_delta/active_contract.yaml
-  current_phase: BENCHMARK-RESOURCE
-  current_authority_state: PHASE3_FAIL_CLOSED_BENCHMARK_RESOURCE_EPOCH19
-  current_runnable_phase: BENCHMARK-RESOURCE
+  current_phase: PHASE1_BENCHMARK_V3
+  current_authority_state: PHASE1_BENCHMARK_V3_REBUILD_EPOCH20
+  current_runnable_phase: PHASE1_BENCHMARK_V3
   conflict_policy: FAIL_CLOSED
   precedence:
   - ACTIVE_CONTRACT_MANIFEST
   - V4_CONTRACT_DOCUMENT
   - RUN_MANIFEST
   - HISTORICAL_DOCUMENTS
+  source_commit: 887066d63369df3f43deec886beba41326a30dee
+  scope: PHASE1_BENCHMARK_V3_ONLY
+  artifact_root: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/benchmark_v3
 active_contract:
   id: reactflow_delta_v4_data_first
   version: v4_data_first
@@ -83,7 +86,7 @@ authorization:
   - REBUILD-P1
   - REBUILD-P2
   runnable_phases:
-  - BENCHMARK-RESOURCE
+  - PHASE1_BENCHMARK_V3
   training_allowed: false
   full_data_recall_allowed: true
   new_split_allowed: false
@@ -91,12 +94,16 @@ authorization:
   cross_project_export_allowed: false
   new_wet_lab_allowed: false
   blind_test_aggregate_allowed: true
-  rebuild_epoch: 19
+  rebuild_epoch: 20
   rebuild_contract_path: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
-  rebuild_amendment_path: docs/contracts/amendments/reactflow_delta_v4_epoch19_phase3_closure_20260809.yaml
-  rebuild_approval_record_path: docs/approvals/reactflow_delta_v4_epoch19_phase3_closure_approval_20260809.yaml
+  rebuild_amendment_path: docs/contracts/amendments/reactflow_delta_v4_epoch20_benchmark_v3_20260809.yaml
+  rebuild_approval_record_path: docs/approvals/reactflow_delta_v4_epoch20_benchmark_v3_approval_20260809.yaml
   gpu_policy: USE_FREE_VRAM_ANY_GPU_NO_EXCLUSIVITY
-  endpoint_version: endpoint_v5
+  endpoint_version: endpoint_v6
+  candidate_model_training_allowed: false
+  confirmatory_test_outcome_access_allowed: false
+  caller_version: caller_v4
+  split_version: split_v3
 bindings:
   repository_root: /home/cunyuliu/reactflow_delta_goal_20260729
   git_commit: 9f239501ba2323ded799292ffc32ed70d8f97dab
@@ -490,6 +497,21 @@ phase_graph:
   no_dev13_plus_free_search: true
   evidence_manifest_path: results/phase3_benchmark_resource_20260809/manifest.json
   verdict_path: results/phase3_diagnostic_20260809/phase3_diagnostic_table.json
+- phase_id: PHASE1-BENCHMARK-V3
+  dependencies:
+  - BENCHMARK-RESOURCE
+  lifecycle_status: RUNNING
+  gate_result: NOT_RUN
+  execution_authorized: true
+  training_required: false
+  candidate_model_training_allowed: false
+  confirmatory_test_outcome_access_allowed: false
+  gpu_required: false
+  authority_epoch: 20
+  endpoint: endpoint_v6
+  caller: caller_v4
+  split: split_v3
+  route: BENCHMARK_V3_REBUILD
 gate_catalog:
   TIER_B_PLUS:
     status: PASS
@@ -516,9 +538,9 @@ integrity:
   hash_algorithm: SHA256
   file_hash_mode: RAW_FILE_BYTES
   embedded_manifest_sha256: FORBIDDEN_SELF_REFERENCE
-  detached_bundle_ledger_path: configs/reactflow_delta/authority_epoch_19.bundle.sha256
+  detached_bundle_ledger_path: configs/reactflow_delta/authority_epoch_20.bundle.sha256
   detached_bundle_ledger_status: REQUIRED_AND_VERIFIED_BY_SENTINEL
-  authority_sentinel_path: configs/reactflow_delta/authority_epoch_19.sentinel.yaml
+  authority_sentinel_path: configs/reactflow_delta/authority_epoch_20.sentinel.yaml
   bundle_member_paths:
   - configs/reactflow_delta/active_contract.yaml
   - docs/approvals/reactflow_delta_v4_approval_20260803.yaml
@@ -541,8 +563,9 @@ integrity:
   - configs/reactflow_delta/authority_epoch_4.bundle.sha256
   - configs/reactflow_delta/authority_epoch_4.sentinel.yaml
 governance_resolution:
-  phase3_route: PHASE3_FAIL_CLOSED_RETIRED_ALL_SCHEMES
-  phase3_pivot: BENCHMARK_RESOURCE_ROUTE
-  phase3_retained_default: simplest_capacity_matched_generic
-  m0x_status: ALREADY_TERMINAL_FAIL_PRESERVED
-  current_phase: BENCHMARK-RESOURCE
+  benchmark_v3_route: PHASE1_BENCHMARK_V3_REBUILD
+  epoch19_status: SUPERSEDED_FOR_SCOPE_SEMANTICS
+  current_phase: PHASE1_BENCHMARK_V3
+  training_allowed: false
+  candidate_model_training_allowed: false
+  confirmatory_test_outcome_access_allowed: false

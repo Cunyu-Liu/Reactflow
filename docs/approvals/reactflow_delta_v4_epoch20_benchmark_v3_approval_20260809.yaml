@@ -1,0 +1,40 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_epoch20_benchmark_v3_approval_20260809
+project_task_id: reactflow_delta
+approved_at: '2026-08-09T00:00:00+00:00'
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: User submitted the post-audit recovery master execution prompt and
+  required its implementation from Phase 0 through Phase 1 complete gate. This authorizes
+  Phase 0 fresh preflight and Phase 1 benchmark/evaluator/provenance/Caller rebuild
+  in the isolated worktree, plus focused local commits. It does NOT authorize Phase
+  2+ (which need per-phase tokens), training, test-outcome access, push/PR, or cleanup.
+approval_kind: BENCHMARK_V3_REBUILD_PHASE1_ONLY_EPOCH20
+approved_contract_path: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
+approved_epoch: 20
+approval_scope:
+- PHASE0_FRESH_PREFLIGHT
+- PHASE1_BENCHMARK_V3_REBUILD
+- ENDPOINT_V6_CALLER_V4_FREEZE
+- SPLIT_V3_PHYSICAL_TEST_ISOLATION
+- KEYED_PREDICTION_SCHEMA_V2
+- EVALUATE_V6_FIXTURES
+- FOCUSED_LOCAL_COMMITS_ONLY
+explicit_denials:
+- TRAINING
+- CANDIDATE_MODEL_TRAINING
+- CONFIRMATORY_TEST_OUTCOME_ACCESS
+- PHASE2_LEARNABILITY
+- PHASE3_METHOD
+- PHASE4_LOCKED_TEST
+- PHASE5_6_PUBLICATION_RELEASE
+- PUSH
+- PR
+- SEALED_TEST_UNSEAL
+- SOTA_CLAIM
+- OVERWRITE_LEGACY_ARTIFACTS
+- CLEANUP_UNTACKED
+- HIDE_FAILURE
+- LOWER_GATE_THRESHOLDS
+signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
+signed_by: user (explicit message 2026-08-09)

@@ -1,0 +1,156 @@
+schema_version: reactflow_delta.endpoint_v6.v1
+endpoint_id: RFD_ENDPOINT_V6
+endpoint_version: 6
+frozen_at: "2026-08-09T00:00:00+00:00"
+governing_contract: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
+authority_epoch: 20
+status: FROZEN
+supersedes: RFD_ENDPOINT_V5
+
+# ------------------------------------------------------------------
+# 本版本变更范围（相对 endpoint_v5）—— 信息权限与任务层级冻结
+# ------------------------------------------------------------------
+change_control:
+  rule: "任何 unit/label/score/metric/mask/information-permission 变更都必须产生新的 endpoint 版本，禁止原地修改本文件。"
+  requires: "新 authority epoch + amendment + approval"
+  v6_change_summary: >-
+    benchmark_v3 重建的一部分（Batch 1C）。在 endpoint_v5（epoch 17）的基础上：
+    (1) 明确三层任务层级（primary prospective changer / secondary oracle-conditioned
+    magnitude / tertiary continuous response），并声明 conditional magnitude 不能单独
+    证明 end-to-end 部署；(2) 冻结 CallerV4 的两种信息权限模式
+    （STRICT_INDUCTIVE_WT_ALLOWED 为主，WT_REPLICATE_CONDITIONED_TRANSDUCTIVE 为
+    sensitivity）；(3) 明确 target eligibility mask 只能进入 label/evaluator，绝不
+    能成为 prospective model input；(4) 预注册 Caller 稳定性 gate。所有 endpoint_v5
+    的 STOP/冻结结论保持不被覆盖。
+
+# ------------------------------------------------------------------
+# 预测单位与任务层级
+# ------------------------------------------------------------------
+prediction_unit: "matched WT-exact_single-mutant pair"
+
+task_tiers:
+  primary:
+    name: "prospective changer probability"
+    unit: "pair"
+    label_definition: "C_i = train-only CallerV4 (STRICT_INDUCTIVE_WT_ALLOWED) 判定的 binary changer label"
+    score: "pair-level P(C_i=1) 概率（模型直接输出，禁止 max(position prob) 事后聚合）"
+    metric: "publication-macro AUPRC over NON-DEGENERATE publications"
+    note: "这是唯一可支撑 end-to-end deployment 主张的前瞻任务。"
+  secondary:
+    name: "oracle-conditioned conditional magnitude"
+    unit: "pair (TRUE CHANGERS only, C_i=1 from CallerV4)"
+    label_definition: >-
+      y_i = profile-level magnitude = 对真实 changer pair，在 ELIGIBLE positions 上
+      的 mean_i |mutant_react[i] - wt_react[i]|。权重 w_i = ELIGIBLE position 数。
+    score: "pair-level magnitude hat{y}_i（regression head 直接输出）"
+    metric: "conditional WMAE skill 及 CI（publication-block）"
+    dependence: "依赖 CallerV4 判定的真实 changer；是 oracle-conditioned 任务，不能单独证明 end-to-end deployment。"
+    note: "primary 与 conditional 分开判定；conditional-only PASS 不得解锁 end-to-end 主张。"
+  tertiary:
+    name: "continuous response on eligible positions"
+    unit: "position (eligible)"
+    label_definition: "连续 noise-weighted signed delta（只在 eligible positions 上）"
+    score: "signed delta_r_hat"
+    metric: "WMAE skill / Spearman"
+    semantics: "signed/absolute 语义必须预注册并分表，禁止混用"
+
+# ------------------------------------------------------------------
+# Information permission（信息权限冻结）
+# ------------------------------------------------------------------
+information_permission:
+  allowed_inputs:
+  - "WT sequence (canonical_sequence)"
+  - "exact single-nucleotide mutation: ref_allele / alt_allele / position(coordinate)"
+  - "experimental condition: buffer / ligand / probe / temperature / experimentType / environment"
+  - "allowed WT experimental reactivity state（仅 WT profile，不含 mutant profile）"
+  - "structure/thermo 特征（来自 WT 或 three-alt 静态计算，不得携带 actual-alt mutant 信息）"
+  forbidden_inputs:
+  - "mutant 实验 reactivity profile（prospective input 禁止）"
+  - "mutant noise/error profile"
+  - "actual-alt exact thermodynamic result"
+  - "test/outer-fold outcome 或任何以 outcome 为条件的统计量"
+  - "target mask（目标缺失模式）不得作为 prospective input"
+  - "held-out publication 的 pooled replicate 统计（STRICT 模式下不可进入 caller 参数）"
+  target_mask_policy: "target eligibility mask 只能进入 label/evaluator，绝不能成为 prospective model input；不得进入 model input manifest"
+
+# ------------------------------------------------------------------
+# Mask / position eligibility（与 endpoint_v5 相同 + 显式声明）
+# ------------------------------------------------------------------
+mask:
+  primary_position_eligibility_rules:
+  - "edited-site（突变位点本身）排除，不参与 response 评估"
+  - "alignment-change 位置排除"
+  - "probe-eligibility 变化的位置排除"
+  - "NaN / missing reactivity 位置排除，缺失不填零"
+  - "length mismatch 排除"
+  eligibility_reason_codes:
+  - EDITED_SITE
+  - ALIGNMENT_CHANGE
+  - PROBE_ELIGIBILITY_CHANGE
+  - MISSING_REACTIVITY
+  - LENGTH_MISMATCH
+  - ELIGIBLE
+  mask_policy: "所有 primary position 必须有明确 eligibility reason code；无 ELIGIBLE 记录不得进入 evaluator"
+  mask_in_model_input: "FORBIDDEN（target mask 不得进入 model input manifest）"
+
+# ------------------------------------------------------------------
+# CallerV4（两种明确模式）
+# ------------------------------------------------------------------
+caller_v4_modes:
+  primary:
+    name: "STRICT_INDUCTIVE_WT_ALLOWED"
+    description: >-
+      null、reliability、noise/scatter 模型只从 outer-train publications 的
+      replicate groups 拟合；held pair 可使用其部署时合法的 WT
+      sequence/profile/error；禁止使用 held publication pooled replicate
+      statistics 改变 caller 参数。held group 缺 sigma 时用 train-global
+      median sigma 回退（仍为 train-only）。
+    run_condition: "总是作为 primary 运行"
+  sensitivity:
+    name: "WT_REPLICATE_CONDITIONED_TRANSDUCTIVE"
+    description: >-
+      仅当部署情景明确保证同域 WT replicates 可用时运行。允许用 held group 自身
+      WT replicates 估计 sigma（transductive conditioning）。必须单独命名、分表，
+      不得与 primary 混合。
+    run_condition: "仅作为 sensitivity，单独报告"
+
+caller_sensitivity_outputs:
+- "pair-level label agreement"
+- "0<->1 / NO_CALL transition matrix"
+- "overall 与 publication-macro call coverage"
+- "每真实 publication 的 flip rate"
+- "reliability / noise coverage"
+- "对后续 simple baseline 结论的敏感性"
+
+# ------------------------------------------------------------------
+# Caller 稳定性 gate（预注册，默认值；运行前不可事后调整）
+# ------------------------------------------------------------------
+caller_stability_gate:
+  overall_label_flip_max: 0.10        # overall label flip <= 10%
+  per_publication_flip_max: 0.25      # 任一非极小 publication flip <= 25%
+  min_pub_for_flip_gate: 20           # 小于此 pair 数的 publication 视为极小，豁免
+  overall_callable_coverage_min: 0.70 # overall callable coverage >= 70%
+  per_publication_callable_min: 0.50  # 每个用于推断的 publication callable >= 50%
+  primary_label_not_degenerate: "primary label 不得在评估集退化为常数或极端饱和"
+  if_fail: "CALLER_ENDPOINT_UNSTABLE；禁止 Phase 2 learned baseline；优先改为连续 measurement-error model / abstention / 补 replicates；不得通过调阈值追求更好模型分数"
+
+# ------------------------------------------------------------------
+# 退化与不可识别边界
+# ------------------------------------------------------------------
+degenerate_policies:
+  no_true_changer_heldout: "held-out 无真实 changer => UNIDENTIFIABLE（无 magnitude target）"
+  publication_lt_3_changers: "含真实 changer 的 publication < 3 => 禁止 confirmatory CI（PUBLICATION_LT_3_NO_CONFIRMATORY_CI）"
+  constant_magnitude_heldout: "held-out magnitude 全相等（无变异）=> UNIDENTIFIABLE（无 learnable variance）"
+  missing_info_not_zero: "缺失信息不得填充为零"
+  no_silent_exclusion: "任何排除必须显式记录（n_true_changers / n_publications）"
+  signed_abs_same_rank: "绝对 magnitude 任务中正/负大幅变化应同 rank"
+  baseline_not_leaked: "baseline（加权均值）必须只来自 train-fold changer，禁止用 held-out 均值"
+  insufficient_publications: "若未触及 publication 数量不足统计充分性，标 UNIDENTIFIABLE_INSUFFICIENT_PUBLICATIONS，不得用 已有三篇 解锁"
+
+# ------------------------------------------------------------------
+# 版本与冻结
+# ------------------------------------------------------------------
+integrity:
+  hash_algorithm: SHA256
+  file_hash_mode: RAW_FILE_BYTES
+  change_requires_new_version: true

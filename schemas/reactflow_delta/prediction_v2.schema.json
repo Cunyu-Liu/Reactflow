@@ -1,0 +1,43 @@
+{
+  "schema_version": "reactflow_delta.prediction_v2.v1",
+  "description": "Keyed prediction row schema for benchmark_v3 / evaluate_v6. Binds every prediction to biological keys so candidate-vs-baseline comparisons require exact key equality (fixes Scheme-3 positional misalignment).",
+  "required_fields": [
+    "pair_id",
+    "asset_id",
+    "study_id",
+    "publication_id",
+    "parent_id",
+    "lineage_id",
+    "fold_id",
+    "split_role",
+    "endpoint_version",
+    "caller_version",
+    "seed",
+    "model_id",
+    "model_variant",
+    "y",
+    "weight",
+    "raw_prediction",
+    "transformed_prediction",
+    "coverage_status",
+    "data_hash",
+    "split_hash",
+    "caller_hash",
+    "model_config_hash",
+    "source_commit"
+  ],
+  "uniqueness_key": ["pair_id", "fold_id", "seed", "model_variant"],
+  "enum_fields": {
+    "coverage_status": ["CALLED", "NO_CALL", "ABSTAIN", "UNSUPPORTED", "MISSING", "TOOL_FAILURE"],
+    "split_role": ["development", "confirmatory", "excluded"],
+    "endpoint_version": ["endpoint_v6"],
+    "caller_version": ["caller_v4"]
+  },
+  "rules": {
+    "no_pure_position_zip": true,
+    "raw_and_transformed_separate": true,
+    "tool_failure_not_zero": true,
+    "common_and_full_coverage_separate": true,
+    "target_mask_not_in_model_input": true
+  }
+}
