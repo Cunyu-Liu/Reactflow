@@ -1,0 +1,51 @@
+contract_schema: reactflow_delta.contract.v4
+amendment_id: reactflow_delta_v4_epoch19_phase3_closure_20260809
+amendment_epoch: 19
+previous_amendment: reactflow_delta_v4_epoch18_phase3_20260808
+authorization_status: ACTIVE_AUTHORIZED
+amendment_kind: PHASE3_FAIL_CLOSED_CLOSURE_AND_BENCHMARK_RESOURCE_PIVOT
+amendment_summary: Terminalize the last open phase PHASE3-ARCH as FAIL_CLOSED_RETIRED.
+  All three authorized architecture schemes (pair_v1 DeepSets primary, exact_alt_v1
+  generic interaction, epro_v2 repaired nonlocal propagation) were executed under
+  epoch 18 with nested leave-one-publication-out, 5 paired seeds, capacity-matched
+  generic; each retired fail-closed because the paired publication-block CI low <=
+  0 vs the same-capacity generic. Per the preregistered Phase 3 stop rule, the project
+  pivots to the benchmark/resource route (NO dev13+ free search) and retains the simplest
+  generic as the development default. M0-X was already terminalized FAIL in a prior
+  epoch; this finalizer closes only PHASE3-ARCH and rebinds authority to epoch 19.
+phase3_closure_verdict:
+  gate: PHASE3_DEVELOPMENT_WINNER
+  result: FAIL_CLOSED_RETIRED_ALL_SCHEMES
+  route_pivot: BENCHMARK_RESOURCE_ROUTE
+  retained_default: simplest_capacity_matched_generic
+  endpoint: endpoint_v5_frozen
+  primary_v4_verdict_preserved: ENDPOINT_V4_PRIMARY_STOP_FROZEN
+  per_scheme_mean_skill:
+    pair_v1_deepsets: 0.684
+    exact_alt_v1: 0.722
+    epro_v2_repaired: 0.657
+    generic: 0.679
+  closure_audit_doc: docs/audits/reactflow_delta_phase3_closure_fail_closed_20260809.md
+benchmark_resource_route:
+  purpose: 'Resource/negative-result evidence chain: caller reliability (50% NO_CALL,
+    global ICC 0.686), publication label shift (changers rate 0.048-1.0, 20.7x), magnitude-vs-replicate-noise
+    floor (44.7% below 1x, 61.95% below 1.96x), and per-publication uniformity of
+    the negative result.'
+  gpu_required: false
+  training_required: false
+  no_dev13_plus_free_search: true
+invariants_unchanged:
+  test_split_sealed: true
+  test_not_used_for_training: true
+  cross_project_export: false
+  wet_lab: false
+  no_fabricated_data: true
+  no_hide_failure: true
+  no_lower_gate: true
+  primary_v4_stop_preserved: true
+  no_seed_retry_gaming: true
+  m0x_fail_record_preserved: true
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_epoch19_phase3_closure_approval_20260809.yaml
+  signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+  external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
