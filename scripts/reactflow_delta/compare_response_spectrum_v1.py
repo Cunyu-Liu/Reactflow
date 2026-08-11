@@ -48,13 +48,15 @@ def _wmae(y, w, pred):
     return num / den if den > 0 else float("nan")
 
 
-def _unroll_rows(rows):
+def _unroll_rows(rows, model_variant="wmae_mlp_spectrum"):
     """Return (model_pids, baseline_pids) dicts: pair_id -> {fold, y, w, pred} arrays.
 
     Unrolls CALLED magnitude_spectrum rows into per-position numpy arrays, keeping
-    only positions with weight==1 (eligible + finite).
+    only positions with weight==1 (eligible + finite).  `model_variant` selects which
+    neural family is treated as the model (default wmae_mlp_spectrum; use
+    wmae_resid_spectrum for the residual-learning run).
     """
-    model = {}   # (pair, fold, seed) -> arrays for wmae_mlp_spectrum
+    model = {}   # (pair, fold, seed) -> arrays for the selected model variant
     base = {}    # (pair, fold)      -> arrays for wmed_spectrum (seed 0)
     for r in rows:
         if r["task"] != "magnitude_spectrum" or r["coverage_status"] != "CALLED":
@@ -72,7 +74,7 @@ def _unroll_rows(rows):
                 "w": np.ones(len(y), dtype=np.float64),
                 "pred": np.array([float(p) for p, ww in zip(pv, wv) if ww], dtype=np.float64),
             }
-        elif r["model_variant"] == "wmae_mlp_spectrum":
+        elif r["model_variant"] == model_variant:
             y = [float(a) for a, ww in zip(yv, wv) if ww]
             model[(r["pair_id"], r["fold_id"], r["seed"])] = {
                 "fold": r["fold_id"],
@@ -183,18 +185,21 @@ def main():
     ap.add_argument("--pred", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--dominant-pub", default="pmid_29446752")
+    ap.add_argument("--model-variant", default="wmae_mlp_spectrum",
+                    choices=["wmae_mlp_spectrum", "wmae_resid_spectrum"])
     ap.add_argument("--n-perm", type=int, default=200)
     ap.add_argument("--n-boot", type=int, default=200)
     ap.add_argument("--perm-seed", type=int, default=20260812)
     args = ap.parse_args()
 
     rows = _load_rows(args.pred)
-    model, base = _unroll_rows(rows)
+    model, base = _unroll_rows(rows, model_variant=args.model_variant)
     out = Path(args.out)
 
     report = {
         "schema": "reactflow_delta.response_spectrum_comparison.v1",
         "authority_epoch": 20, "endpoint": "endpoint_v6", "caller_version": "caller_v4",
+        "model_variant": args.model_variant,
         "n_rows": len(rows), "n_model_pairs": len(set(k[:2] for k in model)),
         "n_base_pairs": len(base), "models": {},
     }
@@ -204,7 +209,7 @@ def main():
                               n_boot=args.n_boot)
         a_loo = spectrum_analysis(model, base, seed, rng, n_perm=args.n_perm,
                                   n_boot=args.n_boot, exclude_pub=args.dominant_pub)
-        report["models"][f"wmae_mlp_spectrum:{seed}"] = {
+        report["models"][f"{args.model_variant}:{seed}"] = {
             "full": a, "without_dominant({})".format(args.dominant_pub): a_loo,
         }
     report["noise_ceiling"] = noise_ceiling(base)
@@ -213,7 +218,7 @@ def main():
         json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
     print(f"DONE -> {out / 'response_spectrum_comparison.json'}")
     for seed in [0, 1, 2, 3, 4]:
-        a = report["models"][f"wmae_mlp_spectrum:{seed}"]["full"]
+        a = report["models"][f"{args.model_variant}:{seed}"]["full"]
         print(f"SEED {seed} skill={a['skill']} ci=({a['ci_low']},{a['ci_high']}) "
               f"perm_p={a['permutation_p']} n_pos={a['n_positions']} n_pub={a['n_publications']}")
 
