@@ -179,6 +179,7 @@ def main() -> int:
 
     per_puzzle_d = {}
     method_held = {m: {} for m in METHODS}
+    pred_rows = []  # per-position held rows for region/distance/coverage secondaries
     for fold in split["folds"]:
         held = fold.held_puzzle
         train_records = [r for r in all_records if r.puzzle in set(fold.train_puzzles)]
@@ -256,6 +257,19 @@ def main() -> int:
             if target_prof is None or not r.target_observed:
                 continue
             wt = c.wt_reactivity
+            pred_direct = held_prof["reg_direct"][r.biological_scoring_key]
+            for i in range(len(wt)):
+                if np.isnan(target_prof[i]):
+                    continue
+                pred_rows.append({
+                    "puzzle": r.puzzle, "method": r.method, "construct": r.construct_id,
+                    "edit_pos": r.pos, "ref": r.ref, "alt": r.alt, "pos": i,
+                    "region": str(c.region_map[i]), "dist": int(i - r.pos),
+                    "wt": float(wt[i]) if not np.isnan(wt[i]) else None,
+                    "target": float(target_prof[i]),
+                    "pred_direct": float(pred_direct[i]) if not np.isnan(pred_direct[i]) else None,
+                    "pred_zero": float(wt[i]) if not np.isnan(wt[i]) else None,
+                })
             for m in METHODS:
                 if m in ("zero", "train_median"):
                     pred_prof = wt.copy()  # zero/median anchor to WT full construct
@@ -293,6 +307,10 @@ def main() -> int:
         "verdict": "PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT" if ci.get("ci_low_gt_0") else "PROSPECTIVE_SIGNAL_NOT_ESTABLISHED",
     }
     (out / "p2_direct_v2_result.json").write_text(json.dumps(result, indent=2, default=str))
+    # save per-position held rows for region/distance/coverage secondaries
+    (out / "p2_held_position_rows.jsonl").write_text(
+        "\n".join(json.dumps(x) for x in pred_rows), encoding="utf-8")
+    print(f"saved {len(pred_rows)} held position rows", flush=True)
     print(json.dumps(result, indent=2, default=str))
     return 0
 
