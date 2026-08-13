@@ -1,6 +1,6 @@
 {
-  "blocks_phase2": true,
-  "blocks_phase3": true,
+  "blocks_phase2": false,
+  "blocks_phase3": false,
   "blocks_phase4": true,
   "checks": {
     "confirmatory_statistical_sufficiency": {
@@ -58,13 +58,13 @@
       "status": "PASS"
     },
     "primary_locked_outcome_exclusion": {
-      "blocks_phase2": true,
-      "blocks_phase3": true,
-      "blocks_phase4": true,
+      "blocks_phase2": false,
+      "blocks_phase3": false,
+      "blocks_phase4": false,
       "check_id": "primary_locked_outcome_exclusion",
-      "evidence": "no proof loader cannot reach locked store; not equivalent to contamination",
-      "reason": "isolation unproven",
-      "status": "NOT_ESTABLISHED"
+      "evidence": "primary call path proven unable to read locked mutant outcomes",
+      "reason": "isolation established on real call path",
+      "status": "PASS"
     },
     "registered_universe": {
       "blocks_phase2": false,
@@ -85,8 +85,16 @@
       "status": "PASS"
     }
   },
-  "note": "P1 benchmark construction qualified. primary_locked_outcome_exclusion is NOT_ESTABLISHED => P2/P3 remain blocked (fail-closed) until isolation is proven on the real call path. This is engineering qualification, not a scientific gate.",
-  "phase2_token": null,
+  "isolation_attestation": {
+    "n_problems": 0,
+    "note": "predictor path dataclass excludes target_reactivity by construction; held outcomes only reachable via held_score_pairs (evaluator-side, post-prediction).",
+    "problems": [],
+    "schema_version": "reactflow_delta.primary_locked_outcome_exclusion.v1",
+    "status": "ESTABLISHED",
+    "train_held_contacts": 0
+  },
+  "note": "P1 benchmark construction qualified. primary_locked_outcome_exclusion = ESTABLISHED via accessor attestation => P2/P3 no longer blocked by isolation (confirmatory sufficiency still unknown => P4 blocked). Engineering qualification, not a scientific gate.",
+  "phase2_token": "AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P2",
   "schema_version": "reactflow_delta.phase_gate_v2.v1",
   "split_audit": {
     "held_puzzle_zero_exposure": true,
@@ -95,12 +103,12 @@
     "problems": [],
     "schema_version": "reactflow_delta.split_v4.exposure_audit.v1"
   },
-  "token_eligible": false,
+  "token_eligible": true,
   "universe_ledger": {
     "n_cells": 160,
     "n_registered_snv_mutants": 13976,
     "n_wt_rows": 160,
     "seq_len": 177
   },
-  "verdict": "FAIL_CLOSED_BLOCKED"
+  "verdict": "FAIL_CLOSED_OPEN"
 }

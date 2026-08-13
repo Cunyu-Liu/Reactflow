@@ -29,6 +29,7 @@ from scripts.reactflow_delta.model_output_v1 import (
 from scripts.reactflow_delta.feature_builder_v1 import (
     MutationInput, build_features, held_response_invariance,
 )
+from scripts.reactflow_delta.primary_data_accessor_v1 import PrimaryDataAccessor
 
 
 # ------------------------- evaluator fixtures ------------------------------
@@ -295,3 +296,28 @@ def test_model_output_rejects_scale_zero_and_region_mismatch():
     v = validate_model_output(out, L, region)
     assert v["all_pass"] is False
     assert any("positive" in p for p in v["problems"])
+
+
+# ------------------------- primary_data_accessor_v1 (isolation) -----------
+def test_isolation_attestation_established_on_synthetic():
+    import tempfile
+    from scripts.reactflow_delta.m2_universe_v1 import M2Universe
+    from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
+    with tempfile.TemporaryDirectory() as td:
+        csv = _make_synthetic_csv(Path(td) / "m2.csv")
+        u = M2Universe(csv)
+        u.build()
+        s = build_split_v4(["P01", "P02"])
+        acc = PrimaryDataAccessor(u, s)
+        att = acc.isolation_attestation()
+        assert att["status"] == "ESTABLISHED"
+        assert att["n_problems"] == 0
+        assert att["train_held_contacts"] == 0
+        # predict path dataclass has no outcome field
+        f0 = s["folds"][0]
+        for hp in acc.held_predict_inputs(f0.outer_fold):
+            assert not hasattr(hp, "target_reactivity")
+        # train context never returns a held-puzzle sample
+        held = f0.held_puzzle
+        for t in acc.train_context(f0.outer_fold):
+            assert t.puzzle != held
