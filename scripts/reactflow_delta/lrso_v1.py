@@ -88,10 +88,10 @@ class RFDLRSO(nn.Module):
         self.bdirect = nn.Sequential(nn.Linear(d + d + 1 + 8, hidden), nn.ReLU(),
                                      nn.Linear(hidden, 1))
 
-    def _onehot(self, base: str, device: torch.device) -> torch.Tensor:
+    def _onehot(self, ref: str, alt: str, device: torch.device) -> torch.Tensor:
         v = torch.zeros(8, device=device)
-        v[ALPHA.get(base, 3)] = 1.0
-        v[4 + ALPHA.get(base, 3)] = 0.0
+        v[ALPHA.get(ref, 3)] = 1.0
+        v[4 + ALPHA.get(alt, 3)] = 1.0
         return v
 
     def delta(self, H: torch.Tensor, edit_idx: int, dists: torch.Tensor,
@@ -101,7 +101,7 @@ class RFDLRSO(nn.Module):
         device = H.device
         H = self.ctx_norm(H)
         hp = H[edit_idx]
-        ra = self._onehot(ref, device)
+        ra = self._onehot(ref, alt, device)
         src = self.src(torch.cat([hp, ra]))          # (k,) or (1,)
         recv = self.recv(H)                           # (L, k)
         g = self.gmod(dists.unsqueeze(-1))            # (L, k)
