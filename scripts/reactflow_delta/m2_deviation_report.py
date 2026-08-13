@@ -79,7 +79,7 @@ def _auroc(label, score):
     return float((s - n1 * (n1 + 1) / 2) / (n1 * n0))
 
 
-def _unroll(rows):
+def _unroll(rows, model_variant=MODEL):
     """Return (base, model): base[pair_id] -> {y, prior}; model[pair_id][seed] -> pred."""
     base = {}
     model = defaultdict(dict)
@@ -97,7 +97,7 @@ def _unroll(rows):
             continue
         if r["model_variant"] == BASELINE and r["seed"] == 0:
             base[r["pair_id"]] = {"y": y, "prior": p}
-        elif r["model_variant"] == MODEL:
+        elif r["model_variant"] == model_variant:
             model[r["pair_id"]][r["seed"]] = p
     return base, model
 
@@ -252,12 +252,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pred", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--model-variant", default=MODEL,
+                    help="model_variant to analyze (default wmae_resid_spectrum)")
     ap.add_argument("--n-perm", type=int, default=300)
     ap.add_argument("--perm-seed", type=int, default=20260812)
     args = ap.parse_args()
 
     rows = _load_rows(args.pred)
-    base, model = _unroll(rows)
+    base, model = _unroll(rows, args.model_variant)
     common = [k for k in base if len(model.get(k, {})) == len(SEEDS)]
     ens = {k: np.mean([model[k][s] for s in SEEDS], axis=0) for k in common}
     out = Path(args.out)
@@ -266,7 +268,7 @@ def main():
     report = {
         "schema": "reactflow_delta.response_spectrum.m2_deviation_report.v1",
         "dataset": "OpenKnot_M2", "exchangeable_unit": "puzzle_x_method_design",
-        "baseline": BASELINE, "model": MODEL, "seeds": SEEDS,
+        "baseline": BASELINE, "model": args.model_variant, "seeds": SEEDS,
         "n_pairs": len(common),
         "mu_ensemble": analyze(base, model, ens, n_perm=args.n_perm, perm_seed=args.perm_seed),
         "per_seed": {},

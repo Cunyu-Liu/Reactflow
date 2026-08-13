@@ -70,6 +70,24 @@ def test_unroll_separates_baseline_and_model_seeds(tmp_path):
             assert model[k][s].shape[0] == 21
 
 
+def test_unroll_accepts_alternative_model_variant(tmp_path):
+    """--model-variant parameterization: an alternate variant (e.g. position-aware)
+    must be unrolled as the model when requested, and ignored otherwise."""
+    rows = _mk_rows(n_pairs=8)
+    alt = "wmae_resid_posaware_spectrum"
+    rows2 = []
+    for r in rows:
+        rows2.append(dict(r))
+        if r["model_variant"] == MODEL:
+            rows2[-1]["model_variant"] = alt
+    base, model = mdr._unroll(rows2, alt)
+    assert len(base) == 8
+    assert all(len(model[k]) == len(SEEDS) for k in base)
+    # default variant must find nothing (all rows moved to alt)
+    base2, model2 = mdr._unroll(rows2)
+    assert not model2 or all(len(model2[k]) == 0 for k in model2)
+
+
 def test_analyze_detects_real_deviation_signal(tmp_path):
     rows = _mk_rows(n_pairs=120, seed=7)
     base, model = mdr._unroll(rows)
