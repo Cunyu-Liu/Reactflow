@@ -45,6 +45,24 @@ p4_primary:
   verdict: P4_EXTERNAL_STATISTICAL_PASS
   practical_importance: PRACTICAL_IMPORTANCE_NOT_ESTABLISHED
   locked_outcome_access_count: 1
+p4_calibration:  # contract 12.6 'coverage/calibration 合格' gate
+  result: /mnt/cunyuliu/prospective_v2_p4_20260813/p4_calibration_result.json
+  n_positions: 355655
+  pooled: {cov_68: 0.69915, tol_68: [0.58, 0.78], pass_68: true,
+           cov_95: 0.87420, tol_95: [0.85, 0.99], pass_95: true,
+           empirical_residual_sd: 0.61064, nominal_scale: 0.3}
+  per_dataset_95pct_coverage:
+    M2SL5_2A3_0000: {empirical_residual_sd: 0.2778, cov_95: 0.9596}
+    M3SARS_2A3_0000: {empirical_residual_sd: 1.3709, cov_95: 0.7808}
+    15KLIB_2A3_0000: {empirical_residual_sd: 0.6082, cov_95: 0.8533}
+  verdict: CALIBRATION_ACCEPTABLE
+  note: >-
+    frozen Gaussian scale 0.3 gives slightly undercovered intervals on external
+    data (nominal 95% -> empirical 87.4%), within the pre-declared tolerance and
+    consistent with the P2 development diagnostic (89.6%). M3SARS is noisier
+    (empirical SD 1.37) and under-covered (78%); the honest empirical residual
+    SD is reported as a deployment/interpretation diagnostic and does not alter
+    the frozen evaluator.
 data_integrity_note: >-
   The direct-learnability signal established on the development benchmark (P2
   CI lower +0.0079) replicates on development-disconnected external M2 2A3-MaP
