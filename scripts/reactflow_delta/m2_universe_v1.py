@@ -67,6 +67,33 @@ class M2Universe:
         df = pd.read_csv(self.csv_path)
         self.df = df
         self._canonicalize(df)
+        self._full_profiles: dict[str, np.ndarray] = {}
+        self._full_errors: dict[str, np.ndarray] = {}
+        self._index_full_profiles()
+
+    def _index_full_profiles(self) -> None:
+        """Index full-construct mutant reactivity/error profiles by row id (canonical)."""
+        react = self._reactivity_cols(self.df)
+        err = self._error_cols(self.df)
+        for r in self.df.itertuples():
+            rid = str(r.id)
+            # canonical T->U on the allele part if present
+            rid = rid.replace("_T>", "_U>").replace("_A_T", "_A_U").replace("_C_T", "_C_U") \
+                     .replace("_G_T", "_G_U").replace("_U_T", "_U_U")
+            arr = np.asarray([getattr(r, c) for c in react], dtype=float)
+            earr = np.asarray([getattr(r, c) for c in err], dtype=float)
+            self._full_profiles[rid] = arr
+            self._full_errors[rid] = earr
+
+    def mutant_full_profile(self, wt_id: str, pos: int, ref: str, alt: str) -> tuple[np.ndarray, np.ndarray]:
+        """Return (full reactivity, full error) for a mutant row by constructing its canonical id."""
+        alt_c = alt.replace("T", "U")
+        rid = f"{wt_id.replace('_wt', '')}_mm_{pos}_{ref}_{alt_c}"
+        if rid not in self._full_profiles:
+            # fallback: search by prefix (id may use original allele casing)
+            cands = [k for k in self._full_profiles if k.endswith(f"_mm_{pos}_{ref}_{alt_c}")]
+            rid = cands[0] if cands else rid
+        return self._full_profiles.get(rid), self._full_errors.get(rid)
 
     # -- raw parsing (outcome-blind) --------------------------------------
     def _canonicalize(self, df: pd.DataFrame) -> None:
