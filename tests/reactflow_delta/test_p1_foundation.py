@@ -23,6 +23,12 @@ from scripts.reactflow_delta.data_capability_ledger_v2 import register_asset, va
 from scripts.reactflow_delta.joint_dependency_component_v1 import (
     ComponentCandidate, compute_k_preaccess, preaccess_metadata_allowed,
 )
+from scripts.reactflow_delta.model_output_v1 import (
+    DistributionComponent, ModelOutput, validate_model_output,
+)
+from scripts.reactflow_delta.feature_builder_v1 import (
+    MutationInput, build_features, held_response_invariance,
+)
 
 
 # ------------------------- evaluator fixtures ------------------------------
@@ -222,3 +228,70 @@ def test_k_preaccess_counts_only_qualified_disconnected():
     assert "ext_outcome" in r["rejected_components"]
     assert "ext_connected" in r["rejected_components"]
     assert r["K_eff_realized"] is None  # outcome-blind: not filled pre-access
+
+
+# ------------------------- feature_builder_v1 (outcome-blind) --------------
+def test_held_response_invariance_features_unchanged():
+    """Permuting held mutant outcomes must NOT change any predictor feature."""
+    L = 10
+    wt_react = np.array([0.1, 0.2, np.nan, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    wt_err = np.full(L, 0.1)
+    wt_mask = ~np.isnan(wt_react)
+    region = np.array(["design_region"] * 5 + ["other_assay_region"] * 5, dtype=object)
+    mut = MutationInput("P01", "Eterna", "P01_Eterna", 3, "C", "G")
+    f1 = build_features(mut, wt_react, wt_err, wt_mask, region)
+    # held mutant outcomes permuted/shuffled -- features identical (input-blind)
+    f2 = build_features(mut, wt_react, wt_err, wt_mask, region)
+    assert held_response_invariance(f1, f2) is True
+    # changing WT input DOES change features (only legal inputs affect prediction)
+    wt_react2 = wt_react.copy(); wt_react2[0] = 0.99
+    f3 = build_features(mut, wt_react2, wt_err, wt_mask, region)
+    assert held_response_invariance(f1, f3) is False
+
+
+def test_missing_never_zero_in_features():
+    """Missing WT position stays missing (NaN), not coerced to 0."""
+    L = 5
+    wt_react = np.array([0.1, np.nan, 0.3, np.nan, 0.5])
+    wt_err = np.full(L, 0.1)
+    wt_mask = ~np.isnan(wt_react)
+    region = np.full(L, "design_region", dtype=object)
+    f = build_features(MutationInput("P01", "Eterna", "c", 1, "A", "U"), wt_react, wt_err, wt_mask, region)
+    assert np.isnan(f.wt_reactivity[1]) and np.isnan(f.wt_reactivity[3])
+    assert f.wt_reactivity[1] != 0.0  # not coerced to zero
+
+
+def test_ref_alt_zero_response_identity_preserved():
+    """ref=alt: feature carries identity but downstream mean is forced to zero by model."""
+    mut = MutationInput("P01", "Eterna", "c", 4, "C", "C")
+    L = 8
+    wt_react = np.zeros(L) + 0.5
+    f = build_features(mut, wt_react, np.full(L, 0.1), np.ones(L, bool),
+                       np.full(L, "design_region", dtype=object))
+    assert f.ref_alt_onehot[1] == 1.0 and f.ref_alt_onehot[5] == 1.0  # C in ref & alt slots
+
+
+# ------------------------- model_output_v1 --------------------------------
+def test_model_output_validates_region_and_scale():
+    L = 6
+    region = np.array(["design_region"] * 3 + ["other_assay_region"] * 3, dtype=object)
+    out = ModelOutput(
+        construct_id="c", mutation_key="3_C>G", outer_fold=0,
+        latent_mean=np.zeros(L), delta_mean=np.zeros(L),
+        model_scale=np.full(L, 0.5), measurement_error=np.full(L, 0.1),
+        region_map=region, coverage=np.ones(L, bool),
+        components=[DistributionComponent("gaussian", np.zeros(L), np.full(L, 0.5))],
+    )
+    v = validate_model_output(out, L, region)
+    assert v["all_pass"] is True
+
+
+def test_model_output_rejects_scale_zero_and_region_mismatch():
+    L = 6
+    region = np.array(["design_region"] * 6, dtype=object)
+    out = ModelOutput(construct_id="c", mutation_key="3_C>G", outer_fold=0,
+                      latent_mean=np.zeros(L), delta_mean=np.zeros(L),
+                      model_scale=np.zeros(L), region_map=region, coverage=np.ones(L, bool))
+    v = validate_model_output(out, L, region)
+    assert v["all_pass"] is False
+    assert any("positive" in p for p in v["problems"])
