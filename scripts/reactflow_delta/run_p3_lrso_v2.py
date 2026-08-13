@@ -98,8 +98,10 @@ def _bstar_held_crps(univ, held_records, coef, device):
         for i in idx:
             f = _feat(we, c.wt_reactivity[i], i - r.pos, r.ref, r.alt)
             prof[i] = float(np.dot(coef, np.concatenate([[1.0], f])))
-        q = ~np.isnan(tprof) & ~np.isnan(prof)
-        total += float(np.nanmean([crps_gaussian(prof[i], 0.3, tprof[i]) for i in np.where(q)[0]]))
+        q = np.where(~np.isnan(tprof) & ~np.isnan(prof))[0]
+        if q.size == 0:
+            continue  # no qualified positions; do not poison total with nanmean([])
+        total += float(np.nanmean([crps_gaussian(prof[i], 0.3, tprof[i]) for i in q]))
         n += 1
     return total / n if n else float("nan")
 
@@ -159,8 +161,10 @@ def _lrso_held_crps(model, univ, held_records, ctx_cache, device):
         for bi, r in enumerate(recs):
             tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
             pred_prof = wt + delta[bi].cpu().numpy()
-            q = ~np.isnan(tprof) & ~np.isnan(pred_prof)
-            total += float(np.nanmean([crps_gaussian(pred_prof[i], 0.3, tprof[i]) for i in np.where(q)[0]]))
+            q = np.where(~np.isnan(tprof) & ~np.isnan(pred_prof))[0]
+            if q.size == 0:
+                continue  # no qualified positions; do not poison total with nanmean([])
+            total += float(np.nanmean([crps_gaussian(pred_prof[i], 0.3, tprof[i]) for i in q]))
             n += 1
     return total / n if n else float("nan")
 

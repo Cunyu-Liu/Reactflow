@@ -26,7 +26,7 @@
     "P17": 0.1860646293911771,
     "P18": 0.16658078382715472,
     "P19": 0.1877275304313769,
-    "P20": NaN
+    "P20": 0.19435830394271472
   },
   "rank_held_crps": {
     "2": {
@@ -167,303 +167,313 @@
   "ci_rank_2": {
     "planned_n_not_met": false,
     "n_effects": 20,
-    "mean": NaN,
-    "sd": NaN,
-    "ci_low": NaN,
-    "ci_high": NaN,
+    "mean": -0.021470251710419157,
+    "sd": 0.015652888122055012,
+    "ci_low": -0.02879602885361998,
+    "ci_high": -0.01414447456721833,
     "ci_low_gt_0": "False"
   },
   "sign_rank_2": {
-    "status": "UNIDENTIFIABLE_SIGN_FLIP",
-    "reason": "zero/degenerate standard error; no epsilon added"
+    "status": "OK",
+    "T_obs": -6.134196059433081,
+    "K": 20,
+    "p_value": 1.9073486328125e-06,
+    "mode": "exhaustive"
   },
   "lop_rank_2": {
     "schema_version": "reactflow_delta.p2.lop_influence.v1",
     "rows": [
       {
         "excluded": "P01",
-        "theta": NaN
+        "theta": -0.021201452166625917
       },
       {
         "excluded": "P02",
-        "theta": NaN
+        "theta": -0.021900516886738858
       },
       {
         "excluded": "P03",
-        "theta": NaN
+        "theta": -0.021595583024889467
       },
       {
         "excluded": "P04",
-        "theta": NaN
+        "theta": -0.022527232573234038
       },
       {
         "excluded": "P05",
-        "theta": NaN
+        "theta": -0.019134646301365292
       },
       {
         "excluded": "P06",
-        "theta": NaN
+        "theta": -0.021903078258499055
       },
       {
         "excluded": "P07",
-        "theta": NaN
+        "theta": -0.02068920699672408
       },
       {
         "excluded": "P08",
-        "theta": NaN
+        "theta": -0.022023939717674065
       },
       {
         "excluded": "P09",
-        "theta": NaN
+        "theta": -0.02179305257282578
       },
       {
         "excluded": "P10",
-        "theta": NaN
+        "theta": -0.021642744927599964
       },
       {
         "excluded": "P11",
-        "theta": NaN
+        "theta": -0.020863267494887677
       },
       {
         "excluded": "P12",
-        "theta": NaN
+        "theta": -0.021684823881586143
       },
       {
         "excluded": "P13",
-        "theta": NaN
+        "theta": -0.022486195403009102
       },
       {
         "excluded": "P14",
-        "theta": NaN
+        "theta": -0.02103307826465255
       },
       {
         "excluded": "P15",
-        "theta": NaN
+        "theta": -0.02041520858881816
       },
       {
         "excluded": "P16",
-        "theta": NaN
+        "theta": -0.02250322406157167
       },
       {
         "excluded": "P17",
-        "theta": NaN
+        "theta": -0.02222129632030912
       },
       {
         "excluded": "P18",
-        "theta": NaN
+        "theta": -0.02155583288214397
       },
       {
         "excluded": "P19",
-        "theta": NaN
+        "theta": -0.02082296169765785
       },
       {
         "excluded": "P20",
         "theta": -0.02140769218757041
       }
     ],
-    "max_abs_shift": NaN
+    "max_abs_shift": 0.0023356054090538647
   },
   "ci_rank_4": {
     "planned_n_not_met": false,
     "n_effects": 20,
-    "mean": NaN,
-    "sd": NaN,
-    "ci_low": NaN,
-    "ci_high": NaN,
+    "mean": -0.016450380279289252,
+    "sd": 0.017100805160682183,
+    "ci_low": -0.02445380345586845,
+    "ci_high": -0.008446957102710055,
     "ci_low_gt_0": "False"
   },
   "sign_rank_4": {
-    "status": "UNIDENTIFIABLE_SIGN_FLIP",
-    "reason": "zero/degenerate standard error; no epsilon added"
+    "status": "OK",
+    "T_obs": -4.302039373536182,
+    "K": 20,
+    "p_value": 3.0517578125e-05,
+    "mode": "exhaustive"
   },
   "lop_rank_4": {
     "schema_version": "reactflow_delta.p2.lop_influence.v1",
     "rows": [
       {
         "excluded": "P01",
-        "theta": NaN
+        "theta": -0.016205356047094183
       },
       {
         "excluded": "P02",
-        "theta": NaN
+        "theta": -0.015825490901572516
       },
       {
         "excluded": "P03",
-        "theta": NaN
+        "theta": -0.014350845418243363
       },
       {
         "excluded": "P04",
-        "theta": NaN
+        "theta": -0.017271647780555163
       },
       {
         "excluded": "P05",
-        "theta": NaN
+        "theta": -0.016304634874899082
       },
       {
         "excluded": "P06",
-        "theta": NaN
+        "theta": -0.016076231798099295
       },
       {
         "excluded": "P07",
-        "theta": NaN
+        "theta": -0.01610421330730498
       },
       {
         "excluded": "P08",
-        "theta": NaN
+        "theta": -0.01711972264916413
       },
       {
         "excluded": "P09",
-        "theta": NaN
+        "theta": -0.014578216230993049
       },
       {
         "excluded": "P10",
-        "theta": NaN
+        "theta": -0.015945078343278622
       },
       {
         "excluded": "P11",
-        "theta": NaN
+        "theta": -0.015358672115397747
       },
       {
         "excluded": "P12",
-        "theta": NaN
+        "theta": -0.016886713237464334
       },
       {
         "excluded": "P13",
-        "theta": NaN
+        "theta": -0.017550248487499354
       },
       {
         "excluded": "P14",
-        "theta": NaN
+        "theta": -0.017075911119142615
       },
       {
         "excluded": "P15",
-        "theta": NaN
+        "theta": -0.017361872779584592
       },
       {
         "excluded": "P16",
-        "theta": NaN
+        "theta": -0.016990259228923266
       },
       {
         "excluded": "P17",
-        "theta": NaN
+        "theta": -0.017145920931795584
       },
       {
         "excluded": "P18",
-        "theta": NaN
+        "theta": -0.01694851516120155
       },
       {
         "excluded": "P19",
-        "theta": NaN
+        "theta": -0.01706415161236176
       },
       {
         "excluded": "P20",
         "theta": -0.01684390356120984
       }
     ],
-    "max_abs_shift": NaN
+    "max_abs_shift": 0.0020995348610458892
   },
   "ci_rank_8": {
     "planned_n_not_met": false,
     "n_effects": 20,
-    "mean": NaN,
-    "sd": NaN,
-    "ci_low": NaN,
-    "ci_high": NaN,
+    "mean": -0.01702226521186344,
+    "sd": 0.015401896169176432,
+    "ci_low": -0.024230574505221626,
+    "ci_high": -0.009813955918505257,
     "ci_low_gt_0": "False"
   },
   "sign_rank_8": {
-    "status": "UNIDENTIFIABLE_SIGN_FLIP",
-    "reason": "zero/degenerate standard error; no epsilon added"
+    "status": "OK",
+    "T_obs": -4.942630663999836,
+    "K": 20,
+    "p_value": 1.9073486328125e-06,
+    "mode": "exhaustive"
   },
   "lop_rank_8": {
     "schema_version": "reactflow_delta.p2.lop_influence.v1",
     "rows": [
       {
         "excluded": "P01",
-        "theta": NaN
+        "theta": -0.01466557834717595
       },
       {
         "excluded": "P02",
-        "theta": NaN
+        "theta": -0.01603950312635809
       },
       {
         "excluded": "P03",
-        "theta": NaN
+        "theta": -0.017556507302721267
       },
       {
         "excluded": "P04",
-        "theta": NaN
+        "theta": -0.01772001798761456
       },
       {
         "excluded": "P05",
-        "theta": NaN
+        "theta": -0.01591846924780661
       },
       {
         "excluded": "P06",
-        "theta": NaN
+        "theta": -0.01751358742541139
       },
       {
         "excluded": "P07",
-        "theta": NaN
+        "theta": -0.017076793138823734
       },
       {
         "excluded": "P08",
-        "theta": NaN
+        "theta": -0.01746454933052687
       },
       {
         "excluded": "P09",
-        "theta": NaN
+        "theta": -0.01670108401143158
       },
       {
         "excluded": "P10",
-        "theta": NaN
+        "theta": -0.01675431416660752
       },
       {
         "excluded": "P11",
-        "theta": NaN
+        "theta": -0.017410428157905902
       },
       {
         "excluded": "P12",
-        "theta": NaN
+        "theta": -0.01738046636899417
       },
       {
         "excluded": "P13",
-        "theta": NaN
+        "theta": -0.016631984954391058
       },
       {
         "excluded": "P14",
-        "theta": NaN
+        "theta": -0.016909020178600825
       },
       {
         "excluded": "P15",
-        "theta": NaN
+        "theta": -0.017862116446562503
       },
       {
         "excluded": "P16",
-        "theta": NaN
+        "theta": -0.017750308120026835
       },
       {
         "excluded": "P17",
-        "theta": NaN
+        "theta": -0.017685877440546498
       },
       {
         "excluded": "P18",
-        "theta": NaN
+        "theta": -0.017799561385624302
       },
       {
         "excluded": "P19",
-        "theta": NaN
+        "theta": -0.01628334668993881
       },
       {
         "excluded": "P20",
         "theta": -0.017321790410200332
       }
     ],
-    "max_abs_shift": NaN
+    "max_abs_shift": 0.002356686864687492
   },
   "verdict": {
     "2": "NO_INCREMENTAL_LRSO_SKILL",
     "4": "NO_INCREMENTAL_LRSO_SKILL",
     "8": "NO_INCREMENTAL_LRSO_SKILL"
-  }
+  },
+  "b_star_p20_note": "B20 recomputed offline with fixed empty-q skip (0.19435830394271472); original artifact had NaN from np.nanmean([]) poisoning"
 }

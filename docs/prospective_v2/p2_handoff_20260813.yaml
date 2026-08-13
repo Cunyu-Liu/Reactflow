@@ -1,0 +1,72 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P2
+run_id: prospective_v2_p2_20260813
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+head: 7b0713db8a393a1e0350e8137cd95de689bf9442
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P0_P3 (exact match)'
+active_authority_evidence:
+  manifest: configs/reactflow_delta/active_contract.yaml (epoch 21)
+  sentinel: configs/reactflow_delta/authority_epoch_21.sentinel.yaml
+  bundle: configs/reactflow_delta/authority_epoch_21.bundle.sha256
+inputs:
+- prospective-v2 contract (frozen)
+- OK7a_M2_data.v4.5.2.csv (160 cells, 160 WT, 13976 exact-SNV registered)
+- split_v4_lopo_puzzle (20 puzzle LOPO, outer-train puzzle-grouped inner 4-fold OOF)
+- full-construct CRPS evaluator (fixed scale 0.3, contract 9.2)
+outputs:
+- docs/prospective_v2/p2_direct_v2_result_20260813.json
+- /mnt/cunyuliu/prospective_v2_p2_preds_20260813/p2_direct_v2_result.json
+- /mnt/cunyuliu/prospective_v2_p2_preds_20260813/p2_held_position_rows.jsonl (975600 rows)
+- /mnt/cunyuliu/prospective_v2_p2_preds_20260813/p2_secondaries_report.json
+- scripts/reactflow_delta/analyze_p2_secondaries_v1.py
+- tests/reactflow_delta/test_p2_secondaries_v1.py
+tests:
+- test_p2_learnability.py, test_p2_secondaries_v1.py, full suite 54 PASS (local/remote)
+engineering_status: ENGINEERING_PASS (full-construct scoring + inner-OOF T*/Direct* selection)
+scientific_status: 'P2 PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT (20-puzzle CI lower +0.0079 > 0)'
+p2_primary:
+  adaptive_procedure: 'T*/Direct* inner-OOF over outer-train; zero vs reg_direct'
+  D_p_mean: 0.012716
+  ci20_low: 0.007925
+  ci20_high: 0.017508
+  sign_flip_p: 1.9e-06 (exhaustive 2^20)
+  leave_one_puzzle_max_abs_shift: 0.001114 (theta stays > 0)
+  n_puzzles: 20
+p2_secondaries:
+  signed_delta_overall: MAE_direct=0.2557 MAE_zero=0.2401 skill=-6.48% (NEGATIVE)
+  region_mae: design_region direct 0.246 vs zero 0.226 (worse); other_assay direct 0.344 vs zero 0.372 (better)
+  distance_mae: direct worse in every band; smallest gap at edit site
+  crps_scale_sensitivity: D_p>0 at scale>=0.2; reverses at 0.05 (CRPS->MAE limit)
+  honest_per_method_calibration: direct sd 0.413 < zero sd 0.458 -> D_p=+0.0182, 20/20 positive
+reconciliation_note: >-
+  signed-delta MAE is negative because the direct model's bulk point
+  predictions are less accurate than the no-change anchor; its CRPS advantage
+  at frozen scale 0.3 is driven by extreme-tail behavior and is robust to
+  honest per-method calibration (D_p INCREASES to +0.0182). Both are reported
+  as mandatory secondaries; the primary P2 estimand is full-construct CRPS.
+blocks_phase2: false
+blocks_phase3: false
+blocks_phase4: true (no Phase4 token; confirmatory sufficiency NOT_ESTABLISHED)
+locked_outcome_access_count: 0
+K_preaccess: null (no external confirmatory access)
+K_eff_realized: null
+K_required_planned: null
+delta_stat: 0
+delta_practical: NOT_ESTABLISHED
+known_failures:
+- RNet static-delta not in direct baseline set (checkpoint unavailable; EXPOSURE_UNKNOWN_DIRECT_REFERENCE, audited separately)
+- nonlinear and flat_mlp equivalent; rfd_direct and flat_mlp equivalent (degenerate baseline redundancy noted)
+unknowns:
+- whether direct signal persists on qualified external confirmatory data (P4)
+- whether LRSO adds incremental skill over direct (P3, answered below)
+next_allowed_action: P3 RFD-LRSO (K_rank 2/4/8 nested null K_rank=0) vs fold-specific B*=Direct*
+next_forbidden_actions:
+- any locked external outcome read (no Phase4 token)
+- P5/P6 release (no Phase5-6 token)
+- push/PR/publication without per-request owner instruction
+p2_verdict: PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT

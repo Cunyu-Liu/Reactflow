@@ -1,0 +1,81 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P3
+run_id: prospective_v2_p3_20260813
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+head: 7b0713db8a393a1e0350e8137cd95de689bf9442
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P0_P3 (exact match)'
+active_authority_evidence:
+  manifest: configs/reactflow_delta/active_contract.yaml (epoch 21)
+  sentinel: configs/reactflow_delta/authority_epoch_21.sentinel.yaml
+  bundle: configs/reactflow_delta/authority_epoch_21.bundle.sha256
+inputs:
+- prospective-v2 contract (frozen)
+- OK7a_M2_data.v4.5.2.csv (same registered universe, 20 puzzle LOPO)
+- RFD-LRSO model (WT-context encoder + asymmetric source/receiver heads + distance modulation, K_rank=0 nested null)
+- fold-specific B* = Direct* selection procedure (contract 9.2, 17.2)
+outputs:
+- docs/prospective_v2/p3_lrso_v2_result_20260813.json (corrected: valid 20-puzzle CI)
+- /mnt/cunyuliu/prospective_v2_p3_20260813/p3_lrso_v2_result.json (raw)
+- scripts/reactflow_delta/run_p3_lrso_v2.py (NaN-poisoning fix applied)
+- scripts/reactflow_delta/lrso_v1.py (K_rank=0 null, exact-alt source encoding)
+- scripts/reactflow_delta/patch_p3_b20.py (B* P20 recomputation driver)
+tests:
+- test_lrso_v1.py, test_p3_scoring_nan_fix.py, full suite 57 PASS (local/remote)
+engineering_status: ENGINEERING_PASS (LRSO trained on GPU cuda:0, 20 folds x 3 ranks, contract 14.1 fixtures)
+scientific_status: 'P3 FAIL: NO_INCREMENTAL_LRSO_SKILL (all K_rank 2/4/8; corrected 20-puzzle CI upper < 0)'
+p3_primary:
+  b_star: 'fold-specific Direct* = reg_direct (held CRPS mean ~0.2016 over 20 puzzles)'
+  rank_2:
+    D_p_mean: -0.02147
+    ci20_low: -0.02880
+    ci20_high: -0.01414
+    ci_low_gt_0: false
+    n_puzzles_positive: 0
+  rank_4:
+    D_p_mean: -0.01645
+    ci20_low: -0.02445
+    ci20_high: -0.00845
+    ci_low_gt_0: false
+    n_puzzles_positive: 2
+  rank_8:
+    D_p_mean: -0.01702
+    ci20_low: -0.02423
+    ci20_high: -0.00981
+    ci_low_gt_0: false
+    n_puzzles_positive: 0
+data_integrity_note: >-
+  The original p3 artifact had B*_held_crps[P20]=NaN because
+  _bstar_held_crps used np.nanmean([]) when a held record had no qualified
+  positions, poisoning the running total and invalidating the 20-puzzle CI.
+  Root cause fixed (empty-q records skipped in _bstar_held_crps and
+  _lrso_held_crps); B* P20 recomputed offline = 0.194358 (finite) and the
+  corrected full-20 CI confirms the same NO_INCREMENTAL_LRSO_SKILL verdict.
+  No verdict reversal; conclusion is now supported by a valid CI.
+blocks_phase2: false
+blocks_phase3: false
+blocks_phase4: true (no Phase4 token; confirmatory sufficiency NOT_ESTABLISHED)
+locked_outcome_access_count: 0
+K_preaccess: null (no external confirmatory access)
+K_eff_realized: null
+K_required_planned: null
+delta_stat: 0
+delta_practical: NOT_ESTABLISHED
+known_failures:
+- plain low-rank source-receiver susceptibility does not exceed the same-information direct chemistry/distance template
+- no development-disconnected external confirmatory component available (P4 PUBLIC_EXTERNAL_NOT_QUALIFIED)
+- RNet checkpoint unavailable locally (EXPOSURE_UNKNOWN_DIRECT_REFERENCE)
+unknowns:
+- whether any qualified external confirmatory data would alter the direct-vs-LRSO ranking (no such data exists; P4 blocked)
+- mechanism claims require external replication (P5)
+next_allowed_action: P0-P3 completed; adopt simplest qualified direct model (reg_direct) per contract 17.2, terminate LRSO novelty narrative
+next_forbidden_actions:
+- any locked external outcome read (no Phase4 token)
+- P5/P6 release (no Phase5-6 token)
+- push/PR/publication without per-request owner instruction
+- re-introducing LRSO as the novelty claim without external replication
+p3_verdict: NO_INCREMENTAL_LRSO_SKILL
