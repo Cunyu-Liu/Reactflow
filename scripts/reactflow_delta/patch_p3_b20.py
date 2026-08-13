@@ -39,7 +39,10 @@ def main(argv: list[str] | None = None) -> int:
         effects = []
         for p in puzzles:
             b = B20 if p == "P20" else r["b_star_held_crps"][p]
-            effects.append(b - r["rank_held_crps"][str(k)][p])
+            dp = b - r["rank_held_crps"][str(k)][p]
+            # keep the per-puzzle effect dict internally consistent (was NaN for P20)
+            r["rank_d_p3"][str(k)][p] = dp
+            effects.append(dp)
         r[f"ci_rank_{k}"] = puzzle_level_ci20(effects)
         r[f"sign_rank_{k}"] = studentized_sign_flip(effects)
         r[f"lop_rank_{k}"] = leave_one_puzzle_influence(effects, puzzles)
