@@ -83,7 +83,8 @@ def main():
 
     def run_horizontal(pred, variant, tag):
         rep_path = out / f"m2_horizontal_ensemble_report_{tag}.json"
-        cmd = [sys.executable, "m2_horizontal_ensemble_report.py",
+        script = Path(__file__).resolve().parent / "m2_horizontal_ensemble_report.py"
+        cmd = [sys.executable, str(script),
                "--pred", pred, "--out", str(out), "--model-variant", variant]
         subprocess.run(cmd, check=True)
         (out / "m2_horizontal_ensemble_report.json").replace(rep_path)
