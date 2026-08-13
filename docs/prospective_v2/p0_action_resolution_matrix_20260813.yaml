@@ -1,0 +1,79 @@
+schema_version: reactflow_delta.prospective_v2.p0_action_resolution_matrix.v1
+observed_at: '2026-08-13T18:12:00+08:00'
+owner_authorization: PROVIDED_EXACT_MATCH (P0_P3)
+prior_active_authority: epoch20 PHASE1_BENCHMARK_V3_REBUILD / scope PHASE1_BENCHMARK_V3_ONLY / training_allowed=false
+authority_vnext: epoch21 PROSPECTIVE_V2_EPOCH21_ACTIVE / training_allowed=false / runnable=P0
+resolution_rule: one ruling per action; owner token authorizes P0 reconciliation + installing vNext as ACTIVE, but does not bypass a stale training_allowed=false for P1/P2/P3.
+actions:
+- action: read contract & verify identity/digest
+  before_vnext_active: ALLOWED (static)
+  after_vnext_active: ALLOWED
+  authority_disposition: no gate
+- action: fresh repo/authority/job preflight (read-only)
+  before_vnext_active: ALLOWED (P0 read-only)
+  after_vnext_active: ALLOWED
+  authority_disposition: no gate
+- action: create isolated branch/worktree for prospective-v2
+  before_vnext_active: ALLOWED (P0 minimal governance)
+  after_vnext_active: ALLOWED
+  authority_disposition: required by epoch20 worktree_policy
+- action: install authority vNext (epoch21) as single ACTIVE authority
+  before_vnext_active: ALLOWED (minimal governance)
+  after_vnext_active: COMPLETE
+  authority_disposition: SUPERSEDES epoch20 (preserve unchanged)
+- action: P0 historical artifact inventory (read-only)
+  before_vnext_active: ALLOWED (read-only)
+  after_vnext_active: ALLOWED
+  authority_disposition: no gate
+- action: P0 historical replay of raw artifacts via validator + evaluator
+  before_vnext_active: BLOCKED (no repo mutation/replay until ACTIVE)
+  after_vnext_active: ALLOWED if raw sufficient
+  authority_disposition: gated by vNext ACTIVE evidence
+- action: P0 machine gate repair (phase_gate_v2 + fail-open fix) code+tests
+  before_vnext_active: BLOCKED
+  after_vnext_active: ALLOWED
+  authority_disposition: vNext ACTIVE evidence required
+- action: P1 mutation (data/split/endpoint/schema/evaluator code)
+  before_vnext_active: BLOCKED
+  after_vnext_active: ALLOWED only after P0 PASS
+  authority_disposition: P0 gate PASS + vNext ACTIVE
+- action: P2 direct development training
+  before_vnext_active: BLOCKED
+  after_vnext_active: BLOCKED until P1 PASS; primary_locked_outcome_exclusion must be ESTABLISHED
+  authority_disposition: P1 PASS + isolation ESTABLISHED
+- action: P3 LRSO development training
+  before_vnext_active: BLOCKED
+  after_vnext_active: BLOCKED until P2 PASS
+  authority_disposition: P2 PASS
+- action: teacher/structure exploratory
+  before_vnext_active: BLOCKED
+  after_vnext_active: BLOCKED until plain LRSO PASS
+  authority_disposition: P3 plain PASS
+- action: locked external outcome read
+  before_vnext_active: BLOCKED
+  after_vnext_active: BLOCKED (no Phase4 token)
+  authority_disposition: requires Phase4 token + power gates
+- action: P5-P6 internal release package
+  before_vnext_active: BLOCKED
+  after_vnext_active: BLOCKED (no Phase5-6 token)
+  authority_disposition: requires Phase5-6 token
+- action: push/PR/publication/release
+  any: BLOCKED (never authorized without explicit per-request owner instruction)
+  authority_disposition: FORBIDDEN
+- action: new wet-lab
+  any: BLOCKED
+  authority_disposition: FORBIDDEN
+- action: delete/overwrite historical artifacts
+  any: BLOCKED
+  authority_disposition: FORBIDDEN
+- action: interfere with unrelated running jobs
+  any: BLOCKED
+  authority_disposition: FORBIDDEN
+- action: lower gates / swap endpoint/metric/split after the fact
+  any: BLOCKED
+  authority_disposition: FORBIDDEN
+summary:
+  single_ruling_per_action: true
+  p0_gate_status: IN_PROGRESS
+  next_allowed_action_after_vnext: P0 gate repair + historical inventory/replay + P1 design freeze
+  forbidden_until_gates: P1 mutation (until P0 PASS), P2/P3 training (until P1/P2 PASS + isolation ESTABLISHED)

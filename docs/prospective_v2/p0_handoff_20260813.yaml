@@ -1,0 +1,63 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P0
+run_id: prospective_v2_p0_20260813
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+head: 327c92c187a363ae7a10bec1f7946164d2bc543c (pre-P0-commit base)
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P0_P3 (exact match)'
+active_authority_evidence:
+  manifest: configs/reactflow_delta/active_contract.yaml (epoch 21)
+  sentinel: configs/reactflow_delta/authority_epoch_21.sentinel.yaml
+  bundle: configs/reactflow_delta/authority_epoch_21.bundle.sha256
+  active_manifest_sha256: c10dbd19c568d70cd67fa73b3706a889d442cad53ce6b9de052c26a150c3d458
+  bundle_ledger_sha256: 13c5871d2f12dc9eb076573f3c90c9677e9eab715fb66ea014d7b4f4e07993b9
+superseded: [epoch19 PHASE3_FAIL_CLOSED_BENCHMARK_RESOURCE, epoch20 PHASE1_BENCHMARK_V3_REBUILD] both PRESERVE_UNCHANGED
+inputs:
+- prospective-v2 contract
+- master execution prompt v2
+- live repo/authority/job/GPU preflight (fresh)
+- historical artifacts under /mnt/cunyuliu/reactflow_delta_artifacts_20260729
+outputs:
+- docs/prospective_v2/p0_fresh_snapshot_20260813.yaml
+- docs/prospective_v2/p0_action_resolution_matrix_20260813.yaml
+- docs/prospective_v2/p0_historical_evidence_inventory_20260813.yaml
+- configs/reactflow_delta/active_contract.yaml (epoch 21 authority vNext)
+- configs/reactflow_delta/authority_epoch_21.sentinel.yaml
+- configs/reactflow_delta/authority_epoch_21.bundle.sha256
+- scripts/reactflow_delta/phase_gate_v2.py
+- scripts/reactflow_delta/install_authority_vNext.py
+- tests/reactflow_delta/test_phase_gate_v2.py
+- patched scripts/reactflow_delta/phase1_integration_v1.py (fail-open -> fail-closed)
+tests:
+- test_phase_gate_v2.py: 9 fixtures PASS
+- install_authority_vNext validation: all 16 checks PASS, verdict AUTHORITY_VNEXT_VALIDATED_AND_INSTALLED
+engineering_status: ENGINEERING_PASS (authority reconciliation + gate repair implemented and tested)
+scientific_status: P0 governance qualification; no scientific gate claimed
+blocks_phase2: true until P1 PASS and primary_locked_outcome_exclusion ESTABLISHED
+blocks_phase3: true until P2 PASS
+blocks_phase4: true (no Phase4 token; confirmatory sufficiency NOT_ESTABLISHED)
+locked_outcome_access_count: 0
+K_preaccess: null (P1 computes outcome-blind)
+K_eff_realized: null (no Phase4 access)
+K_required_planned: null (P4 planning)
+delta_stat: 0
+delta_practical: NOT_ESTABLISHED
+known_failures:
+- historical raw_usable/oracle-analyzable counts remain REPOSITORY_REPORTED_NOT_REPLAYED (deferred to fresh P1 recompute)
+- old M2 not replayable as new primary (different estimand); NEW_EXPERIMENT_REQUIRED
+unknowns:
+- exact all-mutant LOPO-puzzle effect (needs P2/P3)
+- qualified public external K_preaccess (P1/P4)
+- RibonanzaNet exact checkpoint exposure (P1)
+next_allowed_action: P1 design freeze + P1 implementation (data/split/endpoint_v7/split_v4/prediction_v3/model_output_v1/evaluator/ledgers)
+next_forbidden_actions:
+- P2/P3 training until P1 PASS and isolation ESTABLISHED
+- any locked external outcome read (no Phase4 token)
+- P5/P6 release (no Phase5-6 token)
+- push/PR/publication (no explicit per-request owner instruction)
+- interfering with unrelated running jobs
+p0_verdict: AUTHORITY_RECONCILIATION_COMPLETE_PASS -> P1 entry allowed (engineering gate only)

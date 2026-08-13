@@ -461,23 +461,36 @@ def phase1_gate(cap, eval_valid, iso_attest, caller_sens):
                     "role/exposure audit",
     }
 
+    # fail-closed Phase-2 blocking classification (contract 11.6 / 14.2):
+    # a gate blocks Phase 2 only if it is in the Phase-2 blocking set AND not PASS.
+    # test_statistical_sufficiency is a Phase-4 (locked test) blocker, not Phase-2.
+    phase2_blocking_gates = {
+        "authority_semantic_closure", "asset_disposition", "pair_publication_resolution",
+        "sequence_lineage_leakage_audit", "split_independence", "physical_test_isolation",
+        "caller_stability", "endpoint_mask_alignment", "keyed_prediction_schema",
+        "evaluator_fixtures",
+    }
+    phase2_blocking_fail = [k for k in phase2_blocking_gates
+                            if g.get(k, {}).get("status") != "PASS"]
     phase2_prereq = [k for k, v in g.items() if v["status"] == "PASS"]
     phase2_not_pass = [k for k, v in g.items() if v["status"] != "PASS"]
 
     return {
-        "schema_version": "reactflow_delta.phase1_benchmark_v3_gate.v1",
+        "schema_version": "reactflow_delta.phase1_benchmark_v3_gate.v2",
         "generated_at": now_iso(),
-        "verdict": ("PHASE1_BENCHMARK_V3_PASS_CLOSED" if not phase2_not_pass
-                    else "PHASE1_BENCHMARK_V3_PASS_WITH_NON_BLOCKING_NOTICE"),
+        "verdict": ("PHASE1_BENCHMARK_V3_PASS_CLOSED" if not phase2_blocking_fail
+                    else "PHASE1_BENCHMARK_V3_FAIL_CLOSED_BLOCKED"),
         "gates": g,
+        "phase2_blocking_gates": sorted(phase2_blocking_gates),
+        "phase2_blocking_fail": phase2_blocking_fail,
         "phase2_prereq_pass": phase2_prereq,
         "phase2_prereq_not_pass": phase2_not_pass,
-        "phase2_authorization_token": "AUTHORIZE_PHASE2_LEARNABILITY",
-        "note": "All Phase-2 prerequisites are benchmark-construction gates. "
-                "test_statistical_sufficiency is NOT_ESTABLISHED only because no "
-                "untouched confirmatory publication set exists yet; this blocks "
-                "Phase 4 (locked test), not Phase 2 (development learnability). "
-                "No model trained; no confirmatory outcome opened; fail-closed.",
+        "phase2_authorization_token": ("AUTHORIZE_PHASE2_LEARNABILITY"
+                                       if not phase2_blocking_fail else None),
+        "note": "Fail-closed: Phase-2 token emitted only when no Phase-2-blocking "
+                "gate fails. test_statistical_sufficiency remains a Phase-4 blocker and "
+                "does not, by itself, grant or revoke the Phase-2 token. No model trained; "
+                "no confirmatory outcome opened.",
     }
 
 
