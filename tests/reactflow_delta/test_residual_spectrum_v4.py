@@ -53,12 +53,12 @@ def test_untrained_model_outputs_zero_delta():
 
 def test_position_aware_heads():
     model = rv4.PositionAwareAttentionResidMLP(POS_DIM, TAIL_DIM, W, seed=3)
-    assert len(model.heads) == W
-    # per-position heads must have independent (non-shared) weights in their
-    # first (non-final) layers — final layers are zero-init (identical zeros)
-    w0 = model.heads[0][0].weight.detach().numpy()
-    w10 = model.heads[10][0].weight.detach().numpy()
+    # per-position decoder weights must be DISTINCT across positions (W1[0] != W1[10])
+    w0 = model.W1[0].detach().numpy()
+    w10 = model.W1[10].detach().numpy()
     assert not np.allclose(w0, w10)
+    # final decoder layer zero-init (fail-safe)
+    assert np.abs(model.W2.detach().numpy()).max() < 1e-6
 
 
 def test_attention_changes_representations():

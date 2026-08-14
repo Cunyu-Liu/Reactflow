@@ -67,6 +67,11 @@ def split_pos_glob(X, W, pos_dim):
 class PositionAwareAttentionResidMLP(nn.Module):
     """Per-position encoder + self-attention over window positions + per-position
     decoder heads.  Final decoder layer of each head zero-init => delta=0 at init.
+
+    Decoder is VECTORIZED via einsum (per-position weight tensors) so there is NO
+    21-iteration Python loop — the per-position heads stay distinct, but forward
+    runs as a single batched op.  This was the fix that makes the attention model
+    feasible on the MIG 1g.5gb slice (the naive ModuleList loop was ~5x slower).
     """
     def __init__(self, pos_dim, tail_dim, out_dim, hidden=128, head_hidden=DEFAULT_HEAD_HIDDEN,
                  nhead=DEFAULT_NHEAD, nlayers=DEFAULT_NLAYERS, dropout=DEFAULT_DROPOUT, seed=0):
@@ -74,6 +79,7 @@ class PositionAwareAttentionResidMLP(nn.Module):
         torch.manual_seed(seed)
         self.npos = out_dim
         self.hidden = hidden
+        self.head_hidden = head_hidden
         self.pos_enc = nn.Sequential(
             nn.Linear(pos_dim, hidden), nn.ReLU(),
         )
@@ -85,21 +91,27 @@ class PositionAwareAttentionResidMLP(nn.Module):
             nn.Linear(tail_dim, hidden), nn.ReLU(),
         )
 
-        self.heads = nn.ModuleList()
-        for _ in range(out_dim):
-            layers = []
-            if head_hidden > 0:
-                layers += [nn.Linear(hidden * 3, head_hidden), nn.ReLU()]
-                if dropout > 0:
-                    layers.append(nn.Dropout(dropout))
-                layers.append(nn.Linear(head_hidden, 1))
-            else:
-                layers.append(nn.Linear(hidden * 3, 1))
-            head = nn.Sequential(*layers)
+        # ---- per-position decoder as per-position weight tensors (einsum) ----
+        # z_k = cat([h_k, pooled, t])  ->  (B, W, 3*hidden)
+        in3 = hidden * 3
+        if head_hidden > 0:
+            # (W, in3, head_hidden) then (W, head_hidden, 1)
+            self.W1 = nn.Parameter(torch.empty(out_dim, in3, head_hidden))
+            self.b1 = nn.Parameter(torch.empty(out_dim, head_hidden))
+            nn.init.xavier_uniform_(self.W1)
+            nn.init.zeros_(self.b1)
+            self.W2 = nn.Parameter(torch.empty(out_dim, head_hidden, 1))
+            self.b2 = nn.Parameter(torch.empty(out_dim, 1))
             # zero-init final layer so initial delta = 0 (== prior == baseline)
-            nn.init.zeros_(head[-1].weight)
-            nn.init.zeros_(head[-1].bias)
-            self.heads.append(head)
+            nn.init.zeros_(self.W2)
+            nn.init.zeros_(self.b2)
+            self._two_layer = True
+        else:
+            self.W2 = nn.Parameter(torch.empty(out_dim, in3, 1))
+            self.b2 = nn.Parameter(torch.empty(out_dim, 1))
+            nn.init.zeros_(self.W2)
+            nn.init.zeros_(self.b2)
+            self._two_layer = False
 
     def forward(self, x):
         """x: flat feature tensor (B, in_dim).  Splits internally."""
@@ -112,14 +124,17 @@ class PositionAwareAttentionResidMLP(nn.Module):
         pe = _pos_encoding(npos, self.hidden, x.device).unsqueeze(0)  # (1, W, hidden)
         h = h + pe
         h = self.attn(h)                                        # (B, W, hidden)
-        pooled = h.mean(dim=1)                                  # (B, hidden)
-        t = self.tail_enc(glob)                                 # (B, hidden)
-        ctx = torch.cat([pooled, t], dim=1)                     # (B, 2*hidden)
-        outs = []
-        for k in range(self.npos):
-            z = torch.cat([h[:, k], ctx], dim=1)                # (B, 2*hidden) = h_k + ctx
-            outs.append(self.heads[k](z))
-        return torch.cat(outs, dim=1)                           # (B, npos)
+        pooled = h.mean(dim=1, keepdim=True)                    # (B, 1, hidden)
+        t = self.tail_enc(glob).unsqueeze(1)                    # (B, 1, hidden)
+        z = torch.cat([h, pooled.expand(B, npos, self.hidden), t.expand(B, npos, self.hidden)],
+                      dim=-1)                                   # (B, W, 3*hidden)
+        if self._two_layer:
+            y1 = torch.einsum("bwi,wih->bwh", z, self.W1) + self.b1   # (B, W, head_hidden)
+            y1 = torch.relu(y1)
+            y = torch.einsum("bwh,who->bwo", y1, self.W2) + self.b2.unsqueeze(0)
+        else:
+            y = torch.einsum("bwi,wio->bwo", z, self.W2) + self.b2.unsqueeze(0)
+        return y.squeeze(-1)                                    # (B, W) residual delta
 
 
 def train_posaware_attn2(
