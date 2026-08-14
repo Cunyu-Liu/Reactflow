@@ -3,7 +3,7 @@
 > 范围：P0–P5 全部正式 claim 与对应证据/裁决。证据均来自 locked 结果与 replay。
 > 状态边界：`DEVELOPMENT_REPLICATED / EXTERNAL_TRANSPORTABILITY_ESTABLISHED /
 > PRACTICAL_IMPORTANCE_NOT_ESTABLISHED / MECHANISM_CONCENTRATION_NOT_ESTABLISHED /
-> PUBLICATION_NOT_RELEASED`
+> MECHANISM_FEATURE_DEPENDENCE_NOT_CLEAN / PUBLICATION_NOT_RELEASED`
 
 ## 1. 正式 claims（可发表范围）
 
@@ -15,19 +15,21 @@
 | C4. 冻结 scale 下校准可接受 | `CALIBRATION_ACCEPTABLE` | cov68 0.699 / cov95 0.874（预声明容差内）；`p4_calibration_result` |
 | C5. 信号是 feature-dependent（非伪影） | ESTABLISHED | 置换负对照 permuted D CI upper −0.062 <0；`p5_mechanism_result` |
 | C6. 效应跨生物学区域复制 | ESTABLISHED | M3SARS +0.083、15KLIB +0.031（2/3 数据集正向）；`p5_mechanism_result` |
+| C6b. full-construct 空间扩展 skill 在新独立组件复现（主 claim） | CONFIRMED（primary） | M2RFOK/M2RFPK 新集（505 可评估组件），very-far D_vs_zero CI lower +0.0835、Holm pass p<1e-89；edit-site CI lower +0.0790；4/4 数据集正向；leave-dominant-out +0.0829；`p5b_mechanism_result` |
 
 ## 2. 被删除/未建立的 claims
 
 | Claim | 裁决 | 原因 |
 |---|---|---|
 | C7. direct 技能集中在编辑位点（distance heterogeneity） | `MECHANISM_NOT_ESTABLISHED` | 预冻结 claim；edit−vfar 异质性 CI lower −0.0199 <0；距离曲线均匀。按合同 §12.7 删除机制 claim。 |
+| C6c. feature-dependence 负对照在新独立组件上不 clean（机制 gate 仍 fail） | `MECHANISM_NOT_ESTABLISHED` | P5b 新集负对照 permuted CI upper +0.0204 >0（shrinkage-to-mean 伪影，coef 0.62 on wt_r）；主 claim 虽强确认但冻结负对照门未过 → 按 §12.7/§16.1 仍 fail-closed；`p5b_mechanism_result` |
 | C8. practical/material importance | `PRACTICAL_IMPORTANCE_NOT_ESTABLISHED` | 无独立 delta_practical 证据（frozen protocol §3）。 |
 | C9. SOTA / external generalization 的广泛表述 | NOT_CLAIMED | 合同 §6 claim boundary；只允许 benchmark-level 统计优越性。 |
 
 ## 3. 证据分类与可审计性
 - 所有 C1–C6 数字均可由 `run_replay_v1.py` 从 clean checkout + artifacts 重放复现（`REPLAY_CONSISTENT`）。
 - 数据溯源：dev=OK7a_M2 Round 3（160/160/13976）；external=Ribonanza M2-style 2A3 via RMDB（24/3237，零 dev 重叠）。
-- 失败记录：`p6_failure_log_20260814.md`（F1–F7）。
+- 失败记录：`p6_failure_log_20260814.md`（F1–F8）。
 - 模型：RFD-Direct（reg_direct）单 seed 为初步；五 seed ensemble 为部署目标（§9.1）。
 
 ## 4. 论文允许/禁止表述
