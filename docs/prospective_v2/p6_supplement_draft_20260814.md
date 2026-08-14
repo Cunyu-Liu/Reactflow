@@ -11,21 +11,25 @@
 | P1 | FAIL_CLOSED_OPEN | blocks_phase2/3=false; evaluator/isolation PASS |
 | P2 | PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT | 20-puzzle CI lower +0.0079 |
 | P3 | NO_INCREMENTAL_LRSO_SKILL | all ranks CI upper < 0 |
-| P4 | P4_EXTERNAL_STATISTICAL_PASS + CALIBRATION_ACCEPTABLE | external D +0.0410 CI lower +0.0153 |
-| P5 | MECHANISM_NOT_ESTABLISHED | edit-site heterogeneity CI lower −0.0199 |
+| P4 | P4_EXTERNAL_STATISTICAL_PASS + CALIBRATION_ACCEPTABLE | external D +0.0410 CI lower +0.0153 (24 comps) |
+| P5 | MECHANISM_NOT_ESTABLISHED | edit-site heterogeneity CI lower −0.0199 (24 comps); primary spatial-extension claim CONFIRMED on P5b but feature-dependence negative control not clean there (permuted CI upper +0.0204) |
+| P5b | MECHANISM_NOT_ESTABLISHED (confirmatory re-test, NEW set) | 505 comps; very-far CI lower +0.0835; negative control CI upper +0.0204 |
 | P6 | REPLAY_CONSISTENT (pending) | run_replay_v1.py |
 
 ## S2. Main tables (auto-generated)
 See `main_tables.md` / `main_tables.tex` (Table 1 development horizontal, Table 2 P4
-external components, Table 3 P5 distance curve, Table 4 gates).
+external components, Table 3 P5 distance curve, Table 3b P5b second independent set
+distance curve, Table 4 gates).
 
 ## S3. Figures (auto-generated)
 - Fig1 P2 per-puzzle forest; Fig2 P4 component D; Fig3 P5 signed distance curve;
-  Fig4 P4 calibration. (rendered by generate_p6_tables_figures_v1.py)
+  Fig4 P4 calibration; Fig5 P5b signed distance curve (dual independent set comparison).
+  (rendered by generate_p6_tables_figures_v1.py)
 
 ## S4. Cards
-- Model card: RFD-Direct (reg_direct); data card: dev OpenKnot M2 + external Ribonanza
-  M2-style; code card: repo/branch/commit/entrypoints. (build_p6_cards_v1.py)
+- Model card: RFD-Direct (reg_direct); data card: dev OpenKnot M2 + two external
+  Ribonanza M2-style / DasLab BigLib2 2A3 sets; code card: repo/branch/commit/entrypoints.
+  (build_p6_cards_v1.py)
 
 ## S5. Environment
 - `environment.yml` (python 3.10, numpy 1.26.4, scipy 1.15.3, torch 2.5.1+cu121,
@@ -33,7 +37,8 @@ external components, Table 3 P5 distance curve, Table 4 gates).
 
 ## S6. Failure log
 - See `p6_failure_log_20260814.md` (F1 NaN poisoning, F2 reactivity-array bounds,
-  F3 permutation no-op, F4 calibration gate gap, F5/F6 replay robustness, F7 resource).
+  F3 permutation no-op, F4 calibration gate gap, F5/F6 replay robustness, F7 resource,
+  F8 P5b negative control not clean on second independent set).
 
 ## S7. Claim-evidence map
 - See `p6_claim_evidence_map_20260814.md`.
