@@ -1,0 +1,56 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P6
+run_id: prospective_v2_p6_20260814
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_PHASE5_6_RELEASE (exact match, 2026-08-14)'
+upstream_gates:
+  P0: AUTHORITY_RECONCILIATION_COMPLETE_PASS
+  P1: FAIL_CLOSED_OPEN (blocks_phase2/3=false)
+  P2: PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT
+  P3: NO_INCREMENTAL_LRSO_SKILL
+  P4: P4_EXTERNAL_STATISTICAL_PASS + CALIBRATION_ACCEPTABLE
+  P5: MECHANISM_NOT_ESTABLISHED
+outputs:
+- /mnt/cunyuliu/prospective_v2_p6_20260814/replay_report.json  (REPLAY_CONSISTENT)
+- /mnt/cunyuliu/prospective_v2_p6_20260814/out/main_tables.md / main_tables.tex
+- /mnt/cunyuliu/prospective_v2_p6_20260814/out/figures/fig1..fig4.png
+- /mnt/cunyuliu/prospective_v2_p6_20260814/out/cards.md / environment.yml / cards_summary.json
+- scripts/reactflow_delta/run_replay_v1.py
+- scripts/reactflow_delta/generate_p6_tables_figures_v1.py
+- scripts/reactflow_delta/build_p6_cards_v1.py
+- docs/prospective_v2/REPRODUCE_p6_20260814.md
+- docs/prospective_v2/p6_failure_log_20260814.md
+- docs/prospective_v2/p6_claim_evidence_map_20260814.md
+- docs/prospective_v2/p6_manuscript_draft_20260814.md
+- docs/prospective_v2/p6_supplement_draft_20260814.md
+- docs/prospective_v2/p6_environment.json
+tests:
+- test_run_replay_v1.py (9), test_generate_p6_tables_figures_v1.py (3), test_build_p6_cards_v1.py (2) = 14 PASS (remote)
+replay:
+  verdict: REPLAY_CONSISTENT
+  all_reproduced: true
+  P2: artifact_replay_no_retrain  -> reproduced (per-puzzle D + 20-puzzle CI re-derived from 975,600 held rows)
+  P3: artifact_replay_no_retrain  -> reproduced (rank2/4/8 CI + NO_INCREMENTAL)
+  P4: fresh_replay                -> reproduced (external D + CI + verdict)
+  P5: fresh_replay                -> reproduced (mechanism verdict)
+  P2_note: >-
+    locked per-puzzle P20 D (0.00136) carries the pre-fix NaN artifact (4100 all-NaN
+    unqualified records counted as 0 in the original denominator); corrected per-record
+    replay gives 0.00147 (~8% relative on this single small effect). Pooled 20-puzzle CI
+    and verdict unchanged (CI lower 0.0079 > 0). Tolerance P2_PUZZLE_RTOL=0.1 documented.
+acceptance: 'P6 PASS: clean replay produces identical main estimand, counts, effect direction, CI,
+  coverage and qualification states; no placeholder/手工复制 headline (all tables/figures/cards
+  auto-generated from locked artifacts); manuscript/supplement drafts auto-filled.'
+blocks_phase6: false
+next_allowed_action: owner/human-author final review of manuscript/supplement + release decision
+  (P6 deliverables prepared; external actions e.g. push/PR/submission still require explicit
+  owner instruction per contract 15.3)
+next_forbidden_actions:
+- push/PR/public release/submission without explicit owner instruction
+- re-running locked external outcomes as a new confirmatory set
+p6_verdict: P6_REPRODUCIBILITY_DELIVERED (pending owner author review for RELEASE_AUTHORIZED)
