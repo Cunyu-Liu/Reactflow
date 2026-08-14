@@ -1,0 +1,91 @@
+# ReactFlow-Delta prospective-v2: Supplementary Data Manifest
+
+> Auto-generated from locked artifacts. Generated: 2026-08-14.
+> Claim boundary: DEVELOPMENT_ONLY / SOTA_NOT_ESTABLISHED / PUBLICATION_NOT_RELEASED.
+
+## S1. Data availability
+
+### Development dataset
+- **Source**: [OpenKnot M2 official release](https://github.com/eternagame/OpenKnotAIDesignData)
+- **File**: OK7a_M2_data.v4.5.2.csv
+- **Role**: PRIMARY_PUBLIC_DEVELOPMENT
+- **Cells**: 160 intended (20 puzzles x 8 methods, same public activity/sequencing release)
+- **WT constructs**: 160
+- **Registered exact SNV**: 13,976
+- **Chemistry**: 2A3-MaP
+- **Split**: 20-fold LOPO-puzzle (split_v4_lopo_puzzle)
+- **Provenance**: OpenKnot AI Design Data, EternaGames community project
+
+### External confirmatory dataset
+- **Source**: RMDB (https://rmdb.stanford.edu/), Ribonanza M2-style 2A3 datasets
+- **Datasets**: M2SL5_2A3_0000 (betacoronavirus SL5), M3SARS_2A3_0000 (coronavirus frameshift elements), 15KLIB_2A3_0000 (diverse: TTR, SAM riboswitch, SARS windows, HDV)
+- **Components**: 24 (each = 1 WT anchor + its single-SNV mutant library)
+- **Single-SNV mutants**: 3,237
+- **Development disconnect**: Zero sequence identity overlap with OK7a_M2 development set
+- **Chemistry**: 2A3-MaP (same family as development)
+- **Platform**: NovaSeq (Ribonanza) vs Ultima (OpenKnot M2); recorded, not concatenated
+- **Normalization**: RNAFramework per-dataset; recorded per component
+
+### Raw data files (remote archive)
+- /mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_20260730/ -- parsed rdat files
+- /mnt/cunyuliu/reactflow_delta_raw/rmdb/entries_20260730/ -- raw entries
+- Available from RMDB on request
+
+## S2. Primary result artifacts
+
+| Phase | Artifact | Path |
+|-------|----------|------|
+| P2 | Direct effects (20-puzzle) | docs/prospective_v2/p2_direct_v2_result_20260813.json |
+| P2 | Held position rows (raw) | /mnt/cunyuliu/prospective_v2_p2_preds_20260813/p2_held_position_rows.jsonl (975,599 rows) |
+| P2 | Secondaries (region/distance/calibration) | /mnt/cunyuliu/prospective_v2_p2_preds_20260813/p2_secondaries_report.json |
+| P3 | LRSO effects (corrected) | docs/prospective_v2/p3_lrso_v2_result_20260813.json |
+| P4 | External components (full) | /mnt/cunyuliu/prospective_v2_p4_20260813/p4_external_components.json (90 MB) |
+| P4 | External result (D/CI/FWER) | /mnt/cunyuliu/prospective_v2_p4_20260813/p4_external_result.json |
+| P4 | Calibration result | /mnt/cunyuliu/prospective_v2_p4_20260813/p4_calibration_result.json |
+| P5 | Mechanism result (distance/neg-ctrl/region) | /mnt/cunyuliu/prospective_v2_p4_20260813/p5_mechanism_result.json |
+| P6 | Replay report | /mnt/cunyuliu/prospective_v2_p6_20260814/replay_report.json |
+| P6 | Main tables | /mnt/cunyuliu/prospective_v2_p6_20260814/out/main_tables.md / .tex |
+| P6 | Figures (4) | /mnt/cunyuliu/prospective_v2_p6_20260814/out/figures/fig1..fig4.png |
+| P6 | Model/Data/Code cards | /mnt/cunyuliu/prospective_v2_p6_20260814/out/cards.md |
+| P6 | Environment spec | /mnt/cunyuliu/prospective_v2_p6_20260814/out/environment.yml |
+
+## S3. Primary results summary
+
+| Estimand | Value | 95% CI | Verdict |
+|----------|-------|--------|---------|
+| P2: D_p = CRPS(T*) - CRPS(Direct*) | +0.0127 | [+0.0079, +0.0175] | PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT |
+| P3: LRSO rank 2 vs B* | -0.0215 | [-0.0288, -0.0141] | NO_INCREMENTAL_LRSO_SKILL |
+| P3: LRSO rank 4 vs B* | -0.0165 | [-0.0245, -0.0084] | NO_INCREMENTAL_LRSO_SKILL |
+| P3: LRSO rank 8 vs B* | -0.0170 | [-0.0242, -0.0098] | NO_INCREMENTAL_LRSO_SKILL |
+| P4: Component-macro D vs zero | +0.0410 | [+0.0153, +0.0667] | P4_EXTERNAL_STATISTICAL_PASS |
+| P4: FWER (Holm-Bonferroni) | pass |  |  |
+| P4: Calibration cov95 | 0.874 | [0.85, 0.99] | CALIBRATION_ACCEPTABLE |
+| P5: Edit-site - very-far heterogeneity | -0.0090 | [-0.0199, +0.0019] | MECHANISM_NOT_ESTABLISHED |
+| P5: Permuted negative control | -0.1107 | [-0.159, -0.062] | passes (feature-dependent) |
+
+## S4. Attrition ledger
+
+| Level | Count | Status |
+|-------|-------|--------|
+| Intended cells (20x8) | 160 | CONFIRMED_FACT |
+| Historical oracle-analyzable | 158 | REPOSITORY_REPORTED_NOT_REPLAYED |
+| P2 primary (20 puzzles, all finite D_p) | 20 | CONFIRMED |
+| P4 K_preaccess (outcome-blind) | 24 | CONFIRMED |
+| P4 K_eff_realized (post-attrition) | 24 | CONFIRMED |
+
+## S5. Code availability
+
+- **Repository**: https://github.com/Cunyu-Liu/ReactFlow
+- **Branch**: codex/reactflow-delta-prospective-v2-20260813
+- **Commit**: 13d34ac5adef63ec971cb238d5a0735aa3f5b1a3
+- **Entry points**:
+  - P2: scripts/reactflow_delta/run_p2_direct_v2.py
+  - P3: scripts/reactflow_delta/run_p3_lrso_v2.py
+  - P4: scripts/reactflow_delta/run_p4_external_v1.py
+  - P5: scripts/reactflow_delta/run_p5_mechanism_v1.py
+  - P6 replay: scripts/reactflow_delta/run_replay_v1.py
+  - P6 tables/figures: scripts/reactflow_delta/generate_p6_tables_figures_v1.py
+  - P6 cards: scripts/reactflow_delta/build_p6_cards_v1.py
+- **Replay**: python -m scripts.reactflow_delta.run_replay_v1
+- **Test suite**: pytest tests/reactflow_delta/
+- **Environment**: out/environment.yml (conda)

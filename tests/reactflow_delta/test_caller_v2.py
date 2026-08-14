@@ -24,9 +24,9 @@ CALLER_PY = os.path.join(ROOT, "scripts/reactflow_delta/caller_v2.py")
 
 def _load_caller():
     import sys
-    spec = importlib.util.spec_from_file_location("caller_v2", CALLER_PY)
+    spec = importlib.util.spec_from_file_location("caller_v2_under_test", CALLER_PY)
     mod = importlib.util.module_from_spec(spec)
-    sys.modules["caller_v2"] = mod
+    sys.modules["caller_v2_under_test"] = mod
     spec.loader.exec_module(mod)
     return mod
 

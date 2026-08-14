@@ -21,7 +21,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+          python -m pip install -e ".[dev,torch]"
       - name: Test with coverage
         run: python -m pytest --cov=reactflow --cov-report=term-missing
       - name: Symbolic checks
