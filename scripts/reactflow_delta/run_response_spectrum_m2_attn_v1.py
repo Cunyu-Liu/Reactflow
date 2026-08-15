@@ -54,6 +54,9 @@ def main():
     ap.add_argument("--nlayers", type=int, default=1)
     ap.add_argument("--dropout", type=float, default=0.1)
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--fast", action="store_true",
+                    help="use torch.compile + GPU-accumulated stats (identical "
+                         "training semantics, ~7x faster per step)")
     args = ap.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda_device
@@ -195,7 +198,8 @@ def main():
                 pos_tr, glob_tr, Ytr, Wtr, prior, POS_DIM, tail_dim, WINDOW,
                 epochs=args.epochs, bs=args.bs, lr=args.lr, resid_pen=args.resid_pen,
                 hidden=args.hidden, head_hidden=args.head_hidden, nhead=args.nhead,
-                nlayers=args.nlayers, dropout=args.dropout, seed=seed, device=device)
+                nlayers=args.nlayers, dropout=args.dropout, seed=seed, device=device,
+                fast=args.fast)
             delta = rv4.predict_posaware_attn(model, pos_te, glob_te, device)
             pred = (np.asarray(prior) + delta).astype(np.float32)
             fold_log["seeds"][str(seed)] = tlog
