@@ -24,7 +24,6 @@ from pathlib import Path
 
 ATTN_VARIANT = "wmae_resid_attn_spectrum"
 
-
 def _progress(path):
     try:
         d = json.loads(Path(path).read_text(encoding="utf-8"))
@@ -71,6 +70,8 @@ def main():
     ap.add_argument("--mlp-report", required=True)
     ap.add_argument("--pa-report", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--attn-variant", default=ATTN_VARIANT,
+                    help="model_variant of the third model (default wmae_resid_attn_spectrum)")
     ap.add_argument("--early-at", type=int, default=40,
                     help="run a matched early comparison once this many folds complete")
     ap.add_argument("--poll-secs", type=int, default=300)
@@ -116,11 +117,11 @@ def main():
                 r_pa = run_horizontal(str(out / "pa_matched_early.jsonl"),
                                       "wmae_resid_posaware_spectrum", "pa_early")
                 r_attn = run_horizontal(str(out / "attn_matched_early.jsonl"),
-                                        ATTN_VARIANT, "attn_early")
+                                        args.attn_variant, "attn_early")
                 p = save_compare("early", {
                     "wmae_resid_spectrum": _rows_summary(r_mlp),
                     "wmae_resid_posaware_spectrum": _rows_summary(r_pa),
-                    "wmae_resid_attn_spectrum": _rows_summary(r_attn),
+                    args.attn_variant: _rows_summary(r_attn),
                 }, n)
                 print(f"[attn_compare] EARLY comparison -> {p}", flush=True)
             except Exception as e:
@@ -130,7 +131,7 @@ def main():
         time.sleep(args.poll_secs)
 
     # ---- final full 3-way comparison ----
-    r_attn = run_horizontal(args.pred_attn, ATTN_VARIANT, "attn_full")
+    r_attn = run_horizontal(args.pred_attn, args.attn_variant, "attn_full")
     mlp_report = json.loads(Path(args.mlp_report).read_text(encoding="utf-8"))
     pa_report = json.loads(Path(args.pa_report).read_text(encoding="utf-8"))
     final = {
@@ -140,7 +141,7 @@ def main():
         "variants": {
             "wmae_resid_spectrum": _rows_summary(mlp_report),
             "wmae_resid_posaware_spectrum": _rows_summary(pa_report),
-            "wmae_resid_attn_spectrum": _rows_summary(r_attn),
+            args.attn_variant: _rows_summary(r_attn),
         },
     }
     fp = save_compare("full", final["variants"], len(done))
