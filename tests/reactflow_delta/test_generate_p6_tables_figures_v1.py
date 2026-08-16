@@ -20,7 +20,9 @@ def _p2():
 
 
 def _p3():
-    return {"verdict": "NO_INCREMENTAL_LRSO_SKILL"}
+    return {"verdict": {"2": "LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT",
+                        "4": "LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT",
+                        "8": "LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT"}}
 
 
 def _horizontal():

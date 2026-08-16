@@ -1,0 +1,93 @@
+{
+  "schema_version": "reactflow_delta.p5b_mechanism.v1",
+  "verdict": "MECHANISM_NOT_ESTABLISHED",
+  "K_preaccess": 694,
+  "K_eff_realized": 505,
+  "locked_outcome_access_count": 2,
+  "band_stats": {
+    "edit_site": {
+      "n": 505,
+      "mean": 0.08678,
+      "sd": 0.02,
+      "ci_low": 0.079,
+      "ci_high": 0.09456
+    },
+    "near_1_3": {
+      "n": 505,
+      "mean": 0.08689,
+      "sd": 0.02,
+      "ci_low": 0.07961,
+      "ci_high": 0.09417
+    },
+    "mid_4_10": {
+      "n": 505,
+      "mean": 0.0872,
+      "sd": 0.02,
+      "ci_low": 0.08012,
+      "ci_high": 0.09428
+    },
+    "far_11_25": {
+      "n": 505,
+      "mean": 0.09275,
+      "sd": 0.02,
+      "ci_low": 0.08595,
+      "ci_high": 0.09955
+    },
+    "very_far_26p": {
+      "n": 505,
+      "mean": 0.09066,
+      "sd": 0.02,
+      "ci_low": 0.0835,
+      "ci_high": 0.09782
+    }
+  },
+  "band_holm": {
+    "edit_site": {
+      "pass": true
+    },
+    "near_1_3": {
+      "pass": true
+    },
+    "mid_4_10": {
+      "pass": true
+    },
+    "far_11_25": {
+      "pass": true
+    },
+    "very_far_26p": {
+      "pass": true
+    }
+  },
+  "primary_very_far": {
+    "n": 505,
+    "mean": 0.09066,
+    "sd": 0.02,
+    "ci_low": 0.0835,
+    "ci_high": 0.09782
+  },
+  "primary_pass": true,
+  "edit_site_pass": true,
+  "negative_control": {
+    "permuted_edit_D": {
+      "n": 505,
+      "mean": 0.00655,
+      "sd": 0.015,
+      "ci_low": -0.01345,
+      "ci_high": 0.0204
+    },
+    "seed": 20260813,
+    "pass": false
+  },
+  "region_replication_pass": true,
+  "leave_dominant_out_vfar_ci": {
+    "n": 504,
+    "mean": 0.0901,
+    "sd": 0.02,
+    "ci_low": 0.08293,
+    "ci_high": 0.09727
+  },
+  "leave_dominant_out_pass": true,
+  "p4_carried": {
+    "verdict": "P4_EXTERNAL_STATISTICAL_PASS"
+  }
+}

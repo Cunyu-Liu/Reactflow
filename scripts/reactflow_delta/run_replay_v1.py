@@ -13,6 +13,15 @@ Replays the prospective-v2 primary results from a clean checkout + artifacts:
     verdict + component-macro CI to the locked P4 result.
   P5 (fresh replay): re-run the frozen mechanism contrasts into a fresh output
     and compare verdict to the locked P5 result.
+  P5b (fresh replay, optional): re-run the NEW independent set mechanism protocol
+    (M2RFOK/M2RFPK, 694 components) into a fresh output and compare.
+    Requires --locked-p5b and --p5b-components; omitted if not provided.
+  P5_COMBINED (report-level replay, fresh aggregation): if BOTH P5 and P5b are
+    available (replayed or locked), run the honest cross-set combined meta-
+    aggregation on the (replayed, else locked) per-set reports and compare
+    overall verdict, sub-criterion flags, caveat count, and total component
+    count to the locked P5 combined report.  Requires --locked-p5-combined;
+    if --locked-p5b / --p5b-components are missing, P5_COMBINED is skipped.
 
 P2/P3 retraining is NOT re-executed (GPU >8h per full run); instead the saved
 predictions are re-scored/re-derived, which is the artifact-level reproduction
@@ -30,6 +39,8 @@ from scipy import stats as _st
 from scripts.reactflow_delta.evaluator_crps_v1 import crps_gaussian
 from scripts.reactflow_delta.run_p4_external_v1 import run_p4
 from scripts.reactflow_delta.run_p5_mechanism_v1 import run_p5
+from scripts.reactflow_delta.run_p5b_mechanism_v1 import run_p5b
+from scripts.reactflow_delta.run_p5_combined_meta_v1 import evaluate_combined
 
 SCALE = 0.3
 RTOL = 1e-6
@@ -53,11 +64,8 @@ def _replay_p2(held_rows: Path) -> dict:
 
     Semantics: per-RECORD CRPS macro (mean over qualified positions within a
     record, then mean over records per puzzle), matching the original P2 evaluator.
-    Per-position rows are grouped by (puzzle, construct, edit_pos, ref, alt) to
-    reconstruct per-record means.
     """
     from collections import defaultdict
-    # group positions by record key
     record_positions: dict[str, dict[str, list[float]]] = defaultdict(
         lambda: {"zero": [], "direct": [], "target": []})
     n_skipped = 0
@@ -72,7 +80,6 @@ def _replay_p2(held_rows: Path) -> dict:
             record_positions[key]["direct"].append(r["pred_direct"])
             record_positions[key]["target"].append(r["target"])
             record_positions[key]["puzzle"] = r["puzzle"]
-    # per-record CRPS, per-puzzle D
     per_puzzle_d: dict[str, list[float]] = {}
     for key, data in record_positions.items():
         puzzle = data["puzzle"]
@@ -98,8 +105,16 @@ def _replay_p3(p3_result: Path) -> dict:
         dmap = doc["rank_d_p3"][rank]
         effects = [dmap[p] for p in sorted(dmap)]
         ci = _ci_from_effects(effects)
-        out[rank] = {"ci": ci,
-                     "verdict": "NO_INCREMENTAL_LRSO_SKILL" if ci["ci_high"] < 0 else "REVIEW"}
+        # Determine verdict from CI: ci_low > 0 => LRSO exceeds Direct*; ci_high < 0 => no skill;
+        # otherwise inconclusive. The replayed verdict is derived purely from the held effects,
+        # independent of the locked artifact's verdict string (which may differ between v1/v2/v3).
+        if ci["ci_low"] > 0:
+            v = "LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT"
+        elif ci["ci_high"] < 0:
+            v = "NO_INCREMENTAL_LRSO_SKILL"
+        else:
+            v = "REVIEW"
+        out[rank] = {"ci": ci, "verdict": v}
     return out
 
 
@@ -120,7 +135,10 @@ def _compare(key: str, orig: float | str | None, replayed: float | str | None,
 
 def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
                locked_p4: Path, locked_p5: Path, locked_p2: Path, locked_p3: Path,
-               p2_held_rows: Path, replay_out: Path, out: Path) -> dict:
+               p2_held_rows: Path, replay_out: Path, out: Path,
+               locked_p5b: Path | None = None,
+               p5b_components: Path | None = None,
+               locked_p5_combined: Path | None = None) -> dict:
     replay_out.mkdir(parents=True, exist_ok=True)
     results = {}
 
@@ -158,10 +176,13 @@ def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
                                p3[rank]["ci"]["ci_high"]))
         p3_cmp.append(_compare(f"P3_rank{rank}_ci_low", lk_ci.get("ci_low"),
                                p3[rank]["ci"]["ci_low"]))
-    p3_ok = all(c["match"] for c in p3_cmp) and \
-        all(p3[r]["verdict"] == "NO_INCREMENTAL_LRSO_SKILL" for r in p3) and \
-        all(str(p3_locked.get("verdict", {}).get(r)) == "NO_INCREMENTAL_LRSO_SKILL"
-            for r in p3)
+        # Verdict string agreement: compare replayed verdict to the locked verdict for
+        # the same rank (works for BOTH the retracted v1/v2 NO_INCREMENTAL_LRSO_SKILL
+        # and the valid v3 LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT), instead of hardcoding
+        # a single verdict string.
+        p3_cmp.append(_compare(f"P3_rank{rank}_verdict", p3[rank]["verdict"],
+                               str(p3_locked.get("verdict", {}).get(rank))))
+    p3_ok = all(c["match"] for c in p3_cmp)
     results["P3"] = {"type": "artifact_replay_no_retrain",
                      "verdict_replayed": {r: p3[r]["verdict"] for r in p3},
                      "verdict_locked": p3_locked.get("verdict"),
@@ -202,12 +223,129 @@ def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
                      "verdict_replayed": p5_new.get("verdict"),
                      "checks": p5_cmp, "reproduced": p5_ok}
 
+    # ---- P5b fresh replay (NEW independent component set, access count 2) ----
+    if locked_p5b is not None and p5b_components is not None and p5b_components.exists():
+        replay_p5b = replay_out / "p5b_replay_result.json"
+        run_p5b(rdat_dir, dev_csv, p5b_components, locked_p4, replay_p5b)
+        p5b_new = json.loads(replay_p5b.read_text(encoding="utf-8"))
+        p5b_locked = json.loads(locked_p5b.read_text(encoding="utf-8"))
+        p5b_cmp = [
+            _compare("P5b_verdict", p5b_locked.get("verdict"), p5b_new.get("verdict"), tol=0),
+            _compare("P5b_very_far_low",
+                     p5b_locked.get("primary_very_far", {}).get("ci_low"),
+                     p5b_new.get("primary_very_far", {}).get("ci_low")),
+            _compare("P5b_K_eff", float(p5b_locked.get("K_eff_realized")),
+                     float(p5b_new.get("K_eff_realized")), tol=0),
+        ]
+        p5b_ok = all(c["match"] for c in p5b_cmp)
+        results["P5b"] = {"type": "fresh_replay",
+                          "verdict_locked": p5b_locked.get("verdict"),
+                          "verdict_replayed": p5b_new.get("verdict"),
+                          "checks": p5b_cmp, "reproduced": p5b_ok}
+    else:
+        results["P5b"] = {"type": "skipped_missing_inputs",
+                          "note": "locked_p5b/p5b_components not provided; P5b replay omitted",
+                          "reproduced": True}
+
+    # ---- P5_COMBINED honest report-level replay --------------------------
+    # Prefer replayed per-set reports if available; else fall back to locked
+    # per-set reports. This is an "aggregation replay", not a raw-data replay,
+    # so the determinism is exact (same code, same inputs = same verdict).
+    p5_for_combined = p5_new if p5_ok else p5_locked
+    have_p5b_for_combined = (locked_p5b is not None
+                             and p5b_components is not None
+                             and p5b_components.exists())
+    if have_p5b_for_combined:
+        p5b_for_combined = p5b_new if (results.get("P5b") or {}).get("reproduced") else p5b_locked
+    else:
+        p5b_for_combined = None
+
+    if locked_p5_combined is not None and p5b_for_combined is not None:
+        replay_p5c = replay_out / "p5_combined_replay_result.json"
+        p5c_new = evaluate_combined(p5_for_combined, p5b_for_combined)
+        replay_p5c.write_text(json.dumps(p5c_new, indent=2, default=str), encoding="utf-8")
+        p5c_locked = json.loads(locked_p5_combined.read_text(encoding="utf-8"))
+        p5c_cmp = [
+            _compare("P5c_overall_verdict",
+                     p5c_locked.get("verdict"), p5c_new.get("verdict"), tol=0),
+            _compare("P5c_total_components",
+                     float((p5c_locked.get("inputs") or {}).get(
+                         "total_components_across_both_sets", -1)),
+                     float((p5c_new.get("inputs") or {}).get(
+                         "total_components_across_both_sets", -2)), tol=0),
+            _compare("P5c_primary_replicated_flag",
+                     str(bool((p5c_locked.get("primary_spatial_extension") or {}).get(
+                         "replicated_across_both"))),
+                     str(bool((p5c_new.get("primary_spatial_extension") or {}).get(
+                         "replicated_across_both"))), tol=0),
+            _compare("P5c_feature_dependence_conceptual_pass",
+                     str(bool((p5c_locked.get("feature_dependence_negative_control") or {}).get(
+                         "conceptual_overall_pass"))),
+                     str(bool((p5c_new.get("feature_dependence_negative_control") or {}).get(
+                         "conceptual_overall_pass"))), tol=0),
+            _compare("P5c_caveat_count",
+                     float(len(p5c_locked.get("caveats") or [])),
+                     float(len(p5c_new.get("caveats") or [])), tol=0),
+            _compare("P5c_claim_map_all_pass",
+                     str(all((c.get("pass") for c in
+                              (p5c_locked.get("claim_evidence_map") or [])))),
+                     str(all((c.get("pass") for c in
+                              (p5c_new.get("claim_evidence_map") or [])))), tol=0),
+        ]
+        # Set-B literal neg-control flag must match identically (honesty check)
+        p5c_cmp.append(_compare(
+            "P5c_SetB_literal_negcontrol_pass",
+            str(bool(((p5c_locked.get("feature_dependence_negative_control") or {}).get(
+                "set_b_literal_pass")))),
+            str(bool(((p5c_new.get("feature_dependence_negative_control") or {}).get(
+                "set_b_literal_pass")))), tol=0))
+        # Per-set individual verdicts must be preserved fail-closed
+        p5c_cmp.append(_compare(
+            "P5c_per_set_A_verdict_preserved_failclosed",
+            str((p5c_locked.get("inputs") or {}).get("p5_set_a_verdict")),
+            str((p5c_new.get("inputs") or {}).get("p5_set_a_verdict")), tol=0))
+        p5c_cmp.append(_compare(
+            "P5c_per_set_B_verdict_preserved_failclosed",
+            str((p5c_locked.get("inputs") or {}).get("p5b_set_b_verdict")),
+            str((p5c_new.get("inputs") or {}).get("p5b_set_b_verdict")), tol=0))
+        p5c_ok = all(c["match"] for c in p5c_cmp)
+        results["P5_COMBINED"] = {
+            "type": "report_level_aggregation_replay",
+            "verdict_locked": p5c_locked.get("verdict"),
+            "verdict_replayed": p5c_new.get("verdict"),
+            "note": (
+                "If per-set reproductions mismatch, falls back to locked per-set "
+                "inputs for aggregation (replay tests the aggregation logic, not "
+                "per-set recalculation). P5 and P5b individual replay flags are "
+                "checked in their own rows above."
+            ),
+            "used_replayed_set_a": bool(p5_new is p5_for_combined),
+            "used_replayed_set_b": bool(p5b_for_combined is p5b_new),
+            "checks": p5c_cmp, "reproduced": p5c_ok,
+        }
+    else:
+        if locked_p5_combined is None:
+            reason = "locked_p5_combined not provided"
+        else:
+            reason = "P5b inputs unavailable, cannot aggregate cross-set"
+        results["P5_COMBINED"] = {
+            "type": "skipped_missing_inputs",
+            "note": (f"P5_COMBINED replay omitted ({reason}; "
+                     "requires --locked-p5-combined AND (--locked-p5b + --p5b-components))."),
+            "reproduced": True,
+        }
+
     all_ok = all(v["reproduced"] for v in results.values())
+    locked_inputs = {"locked_p2": str(locked_p2), "locked_p3": str(locked_p3),
+                     "locked_p4": str(locked_p4), "locked_p5": str(locked_p5),
+                     "p2_held_rows": str(p2_held_rows)}
+    if locked_p5b is not None:
+        locked_inputs["locked_p5b"] = str(locked_p5b)
+        locked_inputs["p5b_components"] = str(p5b_components)
+    if locked_p5_combined is not None:
+        locked_inputs["locked_p5_combined"] = str(locked_p5_combined)
     report = {"schema_version": "reactflow_delta.p6_replay.v1",
-              "locked_inputs": {k: str(v) for k, v in {
-                  "locked_p2": locked_p2, "locked_p3": locked_p3,
-                  "locked_p4": locked_p4, "locked_p5": locked_p5,
-                  "p2_held_rows": p2_held_rows}.items()},
+              "locked_inputs": locked_inputs,
               "replay_output_dir": str(replay_out),
               "replay": results,
               "all_reproduced": all_ok,
@@ -227,14 +365,21 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--locked-p3", required=True)
     ap.add_argument("--locked-p4", required=True)
     ap.add_argument("--locked-p5", required=True)
+    ap.add_argument("--locked-p5b", required=False, default=None)
+    ap.add_argument("--p5b-components", required=False, default=None)
+    ap.add_argument("--locked-p5-combined", required=False, default=None)
     ap.add_argument("--p2-held-rows", required=True)
     ap.add_argument("--replay-out", required=True)
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
-    run_replay(Path(args.dev_csv), Path(args.rdat_dir), Path(args.components),
-               Path(args.locked_p4), Path(args.locked_p5), Path(args.locked_p2),
-               Path(args.locked_p3), Path(args.p2_held_rows),
-               Path(args.replay_out), Path(args.out))
+    run_replay(
+        Path(args.dev_csv), Path(args.rdat_dir), Path(args.components),
+        Path(args.locked_p4), Path(args.locked_p5), Path(args.locked_p2),
+        Path(args.locked_p3), Path(args.p2_held_rows),
+        Path(args.replay_out), Path(args.out),
+        locked_p5b=Path(args.locked_p5b) if args.locked_p5b else None,
+        p5b_components=Path(args.p5b_components) if args.p5b_components else None,
+        locked_p5_combined=Path(args.locked_p5_combined) if args.locked_p5_combined else None)
     return 0
 
 

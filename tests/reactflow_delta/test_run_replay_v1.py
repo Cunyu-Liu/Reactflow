@@ -102,3 +102,16 @@ class TestReplayP3:
         for r in ("2", "4", "8"):
             assert out[r]["verdict"] == "NO_INCREMENTAL_LRSO_SKILL"
             assert out[r]["ci"]["ci_high"] < 0.0
+
+    def test_replays_exceeds_direct_verdict(self, tmp_path):
+        # v3 spec-compliant re-run: positive per-puzzle D -> ci_low > 0 ->
+        # LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT (regression for the v3 verdict path)
+        doc = {"rank_d_p3": {
+            r: {f"P{i + 1:02d}": 0.012 + 0.0003 * i for i in range(20)}
+            for r in ("2", "4", "8")}}
+        p = tmp_path / "p3.json"
+        p.write_text(json.dumps(doc))
+        out = R._replay_p3(p)
+        for r in ("2", "4", "8"):
+            assert out[r]["verdict"] == "LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT"
+            assert out[r]["ci"]["ci_low"] > 0.0

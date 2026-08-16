@@ -18,82 +18,23 @@
 
 ## Gate summary
 
-P0 PASS | P1 FAIL_CLOSED_OPEN | P2 PROSPECTIVE_SIGNAL | P3 NO_INCREMENTAL_LRSO |
+P0 PASS | P1 FAIL_CLOSED_OPEN | P2 PROSPECTIVE_SIGNAL | P3 LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT (v1/v2 retracted) |
 P4 EXTERNAL_STATISTICAL_PASS + CALIBRATION | P5 MECHANISM_NOT_ESTABLISHED | P6 REPLAY_CONSISTENT
 
 ## How to verify
 
-CI detected...
-2 channel Terms of Service accepted
-Retrieving notices: - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / - \ | / done
+Everything in this package is auto-generated from locked artifacts on branch
+`codex/reactflow-delta-prospective-v2-20260813` and is reproducible:
 
-==================================== ERRORS ====================================
-__________ ERROR collecting tests/reactflow_delta/test_evaluate_v4.py __________
-ImportError while importing test module '/Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/tests/reactflow_delta/test_evaluate_v4.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-../../../../anaconda3/lib/python3.13/importlib/__init__.py:88: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-tests/reactflow_delta/test_evaluate_v4.py:15: in <module>
-    import evaluate_v4 as v4
-scripts/reactflow_delta/evaluate_v4.py:31: in <module>
-    from evaluate_v2 import (
-E   ModuleNotFoundError: No module named 'evaluate_v2'
-__________ ERROR collecting tests/reactflow_delta/test_evaluate_v5.py __________
-ImportError while importing test module '/Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/tests/reactflow_delta/test_evaluate_v5.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-../../../../anaconda3/lib/python3.13/importlib/__init__.py:88: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-tests/reactflow_delta/test_evaluate_v5.py:14: in <module>
-    import evaluate_v5 as v5
-scripts/reactflow_delta/evaluate_v5.py:36: in <module>
-    from evaluate_v2 import (
-E   ModuleNotFoundError: No module named 'evaluate_v2'
-_____ ERROR collecting tests/reactflow_delta/test_m0x_dev12_regression.py ______
-ImportError while importing test module '/Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/tests/reactflow_delta/test_m0x_dev12_regression.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-../../../../anaconda3/lib/python3.13/importlib/__init__.py:88: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-tests/reactflow_delta/test_m0x_dev12_regression.py:14: in <module>
-    from scripts.reactflow_delta.m0x_epro_dev12_regression import (  # noqa: E402
-scripts/reactflow_delta/m0x_epro_dev12_regression.py:53: in <module>
-    import m0x_epro_dev06 as dev06  # noqa: E402  (feature pipeline + pair records)
-scripts/reactflow_delta/m0x_epro_dev06.py:66: in <module>
-    from b0x_baselines import run_baseline, _pair_scale, _build_features as p2_features  # noqa: E402
-E   ModuleNotFoundError: No module named 'b0x_baselines'
-___ ERROR collecting tests/reactflow_delta/test_m0x_magnitude_calibration.py ___
-ImportError while importing test module '/Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/tests/reactflow_delta/test_m0x_magnitude_calibration.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-../../../../anaconda3/lib/python3.13/importlib/__init__.py:88: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-tests/reactflow_delta/test_m0x_magnitude_calibration.py:19: in <module>
-    from scripts.reactflow_delta.m0x_dev12_magnitude_calibration import (  # noqa: E402
-scripts/reactflow_delta/m0x_dev12_magnitude_calibration.py:41: in <module>
-    from b0x_baselines import _pair_scale  # noqa: E402
-E   ModuleNotFoundError: No module named 'b0x_baselines'
-____________ ERROR collecting tests/reactflow_delta/test_pair_v2.py ____________
-ImportError while importing test module '/Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/tests/reactflow_delta/test_pair_v2.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-../../../../anaconda3/lib/python3.13/importlib/__init__.py:88: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-tests/reactflow_delta/test_pair_v2.py:15: in <module>
-    from models.pair_v2 import build_scheme2_features, POS_DIM, _condition_feat
-scripts/reactflow_delta/models/pair_v2.py:25: in <module>
-    from run_p2_v3 import (  # noqa: E402
-run_p2_v3.py:47: in <module>
-    from caller_v3 import CallerV3
-caller_v3.py:43: in <module>
-    from caller_v2 import (
-E   ModuleNotFoundError: No module named 'caller_v2'
-=========================== short test summary info ============================
-ERROR tests/reactflow_delta/test_evaluate_v4.py
-ERROR tests/reactflow_delta/test_evaluate_v5.py
-ERROR tests/reactflow_delta/test_m0x_dev12_regression.py
-ERROR tests/reactflow_delta/test_m0x_magnitude_calibration.py
-ERROR tests/reactflow_delta/test_pair_v2.py
-!!!!!!!!!!!!!!!!!!! Interrupted: 5 errors during collection !!!!!!!!!!!!!!!!!!!!
-5 errors in 0.92s
+1. **Gates** — `pr_readiness_checklist.md` rows A1-A8 and E are checked against the
+   live remote state (authority epoch 21 ACTIVE; P2/P3/P4/P5/P6 verdicts above).
+2. **Replay** — one-click reproducibility via
+   `PYTHONPATH=.:src python scripts/reactflow_delta/run_replay_v1.py`
+   with the locked artifacts (P2/P3 re-derived; P4/P5/P5b fresh re-run; P5_COMBINED
+   report-level aggregation) yields `REPLAY_CONSISTENT`; see
+   `REPRODUCE_p6_20260814.md` for the full command.
+3. **Tests** — the full `reactflow_delta` suite passes on the remote GPU machine,
+   including the P3 spec-compliance fixtures (`test_p3_lrso_v3.py`, 14 tests) and the
+   P5 combined fail-closed fixtures (`test_p5_combined_meta_v1.py`, 11 tests).
+4. **No placeholders** — manuscript/supplement drafts contain no TODO/TBD/placeholder
+   markers.

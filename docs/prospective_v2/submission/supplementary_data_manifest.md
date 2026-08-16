@@ -38,7 +38,7 @@
 | P2 | Direct effects (20-puzzle) | docs/prospective_v2/p2_direct_v2_result_20260813.json |
 | P2 | Held position rows (raw) | /mnt/cunyuliu/prospective_v2_p2_preds_20260813/p2_held_position_rows.jsonl (975,599 rows) |
 | P2 | Secondaries (region/distance/calibration) | /mnt/cunyuliu/prospective_v2_p2_preds_20260813/p2_secondaries_report.json |
-| P3 | LRSO effects (corrected) | docs/prospective_v2/p3_lrso_v2_result_20260813.json |
+| P3 | LRSO effects (spec-compliant v3; v1/v2 retracted) | docs/prospective_v2/p3_lrso_v3_result_20260815.json |
 | P4 | External components (full) | /mnt/cunyuliu/prospective_v2_p4_20260813/p4_external_components.json (90 MB) |
 | P4 | External result (D/CI/FWER) | /mnt/cunyuliu/prospective_v2_p4_20260813/p4_external_result.json |
 | P4 | Calibration result | /mnt/cunyuliu/prospective_v2_p4_20260813/p4_calibration_result.json |
@@ -54,9 +54,9 @@
 | Estimand | Value | 95% CI | Verdict |
 |----------|-------|--------|---------|
 | P2: D_p = CRPS(T*) - CRPS(Direct*) | +0.0127 | [+0.0079, +0.0175] | PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT |
-| P3: LRSO rank 2 vs B* | -0.0215 | [-0.0288, -0.0141] | NO_INCREMENTAL_LRSO_SKILL |
-| P3: LRSO rank 4 vs B* | -0.0165 | [-0.0245, -0.0084] | NO_INCREMENTAL_LRSO_SKILL |
-| P3: LRSO rank 8 vs B* | -0.0170 | [-0.0242, -0.0098] | NO_INCREMENTAL_LRSO_SKILL |
+| P3: LRSO rank 2 vs B* (v3 spec-compliant) | +0.0147 | [+0.0119, +0.0175] | LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT |
+| P3: LRSO rank 4 vs B* (v3 spec-compliant) | +0.0155 | [+0.0113, +0.0196] | LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT |
+| P3: LRSO rank 8 vs B* (v3 spec-compliant) | +0.0154 | [+0.0122, +0.0185] | LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT |
 | P4: Component-macro D vs zero | +0.0410 | [+0.0153, +0.0667] | P4_EXTERNAL_STATISTICAL_PASS |
 | P4: FWER (Holm-Bonferroni) | pass |  |  |
 | P4: Calibration cov95 | 0.874 | [0.85, 0.99] | CALIBRATION_ACCEPTABLE |

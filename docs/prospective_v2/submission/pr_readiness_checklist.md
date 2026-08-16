@@ -10,7 +10,7 @@
 | A1 P0 authority/truth reconciliation | PASS | epoch21 ACTIVE; authority_epoch_21 sentinel+bundle |
 | A2 P1 data/measurement/evaluator | FAIL_CLOSED_OPEN (non-blocking for P2/P3) | evaluator PASS, held_response_invariance PASS, primary caller exclusion PASS |
 | A3 P2 direct learnability | PASS | 20-puzzle CI lower +0.0079 > 0; sign-flip p=1.9e-6 |
-| A4 P3 LRSO incremental skill | NO_INCREMENTAL (adopt reg_direct) | all ranks CI upper < 0 |
+| A4 P3 LRSO incremental skill | PASS (LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT) | spec-compliant v3 re-run (2026-08-16): rank2/4/8 D_p^P3=+0.0147/+0.0155/+0.0154, all 95% CI lower > 0; 20/20 puzzles positive; sign-flip p=1.9e-6. v1/v2 verdict retracted (implementation failure). |
 | A5 P4 external statistical | PASS | K_eff=24 >= 9; component CI lower +0.0153; FWER pass; leave-dominant-out lower +0.0127 |
 | A6 P4 calibration | PASS | cov95 0.874 in [0.85,0.99] |
 | A7 P5 mechanism | MECHANISM_NOT_ESTABLISHED (reported honestly) | edit-vfar CI lower -0.0199; negative control passes |
@@ -51,7 +51,7 @@
 - P0: AUTHORITY_RECONCILIATION_COMPLETE_PASS
 - P1: FAIL_CLOSED_OPEN (blocks_phase2/3=false, blocks_phase4=true)
 - P2: PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT
-- P3: NO_INCREMENTAL_LRSO_SKILL
+- P3: LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT (v1/v2 retracted)
 - P4: P4_EXTERNAL_STATISTICAL_PASS + CALIBRATION_ACCEPTABLE
 - P5: MECHANISM_NOT_ESTABLISHED
 - P6: REPLAY_CONSISTENT (P6_REPRODUCIBILITY_DELIVERED)

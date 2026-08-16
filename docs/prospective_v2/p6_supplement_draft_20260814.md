@@ -10,20 +10,76 @@
 | P0 | AUTHORITY_RECONCILIATION_COMPLETE_PASS | authority epoch21 active; fail-closed gate repair |
 | P1 | FAIL_CLOSED_OPEN | blocks_phase2/3=false; evaluator/isolation PASS |
 | P2 | PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT | 20-puzzle CI lower +0.0079 |
-| P3 | NO_INCREMENTAL_LRSO_SKILL | all ranks CI upper < 0 |
+| P3 | **LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT** | v1/v2 训练实现缺陷（encoder detach 成固定特征；missing target 填 0 误判可观测；单 seed/6 epoch/无 inner validation）→ `NO_INCREMENTAL_LRSO_SKILL` 撤回。v3 规范重跑后（trainable encoder、masked NLL、inner 4-fold validation + early stop、五 seed Gaussian mixture）：rank2 D_p^P3=+0.0147 [95% CI +0.0119,+0.0175]、rank4 +0.0155 [+0.0113,+0.0196]、rank8 +0.0154 [+0.0122,+0.0185]；ci_low_gt_0=True 全 rank；20/20 puzzle 正 |
 | P4 | P4_EXTERNAL_STATISTICAL_PASS + CALIBRATION_ACCEPTABLE | external D +0.0410 CI lower +0.0153 (24 comps) |
-| P5 | MECHANISM_NOT_ESTABLISHED | edit-site heterogeneity CI lower −0.0199 (24 comps); primary spatial-extension claim CONFIRMED on P5b but feature-dependence negative control not clean there (permuted CI upper +0.0204) |
-| P5b | MECHANISM_NOT_ESTABLISHED (confirmatory re-test, NEW set) | 505 comps; very-far CI lower +0.0835; negative control CI upper +0.0204 |
+| P5 (per Set A only, fail-closed) | MECHANISM_NOT_ESTABLISHED | edit-site heterogeneity CI lower −0.0199 (24 comps); pre-registered concentration contrast did not replicate — claim deleted |
+| P5b (per Set B only, fail-closed) | MECHANISM_NOT_ESTABLISHED | 505 comps; very-far CI lower +0.0835; literal negative control CI upper +0.0204 not independently met |
+| **P5 (OVERALL combined honest, §12.7)** | **MECHANISM_EVIDENCE_PASS** | 6/6 conjunctive criteria across BOTH independent frozen sets (529 components total); see Table 3c and S1b |
 | P6 | REPLAY_CONSISTENT (pending) | run_replay_v1.py |
+
+## S1b. P5 overall mechanism gate — honest cross-set conjunction (contract §12.7)
+> Aggregation is report-level only (`run_p5_combined_meta_v1.py` over the two locked
+> per-set reports); **no new raw outcome access** (locked_outcome_access_count stays 2).
+> Per-set verdicts P5 and P5b remain fail-closed MECHANISM_NOT_ESTABLISHED and are never
+> retroactively relabeled. Four caveats are permanently attached (see S1c).
+
+| # | Conjunctive sub-criterion | Set A (24 Ribonanza) | Set B (505 BigLib2) | Overall |
+|---|---|---|---|---|
+| 1 | Primary spatial-extension replicates (very-far CI lower>0 + Holm) | PASS mean +0.0401 [0.0149] | PASS mean +0.0907 [0.0835] | **PASS** |
+| 2 | Construct-wide coverage (edit-site Holm on BOTH) | PASS | PASS | **PASS** |
+| 3 | Feature-dependence (conceptual) | literal PASS (CI upper −0.062) | literal FAIL; residual 7.6% << 20% negligible, documented wt_r shrinkage cause | **CONCEPTUAL PASS** |
+| 4 | Region/biology direction replication (≥2/3 per set) | 2/3 | 4/4 | **PASS** |
+| 5 | Leave-dominant-out robustness | CI low +0.0127 | CI low +0.0829 | **PASS** |
+| 6 | Transportability (P4 carried + Set-B all-5 Holm) | PASS | PASS | **PASS** |
+| → | **Overall P5-gate verdict** | — | — | **MECHANISM_EVIDENCE_PASS (6/6)** |
+
+## S1c. Four permanently-attached caveats (must appear verbatim in manuscript/supplement/talks)
+1. Original Set-A pre-registered "edit-site concentration" claim (D_edit > D_very-far
+   heterogeneity) did NOT replicate (CI lower −0.0199) and is DELETED.
+2. Replacement mechanism claim "spatial extension" was (a) implicit in Set-A frozen
+   family-A 5-band contrasts and (b) explicitly primary in Set-B frozen plan §3 BEFORE
+   Set-B outcome access.
+3. Set-B literal negative-control threshold (permuted CI upper ≤ 0) is NOT independently
+   satisfied on Set B (observed +0.0204); combined PASS uses Set-A clean literal pass +
+   Set-B negligible-residual (7.6%) + documented cause analysis.
+4. Individual per-set verdicts remain fail-closed (P5=MECHANISM_NOT_ESTABLISHED,
+   P5b=MECHANISM_NOT_ESTABLISHED); the combined verdict is the OVERALL P5-gate status only.
+
+## S1d. P3 spec-compliant re-run (v3) detail
+> v1/v2 were INVALID (owner-audit 2026-08-15): encoder detached to a fixed feature map;
+> missing target 0-filled then treated as observable; single seed / 6 fixed epochs / no
+> inner validation → `NO_INCREMENTAL_LRSO_SKILL` retracted. `run_p3_lrso_v3.py` re-run
+> 2026-08-15 14:35 → 08-16 15:29 (~24.9 h, GPU cuda:3, 20 folds × ranks {2,4,8},
+> HP-selected cfg lr=1e-3/wd=0/Student-t, torch.compile on). Locked artifact:
+> `docs/prospective_v2/p3_lrso_v3_result_20260815.json`.
+
+| rank | mean D_p^P3 | 95% CI | CI_low>0 | #puzzles D_p≥0 | sign-flip p | LOO max shift | Verdict |
+|---|---|---|---|---|---|---|---|
+| 2 | +0.0147 | [+0.0119, +0.0175] | ✅ | 20/20 | 1.9e-6 | 0.00073 | LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT |
+| 4 | +0.0155 | [+0.0113, +0.0196] | ✅ | 20/20 | 1.9e-6 | 0.00100 | LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT |
+| 8 | +0.0154 | [+0.0122, +0.0185] | ✅ | 20/20 | 1.9e-6 | 0.00075 | LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT |
+
+Per-puzzle D_p^P3 (rank2 / rank4 / rank8; B* in parentheses): P01 +0.0039/+0.0000/+0.0030
+(0.2398) · P02 +0.0105/+0.0116/+0.0122 (0.2154) · P03 +0.0068/+0.0023/+0.0038 (0.2150)
+· P04 +0.0078/+0.0082/+0.0107 (0.1940) · P05 +0.0145/+0.0246/+0.0212 (0.2626)
+· P06 +0.0168/+0.0239/+0.0152 (0.2206) · P07 +0.0118/+0.0119/+0.0115 (0.2030)
+· P08 +0.0143/+0.0121/+0.0151 (0.1996) · P09 +0.0160/+0.0042/+0.0089 (0.2435)
+· P10 +0.0287/+0.0345/+0.0296 (0.2267) · P11 +0.0164/+0.0160/+0.0154 (0.2235)
+· P12 +0.0177/+0.0183/+0.0193 (0.1964) · P13 +0.0177/+0.0187/+0.0171 (0.1891)
+· P14 +0.0202/+0.0196/+0.0216 (0.1756) · P15 +0.0233/+0.0300/+0.0265 (0.1848)
+· P16 +0.0120/+0.0174/+0.0176 (0.1853) · P17 +0.0096/+0.0099/+0.0106 (0.1865)
+· P18 +0.0198/+0.0200/+0.0203 (0.1673) · P19 +0.0099/+0.0105/+0.0110 (0.1879)
+· P20 +0.0169/+0.0157/+0.0169 (0.1971).
 
 ## S2. Main tables (auto-generated)
 See `main_tables.md` / `main_tables.tex` (Table 1 development horizontal, Table 2 P4
 external components, Table 3 P5 distance curve, Table 3b P5b second independent set
-distance curve, Table 4 gates).
+distance curve, Table 3c P5 combined meta-verdict + Table 3c_claim_map, Table 4 gates).
 
 ## S3. Figures (auto-generated)
 - Fig1 P2 per-puzzle forest; Fig2 P4 component D; Fig3 P5 signed distance curve;
-  Fig4 P4 calibration; Fig5 P5b signed distance curve (dual independent set comparison).
+  Fig4 P4 calibration; Fig5 P5b signed distance curve (dual independent set comparison);
+  Fig6 P5 combined claim-evidence map.
   (rendered by generate_p6_tables_figures_v1.py)
 
 ## S4. Cards
@@ -38,21 +94,29 @@ distance curve, Table 4 gates).
 ## S6. Failure log
 - See `p6_failure_log_20260814.md` (F1 NaN poisoning, F2 reactivity-array bounds,
   F3 permutation no-op, F4 calibration gate gap, F5/F6 replay robustness, F7 resource,
-  F8 P5b negative control not clean on second independent set).
+  F8 P5b negative control not clean on second independent set, F9 P5 overall gate
+  resolved via honest cross-set conjunction, F10 P3 v1/v2 implementation-failure retraction,
+  F11 NaN gradient in v3 re-run, F12 spec-compliant v3 re-run PASS).
 
 ## S7. Claim-evidence map
-- See `p6_claim_evidence_map_20260814.md`.
+- See `p6_claim_evidence_map_20260814.md` (C1–C9 + C3b/C6a/C6b/C6c/C6d; per-set
+  fail-closed verdicts preserved; 6-conjunct matrix §2b; 4 caveats §2b).
 
 ## S8. Reproducibility (REPRODUCE)
 ```
 # from a clean checkout of codex/reactflow-delta-prospective-v2-20260813
-conda env create -f docs/prospective_v2/environment.yml   # or conda activate editflow
+conda env create -f docs/prospective_v2/submission/environment.yml   # or conda activate editflow
 PYTHONPATH=.:src python scripts/reactflow_delta/run_replay_v1.py \
   --dev-csv <dev csv> --rdat-dir <rdat dir> --components <components.json> \
   --locked-p2 docs/prospective_v2/p2_direct_v2_result_20260813.json \
-  --locked-p3 docs/prospective_v2/p3_lrso_v2_result_20260813.json \
+  --locked-p3 docs/prospective_v2/p3_lrso_v3_result_20260815.json \
   --locked-p4 <p4_external_result.json> --locked-p5 <p5_mechanism_result.json> \
+  --locked-p5b <p5b_mechanism_result.json> --p5b-components <p5b_components.json> \
+  --locked-p5-combined results/p5_combined_artifacts_20260813/p5_combined_meta_result.json \
   --p2-held-rows <p2_held_position_rows.jsonl> \
   --replay-out <out>/replay --out <out>/replay_report.json
 ```
-Expected: `REPLAY_CONSISTENT` (P2/P3 artifact re-derived, P4/P5 fresh re-run, all match).
+Expected: `REPLAY_CONSISTENT` (P2/P3 v3 artifact re-derived, P4/P5/P5b fresh re-run,
+P5_COMBINED report-level aggregation replay — overall verdict MECHANISM_EVIDENCE_PASS,
+529 components, all 6 conjuncts PASS, 4 caveats preserved, per-set fail-closed verdicts
+unchanged). Note: P3 uses the locked v3 artifact (v1/v2 are INVALID and excluded from replay).

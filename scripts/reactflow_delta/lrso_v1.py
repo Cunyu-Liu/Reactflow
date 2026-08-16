@@ -31,6 +31,19 @@ class RelativeAttentionBlock(nn.Module):
         self.norm2 = nn.LayerNorm(d)
         # relative position bias per head over a max window (small init for stability)
         self.rel = nn.Parameter(torch.randn(heads, 401) * 0.02)
+        self._idx_cache: dict = {}
+
+    def _rel_index(self, L: int, device: torch.device) -> torch.Tensor:
+        """Relative-position index tensor (L, L) cached per length/device.
+        Pure performance: identical values to the per-forward construction,
+        just computed once instead of every forward."""
+        key = (L, str(device))
+        idx = self._idx_cache.get(key)
+        if idx is None:
+            idx = torch.clamp(torch.arange(L, device=device)[None, :]
+                              - torch.arange(L, device=device)[:, None] + 200, 0, 400)
+            self._idx_cache[key] = idx
+        return idx
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
         # x: (B, L, d), mask: (B, L)
@@ -39,14 +52,19 @@ class RelativeAttentionBlock(nn.Module):
         qkv = self.qkv(xn).reshape(B, L, 3, self.heads, self.dh).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[2]  # (B,H,L,dh)
         att = (q @ k.transpose(-1, -2)) / (self.dh ** 0.5)
-        rel = torch.stack([self.rel[h, torch.clamp(torch.arange(L, device=x.device)[None, :]
-                                                   - torch.arange(L, device=x.device)[:, None] + 200, 0, 400)]
-                           for h in range(self.heads)])
+        # single batched gather over all heads (self.rel: (heads, 401))
+        rel = self.rel[:, self._rel_index(L, x.device)]  # (heads, L, L)
         att = att + rel.unsqueeze(0)
-        pad = (~mask).unsqueeze(1).unsqueeze(-1)
-        att = att.masked_fill(pad, float("-inf"))
+        # Mask invalid KEYS, but ALWAYS keep the diagonal (self-attention) valid.
+        # Using -inf on an entire query row makes softmax output NaN AND, worse,
+        # produces NaN gradients through softmax backward even if the forward value
+        # is later zeroed. Keeping the diagonal valid guarantees no row is fully
+        # masked, so forward and backward stay finite (unobserved positions attend
+        # only to themselves and are excluded downstream by the WT-obs mask).
+        key_pad = (~mask).unsqueeze(1).unsqueeze(-1)      # (B,1,1,L): invalid keys
+        diag = torch.eye(L, device=x.device, dtype=torch.bool)[None, None]  # (1,1,L,L)
+        att = att.masked_fill(key_pad & ~diag, float("-inf"))
         att = F.softmax(att, dim=-1)
-        att = att.masked_fill(pad, 0.0)
         ctx = (att @ v).transpose(1, 2).reshape(B, L, d)
         return self.norm2(x + self.out(ctx))
 
