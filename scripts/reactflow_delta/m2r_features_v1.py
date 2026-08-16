@@ -149,6 +149,21 @@ def build_pair_features(s: "M2RPair") -> np.ndarray:
         1.0 if (base_i, base_j) in WOBBLE else 0.0,
     ]))
 
+    # ---- 6. double-mutant base types (LEGAL: from the single-mutant SEQUENCES,
+    #         NOT from the double-mutant reactivity profile) ----
+    # The double mutant's SEQUENCE at i is mutA_seq[i]; at j is mutB_seq[j].
+    _seqA = getattr(s, "mutA_seq", None)
+    _seqB = getattr(s, "mutB_seq", None)
+    dbi = _seqA[i] if _seqA is not None and i < len(_seqA) else seq[i]
+    dbj = _seqB[j] if _seqB is not None and j < len(_seqB) else seq[j]
+    parts.append(_base_oh(dbi))
+    parts.append(_base_oh(dbj))
+    parts.append(np.array([
+        1.0 if (dbi, dbj) in WC_PAIRS else 0.0,
+        1.0 if (dbi, dbj) in WOBBLE else 0.0,
+        1.0 if (base_i, base_j) in WC_PAIRS and (dbi, dbj) in WC_PAIRS else 0.0,
+    ]))
+
     return np.concatenate(parts).astype(np.float64)
 
 
@@ -175,6 +190,9 @@ def feature_names() -> list[str]:
     names += [f"oh_i_{b}" for b in BASES]
     names += [f"oh_j_{b}" for b in BASES]
     names += ["wc_pair", "wobble"]
+    names += [f"oh_dbi_{b}" for b in BASES]
+    names += [f"oh_dbj_{b}" for b in BASES]
+    names += ["dbl_wc_pair", "dbl_wobble", "wt_and_dbl_wc"]
     return names
 
 

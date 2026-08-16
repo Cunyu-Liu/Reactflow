@@ -178,6 +178,8 @@ class M2RPair:
     target_structure: str
     sub_start: int
     sub_end: int
+    mutA_seq: Optional[str] = None   # full sequence of the single-A mutant
+    mutB_seq: Optional[str] = None   # full sequence of the single-B mutant
 
 
 def build_pair_samples(design: dict) -> list[M2RPair]:
@@ -210,6 +212,8 @@ def build_pair_samples(design: dict) -> list[M2RPair]:
             eligibility_mask=mask,
             target_structure=design["target_structure"],
             sub_start=sub_start, sub_end=design["sub_end"] or sub_start,
+            mutA_seq=p.get("mutA_seq"),
+            mutB_seq=p.get("mutB_seq"),
         ))
     return out
 
