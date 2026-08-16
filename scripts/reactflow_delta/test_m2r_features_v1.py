@@ -85,5 +85,41 @@ def test_build_all_consistent(samples):
     assert np.all(np.isfinite(X))
 
 
+def test_m2structure_features_added(samples):
+    """When M2_structure is attached, feature dim grows by 6 and is non-zero."""
+    s = samples[0]
+    # No M2_structure attached -> last 6 features are zero (or defaults)
+    x_none = m2rf.build_pair_features(s)
+    names = m2rf.feature_names()
+    n = len(names)
+    # attach M2_structure to the sample
+    s2 = type(s)(**{f: getattr(s, f) for f in s.__dataclass_fields__})
+    s2.m2_structure = "((....))" + "." * (len(s.sequence) - 8)
+    s2.sub_start = 1
+    x_with = m2rf.build_pair_features(s2)
+    assert len(x_none) == n
+    assert len(x_with) == n
+    # the last 4 paired/depth features should differ when structure attached
+    m2_idx = names.index("m2_pa_i")
+    assert names[m2_idx] == "m2_pa_i"
+    assert names[-2] == "m2_f1"
+    assert names[-1] == "m2_f1_crossed_pair"
+    assert x_with[m2_idx] >= 0  # finite, defined
+
+
+def test_attach_m2_structure_all_designs():
+    """attach_m2_structure attaches non-empty structure to all usable designs."""
+    path = "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2R_data.v4.5.1.csv"
+    m2_path = "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv"
+    designs, meta = m2r.parse_m2r_csv(path)
+    m2r.attach_m2_structure(designs, m2_path)
+    usable = [d for d in designs if d["usable"]]
+    assert len(usable) > 100
+    empty = [d for d in usable if not d.get("m2_structure")]
+    assert len(empty) == 0, f"{len(empty)} usable designs lack M2_structure"
+    f1s = [d.get("m2_f1") for d in usable]
+    assert all(f is not None for f in f1s)
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

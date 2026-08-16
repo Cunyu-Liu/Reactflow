@@ -104,6 +104,8 @@ def predict_mlp(model, Xte, device=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--m2r-csv", required=True)
+    ap.add_argument("--m2-csv", default=None,
+                    help="Optional M2 CSV to attach M2_structure features")
     ap.add_argument("--out", required=True)
     ap.add_argument("--cuda-device", default="2")
     ap.add_argument("--skip-mlp", action="store_true")
@@ -123,6 +125,9 @@ def main():
         print("[m2r] torch not available", flush=True)
 
     designs, meta = m2r.parse_m2r_csv(args.m2r_csv)
+    if args.m2_csv:
+        m2r.attach_m2_structure(designs, args.m2_csv)
+        print(f"[m2r] M2_structure attached from {args.m2_csv}", flush=True)
     samples = m2r.build_all_pair_samples(designs)
     samples = [s for s in samples if s.rescue_factor is not None]
     print(f"[m2r] n_samples={len(samples)} n_designs={len(designs)}", flush=True)

@@ -48,6 +48,38 @@ def _parse_arrays(row: dict, prefix: str) -> list[Optional[float]]:
     return out
 
 
+def attach_m2_structure(designs: list[dict], m2_csv_path: str) -> None:
+    """Attach M2_structure / M2_F1 / M2_F1_crossed_pair to each M2R design.
+
+    The M2 experiment (OK7a_M2_data) is an INDEPENDENT data source from the
+    M2R rescue_factor target: it measures single-mutant SHAPE reactivity and
+    infers the experimentally observed secondary structure via ShapeKnots.
+    M2 and M2R share the same (puzzle, method) designs.
+
+    Modifies designs in place: adds keys
+      "m2_structure", "m2_f1", "m2_f1_crossed_pair", "m2_sub_start".
+    If no matching M2 design is found, the keys default to empty/None.
+    """
+    with open(m2_csv_path, newline="", encoding="utf-8") as fh:
+        m2_by_key = {}
+        for row in csv.DictReader(fh):
+            if not row.get("mutA") and not row.get("mutB"):
+                key = (row["puzzle"], row["method"])
+                m2_by_key[key] = {
+                    "m2_structure": row.get("M2_structure") or "",
+                    "m2_f1": float(row["M2_F1"]) if row.get("M2_F1") else None,
+                    "m2_f1_crossed_pair": float(row["M2_F1_crossed_pair"])
+                    if row.get("M2_F1_crossed_pair") else None,
+                    "m2_sub_start": int(row["sub_start"]) if row.get("sub_start") else None,
+                }
+    for d in designs:
+        m2 = m2_by_key.get((d["puzzle"], d["method"]), {})
+        d["m2_structure"] = m2.get("m2_structure", "")
+        d["m2_f1"] = m2.get("m2_f1")
+        d["m2_f1_crossed_pair"] = m2.get("m2_f1_crossed_pair")
+        d["m2_sub_start"] = m2.get("m2_sub_start")
+
+
 def _has(x) -> bool:
     return x not in (None, "")
 
@@ -180,6 +212,9 @@ class M2RPair:
     sub_end: int
     mutA_seq: Optional[str] = None   # full sequence of the single-A mutant
     mutB_seq: Optional[str] = None   # full sequence of the single-B mutant
+    m2_structure: str = ""
+    m2_f1: Optional[float] = None
+    m2_f1_crossed_pair: Optional[float] = None
 
 
 def build_pair_samples(design: dict) -> list[M2RPair]:
@@ -211,6 +246,9 @@ def build_pair_samples(design: dict) -> list[M2RPair]:
             rescue_factor=p["rescue_factor"],
             eligibility_mask=mask,
             target_structure=design["target_structure"],
+            m2_structure=design.get("m2_structure", ""),
+            m2_f1=design.get("m2_f1"),
+            m2_f1_crossed_pair=design.get("m2_f1_crossed_pair"),
             sub_start=sub_start, sub_end=design["sub_end"] or sub_start,
             mutA_seq=p.get("mutA_seq"),
             mutB_seq=p.get("mutB_seq"),

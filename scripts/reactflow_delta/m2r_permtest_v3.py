@@ -27,6 +27,8 @@ def _mae(y, p):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--m2r-csv", required=True)
+    ap.add_argument("--m2-csv", default=None,
+                    help="Optional M2 CSV to attach M2_structure features")
     ap.add_argument("--out", required=True)
     ap.add_argument("--n-perm", type=int, default=300)
     ap.add_argument("--n-boot", type=int, default=500)
@@ -34,6 +36,8 @@ def main():
     args = ap.parse_args()
 
     designs, meta = m2r.parse_m2r_csv(args.m2r_csv)
+    if args.m2_csv:
+        m2r.attach_m2_structure(designs, args.m2_csv)
     samples = [s for s in m2r.build_all_pair_samples(designs) if s.rescue_factor is not None]
     X, y, keys, _ = m2rf.build_all(samples)
     keys = np.array(keys)

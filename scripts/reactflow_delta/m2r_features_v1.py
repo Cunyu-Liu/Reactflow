@@ -164,6 +164,32 @@ def build_pair_features(s: "M2RPair") -> np.ndarray:
         1.0 if (base_i, base_j) in WC_PAIRS and (dbi, dbj) in WC_PAIRS else 0.0,
     ]))
 
+    # ---- 7. M2_structure features (INDEPENDENT experimental data source) ----
+    # M2_structure is the experimentally observed secondary structure of the
+    # design, inferred via ShapeKnots from the M2 experiment's single-mutant
+    # Z-score contact map.  It is NOT derived from the M2R rescue_factor target.
+    # M2_structure covers only the design region starting at sub_start
+    # (1-indexed); M2R pair sites are full-sequence 0-indexed coordinates.
+    m2str = getattr(s, "m2_structure", "") or ""
+    m2_sub = getattr(s, "sub_start", None)
+    if m2str and m2_sub is not None:
+        _pa, _dp = dot_to_depth(m2str)
+        idx_i = i - (m2_sub - 1)
+        idx_j = j - (m2_sub - 1)
+        def _val(arr, idx):
+            return float(arr[idx]) if 0 <= idx < len(arr) else 0.0
+        parts.append(np.array([
+            _val(_pa, idx_i), _val(_pa, idx_j),
+            _val(_dp, idx_i), _val(_dp, idx_j),
+        ]))
+    else:
+        parts.append(np.zeros(4))
+    # design-level M2_F1 agreement scores (1.0 = perfect M2/target agreement)
+    parts.append(np.array([
+        _nan_to(getattr(s, "m2_f1", None)),
+        _nan_to(getattr(s, "m2_f1_crossed_pair", None)),
+    ]))
+
     return np.concatenate(parts).astype(np.float64)
 
 
@@ -193,6 +219,8 @@ def feature_names() -> list[str]:
     names += [f"oh_dbi_{b}" for b in BASES]
     names += [f"oh_dbj_{b}" for b in BASES]
     names += ["dbl_wc_pair", "dbl_wobble", "wt_and_dbl_wc"]
+    names += ["m2_pa_i", "m2_pa_j", "m2_dp_i", "m2_dp_j",
+              "m2_f1", "m2_f1_crossed_pair"]
     return names
 
 
