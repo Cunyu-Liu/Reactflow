@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-08-07T00:00:00+08:00",
+  "outputs": {
+    "asset_disposition_v2.jsonl": {
+      "path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d1x_v2/d1x_v2_canonicalization_20260807T1830+0800/asset_disposition_v2.jsonl",
+      "sha256": "7b9d5a038139400cfca108c405900f4d44a8896bceab0acfe2dcbabcc15f0e16"
+    },
+    "canonical_records_v2.jsonl": {
+      "path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d1x_v2/d1x_v2_canonicalization_20260807T1830+0800/canonical_records_v2.jsonl",
+      "sha256": "d6ef0e16e8dddb0ac257523292d57fc4d1c190ec64b9c1671342764227739159"
+    },
+    "canonical_v2_vs_v1_crosswalk.json": {
+      "path": "data_registry/d1x_v2/canonical_v2_vs_v1_crosswalk.json",
+      "sha256": "11fa2d02ab811490de2dd16ffc509b8e6ad301f957748a0637f8cd7bb7357c17"
+    },
+    "primary_pairs_v2.jsonl": {
+      "path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d1x_v2/d1x_v2_canonicalization_20260807T1830+0800/primary_pairs_v2.jsonl",
+      "sha256": "1acd106d30e61de3e591b6ed6f997df96ed985a17e2bd698d0852eec9563341c"
+    }
+  },
+  "schema_version": "reactflow_delta.d1x_v2_manifest.v1"
+}

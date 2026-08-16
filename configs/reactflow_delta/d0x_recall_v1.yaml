@@ -1,0 +1,43 @@
+schema_version: reactflow_delta.d0x_recall_config.v1
+config_id: reactflow_delta_d0x_exact_recovery_20260803_v1
+run_id: d0x_exact_recovery_20260803_v1
+phase_id: D0-X
+mode: EXACT_MUTATION_RECOVERY_ONLY
+authority_required_before_execution: true
+expected_authority_epoch: 3
+frozen_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+source_declaration_path: configs/reactflow_delta/d0x_source_declaration_v1.yaml
+license_policy_path: configs/reactflow_delta/d0x_license_policy_v1.yaml
+parser_fixture_manifest_path: tests/fixtures/reactflow_delta/d0x/fixture_manifest.yaml
+historical_inputs:
+  accession_registry_path: data_registry/d0r_accession_registry.jsonl
+  accession_registry_sha256: 37eb17dab6c314e648dc7d367535a0dce0e791e90472662e2febcdcc5c878f08
+  raw_rdat_root: /mnt/cunyuliu/reactflow_delta_raw/rmdb/rdat_tierA_20260730
+  raw_rdat_role: READ_ONLY_REQUALIFICATION_INPUT_NOT_PREQUALIFIED
+artifact_root: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0x/d0x_exact_recovery_20260803_v1
+raw_write_policy: APPEND_ONLY_RUN_ROOT_ATOMIC_FILE_FINALIZATION
+maximum_concurrent_primary_runs: 1
+allowed_operations:
+  - FROZEN_METADATA_INDEX_READ
+  - EXISTING_RAW_HASH_REQUALIFICATION
+  - FROZEN_ASSET_DOWNLOAD_WHEN_REQUIRED
+  - PROFILE_LEVEL_RDAT_PARSE
+  - ACCESSION_AND_PUBLICATION_CROSSWALK
+  - PARSER_COVERAGE_AND_RETENTION_AUDIT
+  - CANDIDATE_PROFILE_INVENTORY
+explicit_denials:
+  - D1_X_CANONICALIZATION
+  - DATASET_BUILD
+  - SPLIT_BUILD
+  - NORMALIZATION_OR_THRESHOLD_FITTING
+  - TRAINING
+  - TEST_UNSEAL
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PUSH
+  - PULL_REQUEST
+finalizer_required: true
+terminal_routes:
+  pass: STOP_AWAIT_D1X_AUTHORITY_AMENDMENT
+  fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+

@@ -1,0 +1,35 @@
+contract_schema: reactflow_delta.contract.v4
+amendment_id: reactflow_delta_v4_rebuild_20260807
+amendment_epoch: 14
+previous_amendment: reactflow_delta_v4_m0x_epro_scope_20260805
+authorization_status: ACTIVE_AUTHORIZED
+amendment_kind: M0X_TERMINALIZE_AND_BENCHMARK_REBUILD
+amendment_summary: >-
+  Per the strict scientific-engineering audit
+  (ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md) and
+  explicit user grant, this amendment (epoch 14):
+  (1) TERMINALIZES the M0-X authority/phase as FAIL (gate not met; no PASS
+  sentinel; converts to DEVELOPMENT_ONLY negative / leakage-resistant
+  benchmark / P2 resource result);
+  (2) CLOSES legacy M0-X training authorization (training_allowed=false);
+  (3) BINDS the final exposure (16SFWJ test remains DEVELOPMENT_CONSUMED,
+  not re-usable as confirmatory);
+  (4) moves current authority to a REBUILD phase and authorizes Phase 1
+  (benchmark/evaluator rebuild) then Phase 2 (P2 learnability gate) in order;
+  (5) GPU training allowed on free VRAM (no GPU exclusivity assumed).
+amendment_routes:
+  phase_1_acceptance: BENCHMARK_EVALUATOR_REBUILD_PASS
+  phase_2_gate: P2_LEARNABILITY_GO_OR_STOP_METHOD_ROUTE
+invariants_unchanged:
+- test_split_sealed: true
+- test_not_used_for_training: true
+- cross_project_export: false
+- wet_lab: false
+- no_fabricated_data: true
+- no_seed_retry_gaming: true
+- no_hide_failure: true
+- no_lower_gate: true
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_rebuild_approval_20260807.yaml
+  signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+  external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE

@@ -1,0 +1,43 @@
+# endpoint_v7_all_mutant_full_spectrum (contract 3.1, 7.4, 11.1)
+schema_version: reactflow_delta.endpoint_v7_all_mutant_full_spectrum.v1
+task_tags:
+- ALL_MUTANT
+- OUTCOME_BLIND
+- CONTINUOUS_FULL_SPECTRUM
+- NEW_PUZZLE_GENERALIZATION
+- WT_ASSAY_AVAILABLE
+legal_predictor_inputs:
+- WT_nucleotide_sequence
+- WT_observed_reactivity
+- wt_reported_error_input
+- WT_observed_mask
+- construct_coordinate
+- region
+- assay_condition
+- exact_directional_mutation_position_ref_alt
+forbidden_predictor_inputs:
+- mutant_response
+- mutant_target_reported_error
+- mutant_mask
+- Caller
+- M2_structure
+- any_mutant_outcome_derived_feature
+output:
+  region: full_construct
+  scoring_region: full_construct ∩ target_qualified_positions
+  per_position:
+  - mutant_latent_reactivity_mean
+  - signed_delta_mean
+  - model_scale_predictive_interval
+  - registered_prediction_coverage
+  - coordinate_aligned_region_map
+target_mask_semantics: evaluator_side_only_never_predictor_input
+missing_semantics: missing_never_zero; TARGET_UNOBSERVABLE status preserved when no target-qualified position
+registered_universe:
+  source: openknot_m2/OK7a_M2_data.v4.5.2.csv
+  n_cells: 160
+  n_cells_status: CONFIRMED (20 puzzles x 8 raw-qualified methods)
+  n_wt: 160
+  n_registered_snv_mutants: 13976
+  allele_canonicalization: T->U canonical RNA
+  seq_len: 177

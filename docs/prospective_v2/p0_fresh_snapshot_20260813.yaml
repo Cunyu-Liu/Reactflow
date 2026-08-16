@@ -1,0 +1,62 @@
+schema_version: reactflow_delta.prospective_v2.p0_fresh_snapshot.v1
+observed_at: '2026-08-13T18:00:00+08:00'
+observed_by: codex_agent
+authority_contract:
+  path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+  version: v2_20260813
+  sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+  identity_status: VERIFIED
+owner_authorization:
+  line: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P0_P3'
+  status: PROVIDED_EXACT_MATCH
+  scope: P0_P3
+live_environment:
+  ssh_alias: A100
+  hostname: bms-18937653-012
+  user: cunyuliu
+  repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+  benchmark_worktree: /home/cunyuliu/reactflow_delta_worktrees/benchmark_v3_20260809
+  benchmark_branch: codex/reactflow-delta-benchmark-v3-20260809
+  benchmark_head: 327c92c187a363ae7a10bec1f7946164d2bc543c
+  main_branch: codex/reactflow-delta-d0r
+  main_head: 887066d63369df3f43deec886beba41326a30dee
+  historical_snapshot_commit_from_contract: ac4210d154fec797c8d23f591b2c099b9e6fe6ad
+  head_divergence_note: benchmark branch advanced past contract-reviewed historical snapshot; record diff, do not blind-reuse contract line numbers
+  prospective_worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+  prospective_branch: codex/reactflow-delta-prospective-v2-20260813
+  prospective_head: 327c92c187a363ae7a10bec1f7946164d2bc543c
+active_authority:
+  manifest: configs/reactflow_delta/active_contract.yaml
+  epoch: 20
+  state: PHASE1_BENCHMARK_V3_REBUILD_EPOCH20
+  scope: PHASE1_BENCHMARK_V3_ONLY
+  current_phase: PHASE1_BENCHMARK_V3
+  training_allowed: false
+  candidate_model_training_allowed: false
+  confirmatory_test_outcome_access_allowed: false
+  endpoint_version: endpoint_v6
+  caller_version: caller_v4
+  split_version: split_v3
+  status: STALE_RELATIVE_TO_PROSPECTIVE_V2_CONTRACT
+  note: does not authorize prospective-v2 P1 mutation / P2/P3 training; per contract 0.3 must be superseded via authority vNext
+artifact_root: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta
+historical_artifact_dirs_present:
+- benchmark_v3
+- openknot_m2
+- p2_v1
+- p2_cache
+- d0
+- d0x
+- d1
+- d1x
+- d2x
+- ph0x
+- b0x
+- o0x
+- m0x
+- recovery
+gpu_state:
+  n_gpus: 8
+  all_busy: true
+  note: GPUs 0-7 near full utilization by unrelated/m2 development jobs; P0 is compute-free, P2/P3 training requires later availability
+running_jobs_note: Many unrelated (tokenizer-benchmark, mrna_editflow, rna_junction) + owner-authorized M2 development jobs (run_response_spectrum_m2_seq_v1, run_m2_seq_compare, m2_deviation_report, run_response_spectrum_m2_posaware_v1, run_m2_posaware_compare) are running; per contract 3.2/4.3 no interference.

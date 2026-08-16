@@ -1,0 +1,17 @@
+[p2] GPU OK: cuda_visible=6 current_idx=0 name=NVIDIA A100-PCIE-40GB MIG 1g.5gb free=3.2GB
+[p2] pool_studies=['16SFWJ', '5SRRNA', 'ADD140', 'ADDRSW', 'AGSARNA', 'CIDGMP', 'CL1LIG', 'ETBSTR', 'GLYCFN', 'HC16M2R', 'MDLOOP', 'PSL2IAV', 'RNAPZ18', 'RNAPZ5', 'RNAPZ6', 'RNASEP', 'SRPDIV', 'TRNAPH', 'TRP4P6'] n_pairs_usable=6385 missing=0
+[p2] distinct publications in pool: 18 -> ['UNKNOWN_PUBLICATION:5SRRNA', 'UNKNOWN_PUBLICATION:ADDRSW', 'UNKNOWN_PUBLICATION:AGSARNA', 'UNKNOWN_PUBLICATION:CL1LIG', 'UNKNOWN_PUBLICATION:GLYCFN', 'UNKNOWN_PUBLICATION:HC16M2R', 'UNKNOWN_PUBLICATION:MDLOOP', 'UNKNOWN_PUBLICATION:RNAPZ6', 'UNKNOWN_PUBLICATION:RNASEP', 'UNKNOWN_PUBLICATION:SRPDIV', 'UNKNOWN_PUBLICATION:TRNAPH', 'pmid_24469816', 'pmid_25183835', 'pmid_25303992', 'pmid_25883046', 'pmid_29446752', 'pmid_35982307', 'pub_RNAPuzzle18_daslab']
+[p2] publication->studies: {'pmid_25183835': ['16SFWJ'], 'UNKNOWN_PUBLICATION:5SRRNA': ['5SRRNA'], 'pmid_29446752': ['ADD140'], 'UNKNOWN_PUBLICATION:ADDRSW': ['ADDRSW'], 'UNKNOWN_PUBLICATION:AGSARNA': ['AGSARNA'], 'pmid_25303992': ['CIDGMP', 'TRP4P6'], 'UNKNOWN_PUBLICATION:CL1LIG': ['CL1LIG'], 'pmid_24469816': ['ETBSTR'], 'UNKNOWN_PUBLICATION:GLYCFN': ['GLYCFN'], 'UNKNOWN_PUBLICATION:HC16M2R': ['HC16M2R'], 'UNKNOWN_PUBLICATION:MDLOOP': ['MDLOOP'], 'pmid_35982307': ['PSL2IAV'], 'pub_RNAPuzzle18_daslab': ['RNAPZ18'], 'pmid_25883046': ['RNAPZ5'], 'UNKNOWN_PUBLICATION:RNAPZ6': ['RNAPZ6'], 'UNKNOWN_PUBLICATION:RNASEP': ['RNASEP'], 'UNKNOWN_PUBLICATION:SRPDIV': ['SRPDIV'], 'UNKNOWN_PUBLICATION:TRNAPH': ['TRNAPH']}
+[fold] held=UNKNOWN_PUBLICATION:5SRRNA SKIPPED (empty eligible: train_ok=3181 held_ok=0)
+[fold] held=UNKNOWN_PUBLICATION:ADDRSW SKIPPED (empty eligible: train_ok=3181 held_ok=0)
+[fold] held=UNKNOWN_PUBLICATION:AGSARNA SKIPPED (empty eligible: train_ok=3181 held_ok=0)
+Traceback (most recent call last):
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/run_p2_v3.py", line 698, in <module>
+    main()
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/run_p2_v3.py", line 576, in main
+    scores = runner.fit_predict(m, Xtr_ok, ytr_ok, Xte_ok, seed)
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/run_p2_v3.py", line 379, in fit_predict
+    return predict_deepsets(model, pos_te, gl_te, self.device).astype(np.float32)
+  File "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/run_p2_v3.py", line 413, in predict_deepsets
+    return torch.sigmoid(model(pos_t, glob_t)).cpu().numpy().squeeze(-1)
+ValueError: cannot select an axis to squeeze out which has size not equal to one

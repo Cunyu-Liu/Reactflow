@@ -1,0 +1,21 @@
+{
+  "schema": "reactflow_delta.phase3.benchmark_resource.manifest.v1",
+  "run_id": "phase3_benchmark_resource_20260809",
+  "authority_epoch": 18,
+  "phase": "PHASE3-BENCHMARK-RESOURCE",
+  "created_at_utc": "2026-08-08T20:29:55.529278+00:00",
+  "files": {
+    "scripts/reactflow_delta/run_phase3_benchmark_resource.py": "bdf30e5fcd3a28fdea36c6b5a4ae09d2b9d776a0ca8d963afb86b01b3cfb133c",
+    "scripts/reactflow_delta/run_phase3_noise_floor.py": "2fc474b4d0c307d384f56eecf89651fa62f69ab106409f8385a90b57087184ca",
+    "scripts/reactflow_delta/build_phase3_diagnostic_table.py": "eb2350972cdc859f10de68cb360b6e64362fb8d06fc76e6da1252858bb940988",
+    "scripts/reactflow_delta/run_phase3_per_pub_skill.py": "93d22b2900c0c895da6c0e70b95f381f1a9e07d005cfda82cffa0ef1f3efdf79",
+    "scripts/reactflow_delta/finalize_phase3_benchmark_manifest.py": "068a8be7cac8722d5da1b6b7916aa0d5bb64640bbf7a188508a7db843c81cfe9",
+    "results/phase3_benchmark_resource_20260809/benchmark_resource_report.json": "5ab08294b8f885ba26ca286029dc2f5de2a3f0d0aae2cb571e9b92dec912f70f",
+    "results/phase3_noise_floor_20260809/noise_floor_report.json": "2ebae748e6198d2362cf154bbee6029c5105d58f149c5d89f15663fb271d9bc1",
+    "results/phase3_diagnostic_20260809/phase3_diagnostic_table.json": "e2ac2e58354430de3e45a0963cd11172102e8caa69d810e56c0eec8fac25d21f",
+    "results/phase3_diagnostic_20260809/phase3_diagnostic_table.tsv": "be0fc0522beab15da508750fdf6d812cd3cb5b869cedf82d622c0cc586d346af",
+    "results/phase3_per_pub_skill_20260809/per_pub_skill.json": "267f16ed1281c43e111d0ecac40a15aed8671ab72231756306822d8ce45f4ecf",
+    "docs/audits/reactflow_delta_phase3_closure_fail_closed_20260809.md": "49b8e7261504644794956a4f284249a24d5a2b90bf8ed30e09da80628a2cbac5",
+    "docs/reactflow_delta_phase3_negative_result_draft_20260809.md": "040e73f8ac682724c0d41dc412a53c57e8d7d6efcd0c85aea47ba4d7e0ec01cc"
+  }
+}

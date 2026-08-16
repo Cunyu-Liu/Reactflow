@@ -1,0 +1,44 @@
+contract_schema: reactflow_delta.contract.v4
+amendment_id: reactflow_delta_v4_epoch17_endpoint_v5_conditional_magnitude_20260808
+amendment_epoch: 17
+previous_amendment: reactflow_delta_v4_epoch16_endpoint_v4_non_degenerate_macro_20260808
+authorization_status: ACTIVE_AUTHORIZED_FINALIZED_ROUTE_B
+amendment_kind: ENDPOINT_V5_CONDITIONAL_MAGNITUDE_ROUTE_B_FINALIZED_GO
+amendment_summary: 'Route B (user explicit grant, epoch 17). Finalization of the conditional-magnitude
+  learnability gate under endpoint_v5. After the P2 primary (binary-changer publication-macro
+  AUPRC) was adjudicated STOP (fail-closed, epoch 16, frozen), the scientific adjudication
+  focus moved to the INDEPENDENT conditional-magnitude estimand (contract §4.2 conditional
+  row; §9.2 conditional head): for caller_v3-adjudicated TRUE CHANGERS (C_i=1), predict
+  profile-level |delta_r| magnitude; metric = conditional WMAE skill vs the train-fold
+  weighted-mean trivial baseline, with paired publication-block bootstrap CI. RESULT:
+  deepsets mean skill 0.677, all 5 seeds positive, bootstrap CI low 0.323 (>0), 10/10
+  held-out publications with changers positive => P2_CONDITIONAL_MAGNITUDE = GO (fail-closed).
+  The primary endpoint_v4 STOP is preserved and NOT overridden.'
+governance_resolution:
+  route_selected: ROUTE_B_CONDITIONAL_MAGNITUDE
+  route_c_position_granularity: SUPERSEDED_UNSELECTED_PARALLEL_BRANCH_KEPT_NOT_DELETED
+  route_c_artifacts_backup: docs/contracts/amendments/_unselected_routeC_epoch17/(endpoint_v5_routeC_position_granularity.yaml
+    + amendment + approval)
+  route_c_run: run_p2_position_v5.py (separate, not part of this GO)
+  primary_endpoint_v4_stop: FROZEN_EPOCH16_PRESERVED
+amendment_routes:
+  phase_2_gate: P2_CONDITIONAL_MAGNITUDE_GO
+  primary_verdict_preserved: ENDPOINT_V4_PRIMARY_STOP_FROZEN
+  new_endpoint: endpoint_v5_conditional_magnitude
+  training: CONDITIONAL_MAGNITUDE_LOOCV_GPU_DONE
+  result: GO
+invariants_unchanged:
+  test_split_sealed: true
+  test_not_used_for_training: true
+  cross_project_export: false
+  wet_lab: false
+  no_fabricated_data: true
+  no_seed_retry_gaming: true
+  no_hide_failure: true
+  no_lower_gate: true
+  primary_v4_stop_preserved: true
+  baseline_train_fold_only: true
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_epoch17_endpoint_v5_conditional_magnitude_approval_20260808.yaml
+  signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+  external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE

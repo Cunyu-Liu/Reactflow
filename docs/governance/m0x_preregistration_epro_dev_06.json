@@ -1,0 +1,60 @@
+{
+  "schema_version": "reactflow_delta.m0x_preregistration.v1",
+  "iteration_id": "EPRO_DEV_06",
+  "window_id": "m0x_dev_window_20260804",
+  "hypothesis_id": "m0x_h06_structure_aware_changer",
+  "preregistered_at_utc": "2026-08-05T00:00:00Z",
+  "change_category": "structure_aware_feature_injection_on_proven_classifier",
+  "prediction_changing": true,
+  "counts_as_iteration": true,
+  "motivation": "EPRO_DEV_05 (deep mechanistic EPRO backbone + changer head) failed to converge (val study-macro AUPRC plateau ~0.52, persistent train/val gap ~0.16), far below the flat MLP changer classifier (EPRO_DEV_04, AUPRC 0.7344). The failure is architectural, not capacity-driven: the deep backbone neither fits nor generalizes while the simple per-position classifier already ranks changers well. DEV_06 therefore keeps the proven flat classifier and injects explicit structure-aware (base-pair contact-graph) features that the 36-dim B0-X+delta_thermo vector omits, then aligns the horizontal comparison to published ViennaRNA Turner-rules physics and the internal P2/wt baselines on the same changer-detection task.",
+  "hypothesis": "A flat per-position changer classifier augmented with explicit structure-aware base-pair contact-graph features (per-position pairing probability, structural partner aggregation of WT reactivity and of mutant-WT structural deltas, local structural context windows) achieves a study-macro AUPRC gain over the plain 36-dim classifier (EPRO_DEV_04) whose cluster-CI lower bound is > 0, and does not underperform the published ViennaRNA Turner-rules physics baseline on the same estimated changer-detection task.",
+  "arms": [
+    {
+      "arm_id": "structure_aware_changer",
+      "kind": "flat_mlp_with_contact_graph_features",
+      "base_features": "B0-X (31) + delta_thermo (5)",
+      "added_features": "contact-graph pairing & partner-aggregation & local structural windows",
+      "loss": "focal loss (direct changer classification)",
+      "pretraining": "none"
+    }
+  ],
+  "baseline": {
+    "run_id": "epro_dev_04_20260805",
+    "kind": "flat MLP changer classifier (proven best)",
+    "param_count": 141313,
+    "study_macro_auprc": 0.7344129736741765,
+    "published_physics": "ViennaRNA Turner-rules |Delta(unpaired)| in-silico mutagenesis",
+    "strongest_trivial": "wt_only"
+  },
+  "data": {
+    "split_manifest": "d2x_split_publication_20260804T1600+0800",
+    "train_pairs": 3516,
+    "validation_pairs": 548,
+    "test_pairs": 408,
+    "test_sealed": true
+  },
+  "fixed_seed": 20260804,
+  "selection_rule": {
+    "ref": "contract section 13.5",
+    "primary_metric": "study-macro AUPRC gain over strongest validated changer classifier (EPRO_DEV_04)",
+    "tie_break": [
+      "fewer_params",
+      "lower_brier",
+      "lower_log_loss",
+      "model_id_lexical"
+    ]
+  },
+  "evaluation": {
+    "estimand_a": "changer detection/ranking (AUPRC, Brier, log loss)",
+    "estimand_b": "signed magnitude (Student-t, >=5% relative improvement to keep headline)",
+    "secondary": "all-position continuous delta",
+    "ci": "cluster bootstrap study->parent, frozen seed",
+    "permutation": "group-aware, frozen exchangeability blocks"
+  },
+  "stop_conditions": [
+    "reliability/permutation/provenance gate failure",
+    "3 consecutive rounds without beating strongest validated changer classifier",
+    "window deadline or 6 iterations reached"
+  ]
+}

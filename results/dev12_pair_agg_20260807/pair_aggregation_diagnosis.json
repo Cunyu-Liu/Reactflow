@@ -1,0 +1,32 @@
+{
+  "n_pairs": 548,
+  "true_burden": {
+    "mean": 0.14400472314178042,
+    "std": 0.07841858262924782,
+    "median": 0.13697979060572224,
+    "p10": 0.07976293856093188,
+    "p90": 0.21266260200763584
+  },
+  "pred_burden": {
+    "mean": 0.18482588707931666,
+    "std": 0.2611587758170234,
+    "median": 0.07778900489211082,
+    "p10": 0.03789198882877827,
+    "p90": 0.7511000216007233
+  },
+  "pair_burden": {
+    "spearman": -0.2846845853571105,
+    "pearson": -0.2039629841216866,
+    "pred_scaled_to_true_note": "if spear high but pearson low -> pure scale/calibration issue"
+  },
+  "within_pair_position_ranking": {
+    "mean_spearman": 0.4852802359893361,
+    "median_spearman": 0.5148476053831774,
+    "frac_positive": 0.9927007299270073
+  },
+  "position_level": {
+    "n_pos": 86126,
+    "spearman_abs": 0.4295573548332801
+  },
+  "pred_compression_ratio": 3.3303174714562984
+}

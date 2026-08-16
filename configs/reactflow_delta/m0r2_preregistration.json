@@ -1,0 +1,185 @@
+{
+  "schema_version": "reactflow-delta-m0r2-preregistration-v1",
+  "stage": "M0-R2",
+  "contract": "v3.5 (ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_5_M0R2_20260731.md)",
+  "created_at_utc": "2026-07-31T22:00:00Z",
+  "purpose": "M0-R FAIL remediation:彻底去除 delta 参数化的 positive bump，使 delta = correction_net(delta_thermo_context) 可正可负，打破非负性链。M0-R 证明'保留 bump + delta_thermo 进 encoder'不足以消除 pred_min=0.0 的非负性偏差。",
+
+  "trigger": {
+    "m0r_failure_record": "artifacts/reactflow_delta/m0r/failure_record.json",
+    "m0r_best_val_skill": -0.4083,
+    "m0r_pred_min": 0.0,
+    "m0r_n_negative": 0,
+    "m0r_root_cause": "delta = bump*0.1 + correction(z_w); on OOD parent correction collapses near-zero, delta dominated by positive bump (bump>=0); through b=w_sym*delta (w_sym=softplus>=0) yields delta_r_hat>=0; cannot predict negative delta (true min=-0.111)",
+    "m0r_fundamental_limitation": "the parameterization itself must change (e.g. signed bump, or correction without positive bias, or removing the bump term); No amount of input feature augmentation can overcome this",
+    "fail_forward_layer": "D_operator_parameterization"
+  },
+
+  "scope": {
+    "model_tier": "EPRO-Lite (v3 §4.9, 2-6M params)",
+    "max_param_count": 5000000,
+    "feature_change": "NONE - feature dim stays 10 (5 WT thermo + 5 delta_thermo, reused from M0-R mutant_thermo_features.npz, NOT recomputed)",
+    "feature_reuse": "directly reuse artifacts/reactflow_delta/m0r/mutant_thermo_features.npz (1509 pairs, v3.5 §2.2 item 2)",
+
+    "parameterization_fix": {
+      "method": "remove_positive_bump + delta_thermo_driven_correction",
+      "description": "delta = correction_net(concat(z_w[lo:hi].flatten(), delta_thermo[lo:hi].flatten())); NO bump term; delta can be positive or negative",
+      "bump_removal_locations": [
+        "ForcingModule.forward L234 (bump = torch.exp(...)) and L237 (delta_window = bump.unsqueeze(-1) * 0.1): DELETED",
+        "EPROModel.forward L656-658 (duplicate bump + delta[lo:hi] = bump*0.1): DELETED"
+      ],
+      "correction_net_input": {
+        "method": "concat",
+        "components": ["z_w[lo:hi].flatten() (latent_dim*window_size)", "delta_thermo[lo:hi].flatten() (delta_thermo_dim*window_size)"],
+        "delta_thermo_dim": 5,
+        "latent_dim": 64,
+        "local_window": 50,
+        "window_size": 101,
+        "context_dim_old": 6464,
+        "context_dim_new": 6969,
+        "rationale": "delta_thermo directly drives correction_net, bypassing encoder OOD collapse. z_w retained for learned context."
+      },
+      "delta_computation": "delta_window = correction_net(context).unsqueeze(-1); NO bump addition; delta fully learned, can be negative",
+      "w_sym_unchanged": "w_sym = F.softplus(0.5*z_sum.sum + 0.25*z_abs_diff.sum) >= 0 (NOT modified; delta negative => b=w_sym*delta negative, breaking non-negativity chain at delta ring)",
+      "forcing_return_change": "ForcingModule.forward returns (b, delta) instead of b only; EPROModel.forward uses returned delta (removes duplicate L651-665 computation)",
+      "batch_change": "EPROModel.forward batch adds 'delta_thermo' key (n, 5); train.py separates delta_thermo from features for forcing input",
+      "initialization": "correction_net Linear weights normal_(std=0.01), bias zeros_ (same as M0-R)",
+      "architecture_unchanged": [
+        "ThermoEncoder (MLP, learned, hidden=512, layers=3, input dim 10)",
+        "SusceptibilityModule (rho_max=0.95, neumann_iter=10, learned edge_net)",
+        "SwitchModule (disabled, epro_lite)",
+        "ObservationModule (monotone head, learned)",
+        "w_sym computation (softplus, non-negative)"
+      ]
+    },
+
+    "param_count_estimate": {
+      "m0r_total": 4201963,
+      "correction_net_old": 3624549,
+      "correction_net_new": 3883109,
+      "delta": 258560,
+      "m0r2_total_estimate": 4460523,
+      "within_epro_lite_limit": true
+    },
+
+    "not_authorized": [
+      "EPRO-Core (6-15M params, bounded endpoint correction, node+edge forcing, stable sparse susceptibility new form, odd nonlinear switch, P1/P2, heteroscedastic output)",
+      "modifying w_sym softplus non-negativity (v3.5 §2.3 item 13)",
+      "modifying SusceptibilityModule or ObservationModule (monotone head)",
+      "nonlinear switch",
+      "P1/P2 anchor posterior update",
+      "hyperparameter search",
+      "test set unfreezing",
+      "Tier threshold lowering",
+      "alt inference (only 3-alt marginalization, reused from M0-R)",
+      "new data beyond 1509 true_pairs",
+      "recomputing delta_thermo features (must reuse M0-R npz)",
+      "auto-re-remediation (M0-R3) on FAIL",
+      "extending max_epochs beyond 200"
+    ]
+  },
+
+  "training_config": {
+    "seed": 42,
+    "split": "by-parent (same as M0/M0-R: train=4 parents, val=Tetrahymena P4-P6)",
+    "loss": "student_t (learned_scale=true, init_df=4.0)",
+    "optimizer": "adam, pilot_lr=1.0e-4, weight_decay=1.0e-5, grad_clip=1.0",
+    "scheduler": "cosine, T_max=5000, eta_min=1.0e-6",
+    "max_epochs": 200,
+    "batch_size": 8,
+    "gpu": "CUDA_VISIBLE_DEVICES=2",
+    "config_file": "configs/reactflow_delta/epro_lite.yaml"
+  },
+
+  "gate": {
+    "gate_name": "M0-R2 Gate (v3.5 §5.1, identical to M0-R Gate v3.4 §5.1)",
+    "all_bullets_must_pass": true,
+    "bullets": [
+      {
+        "name": "validation_skill_positive",
+        "definition": "mean per-pair Skill on validation (parent holdout=Tetrahymena P4-P6) > 0",
+        "threshold": 0.0,
+        "operator": ">",
+        "m0r_value": -0.4083
+      },
+      {
+        "name": "beats_strongest_independent",
+        "definition": "EPRO-Lite (M0-R2) val Skill >= strongest independent baseline (static_reactivity)",
+        "threshold": -0.0068,
+        "operator": ">=",
+        "min_improvement": 0.01,
+        "m0r_value": -0.4083
+      },
+      {
+        "name": "beats_matched_generic_paired",
+        "definition": "EPRO-Lite (M0-R2) val Skill > matched generic paired baseline (v3 §10.4)",
+        "threshold": -0.1226,
+        "operator": ">",
+        "m0r_value": -0.4083
+      },
+      {
+        "name": "gain_not_only_edit_local",
+        "definition": "Skill on distal positions > 0",
+        "distal_definition": "|seq_pos - edit_pos_1indexed| / seq_length > 0.10",
+        "edit_local_definition": "|seq_pos - edit_pos_1indexed| <= local_window (=50) OR |seq_pos - edit_pos_1indexed| / seq_length <= 0.10",
+        "threshold": 0.0,
+        "operator": ">",
+        "m0r_value": -0.0252
+      },
+      {
+        "name": "invariants_all_pass",
+        "definition": "forcing/susceptibility/switch/observation invariant suite 100% PASS (reuse invariants.py)",
+        "threshold": 1.0,
+        "operator": "==",
+        "m0r_value": 1.0
+      },
+      {
+        "name": "single_seed",
+        "definition": "exactly one seed (42), no seed追加",
+        "threshold": 1,
+        "operator": "=="
+      },
+      {
+        "name": "param_count_within_epro_lite",
+        "definition": "trainable param count <= 5,000,000 (EPRO-Lite range, not escalated to EPRO-Core)",
+        "threshold": 5000000,
+        "operator": "<=",
+        "m0r_value": 4201963,
+        "m0r2_estimate": 4460523
+      },
+      {
+        "name": "pred_min_negative",
+        "definition": "min prediction on validation < 0 (verifies non-negativity bias eliminated, can predict negative delta) - CORE VERIFICATION BULLET for M0-R2",
+        "threshold": 0.0,
+        "operator": "<",
+        "m0r_value": 0.0,
+        "note": "M0-R FAIL on this bullet (pred_min=0.0, n_negative=0/6464); M0-R2 target: pred_min<0, n_negative>0"
+      }
+    ]
+  },
+
+  "comparison_baseline": {
+    "m0": {"best_val_skill": -0.7129, "pred_min": 0.0, "commit": "d644dee"},
+    "m0r": {"best_val_skill": -0.4083, "pred_min": 0.0, "commit": "03aa255"},
+    "strongest_independent": {"static_reactivity_skill": -0.0068},
+    "matched_generic_paired": {"skill": -0.1226, "eval_on": "TEST Csde1_190 293 pairs"}
+  },
+
+  "fail_forward": {
+    "on_fail": "freeze evidence, diagnose per v3 §18, do NOT enlarge model, do NOT auto-enter M0-R3 or M1 (v3.5 §2.3 item 12), record failure_record.json, forward-only. If pred_min still 0.0 after bump removal, record honestly as architectural limit of EPRO-Lite observation/susceptibility chain, do NOT modify w_sym/observation (v3.5 §2.3 item 13).",
+    "on_pass": "record training_run.json + mechanism_failure_matrix.json (M0 vs M0-R vs M0-R2 3-way) + model_card_draft.md; M0-R2 PASS does NOT auto-enter M1 (M1 needs Tier A + new contract per v3.4 §8)"
+  },
+
+  "artifacts": {
+    "preregistration": "artifacts/reactflow_delta/m0r2/preregistration.json (this file)",
+    "mutant_thermo_features_reused": "artifacts/reactflow_delta/m0r/mutant_thermo_features.npz (M0-R, NOT recomputed)",
+    "training_run": "artifacts/reactflow_delta/m0r2/training_run.json",
+    "mechanism_matrix": "artifacts/reactflow_delta/m0r2/mechanism_failure_matrix.json",
+    "model_card": "artifacts/reactflow_delta/m0r2/model_card_draft.md",
+    "failure_record": "artifacts/reactflow_delta/m0r2/failure_record.json (only if FAIL)",
+    "checkpoint": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r2/pilot_v1/best_checkpoint.pt",
+    "predictions_val": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0r2/pilot_v1/predictions_val.json"
+  },
+
+  "frozen_against_modification": "This preregistration is committed BEFORE M0-R2 execution starts. Thresholds, definitions, parameterization method, and correction_net input concatenation above MUST NOT be modified after commit (v3.5 §5.1, §4.2). Any modification requires new contract amendment."
+}

@@ -1,0 +1,64 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_d2x_20260804
+amendment_status: ACTIVE_AUTHORIZED
+authority_epoch: 6
+created_at: "2026-08-04T12:30:00+08:00"
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_d2x_approval_20260804.yaml
+  approval_record_sha256: null
+  scope: CONDITIONAL_D2X_ONLY_AUTHORITY
+  scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
+  external_identity_status: NOT_VERIFIED
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+prerequisites:
+  d1x_terminal_manifest_sha256: bd29a4f679d376ca27c9cc83b3bb9d1ce2903d98de66caba626650d42f55d9e3
+  d1x_terminal_sentinel_sha256: 7a4aaeda5968c2dcfafa98fe53f149643a7eb53bbce6c9e06019f45d37437074
+  d1x_checksum_ledger_sha256: e19d169f524cd00453b28fc18c14f1bca7af03a32d2c8f6e589b7f5405911de1
+  d1x_canonicalization_audit_sha256: cad96624e75109f68ad583933ea8bd208ffd1cfc7d764644888f1097e14c4d98
+  d1x_artifact_inventory_sha256: 7a2667078b019f0544d7aaf5e4f850b01bd13a100ca8a2b7e146a73302401c85
+  d1x_canonical_records_sha256: af34147d636c248ac8d14ae4a4c349aa71dcef4d0e2f4926701cb6c506c6fb6f
+  d1x_primary_pairs_sha256: 92c90492f9907177f373faefcbff73fa702f95d533b198ac7dd387aa34ddb875
+  d1x_canonicalization_summary_sha256: c039c67dd4a74e767b528f79aad180c6d62d541135576fac00ac99899d21f635
+  d1x_closure_commit: 8f8e90a
+  d1x_gate_result: PASS
+  d1x_evidence_class: DATA_QUALIFICATION_ONLY
+grant:
+  phase_id: D2-X
+  authorization_kind: SINGLE_PHASE_SPLIT_EXPOSURE_ONLY
+  allowed_actions:
+    - READ_ONLY_PREFLIGHT
+    - D1X_CANONICAL_RECORDS_READ
+    - HIERARCHICAL_SPLIT_BUILD
+    - STUDY_PARENT_DESIGN_LINEAGE_OVERLAP_AUDIT
+    - EXACT_SEQUENCE_NEAR_DUP_FAMILY_STRUCTURE_MIRROR_PRETRAINING_EXPOSURE_AUDIT
+    - TIER_CALCULATION
+    - TEST_SEAL_AND_ACCESS_LEDGER
+    - BLIND_VIABILITY_CERTIFICATE
+    - DATA_CARD
+    - CONTROLS_ONLY_NORMALIZATION_AND_SCALE_FITTING
+  explicit_denials:
+    - PH0_X_IDENTIFIABILITY_CALLER_FIT
+    - TRAINING_DATASET_FINALIZATION
+    - MODEL_OR_BASELINE_TRAINING
+    - CONFIRMATORY_TEST_UNSEAL
+    - TEST_OUTCOME_FITTING
+    - CROSS_PROJECT_EXPORT
+    - WET_LAB
+    - PULL_REQUEST
+    - PUSH_IS_GOVERNED_BY_USER_INSTRUCTION_9
+run_authorization:
+  authorization_token_id: d2x_split_20260804_v1
+  maximum_primary_run_count: 1
+  maximum_concurrent_runs: 1
+  same_run_checkpoint_resume_allowed: true
+  terminal_run_consumes_authority: true
+  run_id_must_be: d2x_split_20260804_v1
+  isolated_clean_worktree_required_before_execution: true
+terminal_routes:
+  on_pass: STOP_AWAIT_PH0X_AUTHORITY_AMENDMENT
+  on_fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+  automatic_downstream_unlock: false
+embedded_self_sha256: FORBIDDEN

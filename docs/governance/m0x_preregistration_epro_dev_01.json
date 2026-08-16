@@ -1,0 +1,66 @@
+{
+  "schema_version": "reactflow_delta.m0x_preregistration.v1",
+  "iteration_id": "EPRO_DEV_01",
+  "window_id": "m0x_dev_window_20260804",
+  "hypothesis_id": "m0x_h01_frozen_fromscratch",
+  "preregistered_at_utc": "2026-08-04T12:17:14Z",
+  "change_category": "baseline_matched_comparison",
+  "prediction_changing": true,
+  "counts_as_iteration": true,
+  "hypothesis": "A 50k-250k-param EPRO-Small, trained from scratch on the frozen D2-X train split, achieves a study-macro AUPRC gain over the strongest simple baseline (P2 paired, from B0-X) whose cluster CI lower bound is > 0, and does not underperform a capacity-matched generic model on the same protocol.",
+  "arms": [
+    {
+      "arm_id": "epro_small_scratch",
+      "kind": "EPRO-Small",
+      "pretraining": "none",
+      "param_bounds": [50000, 250000]
+    },
+    {
+      "arm_id": "matched_generic",
+      "kind": "generic_paired",
+      "pretraining": "none",
+      "param_bounds": [50000, 250000],
+      "matched_to": "epro_small_scratch"
+    }
+  ],
+  "baseline": {
+    "run_id": "b0x_strong_baseline_20260804_v1",
+    "kind": "P2 paired baseline",
+    "param_count": 20737,
+    "skill_wmae": 0.07880318586105606,
+    "cluster_ci_low": 0.0029131860080127137,
+    "permutation_p": 0.0099,
+    "strongest_trivial": "wt_only"
+  },
+  "data": {
+    "split_manifest": "d2x_split_publication_20260804T1600+0800",
+    "train_pairs": 3516,
+    "validation_pairs": 548,
+    "test_pairs": 408,
+    "test_sealed": true
+  },
+  "fixed_seed": 20260804,
+  "selection_rule": {
+    "ref": "contract section 13.5",
+    "primary_metric": "study-macro AUPRC gain over strongest baseline",
+    "tie_break": [
+      "fewer_params",
+      "parent_macro_k10_topk_recall_gain",
+      "lower_brier",
+      "lower_log_loss",
+      "model_id_lexical"
+    ]
+  },
+  "evaluation": {
+    "estimand_a": "changer detection/ranking (AUPRC, Brier, log loss)",
+    "estimand_b": "signed magnitude (Student-t, >=5% relative improvement to keep headline)",
+    "secondary": "all-position continuous delta",
+    "ci": "cluster bootstrap study->parent, frozen seed",
+    "permutation": "group-aware, frozen exchangeability blocks"
+  },
+  "stop_conditions": [
+    "reliability/permutation/provenance gate failure",
+    "3 consecutive rounds without beating strongest simple baseline",
+    "window deadline or 6 iterations reached"
+  ]
+}

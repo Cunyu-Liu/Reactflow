@@ -1,0 +1,50 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_recovery_finalization_20260803
+amendment_status: FROZEN
+authority_epoch: 2
+created_at: "2026-08-03T23:08:38+08:00"
+purpose: FORWARD_REPAIR_RECOVERY_FINALIZATION_ONLY
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+  frozen_contract_bytes_modified: false
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_approval_20260803.yaml
+  approval_record_sha256: c8b20a7eccf0ac582f316a82e2015fac981128de7a9e041c96a85be4231f7109
+  scope: RECOVERY_TERMINALIZATION_IF_ALL_ACCEPTANCE_TESTS_PASS
+  identity_assurance: PLATFORM_USER_ROLE_ONLY
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+historical_receipt:
+  authority_commit: 940697de985dbd7425112babd2d429e81ddde4cb
+  authority_commit_parent: 10e52412a1612667993209e56117b1608a084297
+  active_manifest_sha256: 16f7867454cbcb8bddfeafb9d91f54a04e2eabfd1e0aeafa99d33c097b5b2ea5
+  detached_ledger_sha256: 78d38faa16e6feaf5fac02b702ad142286abc102dd0c32ee288bb9615273bfaf
+  sentinel_sha256: cd07dabf7f076b239ca2cb0adbee8599bc6c7dc94e607cc888290d964d5f6733
+  disposition: HASH_AND_GIT_INTEGRITY_EVIDENCE_SUPERSEDED_BY_FORWARD_FINALIZATION
+finalizer_binding:
+  execution_source_commit: 9e668e85c9332b75de41fc03af23b273a5097a71
+  finalizer_path: scripts/reactflow_delta/finalize_recovery_v4.py
+  finalizer_sha256: a52b487068fbd5817d232e20dd6bbfdf85606df6e2072bc3fdc0cea266092c68
+  external_terminal_manifest_sha256: fe19c1aa994f5ce193a23ffb9b8c041946760ada7f350a76f98439405da5086d
+  external_checksum_ledger_sha256: 17a927d9e6713ed876162bc78a53868496164e8bdb285626402e90cb7eada3f8
+  external_terminal_sentinel_sha256: 88c6027774500f1a0126e656f4c9f323e439f04b310b915d43d12efbea5da09e
+grant:
+  phase_id: RECOVERY_CONTRACT_REWRITE
+  lifecycle_status: TERMINAL
+  gate_result: PASS
+  evidence_class: ENGINEERING_ONLY
+  next_state: STOP_AWAIT_D0X_AUTHORITY_AMENDMENT
+explicit_denials:
+  - D0_X_EXECUTION
+  - FULL_DATA_RECALL
+  - D1_X_CANONICALIZATION
+  - TRAINING_DATASET_BUILD
+  - SPLIT_BUILD
+  - MODEL_OR_BASELINE_TRAINING
+  - CONFIRMATORY_TEST_UNSEAL
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PUSH
+  - PULL_REQUEST
+embedded_self_sha256: FORBIDDEN
+

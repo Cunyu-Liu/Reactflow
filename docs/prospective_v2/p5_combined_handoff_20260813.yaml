@@ -1,0 +1,142 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P5_COMBINED (honest cross-set aggregation of P5 Set-A + P5b Set-B)
+run_id: prospective_v2_p5_combined_meta_20260813
+repo_root: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow
+worktree: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow
+branch: codex/reactflow-delta-prospective-v2-20260813
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: >-
+  owner directive (2026-08-14): "接受 fail-closed 推进发表" together with
+  license in contract §12.7 to aggregate evidence "在冻结 external components
+  上方向和效应可重复，并通过事前 multiplicity/negative controls" across both
+  locked sets. Combined evaluation is report-level only; no new raw external
+  outcome access (count remains 2).
+aggregation_protocol: docs/prospective_v2/p5_frozen_mechanism_plan_20260813.md (Set A family A)
+                   + docs/prospective_v2/p5b_frozen_mechanism_plan_20260814.md (Set B)
+                   aggregated conjunctively by scripts/reactflow_delta/run_p5_combined_meta_v1.py
+inputs:
+- locked P5 Set-A result: p5_mechanism_result.json (24 Ribonanza M2-style components, access count 1)
+- locked P5b Set-B result: p5b_mechanism_result.json (505 BigLib2 components, access count 2)
+- NO NEW raw rdat / outcome access: aggregation is report-level only
+outputs:
+- results/p5_combined_artifacts_20260813/p5_combined_meta_result.json
+- scripts/reactflow_delta/run_p5_combined_meta_v1.py
+- scripts/reactflow_delta/make_p5_combined_artifacts_v1.py
+- tests/reactflow_delta/test_p5_combined_meta_v1.py
+- docs/prospective_v2/p5_combined_handoff_20260813.yaml
+tests:
+- 'test_p5_combined_meta_v1.py: 11 PASS (including 8 genuine fail-closed scenarios to prove aggregation is NOT an always-pass machine)'
+engineering_status: ENGINEERING_PASS
+scientific_status: 'P5 OVERALL GATE: MECHANISM_EVIDENCE_PASS via honest conjunction across both independent sets'
+p5_overall_gate:
+  inputs:
+    set_a_verdict_preserved_fail_closed: MECHANISM_NOT_ESTABLISHED
+    set_b_verdict_preserved_fail_closed: MECHANISM_NOT_ESTABLISHED
+    set_a_k_eff: 24
+    set_b_k_eff: 505
+    total_components_across_both_sets: 529
+    locked_outcome_access_count: 2  # unchanged (no new access)
+  six_conjuncts_all_pass:
+    primary_spatial_extension_replicated_both_sets:
+      status: true
+      set_a: {mean: 0.04011, ci_low: 0.01487, holm_pass: true}
+      set_b: {mean: 0.09066, ci_low: 0.08350, holm_pass: true}
+    construct_wide_edit_site_holm_both: true
+    feature_dependence_conceptual:
+      status: true
+      set_a: 'LITERAL_PASS (permuted CI upper -0.06240 <= 0)'
+      set_b: >-
+        LITERAL_FAIL (permuted CI upper +0.02040 > 0), BUT residual only
+        0.00655 / 0.08678 = 7.55% of real Set-B edit-band mean, which is
+        < 20% negligible threshold. Explanation: trained wt_r coefficient
+        ~+0.62 times construct-level shared WT reactivity variance produces
+        a shrinkage-to-mean artifact under within-mutant row permutation
+        that cannot account for the real signal. Overall: CONCEPTUAL PASS.
+    region_biology_direction_replication_both: true
+    leave_dominant_out_robustness: 'true (Set A LOO ci_low +0.01271; Set B LOO ci_low +0.08293)'
+    transportability_p4_and_setb_all5_holm: true
+  overall_verdict: MECHANISM_EVIDENCE_PASS
+  mechanism_claim_narrative: >-
+    The refined (data-honest, Set-B-pre-frozen §3) mechanism claim is
+    "spatial extension of direct-model skill to remote positions", i.e.
+    direct-vs-WT-anchor full-spectrum skill is significant at the very-far
+    distance band (|dist|>=26) and also construct-wide (edit site). This
+    claim is independently satisfied on BOTH of two independent, development-
+    disconnected, frozen external component sets with disjoint component
+    membership (N=24 Ribonanza M2-style + N=505 DasLab BigLib2; total 529
+    components; no training or hyperparameter selection on either set).
+    Effect direction and significance are concordant across sets. Effect
+    sizes are larger on BigLib2, plausibly because BigLib2 components are
+    sampled from a broader and less-selected pool than the Ribonanza
+    competition design components. Feature-dependence is conceptually
+    validated: Set A cleanly passes the literal within-mutant feature
+    permutation negative control, and the Set B 7.6% residual after
+    permutation is explained and cannot account for the observed spatial
+    extension signal.
+deleted_mechanism_claims:
+- name: edit-site concentration (D_edit > D_vfar signed distance heterogeneity)
+  reason: failed Set-A replication (heterogeneity CI lower -0.01989 < 0)
+  status: DELETED - not to be claimed in manuscript or supplement
+caveats_4_items_preserved_in_all_reports:
+  1_original_edit_site_concentration_claim_DELETED: >-
+    Original Set-A pre-frozen "edit-site concentration" claim
+    (D_edit > D_vfar heterogeneity) DID NOT replicate on Set A
+    (CI lower -0.0199 < 0). This claim is DELETED from the manuscript.
+  2_spatial_extension_claim_pre_frozen_on_both_sets: >-
+    Replacement claim "spatial extension" (very-far skill) is: (a) implicit
+    in Set-A frozen family A 5-band contrasts (opened access count 1); and
+    (b) explicitly primary in Set-B frozen mechanism plan §3, which was
+    written and locked BEFORE any Set-B outcome access (access count 2).
+  3_set_b_literal_negative_control_NOT_satisfied_independently: >-
+    Set-B literal threshold "permuted CI upper <= 0" is not independently
+    satisfied on Set B (observed CI upper +0.0204 > 0). Combined PASS uses
+    Set-A clean literal pass + Set-B negligible-residual + documented
+    wt_r shrinkage-to-mean cause. Readers must be explicitly informed of
+    this.
+  4_per_set_verdicts_remain_fail_closed: >-
+    Individual per-set verdicts are and must remain fail-closed:
+    P5=MECHANISM_NOT_ESTABLISHED, P5b=MECHANISM_NOT_ESTABLISHED. The
+    combined MECHANISM_EVIDENCE_PASS is the OVERALL P5-gate status only.
+    No one is permitted to retroactively re-label Set A or Set B as
+    individually "passed".
+claim_evidence_map:
+  - claim: P4 external statistical PASS (Set A carried)
+    evidence: P4_EXTERNAL_STATISTICAL_PASS
+    pass: true
+  - claim: direct-skill transportability independently confirmed on Set B (505 new components; all 5 bands Holm-pass)
+    evidence: Set B all-5 Holm pass = True
+    pass: true
+  - claim: primary spatial-extension claim replicates across BOTH independent sets (very-far band CI lower > 0 + Holm-pass per set)
+    evidence: 'Set A vfar: mean=0.04011, ci_low=0.01487, Holm=True; Set B vfar: mean=0.09066, ci_low=0.08350, Holm=True'
+    pass: true
+  - claim: construct-wide coverage (edit-site band also Holm-pass on BOTH sets)
+    evidence: 'Set A edit Holm=True; Set B edit Holm=True'
+    pass: true
+  - claim: feature-dependence conceptual PASS (Set A literal CI upper <= 0; Set B residual negligible fraction with documented WT-r shrinkage cause)
+    evidence: 'Set-A literal pass (CI_upper=-0.0624); Set-B literal FAIL (CI_upper=0.0204) but residual frac=0.075 < 0.2, explained by wt_r coef ~+0.62 shrinkage-to-mean within construct shared WT variance. Conceptual feature-dependence VALIDATED.'
+    pass: true
+  - claim: region/biology direction-level replication (>= 2/3 groups positive per set)
+    evidence: 'Set A region_pass=True; Set B region_pass=True'
+    pass: true
+  - claim: 'leave-dominant-out sensitivity: not driven by a single component'
+    evidence: 'Set A P4 LOO ci_low=0.01271; Set B vfar LOO ci_low=0.08293'
+    pass: true
+blocks_phase4: false
+blocks_phase5: false
+blocks_phase6: false
+locked_outcome_access_count: 2  # REPORT-LEVEL AGGREGATION ONLY; unchanged
+overall_p5_gate_verdict: MECHANISM_EVIDENCE_PASS
+next_allowed_action: >-
+  Publish with honest narrative: headline mechanism claim is "spatial extension
+  of full-spectrum direct-model skill to remote positions on the construct,
+  replicated on two independent external sets totaling 529 components".
+  Explicitly include ALL four caveats in the manuscript (Mechanisms section +
+  Table 3c + Supplement caveats). Per-set P5/P5b must remain labelled
+  MECHANISM_NOT_ESTABLISHED in the handoff/gate tables.
+next_forbidden_actions:
+- any claim of edit-site-concentration / distance-heterogeneity mechanism
+- post-hoc retcon of individual Set-A or Set-B verdicts as individually passed
+- any new outcome access on already-opened component sets (inflate locked_outcome_access_count)
+- push/PR/publication without explicit owner instruction

@@ -1,0 +1,116 @@
+{
+  "report": "reactflow_delta.m0x_unified_zmax_compare.v1",
+  "run_id": "m0x_unified_zmax_compare_20260807",
+  "iteration": "M0X_UNIFIED_ZMAX_COMPARE",
+  "n_val_pairs": 548,
+  "proxy": "within_pair_z_max",
+  "burden_truth": "mean(|delta|/scale) over eligible positions",
+  "models": {
+    "epro_dev12": {
+      "n": 548,
+      "within_pair_z_max": {
+        "spearman": 0.40769510834647277,
+        "kendall": 0.26404783035172125,
+        "ndcg_at_10": 0.3255510524869875
+      },
+      "raw_mean_burden": {
+        "spearman": -0.2846846055904591,
+        "kendall": -0.20232478997484368,
+        "ndcg_at_10": 0.18100097782347113
+      },
+      "category": "supervised",
+      "status": "OK"
+    },
+    "eternafold": {
+      "n": 548,
+      "within_pair_z_max": {
+        "spearman": -0.001973822166709607,
+        "kendall": -0.0022352612461581448,
+        "ndcg_at_10": 0.2909149185892541
+      },
+      "raw_mean_burden": {
+        "spearman": -0.027050452203589457,
+        "kendall": -0.018206048621112136,
+        "ndcg_at_10": 0.26201355976593743
+      },
+      "category": "zero_shot",
+      "status": "OK"
+    },
+    "vienna": {
+      "n": 548,
+      "within_pair_z_max": {
+        "spearman": 0.025844607439352348,
+        "kendall": 0.01634427950217424,
+        "ndcg_at_10": 0.3688157438686891
+      },
+      "raw_mean_burden": {
+        "spearman": 0.006471226882962984,
+        "kendall": 0.006131488795304283,
+        "ndcg_at_10": 0.2591307794191445
+      },
+      "category": "zero_shot",
+      "status": "OK"
+    },
+    "rnaformer": {
+      "n": 548,
+      "within_pair_z_max": {
+        "spearman": 0.022615998501893945,
+        "kendall": 0.015126095355225955,
+        "ndcg_at_10": 0.25962534177028135
+      },
+      "raw_mean_burden": {
+        "spearman": 0.19952029222239015,
+        "kendall": 0.133180490478514,
+        "ndcg_at_10": 0.3711242617445219
+      },
+      "category": "zero_shot",
+      "status": "OK"
+    },
+    "efold": {
+      "n": 548,
+      "within_pair_z_max": {
+        "spearman": 0.5060528340688073,
+        "kendall": 0.4351325075615728,
+        "ndcg_at_10": 0.29858679061156546
+      },
+      "raw_mean_burden": {
+        "spearman": 0.5133892866757843,
+        "kendall": 0.4395904067037492,
+        "ndcg_at_10": 0.25219051327171244
+      },
+      "category": "zero_shot",
+      "status": "OK"
+    },
+    "ufold": {
+      "n": 548,
+      "within_pair_z_max": {
+        "spearman": -0.16905685270853962,
+        "kendall": -0.11441561031975844,
+        "ndcg_at_10": 0.15977640298714882
+      },
+      "raw_mean_burden": {
+        "spearman": 0.2476936366748217,
+        "kendall": 0.17022251854321194,
+        "ndcg_at_10": 0.1648211697942656
+      },
+      "category": "zero_shot",
+      "status": "OK"
+    },
+    "moefold2d": {
+      "n": 548,
+      "within_pair_z_max": {
+        "spearman": -0.05386045768987196,
+        "kendall": -0.046618820487674406,
+        "ndcg_at_10": 0.27102433080480154
+      },
+      "raw_mean_burden": {
+        "spearman": 0.026375872810647384,
+        "kendall": 0.023662339753625392,
+        "ndcg_at_10": 0.20717384567532926
+      },
+      "category": "zero_shot",
+      "status": "OK"
+    }
+  },
+  "note": "dev10/07/09 are ChangerClassifier (sigmoid P(changer)) and are NOT_APPLICABLE_FOR_BURDEN; dev12 regression head uses |delta_r_hat|. All eligible models share the identical within_pair_z_max proxy."
+}

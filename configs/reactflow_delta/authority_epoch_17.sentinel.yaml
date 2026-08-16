@@ -1,0 +1,16 @@
+schema_version: reactflow_delta.authority_epoch_sentinel.v1
+authority_epoch: 17
+current_authority_state: CONDITIONAL_MAGNITUDE_EPOCH17_ENDPOINT_V5_GO_TERMINAL
+current_phase: CONDITIONAL-MAGNITUDE
+active_manifest_sha256: 59341530862e9b5985be975a9ac239d4967fc517fe3bf69ab889ef6966fcbdf3
+bundle_ledger_path: configs/reactflow_delta/authority_epoch_17.bundle.sha256
+bundle_ledger_sha256: 5c15f1d7e9823ec55017172e9fd4ebbb8ed5758ba42540598c35461db916ce03
+created_at: '2026-08-08T16:19:03.317462+00:00'
+emitted_after: BUNDLE_LEDGER
+embedded_self_sha256: FORBIDDEN
+endpoint_version: endpoint_v5
+metric_semantics: CONDITIONAL_WMAE_SKILL
+primary_v4_verdict: STOP_FROZEN_EPOCH16
+route_b_result: GO
+route_c_status: SUPERSEDED_UNSELECTED_PARALLEL_BRANCH_KEPT
+phase_graph_fix: POSITION_GRANULARITY_MARKED_SUPERSEDED_EPOCH17

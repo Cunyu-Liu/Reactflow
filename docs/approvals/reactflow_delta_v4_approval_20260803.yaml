@@ -1,0 +1,49 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_d0x_context_approval_20260803
+project_task_id: reactflow_delta
+recorded_at: "2026-08-03T22:40:15+08:00"
+approval_event:
+  actor_role: USER_IN_CURRENT_CODEX_THREAD
+  actor_identity_assurance: PLATFORM_ROLE_ONLY
+  platform_event_id: null
+  platform_event_id_status: NOT_AVAILABLE_NOT_ASSERTED
+  raw_event_export: null
+  raw_event_export_status: NOT_AVAILABLE_NOT_ASSERTED
+  message_text_utf8: "批准执行"
+  message_text_sha256: 2769e7199035a5e0f5da59ab8dc837c7e7d3c78add9f839d996c6ca7e00714a2
+  message_text_hash_mode: UTF8_BYTES_WITHOUT_TRAILING_NEWLINE
+  cryptographic_signature: null
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+context_binding:
+  context_artifact_path: docs/approvals/reactflow_delta_v4_d0x_approval_context_20260803.md
+  context_artifact_sha256: 38130cedde93fb7c6c6c1350aa0a0a6d14e7fb801797f2659d83496d00319492
+  preceding_user_plan_title: ReactFlow-Delta V4 数据优先救援与合同重写计划
+  interpretation_status: CONTEXT_BOUND_EXACT_SCOPE
+contract_binding:
+  contract_id: reactflow_delta_v4_data_first
+  contract_path: docs/contracts/ReactFlowDelta科研合同_v4_data_first.md
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+  hash_mode: RAW_FILE_BYTES
+grant:
+  - V4_SIGNOFF
+  - RECOVERY_TERMINALIZATION_IF_ALL_ACCEPTANCE_TESTS_PASS
+  - CONDITIONAL_D0X_ONLY_AUTHORITY
+explicit_denials:
+  - D1_X_CANONICALIZATION
+  - TRAINING_DATASET_BUILD
+  - SPLIT_BUILD
+  - NORMALIZATION_OR_THRESHOLD_FITTING
+  - BASELINE_TRAINING
+  - MODEL_TRAINING
+  - P2_EXECUTION
+  - EPRO_EXECUTION
+  - CONFIRMATORY_TEST_UNSEAL
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PUSH
+  - PULL_REQUEST
+revocation:
+  any_contract_hash_drift_revokes: true
+  any_scope_expansion_requires_new_user_approval: true
+  d0x_terminal_state_consumes_d0x_authority: true
+embedded_self_sha256: FORBIDDEN

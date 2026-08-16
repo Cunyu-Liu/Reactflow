@@ -1,0 +1,11 @@
+# split_v4_lopo_puzzle (contract 7.2, 11.2)
+schema_version: reactflow_delta.split_v4_lopo_puzzle.v1
+outer_folds: 20
+outer_units: puzzle (P01..P20)
+held_puzzle_isolation: all methods/constructs/mutants excluded from fit/tuning/prior/calibration/early_stopping/B*_selection
+inner_split: fixed outcome-blind 4-fold puzzle-grouped over the 19 outer-train puzzles
+fold_local: normalization/prior/calibration/noise_floor/early_stopping/B*_selection
+sensitivity:
+- method_disjoint: sensitivity_only
+- cell_loo: diagnostic_only
+registered_universe_ref: endpoint_v7_all_mutant_full_spectrum.yaml

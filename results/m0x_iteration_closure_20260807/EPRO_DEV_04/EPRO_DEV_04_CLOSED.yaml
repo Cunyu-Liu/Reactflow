@@ -1,0 +1,9 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_sentinel.v1",
+  "iteration_id": "EPRO_DEV_04",
+  "run_id": "epro_dev_04_20260805",
+  "overall": "PASS",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "finalizer": "results/m0x_iteration_closure_20260807/EPRO_DEV_04/finalizer.json",
+  "note": "direct changer classifier (36-dim B0-X+delta_thermo -> MLP 141k) with focal loss; beats P2 baseline, CI low>0"
+}

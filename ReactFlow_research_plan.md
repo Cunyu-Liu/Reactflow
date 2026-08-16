@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **已由 ReactFlow-Δ EPRO V3 合同取代（2026-07-29；仅保留为历史工程资产与负结果证据）。**
+> 本文件不再是可执行科研合同，也不得用于启动训练、追加 seed、降低 Gate 或支撑新的科学主张。当前唯一有效合同为
+> `docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md`
+>（SHA-256：`3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10`）。
+
 # ReactFlow:以化学探针 reactivity 为条件、离散流匹配生成 RNA 2D 结构分布 — 研究规划(v0.1)
 
 > 状态:C1/C2/C3/C4/C5 实现内核已落地(工程实现见 `reactflow/`,合成 pilot 端到端跑通;采样器 100% 合法、guidance `η` 扫描单调性已证并 SymPy 验证;C5 Stage-A warm-start 冻结特征 + 手写线性 adapter + C5.4 评测协议已实现,并已升级到真实 eFold/RNAndria Dryad JSON scale-up 基础设施:`prepare-efold-cache` 物化 JSONL cache 且支持长序列 windowing/length bucketing,`split-efold-cache` 可生成 clan/cluster 无泄漏 train/val/test/novel JSONL artifacts,`train-efold`/`evaluate-efold` 可训练和评估真实结构标签并支持 per-phase profiling 与 JSON checkpoint,RibonanzaNet2 Kaggle-alpha single-only frozen export 成功(64 条 shard 8.8MB),可选 lazy PyTorch base 训练后端已接入;全量 283 passed/2 skipped、coverage 92.79%、`import reactflow` 零重依赖;外部 Rfam/MMseqs 真标签、全量 frozen export、服务器规模化 profiling/torch 对比与同口径 baseline rerun 留待 full real-data run) · 日期 2026-07-08

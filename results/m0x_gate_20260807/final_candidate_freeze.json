@@ -1,0 +1,40 @@
+{
+  "schema": "reactflow_delta.m0x_final_candidate_freeze.v1",
+  "run_id": "m0x_gate_harness_20260807",
+  "frozen_at_utc": "2026-08-07T06:10:21.234784+00:00",
+  "evidence_class": "DEVELOPMENT_ONLY",
+  "split": "publication frozen (train 3516 / val 548), test SEALED & untouched",
+  "selection_rule": "contract \u00a713.5 (study-macro AUPRC gain over strongest simple baseline; only valid full-coverage supervised candidate)",
+  "unique_final_candidate": {
+    "model": "epro_dev10_best",
+    "checkpoint": "results/epro_dev10_hpsearch_20260805/best_model.pt",
+    "param_count": 142849,
+    "study_macro_auprc": 0.2652025367114727,
+    "frozen": true
+  },
+  "strongest_simple_baseline": {
+    "model": "tree",
+    "study_macro_auprc": 0.29831932734267586
+  },
+  "gate_13_4_verdict": {
+    "real_labels_beat_permutation_null": {
+      "status": "FAIL",
+      "p_value": 1.0
+    },
+    "cluster_ci_lb_gt_0_vs_strongest_simple": {
+      "status": "FAIL",
+      "ci_low": -0.13560872786736744,
+      "ci_high": 0.06689901384272967,
+      "point": -0.03311679063120315
+    },
+    "candidate_beats_strongest_simple": {
+      "status": "FAIL",
+      "candidate": 0.2652025367114727,
+      "baseline": 0.29831932734267586
+    },
+    "overall_gate": "FAIL"
+  },
+  "phase_status": "M0_X_GATE_NOT_PASSED",
+  "phase_conversion": "per \u00a717.10 / \u00a720.11: confirmatory gate NOT met; phase does NOT formally PASS. Converts to DEVELOPMENT_ONLY negative / leakage-resistant benchmark / P2 resource result. Does NOT unlock P0-X and does NOT claim SOTA.",
+  "honesty_note": "Freezing the unique final-candidate SELECTION is recorded per \u00a713.5/\u00a717 rule 9. The M0-X confirmatory gate (\u00a713.4) is NOT met and is recorded as FAIL. No PASS sentinel is issued because the conjunctive criteria are not satisfied."
+}

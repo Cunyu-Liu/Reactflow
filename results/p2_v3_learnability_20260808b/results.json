@@ -1,0 +1,404 @@
+{
+  "fold_timing": {
+    "UNKNOWN_PUBLICATION:5SRRNA": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 136.2,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:ADDRSW": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 117.8,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:AGSARNA": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 100.2,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:CL1LIG": {
+      "n_held_pairs": 128,
+      "n_train_pairs": 3053,
+      "seconds": 1455.2,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:GLYCFN": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 172.9,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:HC16M2R": {
+      "n_held_pairs": 62,
+      "n_train_pairs": 3119,
+      "seconds": 2072.4,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:MDLOOP": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 170.3,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:RNAPZ6": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 172.0,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:RNASEP": {
+      "n_held_pairs": 36,
+      "n_train_pairs": 3145,
+      "seconds": 1407.1,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:SRPDIV": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 144.6,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "UNKNOWN_PUBLICATION:TRNAPH": {
+      "n_held_pairs": 0,
+      "n_train_pairs": 3181,
+      "seconds": 126.9,
+      "skipped": true,
+      "train_studies": 18
+    },
+    "pmid_24469816": {
+      "n_held_pairs": 220,
+      "n_train_pairs": 2961,
+      "seconds": 1711.2,
+      "train_studies": 18
+    },
+    "pmid_25183835": {
+      "n_held_pairs": 408,
+      "n_train_pairs": 3071,
+      "seconds": 2039.8,
+      "train_studies": 18
+    },
+    "pmid_25303992": {
+      "n_held_pairs": 64,
+      "n_train_pairs": 3129,
+      "seconds": 1836.2,
+      "train_studies": 17
+    },
+    "pmid_25883046": {
+      "n_held_pairs": 68,
+      "n_train_pairs": 3113,
+      "seconds": 1710.7,
+      "train_studies": 18
+    },
+    "pmid_29446752": {
+      "n_held_pairs": 2366,
+      "n_train_pairs": 815,
+      "seconds": 1881.9,
+      "train_studies": 18
+    },
+    "pmid_35982307": {
+      "n_held_pairs": 68,
+      "n_train_pairs": 3113,
+      "seconds": 1444.0,
+      "train_studies": 18
+    },
+    "pub_RNAPuzzle18_daslab": {
+      "n_held_pairs": 71,
+      "n_train_pairs": 3110,
+      "seconds": 1824.0,
+      "train_studies": 18
+    }
+  },
+  "models": [
+    "trivial",
+    "logistic",
+    "gbm",
+    "p2_mlp",
+    "deepsets"
+  ],
+  "n_distinct_publications": 18,
+  "n_pool_pairs": 6385,
+  "n_pool_studies": 19,
+  "per_publication_ap_seed0": {
+    "deepsets": {
+      "UNKNOWN_PUBLICATION:CL1LIG": 0.9208069132214858,
+      "UNKNOWN_PUBLICATION:HC16M2R": 0.0418649774581978,
+      "UNKNOWN_PUBLICATION:RNASEP": 0.5021947392511908,
+      "pmid_24469816": 0.4002533076520039,
+      "pmid_25183835": 0.8089639435709953,
+      "pmid_25303992": 0.8310628236139245,
+      "pmid_25883046": "DEGENERATE",
+      "pmid_29446752": 0.8475357694693074,
+      "pmid_35982307": "DEGENERATE",
+      "pub_RNAPuzzle18_daslab": 0.9631346280206478
+    },
+    "gbm": {
+      "UNKNOWN_PUBLICATION:CL1LIG": 0.8781094964707912,
+      "UNKNOWN_PUBLICATION:HC16M2R": 0.06012104118925906,
+      "UNKNOWN_PUBLICATION:RNASEP": 0.467640235581412,
+      "pmid_24469816": 0.48108922479021154,
+      "pmid_25183835": 0.7525793605234149,
+      "pmid_25303992": 0.7716873455549865,
+      "pmid_25883046": "DEGENERATE",
+      "pmid_29446752": 0.768144374947642,
+      "pmid_35982307": "DEGENERATE",
+      "pub_RNAPuzzle18_daslab": 0.9781137523602734
+    },
+    "logistic": {
+      "UNKNOWN_PUBLICATION:CL1LIG": 0.9038964048121493,
+      "UNKNOWN_PUBLICATION:HC16M2R": 0.06431623931623931,
+      "UNKNOWN_PUBLICATION:RNASEP": 0.5817413396334965,
+      "pmid_24469816": 0.3426910991225183,
+      "pmid_25183835": 0.88738864000432,
+      "pmid_25303992": 0.7983522912646441,
+      "pmid_25883046": "DEGENERATE",
+      "pmid_29446752": 0.8707267361958475,
+      "pmid_35982307": "DEGENERATE",
+      "pub_RNAPuzzle18_daslab": 0.9804114205907164
+    },
+    "p2_mlp": {
+      "UNKNOWN_PUBLICATION:CL1LIG": 0.9180503683656147,
+      "UNKNOWN_PUBLICATION:HC16M2R": 0.0546947738252086,
+      "UNKNOWN_PUBLICATION:RNASEP": 0.6567228325613103,
+      "pmid_24469816": 0.3207696894284421,
+      "pmid_25183835": 0.8303824471419778,
+      "pmid_25303992": 0.8514623431179013,
+      "pmid_25883046": "DEGENERATE",
+      "pmid_29446752": 0.8432576829501415,
+      "pmid_35982307": "DEGENERATE",
+      "pub_RNAPuzzle18_daslab": 0.975612111607354
+    },
+    "trivial": {
+      "UNKNOWN_PUBLICATION:CL1LIG": 0.8828125,
+      "UNKNOWN_PUBLICATION:HC16M2R": 0.04838709677419355,
+      "UNKNOWN_PUBLICATION:RNASEP": 0.4166666666666667,
+      "pmid_24469816": 0.5,
+      "pmid_25183835": 0.7303921568627451,
+      "pmid_25303992": 0.90625,
+      "pmid_25883046": "DEGENERATE",
+      "pmid_29446752": 0.757396449704142,
+      "pmid_35982307": "DEGENERATE",
+      "pub_RNAPuzzle18_daslab": 0.971830985915493
+    }
+  },
+  "publication_studies": {
+    "UNKNOWN_PUBLICATION:5SRRNA": [
+      "5SRRNA"
+    ],
+    "UNKNOWN_PUBLICATION:ADDRSW": [
+      "ADDRSW"
+    ],
+    "UNKNOWN_PUBLICATION:AGSARNA": [
+      "AGSARNA"
+    ],
+    "UNKNOWN_PUBLICATION:CL1LIG": [
+      "CL1LIG"
+    ],
+    "UNKNOWN_PUBLICATION:GLYCFN": [
+      "GLYCFN"
+    ],
+    "UNKNOWN_PUBLICATION:HC16M2R": [
+      "HC16M2R"
+    ],
+    "UNKNOWN_PUBLICATION:MDLOOP": [
+      "MDLOOP"
+    ],
+    "UNKNOWN_PUBLICATION:RNAPZ6": [
+      "RNAPZ6"
+    ],
+    "UNKNOWN_PUBLICATION:RNASEP": [
+      "RNASEP"
+    ],
+    "UNKNOWN_PUBLICATION:SRPDIV": [
+      "SRPDIV"
+    ],
+    "UNKNOWN_PUBLICATION:TRNAPH": [
+      "TRNAPH"
+    ],
+    "pmid_24469816": [
+      "ETBSTR"
+    ],
+    "pmid_25183835": [
+      "16SFWJ"
+    ],
+    "pmid_25303992": [
+      "CIDGMP",
+      "TRP4P6"
+    ],
+    "pmid_25883046": [
+      "RNAPZ5"
+    ],
+    "pmid_29446752": [
+      "ADD140"
+    ],
+    "pmid_35982307": [
+      "PSL2IAV"
+    ],
+    "pub_RNAPuzzle18_daslab": [
+      "RNAPZ18"
+    ]
+  },
+  "publications": [
+    "UNKNOWN_PUBLICATION:5SRRNA",
+    "UNKNOWN_PUBLICATION:ADDRSW",
+    "UNKNOWN_PUBLICATION:AGSARNA",
+    "UNKNOWN_PUBLICATION:CL1LIG",
+    "UNKNOWN_PUBLICATION:GLYCFN",
+    "UNKNOWN_PUBLICATION:HC16M2R",
+    "UNKNOWN_PUBLICATION:MDLOOP",
+    "UNKNOWN_PUBLICATION:RNAPZ6",
+    "UNKNOWN_PUBLICATION:RNASEP",
+    "UNKNOWN_PUBLICATION:SRPDIV",
+    "UNKNOWN_PUBLICATION:TRNAPH",
+    "pmid_24469816",
+    "pmid_25183835",
+    "pmid_25303992",
+    "pmid_25883046",
+    "pmid_29446752",
+    "pmid_35982307",
+    "pub_RNAPuzzle18_daslab"
+  ],
+  "run_id": "p2_v3_learnability_20260808b",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "table": {
+    "deepsets:0": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "deepsets:1": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "deepsets:2": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "deepsets:3": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "deepsets:4": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "gbm:0": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "gbm:1": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "gbm:2": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "gbm:3": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "gbm:4": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "logistic:0": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "logistic:1": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "logistic:2": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "logistic:3": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "logistic:4": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "p2_mlp:0": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "p2_mlp:1": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "p2_mlp:2": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "p2_mlp:3": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "p2_mlp:4": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "trivial:0": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "trivial:1": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "trivial:2": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "trivial:3": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    },
+    "trivial:4": {
+      "ci": "UNIDENTIFIABLE",
+      "metric": "UNIDENTIFIABLE",
+      "permutation_p": 1.0
+    }
+  }
+}

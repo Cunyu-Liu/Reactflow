@@ -1,0 +1,82 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_o0x_20260804
+amendment_status: ACTIVE_AUTHORIZED
+authority_epoch: 11
+created_at: "2026-08-04T19:00:00+08:00"
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+supersedes_amendment:
+  amendment_id: reactflow_delta_v4_b0x_20260804
+  superseded_authority_epoch: 10
+  superseded_b0x_run_id: b0x_strong_baseline_20260804_v1
+  supersession_reason: >-
+    B0X_CLOSED_PROCEED_TO_O0X. The epoch-10 B0-X amendment (strong baseline
+    qualification) reached terminal PASS (run b0x_strong_baseline_20260804_v1,
+    closure b0x_finalize_20260804T1900+0800, gate_result PASS, no single-group
+    dominance). This amendment consumes that closure as prerequisite and
+    authorizes the O0-X Operator Engineering phase (contract section 20.9) on
+    the frozen operator spec and the frozen D2-X publication split. O0-X is
+    ENGINEERING_ONLY: it verifies the exact endpoint-response operator
+    invariants (section 15.2/15.4), the real CUDA forward/backward with
+    fallback=0, tiny-subset overfit, and edge cases. It does NOT train any EPRO
+    method, does NOT do scientific model selection, and does NOT touch the
+    sealed test split.
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_o0x_approval_20260804.yaml
+  approval_record_sha256: null
+  scope: SINGLE_PHASE_OPERATOR_ENGINEERING_ONLY
+  scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
+  external_identity_status: NOT_VERIFIED
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+prerequisites:
+  b0x_terminal_manifest_sha256: 2500fc66dd92184f8915497aa94dd11fa69a53170ee974efcdd58f1f28d9516b
+  b0x_terminal_sentinel_sha256: e8bfca70e9282dde6e492af71e653618784da757c7211b149d820c489524647e
+  b0x_checksum_ledger_sha256: 4eb641ae6f135ead8e4374e106c12f961897eab0b33132186b3a826b2b8aa077
+  b0x_closure_commit: dd6cce3
+  b0x_gate_result: PASS
+  b0x_tier_b_plus: PASS
+  ph0x_gate_result: PASS
+  d2x_gate_result: PASS
+  d1x_gate_result: PASS
+grant:
+  phase_id: O0-X
+  authorization_kind: SINGLE_PHASE_OPERATOR_ENGINEERING_ONLY
+  allowed_actions:
+    - READ_ONLY_PREFLIGHT
+    - OPERATOR_PROPERTY_AND_UNIT_TESTS
+    - INVARIANT_SUITE_EXECUTION
+    - REAL_CUDA_FORWARD_BACKWARD
+    - TINY_SUBSET_OVERFIT_8_32_PAIR
+    - EDGE_CASE_TESTING
+    - EVALUATOR_REFERENCE_CROSSCHECK
+    - DETERMINISTIC_EVAL_CHECK
+    - SANITY_GRADIENT_CHECK
+    - FINALIZER_AND_CHECKSUM_LEDGER
+    - TERMINAL_SENTINEL_WRITE
+  explicit_denials:
+    - EPRO_METHOD_OPTIMIZATION
+    - SCIENTIFIC_MODEL_SELECTION
+    - SEALED_TEST_UNSEAL
+    - TEST_OUTCOME_FITTING
+    - SEED_RETRY
+    - CONFIRMATORY_TEST_UNSEAL
+    - CROSS_PROJECT_EXPORT
+    - WET_LAB
+    - PULL_REQUEST
+    - PUSH_IS_GOVERNED_BY_USER_INSTRUCTION_9
+run_authorization:
+  authorization_token_id: o0x_operator_engineering_20260804_v1
+  maximum_primary_run_count: 1
+  maximum_concurrent_runs: 1
+  same_run_checkpoint_resume_allowed: true
+  terminal_run_consumes_authority: true
+  run_id_must_be: o0x_operator_engineering_20260804_v1
+  isolated_clean_worktree_required_before_execution: true
+  gpu_required: true
+  cuda_fallback_zero: true
+terminal_routes:
+  on_pass: STOP_AWAIT_M0X_AUTHORITY_AMENDMENT
+  on_fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+  automatic_downstream_unlock: false
+embedded_self_sha256: FORBIDDEN

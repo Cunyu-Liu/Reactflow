@@ -1,0 +1,12 @@
+{
+  "audit_path": "artifacts/reactflow_delta/d0r/d0r_all_audit.json",
+  "distinct_parents": 43,
+  "distinct_studies": 18,
+  "generated_at": "2026-08-01T19:13:45.283697+08:00",
+  "parse_errors": 512,
+  "rdat_files_scanned": 1024,
+  "relations_path": "artifacts/reactflow_delta/d0r/d0r_all_relations.json",
+  "schema_version": "reactflow-delta-d0r-all-parse-manifest-v1",
+  "summary_path": "artifacts/reactflow_delta/d0r/d0r_all_summary.json",
+  "total_candidate_relations": 10424
+}

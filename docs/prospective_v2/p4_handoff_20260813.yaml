@@ -1,0 +1,82 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P4
+run_id: prospective_v2_p4_20260813
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P4_P5 (granted by owner directive 2026-08-13)'
+frozen_protocol: docs/prospective_v2/p4_frozen_protocol_20260813.md
+inputs:
+- frozen outcome-blind component graph: /mnt/cunyuliu/prospective_v2_p4_20260813/p4_external_components.json
+  (M2SL5=3, M3SARS=3, 15KLIB=18 => K_preaccess=24 components, 3237 single-SNV,
+  zero sequence overlap with OK7a_M2 development)
+- B*_external = reg_direct refit once on ALL development OK7a_M2
+- Ribonanza M2-style 2A3 rdat profiles (development-disconnected)
+outputs:
+- /mnt/cunyuliu/prospective_v2_p4_20260813/p4_external_result.json
+- scripts/reactflow_delta/run_p4_external_v1.py
+- tests/reactflow_delta/test_p4_external_v1.py
+tests:
+- test_p4_external_v1.py: 15 PASS (remote)
+- regression found+fixed: first execution crashed with IndexError because reactivity
+  arrays are shorter than sequences (3' pads/barcodes non-observed); shared-region
+  indices now bounded by reactivity array length per frozen attrition rule 3
+engineering_status: ENGINEERING_PASS
+scientific_status: 'P4 PASS: P4_EXTERNAL_STATISTICAL_PASS'
+p4_primary:
+  candidate: reg_direct (adopted direct model per P3 / contract 17.2)
+  baseline: ZeroResponse (WT-anchor) + train median (sensitivity)
+  delta_stat: 0.0
+  K_required_planned: 9
+  K_preaccess: 24
+  K_eff_realized: 24
+  D_vs_zero_mean: 0.041010
+  ci_zero: {low: 0.015337, high: 0.066683}
+  D_vs_median_mean: 0.044643
+  ci_median: {low: 0.011218, high: 0.078068}
+  holm_bonferroni_p: [0.001548, 0.005536]
+  fwer_pass: true
+  dominant_component_index: 8
+  leave_dominant_out_ci_low: 0.012708
+  statistical_pass: true
+  verdict: P4_EXTERNAL_STATISTICAL_PASS
+  practical_importance: PRACTICAL_IMPORTANCE_NOT_ESTABLISHED
+  locked_outcome_access_count: 1
+p4_calibration:  # contract 12.6 'coverage/calibration 合格' gate
+  result: /mnt/cunyuliu/prospective_v2_p4_20260813/p4_calibration_result.json
+  n_positions: 355655
+  pooled: {cov_68: 0.69915, tol_68: [0.58, 0.78], pass_68: true,
+           cov_95: 0.87420, tol_95: [0.85, 0.99], pass_95: true,
+           empirical_residual_sd: 0.61064, nominal_scale: 0.3}
+  per_dataset_95pct_coverage:
+    M2SL5_2A3_0000: {empirical_residual_sd: 0.2778, cov_95: 0.9596}
+    M3SARS_2A3_0000: {empirical_residual_sd: 1.3709, cov_95: 0.7808}
+    15KLIB_2A3_0000: {empirical_residual_sd: 0.6082, cov_95: 0.8533}
+  verdict: CALIBRATION_ACCEPTABLE
+  note: >-
+    frozen Gaussian scale 0.3 gives slightly undercovered intervals on external
+    data (nominal 95% -> empirical 87.4%), within the pre-declared tolerance and
+    consistent with the P2 development diagnostic (89.6%). M3SARS is noisier
+    (empirical SD 1.37) and under-covered (78%); the honest empirical residual
+    SD is reported as a deployment/interpretation diagnostic and does not alter
+    the frozen evaluator.
+data_integrity_note: >-
+  The direct-learnability signal established on the development benchmark (P2
+  CI lower +0.0079) replicates on development-disconnected external M2 2A3-MaP
+  components: component-macro D vs ZeroResponse = +0.0410 with one-sided 95% CI
+  lower +0.0153 > delta_stat=0, Holm-Bonferroni FWER over {zero, train_median}
+  passes, and leave-dominant-component-out sensitivity keeps CI lower > 0.
+blocks_phase2: false
+blocks_phase3: false
+blocks_phase4: false
+blocks_phase5: false
+blocks_phase6: false
+next_allowed_action: P5 mechanism contrasts (pre-frozen in protocol section 7);
+  delete/narrow mechanism claims only after P5 verdict.
+next_forbidden_actions:
+- reading locked outcomes again as a new confirmatory set
+- push/PR/publication without explicit owner instruction
+p4_verdict: P4_EXTERNAL_STATISTICAL_PASS

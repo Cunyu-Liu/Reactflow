@@ -1,0 +1,9 @@
+{
+  "schema": "reactflow_delta.m0x_iteration_closure_sentinel.v1",
+  "iteration_id": "EPRO_DEV_05",
+  "run_id": "epro_dev_05_20260805",
+  "overall": "FAIL",
+  "closure_type": "RETROACTIVE_REGISTRY_BACKFILL",
+  "finalizer": "results/m0x_iteration_closure_20260807/EPRO_DEV_05/finalizer.json",
+  "note": "EPRO deep backbone + focal changer head did not converge (val study-macro AP ~0.52); superseded by structure-aware flat MLP (EPRO_DEV_06)."
+}

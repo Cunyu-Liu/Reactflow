@@ -1,0 +1,101 @@
+{
+  "schema_version": "reactflow_delta.p5_mechanism.v1",
+  "verdict": "MECHANISM_NOT_ESTABLISHED",
+  "K_eff_realized": 24,
+  "locked_outcome_access_count": 1,
+  "band_stats": {
+    "edit_site": {
+      "n": 24,
+      "mean": 0.03111,
+      "sd": 0.05,
+      "ci_low": 0.00555,
+      "ci_high": 0.05667
+    },
+    "near_1_3": {
+      "n": 24,
+      "mean": 0.03612,
+      "sd": 0.05,
+      "ci_low": 0.00982,
+      "ci_high": 0.06242
+    },
+    "mid_4_10": {
+      "n": 24,
+      "mean": 0.03778,
+      "sd": 0.05,
+      "ci_low": 0.01036,
+      "ci_high": 0.0652
+    },
+    "far_11_25": {
+      "n": 24,
+      "mean": 0.04665,
+      "sd": 0.05,
+      "ci_low": 0.02004,
+      "ci_high": 0.07326
+    },
+    "very_far_26p": {
+      "n": 24,
+      "mean": 0.04011,
+      "sd": 0.05,
+      "ci_low": 0.01487,
+      "ci_high": 0.06535
+    }
+  },
+  "band_holm": {
+    "edit_site": {
+      "pass": true
+    },
+    "near_1_3": {
+      "pass": true
+    },
+    "mid_4_10": {
+      "pass": true
+    },
+    "far_11_25": {
+      "pass": true
+    },
+    "very_far_26p": {
+      "pass": true
+    }
+  },
+  "distance_heterogeneity": {
+    "D_edit_minus_vfar": {
+      "n": 24,
+      "mean": -0.009,
+      "sd": 0.03,
+      "ci_low": -0.01989,
+      "ci_high": 0.00188,
+      "pass": false
+    }
+  },
+  "negative_control": {
+    "permuted_edit_D": {
+      "n": 24,
+      "mean": -0.11071,
+      "sd": 0.05,
+      "ci_low": -0.15902,
+      "ci_high": -0.0624
+    },
+    "seed": 20260813,
+    "pass": true
+  },
+  "region_strata": {
+    "M2SL5_2A3_0000": {
+      "n_components": 3,
+      "mean_D_edit": -0.01985
+    },
+    "M3SARS_2A3_0000": {
+      "n_components": 3,
+      "mean_D_edit": 0.08269
+    },
+    "15KLIB_2A3_0000": {
+      "n_components": 18,
+      "mean_D_edit": 0.03101
+    }
+  },
+  "region_replication_pass": true,
+  "p4_carried": {
+    "verdict": "P4_EXTERNAL_STATISTICAL_PASS",
+    "ci_zero_low": 0.01534,
+    "leave_dominant_out_ci_low": 0.01271
+  }
+}

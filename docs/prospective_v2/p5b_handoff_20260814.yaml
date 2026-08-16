@@ -1,0 +1,88 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P5b (confirmatory mechanism re-test on NEW independent components)
+run_id: prospective_v2_p5b_20260814
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: >-
+  owner confirmed "Authorize P5b execution" (2026-08-14) for a NEW locked
+  external outcome access (count 1 -> 2) on the frozen P5b protocol
+  (docs/prospective_v2/p5b_frozen_mechanism_plan_20260814.md).
+frozen_plan: docs/prospective_v2/p5b_frozen_mechanism_plan_20260814.md
+inputs:
+- NEW independent external component graph p5b_external_components.json
+  (M2RFOK/M2RFPK DasLab BigLib2 OneMil2; 694 components / 106,904 single-SNV;
+  zero dev overlap; disjoint from consumed 24; NEVER outcome-accessed before this run)
+- B*_external = reg_direct refit once on all development OK7a_M2 (same coef as P4/P5)
+outputs:
+- /mnt/cunyuliu/prospective_v2_p4_20260813/p5b_mechanism_result.json
+- scripts/reactflow_delta/run_p5b_mechanism_v1.py
+- scripts/reactflow_delta/build_p5b_external_components_v1.py
+- docs/prospective_v2/p5b_frozen_mechanism_plan_20260814.md
+tests:
+- (new unit tests to be added for p5b in tests/reactflow_delta/test_p5b_mechanism_v1.py)
+engineering_status: ENGINEERING_PASS
+scientific_status: 'P5b FAIL: MECHANISM_NOT_ESTABLISHED (negative control criterion failed on new set)'
+p5b_primary:
+  K_preaccess: 694
+  K_eff_realized: 505
+  band_D_vs_zero:  # component-macro mean (positive = direct better than WT-anchor)
+    edit_site:  {mean: 0.08678, ci_low: 0.07900, holm_pass: true}
+    near_1_3:   {mean: 0.08689, ci_low: 0.07961, holm_pass: true}
+    mid_4_10:   {mean: 0.08720, ci_low: 0.08012, holm_pass: true}
+    far_11_25:  {mean: 0.09275, ci_low: 0.08595, holm_pass: true}
+    very_far_26p: {mean: 0.09066, ci_low: 0.08350, holm_pass: true}
+  primary_claim_remote_skill:  # "full-construct skill extends to REMOTE positions"
+    mean: 0.09066
+    ci_low: 0.08350
+    pass: true
+  edit_site_skill_pass: true
+  region_replication_pass: true  # 4/4 dataset groups positive (M2RFOK + M2RFPK x3)
+  leave_dominant_out_vfar_ci_low: 0.08293  # pass: true
+p5b_secondary:
+  negative_control:  # permuted direct features (seed 20260813)
+    permuted_edit_D: {mean: 0.00655, ci_high: 0.02040}
+    pass: false  # CI upper > 0 -> frozen negative-control gate FAILS on new set
+  interpretation: >-
+    Primary remote-skill claim (D_vs_zero very-far CI lower +0.0835, Holm pass,
+    p<1e-89) is strongly CONFIRMED on 505 new independent components. But the
+    pre-frozen negative control (permuted features must show NO skill, CI upper
+    <= 0) FAILED: permuted direct retains a small positive D (mean +0.0066,
+    ~7.6% of real skill, one-sided CI upper +0.0204). Unlike the consumed
+    Ribonanza set (permuted CI upper -0.062), on BigLib2 the coefficient's
+    WT-reactivity/shrinkage component partially survives feature-position
+    permutation, so the feature-dependence control is not cleanly satisfied.
+p4_carried:
+  verdict: P4_EXTERNAL_STATISTICAL_PASS
+claim_evidence_map:
+- claim: P4 external statistical replication (carried)
+  verdict: ESTABLISHED
+- claim: full-construct direct skill extends to REMOTE positions (very-far band)
+  verdict: CONFIRMED (primary; CI lower +0.0835, Holm pass)
+- claim: construct-wide coverage (edit site also positive)
+  verdict: CONFIRMED
+- claim: effect replicates across dataset groups
+  verdict: ESTABLISHED (4/4)
+- claim: remote-skill contrast robust to dominant component
+  verdict: ESTABLISHED
+- claim: effect is feature-dependent (negative control)
+  verdict: NOT_ESTABLISHED (permuted CI upper +0.0204 > 0)
+blocks_phase4: false
+blocks_phase5: false
+blocks_phase6: false
+locked_outcome_access_count: 2
+next_allowed_action: >-
+  Report honest fail-closed P5b. Either (a) keep P5 = MECHANISM_NOT_ESTABLISHED
+  and publish the qualified prediction/transportability narrative only (contract
+  12.7 failure route), or (b) obtain a THIRD independent external set for a
+  fresh pre-frozen protocol. No post-hoc relaxation of the frozen negative
+  control on the already-opened set.
+next_forbidden_actions:
+- any claim of edit-site-concentration / distance-heterogeneity mechanism
+- any post-hoc change to the frozen negative-control criterion after opening
+- outcome-driven selection of further external sets
+- push/PR/publication without explicit owner instruction
+p5b_verdict: MECHANISM_NOT_ESTABLISHED

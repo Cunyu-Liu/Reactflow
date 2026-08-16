@@ -1,0 +1,35 @@
+{
+  "competition": "stanford-ribonanza-rna-folding",
+  "conclusion": "Ribonanza Kaggle data is NOT directly accessible in this environment (no kaggle CLI, no credentials). However, M2SL5 (Ribonanza pre-competition derivative) IS accessible via RMDB and has been downloaded and parsed. The D0 404 is reinterpreted as a探测 method failure, not data inaccessibility.",
+  "correct_download_flow": [
+    "1. Install kaggle CLI: pip install kaggle",
+    "2. Place credentials at ~/.kaggle/kaggle.json (from kaggle.com -> Account -> Create New Token)",
+    "3. Run: kaggle competitions download -c stanford-ribonanza-rna-folding",
+    "4. Accept competition rules at https://www.kaggle.com/competitions/stanford-ribonanza-rna-folding/rules"
+  ],
+  "d0_finding": {
+    "d0_method": "direct URL probe (incorrect URL, no Kaggle auth)",
+    "d0_result": "404 / no data retrieved",
+    "interpretation": "The 404 only proves the探测 method (direct URL without auth) failed, NOT that the data is inaccessible. The correct method is via Kaggle CLI with credentials."
+  },
+  "generated_at": "2026-07-30T17:45:57.808662+08:00",
+  "kaggle_status": {
+    "kaggle_cli_installed": false,
+    "kaggle_cli_path": null,
+    "kaggle_json_exists": false,
+    "kaggle_json_path": "/home/cunyuliu/.kaggle/kaggle.json",
+    "kaggle_module_available": false
+  },
+  "m2sl5_via_rmdb": {
+    "accessible": true,
+    "caveat": "M2SL5 candidate relations are candidate_only_unverified. Intervention lineage is NOT independently confirmed — the WT anchor is identified by name convention, not by experimental verification.",
+    "citation": "R. Huang, R. Das (no PMID/DOI in RMDB entry)",
+    "description": "M2SL5 is Ribonanza Kaggle pre-competition data deposited in RMDB. Accessible via RMDB GitHub releases without Kaggle credentials. Entry description explicitly states 'Ribonanza Kaggle dataset... Collected: pre-competition'.",
+    "rmdb_ids": [
+      "M2SL5_2A3_0000",
+      "M2SL5_DMS_0000"
+    ]
+  },
+  "schema_version": "reactflow-delta-d0r-ribonanza-audit-v1",
+  "stage": "D0-R"
+}

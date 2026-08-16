@@ -1,0 +1,8 @@
+{
+  "schema": "reactflow_delta.m0x_dev12_terminal_sentinel.v1",
+  "iteration_id": "EPRO_DEV_12_REGRESSION",
+  "run_id": "epro_dev12_regression_std_20260807",
+  "overall": "PASS",
+  "acceptance_report": "results/epro_dev12_acceptance_20260807/acceptance_report.json",
+  "checksum_ledger": "results/epro_dev12_acceptance_20260807/checksum_ledger.json"
+}

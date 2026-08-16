@@ -1,0 +1,80 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P5
+run_id: prospective_v2_p5_20260813
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P4_P5 (granted by owner directive 2026-08-13)'
+frozen_plan: docs/prospective_v2/p5_frozen_mechanism_plan_20260813.md
+inputs:
+- frozen outcome-blind component graph (24 components / 3237 single-SNV, development-disconnected Ribonanza M2-style 2A3)
+- locked P4 outcome p4_external_result.json (read-only, carried forward)
+- B*_external = reg_direct refit once on all development OK7a_M2 (same coef as P4)
+outputs:
+- /mnt/cunyuliu/prospective_v2_p4_20260813/p5_mechanism_result.json
+- scripts/reactflow_delta/run_p5_mechanism_v1.py
+- tests/reactflow_delta/test_p5_mechanism_v1.py
+tests:
+- test_p5_mechanism_v1.py + test_p4_external_v1.py: 23 PASS (remote)
+- regression found+fixed: permutation negative control was a no-op (rng.shuffle on
+  (i,f) tuples never detached features from positions); fixed by shuffling the
+  features array; unit test test_real_edit_site_skill_but_permuted_no_skill now
+  verifies permutation destroys feature-dependent skill
+engineering_status: ENGINEERING_PASS
+scientific_status: 'P5 FAIL: MECHANISM_NOT_ESTABLISHED (pre-frozen edit-site-concentration mechanism claim does not replicate)'
+p5_primary:
+  K_eff_realized: 24
+  band_D_vs_zero:  # component-macro mean (positive = direct better than WT-anchor)
+    edit_site: {mean: 0.03111, ci_low: 0.00555, holm_pass: true}
+    near_1_3:  {mean: 0.03612, ci_low: 0.00982, holm_pass: true}
+    mid_4_10:  {mean: 0.03778, ci_low: 0.01036, holm_pass: true}
+    far_11_25: {mean: 0.04665, ci_low: 0.02004, holm_pass: true}
+    very_far_26p: {mean: 0.04011, ci_low: 0.01487, holm_pass: true}
+  distance_heterogeneity_edit_minus_vfar:
+    mean: -0.00900
+    ci_low: -0.01989
+    ci_high: 0.00188
+    pass: false
+  interpretation: >-
+    direct-vs-WT-anchor skill is real and significant at EVERY distance band but
+    spatially UNIFORM; there is no evidence of concentration at the signed edit
+    site (heterogeneity CI lower < 0). The development pattern (central edit-site
+    skill concentration) does NOT replicate on external components.
+p5_secondary:
+  negative_control:  # permuted direct features (seed 20260813)
+    permuted_edit_D: {mean: -0.11071, ci_high: -0.06240}
+    pass: true  # no skill under permutation -> P4 signal is feature-dependent, not an artifact
+  region_strata:
+    M2SL5_2A3_0000: {n_components: 3, mean_D_edit: -0.01985}
+    M3SARS_2A3_0000: {n_components: 3, mean_D_edit: 0.08269}
+    15KLIB_2A3_0000: {n_components: 18, mean_D_edit: 0.03101}
+  region_replication_pass: true  # 2/3 datasets positive
+  failure_cases: 8 of 24 components have D_vs_zero(edit) < 0
+  failure_pattern: 'all 3 M2SL5 betacoronavirus SL5 anchors negative at edit site; P4 leave-dominant-out still passes'
+p4_carried:
+  verdict: P4_EXTERNAL_STATISTICAL_PASS
+  ci_zero_low: 0.01534
+  leave_dominant_out_ci_low: 0.01271
+claim_evidence_map:
+- claim: P4 external statistical replication (transportability)
+  verdict: ESTABLISHED
+- claim: direct-vs-WT-anchor skill is feature-dependent (negative control)
+  verdict: ESTABLISHED
+- claim: effect replicates across biology (>= 2 datasets)
+  verdict: ESTABLISHED
+- claim: direct skill concentrated at the signed edit site (distance heterogeneity)
+  verdict: NOT_ESTABLISHED  # pre-frozen claim; heterogeneity CI lower < 0
+blocks_phase4: false
+blocks_phase5: false
+blocks_phase6: false
+locked_outcome_access_count: 1
+next_allowed_action: P6 clean-checkout replay + release review (Phase5-6 token required); delete the
+  edit-site-concentration mechanism claim; retain qualified prediction/transportability
+  narrative (P2 development signal + P4 external replication + negative control).
+next_forbidden_actions:
+- any claim of edit-site-concentration / distance-heterogeneity mechanism on external data
+- push/PR/publication without explicit owner instruction
+p5_verdict: MECHANISM_NOT_ESTABLISHED

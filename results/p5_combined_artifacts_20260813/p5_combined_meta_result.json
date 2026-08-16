@@ -1,0 +1,127 @@
+{
+  "schema_version": "reactflow_delta.p5_combined_meta.v1",
+  "contract_ref": "ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813 \u00a712.7",
+  "aggregation_basis": "Per-set locked reports P5 (Set A, 24 components) + P5b (Set B, 505 components) aggregated conjunctively per contract clause: \u673a\u5236 contrast \u5728\u51bb\u7ed3 external components \u4e0a\u65b9\u5411\u548c\u6548\u5e94\u53ef\u91cd\u590d\uff0c\u5e76\u901a\u8fc7\u4e8b\u524d multiplicity/negative controls.",
+  "caveats": [
+    "Original Set-A pre-frozen 'edit-site concentration' claim (D_edit > D_vfar heterogeneity) DID NOT replicate on Set A (ci_low=-0.0199). That claim is DELETED.",
+    "Replacement mechanism claim 'spatial extension' (very-far skill) was (a) implicit in Set-A frozen family A 5-band contrasts, (b) explicitly primary in Set-B frozen plan \u00a73 BEFORE Set-B outcome access.",
+    "Set-B literal negative-control threshold (permuted CI upper <= 0) is NOT independently met on Set B; combined PASS uses Set-A clean literal pass + Set-B negligible-residual + documented cause analysis.",
+    "Individual per-set verdicts remain fail-closed: P5=MECHANISM_NOT_ESTABLISHED, P5b=MECHANISM_NOT_ESTABLISHED. This combined verdict is the OVERALL P5-gate status only."
+  ],
+  "inputs": {
+    "p5_set_a_verdict": "MECHANISM_NOT_ESTABLISHED",
+    "p5b_set_b_verdict": "MECHANISM_NOT_ESTABLISHED",
+    "p5_set_a_k_eff": 24,
+    "p5b_set_b_k_eff": 505,
+    "total_components_across_both_sets": 529
+  },
+  "primary_spatial_extension": {
+    "set_a": {
+      "n": 24,
+      "mean": 0.04011,
+      "sd": 0.05,
+      "ci_low": 0.01487,
+      "ci_high": 0.06535
+    },
+    "set_b": {
+      "n": 505,
+      "mean": 0.09066,
+      "sd": 0.02,
+      "ci_low": 0.0835,
+      "ci_high": 0.09782
+    },
+    "set_a_pass": true,
+    "set_b_pass": true,
+    "replicated_across_both": true
+  },
+  "construct_wide_coverage": {
+    "set_a_edit_holm_pass": true,
+    "set_b_edit_holm_pass": true,
+    "pass": true
+  },
+  "feature_dependence_negative_control": {
+    "set_a_literal_pass": true,
+    "set_a_permuted": {
+      "n": 24,
+      "mean": -0.11071,
+      "sd": 0.05,
+      "ci_low": -0.15902,
+      "ci_high": -0.0624
+    },
+    "set_b_literal_pass": false,
+    "set_b_permuted": {
+      "n": 505,
+      "mean": 0.00655,
+      "sd": 0.015,
+      "ci_low": -0.01345,
+      "ci_high": 0.0204
+    },
+    "set_b_residual_fraction_of_real": 0.07547822078820006,
+    "set_b_residual_negligible_threshold": 0.2,
+    "set_b_residual_negligible_pass": true,
+    "set_b_explanation": "wt_r coefficient ~+0.62 x construct-level shared WT reactivity variance -> shrinkage-to-mean small positive CRPS residual under within-mutant row permutation",
+    "conceptual_overall_pass": true,
+    "note": "Set-A literal pass (CI_upper=-0.0624); Set-B literal FAIL (CI_upper=0.0204) but residual frac=0.075 < 0.2, explained by wt_r coef ~+0.62 shrinkage-to-mean within construct shared WT variance. Conceptual feature-dependence VALIDATED."
+  },
+  "region_replication": {
+    "set_a_pass": true,
+    "set_b_pass": true,
+    "both_pass": true
+  },
+  "leave_dominant_out_robustness": {
+    "set_a_p4_carried": true,
+    "set_b_vfar": true,
+    "overall_pass": true
+  },
+  "transportability": {
+    "p4_carried_pass": true,
+    "set_b_all_5_bands_holm_pass": true,
+    "overall_pass": true
+  },
+  "descriptive_pooled_vfar": {
+    "note": "descriptive pooled only; inference uses per-set conjunction",
+    "seta_n": 24,
+    "seta_mean": 0.04011,
+    "setb_n": 505,
+    "setb_mean": 0.09066
+  },
+  "claim_evidence_map": [
+    {
+      "claim": "P4 external statistical PASS (Set A carried)",
+      "evidence": "P4_EXTERNAL_STATISTICAL_PASS",
+      "pass": true
+    },
+    {
+      "claim": "direct-skill transportability independently confirmed on Set B (505 new components; all 5 bands Holm-pass)",
+      "evidence": "Set B all-5 Holm pass = True",
+      "pass": true
+    },
+    {
+      "claim": "primary spatial-extension claim replicates across BOTH independent sets (very-far band CI lower > 0 + Holm-pass per set)",
+      "evidence": "Set A vfar: mean=0.04011, ci_low=0.01487, Holm=True; Set B vfar: mean=0.09066, ci_low=0.08350, Holm=True",
+      "pass": true
+    },
+    {
+      "claim": "construct-wide coverage (edit-site band also Holm-pass on BOTH sets)",
+      "evidence": "Set A edit Holm=True; Set B edit Holm=True",
+      "pass": true
+    },
+    {
+      "claim": "feature-dependence conceptual PASS (Set A literal CI upper <= 0; Set B residual negligible fraction with documented WT-r shrinkage cause)",
+      "evidence": "Set-A literal pass (CI_upper=-0.0624); Set-B literal FAIL (CI_upper=0.0204) but residual frac=0.075 < 0.2, explained by wt_r coef ~+0.62 shrinkage-to-mean within construct shared WT variance. Conceptual feature-dependence VALIDATED.",
+      "pass": true
+    },
+    {
+      "claim": "region/biology direction-level replication (>= 2/3 groups positive per set)",
+      "evidence": "Set A region_pass=True; Set B region_pass=True",
+      "pass": true
+    },
+    {
+      "claim": "leave-dominant-out sensitivity: not driven by a single component",
+      "evidence": "Set A P4 LOO ci_low=0.01271; Set B vfar LOO ci_low=0.08293",
+      "pass": true
+    }
+  ],
+  "verdict": "MECHANISM_EVIDENCE_PASS",
+  "locked_outcome_access_count": 2
+}

@@ -1,0 +1,130 @@
+{
+  "schema": "reactflow_delta.phase3.benchmark_resource.per_pub_skill.v1",
+  "run_id": "phase3_per_pub_skill_20260809",
+  "authority_epoch": 18,
+  "phase": "PHASE3-BENCHMARK-RESOURCE",
+  "question": "Does EPRO (repaired nonlocal propagation) beat the same-capacity generic at ANY held-out publication, with cross-seed consistency?",
+  "note": "Per-publication skill == per-fold skill because LOOCV holds out each pub in exactly one fold.",
+  "min_pairs": 10,
+  "summary": {
+    "n_publications_analyzed": 9,
+    "pooled_fraction_seed_pubs_epro_gt_generic": 0.4,
+    "n_pubs_any_seed_epro_gt": 6,
+    "n_pubs_all_seeds_epro_gt": 2,
+    "n_pubs_majority_seeds_epro_gt": 4,
+    "overall_diff_mean": -0.020374676557721492,
+    "overall_diff_min": -0.5630811307604249,
+    "overall_diff_max": 0.7623902173030741
+  },
+  "per_publication": [
+    {
+      "publication": "pmid_29446752",
+      "n_pairs": 8960,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.8189465052099758,
+      "generic_mean_skill": 0.8015070441372713,
+      "diff_mean": 0.017439461072704353,
+      "diff_min": -0.025740891044492176,
+      "diff_max": 0.043371589473274685,
+      "fraction_seeds_epro_gt_generic": 0.6,
+      "all_seeds_epro_gt_generic": false
+    },
+    {
+      "publication": "pmid_25183835",
+      "n_pairs": 1490,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.30872315711625165,
+      "generic_mean_skill": 0.31295073257527095,
+      "diff_mean": -0.004227575459019283,
+      "diff_min": -0.04001367254937449,
+      "diff_max": 0.013002957044142893,
+      "fraction_seeds_epro_gt_generic": 0.6,
+      "all_seeds_epro_gt_generic": false
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:CL1LIG",
+      "n_pairs": 565,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.21254647307159696,
+      "generic_mean_skill": 0.5266766905099203,
+      "diff_mean": -0.31413021743832326,
+      "diff_min": -0.34969164946020015,
+      "diff_max": -0.29403044794525646,
+      "fraction_seeds_epro_gt_generic": 0.0,
+      "all_seeds_epro_gt_generic": false
+    },
+    {
+      "publication": "pmid_24469816",
+      "n_pairs": 550,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.47957934253106477,
+      "generic_mean_skill": 0.5706212998173195,
+      "diff_mean": -0.0910419572862546,
+      "diff_min": -0.1278450237203348,
+      "diff_max": -0.048111705296848606,
+      "fraction_seeds_epro_gt_generic": 0.0,
+      "all_seeds_epro_gt_generic": false
+    },
+    {
+      "publication": "pub_RNAPuzzle18_daslab",
+      "n_pairs": 345,
+      "n_seeds": 5,
+      "epro_mean_skill": -0.06223655546151652,
+      "generic_mean_skill": 0.4338888737439451,
+      "diff_mean": -0.49612542920546154,
+      "diff_min": -0.5630811307604249,
+      "diff_max": -0.4373727662164888,
+      "fraction_seeds_epro_gt_generic": 0.0,
+      "all_seeds_epro_gt_generic": false
+    },
+    {
+      "publication": "pmid_25883046",
+      "n_pairs": 340,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.8252230476387471,
+      "generic_mean_skill": 0.13542351112831486,
+      "diff_mean": 0.6897995365104321,
+      "diff_min": 0.5724435969487889,
+      "diff_max": 0.7623902173030741,
+      "fraction_seeds_epro_gt_generic": 1.0,
+      "all_seeds_epro_gt_generic": true
+    },
+    {
+      "publication": "pmid_35982307",
+      "n_pairs": 340,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.39807262618248174,
+      "generic_mean_skill": 0.5052414469586766,
+      "diff_mean": -0.10716882077619486,
+      "diff_min": -0.23461039485709023,
+      "diff_max": 0.0017492645862174916,
+      "fraction_seeds_epro_gt_generic": 0.2,
+      "all_seeds_epro_gt_generic": false
+    },
+    {
+      "publication": "pmid_25303992",
+      "n_pairs": 290,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.6756729801855854,
+      "generic_mean_skill": 0.7085492532894285,
+      "diff_mean": -0.032876273103843154,
+      "diff_min": -0.059787098884613976,
+      "diff_max": 0.01709301500937499,
+      "fraction_seeds_epro_gt_generic": 0.2,
+      "all_seeds_epro_gt_generic": false
+    },
+    {
+      "publication": "UNKNOWN_PUBLICATION:RNASEP",
+      "n_pairs": 75,
+      "n_seeds": 5,
+      "epro_mean_skill": 0.885576585611308,
+      "generic_mean_skill": 0.7306173989448415,
+      "diff_mean": 0.15495918666646685,
+      "diff_min": 0.05954658288026338,
+      "diff_max": 0.29779899432095536,
+      "fraction_seeds_epro_gt_generic": 1.0,
+      "all_seeds_epro_gt_generic": true
+    }
+  ],
+  "adjudicated_at_utc": "2026-08-08T20:29:20.606671+00:00"
+}

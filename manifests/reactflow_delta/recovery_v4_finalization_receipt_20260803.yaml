@@ -1,0 +1,68 @@
+schema_version: reactflow_delta.recovery_finalization_receipt.v1
+receipt_id: recovery_v4_finalization_20260803T230838+0800_r2
+project_task_id: reactflow_delta
+phase_id: RECOVERY_CONTRACT_REWRITE
+lifecycle_status: TERMINAL
+gate_result: PASS
+scientific_gate_result: NOT_RUN
+evidence_class: ENGINEERING_ONLY
+external_artifact_root: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2
+terminal_manifest:
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2/terminal_manifest.yaml
+  sha256: fe19c1aa994f5ce193a23ffb9b8c041946760ada7f350a76f98439405da5086d
+checksum_ledger:
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2/SHA256SUMS
+  sha256: 17a927d9e6713ed876162bc78a53868496164e8bdb285626402e90cb7eada3f8
+  verification_status: PASS_ALL_LISTED_FILES
+terminal_sentinel:
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2/RECOVERY_V4_CLOSED.yaml
+  sha256: 88c6027774500f1a0126e656f4c9f323e439f04b310b915d43d12efbea5da09e
+automated_tests:
+  status: PASS
+  command: /usr/bin/python3 -m unittest tests/reactflow_delta/test_recovery_authority_v4.py -v
+  tool_versions:
+    python: 3.10.12
+    pyyaml: 5.4.1
+    git: 2.34.1
+  exit_code: 0
+  report_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2/automated_tests.txt
+  report_sha256: dcb94dc01bcbc8466ee51664c1ab0a65f3b2bb3a8863b1645948330f3b436c61
+  machine_object_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2/automated_tests.json
+  machine_object_sha256: 80ee3466d8fb719b89c35dfe6bd51919ed2a0d368a5de715e25d99a7f24e022b
+manual_audit:
+  status: PASS
+  reviewer_role: CODEX_PRIMARY_IMPLEMENTATION_AGENT
+  reviewer_external_identity: null
+  identity_status: NOT_EXTERNALLY_VERIFIED
+  scope: FULL_GOVERNANCE_ARTIFACT_SET_PLUS_EXTERNAL_PILOT_LEDGER
+  findings_path: docs/audits/reactflow_delta_v4_recovery_manual_audit_20260803.md
+  findings_sha256: 4c4351fb97bcfa4bf79077231d95c44b3a0f9e5bfaee7aa9cf1d343668cb6cd1
+  machine_object_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2/manual_audit.json
+  machine_object_sha256: 8d0ccbabcbf64d09475de1985e7dcb796dac67b78fa798bcd68b71704f52cf32
+  disposition: PASS_AFTER_FORWARD_REPAIR
+finalizer:
+  status: PASS
+  path: scripts/reactflow_delta/finalize_recovery_v4.py
+  sha256: a52b487068fbd5817d232e20dd6bbfdf85606df6e2072bc3fdc0cea266092c68
+  validator_path: scripts/reactflow_delta/validate_recovery_v4.py
+  validator_sha256: 745ffcc3f2a2b2c33d978087649447ba876c795a831db6f77ca259e8bdd3ba7e
+  execution_source_commit: 9e668e85c9332b75de41fc03af23b273a5097a71
+  exit_code: 0
+  artifact_inventory_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230838+0800_r2/artifact_inventory.json
+  artifact_inventory_sha256: 3a8d30ec811611cdfa61576833b27828d2dc1335a56cf935d0304943107421bd
+failed_attempts:
+  - artifact_root: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/recovery/recovery_v4_finalization_20260803T230617+0800_r1.staging-130387
+    status: PRESERVED_FAIL_CLOSED
+    reason: GIT_QUOTED_UNICODE_PATH_FALSE_DRIFT
+    failure_record_sha256: 4528d6eee557d72d824998e0e493b50b99f862a74c06a1c2c2549a94461c72de
+permissions:
+  d0_x_execution_allowed: false
+  full_data_recall_allowed: false
+  training_allowed: false
+  new_split_allowed: false
+  confirmatory_test_access_allowed: false
+  cross_project_export_allowed: false
+  new_wet_lab_allowed: false
+terminal_route: STOP_AWAIT_D0X_AUTHORITY_AMENDMENT
+embedded_self_sha256: FORBIDDEN
+

@@ -1,0 +1,136 @@
+schema_version: reactflow_delta.endpoint_v4.v1
+endpoint_id: RFD_ENDPOINT_V4
+endpoint_version: 4
+frozen_at: "2026-08-08T22:30:00+08:00"
+governing_contract: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
+governing_amendment: docs/contracts/amendments/reactflow_delta_v4_epoch16_endpoint_v4_non_degenerate_macro_20260808.yaml
+authority_epoch: 16
+status: FROZEN
+supersedes: RFD_ENDPOINT_V3
+
+# ------------------------------------------------------------------
+# 本版本变更范围（相对 endpoint_v3）—— 仅 metric 退化策略
+# ------------------------------------------------------------------
+change_control:
+  rule: "任何 unit/label/score/metric/mask/information-permission 变更都必须产生新的 endpoint 版本，禁止原地修改本文件。"
+  requires: "新 authority epoch + amendment + approval"
+  v4_change_summary: >-
+    Route A（用户显式授权，epoch 16）。仅放宽 PRIMARY metric 的退化策略：
+    endpoint_v2/v3 的 fail-closed 规则（任一 publication 恒定标签 ⇒ 整个
+    publication-macro AUPRC 返回 UNIDENTIFIABLE，静默排除禁止）改为——
+    constant-label（退化）publications 被显式列出并排除，macro AUPRC 在
+    剩余 non-degenerate（mixed-label）publications 上计算。unit/label/score/
+    mask/information-permission/caller 均不变。
+  primary_endpoint_change_policy: "PRIMARY_ENDPOINT_NEVER_SILENT_CHANGE"
+
+# ------------------------------------------------------------------
+# 预测单位与任务定义（与 endpoint_v3 相同）
+# ------------------------------------------------------------------
+prediction_unit: "matched WT-exact_single-mutant pair"
+task_statement: >-
+  在不读取 mutant 实验 reactivity profile 的条件下，由 WT sequence、exact
+  single-nucleotide mutation（ref/alt/position）、允许的 WT experimental state
+  与实验条件，跨 publication 预测 mutation-induced experimental reactivity
+  response。
+
+primary:
+  unit: "pair"
+  label_definition: "C_i = train-only caller_v3 在 outer outcome 不可见条件下、基于 empirical-scatter 重校准噪声判定的 binary changer label"
+  score: "pair-level P(C_i=1) 概率（模型直接输出，禁止 max(position prob) 事后聚合）"
+  metric: "publication-macro AUPRC over NON-DEGENERATE publications"
+  resampling: "publication 为 outer unit；禁止 mixed-block 重采样；permutation 用 (b+1)/(B+1)"
+  metric_semantics: >-
+    在每个 publication 内计算 AP（score = P(C_i=1)），再在 non-degenerate
+    （mixed-label）publications 上做 macro 平均（每 publication 等权）。
+    constant-label（全阳或全阴，包括 pair_any_all_positive）publications 被
+    显式列出并从 macro 中排除（degenerate_policies.constant_label_relaxed）。
+    排除集合必须在结果中显式记录，禁止静默丢弃。此放宽是 Route A 的明确定义，
+    不是降低门槛或掩盖失败；退化出版仍被完整报告。
+
+conditional:
+  unit: "pair"
+  label_definition: "changer 条件下 profile-level |delta_r| magnitude"
+  score: "signed/absolute delta_r_hat（回归头直接输出）"
+  metric: "conditional WMAE skill"
+  note: "仅在 primary 任务可识别且 caller 可靠时启用；当前不作为 primary"
+
+secondary:
+  unit: "position (eligible)"
+  label_definition: "连续 noise-weighted signed delta（只在 eligible positions 上）"
+  score: "signed delta_r_hat"
+  metric: "WMAE skill / Spearman"
+  note: "评价与 primary 任务严格分表，禁止混用"
+
+# ------------------------------------------------------------------
+# 信息权限（与 endpoint_v3 相同）
+# ------------------------------------------------------------------
+information_permission:
+  allowed_inputs:
+  - "WT sequence (canonical_sequence)"
+  - "exact single-nucleotide mutation: ref_allele / alt_allele / position(coordinate)"
+  - "experimental condition: buffer / ligand / probe / temperature / experimentType / environment"
+  - "allowed WT experimental reactivity state（仅 WT profile，不含 mutant profile）"
+  - "structure/thermo 特征（来自 WT 或 three-alt 静态计算，不得携带 actual-alt mutant 信息）"
+  forbidden_inputs:
+  - "mutant 实验 reactivity profile（prospective input 禁止）"
+  - "mutant noise/error profile"
+  - "actual-alt exact thermodynamic result"
+  - "test/outer-fold outcome 或任何以 outcome 为条件的统计量"
+  - "target mask（目标缺失模式）不得作为 prospective input"
+  target_mask_policy: "target mask 只能用于排除不可评估 position，不得作为预测输入"
+
+# ------------------------------------------------------------------
+# Mask / position eligibility（与 endpoint_v3 相同）
+# ------------------------------------------------------------------
+mask:
+  primary_position_eligibility_rules:
+  - "edited-site（突变位点本身）排除，不参与 response 评估"
+  - "alignment-change 位置排除"
+  - "probe-eligibility 变化的位置排除"
+  - "NaN / missing reactivity 位置排除，缺失不填零"
+  - "length mismatch 排除"
+  eligibility_reason_codes:
+  - EDITED_SITE
+  - ALIGNMENT_CHANGE
+  - PROBE_ELIGIBILITY_CHANGE
+  - MISSING_REACTIVITY
+  - LENGTH_MISMATCH
+  - ELIGIBLE
+  mask_policy: "所有 primary position 必须有明确 eligibility reason code；无 ELIGIBLE 记录不得进入 evaluator"
+
+# ------------------------------------------------------------------
+# Caller（R3v3，与 endpoint_v3 相同）
+# ------------------------------------------------------------------
+caller_contract:
+  scope: "train-fold replicates + controls only；outer 行 outcome 不可见（null 与 reliability 仅用 train fold）"
+  label: "C_i binary changer"
+  noise_model: >-
+    per-position empirical scatter sigma_i = sample SD(ddof=1) across the
+    replicate group's WT profiles；z_i = (mut_i - wt_i)/(sqrt(2)*sigma_i)。
+    reported errors 不再作为噪声源（caller_v2 中失准）。per-study
+    (median/MAD) 归一化在 z 比值中抵消，故不显式施加。
+  reliability: "reliability 过低时返回 NO_CALL（不强制下 binary 标签）"
+  determinism: "同输入 hash 同输出；deterministic seed；sliding cluster；spatial-block null"
+
+# ------------------------------------------------------------------
+# 退化与不可识别边界（v4：放宽 constant_label 到显式排除）
+# ------------------------------------------------------------------
+degenerate_policies:
+  constant_label: "RELAXED_VIA_EXPLICIT_EXCLUSION（Route A）：constant-label publication 显式列出并排除；macro 在 non-degenerate publications 上计算"
+  constant_label_exclusion_documented: "排除集合必须写入结果（degenerate_publications 字段），禁止静默丢弃"
+  single_hotspot_not_majority: "单一 hotspot 不得代表 majority label"
+  signed_abs_same_rank: "负/正大幅变化在 absolute task 应同 rank"
+  pair_any_all_positive: "全阳 publication 作为 constant-label 被显式排除（不再使整个 macro UNIDENTIFIABLE）"
+  missing_info_not_zero: "缺失信息不得填充为零"
+  tied_ap_row_order_invariant: "tied AP 必须与行序无关"
+  publication_lt_3: "non-degenerate publication < 3 时禁止 confirmatory CI，返回 UNIDENTIFIABLE"
+  all_publications_degenerate: "若所有 publications 均 constant-label，返回 UNIDENTIFIABLE（无可用 non-degenerate 集合）"
+
+# ------------------------------------------------------------------
+# 版本与冻结
+# ------------------------------------------------------------------
+integrity:
+  hash_algorithm: SHA256
+  file_hash_mode: RAW_FILE_BYTES
+  detached_ledger_path: configs/reactflow_delta/endpoint_v4.sha256
+  change_requires_new_version: true

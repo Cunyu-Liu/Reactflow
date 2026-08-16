@@ -1,0 +1,44 @@
+schema_version: reactflow_delta.authority_sentinel.v1
+sentinel_id: reactflow_delta_recovery_final_authority_epoch_2
+sentinel_status: RECOVERY_FORMAL_AUTHORITY_READY_IF_GIT_HEAD_POLICY_PASSES
+authority_epoch: 2
+created_at: "2026-08-03T23:08:38+08:00"
+contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approval_record_sha256: c8b20a7eccf0ac582f316a82e2015fac981128de7a9e041c96a85be4231f7109
+recovery_amendment_sha256: 6aa8e08351e1586203a719f4a6d3c99bf7626e6117d85f40ad6e33eef6ad3840
+recovery_finalization_receipt_sha256: de01062d3cc93c3367e8860978433ca4c0423410fb1e3f9ad0d7f710198d16bf
+recovery_external_terminal_manifest_sha256: fe19c1aa994f5ce193a23ffb9b8c041946760ada7f350a76f98439405da5086d
+recovery_external_checksum_ledger_sha256: 17a927d9e6713ed876162bc78a53868496164e8bdb285626402e90cb7eada3f8
+recovery_external_terminal_sentinel_sha256: 88c6027774500f1a0126e656f4c9f323e439f04b310b915d43d12efbea5da09e
+active_manifest_sha256: dccf6b414b83a03735a032ca340e909ccd4066955b915dcde2c1de04213a17cb
+detached_ledger_path: configs/reactflow_delta/authority_epoch_2.bundle.sha256
+detached_ledger_sha256: c391b2b06df34ffbf3d20abd2298e713bdfd927a25975fbb2ff1faf72126d4b9
+git_expectation:
+  authority_source_parent: 9e668e85c9332b75de41fc03af23b273a5097a71
+  required_head_first_parent: 9e668e85c9332b75de41fc03af23b273a5097a71
+  required_head_parent_count: 1
+  merge_commit_allowed: false
+  actual_authority_head_commit: null
+  actual_head_binding_method: VERIFIED_AT_RUNTIME_NOT_EMBEDDED
+  allowed_changed_paths:
+    - configs/reactflow_delta/active_contract.yaml
+    - configs/reactflow_delta/authority_epoch_2.bundle.sha256
+    - configs/reactflow_delta/authority_epoch_2.sentinel.yaml
+    - docs/audits/reactflow_delta_v4_recovery_finalization_report_20260803.md
+    - docs/contracts/amendments/reactflow_delta_v4_recovery_finalization_20260803.yaml
+    - manifests/reactflow_delta/recovery_v4_finalization_receipt_20260803.yaml
+permissions:
+  d0_x_execution_allowed: false
+  full_data_recall_allowed: false
+  training_allowed: false
+  d1_x_allowed: false
+  new_split_allowed: false
+  confirmatory_test_access_allowed: false
+  cross_project_export_allowed: false
+  new_wet_lab_allowed: false
+  push_allowed: false
+  pull_request_allowed: false
+terminal_state: STOP_AWAIT_D0X_AUTHORITY_AMENDMENT
+cryptographic_signature: null
+signature_status: NOT_PROVIDED_NOT_ASSERTED
+embedded_self_sha256: FORBIDDEN

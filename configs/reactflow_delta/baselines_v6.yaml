@@ -1,0 +1,132 @@
+schema_version: reactflow_delta.baselines_v6.v1
+authority_epoch: 20
+endpoint_id: RFD_ENDPOINT_V6
+caller_version: caller_v4
+caller_mode_primary: STRICT_INDUCTIVE_WT_ALLOWED
+caller_mode_sensitivity: WT_REPLICATE_CONDITIONED_TRANSDUCTIVE
+scope: PHASE2_AUTHORIZE_LEARNABILITY
+training_allowed: true            # <-- Phase 2 authorized: development baselines only
+candidate_model_training_allowed: false
+confirmatory_test_outcome_access_allowed: false
+note: >-
+  Phase 2 (AUTHORIZE_PHASE2_LEARNABILITY) development learnability baselines.
+  No candidate architectures.  No confirmatory outcome access.  Both primary
+  prospective-changer and secondary conditional-magnitude tasks are judged
+  separately (endpoint_v6 degenerate/independent-judgment policy).
+
+development_scope:
+  exchangeable_unit: publication
+  resolved_publications_only: true
+  unresolved_pub_policy: exclude-from-inference (kept as train/development only)
+  fold_protocol: leave-one-resolved-publication-out (LOOCV)
+  caller: CallerV4 STRICT_INDUCTIVE_WT_ALLOWED (train-only sigma; train-global median fallback)
+
+# Fold-invariant input permission (identical across tasks; endpoint_v6 information_permission)
+input_permission:
+  wt_sequence: true
+  exact_single_nucleotide_mutation: true
+  condition: true
+  wt_reactivity_anchor: true
+  eligibility_mask_in_input: false   # target mask forbidden in model input
+  mutant_reactivity_in_input: false
+
+tasks:
+  primary_prospective_changer:
+    name: prospective changer probability
+    unit: pair (called subset, NO_CALL excluded)
+    label: "C_i = CallerV4(STRICT) binary changer label (1/0)"
+    score: "P(C_i=1) pair-level"
+    metric: publication-macro AUPRC
+    paired_metric: per-publication AP delta (model - prevalence trivial)
+    trivial: prevalence constant
+  secondary_conditional_magnitude:
+    name: oracle-conditioned conditional magnitude
+    unit: pair (TRUE CHANGERS only, C_i=1)
+    label: "y_i = mean over ELIGIBLE positions of |mut_react - wt_react|; w_i = n_eligible"
+    score: "pair-level magnitude hat{y}_i"
+    metric: conditional WMAE skill (1 - WMAE_model/WMAE_trivial)
+    paired_metric: publication-block bootstrap CI of skill
+    trivial: train-changer weighted median
+  tertiary_continuous:
+    run: false
+    note: not part of Phase 2 learnability gate
+
+models:
+  primary_prospective_changer:
+    prevalence:
+      family: trivial
+      deterministic: true
+    wlogit:
+      family: weighted_logistic
+      deterministic: true
+      objective: log-loss with class_weight balanced
+    gam:
+      family: spline_basis_gam
+      deterministic: true
+      objective: log-loss on spline basis (sklearn SplineTransformer + LogisticRegression)
+    gbm:
+      family: histogram_gradient_boosting
+      deterministic: true
+      objective: probabilistic log-loss
+    p2_mlp:
+      family: generic_paired_mlp
+      deterministic: false
+      seeds: [0,1,2,3,4]
+      objective: weighted BCE
+    deepsets:
+      family: deep_sets_control
+      deterministic: false
+      seeds: [0,1,2,3,4]
+      objective: weighted BCE
+  secondary_conditional_magnitude:
+    wmedian:
+      family: trivial
+      deterministic: true
+      objective: weighted median (train-changer)
+    lad_lm:
+      family: weighted_lad_linear
+      deterministic: true
+      objective: sum w|y - xb| (L1/LAD)
+    wgam:
+      family: spline_basis_weighted_linear
+      deterministic: true
+      objective: weighted squared error on spline basis
+    wmse_gbm:
+      family: histogram_gradient_boosting
+      deterministic: true
+      objective: weighted MSE (HistGBR sample_weight)  # labeled separately from MAE MLP
+    wmae_mlp:
+      family: generic_paired_regressor
+      deterministic: false
+      seeds: [0,1,2,3,4]
+      objective: weighted MAE
+    wmae_deepsets:
+      family: deep_sets_control
+      deterministic: false
+      seeds: [0,1,2,3,4]
+      objective: weighted MAE
+
+hyperparameter_tuning:
+  policy: inner publication-grouped CV only (within outer-train publications)
+  tuned_models: [gbm, wmse_gbm]
+  grid_alpha: [1.0, 10.0]
+  grid_max_depth: [3, 6]
+  grid_max_iter: [100, 200]
+  note: tuning uses only outer-train publications; never held-out fold.
+
+neural:
+  seeds: [0,1,2,3,4]
+  epochs: 30
+  batch_size: 128
+  lr: 0.001
+  cuda_required: true            # contract: STOP if CUDA unavailable, no CPU fallback
+  seed_not_biological_n: true
+
+gate:
+  primary_or_secondary_independent: true
+  paired_ci_lower_bound_gt_0: "at least one non-trivial generic baseline > strongest trivial, publication-level paired 95% CI lower bound > 0"
+  min_positive_publication_fraction: 0.70
+  no_single_dominant_publication: true
+  no_publication_specific_shortcut: true
+  coverage_and_calibration_acceptable: true
+  if_fail: METHOD_ROUTE_STOP_LEARNABILITY_NOT_ESTABLISHED

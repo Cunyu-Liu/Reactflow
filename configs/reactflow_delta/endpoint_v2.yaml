@@ -1,0 +1,110 @@
+schema_version: reactflow_delta.endpoint_v2.v1
+endpoint_id: RFD_ENDPOINT_V2
+endpoint_version: 2
+frozen_sha256: FORBIDDEN_SELF_REFERENCE
+frozen_at: "2026-08-07T18:10:00+08:00"
+governing_contract: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
+authority_epoch: 14
+status: FROZEN
+change_control:
+  rule: "任何 unit/label/score/metric/mask/information-permission 变更都必须产生新的 endpoint 版本（endpoint_v3），禁止原地修改本文件。"
+  requires: "新 authority epoch + amendment + approval"
+  primary_endpoint_change_policy: "PRIMARY_ENDPOINT_NEVER_SILENT_CHANGE"
+
+# ------------------------------------------------------------------
+# 预测单位与任务定义（§3.2，§3.6）
+# ------------------------------------------------------------------
+prediction_unit: "matched WT-exact_single-mutant pair"
+task_statement: >-
+  在不读取 mutant 实验 reactivity profile 的条件下，由 WT sequence、exact single-nucleotide
+  mutation（ref/alt/position）、允许的 WT experimental state 与实验条件，跨 publication
+  预测 mutation-induced experimental reactivity response。
+
+# 统一 estimand：本 endpoint 只有一个 primary unit/label/score/metric（§8.7）
+primary:
+  unit: "pair"
+  label_definition: "C_i = train-only frozen caller 在 outer outcome 不可见条件下判定的 binary changer label"
+  score: "pair-level P(C_i=1) 概率（模型直接输出，禁止 max(position prob) 事后聚合）"
+  metric: "publication-macro AUPRC"
+  resampling: "publication 为 outer unit；禁止 mixed-block 重采样；permutation 用 (b+1)/(B+1)"
+
+conditional:
+  unit: "pair"
+  label_definition: "changer 条件下 profile-level |delta_r| magnitude"
+  score: "signed/absolute delta_r_hat（回归头直接输出）"
+  metric: "conditional WMAE skill"
+  note: "仅在 primary 任务可识别且 caller 可靠时启用；当前不作为 primary"
+
+secondary:
+  unit: "position (eligible)"
+  label_definition: "连续 noise-weighted signed delta（只在 eligible positions 上）"
+  score: "signed delta_r_hat"
+  metric: "WMAE skill / Spearman"
+  note: "评价与 primary 任务严格分表，禁止混用"
+
+# ------------------------------------------------------------------
+# 信息权限（§3.2, §3.3, §13.3.7）—— 模型可用输入
+# ------------------------------------------------------------------
+information_permission:
+  allowed_inputs:
+  - "WT sequence (canonical_sequence)"
+  - "exact single-nucleotide mutation: ref_allele / alt_allele / position(coordinate)"
+  - "experimental condition: buffer / ligand / probe / temperature / experimentType / environment"
+  - "allowed WT experimental reactivity state（仅 WT profile，不含 mutant profile）"
+  - "structure/thermo 特征（来自 WT 或 three-alt 静态计算，不得携带 actual-alt mutant 信息）"
+  forbidden_inputs:
+  - "mutant 实验 reactivity profile（prospective input 禁止）"
+  - "mutant noise/error profile"
+  - "actual-alt exact thermodynamic result（当前实现把三 alt 平均视为非 exact-alt 信息权限缺口）"
+  - "test/outer-fold outcome 或任何以 outcome 为条件的统计量"
+  - "target mask（目标缺失模式）不得作为 prospective input（§13.3.7）"
+  target_mask_policy: "target mask 只能用于排除不可评估 position，不得作为预测输入"
+
+# ------------------------------------------------------------------
+# Mask / position eligibility（§2.2, §13.3.6）
+# ------------------------------------------------------------------
+mask:
+  primary_position_eligibility_rules:
+  - "edited-site（突变位点本身）排除，不参与 response 评估"
+  - "alignment-change 位置排除"
+  - "probe-eligibility 变化的位置排除"
+  - "NaN / missing reactivity 位置排除，缺失不填零"
+  - "length mismatch 排除"
+  eligibility_reason_codes:
+  - EDITED_SITE
+  - ALIGNMENT_CHANGE
+  - PROBE_ELIGIBILITY_CHANGE
+  - MISSING_REACTIVITY
+  - LENGTH_MISMATCH
+  - ELIGIBLE
+  mask_policy: "所有 primary position 必须有明确 eligibility reason code；无 ELIGIBLE 记录不得进入 evaluator"
+
+# ------------------------------------------------------------------
+# Caller（R3 实现，此处只冻结语义契约）
+# ------------------------------------------------------------------
+caller_contract:
+  scope: "train-fold replicates + controls only；outer 行 outcome 不可见"
+  label: "C_i binary changer"
+  reliability: "reliability 过低时返回 NO_CALL（不强制下 binary 标签）"
+  determinism: "同输入 hash 同输出；deterministic seed；sliding cluster；spatial-block null"
+
+# ------------------------------------------------------------------
+# 退化与不可识别边界（§13.3）
+# ------------------------------------------------------------------
+degenerate_policies:
+  single_hotspot_not_majority: "单一 hotspot 不得代表 majority label"
+  signed_abs_same_rank: "负/正大幅变化在 absolute task 应同 rank"
+  pair_any_all_positive: "pair-any 全阳标签在标准 AP 下返回 DEGENERATE/UNIDENTIFIABLE，不产出数字"
+  missing_info_not_zero: "缺失信息不得填充为零"
+  tied_ap_row_order_invariant: "tied AP 必须与行序无关"
+  constant_label: "constant label 时指标返回 UNIDENTIFIABLE，不返回数字"
+  publication_lt_3: "publication < 3 时禁止 confirmatory CI，返回 UNIDENTIFIABLE"
+
+# ------------------------------------------------------------------
+# 版本与冻结
+# ------------------------------------------------------------------
+integrity:
+  hash_algorithm: SHA256
+  file_hash_mode: RAW_FILE_BYTES
+  detached_ledger_path: configs/reactflow_delta/endpoint_v2.sha256
+  change_requires_new_version: true

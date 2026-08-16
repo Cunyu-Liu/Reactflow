@@ -1,0 +1,92 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P6
+run_id: prospective_v2_p6_20260814
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_PHASE5_6_RELEASE (exact match, 2026-08-14)'
+upstream_gates:
+  P0: AUTHORITY_RECONCILIATION_COMPLETE_PASS
+  P1: FAIL_CLOSED_OPEN (blocks_phase2/3=false)
+  P2: PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT
+  P3: LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT (contract 12.5 PASS from the spec-compliant
+      run_p3_lrso_v3.py re-run 2026-08-16 15:29; v1/v2 implementation-failure verdict retracted)
+  P4: P4_EXTERNAL_STATISTICAL_PASS + CALIBRATION_ACCEPTABLE
+  P5 (per Set A only, fail-closed): MECHANISM_NOT_ESTABLISHED
+  P5b (per Set B only, fail-closed): MECHANISM_NOT_ESTABLISHED
+  P5 (OVERALL combined, contract §12.7 honest conjunction): MECHANISM_EVIDENCE_PASS
+outputs:
+- /mnt/cunyuliu/prospective_v2_p6_20260814/replay_report.json  (REPLAY_CONSISTENT)
+- /mnt/cunyuliu/prospective_v2_p6_20260814/out/main_tables.md / main_tables.tex
+- /mnt/cunyuliu/prospective_v2_p6_20260814/out/figures/fig1..fig6.png
+- /mnt/cunyuliu/prospective_v2_p6_20260814/out/cards.md / environment.yml / cards_summary.json
+- scripts/reactflow_delta/run_replay_v1.py (now supports --locked-p5-combined; P3 verdict-agnostic replay)
+- scripts/reactflow_delta/generate_p6_tables_figures_v1.py (now adds Table3c + Table3c_claim_map + Fig6; P3 gate text derived from artifact)
+- scripts/reactflow_delta/build_p6_cards_v1.py
+- scripts/reactflow_delta/run_p5_combined_meta_v1.py (NEW: honest cross-set P5 aggregation)
+- scripts/reactflow_delta/make_p5_combined_artifacts_v1.py (NEW: handoff-number JSON builders)
+- scripts/reactflow_delta/run_p3_lrso_v3.py (NEW: spec-compliant P3 LRSO; supersedes invalid v1/v2)
+- docs/prospective_v2/p3_lrso_v3_result_20260815.json (VALID spec-compliant P3 result; 20 folds x 3 ranks)
+- docs/prospective_v2/REPRODUCE_p6_20260814.md
+- docs/prospective_v2/p6_failure_log_20260814.md (F1-F12 incl. F10 P3 retraction + F12 v3 re-run PASS)
+- docs/prospective_v2/p6_claim_evidence_map_20260814.md (P5 combined 6-conjunct matrix; C2 updated to v3 PASS)
+- docs/prospective_v2/p6_manuscript_draft_20260814.md (P3 §2.2 updated: failure history + v3 PASS)
+- docs/prospective_v2/p6_supplement_draft_20260814.md (S1 P3 gate updated; S1d P3 v3 detail added)
+- docs/prospective_v2/p5_combined_handoff_20260813.yaml (NEW: overall P5-gate handoff, 529 components)
+- docs/prospective_v2/p3_handoff_20260813.yaml (updated: P3 verdict LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT PASS)
+- docs/prospective_v2/p6_environment.json
+- results/p5_combined_artifacts_20260813/p5_combined_meta_result.json
+tests:
+- test_run_replay_v1.py (10), test_generate_p6_tables_figures_v1.py (3), test_build_p6_cards_v1.py (2)
+- test_p5_combined_meta_v1.py (11, incl. 8 genuine fail-closed fixtures)
+- test_p3_lrso_v3.py (14 spec-compliance fixtures) = 40 PASS
+p3_retraction_note: >-
+  2026-08-15 owner audit: v1/v2 LRSO was NOT trained per the frozen spec
+  (detached WT encoder; missing targets 0-filled then treated observable;
+  single seed, 6 fixed epochs, no inner validation). NO_INCREMENTAL_LRSO_SKILL
+  retracted as an implementation-failure artifact. run_p3_lrso_v3.py implements the
+  frozen protocol and the 2026-08-16 spec-compliant re-run (20 folds x ranks {2,4,8},
+  GPU cuda:3, ~24.9h) PASSED contract 12.5:
+  rank2 D_p^P3=+0.0147 [95% CI +0.0119,+0.0175], rank4 +0.0155 [+0.0113,+0.0196],
+  rank8 +0.0154 [+0.0122,+0.0185]; ci_low_gt_0=True; 20/20 puzzles positive;
+  sign-flip p=1.9e-6. LRSO development advantage established; external
+  transportability untested (external protocol frozen on direct candidate).
+replay:
+  verdict: REPLAY_CONSISTENT
+  all_reproduced: true
+  P2: artifact_replay_no_retrain  -> reproduced (per-puzzle D + 20-puzzle CI re-derived from 975,600 held rows)
+  P3: artifact_replay_no_retrain  -> reproduced (locked v3 result re-derives the 20-puzzle CIs and the
+      LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT verdict at all ranks; v1/v2 retracted numbers are NOT replayed)
+  P4: fresh_replay                -> reproduced (external D + CI + verdict)
+  P5: fresh_replay                -> reproduced (mechanism verdict)
+  P5b: fresh_replay               -> reproduced (if p5b inputs provided)
+  P5_COMBINED: report_level_aggregation_replay -> reproduced (overall verdict MECHANISM_EVIDENCE_PASS + 529 components + 6 conjuncts all PASS + 4 caveats preserved + per-set fail-closed verdicts unchanged)
+  P2_note: >-
+    locked per-puzzle P20 D (0.00136) carries the pre-fix NaN artifact (4100 all-NaN
+    unqualified records counted as 0 in the original denominator); corrected per-record
+    replay gives 0.00147 (~8% relative on this single small effect). Pooled 20-puzzle CI
+    and verdict unchanged (CI lower 0.0079 > 0). Tolerance P2_PUZZLE_RTOL=0.1 documented.
+acceptance: >-
+  P6 deliverables produced (replay, tables/figures, cards, manuscript/supplement, failure
+  log, claim-evidence map). P5 overall gate MECHANISM_EVIDENCE_PASS via 6/6 honest
+  conjunctive aggregation across 2 independent frozen sets (529 components). P3 gate
+  PASSED (LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT) by the spec-compliant run_p3_lrso_v3.py
+  re-run; v1/v2 verdict remains retracted (implementation failure). Publication READINESS
+  now hinges only on owner/human-author final author review and release decision.
+blocks_phase6: false
+next_allowed_action: owner/human-author final review of manuscript/supplement + release decision
+  (P6 deliverables prepared and P3 re-adjudicated to PASS; external actions e.g.
+  push/PR/submission still require explicit owner instruction per contract 15.3).
+next_forbidden_actions:
+- push/PR/public release/submission without explicit owner instruction
+- re-running locked external outcomes as a new confirmatory set
+- retroactively re-labeling individual Set A / Set B as individually MECHANISM_PASS
+- making the deleted "edit-site concentration" mechanism claim in any forum
+- omitting the 4 permanently-attached P5-combined caveats from manuscript/supplement/talks
+- citing the retracted v1/v2 NO_INCREMENTAL_LRSO_SKILL as a valid P3 conclusion
+- claiming LRSO external transportability (untested; external protocol frozen on direct candidate)
+p6_verdict: P6_REPRODUCIBILITY_DELIVERED (pending owner author review for RELEASE_AUTHORIZED;
+  P3 gate LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT PASS; P5 overall gate MECHANISM_EVIDENCE_PASS)

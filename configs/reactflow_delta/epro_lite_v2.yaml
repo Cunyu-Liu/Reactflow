@@ -1,0 +1,69 @@
+# EPRO-Lite configuration (v3 EPRO §4.9, Phase M0)
+# Pre-registered: no hyperparameter search on test data.
+
+model:
+  model_type: "epro_lite"
+  latent_dim: 64
+  hidden_dim: 512
+  n_encoder_layers: 3
+  local_window: 50
+  rho_max: 0.95
+  neumann_iter: 10
+  switch_enabled: false  # EPRO-Lite: no switch or single global gate
+  dropout: 0.25  # M0-R2-R3: stronger regularization (was 0.15)
+
+loss:
+  type: "mse"  # MSE for overfit (direct gradient); pilot uses student_t override
+  pilot_loss_type: "mse"  # T-M0.6 pilot: robust NLL (delta_true is heavy-tailed, std/mean=8x)
+  learned_scale: true  # learned sigma: fixed_sigma=0.01 collapsed to zero; learned scale adapts
+  fixed_sigma: 0.01
+  init_df: 4.0
+  min_df: 2.0
+  max_df: 30.0
+  min_sigma: 0.05  # M0-R2-R3: prevent sigma collapse (was 0.0001)
+  use_measurement_variance: true
+  l1_weight: 1.0  # M0-R2-R3: gentle MAE pressure (was 200, too aggressive)
+
+optimizer:
+  type: "adam"
+  lr: 5.0e-4
+  small_batch_lr: 1.0e-4  # lower lr for 8-pair stability (prevents divergence)
+  pilot_lr: 1.0e-4  # M0-R2-R2: lowered from 1e-4 to slow overfitting
+  weight_decay: 1.0e-4  # M0-R2-R2: 10x stronger regularization for 500-epoch run
+  grad_clip: 1.0
+
+scheduler:
+  type: "cosine"
+  T_max: 5000
+  eta_min: 1.0e-6
+
+training:
+  seed: 42
+  max_epochs: 200
+  batch_size: 8  # small batch (variable-length sequences, pad in batch)
+  overfit_batch_size: 1  # T-M0.4 single-sample overfit
+  overfit_n_pairs: 1
+  small_batch_n_pairs: 8  # T-M0.5
+  pilot_max_epochs: 500  # M0-R2-R2: 200→500 (user override of preregistration; stronger reg compensates)
+  log_every: 10
+  eval_every: 20
+  save_dir: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/checkpoints"
+  device: "cuda"  # GPU required (CPU silent fallback = stop)
+
+data:
+  manifest_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/expanded_v2/m0_pair_manifest_expanded.json"
+  parent_thermo_dir: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/parent_thermo"
+  registry_path: "artifacts/reactflow_delta/d1_all/d1_true_pair_registry.json"
+  split_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/expanded_split_members_v2.json"
+  include_annotation_only_pairs: true
+  mutant_thermo_path: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/m0/expanded_v2/mutant_thermo_features_expanded.npz"
+  clip_delta_true: 5.0
+  normalize_per_parent: true  # scale each parent to mean_abs~1 (skill is scale-invariant)  # remove extreme outliers (some parents have delta up to 13655)
+
+# Pre-registered improvement threshold (M0 Gate).
+# Strongest independent baseline: static_reactivity Skill = -0.0068
+# EPRO-Lite must achieve validation Skill > 0 AND improvement >= this.
+preregistered:
+  strongest_independent_skill: -0.0068
+  min_validation_skill: 0.0
+  min_improvement: 0.01  # must beat independent by at least 0.01 Skill

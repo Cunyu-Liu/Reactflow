@@ -1,0 +1,69 @@
+{
+  "schema_version": "reactflow-delta-r0-legacy-archive-v1",
+  "stage": "R0",
+  "task_id": "T-R0.3",
+  "recorded_at": "2026-07-30T12:01:18+08:00",
+  "contract": {
+    "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+    "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+  },
+  "evidence_class": "historical-only",
+  "scientific_claim": "none",
+  "legacy_checkout": {
+    "path": "/home/cunyuliu/reactflow_c1_3_stage_20260722",
+    "branch": "trae/c1-3-static-scale",
+    "head": "2cdf9faf02f075b6f9289e84411a1ae60ff8d45a",
+    "artifacts_realpath": "/home/cunyuliu/reactflow/artifacts",
+    "worktree_was_preexisting_and_dirty": true,
+    "worktree_was_not_modified_by_r0": true
+  },
+  "legacy_run": {
+    "name": "pairformer_ribonanza_frozen_small_pair_fsdp_seed0_v4",
+    "run_directory": "/home/cunyuliu/reactflow/artifacts/c1_3/runs/pairformer_ribonanza_frozen_small_pair_fsdp_seed0_v4",
+    "directory_present": true,
+    "observed_files": [],
+    "checkpoint_files": [],
+    "no_file_or_checkpoint_was_observed_in_the_selected_run_directory": true
+  },
+  "user_authorized_termination": {
+    "authorization": "Explicit user instruction on 2026-07-30: allow direct stop of the old C1-3 v4 task.",
+    "contract_default_superseded_for_this_legacy_run": "natural-completion wait only",
+    "signal": "SIGTERM",
+    "signal_sent_at": "2026-07-30T11:56:17+08:00",
+    "target_pids": [2353493, 2353828, 2353829, 2353830],
+    "sigkill_sent": false,
+    "restart_attempted": false,
+    "new_seed_started": false
+  },
+  "exit_audit": {
+    "post_signal_process_check": "No target PID or matching v4 command remained in ps output after the grace period.",
+    "post_signal_gpu_check": "No target PID remained in nvidia-smi compute-app bindings after the grace period.",
+    "log_evidence": [
+      "line 854: torch elastic received SIGTERM and shut down workers",
+      "lines 855-857: torch elastic sent SIGTERM to worker PIDs",
+      "line 879: torch elastic SignalException reports signal 15 for PID 2353493"
+    ]
+  },
+  "log": {
+    "source_path": "/tmp/c1_3_v4_launch.log",
+    "line_count": 879,
+    "sha256": "4e18b652b330a0e7370c19693daf3bb142a958ba229322d487d0b5e211edcf56",
+    "last_persisted_train_step_record": {
+      "event": "train_step",
+      "step": 27000,
+      "global_step": 27001,
+      "loss": 4.949508190155029,
+      "line_numbers": [851, 852, 853]
+    }
+  },
+  "interpretation_boundary": {
+    "run_completed_naturally": false,
+    "run_termination_is_not_a_success_or_failure_efficacy_conclusion": true,
+    "not_usable_as_epro_evidence": true,
+    "not_authorized_for_resume_or_new_seed": true
+  },
+  "preservation": {
+    "raw_log_archive": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/legacy_c1_3_v4_launch.log",
+    "archive_manifest_copy": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/legacy_c1_3_v4_archive_manifest.json"
+  }
+}

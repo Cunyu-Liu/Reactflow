@@ -1,0 +1,1053 @@
+{
+  "categories": [
+    {
+      "candidate_assets": [
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2PK50_2A3_0000.rdat",
+          "bytes": 123500789,
+          "name": "M2PK50_2A3_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "4b08347b74cf72d8d15e4dc1befac4a9065e907342ea268a0cca0cfdf2f767d2"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2PK50_DMS_0000.rdat",
+          "bytes": 123466580,
+          "name": "M2PK50_DMS_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "410d26b8ba309baba95bdfb6058641d93443301dfb0e7f53847cb0ed0ea5655f"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2PK90_2A3_0000.rdat",
+          "bytes": 219475544,
+          "name": "M2PK90_2A3_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "e139e7918b6c984e41e6ed0bf4273e57630732686834e6eac5e140e79a0e2ef0"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2PK90_DMS_0000.rdat",
+          "bytes": 219412452,
+          "name": "M2PK90_DMS_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "efc209f453c2e9fe1f15feb7fe1082598723c0b1a8dfa408a938e18a35e1afad"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFOK_2A3_0000.rdat",
+          "bytes": 35629654,
+          "name": "M2RFOK_2A3_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "1f2646d346c4d9a70ae1eceaafa369b2aa84f36fa144e60a5f40b7c53c08f0ef"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFOK_DMS_0000.rdat",
+          "bytes": 35660861,
+          "name": "M2RFOK_DMS_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "65109c81434c375dba353a872d54d4a80e99b3a3eb1be6396c50deb1440a96bd"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_2A3_0000.rdat",
+          "bytes": 229159636,
+          "name": "M2RFPK_2A3_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "f78c6dea3a48fde9ab3c348060b1102eabd612f981dddeb1a16c2f0ca8d4ceb2"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_2A3_0001.rdat",
+          "bytes": 229152477,
+          "name": "M2RFPK_2A3_0001.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "25821f8f307d682896a81c9be698bd3f02ead8df0d98f12c6d0aa585e406d0d3"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_2A3_0002.rdat",
+          "bytes": 142050785,
+          "name": "M2RFPK_2A3_0002.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "ab07b8c4b3bae6c651cadf66370d60dc7132855ff5af3732c9f1bd5989c9bb11"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_DMS_0000.rdat",
+          "bytes": 229320598,
+          "name": "M2RFPK_DMS_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "5ec8ea15e5d44933a7f27d1b0212b3f70f2ee49f008991d0db372264b12976d3"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_DMS_0001.rdat",
+          "bytes": 229322020,
+          "name": "M2RFPK_DMS_0001.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "721b9fcd2bea1109184ea931012c0b28466c17129f5fd022346c92afe3ed0112"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_DMS_0002.rdat",
+          "bytes": 142173191,
+          "name": "M2RFPK_DMS_0002.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "9014f4b0b08df21764e9dbaf7f125ca1b4f8c14191fedd1ad91587613c5f3f75"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2SL5_2A3_0000.rdat",
+          "bytes": 7863387,
+          "name": "M2SL5_2A3_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "6a2fded3673735c8daa92512ae3f86bc3e4187bb18db78e2c56fcff3d45a4c8b"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2SL5_DMS_0000.rdat",
+          "bytes": 7863713,
+          "name": "M2SL5_DMS_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "590638963adbde972cc77c70aeb07ff4240d9885be9baffbb0f65ef40243ab85"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/SPINACH_M2G4_0001.rdat",
+          "bytes": 542576,
+          "name": "SPINACH_M2G4_0001.rdat",
+          "release_tag": "data-general",
+          "upstream_sha256": "a2423ec5c4d80b64bb400f0f5b812003b7fe5fab09fe67800352a71509712d31"
+        }
+      ],
+      "candidate_category": "m2_named_candidate",
+      "candidate_count": 15,
+      "classification_basis": "strict filename rule only",
+      "rdat_confirmation_required": true,
+      "rule": "(?:^|_)M2(?:[A-Z0-9_]|$)"
+    },
+    {
+      "candidate_assets": [
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HC16M2R_1M7_0001.rdat",
+          "bytes": 999843,
+          "name": "HC16M2R_1M7_0001.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "b1399fc4160f760f1fff2c0f70d5f4cd2ec45e2d4151afb79680cc88e1bdfc37"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HC16M2R_1M7_0002.rdat",
+          "bytes": 548675,
+          "name": "HC16M2R_1M7_0002.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "e2bcc44a1752253c1f4a77f8a261f2567455724f43d505df6281abf506c66e9d"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/HC16M2R_1M7_0003.rdat",
+          "bytes": 348004,
+          "name": "HC16M2R_1M7_0003.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "7589345cef01215be752b259775c0131e7356185a9fe6197bb013b849be680f4"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFOK_2A3_0000.rdat",
+          "bytes": 35629654,
+          "name": "M2RFOK_2A3_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "1f2646d346c4d9a70ae1eceaafa369b2aa84f36fa144e60a5f40b7c53c08f0ef"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFOK_DMS_0000.rdat",
+          "bytes": 35660861,
+          "name": "M2RFOK_DMS_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "65109c81434c375dba353a872d54d4a80e99b3a3eb1be6396c50deb1440a96bd"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_2A3_0000.rdat",
+          "bytes": 229159636,
+          "name": "M2RFPK_2A3_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "f78c6dea3a48fde9ab3c348060b1102eabd612f981dddeb1a16c2f0ca8d4ceb2"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_2A3_0001.rdat",
+          "bytes": 229152477,
+          "name": "M2RFPK_2A3_0001.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "25821f8f307d682896a81c9be698bd3f02ead8df0d98f12c6d0aa585e406d0d3"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_2A3_0002.rdat",
+          "bytes": 142050785,
+          "name": "M2RFPK_2A3_0002.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "ab07b8c4b3bae6c651cadf66370d60dc7132855ff5af3732c9f1bd5989c9bb11"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_DMS_0000.rdat",
+          "bytes": 229320598,
+          "name": "M2RFPK_DMS_0000.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "5ec8ea15e5d44933a7f27d1b0212b3f70f2ee49f008991d0db372264b12976d3"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_DMS_0001.rdat",
+          "bytes": 229322020,
+          "name": "M2RFPK_DMS_0001.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "721b9fcd2bea1109184ea931012c0b28466c17129f5fd022346c92afe3ed0112"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2RFPK_DMS_0002.rdat",
+          "bytes": 142173191,
+          "name": "M2RFPK_DMS_0002.rdat",
+          "release_tag": "data-rna-structures",
+          "upstream_sha256": "9014f4b0b08df21764e9dbaf7f125ca1b4f8c14191fedd1ad91587613c5f3f75"
+        }
+      ],
+      "candidate_category": "m2r_named_unconfirmed",
+      "candidate_count": 11,
+      "classification_basis": "strict filename rule only",
+      "rdat_confirmation_required": true,
+      "rule": "M2R"
+    },
+    {
+      "candidate_assets": [
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA3_DMS_0000.rdat",
+          "bytes": 309682,
+          "name": "ETERNA3_DMS_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "e4459fb5c9c66232b6eb910319f87c22d5033aee71e60912a350c3a703c03d41"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_P50_0001.rdat",
+          "bytes": 10825505,
+          "name": "ETERNA_P50_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "52564de56c70444f4b66b175260729a00ac9f51e917a71365f9543a9b23c94a9"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_P50_0002.rdat",
+          "bytes": 10863669,
+          "name": "ETERNA_P50_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "c601f10bef9109899692d176330275d7da9a51a440ecd7db688901c635447ecf"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_P90_0001.rdat",
+          "bytes": 10514764,
+          "name": "ETERNA_P90_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "99aaa240abf29eb1a8a53957dd476ee219482d2b28d896fc2343a4168582b010"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_P90_0002.rdat",
+          "bytes": 10678251,
+          "name": "ETERNA_P90_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "ad75be67fed34ff8aac82be81a6e6851f80ee8be29142e9fee02292905f37c01"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R00_0000.rdat",
+          "bytes": 4405247,
+          "name": "ETERNA_R00_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "521eeb119e813fb04f82e601b067c7658833c375d180f6105550df7300a98cb1"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R00_0002.rdat",
+          "bytes": 32095081,
+          "name": "ETERNA_R00_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "891fc1516ed69ba9085cad85e2aa4aba8da444e434feb42cebbcf95653f0a714"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R06_0001.rdat",
+          "bytes": 17968,
+          "name": "ETERNA_R06_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "2d32fe789748b1424d1fdaa6601b841a7fd3cd9cb21a907a3394bf23fa1c03a4"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R07_0001.rdat",
+          "bytes": 18006,
+          "name": "ETERNA_R07_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "c6a16361a046b61773995c80e97f73650a2207779cdb6cdfb93561824a63f790"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R08_0001.rdat",
+          "bytes": 20915,
+          "name": "ETERNA_R08_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "780a172cd0e45ddfae70192c35aef194ac1359ed1a93ea9f34296fdc6fdd10be"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R09_0001.rdat",
+          "bytes": 31903,
+          "name": "ETERNA_R09_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "2d7cbf722c31131fd576f73e72f08dd6032b78235bab91747ff069d664c36db7"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R10_0001.rdat",
+          "bytes": 31909,
+          "name": "ETERNA_R10_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "06cc5c0d7fb61a3a4f8a936300ff4663481f2a43afc641c8941435406083d4fb"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R11_0001.rdat",
+          "bytes": 32041,
+          "name": "ETERNA_R11_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "82728431b85bfe17fe9041a1c040c1413584ff7dc3f4090e60b349effe8d8d8b"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R12_0001.rdat",
+          "bytes": 28360,
+          "name": "ETERNA_R12_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "2a098a980c7009161d121cc33c445040541757deeb08fc81e5438923dbb3e238"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R13_0001.rdat",
+          "bytes": 28139,
+          "name": "ETERNA_R13_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "05cd6bbf56559d0fa864f46a8e05c12f5c4de0e7a886f9ce024d3ae6ca258cc2"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R14_0001.rdat",
+          "bytes": 20279,
+          "name": "ETERNA_R14_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "32817ccd0644d7f9cb5e826a7dc79ba3b98da44e541b3198f43fe38ce6aa3b46"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R15_0001.rdat",
+          "bytes": 32099,
+          "name": "ETERNA_R15_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "d447e4ee4f6f476e08f76045c2bfa0f237093e09312f48c7ee9cded457a3d9f1"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R16_0001.rdat",
+          "bytes": 38035,
+          "name": "ETERNA_R16_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "7663e4c516ebe52697aee9fb0b0b8cfacc710ba604026f4b172a0c3c138b9468"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R17_0001.rdat",
+          "bytes": 38052,
+          "name": "ETERNA_R17_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "fbd12901f1c57ec37acabcf8a97c7a4472dc10f60b79d83463b560f5b2a145fa"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R18_0001.rdat",
+          "bytes": 38135,
+          "name": "ETERNA_R18_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "17b27f8e53c1acb9eaeda3bd1fe9863a986916851c044781c67a636c73bcc613"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R19_0001.rdat",
+          "bytes": 38144,
+          "name": "ETERNA_R19_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "fa52b68811f03863f887e8c5f06e901571608eb89d1e9b77f568956ca57ea87b"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R20_0001.rdat",
+          "bytes": 41585,
+          "name": "ETERNA_R20_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "4fc55e4c2407617906e59c944c5a675d394c4380644e24422cb1c5d3ac39d186"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R21_0001.rdat",
+          "bytes": 41635,
+          "name": "ETERNA_R21_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "1508e12b193e4bfd9e80daf6eabc7bbd38d1a4761fff1d3e040a41b1b7eeeaae"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R22_0001.rdat",
+          "bytes": 41618,
+          "name": "ETERNA_R22_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "f5528264c7a0b73c8b6d1d0890b190e044fd687ff3027bf6998e248c87e320c3"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R23_0001.rdat",
+          "bytes": 34983,
+          "name": "ETERNA_R23_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "2f61dbb398c2a9a743a83c8f3240dcb7b5034e555e35cdb1e99744b193dd6c59"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R24_0001.rdat",
+          "bytes": 28717,
+          "name": "ETERNA_R24_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "c441d1930264473c4eea01f5a04aa07e6f54ecd5221394a80805da163b54dac6"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R25_0001.rdat",
+          "bytes": 35059,
+          "name": "ETERNA_R25_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "27813efd8393848a43301e9f3a08cc5abf3a4409c1a20653512b97224024ed93"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R26_0001.rdat",
+          "bytes": 35153,
+          "name": "ETERNA_R26_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "788d2ab24a56ef12de8ae9961991cdfba8583e2d01c1224fac1fb621c584cb14"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R27_0001.rdat",
+          "bytes": 35228,
+          "name": "ETERNA_R27_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "d74eebb71423b42f0d4fdd03127b351ab48df9d5e2f150d0ef1402de325ec161"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R28_0001.rdat",
+          "bytes": 30783,
+          "name": "ETERNA_R28_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "79d11e2aa96ceb786d3bf900fe8356aec2bca0a0117f6afbbddcb63fd9df2042"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R29_0001.rdat",
+          "bytes": 51464,
+          "name": "ETERNA_R29_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "58f88aa278862a1ba02d91d95e6262d5d0487b9dcb0d61333117494ae6981167"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R30_0001.rdat",
+          "bytes": 51441,
+          "name": "ETERNA_R30_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "f1b0a9934d043668b8d2ed2001549cd5be47f4902eea389c20f199166fe12970"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R31_0001.rdat",
+          "bytes": 59262,
+          "name": "ETERNA_R31_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "9605733c84138c213225fbcaa4d5f2c88ca90ff2d455e079b0d79c719776f462"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R31_0002.rdat",
+          "bytes": 59378,
+          "name": "ETERNA_R31_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "a193dd6bea3e5276551e72f01df64b487a794f2b29dff4b192eca889edb7e034"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R32_0001.rdat",
+          "bytes": 57947,
+          "name": "ETERNA_R32_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "61a6ea3a151e57d635be2388849451edff47268c60cc6cc5b80537e9500df52b"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R33_0001.rdat",
+          "bytes": 54356,
+          "name": "ETERNA_R33_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "27ac92667c0bdca42aa36eefe7443d140f2d4a8c483e456a37615feafeeedbff"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R34_0001.rdat",
+          "bytes": 53830,
+          "name": "ETERNA_R34_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "1dd710a0d45157bb92dcada754d4fccaac113108395ed1c23bbe01ecea591c3c"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R35_0001.rdat",
+          "bytes": 57571,
+          "name": "ETERNA_R35_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "6d1567153054bdf3337275f337fcf5ce5b19092760fe3f42ba94a5ee8443e8a8"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R36_0001.rdat",
+          "bytes": 56092,
+          "name": "ETERNA_R36_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "f9b46796af9a2c23942b78f74366e4e3358482103743407e84512e1afd11e7bb"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R37_0001.rdat",
+          "bytes": 54479,
+          "name": "ETERNA_R37_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "73ffed53937933788c6d6c2bf0e64265e6f3ed06586d6cdf80aff827ceb65820"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R38_0001.rdat",
+          "bytes": 56731,
+          "name": "ETERNA_R38_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "ee76d31ec2a60eeb5d2d794f825758c802e663b253890d95026b1405d31a719a"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R39_0001.rdat",
+          "bytes": 56635,
+          "name": "ETERNA_R39_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "59e695682f745c7fa678e90116e0cee0cc8cfdbd02962a4615af61e2f938a21a"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R40_0001.rdat",
+          "bytes": 70925,
+          "name": "ETERNA_R40_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "0b07cf36d00280c6cb71d2d02cb986235d551d1ef6eeb919e38bf515f8163c7d"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R41_0001.rdat",
+          "bytes": 49461,
+          "name": "ETERNA_R41_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "9ebf4b864ff4e92377711255050e8e26f5837bfc758ffb5cc5e8c0d559601b5d"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R41_0002.rdat",
+          "bytes": 46782,
+          "name": "ETERNA_R41_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "73c72ee0b19bf31c3d357b7f2021e509c8e350afc4b12c8d006e94cdfbb4b16f"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0001.rdat",
+          "bytes": 39574,
+          "name": "ETERNA_R42_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "dd4c95388c8f661cf4677732c12a22af9358f6f4b9fd2380aaada5ea8be2704a"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0002.rdat",
+          "bytes": 15100,
+          "name": "ETERNA_R42_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "3ab87402271505d397ccfa1e98236f13b4dea7cb5b51899cbe78cf9ce8601bab"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0003.rdat",
+          "bytes": 15010,
+          "name": "ETERNA_R42_0003.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "7878af6f68f1834982a15d40a14f65209f0117a0235a108633b7cafb4c418a1b"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0004.rdat",
+          "bytes": 11522,
+          "name": "ETERNA_R42_0004.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "d656c5a8bcdb2a685be17bb79f97b834e93827094fdc15acfbb9544a124b1ccd"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0005.rdat",
+          "bytes": 14443,
+          "name": "ETERNA_R42_0005.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "51dc259f51134a63b64871e133140b5d2a0b838cf5cc9ec839c9954b28ff9292"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0006.rdat",
+          "bytes": 14867,
+          "name": "ETERNA_R42_0006.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "d732375d0dea0568590974c5e9814008bf84152feb161c901567f2e6b22d96b5"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R43_0001.rdat",
+          "bytes": 52538,
+          "name": "ETERNA_R43_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "9aefdcbde15fcd399e2dbe0f63a23d5950aac3e92c2b0b5cd47aa16cbeed0bc1"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R44_0001.rdat",
+          "bytes": 81818,
+          "name": "ETERNA_R44_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "3a3660ffd0b0309a5d104da5caf5229c07a9ed3f931bbccf314e117a42a86953"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R45_0001.rdat",
+          "bytes": 65793,
+          "name": "ETERNA_R45_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "aa5e98edd16f8ef97dba587a827761b88ad978996876d5e04eb7e52b5d9e8d6c"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R45_0002.rdat",
+          "bytes": 40515,
+          "name": "ETERNA_R45_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "d0e93929d761dc3d68ad82705679a065717e8f1b07e221e0b32160753f716e47"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R46_0001.rdat",
+          "bytes": 128254,
+          "name": "ETERNA_R46_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "c7ba40ef7669ba84e22336dbff93aa05c46e389d0cd3a987fab997139fb80d87"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R47_0001.rdat",
+          "bytes": 132383,
+          "name": "ETERNA_R47_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "d95e2d22f4df91f52a85631aa6ef3d06d6a137bafeb0b7829754d688ab350b04"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R47_0002.rdat",
+          "bytes": 67031,
+          "name": "ETERNA_R47_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "5874163985a01539c652adb34eedf03f536e08f60ab635b4e9e633d17f8d4203"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R48_0001.rdat",
+          "bytes": 134057,
+          "name": "ETERNA_R48_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "fe5c2594fb4564e19db3f2ef387a2fea7373cd28186224493d5c39cdd27709a7"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R49_0001.rdat",
+          "bytes": 34016,
+          "name": "ETERNA_R49_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "d0444e2e4279a70ebbf9d343f9b07968c3bcb2092a5c12f0e34079673705737a"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R49_0002.rdat",
+          "bytes": 102268,
+          "name": "ETERNA_R49_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "f4738eb18aa53767f177700e2cc8c1ff99abf6fb336968de7746295aa6c2bdfb"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R50_0001.rdat",
+          "bytes": 103008,
+          "name": "ETERNA_R50_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "53ecfb4fbbf99e65f26ca0b4da09dd69153368f6ce1e2fa81b8aa43ce6711e91"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R51_0001.rdat",
+          "bytes": 34730,
+          "name": "ETERNA_R51_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "422a1c9c7def8ad5e06fbc51310c412349b229a84c5e875339cbe39c790a3453"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R69_0000.rdat",
+          "bytes": 3432989,
+          "name": "ETERNA_R69_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "ed7e5716e497f68aed4dd1d7d73b18b700c911f220e24d4c1b4051769eed40c2"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R69_0001.rdat",
+          "bytes": 13091753,
+          "name": "ETERNA_R69_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "768711c8155d515f0f5db4ee7c1cc05159fe9396f678cd70d8f7f5388cba9188"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R70_0000.rdat",
+          "bytes": 7960681,
+          "name": "ETERNA_R70_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "2c1e6d63cd27372c4ee932fe790becd3709ccd340f1b6e19e25c0cda1db68581"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R71_0000.rdat",
+          "bytes": 3271651,
+          "name": "ETERNA_R71_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "8bb10e331fa18381e0f3d9f24e60329877654d5aa12519c6705a23e353943d57"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R72_0000.rdat",
+          "bytes": 1659602,
+          "name": "ETERNA_R72_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "19670d7f096ec15541e8acb8329f1fde3ae88b41ba69c749789634fcf0d78bb9"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R73_0000.rdat",
+          "bytes": 1936145,
+          "name": "ETERNA_R73_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "378c9452c93fc933d7940a8da2cd7169dfcabc7a705ad107a37990952b3e7c19"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R73_0001.rdat",
+          "bytes": 2055215,
+          "name": "ETERNA_R73_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "9a234605fd6ffc6dafb00eea75a854d5abac94e1a7fb8f88313014405a65d682"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R74_0000.rdat",
+          "bytes": 2730240,
+          "name": "ETERNA_R74_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "035c7478c74da1cda8d24c995d6ac25c16ded4ebc2b44566cd56b4d58e4fcb05"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R75_0000.rdat",
+          "bytes": 2073168,
+          "name": "ETERNA_R75_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "3ff7e74f1f4cbbc4257ac39c54b40d381396fa98cde2f06254a08c0d8413a0b3"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R76_0000.rdat",
+          "bytes": 2508188,
+          "name": "ETERNA_R76_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "6265b96feaa0dbeae30522c230f4a90e85463edcff26c09278ed6b05e3643d37"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R76_0001.rdat",
+          "bytes": 5017479,
+          "name": "ETERNA_R76_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "03888805dc4ff50c6f50f0f2ac2ec7f6a8d9823bdc6a7ffdb0695ec586da61db"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R77_0000.rdat",
+          "bytes": 8396401,
+          "name": "ETERNA_R77_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "42c4a18d415030cd89e4bddd7698ce242c4c719caafb8238e59712eb603a7b51"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R77_0001.rdat",
+          "bytes": 5963799,
+          "name": "ETERNA_R77_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "af33c64bc5882e4577e5ec92cf77dd05a1e212c16d76b075a0d0e60f482cdd4f"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R77_0002.rdat",
+          "bytes": 8817752,
+          "name": "ETERNA_R77_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "abad86a87f0e35ca97f0d134dbfcf2092dcdf1f35fe2f02f0bdc5a420f5fc374"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R78_0000.rdat",
+          "bytes": 6582041,
+          "name": "ETERNA_R78_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "fcdd0ce404949df177e789d140ddaface0b5e0f69d39b46025d7c134c534588a"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R78_0001.rdat",
+          "bytes": 6911199,
+          "name": "ETERNA_R78_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "0bd232d071320b5ffda3c717ab279b28610bbdd19f2664c5fe9914f0820314e0"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R79_0000.rdat",
+          "bytes": 5465616,
+          "name": "ETERNA_R79_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "9a3ce7916e1e4dec8900b83345054fa355786d848f4ef6d81c11385ae0d9566f"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R79_0001.rdat",
+          "bytes": 5737244,
+          "name": "ETERNA_R79_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "3ef64db6909116a39a4e58a028999063b0613974d7c33b29ad7b1da66f9272cf"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R80_0000.rdat",
+          "bytes": 4704779,
+          "name": "ETERNA_R80_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "78d2873c0138b6e9abc1d3eb923d156d94a2f96d54820aa1513255c332e496f8"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R80_0001.rdat",
+          "bytes": 4936306,
+          "name": "ETERNA_R80_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "769a70ba52758b4aa40a3f5fe6fd2250b5ca364800730f534ee64fa49819013c"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R81_0000.rdat",
+          "bytes": 4658142,
+          "name": "ETERNA_R81_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "c70eace20cc90bea443f115a35136c3a03723a8c26e27cd32577b2d46561caff"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R81_0001.rdat",
+          "bytes": 4891924,
+          "name": "ETERNA_R81_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "8993c1968c4324e11b95ef12e01e8b011b744bf9dd48e17b08cc58657e613e4f"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R82_0000.rdat",
+          "bytes": 4726019,
+          "name": "ETERNA_R82_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "e48ad5313c7bd2503b7adc6b4c57d3dcca673c710fcb273306fab9d979d9017d"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R82_0001.rdat",
+          "bytes": 4962845,
+          "name": "ETERNA_R82_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "5bc3032a02f060f93ca6bd8095655ad47cb54083caa30460545ed15cede091a0"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R83_0000.rdat",
+          "bytes": 4268870,
+          "name": "ETERNA_R83_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "f553f7be109a138adef3ff7d3b82434c7548c483b2f1a07f3e845aba741d5c66"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R83_0002.rdat",
+          "bytes": 1895494,
+          "name": "ETERNA_R83_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "8bd8a30ea58e06c15ba06deae8c3abaeea25538265701fa0d8c234ad55aeca33"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R83_0003.rdat",
+          "bytes": 2609100,
+          "name": "ETERNA_R83_0003.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "275679ec8ae108b92e72941f8cedef24761d3f5e547738f4ba882ada2c581466"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R84_0000.rdat",
+          "bytes": 5556478,
+          "name": "ETERNA_R84_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "791f1e89625cdfcf02141bd3c9a1749af99ee57601b2a96985089b56c757e8a6"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R85_0000.rdat",
+          "bytes": 5622704,
+          "name": "ETERNA_R85_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "3db8c79512b498d6b8e0ef7eeaca99af6c6a4998817c99a983f815b45a31edbe"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R86_0000.rdat",
+          "bytes": 6420615,
+          "name": "ETERNA_R86_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "13ec9b5c1adeebfcb7a5c26f0b757b07fd6e190248c08d2d69668d9c01f490b2"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R87_0000.rdat",
+          "bytes": 3994675,
+          "name": "ETERNA_R87_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "fd48b4989aa3b23e8e8ff65d41fad024262182af4c3d3b4f9572938172a598ba"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R87_0001.rdat",
+          "bytes": 3989098,
+          "name": "ETERNA_R87_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "bfad131686f400b50415776e266b599acf1a18cb9a02e98f0a70ce8e0f1e304a"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R87_0002.rdat",
+          "bytes": 3994042,
+          "name": "ETERNA_R87_0002.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "5bb00ffa33bbea755eee32492360b84b171aa5ca820051decb1d717c858e5296"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R87_0003.rdat",
+          "bytes": 4021001,
+          "name": "ETERNA_R87_0003.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "b31455ebb22d07eeff2545ca28c6fc3f859d607e45095aed4c2a97c3002bffa6"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R88_0000.rdat",
+          "bytes": 994858,
+          "name": "ETERNA_R88_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "fac96294b1e6158bb56a856851cf6063e7c8ba1e2e45e12a083f1b9128b92429"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R88_0001.rdat",
+          "bytes": 991543,
+          "name": "ETERNA_R88_0001.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "aa0e7cd9d39eef5e75c9b310ff55f2e0cf8a6f3687b9da661a876de3e8f38a53"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R89_0000.rdat",
+          "bytes": 4183525,
+          "name": "ETERNA_R89_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "a75933f79e8708ac2d54265b83439a6ec9260a76d5b60762769874376b38e25d"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R90_0000.rdat",
+          "bytes": 1073126,
+          "name": "ETERNA_R90_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "e42ea0165e220fb01d8dd6b98e4c1ec3ea02cb91236e1d52a7af03fedcdd537a"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R91_0000.rdat",
+          "bytes": 2569033,
+          "name": "ETERNA_R91_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "764b306d74616a07973d8d16e0d01e758650df65ceec574db6c0550b42fe74f3"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R92_0000.rdat",
+          "bytes": 1625164,
+          "name": "ETERNA_R92_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "0321f832aa6d9145aa25e8c2a9832ab4206ba2797b11bfa0a7f37dc32e243863"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R93_0000.rdat",
+          "bytes": 147482,
+          "name": "ETERNA_R93_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "cabe79733c0d1e27f72c220102d8fd641c59c4d105451c304354ccc783ac37d1"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R94_0000.rdat",
+          "bytes": 3806646,
+          "name": "ETERNA_R94_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "25deca5df6918b84887578658651ceb7e889167567a1f563b461492d99305f12"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R95_0000.rdat",
+          "bytes": 903191,
+          "name": "ETERNA_R95_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "3b22acff45af3f162818360d56f4c71777b9bde8f0c53924f4fd1872b943b9e8"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_TOD_0000.rdat",
+          "bytes": 7065,
+          "name": "ETERNA_TOD_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "e1534b2819eed88173afb1415cd07e93e5aafe673fbc4a912bb4257df2dd093b"
+        },
+        {
+          "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/OK45LIB_2A3_0000.rdat",
+          "bytes": 38008907,
+          "name": "OK45LIB_2A3_0000.rdat",
+          "release_tag": "data-eterna",
+          "upstream_sha256": "f27402f50f754e72f65dde85a96911c4efcba20d9f5d66d6bd4a28ed9f215321"
+        }
+      ],
+      "candidate_category": "variant_or_library_named_candidate",
+      "candidate_count": 108,
+      "classification_basis": "strict filename rule only",
+      "rdat_confirmation_required": true,
+      "rule": "(?:^|_)(?:ETERNA|OK[0-9]|LIB)(?:_|[0-9]|$)"
+    },
+    {
+      "candidate_assets": [],
+      "candidate_category": "explicit_rescue_or_compensatory_named_candidate",
+      "candidate_count": 0,
+      "classification_basis": "strict filename rule only",
+      "rdat_confirmation_required": true,
+      "rule": "rescue|compens"
+    }
+  ],
+  "fixture_selection": [
+    {
+      "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-general/SPINACH_M2G4_0001.rdat",
+      "bytes": 542576,
+      "candidate_category": "m2_named_candidate",
+      "name": "SPINACH_M2G4_0001.rdat",
+      "rdat_confirmation_required": true,
+      "release_tag": "data-general",
+      "selection_basis": "smallest fixed set of three strict filename candidates",
+      "upstream_sha256": "a2423ec5c4d80b64bb400f0f5b812003b7fe5fab09fe67800352a71509712d31"
+    },
+    {
+      "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2SL5_2A3_0000.rdat",
+      "bytes": 7863387,
+      "candidate_category": "m2_named_candidate",
+      "name": "M2SL5_2A3_0000.rdat",
+      "rdat_confirmation_required": true,
+      "release_tag": "data-rna-structures",
+      "selection_basis": "smallest fixed set of three strict filename candidates",
+      "upstream_sha256": "6a2fded3673735c8daa92512ae3f86bc3e4187bb18db78e2c56fcff3d45a4c8b"
+    },
+    {
+      "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-rna-structures/M2SL5_DMS_0000.rdat",
+      "bytes": 7863713,
+      "candidate_category": "m2_named_candidate",
+      "name": "M2SL5_DMS_0000.rdat",
+      "rdat_confirmation_required": true,
+      "release_tag": "data-rna-structures",
+      "selection_basis": "smallest fixed set of three strict filename candidates",
+      "upstream_sha256": "590638963adbde972cc77c70aeb07ff4240d9885be9baffbb0f65ef40243ab85"
+    },
+    {
+      "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_TOD_0000.rdat",
+      "bytes": 7065,
+      "candidate_category": "variant_or_library_named_candidate",
+      "name": "ETERNA_TOD_0000.rdat",
+      "rdat_confirmation_required": true,
+      "release_tag": "data-eterna",
+      "selection_basis": "smallest fixed set of three strict filename candidates",
+      "upstream_sha256": "e1534b2819eed88173afb1415cd07e93e5aafe673fbc4a912bb4257df2dd093b"
+    },
+    {
+      "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0004.rdat",
+      "bytes": 11522,
+      "candidate_category": "variant_or_library_named_candidate",
+      "name": "ETERNA_R42_0004.rdat",
+      "rdat_confirmation_required": true,
+      "release_tag": "data-eterna",
+      "selection_basis": "smallest fixed set of three strict filename candidates",
+      "upstream_sha256": "d656c5a8bcdb2a685be17bb79f97b834e93827094fdc15acfbb9544a124b1ccd"
+    },
+    {
+      "browser_download_url": "https://github.com/DasLab/rmdb.github.io/releases/download/data-eterna/ETERNA_R42_0005.rdat",
+      "bytes": 14443,
+      "candidate_category": "variant_or_library_named_candidate",
+      "name": "ETERNA_R42_0005.rdat",
+      "rdat_confirmation_required": true,
+      "release_tag": "data-eterna",
+      "selection_basis": "smallest fixed set of three strict filename candidates",
+      "upstream_sha256": "51dc259f51134a63b64871e133140b5d2a0b838cf5cc9ec839c9954b28ff9292"
+    }
+  ],
+  "input_release_index": {
+    "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/github_releases.json",
+    "sha256": "56d20dd869c3fd8c544611644b92f2a57b9e76920de0351e1a2eb513f102a9da"
+  },
+  "schema_version": "reactflow-delta-rmdb-candidate-manifest-v1",
+  "scientific_boundary": "This is a filename-based discovery manifest only. It contains no confirmed experiment class, construct count, WT-single-mutant pair count, tier decision, or learned training result.",
+  "stage": "D0",
+  "unresolved_absences": [
+    {
+      "action": "Do not substitute near-matching names. Search entry metadata and RDAT annotations before declaring rescue availability.",
+      "candidate_category": "explicit_rescue_or_compensatory_named_candidate",
+      "candidate_count": 0
+    }
+  ]
+}

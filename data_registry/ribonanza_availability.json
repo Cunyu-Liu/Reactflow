@@ -1,0 +1,55 @@
+{
+  "data_access_outcome": "unavailable_in_current_environment",
+  "endpoint_probes": [
+    {
+      "http_status": 404,
+      "outcome": "http_error",
+      "url": "https://www.kaggle.com/competitions/stanford-ribonanza-rna-folding/data"
+    },
+    {
+      "http_status": 404,
+      "outcome": "http_error",
+      "url": "https://www.kaggle.com/api/v1/competitions/download/stanford-ribonanza-rna-folding/train_data.csv"
+    }
+  ],
+  "environment": {
+    "kaggle_cli_path": null,
+    "kaggle_config_contents_read": false,
+    "kaggle_config_present": false
+  },
+  "pair_count_missing_reason": "No immutable Ribonanza raw table was acquired, so batch, condition, parent lineage, edit endpoint, and duplicate identity cannot be audited.",
+  "retrieved_at": "2026-07-30T13:33:59+08:00",
+  "same_condition_single_edit_pair_count": null,
+  "schema_version": "reactflow-delta-ribonanza-availability-v1",
+  "scientific_boundary": "This report records unavailability in the current environment. It does not imply that Ribonanza globally lacks eligible pairs and it does not convert unknown into zero.",
+  "source_registry_record": {
+    "bytes": null,
+    "download_status": "unavailable",
+    "license": null,
+    "missing_reasons": {
+      "bytes": "no raw Ribonanza file was acquired",
+      "license": "Kaggle data terms/license were not retrievable without an acquired competition data artifact",
+      "parser_version": "no raw Ribonanza file was acquired to parse",
+      "publication_doi": "no publication DOI was asserted by the frozen competition reference used for this availability audit",
+      "publication_pmid": "no PMID was asserted by the frozen competition reference used for this availability audit",
+      "raw_path": "no raw Ribonanza file was acquired",
+      "sha256": "no raw Ribonanza file was acquired",
+      "source_version": "no immutable Ribonanza data file was acquired in this environment"
+    },
+    "parser_version": null,
+    "publication_doi": null,
+    "publication_pmid": null,
+    "raw_path": null,
+    "record_id": "ribonanza:stanford-ribonanza-rna-folding:unavailable-current-environment",
+    "retrieved_at": "2026-07-30T13:33:59+08:00",
+    "schema_version": "reactflow-delta-source-registry-v1",
+    "sha256": null,
+    "source": "Ribonanza",
+    "source_tier": "B",
+    "source_type": "ribonanza",
+    "source_url": "https://www.kaggle.com/competitions/stanford-ribonanza-rna-folding/data",
+    "source_version": null,
+    "upstream_id": "stanford-ribonanza-rna-folding"
+  },
+  "stage": "D0"
+}

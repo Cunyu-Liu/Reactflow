@@ -1,0 +1,81 @@
+schema_version: "reactflow_delta.split_v3.v1"
+endpoint_id: "RFD_ENDPOINT_V3"
+generated_by: "scripts/reactflow_delta/build_pair_publication_registry_v1.py"
+scope: "benchmark_v3"
+precomputed_at: "2026-08-09T00:00:00+00:00"
+input_sources:
+  primary_pairs_v2.jsonl: "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d1x_v2/d1x_v2_canonicalization_20260807T1830+0800/primary_pairs_v2.jsonl"
+  pair_publication_registry_v1.tsv: "data_registry/reactflow_delta/pair_publication_registry_v1.tsv"
+  accession_registry: "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d0r_accession_registry.jsonl"
+
+exchangeable_unit:
+  level: "publication"
+  definition: "resolved PMID (preferred), else canonical DOI, else UNRESOLVED_PUBLICATION:<study_id>"
+  note: "same PMID = one publication = the highest-level exchangeable unit (resampling/permutation unit)."
+
+development_roles:
+  16SFWJ:
+    role: "DEVELOPMENT_CONSUMED / INVALID_FOR_CONFIRMATORY_USE"
+    reason: "old d2x test study (pmid_25183835); already exposed to development; can never be reused as confirmatory."
+  phase3_pool:
+    role: "DEVELOPMENT_USED"
+    reason: "existing Phase-3 pool (previously train/validation) was used by development; treated as exposed."
+  SL5CV2:
+    role: "DEVELOPMENT_USED"
+    publication_domain: "pmid_38427602"
+  SL5HKU:
+    role: "DEVELOPMENT_USED"
+    publication_domain: "pmid_38427602"
+  SL5MER:
+    role: "DEVELOPMENT_USED"
+    publication_domain: "pmid_38427602"
+  merged_publication_sl5:
+    publication: "pmid_38427602"
+    member_studies: ["SL5CV2", "SL5HKU", "SL5MER"]
+    publication_n: 1
+    confirmatory_sufficient: false
+    reason: "SL5CV2/SL5HKU/SL5MER all resolve to the same publication (pmid_38427602). They are ONE publication domain, NOT three. publication N = 1 is NOT sufficient for confirmatory use."
+
+new_confirmatory_requirement:
+  source: "unexposed, provenance-confirmed publications only"
+  rules:
+    - "Must come from a publication NOT exposed to development (not in DEVELOPMENT_CONSUMED / DEVELOPMENT_USED domains)."
+    - "Must have provenance-confirmed citation (RESOLVED via PMID or DOI from the accession registry)."
+    - "UNKNOWN / UNRESOLVED_PUBLICATION entries never count toward confirmatory publication N."
+  note: "new-test candidates that resolve to UNRESOLVED_PUBLICATION cannot be certified as distinct untouched confirmatory publications from frozen metadata alone."
+
+precomputed_statistics:
+  highest_level_exchangeable_unit: "publication"
+  minimum_attainable_pvalue:
+    explanation: "For a two-sided paired permutation (sign-flip) test over N exchangeable publications, the minimum attainable exact p-value is 2 / 2^N = 2^(1-N)."
+    formula: "p_min(N) = 2^(1-N)"
+    values:
+      N=5: "0.0625"
+      N=6: "0.03125"
+      N=7: "0.015625"
+      N=8: "0.0078125"
+  unique_null_assignments:
+    explanation: "For N exchangeable publications, the number of unique sign-flip assignments is 2^N (up to global sign: 2^(N-1) distinct orderings)."
+    formula: "2^N"
+    values:
+      N=5: "32"
+      N=6: "64"
+      N=7: "128"
+  required_publication_n_for_target_alpha:
+    alpha_0_05_two_sided:
+      required_n: 6
+      explanation: "minimum N s.t. 2^(1-N) <= 0.05  =>  N >= 6"
+    alpha_0_01_two_sided:
+      required_n: 8
+      explanation: "minimum N s.t. 2^(1-N) <= 0.01  =>  N >= 8"
+  note: "These values are precomputed from the statistical design (docs/reactflow_delta/statistical_design_v1.md); they do NOT depend on model results."
+
+confirmatory_guardrail:
+  minimum_publication_n_for_confirmatory_ci: 3
+  reason: "fewer than 3 independent publications yields no confirmatory confidence interval (resampling degenerates)."
+
+split_policy:
+  primary: "publication-disjoint primary split"
+  strict: "publication + homology sensitivity split (see docs/reactflow_delta/split_policy_v3.md)"
+  homology_thresholds: [70, 80, 90]
+  homology_thresholds_status: "PRE-SPECIFIED, fixed before any model results exist"

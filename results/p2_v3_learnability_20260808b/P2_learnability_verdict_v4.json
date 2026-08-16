@@ -1,0 +1,143 @@
+{
+  "adjudicated_at_utc": "2026-08-08T09:55:09.850425+00:00",
+  "authority_epoch": 16,
+  "baseline_trivial_macro_mean": 0.6517169819904051,
+  "best_delta_over_trivial_mean": 0.02976752313763773,
+  "best_model": "p2_mlp",
+  "best_paired_bootstrap_delta_ci": {
+    "ci_high": 0.5,
+    "ci_low": -0.08333333333333337,
+    "n_boot": 1000,
+    "point": 0.21814980932570613
+  },
+  "caller": "caller_v3 (empirical-scatter noise recalibration)",
+  "criteria_checks": {
+    "best_model_beats_trivial_delta_gt_0": true,
+    "best_paired_delta_ci_low_gt_0": false,
+    "best_permutation_p_lt_0.05": false,
+    "estimand_identifiable_non_degenerate_macro": true,
+    "n_seeds>=5_all_models": true,
+    "permutation_degenerate_no_power": true
+  },
+  "direction_consistency_seed0": {
+    "deepsets": {
+      "n_nondeg": 8,
+      "n_positive_of_nondeg": 4
+    },
+    "gbm": {
+      "n_nondeg": 8,
+      "n_positive_of_nondeg": 5
+    },
+    "logistic": {
+      "n_nondeg": 8,
+      "n_positive_of_nondeg": 6
+    },
+    "p2_mlp": {
+      "n_nondeg": 8,
+      "n_positive_of_nondeg": 6
+    }
+  },
+  "endpoint": "endpoint_v4",
+  "estimand_status": "IDENTIFIABLE",
+  "excluded_constant_label_publications": [
+    "pmid_25883046",
+    "pmid_35982307"
+  ],
+  "metric_semantics": "MACRO_OVER_NON_DEGENERATE_PUBLICATIONS",
+  "n_distinct_publications": 18,
+  "n_eligible_heldout_publications": 10,
+  "n_non_degenerate_publications": 8,
+  "note": "endpoint_v4 (Route A, authority epoch 16) re-adjudication of P2_LEARNABILITY_GO/STOP. Metric recomputed from the existing p2_v3_learnability_20260808b held-out predictions (caller_v3 labels) over the non-degenerate publications; constant-label publications explicitly excluded and reported (no silent drop). No retraining.",
+  "per_model": {
+    "deepsets": {
+      "auprc_mean": 0.6585490803776153,
+      "delta_over_trivial_mean": 0.006832098387210217,
+      "macro_seeds": [
+        0.6644771377822192,
+        0.6462318144098028,
+        0.6724144222422328,
+        0.6596131496713443,
+        0.6500088777824773
+      ],
+      "n_seeds_perm_null_degenerate_no_power": 5,
+      "n_seeds_perm_p_lt_005": 0,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "gbm": {
+      "auprc_mean": 0.6408713681577624,
+      "delta_over_trivial_mean": -0.010845613832642664,
+      "macro_seeds": [
+        0.6446856039272488,
+        0.6531684806181872,
+        0.6378913375513899,
+        0.6313819919921081,
+        0.6372294266998779
+      ],
+      "n_seeds_perm_null_degenerate_no_power": 5,
+      "n_seeds_perm_p_lt_005": 0,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "logistic": {
+      "auprc_mean": 0.6786905213674914,
+      "delta_over_trivial_mean": 0.026973539377086353,
+      "macro_seeds": [
+        0.6786905213674914,
+        0.6786905213674914,
+        0.6786905213674914,
+        0.6786905213674914,
+        0.6786905213674914
+      ],
+      "n_seeds_perm_null_degenerate_no_power": 5,
+      "n_seeds_perm_p_lt_005": 0,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "p2_mlp": {
+      "auprc_mean": 0.6814845051280428,
+      "delta_over_trivial_mean": 0.02976752313763773,
+      "macro_seeds": [
+        0.6813690311247438,
+        0.6834959095338183,
+        0.6892419135620602,
+        0.6903260049756289,
+        0.6629896664439627
+      ],
+      "n_seeds_perm_null_degenerate_no_power": 5,
+      "n_seeds_perm_p_lt_005": 0,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "permutation_status": "DEGENERATE_NO_POWER",
+  "permutation_status_note": "All 8 non-degenerate publications have UNIQUE sizes, so the publication-block score permutation (within equal-size classes) cannot rearrange any block => the null is a point mass at the observed macro (zero power). permutation p is therefore non-informative and does NOT gate the verdict; the decision rests on the paired publication-block bootstrap delta CI.",
+  "recompute": "FROM_EXISTING_HELDOUT_PREDICTIONS_NO_RETRAIN",
+  "run_id": "p2_v3_learnability_20260808b",
+  "schema": "reactflow_delta.p2_learnability.v1.rebuild_v4",
+  "verdict": "STOP"
+}

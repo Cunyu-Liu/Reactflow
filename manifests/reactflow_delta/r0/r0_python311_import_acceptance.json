@@ -1,0 +1,30 @@
+{
+  "schema_version": "reactflow-delta-r0-python311-acceptance-v1",
+  "stage": "R0",
+  "task_id": "T-R0.9",
+  "recorded_at": "2026-07-30T12:01:18+08:00",
+  "contract": {
+    "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+    "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+  },
+  "source_commit": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479",
+  "runtime": {
+    "interpreter": "/mnt/cunyuliu/reactflow_delta_runtime_py311/bin/python",
+    "version": "Python 3.11.15",
+    "cuda_or_training_used": false
+  },
+  "command": "PYTHONPATH=src /mnt/cunyuliu/reactflow_delta_runtime_py311/bin/python -m pytest -q tests/reactflow_delta/test_manifests.py",
+  "exit_code": 0,
+  "result": "3 passed",
+  "accepted_scope": [
+    "import of reactflow.delta.manifests",
+    "frozen V3 contract SHA-256 assertion",
+    "missing-path error behavior",
+    "invalid chunk-size error behavior"
+  ],
+  "limitations": [
+    "This is an R0 code/provenance acceptance only.",
+    "No model training, GPU verification, data acquisition, EPRO efficacy claim, or final scientific conclusion was performed."
+  ],
+  "r0_gate_status_after_this_task": "T-R0.9 accepted; overall R0 remains in progress pending historical archive and final R0 audit."
+}

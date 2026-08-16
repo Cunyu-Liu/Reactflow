@@ -1,0 +1,130 @@
+schema_version: "reactflow_delta.pair_publication_registry.v1"
+generated_at: "2026-08-09T12:08:53.664757+00:00"
+total_pairs: 7961
+resolved_pairs: 7798
+unresolved_pairs: 163
+distinct_publications:
+  - "UNRESOLVED_PUBLICATION:AGSARNA"
+  - "UNRESOLVED_PUBLICATION:PSL2IAV"
+  - "UNRESOLVED_PUBLICATION:RNAPZ18"
+  - "pmid_20190761"
+  - "pmid_21239468"
+  - "pmid_22109276"
+  - "pmid_22913637"
+  - "pmid_24469816"
+  - "pmid_25183835"
+  - "pmid_25883046"
+  - "pmid_26035425"
+  - "pmid_28851837"
+  - "pmid_29446752"
+  - "pmid_29806027"
+  - "pmid_32616928"
+  - "pmid_35982307"
+  - "pmid_38427602"
+confirmed_publication_n: 14
+confirmed_publications:
+  - "pmid_20190761"
+  - "pmid_21239468"
+  - "pmid_22109276"
+  - "pmid_22913637"
+  - "pmid_24469816"
+  - "pmid_25183835"
+  - "pmid_25883046"
+  - "pmid_26035425"
+  - "pmid_28851837"
+  - "pmid_29446752"
+  - "pmid_29806027"
+  - "pmid_32616928"
+  - "pmid_35982307"
+  - "pmid_38427602"
+publication_studies:
+  UNRESOLVED_PUBLICATION:AGSARNA:
+    - "AGSARNA"
+  UNRESOLVED_PUBLICATION:PSL2IAV:
+    - "PSL2IAV"
+  UNRESOLVED_PUBLICATION:RNAPZ18:
+    - "RNAPZ18"
+  pmid_20190761:
+    - "SRPDIV"
+  pmid_21239468:
+    - "MDLOOP"
+  pmid_22109276:
+    - "5SRRNA"
+    - "ADDRSW"
+    - "CIDGMP"
+    - "GLYCFN"
+    - "TRNAPH"
+    - "TRP4P6"
+  pmid_22913637:
+    - "CIDGMP"
+  pmid_24469816:
+    - "ETBSTR"
+  pmid_25183835:
+    - "16SFWJ"
+  pmid_25883046:
+    - "RNAPZ5"
+    - "RNAPZ6"
+  pmid_26035425:
+    - "CL1LIG"
+  pmid_28851837:
+    - "RNASEP"
+  pmid_29446752:
+    - "ADD140"
+    - "RNAPZ5"
+    - "TRP4P6"
+  pmid_29806027:
+    - "TRP4P6"
+  pmid_32616928:
+    - "HC16M2R"
+  pmid_35982307:
+    - "PSL2IAV"
+  pmid_38427602:
+    - "SL5CV2"
+    - "SL5HKU"
+    - "SL5MER"
+anomalies:
+  same_pmid_across_studies:
+    -
+      pmid: "22109276"
+      studies:
+        - "5SRRNA"
+        - "ADDRSW"
+        - "CIDGMP"
+        - "GLYCFN"
+        - "TRNAPH"
+        - "TRP4P6"
+    -
+      pmid: "25883046"
+      studies:
+        - "RNAPZ5"
+        - "RNAPZ6"
+    -
+      pmid: "29446752"
+      studies:
+        - "ADD140"
+        - "RNAPZ5"
+        - "TRP4P6"
+    -
+      pmid: "38427602"
+      studies:
+        - "SL5CV2"
+        - "SL5HKU"
+        - "SL5MER"
+  multi_pmid_within_study:
+    -
+      study_id: "CIDGMP"
+      pmids:
+        - "22109276"
+        - "22913637"
+    -
+      study_id: "RNAPZ5"
+      pmids:
+        - "25883046"
+        - "29446752"
+    -
+      study_id: "TRP4P6"
+      pmids:
+        - "22109276"
+        - "29446752"
+        - "29806027"
+note: "confirmed_publication_N counts only RESOLVED publications with a PMID; UNRESOLVED_PUBLICATION entries never count toward N."

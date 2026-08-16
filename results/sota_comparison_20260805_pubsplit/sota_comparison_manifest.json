@@ -1,0 +1,77 @@
+{
+  "caveats": [
+    "Folding models are untrained on our data (their own learned weights); runtime is CPU-only inference, no training performed here.",
+    "Dot-bracket paired state is the primary output of all three models; continuous BPP not exposed by these CLI wrappers.",
+    "Point-gain is an aggregate difference; full cluster-bootstrap CI requires per-position scores of our model on the same validation set (see EPRO_DEV_06 run_manifest predictions)."
+  ],
+  "comparison_table": [
+    {
+      "auprc": 0.7353243279593717,
+      "method": "structure_aware_changer"
+    },
+    {
+      "auprc": 0.6935987036031102,
+      "method": "p2_paired_baseline"
+    },
+    {
+      "auprc": 0.6748415894316261,
+      "method": "wt_only"
+    },
+    {
+      "auprc": 0.463159059753075,
+      "method": "eternafold"
+    },
+    {
+      "auprc": 0.4534433843952393,
+      "method": "vienna_physics_published"
+    }
+  ],
+  "created_at_utc": "2026-08-05T18:51:36.693134+00:00",
+  "data": {
+    "test_accessed": false,
+    "test_sealed": true,
+    "validation_pairs": 548
+  },
+  "iteration_id": "M0X_SOTA_COMPARISON",
+  "our_reference_auprc": {
+    "p2_paired_baseline": 0.6935987036031102,
+    "structure_aware_changer": 0.7353243279593717,
+    "vienna_physics_published": 0.4534433843952393,
+    "wt_only": 0.6748415894316261
+  },
+  "point_gains_vs_ours": {
+    "eternafold": {
+      "note": "point difference of study-macro AUPRC (our structure-aware classifier minus published model)",
+      "point_gain": 0.2721652682062968
+    },
+    "p2_paired_baseline": {
+      "point_gain": 0.04172562435626159
+    },
+    "vienna_physics_published": {
+      "point_gain": 0.28188094356413246
+    },
+    "wt_only": {
+      "point_gain": 0.06048273852774566
+    }
+  },
+  "protocol": {
+    "P_pair": "1 if position inside a base pair in predicted dot-bracket",
+    "changer_definition": "|delta_true| > CHANGER_TOL * pair_scale",
+    "changer_tol": 0.05,
+    "metric": "study-macro AUPRC (mean over studies of per-study AP)",
+    "mutants": "3 alternative substitutions via build_mutant_sequences",
+    "our_method": "EPRO_DEV_06 structure-aware changer classifier (trained, GPU)",
+    "score": "|P_pair(mutant_avg) - P_pair(wt)| per position"
+  },
+  "published_models": {
+    "eternafold": {
+      "note": "published folding model (eternafold); untrained in-silico mutagenesis, |P_pair(mutant_avg) - P_pair(wt)|",
+      "param_count": "n/a",
+      "study_macro_auprc": 0.463159059753075
+    }
+  },
+  "run_id": "m0x_sota_baselines_20260805",
+  "schema_version": "reactflow_delta.m0x_sota_baseline_manifest.v1",
+  "seed": 20260804,
+  "warning": "EVALUATION_ONLY_NO_TRAINING"
+}

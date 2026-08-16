@@ -1,0 +1,63 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_d0x_only_20260803
+amendment_status: FROZEN
+authority_epoch: 3
+created_at: "2026-08-03T23:15:00+08:00"
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_approval_20260803.yaml
+  approval_record_sha256: c8b20a7eccf0ac582f316a82e2015fac981128de7a9e041c96a85be4231f7109
+  scope: CONDITIONAL_D0X_ONLY_AUTHORITY
+  scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
+  external_identity_status: NOT_VERIFIED
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+prerequisites:
+  recovery_authority_commit: c7231c97bd11bfcc1530280d46ecea22d180dd96
+  recovery_finalization_receipt_sha256: de01062d3cc93c3367e8860978433ca4c0423410fb1e3f9ad0d7f710198d16bf
+  recovery_terminal_sentinel_sha256: 88c6027774500f1a0126e656f4c9f323e439f04b310b915d43d12efbea5da09e
+  execution_source_commit: d63f4c2fda683065040a91decc3a9febb1ecb2c2
+  source_universe_manifest_sha256: b8aabd83a4eab37d86baa4c47d1b4f8b7116cdf6e2018b96c9d68229078c6df1
+  config_sha256: 214716e6fd51d583d935105799ba78278ede7fd3b2dde3d49d19a72596bf4b4f
+  license_policy_sha256: f03f11beebe2e8371b9ec241c0d847cf019e804afc629237f076467f01201965
+  parser_fixture_manifest_sha256: 8f44b9abf8b3f9ef4d12498cb652c992628ef3fcf699cb533fccc2f361ac2bbb
+  initial_exposure_ledger_sha256: a4196b27878dbb4d26ebd4154c1d6571634cb8fe02d405f22c15b3faedf1821b
+  test_access_ledger_sha256: 8a8f28ea5e45688c83ea0cd674d15bc2b0b40e12b946b5f53236823b4b20ee73
+grant:
+  phase_id: D0-X
+  authorization_kind: SINGLE_PHASE_RECALL_ONLY
+  allowed_actions:
+    - READ_ONLY_PREFLIGHT
+    - FROZEN_METADATA_INDEX_READ
+    - EXISTING_RAW_HASH_REQUALIFICATION
+    - FROZEN_ASSET_DOWNLOAD_WHEN_REQUIRED
+    - PROFILE_LEVEL_RDAT_PARSE
+    - ACCESSION_AND_PUBLICATION_CROSSWALK
+    - PARSER_COVERAGE_AND_RETENTION_AUDIT
+    - CANDIDATE_PROFILE_INVENTORY
+  explicit_denials:
+    - D1_X_CANONICALIZATION
+    - TRAINING_DATASET_BUILD
+    - SPLIT_BUILD
+    - NORMALIZATION_OR_THRESHOLD_FITTING
+    - MODEL_OR_BASELINE_TRAINING
+    - CONFIRMATORY_TEST_UNSEAL
+    - CROSS_PROJECT_EXPORT
+    - WET_LAB
+    - PUSH
+    - PULL_REQUEST
+run_authorization:
+  authorization_token_id: d0x_exact_recovery_20260803_v1
+  maximum_primary_run_count: 1
+  maximum_concurrent_runs: 1
+  same_run_checkpoint_resume_allowed: true
+  terminal_run_consumes_authority: true
+  run_id_must_be: d0x_exact_recovery_20260803_v1
+  isolated_clean_worktree_required_before_execution: true
+terminal_routes:
+  on_pass: STOP_AWAIT_D1X_AUTHORITY_AMENDMENT
+  on_fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+  automatic_downstream_unlock: false
+embedded_self_sha256: FORBIDDEN
+

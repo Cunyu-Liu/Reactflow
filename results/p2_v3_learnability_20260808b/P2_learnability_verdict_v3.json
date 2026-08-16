@@ -1,0 +1,145 @@
+{
+  "adjudicated_at_utc": "2026-08-08T08:46:18.332555+00:00",
+  "authority_epoch": 15,
+  "baseline_trivial_auprc_mean": null,
+  "best_delta_over_trivial_mean": null,
+  "best_model": null,
+  "caller": "caller_v3 (empirical-scatter noise recalibration)",
+  "criteria_checks": {
+    "best_model_beats_trivial": false,
+    "best_permutation_p_lt_0.05": false,
+    "estimand_identifiable": false,
+    "n_seeds>=5_all_models": true
+  },
+  "estimand_status": "UNIDENTIFIABLE",
+  "n_distinct_publications": 18,
+  "n_folds_with_eligible_heldout": 10,
+  "note": "Non-terminal evidence for the REBUILD-P2 gate. The frozen R6 script is NOT modified; this is the new authority-epoch-15 re-adjudication of P2_LEARNABILITY_GO on caller_v3 labels.",
+  "per_model": {
+    "deepsets": {
+      "auprc_mean": null,
+      "delta_over_trivial_mean": null,
+      "n_seeds_numeric": 5,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "gbm": {
+      "auprc_mean": null,
+      "delta_over_trivial_mean": null,
+      "n_seeds_numeric": 5,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "logistic": {
+      "auprc_mean": null,
+      "delta_over_trivial_mean": null,
+      "n_seeds_numeric": 5,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "p2_mlp": {
+      "auprc_mean": null,
+      "delta_over_trivial_mean": null,
+      "n_seeds_numeric": 5,
+      "permutation_p_min": 1.0,
+      "permutation_p_seeds": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "per_model_identifiability": {
+    "deepsets": {
+      "auprc_seeds": [
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE"
+      ],
+      "n_seeds": 5
+    },
+    "gbm": {
+      "auprc_seeds": [
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE"
+      ],
+      "n_seeds": 5
+    },
+    "logistic": {
+      "auprc_seeds": [
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE"
+      ],
+      "n_seeds": 5
+    },
+    "p2_mlp": {
+      "auprc_seeds": [
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE"
+      ],
+      "n_seeds": 5
+    },
+    "trivial": {
+      "auprc_seeds": [
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE",
+        "UNIDENTIFIABLE"
+      ],
+      "n_seeds": 5
+    }
+  },
+  "positive_publications_seed0": {
+    "deepsets": {
+      "n_degenerate": 2,
+      "n_positive": 0
+    },
+    "gbm": {
+      "n_degenerate": 2,
+      "n_positive": 0
+    },
+    "logistic": {
+      "n_degenerate": 2,
+      "n_positive": 0
+    },
+    "p2_mlp": {
+      "n_degenerate": 2,
+      "n_positive": 0
+    }
+  },
+  "run_id": "p2_v3_learnability_20260808b",
+  "schema": "reactflow_delta.p2_learnability.v1.rebuild_v3",
+  "verdict": "STOP"
+}

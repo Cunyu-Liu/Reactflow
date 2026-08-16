@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **已由 ReactFlow-Δ EPRO V3 合同取代（2026-07-29；仅保留为历史工程资产与负结果证据）。**
+> 本文件不再是可执行 Goal，也不得用于启动训练、追加 seed、降低 Gate 或支撑新的科学主张。当前唯一有效合同为
+> `docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md`
+>（SHA-256：`3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10`）。
+
 # ReactFlow SOTA 追赶目标与 Todo List
 
 本文档定义 ReactFlow 下一阶段的明确目标：**在同一公开数据、同一 split、同一评估脚本、同一统计协议下，尽快追赶并尽可能超过 RNA 二级结构 SOTA 模型**。任何没有同协议重算的外部数字，只能放在 `cited` 栏，不能作为论文主结论。

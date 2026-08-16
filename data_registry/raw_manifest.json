@@ -1,0 +1,114 @@
+{
+  "files": [
+    {
+      "bytes": 19150,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/github_main_commit.json",
+      "sha256": "39715d5f620121432b3b1b738ffc9959e6773967cf34d9d76435103feb6036c5"
+    },
+    {
+      "bytes": 1272,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/github_main_commit.json.headers",
+      "sha256": "85537ce13bb38f9200d76d33321ddf3423bd2f99fd790570039511d18e39de12"
+    },
+    {
+      "bytes": 1898962,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/github_releases.json",
+      "sha256": "56d20dd869c3fd8c544611644b92f2a57b9e76920de0351e1a2eb513f102a9da"
+    },
+    {
+      "bytes": 1249,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/github_releases.json.headers",
+      "sha256": "a1e3c2eb1928c1d535a8f6d34352ff1a653d91b096374bc463ca8ff01a8ed5f2"
+    },
+    {
+      "bytes": 15573,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/github_root_contents.json",
+      "sha256": "1dff17b1ec23c29f58a6a5f60a6b08e1c810f090c3b98167e9b6afa7eceaff37"
+    },
+    {
+      "bytes": 1268,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/github_root_contents.json.headers",
+      "sha256": "60a07e280331918880c802a1f02f9edb47b43d0231fa2d11a96bca5c50272d07"
+    },
+    {
+      "bytes": 8144,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/rdat_specification.html",
+      "sha256": "335548c97b70633d93f15563b94162bd28e9e561d841d42da42ea72f3b20e1d5"
+    },
+    {
+      "bytes": 626,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/rdat_specification.html.headers",
+      "sha256": "40621a06080b04dc6c9d0b04b200702647fb6426ae082986d4e6c22b48f2d8a2"
+    },
+    {
+      "bytes": 8939,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/rmdb_about.html",
+      "sha256": "7d98e78582e97931be606526079d51ea0953156be13cfdbeafa1a17a9c66ab97"
+    },
+    {
+      "bytes": 625,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/rmdb_about.html.headers",
+      "sha256": "d76f8e4e1e5275c1045cd5d0ed25087edc0635de5847c0c1841182d5928a2cb6"
+    },
+    {
+      "bytes": 9828,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/rmdb_index.html",
+      "sha256": "2f909cdda2229a7bc802b71dbd584e5c87c85a8136f0edf39ade8aa77b6be85f"
+    },
+    {
+      "bytes": 624,
+      "path": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800/rmdb_index.html.headers",
+      "sha256": "c45d359387b36da3abe4553d67cc76292b3d953e2e9c3e585d4379eb29134be3"
+    }
+  ],
+  "metadata_directory": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800",
+  "release_summary": [
+    {
+      "asset_bytes": 7980670424,
+      "asset_count": 275,
+      "html_url": "https://github.com/DasLab/rmdb.github.io/releases/tag/data-rna-structures",
+      "published_at": "2026-05-16T04:19:28Z",
+      "tag_name": "data-rna-structures"
+    },
+    {
+      "asset_bytes": 53274302,
+      "asset_count": 253,
+      "html_url": "https://github.com/DasLab/rmdb.github.io/releases/tag/data-riboswitches",
+      "published_at": "2026-05-16T04:19:27Z",
+      "tag_name": "data-riboswitches"
+    },
+    {
+      "asset_bytes": 27306112,
+      "asset_count": 94,
+      "html_url": "https://github.com/DasLab/rmdb.github.io/releases/tag/data-puzzle",
+      "published_at": "2026-05-16T04:19:26Z",
+      "tag_name": "data-puzzle"
+    },
+    {
+      "asset_bytes": 263875442,
+      "asset_count": 221,
+      "html_url": "https://github.com/DasLab/rmdb.github.io/releases/tag/data-general",
+      "published_at": "2026-05-16T04:19:29Z",
+      "tag_name": "data-general"
+    },
+    {
+      "asset_bytes": 4188661402,
+      "asset_count": 181,
+      "html_url": "https://github.com/DasLab/rmdb.github.io/releases/tag/data-eterna",
+      "published_at": "2026-05-16T04:19:25Z",
+      "tag_name": "data-eterna"
+    }
+  ],
+  "retrieved_at": "2026-07-30T12:30:10+08:00",
+  "schema_version": "reactflow-delta-raw-manifest-v1",
+  "scientific_boundary": "Release assets are not constructs or pairs. No pair count, tier decision, normalization, or learned training is authorized by this manifest.",
+  "scope": "RMDB release/index/format/license metadata only; no RDAT asset payloads",
+  "source": {
+    "data_license": "CC0-1.0",
+    "github_repository": "https://github.com/DasLab/rmdb.github.io",
+    "main_commit": "339b4fefc9a7092d0847d1d4017a3eadf0771fd7",
+    "name": "RMDB",
+    "publication_doi": "10.1093/bioinformatics/bts554"
+  },
+  "stage": "D0"
+}

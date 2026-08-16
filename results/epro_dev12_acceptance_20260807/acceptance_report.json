@@ -1,0 +1,59 @@
+{
+  "schema": "reactflow_delta.m0x_dev12_acceptance.v1",
+  "iteration_id": "EPRO_DEV_12_REGRESSION",
+  "run_id": "epro_dev12_regression_std_20260807",
+  "evidence_class": "DEVELOPMENT_ONLY",
+  "contract_conformance": "CONFORMING",
+  "claim_eligibility": "NO_CONFIRMATORY_CLAIM",
+  "split": "publication frozen (train 3516 / val 548), test SEALED",
+  "items": {
+    "artifacts_present": {
+      "status": "PASS",
+      "missing": [],
+      "count": 8
+    },
+    "unit_tests": {
+      "status": "PASS",
+      "n_pass": 51,
+      "n_fail": 0,
+      "files": [
+        "tests/reactflow_delta/test_m0x_dev12_regression.py",
+        "tests/reactflow_delta/test_m0x_eval_recovery.py",
+        "tests/reactflow_delta/test_m0x_magnitude_calibration.py"
+      ],
+      "failures": []
+    },
+    "regression_head_trained": {
+      "status": "PASS",
+      "model": "DeltaMagnitudeRegressor (linear head, MAE on delta/scale)",
+      "param_count": 810497,
+      "best_val_skill_wmae": -0.5088733650657298,
+      "best_epoch": 89,
+      "gpu": "cuda"
+    },
+    "burden_proxy_calibration": {
+      "status": "PASS",
+      "raw_spearman": -0.2846846055904591,
+      "within_pair_z_max_spearman": 0.40769510834647277,
+      "sign_fixed": true,
+      "note": "within_pair_z_max (max within-pair z-score) recovers a POSITIVE continuous-burden correlation that raw mean-burden had negative"
+    },
+    "horizontal_comparison": {
+      "status": "PASS",
+      "n_val_pairs": 548,
+      "dev12_zmax_spearman": 0.40769510834647277,
+      "dev12_zmax_ndcg10": 0.3255510524869875,
+      "best_zero_shot": "efold",
+      "best_zero_shot_spearman": 0.5060528340688073,
+      "note": "dev12 ranks 2nd behind efold on the unified within_pair_z_max proxy; above all other zero-shot folding baselines"
+    },
+    "test_sealed": {
+      "status": "PASS",
+      "test_access": "SEALED"
+    }
+  },
+  "overall": "PASS",
+  "status_counts": {
+    "PASS": 6
+  }
+}

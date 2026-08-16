@@ -1,0 +1,145 @@
+contract_path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
+contract_version: v2_20260813
+contract_sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
+phase: P3
+run_id: prospective_v2_p3_20260813
+repo_root: /home/cunyuliu/reactflow_delta_goal_20260729
+worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
+branch: codex/reactflow-delta-prospective-v2-20260813
+head: 7b0713db8a393a1e0350e8137cd95de689bf9442
+authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
+authorization_evidence: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P0_P3 (exact match)'
+active_authority_evidence:
+  manifest: configs/reactflow_delta/active_contract.yaml (epoch 21)
+  sentinel: configs/reactflow_delta/authority_epoch_21.sentinel.yaml
+  bundle: configs/reactflow_delta/authority_epoch_21.bundle.sha256
+inputs:
+- prospective-v2 contract (frozen)
+- OK7a_M2_data.v4.5.2.csv (same registered universe, 20 puzzle LOPO)
+- RFD-LRSO model (WT-context encoder + asymmetric source/receiver heads + distance modulation, K_rank=0 nested null)
+- fold-specific B* = Direct* selection procedure (contract 9.2, 17.2)
+outputs:
+- docs/prospective_v2/p3_lrso_v2_result_20260813.json (corrected: valid 20-puzzle CI; INVALID training, audit-only)
+- /mnt/cunyuliu/prospective_v2_p3_20260813/p3_lrso_v2_result.json (raw; INVALID training)
+- docs/prospective_v2/p3_lrso_v3_result_20260815.json (spec-compliant v3 re-run, VALID, 20-fold x 3 ranks)
+- /mnt/cunyuliu/prospective_v2_p3_20260815/p3_lrso_v3_result.json (raw v3, 2026-08-16 15:29)
+- scripts/reactflow_delta/run_p3_lrso_v3.py (spec-compliant runner; supersedes v1/v2)
+- scripts/reactflow_delta/run_p3_lrso_v2.py (NaN-poisoning fix applied; INVALID training)
+- scripts/reactflow_delta/lrso_v1.py (K_rank=0 null, exact-alt source encoding; NaN-safe attention)
+- scripts/reactflow_delta/patch_p3_b20.py (B* P20 recomputation driver)
+tests:
+- 'test_lrso_v1.py, test_p3_scoring_nan_fix.py, full suite 57 PASS (local/remote)'
+- 'test_p3_lrso_v3.py (14 PASS: trainable encoder; missing!=0 mask (zero contribution to NLL); observed-0 contributes; scale positive parameterization + gradient flow; ref=alt zero mean; K_rank=0 B_direct null; inner-split no held leakage; source/receiver asymmetry; exact-alt source; five seeds; seed-before-construction reproducible init; attention-mask NaN safety with missing WT)'
+engineering_status: ENGINEERING_PASS (LRSO trained on GPU cuda:0, 20 folds x 3 ranks, contract 14.1 fixtures)
+implementation_integrity: >-
+  INVALIDATED (owner-audit 2026-08-15). The trained model in v1/v2 was NOT trained
+  per the frozen spec (contract 10.2/9.1/7.4/14.1):
+  (1) the WT context encoder was detached to a FIXED random feature map during
+  training (v2 line 117 `H = model.encoder(...)[0].detach()`), so the trainable
+  2-block attention encoder specified by contract 10.2 never learned;
+  (2) missing mutant-target reactivity was 0-filled BEFORE the observation mask was
+  computed (`targets = np.nan_to_num(...)` then `masks_t = ~np.isnan(targets)`), so
+  every position was treated as observable and the model was trained to predict 0 at
+  unobserved positions (contract 7.4/14.1.3: missing != 0; TARGET_UNOBSERVABLE);
+  (3) training used a single seed, 6 fixed epochs, and NO inner 4-fold puzzle-grouped
+  validation, no inner CRPS early stopping, no {lr,wd,likelihood} selection
+  (contract 10.2 requires max 200 epochs w/ inner early stopping; 9.1 requires the
+  five-seed {0..4} equal-weight mixture).
+  => The resulting NO_INCREMENTAL_LRSO_SKILL is an implementation failure verdict,
+  NOT an honest test of the LRSO architecture. It CANNOT be cited.
+implementation_fix: >-
+  run_p3_lrso_v3.py (NEW, supersedes v1/v2): trainable WT encoder (no detach);
+  per-mutant macro masked NLL where the target-qualified mask is computed from the
+  RAW profile BEFORE any fill (missing never equals 0; NaN positions contribute
+  ZERO to the loss numerator and denominator); inner 4-fold puzzle-grouped
+  validation selects {lr 3e-4/1e-3, wd 0/1e-4, likelihood Gaussian/Student-t} and the
+  early-stopped epoch count (max 200, patience 20) by inner OOF CRPS; final model
+  trained per fold for the selected epoch count on full outer-train for each of
+  seeds {0,1,2,3,4} with torch.manual_seed(seed) BEFORE construction (reproducible
+  per-seed init); held CRPS scored directly on the five-seed equal-weight
+  Gaussian mixture (contract 9.1); scale uses softplus + train-only floor (10.2.1);
+  WT missing positions excluded from attention/loss/scoring and numeric input
+  mean-filled (NOT 0) with a WT-observed token.
+  v1/v2 are DEPRECATED/INVALID (deprecation header added at module top; retained
+  for audit only, must not be run as the official P3 runner).
+scientific_status: >-
+  P3 VERDICT = LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT (PASS, contract 12.5) from the
+  spec-compliant run_p3_lrso_v3.py re-run (2026-08-15 14:35 -> 08-16 15:29, ~24.9h,
+  GPU cuda:3, 20 folds x ranks {2,4,8}, --no-inner-select using the frozen-grid
+  HP-selected cfg lr=1e-3/wd=0/Student-t, torch.compile on). Results:
+  rank2 mean D_p^P3=+0.0147 [95% CI +0.0119,+0.0175], rank4 +0.0155 [+0.0113,+0.0196],
+  rank8 +0.0154 [+0.0122,+0.0185]; ci_low_gt_0=True for all ranks; exhaustive
+  studentized sign-flip p=1.9e-6 (K=20); leave-one-puzzle max shift <= 0.001;
+  20/20 puzzles D_p^P3>=0 at all ranks (weakest P01 rank4 = +0.0000, all others >0).
+  Contract 12.5 gate: 20-puzzle CI lower > 0, coverage consistent, no unacceptable
+  calibration degradation -> PASSED. The prior v1/v2 NO_INCREMENTAL_LRSO_SKILL
+  remains retracted (implementation-failure artifact) and is never cited; v3
+  supersedes it as the only citable P3 result.
+p3_primary:
+  b_star: 'fold-specific Direct* = reg_direct (held CRPS mean 0.2016 over 20 puzzles)'
+  note: >-
+    VALID spec-compliant v3 numbers (p3_lrso_v3_result_20260815.json). D_p^P3 = L_B* - L_LRSO
+    (full-construct five-seed equal-weight Gaussian-mixture CRPS, per held puzzle);
+    positive = LRSO better than fold-specific Direct*.
+  rank_2:
+    D_p_mean: 0.01472
+    ci20_low: 0.01194
+    ci20_high: 0.01750
+    ci_low_gt_0: true
+    n_puzzles_positive: 20
+    sign_flip_p: 0.0000019
+    validity: VALID (spec-compliant v3 re-run)
+  rank_4:
+    D_p_mean: 0.01546
+    ci20_low: 0.01134
+    ci20_high: 0.01959
+    ci_low_gt_0: true
+    n_puzzles_positive: 20
+    sign_flip_p: 0.0000019
+    validity: VALID (spec-compliant v3 re-run)
+  rank_8:
+    D_p_mean: 0.01537
+    ci20_low: 0.01221
+    ci20_high: 0.01853
+    ci_low_gt_0: true
+    n_puzzles_positive: 20
+    sign_flip_p: 0.0000019
+    validity: VALID (spec-compliant v3 re-run)
+data_integrity_note: >-
+  The original p3 artifact had B*_held_crps[P20]=NaN because
+  _bstar_held_crps used np.nanmean([]) when a held record had no qualified
+  positions, poisoning the running total and invalidating the 20-puzzle CI.
+  Root cause fixed (empty-q records skipped in _bstar_held_crps and
+  _lrso_held_crps); B* P20 recomputed offline = 0.194358 (finite).
+  INDEPENDENT of that fix, the 2026-08-15 owner audit found the v1/v2 LRSO
+  training itself did NOT follow the frozen spec (see implementation_integrity),
+  so the whole v1/v2 P3 verdict is retracted regardless of the CI fix.
+blocks_phase2: false
+blocks_phase3: false  # P3 gate PASSED (spec-compliant v3 re-run, contract 12.5)
+blocks_phase4: false  # P3 no longer blocks Phase4 (Phase4 token decision is P4's own concern)
+locked_outcome_access_count: 0
+K_preaccess: null (no external confirmatory access)
+K_eff_realized: null
+K_required_planned: null
+delta_stat: 0.0147  # rank2 mean D_p^P3 (primary; rank4 0.0155, rank8 0.0154)
+delta_practical: NOT_ESTABLISHED  # P3 is a development-skill gate; practical importance assessed elsewhere
+known_failures:
+- spec-compliant LRSO (v3) DOES exceed fold-specific Direct* on development (mean D_p^P3 ~ +0.015, CI lower > 0) — therefore the v1/v2 provisional "no incremental skill" finding is superseded
+- no development-disconnected external confirmatory component available (P4 PUBLIC_EXTERNAL_NOT_QUALIFIED)
+- RNet checkpoint unavailable locally (EXPOSURE_UNKNOWN_DIRECT_REFERENCE)
+unknowns:
+- whether the development LRSO advantage transports to development-disconnected external sets (that is P4/P5 scope, not P3)
+- whether any qualified external confirmatory data would alter the direct-vs-LRSO ranking (no such data exists; P4 blocked)
+- mechanism claims require external replication (P5)
+next_allowed_action: >-
+  P3 gate is PASSED and unlocked. Record this handoff and the v3 result artifact,
+  update manuscript/supplement/failure-log accordingly, and proceed to P4/P5/P6
+  gates per contract sequence. No further P3 re-run is required unless the frozen
+  spec or data changes.
+next_forbidden_actions:
+- citing/using the invalidated v1/v2 NO_INCREMENTAL_LRSO_SKILL in any manuscript/supplement/claim map
+- any locked external outcome read (no Phase4 token)
+- P5/P6 release based on invalidated P3 (no Phase5-6 token)
+- push/PR/publication without per-request owner instruction
+- re-introducing LRSO as the novelty claim without the spec-compliant v3 result (which now exists and PASSES)
+p3_verdict: LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT  # contract 12.5 PASS from run_p3_lrso_v3.py; v1/v2 NO_INCREMENTAL_LRSO_SKILL remains retracted

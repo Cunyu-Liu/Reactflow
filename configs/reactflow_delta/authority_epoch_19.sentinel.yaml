@@ -1,0 +1,16 @@
+schema_version: reactflow_delta.authority_epoch_sentinel.v1
+authority_epoch: 19
+current_authority_state: PHASE3_FAIL_CLOSED_BENCHMARK_RESOURCE_EPOCH19
+current_phase: BENCHMARK-RESOURCE
+active_manifest_sha256: c7d33b94e430ddd892e7d1335d97ddeb407f80fc6f962eb11b6188dec239870b
+bundle_ledger_path: configs/reactflow_delta/authority_epoch_19.bundle.sha256
+bundle_ledger_sha256: 9cc89d72e3bbd79736ef52d841375c25782d6f586268bd853dc4166d69ce804b
+created_at: '2026-08-09T08:30:00+08:00'
+emitted_after: BUNDLE_LEDGER
+embedded_self_sha256: FORBIDDEN
+endpoint_version: endpoint_v5
+metric_semantics: CONDITIONAL_WMAE_SKILL
+phase3_closure: FAIL_CLOSED_RETIRED_ALL_SCHEMES
+route_pivot: BENCHMARK_RESOURCE_ROUTE
+m0x_status: ALREADY_TERMINAL_FAIL_PRESERVED
+primary_v4_verdict: STOP_FROZEN_EPOCH16

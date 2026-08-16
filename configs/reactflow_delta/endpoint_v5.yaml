@@ -1,0 +1,148 @@
+schema_version: reactflow_delta.endpoint_v5.v1
+endpoint_id: RFD_ENDPOINT_V5
+endpoint_version: 5
+frozen_at: "2026-08-08T18:30:00+08:00"
+governing_contract: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
+governing_amendment: docs/contracts/amendments/reactflow_delta_v4_epoch17_endpoint_v5_conditional_magnitude_20260808.yaml
+authority_epoch: 17
+status: FROZEN
+supersedes: RFD_ENDPOINT_V4
+
+# ------------------------------------------------------------------
+# 本版本变更范围（相对 endpoint_v4）—— 主评估对象切换到 conditional magnitude
+# ------------------------------------------------------------------
+change_control:
+  rule: "任何 unit/label/score/metric/mask/information-permission 变更都必须产生新的 endpoint 版本，禁止原地修改本文件。"
+  requires: "新 authority epoch + amendment + approval"
+  v5_change_summary: >-
+    Route B（用户显式授权，epoch 17）。在 P2 learnability 主任务（binary-changer
+    publication-macro AUPRC）于 endpoint_v4 下判定为 STOP（fail-closed，paired
+    bootstrap delta CI 下界含 0）之后，将评估焦点切换到 conditional magnitude
+    regression（条件 magnitude 回归）任务：对 caller_v3 判定的真实 changer
+    （C_i=1）预测 profile-level |Δr| magnitude，指标为 conditional WMAE skill。
+    主任务 endpoint_v4 的 STOP 结论保持冻结、不被覆盖、不被淡化为成功；本版本
+    只是把科学判定焦点转移到一个与主任务不同的、独立的可 SOTA 化 estimand
+    （见合同 §4.2 条件任务一行）。primary/conditional/secondary 三层语义保持不变，
+    仅 conditional 层成为本轮评估对象。
+  primary_endpoint_change_policy: "PRIMARY_ENDPOINT_NEVER_SILENT_CHANGE"
+  pivot_explicit: >-
+    主任务 P2 endpoint_v4 = STOP（fail-closed）已冻结（epoch 16）。本 pivot 不降低
+    主任务门槛、不解封其 STOP、不把主任务改写为成功。conditional magnitude 是独立的
+    科学问题：给定真实 changer，|Δr| 大小是否可由 allowed inputs 跨 publication 预测。
+
+# ------------------------------------------------------------------
+# 预测单位与任务定义（与 endpoint_v4 相同；本版本评估 conditional 层）
+# ------------------------------------------------------------------
+prediction_unit: "matched WT-exact_single-mutant pair"
+task_statement: >-
+  在不读取 mutant 实验 reactivity profile 的条件下，由 WT sequence、exact
+  single-nucleotide mutation（ref/alt/position）、允许的 WT experimental state
+  与实验条件，跨 publication 预测 mutation-induced experimental reactivity
+  response。
+
+primary:
+  unit: "pair"
+  label_definition: "C_i = train-only caller_v3 在 outer outcome 不可见条件下、基于 empirical-scatter 重校准噪声判定的 binary changer label"
+  score: "pair-level P(C_i=1) 概率（模型直接输出，禁止 max(position prob) 事后聚合）"
+  metric: "publication-macro AUPRC over NON-DEGENERATE publications"
+  note: "endpoint_v4 裁决 = STOP（fail-closed，epoch 16）。本轮不重开；保持冻结。"
+
+conditional:
+  unit: "pair (TRUE CHANGERS only, C_i=1 from caller_v3)"
+  label_definition: >-
+    y_i = profile-level magnitude = 对真实 changer pair，在 ELIGIBLE positions 上
+    的 mean_i |mutant_react[i] - wt_react[i]|（raw reactivity 绝对变化幅度）。
+    权重 w_i = 该 pair 纳入均值计算的 ELIGIBLE position 数。
+  score: "pair-level magnitude hat{y}_i（regression head 直接输出，禁止事后 max/mean 聚合）"
+  metric: "conditional WMAE skill 及 CI"
+  resampling: "publication 为 outer unit；paired publication-block bootstrap；permutation 用 (b+1)/(B+1)"
+  metric_semantics: >-
+    对全部 held-out 真实 changer pairs（跨 publication pooled）计算
+    WMAE_model = sum_i w_i |y_i - hat{y}_i| / sum_i w_i，baseline 用同信息条件的
+    最强 trivial（train-changer 加权均值，constant predictor）。skill =
+    1 - WMAE_model / WMAE_baseline。正 skill 表示模型优于 trivial。显著性用
+    paired publication-block bootstrap 的 skill CI（下界 > 0 才 GO）。权重 w_i 为
+    ELIGIBLE position 数（profile 级加权，使更长 profile 的 pair 有更大权重）。
+  note: >-
+    仅在 caller_v3 能可靠判定 changer 时才有意义；本轮同时报告真实 changer 的
+    publication 覆盖与数量。若 held-out 无真实 changer 或覆盖 publication < 3，
+    判 UNIDENTIFIABLE / PUBLICATION_LT_3。
+
+secondary:
+  unit: "position (eligible)"
+  label_definition: "连续 noise-weighted signed delta（只在 eligible positions 上）"
+  score: "signed delta_r_hat"
+  metric: "WMAE skill / Spearman"
+  note: "评价与 primary/conditional 任务严格分表，禁止混用"
+
+# ------------------------------------------------------------------
+# 信息权限（与 endpoint_v4 相同）
+# ------------------------------------------------------------------
+information_permission:
+  allowed_inputs:
+  - "WT sequence (canonical_sequence)"
+  - "exact single-nucleotide mutation: ref_allele / alt_allele / position(coordinate)"
+  - "experimental condition: buffer / ligand / probe / temperature / experimentType / environment"
+  - "allowed WT experimental reactivity state（仅 WT profile，不含 mutant profile）"
+  - "structure/thermo 特征（来自 WT 或 three-alt 静态计算，不得携带 actual-alt mutant 信息）"
+  forbidden_inputs:
+  - "mutant 实验 reactivity profile（prospective input 禁止）"
+  - "mutant noise/error profile"
+  - "actual-alt exact thermodynamic result"
+  - "test/outer-fold outcome 或任何以 outcome 为条件的统计量"
+  - "target mask（目标缺失模式）不得作为 prospective input"
+  target_mask_policy: "target mask 只能用于排除不可评估 position，不得作为预测输入"
+
+# ------------------------------------------------------------------
+# Mask / position eligibility（与 endpoint_v4 相同）
+# ------------------------------------------------------------------
+mask:
+  primary_position_eligibility_rules:
+  - "edited-site（突变位点本身）排除，不参与 response 评估"
+  - "alignment-change 位置排除"
+  - "probe-eligibility 变化的位置排除"
+  - "NaN / missing reactivity 位置排除，缺失不填零"
+  - "length mismatch 排除"
+  eligibility_reason_codes:
+  - EDITED_SITE
+  - ALIGNMENT_CHANGE
+  - PROBE_ELIGIBILITY_CHANGE
+  - MISSING_REACTIVITY
+  - LENGTH_MISMATCH
+  - ELIGIBLE
+  mask_policy: "所有 primary position 必须有明确 eligibility reason code；无 ELIGIBLE 记录不得进入 evaluator"
+
+# ------------------------------------------------------------------
+# Caller（R3v3，与 endpoint_v4 相同）
+# ------------------------------------------------------------------
+caller_contract:
+  scope: "train-fold replicates + controls only；outer 行 outcome 不可见（null 与 reliability 仅用 train fold）"
+  label: "C_i binary changer"
+  noise_model: >-
+    per-position empirical scatter sigma_i = sample SD(ddof=1) across the
+    replicate group's WT profiles；z_i = (mut_i - wt_i)/(sqrt(2)*sigma_i)。
+    reported errors 不再作为噪声源（caller_v2 中失准）。per-study
+    (median/MAD) 归一化在 z 比值中抵消，故不显式施加。
+  reliability: "reliability 过低时返回 NO_CALL（不强制下 binary 标签）"
+  determinism: "同输入 hash 同输出；deterministic seed；sliding cluster；spatial-block null"
+
+# ------------------------------------------------------------------
+# 退化与不可识别边界（本版本针对 conditional magnitude）
+# ------------------------------------------------------------------
+degenerate_policies:
+  no_true_changer_heldout: "held-out 无真实 changer ⇒ UNIDENTIFIABLE（无 magnitude target）"
+  publication_lt_3_changers: "含真实 changer 的 publication < 3 ⇒ 禁止 confirmatory CI（PUBLICATION_LT_3_NO_CONFIRMATORY_CI）"
+  constant_magnitude_heldout: "held-out magnitude 全相等（无变异）⇒ UNIDENTIFIABLE（无 learnable variance）"
+  missing_info_not_zero: "缺失信息不得填充为零"
+  no_silent_exclusion: "任何排除必须显式记录（n_true_changers / n_publications）"
+  signed_abs_same_rank: "绝对 magnitude 任务中正/负大幅变化应同 rank"
+  baseline_not_leaked: "baseline（加权均值）必须只来自 train-fold changer，禁止用 held-out 均值"
+
+# ------------------------------------------------------------------
+# 版本与冻结
+# ------------------------------------------------------------------
+integrity:
+  hash_algorithm: SHA256
+  file_hash_mode: RAW_FILE_BYTES
+  detached_ledger_path: configs/reactflow_delta/endpoint_v5.sha256
+  change_requires_new_version: true

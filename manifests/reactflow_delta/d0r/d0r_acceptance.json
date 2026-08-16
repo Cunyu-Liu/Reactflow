@@ -1,0 +1,47 @@
+{
+  "d1_authorization": {
+    "authorized": true,
+    "conditions": [
+      "All D1 training pairs must come from strict candidates (functional_edit_count=1)",
+      "Learned training requires D2 Tier B approval",
+      "Lineage must be verified before upgrading from candidate to confirmed pair",
+      "Raw RDAT files remain read-only (checksum-verified, not modified)"
+    ]
+  },
+  "generated_at": "2026-07-30T17:46:11.948508+08:00",
+  "inputs": {
+    "accession_summary": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d0r_accession_registry.summary.json",
+    "construct_audit": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0r/d0r_construct_audit.json",
+    "m2sl5_relations": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0r/m2sl5_candidate_relations.json",
+    "ribonanza_audit": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d0r_ribonanza_audit.json"
+  },
+  "key_findings": [
+    "D0 used filename-keyword recall; D0-R uses paper-accession mapping from 1024 RMDB _entries YAML front matter.",
+    "D0 only downloaded RMDB metadata; D0-R downloaded 13 RDAT payload files (~33MB) with sha256 checksums.",
+    "D0 RDAT parser only accepted global SEQUENCE header; D0-R parser supports per-profile SEQUENCE:N lines and sequence: annotation tokens (M2-seq style).",
+    "D0 parser rejected 5012 M2SL5 profiles as 'parent sequence masked/noncanonical'; D0-R recovers per-profile sequences from annotation tokens.",
+    "D0 pairing used mutation labels only; D0-R computes actual edit sets from per-profile sequence vs WT anchor, partitioned by SEQPOS window.",
+    "ETERNA_R78 (PMID 36192461, paper-explicit) uses RDAT_VERSION 0.33, inaccessible to fail-closed v0.34 parser. Recorded as parse error.",
+    "M2SL5 (Ribonanza pre-competition) produced 744 strict candidate single-mutant relations (functional_edit_count=1).",
+    "Ribonanza Kaggle data inaccessible (no credentials), but M2SL5 derivative accessible via RMDB. D0 404 reinterpreted as探测 method failure.",
+    "All candidate relations are candidate_only_unverified — lineage NOT independently confirmed."
+  ],
+  "original_d0_acceptance_path": "artifacts/reactflow_delta/d0/d0_acceptance_a79fd073.json",
+  "original_d0_acceptance_preserved": true,
+  "schema_version": "reactflow-delta-d0r-acceptance-v1",
+  "scientific_boundary": "D0-R is a fail-forward data feasibility audit. Candidate relations are unverified. No pair, tier, or model claim is made. The original D0 acceptance (NO_GO) is preserved as historical evidence.",
+  "stage": "D0-R",
+  "summary": {
+    "accession_entries_with_pubmed": 839,
+    "accession_registry_entries": 1024,
+    "files_with_parse_errors": 8,
+    "files_with_wt_anchor": 2,
+    "m2sl5_candidate_relations": 744,
+    "m2sl5_strict_candidates_functional_edit_1": 744,
+    "profiles_with_per_profile_sequence": 4998,
+    "total_profiles": 5482,
+    "total_rdat_files_audited": 13
+  },
+  "triage_decision": "non_zero_candidate_pairs_authorize_d1",
+  "triage_detail": "744 strict candidate single-mutant relations found (functional_edit_count=1, name-encoded single mutation). Publish v3.1 authorizing D1. Learned training still requires D2 Tier B."
+}

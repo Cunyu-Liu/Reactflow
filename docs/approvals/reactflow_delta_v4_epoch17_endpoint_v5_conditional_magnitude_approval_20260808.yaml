@@ -1,0 +1,35 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_epoch17_endpoint_v5_conditional_magnitude_approval_20260808
+project_task_id: reactflow_delta
+approved_at: '2026-08-09T00:15:00+08:00'
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: 'User confirmed finalization by Route B (conditional magnitude,
+  GO) after being shown the governance conflict: the executed run_p2_v5.py produced
+  a clean conditional-magnitude GO, while the on-disk epoch-17 governance had been
+  overwritten to the unselected position-granularity (Route C) branch. User authorized:
+  finalize Route B, mark Route C as unselected (kept), restore endpoint_v5 to conditional-magnitude
+  spec, update active_contract to CONDITIONAL-MAGNITUDE GO terminal state.'
+approval_kind: REBUILD_AUTHORITY_ACTIVATION_EPOCH17_ENDPOINT_V5_CONDITIONAL_MAGNITUDE_FINALIZE_GO
+approved_contract_path: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
+approved_epoch: 17
+approval_scope:
+- ENDPOINT_V5_CONDITIONAL_MAGNITUDE_GO_FINALIZE
+- ROUTE_C_MARKED_UNSELECTED_KEPT
+- ACTIVE_CONTRACT_CONDITIONAL_MAGNITUDE_GO_TERMINAL
+- PRIMARY_V4_STOP_PRESERVED
+explicit_denials:
+- SEALED_TEST_UNSEAL
+- TEST_OUTCOME_FITTING
+- CROSS_PROJECT_EXPORT
+- WET_LAB
+- EPRO_SOTA_CLAIM
+- OVERWRITE_LEGACY_ARTIFACTS
+- HIDE_M0X_FAILURE
+- LOWER_GATE_THRESHOLDS
+- UNSEAL_ENDPOINT_V4_PRIMARY_STOP
+- DELETE_ROUTE_C_ARTIFACTS
+- USE_HELDOUT_MEAN_AS_BASELINE
+- SILENT_EXCLUSION
+signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
+signed_by: user (explicit message 2026-08-09)

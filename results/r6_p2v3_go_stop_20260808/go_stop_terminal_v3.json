@@ -1,0 +1,40 @@
+{
+  "schema": "reactflow_delta.r6_p2v3_re_adjudication.v1",
+  "adapter": "scripts/reactflow_delta/r6_p2v3_go_stop.py",
+  "run_id": "p2_v3_learnability_20260808b",
+  "authority_epoch": 15,
+  "caller": "caller_v3 (empirical-scatter noise recalibration)",
+  "endpoint": "endpoint_v3 (RFD_ENDPOINT_V3)",
+  "governing_contract": "docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md",
+  "governing_amendment": "configs/reactflow_delta/reactflow_delta_v4_epoch15_caller_v3_20260808.yaml",
+  "contract_section": "§13.2 R5 / §13.4",
+  "independent": true,
+  "frozen_prior_script_unchanged": true,
+  "overall_decision": "STOP",
+  "route": "STOP_METHOD_ROUTE",
+  "blocking_gates": ["P2_LEARNABILITY_GO"],
+  "P2_LEARNABILITY_GO": {
+    "status": "FAIL",
+    "verdict": "STOP",
+    "verdict_path": "/home/cunyuliu/reactflow_delta_goal_20260729/results/p2_v3_learnability_20260808b/P2_learnability_verdict_v3.json",
+    "estimand_status_primary": "UNIDENTIFIABLE",
+    "criteria_checks": {
+      "n_seeds>=5_all_models": true,
+      "estimand_identifiable": false,
+      "best_model_beats_trivial": false,
+      "best_permutation_p_lt_0.05": false
+    },
+    "baseline_trivial_auprc_mean": null,
+    "best_model": null,
+    "best_delta_over_trivial_mean": null,
+    "n_distinct_publications": 18,
+    "n_folds_with_eligible_heldout": 10,
+    "degenerate_publications_seed0": [
+      "pmid_25883046",
+      "pmid_35982307"
+    ],
+    "estimand_reason": "publication_macro_auprc returns UNIDENTIFIABLE (fail-closed) when ANY publication has a constant label set. 2/10 held-out publications with eligible pairs (pmid_25883046, pmid_35982307) are DEGENERATE across all models/seeds; endpoint_v3.degenerate_policies.constant_label forces the whole publication-macro AUPRC to UNIDENTIFIABLE rather than a number.",
+    "assessment": "NOT_GO"
+  },
+  "recommendation": "Proceed on the model-conditional synthetic / theory / descriptive-real-cases route (ONLY_MODEL_CONDITIONAL_THEORY_SOFTWARE_AND_DESCRIPTIVE_REAL_CASES). The caller_v3/endpoint_v3 fix improved the label structure (most per-publication APs now numeric) but did NOT establish an identifiable publication-macro AUPRC because two publications retain constant binary labels and the frozen degenerate policy forces the whole macro to UNIDENTIFIABLE. Phase 3 model-architecture iteration remains BLOCKED. A further endpoint amendment (e.g. a defined subset estimand over non-constant-label publications) would be a new endpoint version under a new authority epoch requiring explicit user authorization; it is NOT a silent in-place change and is not performed here."
+}

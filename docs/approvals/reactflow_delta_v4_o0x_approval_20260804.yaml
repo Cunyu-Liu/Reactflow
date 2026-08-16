@@ -1,0 +1,32 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_o0x_approval_20260804
+project_task_id: reactflow_delta
+approved_at: "2026-08-04T19:00:00+08:00"
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: >-
+  好的，run_id 和 epoch 都没问题，同意复用现有算子代码的方案，请把 O0-X 执行计划落成正式
+  markdown 文档到 docs/ 目录下。确认无误后开始执行。
+approval_kind: O0X_AUTHORITY_ACTIVATION
+approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approved_amendment_path: docs/contracts/amendments/reactflow_delta_v4_o0x_20260804.yaml
+approved_amendment_sha256: null
+approval_scope:
+  - SINGLE_PHASE_OPERATOR_ENGINEERING_ONLY
+  - O0X_OPERATOR_ENGINEERING
+  - run_id: o0x_operator_engineering_20260804_v1
+  - binds_b0x_closure: b0x_finalize_20260804T1900+0800
+  - binds_b0x_commit: dd6cce3
+  - plan_doc: docs/plans/reactflow_delta_o0x_execution_plan_20260804.md
+explicit_denials:
+  - EPRO_METHOD_OPTIMIZATION
+  - SCIENTIFIC_MODEL_SELECTION
+  - SEALED_TEST_UNSEAL
+  - TEST_OUTCOME_FITTING
+  - SEED_RETRY
+  - CONFIRMATORY_TEST_UNSEAL
+  - CROSS_PROJECT_EXPORT
+  - WET_LAB
+  - PULL_REQUEST
+signature_status: NOT_PROVIDED_NOT_ASSERTED
+external_identity_status: NOT_VERIFIED
+scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY

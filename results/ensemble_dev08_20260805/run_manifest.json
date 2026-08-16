@@ -1,0 +1,117 @@
+{
+  "authority_amendment": "reactflow_delta_v4_m0x_epro_scope_20260805 (epoch 13)",
+  "comparison_table": {
+    "dev06_reference": {
+      "param_count": "n/a",
+      "study_macro_auprc": 0.7353243279593717
+    },
+    "ensemble_changer": {
+      "calibration_selected_method": "isotonic_pava",
+      "improved_vs_dev06": false,
+      "n_seeds": 7,
+      "param_count": 999943,
+      "point_gain_vs_dev06": -0.03216766428831208,
+      "study_macro_auprc": 0.7031566636710597,
+      "study_macro_auprc_calibrated": 0.8725879512200025
+    },
+    "p2_paired_baseline": {
+      "study_macro_auprc": 0.6936
+    }
+  },
+  "created_at_utc": "2026-08-05T16:12:33.010910+00:00",
+  "data": {
+    "changer_frac": 0.5239759531010791,
+    "feat_dim": 42,
+    "pooled_train_positions": 535620,
+    "test_accessed": false,
+    "test_sealed": true,
+    "train_pairs": 3874,
+    "validation_pairs": 190
+  },
+  "dev_definitions": {
+    "calibration": "single-method fit on train, Brier/logloss/ECE on val",
+    "changer_definition": "|delta_true| > CHANGER_TOL * pair_scale",
+    "changer_tol": 0.05,
+    "score": "mean over seeds of sigmoid P(changer)",
+    "study_macro_auprc": "mean over studies of per-study AP over eligible positions"
+  },
+  "evaluation": {
+    "dev06_reference": {
+      "study_macro_auprc": 0.7353243279593717
+    },
+    "ensemble_changer": {
+      "improved_vs_dev06": false,
+      "point_gain_vs_dev06": -0.03216766428831208,
+      "study_macro_auprc": 0.7031566636710597,
+      "study_macro_auprc_calibrated": 0.8725879512200025
+    },
+    "p2_paired_baseline": {
+      "study_macro_auprc": 0.6936
+    }
+  },
+  "hypothesis_id": "m0x_h08_ensemble_changer",
+  "iteration_id": "EPRO_DEV_08",
+  "model": {
+    "ensemble_changer": {
+      "config": {
+        "batch_size": 4096,
+        "epochs": 300,
+        "focal_alpha_pos": 0.47602404689892086,
+        "focal_gamma": 2.0,
+        "lr": 0.001,
+        "n_seeds": 7
+      },
+      "feat_dim": 42,
+      "feature_spec": "B0-X(31) + delta_thermo(5) + contact_graph(6)",
+      "param_count": 999943,
+      "per_seed": [
+        {
+          "best_epoch": 69,
+          "param_count": 142849,
+          "seed": 20260804,
+          "val_study_macro_auprc": 0.7015037925982192
+        },
+        {
+          "best_epoch": 9,
+          "param_count": 142849,
+          "seed": 40521608,
+          "val_study_macro_auprc": 0.7013982500163322
+        },
+        {
+          "best_epoch": 189,
+          "param_count": 142849,
+          "seed": 60782412,
+          "val_study_macro_auprc": 0.6989063950072485
+        },
+        {
+          "best_epoch": 169,
+          "param_count": 142849,
+          "seed": 81043216,
+          "val_study_macro_auprc": 0.7001853703285978
+        },
+        {
+          "best_epoch": 9,
+          "param_count": 142849,
+          "seed": 101304020,
+          "val_study_macro_auprc": 0.7046491355253207
+        },
+        {
+          "best_epoch": 79,
+          "param_count": 142849,
+          "seed": 121564824,
+          "val_study_macro_auprc": 0.6977708512263897
+        },
+        {
+          "best_epoch": 279,
+          "param_count": 142849,
+          "seed": 141825628,
+          "val_study_macro_auprc": 0.7047355202772247
+        }
+      ]
+    }
+  },
+  "run_id": "epro_dev_08_20260805",
+  "schema_version": "reactflow_delta.m0x_run_manifest.v1",
+  "seed": 20260804,
+  "warning": "NOT_FINAL"
+}

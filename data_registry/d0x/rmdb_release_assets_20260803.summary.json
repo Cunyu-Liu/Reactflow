@@ -1,0 +1,63 @@
+{
+  "asset_count": 1024,
+  "asset_index_path": "data_registry/d0x/rmdb_release_assets_20260803.jsonl",
+  "asset_index_sha256": "f8b421a798ba23e947457497661ffc6ede78f0c6c5a01f74f37a29a86f4ff254",
+  "frozen_at": "2026-08-03T23:15:00+08:00",
+  "initial_disposition": "NOT_SEARCHED",
+  "membership_match": true,
+  "registry_accession_count": 1024,
+  "release_tags": [
+    "data-eterna",
+    "data-puzzle",
+    "data-riboswitches",
+    "data-rna-structures",
+    "data-general"
+  ],
+  "releases": [
+    {
+      "api_payload_sha256": "d64aefb313e6a0e0f12625b258a8a2c0a2b95e9560671e9bfcb264f20ba94342",
+      "asset_count": 181,
+      "published_at": "2026-05-16T04:19:25Z",
+      "release_id": 323585107,
+      "tag": "data-eterna",
+      "updated_at": "2026-05-16T04:33:56Z"
+    },
+    {
+      "api_payload_sha256": "2b9f15cb7993672132b93aaccc55008953693f433edae2c7b69a75acbfd0db7c",
+      "asset_count": 94,
+      "published_at": "2026-05-16T04:19:26Z",
+      "release_id": 323585110,
+      "tag": "data-puzzle",
+      "updated_at": "2026-05-16T04:34:08Z"
+    },
+    {
+      "api_payload_sha256": "6daa552913fdb9555d34843bf9e17f164086ed836c081a9bb568feafebe0cefe",
+      "asset_count": 253,
+      "published_at": "2026-05-16T04:19:27Z",
+      "release_id": 323585112,
+      "tag": "data-riboswitches",
+      "updated_at": "2026-05-16T04:34:46Z"
+    },
+    {
+      "api_payload_sha256": "ea08a18d75c07fe66872dc7e583965abaa761047a1fffcc61b949b75da221453",
+      "asset_count": 275,
+      "published_at": "2026-05-16T04:19:28Z",
+      "release_id": 323585118,
+      "tag": "data-rna-structures",
+      "updated_at": "2026-05-16T04:58:44Z"
+    },
+    {
+      "api_payload_sha256": "7e5f286e96d66d3466524617ad3a9493bff82fc64f3d50da4e14746d9c3cec5f",
+      "asset_count": 221,
+      "published_at": "2026-05-16T04:19:29Z",
+      "release_id": 323585124,
+      "tag": "data-general",
+      "updated_at": "2026-05-16T14:50:10Z"
+    }
+  ],
+  "repository": "DasLab/rmdb.github.io",
+  "repository_commit": "339b4fefc9a7092d0847d1d4017a3eadf0771fd7",
+  "schema_version": "reactflow_delta.rmdb_release_snapshot_summary.v1",
+  "scientific_boundary": "Metadata-only frozen source universe. Asset and construct counts are not exact Delta pair counts.",
+  "source_id": "RMDB"
+}

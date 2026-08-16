@@ -1,0 +1,8 @@
+{
+  "dev_builder_references_test_store": false,
+  "test_store_distinct_from_dev_cache": true,
+  "path_test_store": "/mnt/cunyuliu/reactflow_delta_confirmatory/test_outcome_store_v1.jsonl",
+  "path_dev_cache": "/home/cunyuliu/reactflow_delta_worktrees/benchmark_v3_20260809/results/dev_cache.pt",
+  "isolated": true,
+  "ledger": "/home/cunyuliu/reactflow_delta_worktrees/benchmark_v3_20260809/data_registry/reactflow_delta/test_outcome_access_ledger_v1.jsonl"
+}

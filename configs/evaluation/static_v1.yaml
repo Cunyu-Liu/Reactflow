@@ -1,0 +1,270 @@
+# ReactFlow Evaluator Contract v1 (static_v1)
+#
+# Frozen on: 2026-07-21
+# Phase: C1-0 (evaluator forensic audit)
+# Status: FROZEN — any change requires a new version (static_v2.yaml) and
+#   re-running the full C1-0 audit gate.
+#
+# This contract locks in every parameter that affects structure-prediction
+# evaluation.  It is the single source of truth for "how we score" and is
+# enforced by the gold-fixture test suite (tests/test_evaluator_gold_fixtures.py)
+# and the dual-evaluator alignment artifact (artifacts/c1_0/efold_dual_alignment.json).
+#
+# References:
+#   - Gate criterion 1: all 13 gold fixtures pass (evaluator_fixture_results.json)
+#   - Gate criterion 2: eFold and ReactFlow evaluators agree on all non-empty
+#     structures (efold_dual_alignment.json, four_quadrant_results.json)
+#   - Gate criterion 4: no unexplained index/diagonal/length/threshold/
+#     pseudoknot differences
+
+schema_version: "1.0"
+contract_name: "static_v1"
+frozen_date: "2026-07-21"
+
+# ---------------------------------------------------------------------------
+# 1. Pair type definitions
+# ---------------------------------------------------------------------------
+pair_types:
+  canonical:
+    # Watson-Crick edge, standard base pairs.
+    pairs:
+      - {left: "A", right: "U"}
+      - {left: "U", right: "A"}
+      - {left: "G", right: "C"}
+      - {left: "C", right: "G"}
+    notes: "Always counted as valid pairs."
+
+  wobble:
+    # Wobble base pairs (U-G), biologically valid but chemically distinct.
+    pairs:
+      - {left: "G", right: "U"}
+      - {left: "U", right: "G"}
+    notes: "Counted as valid when allow_wobble=true (default)."
+
+  illegal:
+    # Any pair not in canonical or wobble sets, including same-base pairs
+    # (A-A, G-G, etc.) and non-complementary cross-type pairs.
+    rule: "reject if not in canonical and not (in wobble and allow_wobble)"
+    notes: "Illegal pairs are rejected by validate_pair_matrix and never appear in decoded structures."
+
+# ---------------------------------------------------------------------------
+# 2. Structure constraints
+# ---------------------------------------------------------------------------
+constraints:
+  allow_wobble: true        # GU/UG pairs are legal
+  allow_pseudoknot: false   # Default decoder is nested-only (Nussinov DP)
+  min_loop: 3               # Minimum number of unpaired bases in a hairpin loop
+  min_pair_distance: 4      # |j - i| must be > min_loop (i.e., >= min_loop + 1)
+
+  pseudoknot_policy:
+    default_decoder: "nested_dp"        # project_max_weight_nested
+    alternative_decoder: "greedy"       # project_greedy_matching with allow_pseudoknot=true
+    notes: >
+      The default calibrated_marginal decoder uses Nussinov DP (nested-only).
+      The greedy decoder allows pseudoknots but is only used for explicit
+      pseudoknot-allowed experiments.  The evaluator itself is pseudoknot-
+      agnostic: it compares matrix cells regardless of crossing.
+
+# ---------------------------------------------------------------------------
+# 3. Index convention
+# ---------------------------------------------------------------------------
+indexing:
+  base: 0                  # All internal pair indices are 0-based
+  storage: "upper_triangle"  # Pairs stored as (i, j) with i < j
+  external_input:
+    one_based_flag: "--one-based-predictions"
+    notes: >
+      External predictions (e.g., eFold dot-bracket output) may use 1-based
+      indices.  The _normalize_pair function in evaluate_external_baseline_predictions.py
+      handles the conversion when --one-based-predictions is set.
+  self_pair_rejection: true   # (i, i) pairs raise ValueError
+  out_of_range_rejection: true  # indices >= L raise ValueError
+
+# ---------------------------------------------------------------------------
+# 4. Scoring formulas
+# ---------------------------------------------------------------------------
+scoring:
+  # Pair-level confusion matrix over upper-triangle cells.
+  # U = {(i,j) : 0 <= i < j < L}, |U| = L*(L-1)/2
+  confusion:
+    tp: "|P_hat ∩ P|"           # correctly predicted pairs
+    fp: "|P_hat \\ P|"          # spurious pairs
+    fn: "|P \\ P_hat|"          # missed pairs
+    tn: "|U| - tp - fp - fn"    # correctly rejected non-pairs
+
+  f1:
+    formula: "2*TP / (2*TP + FP + FN)"
+    undefined_when: "denominator == 0"
+    undefined_value: 0.0    # ReactFlow convention
+    notes: >
+      CRITICAL DIFFERENCE from eFold: eFold returns F1=1.0 when
+      sum_pair == 0 (empty prediction on empty target).  ReactFlow returns
+      F1=0.0.  This difference is documented and non-blocking.  The
+      static_v1 contract adopts the ReactFlow convention (0.0).
+
+  mcc:
+    formula: "(TP*TN - FP*FN) / sqrt((TP+FP)(TP+FN)(TN+FP)(TN+FN))"
+    undefined_when: "denominator == 0"
+    undefined_value: 0.0
+
+  precision:
+    formula: "TP / (TP + FP)"
+    undefined_value: 0.0    # when TP + FP == 0
+
+  recall:
+    formula: "TP / (TP + FN)"
+    undefined_value: 0.0    # when TP + FN == 0
+
+  # Relaxed (shifted) matching: a predicted pair (i,j) is counted as TP if
+  # there exists an unmatched target pair (i',j') with |i-i'|<=tolerance and
+  # |j-j'|<=tolerance.  One-to-one matching (greedy nearest).
+  shifted_f1:
+    tolerance: 1
+    matching: "greedy_nearest_one_to_one"
+    notes: >
+      Shifted F1 is reported alongside exact F1 but is NOT the primary
+      metric.  It is used only for diagnostic purposes (assessing whether
+      the model gets the approximate location right but the exact index wrong).
+
+# ---------------------------------------------------------------------------
+# 5. Threshold for probability → binary conversion
+# ---------------------------------------------------------------------------
+threshold:
+  matrix_cell: 0.5         # pair_confusion uses > 0.5 on matrix cells
+  decoder_min_score: 0.0   # Nussinov DP min_score (log-odds; 0.0 = positive evidence only)
+  notes: >
+    The 0.5 threshold applies to probability matrices being converted to
+    binary for evaluation.  The 0.0 decoder threshold applies to log-odds
+    scores fed into the Nussinov DP — it means only pairs with positive
+    evidence are considered.  These are DIFFERENT thresholds operating at
+    DIFFERENT stages of the pipeline.
+
+# ---------------------------------------------------------------------------
+# 6. Aggregation
+# ---------------------------------------------------------------------------
+aggregation:
+  primary: "micro_f1"
+  secondary: "macro_f1"
+
+  micro_f1:
+    formula: "pool TP/FP/FN across all sequences, then compute F1"
+    notes: "Primary metric.  Gives equal weight to each pair."
+
+  macro_f1:
+    formula: "compute F1 per sequence, then average"
+    notes: >
+      Secondary metric.  Sensitive to the empty-structure convention:
+      sequences with empty predictions on empty targets get F1=0.0
+      (ReactFlow convention), which drags down the macro average.
+
+  # Per-tier aggregation: compute micro and macro F1 within each tier
+  # (test, holdout, etc.) separately.
+  per_tier: true
+
+# ---------------------------------------------------------------------------
+# 7. Distance bins
+# ---------------------------------------------------------------------------
+distance_bins:
+  - name: "short"
+    min_distance: 1
+    max_distance: 11
+    notes: "Local hairpin pairs."
+  - name: "medium"
+    min_distance: 12
+    max_distance: 23
+    notes: "Mid-range stem pairs."
+  - name: "long"
+    min_distance: 24
+    max_distance: null       # no upper bound
+    notes: "Long-range interactions."
+
+distance_bins_reporting: "per-bin micro_f1 and macro_f1"
+
+# ---------------------------------------------------------------------------
+# 8. Empty-structure convention
+# ---------------------------------------------------------------------------
+empty_structure:
+  reactflow_convention:
+    empty_vs_empty: 0.0      # F1 = 0.0 (denominator is 0)
+    empty_vs_nonempty: 0.0   # F1 = 0.0 (TP = 0)
+    nonempty_vs_empty: 0.0   # F1 = 0.0 (TP = 0)
+
+  efold_convention:
+    empty_vs_empty: 1.0      # F1 = 1.0 (sum_pair == 0 branch)
+    empty_vs_nonempty: 0.0
+    nonempty_vs_empty: 0.0
+
+  contract_adopts: "reactflow_convention"
+  rationale: >
+    The ReactFlow convention (F1=0.0 for empty-vs-empty) is more conservative
+    and avoids inflating macro F1 on sequences with no pairs.  The eFold
+    convention is documented as an annotated, non-blocking difference.
+
+# ---------------------------------------------------------------------------
+# 9. Decoder configuration (for calibrated_marginal mode)
+# ---------------------------------------------------------------------------
+decoder:
+  default_mode: "calibrated_marginal"
+  default_policy: "nested_dp"    # Nussinov DP, nested-only
+  temperature: 1.0
+  epsilon: 1.0e-8
+  min_loop: 3
+  min_score: 0.0                 # log-odds threshold for Nussinov
+
+  alternative_modes:
+    - "legacy_direct"             # raw model forward pass, no CTMC
+    - "ctmc_sample"               # CTMC sampling, not calibrated
+
+  notes: >
+    The calibrated_marginal mode with nested_dp is the default inference
+    path.  legacy_direct is retained only for regression comparison.
+    ctmc_sample is for ensemble diversity experiments.
+
+# ---------------------------------------------------------------------------
+# 10. Evaluation pipeline (data flow)
+# ---------------------------------------------------------------------------
+pipeline:
+  model_output: "marginal_pair_matrix"    # P_ij = 0.5*(pi_i[j+1] + pi_j[i+1])
+  calibration: "pair_vs_unpaired_log_odds"  # log((pair+eps)/null)
+  decoding: "project_max_weight_nested"    # Nussinov DP on log-odds
+  binary_structure: "symmetric L×L matrix of {0,1}"
+  evaluation: "pair_confusion → f1_score / matthews_corrcoef"
+
+  external_baseline_pipeline:
+    model_output: "dot-bracket string"
+    parsing: "parse_dot_bracket → 0-based pairs"
+    evaluation: "_pair_confusion (set-based) → f1"
+
+  alignment_guarantee: >
+    The matrix-based scorer (reactflow.metrics.pair_confusion) and the
+    set-based scorer (evaluate_external_baseline_predictions._pair_confusion)
+    produce identical TP/FP/FN/TN on all non-empty structures.  Verified by
+    13 gold fixtures and 15 dual-evaluator alignment test cases.
+
+# ---------------------------------------------------------------------------
+# 11. Test data requirements
+# ---------------------------------------------------------------------------
+test_data:
+  split_preference: "mmseqs"     # mmseqs split has 14 parent overlaps vs 4142 for exact
+  notes: >
+    The mmseqs split is strongly preferred for honest evaluation.  The exact
+    split has severe window-parent leakage (4,142 parents in both train and
+    test).  See artifacts/c1_0/data_overlap_audit.json for details.
+
+  excluded_tiers:
+    - "human_mRNA"               # 99.7% overlap with eFold training set
+  excluded_tiers_notes: >
+    The human_mRNA tier is excluded from eFold-vs-ReactFlow comparisons
+    because 99.7% of its sequences appear in eFold's training data.
+    This makes eFold's metrics on human_mRNA a train-set metric, not a
+    generalization metric.
+
+# ---------------------------------------------------------------------------
+# 12. Gate criteria (for C1-0 acceptance)
+# ---------------------------------------------------------------------------
+gate:
+  criterion_1: "all 13 gold fixtures pass (100%)"
+  criterion_2: "eFold and ReactFlow evaluators agree on all non-empty structures"
+  criterion_3: "eFold official checkpoint produces reasonable F1 (>0.5 on PDB tier)"
+  criterion_4: "no unexplained index/diagonal/length/threshold/pseudoknot differences"
+  status: "see docs/c1_0_evaluator_forensic_audit.md for final gate judgment"

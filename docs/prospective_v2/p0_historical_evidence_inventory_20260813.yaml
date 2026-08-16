@@ -1,0 +1,54 @@
+schema_version: reactflow_delta.prospective_v2.p0_historical_evidence_inventory.v1
+observed_at: '2026-08-13T18:15:00+08:00'
+method: read-only; only artifacts that could change scientific qualification were inspected; no replay run yet
+attrition_semantics:
+  intended_cells: 160
+  intended_cells_status: CONFIRMED_FACT (official 20 puzzles x 8 methods)
+  raw_usable_cells: 159
+  raw_usable_cells_status: REPOSITORY_REPORTED_NOT_REPLAYED
+  historical_oracle_analyzable_cells: 158
+  historical_oracle_analyzable_cells_status: REPOSITORY_REPORTED_NOT_REPLAYED
+  primary_all_mutant_analyzable_cells: PENDING_FRESH_P1_RECOMPUTE
+assets:
+- asset_id: phase1_benchmark_v3_gate.json
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/benchmark_v3/phase1_benchmark_v3_gate.json
+  verdict_recorded: PHASE1_BENCHMARK_V3_PASS_WITH_NON_BLOCKING_NOTICE
+  token_recorded: AUTHORIZE_PHASE2_LEARNABILITY
+  not_pass_gates: [test_statistical_sufficiency]
+  finding: CONFIRMED H01 fail-open: Phase-2-blocking NOT_ESTABLISHED gate still wrapped as non-blocking notice and token still emitted. Verdict/token NOT qualified.
+  disposition: FAIL_OPEN_DEMONSTRATED; gate closure to be repaired in P0-4 via phase_gate_v2.
+- asset_id: phase2_learnability (old)
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/benchmark_v3/phase2_learnability_20260810/
+  finding: old Phase2 verdict (0.5344/p=1/CI) under old evaluator path; does not call frozen new evaluator (H03).
+  disposition: REPOSITORY_REPORTED_NOT_REPLAYED under new estimand; not usable as new primary evidence.
+- asset_id: m2_response_spectrum (historical M2)
+  path: /mnt/cunyuliu/m2_response_spectrum_20260812/keyed_predictions_m2_spectrum.jsonl
+  task_axis: AUTHORIZED_ORACLE_CONDITIONED_DEVELOPMENT_SECONDARY
+  result_replay_axis: REPOSITORY_REPORTED_NOT_REPLAYED
+  finding: oracle-conditioned held-(puzzle x method)-cell interpolation (H07/H08); not all-mutant LOPO-puzzle; cannot be renamed or aggregated into new primary.
+  disposition: historical secondary only; new primary is NEW_EXPERIMENT_REQUIRED (P2/P3).
+- asset_id: openknot_m2_data
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  role: PRIMARY_PUBLIC_DEVELOPMENT
+  columns_note: id, sequence, puzzle, method, sub_start/sub_end, mutA, target_structure, M2_structure, per-position reactivity_XXXX and reactivity_error_XXXX
+  constraint: M2_structure and any mutant-outcome-derived feature are FORBIDDEN in the new primary model (contract 4.3 item 7).
+  disposition: eligible development data for P1/P2/P3; fresh all-mutant ledger required.
+- asset_id: caller_v4_sensitivity (191-row)
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/benchmark_v3/caller_v4_sensitivity.json
+  finding: synthetic fixture only (H02); not full-pool stability evidence.
+  disposition: overlay SYNTHETIC_FIXTURE_ONLY; preserve, do not delete.
+- asset_id: evaluator_v6_validation.json
+  path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/benchmark_v3/evaluator_v6_validation.json
+  role: historical evaluator fixture validation; new primary uses frozen probabilistic evaluator under endpoint_v7.
+  disposition: historical; not the new primary evaluator.
+replay_decision:
+  old_M2_primary_replay: NOT_APPLICABLE_FOR_NEW_PRIMARY
+  new_primary_replay: NEW_EXPERIMENT_REQUIRED (P2/P3 all-mutant LOPO-puzzle)
+  auto_retrain_to_fill_history: FORBIDDEN (contract 2.3)
+  unqualified_raw_missing: none found that would block P1; note full raw-usable recount deferred to fresh P1.
+evidence_classes_used:
+- CONFIRMED_FACT
+- REPOSITORY_REPORTED_NOT_REPLAYED
+- AUTHORIZED_ORACLE_CONDITIONED_DEVELOPMENT_SECONDARY
+- SYNTHETIC_FIXTURE_ONLY
+- NEW_EXPERIMENT_REQUIRED

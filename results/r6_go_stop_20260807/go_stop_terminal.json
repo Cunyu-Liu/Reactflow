@@ -1,0 +1,168 @@
+{
+  "schema": "reactflow_delta.r6_go_stop_adjudication.v1",
+  "run_id": "r6_go_stop_20260807",
+  "generated_at": "2026-08-08T08:55:20+08:00",
+  "governing_contract": "docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md",
+  "contract_section": "§13.2 R6 / §13.4",
+  "independent": true,
+  "overall_decision": "STOP",
+  "route": "STOP_METHOD_ROUTE",
+  "blocking_gates": [
+    "P2_LEARNABILITY_GO"
+  ],
+  "gates": {
+    "AUTHORITY_CLOSED_PASS": {
+      "status": "PASS",
+      "evidence": {
+        "contract_path": "/home/cunyuliu/reactflow_delta_goal_20260729/configs/reactflow_delta/active_contract.yaml",
+        "sentinel_path": "/home/cunyuliu/reactflow_delta_goal_20260729/configs/reactflow_delta/authority_epoch_14.sentinel.yaml",
+        "bundle_path": "/home/cunyuliu/reactflow_delta_goal_20260729/configs/reactflow_delta/authority_epoch_14.bundle.sha256",
+        "authority_epoch": 14,
+        "current_phase": "REBUILD-P1",
+        "current_authority_state": "REBUILD_P1_AUTHORIZED",
+        "M0X_lifecycle_status": "TERMINAL",
+        "M0X_gate_result": "FAIL",
+        "training_allowed": false,
+        "sentinel_epoch": 14,
+        "sentinel_state": "REBUILD_P1_AUTHORIZED",
+        "contract_sha256": "dba4bc4c7e1fdafa1e2da70a7724b8b5168021ffe9682d9f99e84ad0014bd921",
+        "sentinel_active_manifest_sha256": "dba4bc4c7e1fdafa1e2da70a7724b8b5168021ffe9682d9f99e84ad0014bd921",
+        "bundle_ledger": "/home/cunyuliu/reactflow_delta_goal_20260729/configs/reactflow_delta/authority_epoch_14.bundle.sha256"
+      }
+    },
+    "ASSET_DISPOSITION_1024_OF_1024": {
+      "status": "PASS",
+      "evidence": {
+        "jsonl_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d0x_v2/asset_disposition_20260807.jsonl",
+        "summary_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d0x_v2/asset_disposition_20260807.summary.json",
+        "n_rows": 1024,
+        "n_empty_disposition": 0,
+        "n_malformed": 0,
+        "summary_asset_count": 1024,
+        "summary_empty_disposition_count": 0
+      }
+    },
+    "PRIMARY_MASK_V2_PASS": {
+      "status": "PASS",
+      "evidence": {
+        "primary_pairs_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d1x_v2/d1x_v2_canonicalization_20260807T1830+0800/primary_pairs_v2.jsonl",
+        "summary_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d1x_v2/d1x_v2_summary.json",
+        "n_primary_pairs": 7961,
+        "n_pairs_missing_code": 0,
+        "n_unknown_code": 0,
+        "summary_primary_pairs": 7961
+      }
+    },
+    "GROUP_ATOMS_AND_PUBLICATION_SPLIT_PASS": {
+      "status": "PASS",
+      "evidence": {
+        "overlap_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d2x_v2/overlap_report.json",
+        "split_path": "/home/cunyuliu/reactflow_delta_goal_20260729/configs/reactflow_delta/split_v2.yaml",
+        "publication_overlap:train_vs_validation:n_intersection": 0,
+        "publication_overlap:test_vs_train:n_intersection": 0,
+        "publication_overlap:test_vs_validation:n_intersection": 0,
+        "study_overlap:train_vs_validation:n_intersection": 0,
+        "study_overlap:test_vs_train:n_intersection": 0,
+        "study_overlap:test_vs_validation:n_intersection": 0,
+        "lineage_overlap_parent_sha256:train_vs_validation:n_intersection": 0,
+        "lineage_overlap_parent_sha256:test_vs_train:n_intersection": 0,
+        "lineage_overlap_parent_sha256:test_vs_validation:n_intersection": 0,
+        "new_test_vs_train_val:lineage_parent_sha256:n_intersection": 0,
+        "new_test_vs_train_val:sequence_exact_canonical:n_intersection": 0
+      }
+    },
+    "OLD_TEST_RETIRED_NEW_TEST_UNTOUCHED": {
+      "status": "PASS",
+      "evidence": {
+        "split_path": "/home/cunyuliu/reactflow_delta_goal_20260729/configs/reactflow_delta/split_v2.yaml",
+        "retired_test": {
+          "studies": [
+            "16SFWJ"
+          ],
+          "status": "DEVELOPMENT_CONSUMED",
+          "reason": "old d2x test (pmid_25183835); cannot be re-used as confirmatory"
+        },
+        "new_test": {
+          "studies": [
+            "SL5CV2",
+            "SL5HKU",
+            "SL5MER"
+          ],
+          "publication": "UNKNOWN_PUBLICATION:SL5CV2",
+          "untouched": true,
+          "confirmatory_blocker": {
+            "blocked": true,
+            "reason": "frozen RMDB snapshot does not assert PMID per asset. The only CERTIFIED publications are the OLD split manifest entries, ALL of which were exposed to development (old train/val/test). New v2 studies resolve to UNKNOWN_PUBLICATION:<study> and cannot be certified as distinct untouched confirmatory publications from frozen metadata alone.",
+            "untouched_certified_publications": [],
+            "exposed_certified_publications": [
+              "pmid_24469816",
+              "pmid_25183835",
+              "pmid_25303992",
+              "pmid_25883046",
+              "pmid_29446752",
+              "pmid_35982307",
+              "pub_RNAPuzzle18_daslab"
+            ],
+            "unknown_publication_studies": [
+              "5SRRNA",
+              "ADDRSW",
+              "AGSARNA",
+              "CL1LIG",
+              "GLYCFN",
+              "HC16M2R",
+              "MDLOOP",
+              "RNAPZ6",
+              "RNASEP",
+              "SL5CV2",
+              "SL5HKU",
+              "SL5MER",
+              "SRPDIV",
+              "TRNAPH"
+            ],
+            "satisfies_ge3_untouched": false,
+            "recommendation": "resolve publication identity for new studies (e.g. via RMDB entry citation / d0r_accession_registry, where per-entry PMIDs exist -- the SL5 family carries pmid_38427602) or designate a prospective confirmatory alternative before confirmatory CI."
+          }
+        },
+        "assignment_16SFWJ": "DEVELOPMENT_CONSUMED"
+      }
+    },
+    "CALLER_V2_FOLD_LOCAL_AND_RELIABLE": {
+      "status": "PASS",
+      "evidence": {
+        "caller_path": "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/caller_v2.py",
+        "test_path": "/home/cunyuliu/reactflow_delta_goal_20260729/tests/reactflow_delta/test_caller_v2.py",
+        "checks": {
+          "fold_local_guard_present": true,
+          "no_call_present": true,
+          "seal_present": true
+        },
+        "tests_passed": true,
+        "pytest_output_tail": "............                                                             [100%]\n"
+      }
+    },
+    "EVALUATOR_V2_REFERENCE_TESTS_PASS": {
+      "status": "PASS",
+      "evidence": {
+        "evaluator_path": "/home/cunyuliu/reactflow_delta_goal_20260729/scripts/reactflow_delta/evaluate_v2.py",
+        "test_path": "/home/cunyuliu/reactflow_delta_goal_20260729/tests/reactflow_delta/test_evaluate_v2.py",
+        "tests_passed": true,
+        "pytest_output_tail": ".........................s.                                              [100%]\n"
+      }
+    },
+    "P2_LEARNABILITY_GO": {
+      "status": "FAIL",
+      "evidence": {
+        "verdict_path": "/home/cunyuliu/reactflow_delta_goal_20260729/results/p2_v1_learnability_20260808/P2_learnability_verdict.json",
+        "verdict": "STOP_METHOD_ROUTE",
+        "estimand_status_primary": "UNIDENTIFIABLE",
+        "estimand_reason": "frozen caller_v2 on frozen d1x_v2 data yields an effectively constant binary changer label (3 changers / 3178 non / 3204 NO_CALL); endpoint degenerate_policies.constant_label applies -> no numeric AUPRC produced, per contract.",
+        "checks": {
+          "verdict_is_NOT_GO": true,
+          "primary_UNIDENTIFIABLE": true
+        },
+        "assessment": "NOT_GO"
+      }
+    }
+  },
+  "recommendation": "Phase 3 model-architecture iteration is BLOCKED. The R5 P2 verdict is STOP_METHOD_ROUTE: the primary binary-changer estimand is UNIDENTIFIABLE under the frozen caller_v2 / d1x_v2 data (caller/null-calibration artifact: 3 changers / 3178 non / 3204 NO_CALL). Per §13.4 any non-PASS gate stops Phase 3. Fix requires per-study reactivity normalization + error recalibration to a common scale and a caller_v3/endpoint_v3 amendment under a new authority epoch (NOT a silent in-place change)."
+}

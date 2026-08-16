@@ -1,0 +1,131 @@
+{
+  "schema": "reactflow_delta.m0x_gate_harness.v1",
+  "run_id": "m0x_gate_harness_20260807",
+  "created_at_utc": "2026-08-07T06:09:16.072225+00:00",
+  "seed": 20260804,
+  "evidence_class": "DEVELOPMENT_ONLY",
+  "candidate": {
+    "model": "epro_dev10_best",
+    "n_val_pairs_covered": 548,
+    "study_macro_auprc": 0.2652025367114727,
+    "trained_on_split": "correct publication (train 3516 / val 548)",
+    "note": "only valid full-coverage supervised candidate; dev07/dev09 wrong_190 excluded, dev11 no saved model"
+  },
+  "label": {
+    "mode": "majority",
+    "definition": "C_pair=1 iff >=50% eligible changer positions",
+    "heldout_prevalence": 0.18613138686131386,
+    "n_changers": 102
+  },
+  "aggregation_rule": {
+    "primary": "max over eligible positions"
+  },
+  "strongest_simple_baseline": {
+    "model": "tree",
+    "study_macro_auprc": 0.29831932734267586,
+    "param_count": 0,
+    "meta": {
+      "param_count": 0,
+      "is_learned": false,
+      "runtime_s": 1070.15
+    }
+  },
+  "all_simple_baselines": {
+    "zero": {
+      "study_macro_auprc": 0.19277269963966182,
+      "n_pairs": 548,
+      "meta": {
+        "param_count": 0,
+        "is_learned": false,
+        "runtime_s": 0.02
+      }
+    },
+    "train_mean": {
+      "study_macro_auprc": 0.19277269963966182,
+      "n_pairs": 548,
+      "meta": {
+        "param_count": 0,
+        "is_learned": false,
+        "runtime_s": 0.12
+      }
+    },
+    "mutation_type_mean": {
+      "study_macro_auprc": 0.2065687378281937,
+      "n_pairs": 548,
+      "meta": {
+        "param_count": 0,
+        "is_learned": false,
+        "runtime_s": 0.2
+      }
+    },
+    "edit_only": {
+      "study_macro_auprc": 0.19277269963966182,
+      "n_pairs": 548,
+      "meta": {
+        "param_count": 0,
+        "is_learned": false,
+        "runtime_s": 0.03
+      }
+    },
+    "wt_only": {
+      "study_macro_auprc": 0.21102138717984548,
+      "n_pairs": 548,
+      "meta": {
+        "param_count": 0,
+        "is_learned": false,
+        "runtime_s": 7.74
+      }
+    },
+    "tree": {
+      "study_macro_auprc": 0.29831932734267586,
+      "n_pairs": 548,
+      "meta": {
+        "param_count": 0,
+        "is_learned": false,
+        "runtime_s": 1070.15
+      }
+    },
+    "p2_paired": {
+      "study_macro_auprc": 0.259222825155941,
+      "n_pairs": 548,
+      "meta": {
+        "param_count": 0,
+        "is_learned": true,
+        "runtime_s": 19.55
+      }
+    }
+  },
+  "permutation_null": {
+    "p_value": 1.0,
+    "n_perm": 100,
+    "real_study_macro_auprc": 0.2652025367114727,
+    "seed": 20260804
+  },
+  "bootstrap_ci": {
+    "n_overlap_pairs": 548,
+    "point": -0.03311679063120315,
+    "ci_low": -0.13560872786736744,
+    "ci_high": 0.06689901384272967,
+    "n_boot": 1000,
+    "metric": "study-macro AUPRC gain (candidate - baseline)"
+  },
+  "gate_13_4": {
+    "real_labels_beat_permutation_null": {
+      "status": "FAIL",
+      "p_value": 1.0
+    },
+    "cluster_ci_lb_gt_0_vs_strongest_simple": {
+      "status": "FAIL",
+      "ci_low": -0.13560872786736744,
+      "ci_high": 0.06689901384272967,
+      "point": -0.03311679063120315
+    },
+    "candidate_beats_strongest_simple": {
+      "status": "FAIL",
+      "candidate": 0.2652025367114727,
+      "baseline": 0.29831932734267586
+    }
+  },
+  "overall_gate": "FAIL",
+  "honesty_note": "PASS only if all three conjunctive \u00a713.4 conditions hold with located evidence on the frozen publication validation split. FAIL does not unlock P0-X and does NOT claim SOTA (see \u00a717.10/\u00a720.11)."
+}

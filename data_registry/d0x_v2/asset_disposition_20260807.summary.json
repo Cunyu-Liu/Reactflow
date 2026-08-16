@@ -1,0 +1,28 @@
+{
+  "schema_version": "reactflow_delta.d0x_v2.asset_disposition.v1",
+  "phase_id": "REBUILD-R2A",
+  "generated_at": "2026-08-07T09:40:54.470284+00:00",
+  "asset_manifest_path": "data_registry/d0x/rmdb_release_assets_20260803.jsonl",
+  "asset_count": 1024,
+  "parse_success_count": 414,
+  "parse_fail_count": 610,
+  "empty_disposition_count": 0,
+  "disposition_categories": {
+    "PARSE_SUCCESS": 414,
+    "PARSE_FAIL_LENGTH_MISMATCH_REACTIVITY_VS_SEQPOS": 311,
+    "PARSE_FAIL_NON_NUMERIC_REACTIVITY": 2,
+    "PARSE_FAIL_ANNOTATION_MISSING_SEPARATOR": 63,
+    "PARSE_FAIL_MISSING_REACTIVITY_ROWS": 168,
+    "PARSE_FAIL_MALFORMED_SEQPOS": 56,
+    "PARSE_FAIL_INVALID_PROFILE_INDEX": 2,
+    "PARSE_FAIL_OTHER": 8
+  },
+  "parse_success_by_source_group": {
+    "data-rna-structures": 119,
+    "data-riboswitches": 51,
+    "data-general": 127,
+    "data-eterna": 107,
+    "data-puzzle": 10
+  },
+  "notes": "disposition is never empty; missing/parse-failure is an explicit PARSE_FAIL_* category, not imputed zero. source_group used as publication proxy until R2C group-atom/publication metadata lands."
+}

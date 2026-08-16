@@ -1,0 +1,77 @@
+schema_version: reactflow_delta.authority_amendment.v1
+amendment_id: reactflow_delta_v4_ph0x_20260804
+amendment_status: ACTIVE_AUTHORIZED
+authority_epoch: 7
+created_at: "2026-08-04T14:00:00+08:00"
+amends:
+  contract_id: reactflow_delta_v4_data_first
+  contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approval_binding:
+  approval_record_path: docs/approvals/reactflow_delta_v4_ph0x_approval_20260804.yaml
+  approval_record_sha256: null
+  scope: CONDITIONAL_PH0X_ONLY_AUTHORITY
+  scope_assurance: PLATFORM_CONTEXT_INTERPRETATION_ONLY
+  external_identity_status: NOT_VERIFIED
+  signature_status: NOT_PROVIDED_NOT_ASSERTED
+prerequisites:
+  d2x_terminal_manifest_sha256: f0cd1295d61cf5b65102a76fc5ff761496a995bd093fdfef5243120090d90a93
+  d2x_terminal_sentinel_sha256: 10c65d8e1010fdafcd21f7b8649037592586c6e83e2b9b12dd000b3b1f7535d5
+  d2x_checksum_ledger_sha256: c445cfe0dec125ed1dd7305c8e17bbd45ac45c3c484f18dd296914e7914b650f
+  d2x_artifact_inventory_sha256: cd4000bdad260da5759c3f1d8e9d969cd43f75d00f9d4f2679a213ad542be028
+  d2x_split_manifest_sha256: 8e05636ec5b1a9d184c08be584875a8321bec29d1a970820df0c2a2824178234
+  d2x_exposure_audit_sha256: 6fc3436fdee5a2375ea38e32c1923e60dc41f8a20a1838229e15d729cc6c1c1c
+  d2x_tier_candidate_sha256: 6f32bffffb800bb17da3fc697db629f022d04e80e8954b540d061bd91a85364a
+  d2x_test_seal_sha256: c30a70125cda6ad1fc6f5053f342033e7f1c322dbf8c5a47101cebdec9bb46f9
+  d2x_blind_viability_certificate_sha256: d500a4b9c2d43ff8a86f19e5150bc55b56f8ec78a5d35eadf9ae892ca1617b89
+  d2x_closure_commit: 5aed8b04f9fe9363be49ad82df6fe1bdf19f15d6
+  d2x_gate_result: PASS
+  d1x_gate_result: PASS
+  d1x_terminal_manifest_sha256: bd29a4f679d376ca27c9cc83b3bb9d1ce2903d98de66caba626650d42f55d9e3
+  d1x_terminal_sentinel_sha256: 7a4aaeda5968c2dcfafa98fe53f149643a7eb53bbce6c9e06019f45d37437074
+  d1x_checksum_ledger_sha256: e19d169f524cd00453b28fc18c14f1bca7af03a32d2c8f6e589b7f5405911de1
+  d1x_canonical_records_sha256: af34147d636c248ac8d14ae4a4c349aa71dcef4d0e2f4926701cb6c506c6fb6f
+  d1x_primary_pairs_sha256: 92c90492f9907177f373faefcbff73fa702f95d533b198ac7dd387aa34ddb875
+  d1x_canonicalization_summary_sha256: c039c67dd4a74e767b528f79aad180c6d62d541135576fac00ac99899d21f635
+  d1x_closure_commit: 8f8e90a
+  d1x_evidence_class: DATA_QUALIFICATION_ONLY
+grant:
+  phase_id: PH0-X
+  authorization_kind: SINGLE_PHASE_IDENTIFIABILITY_RELIABILITY_ONLY
+  allowed_actions:
+    - READ_ONLY_PREFLIGHT
+    - D1X_CANONICAL_RECORDS_READ
+    - D2X_SPLIT_MANIFEST_READ
+    - REPLICATE_BLOCK_AND_NOISE_MODELING
+    - ICC_RELIABILITY_ESTIMATION
+    - TRAINING_ONLY_CHANGER_CALLER_FREEZE
+    - GROUP_AWARE_PERMUTATION
+    - MEASUREMENT_ERROR_SENSITIVITY
+    - CHANGER_COUNT_AGGREGATION
+    - BLIND_TEST_CERTIFICATE_AGGREGATE_ONLY
+    - TIER_B_PLUS_UPGRADE_TO_PASS
+    - TIER_A_PLUS_DATA_READY_MAINTENANCE
+  explicit_denials:
+    - B0_X_STRONG_BASELINE_QUALIFICATION
+    - MODEL_OR_BASELINE_TRAINING
+    - TEST_THRESHOLD_FITTING
+    - OUTCOME_PERCENTILE_NOISE
+    - MODEL_GENERATED_LABELS
+    - CONFIRMATORY_TEST_UNSEAL
+    - TEST_OUTCOME_FITTING
+    - CROSS_PROJECT_EXPORT
+    - WET_LAB
+    - PULL_REQUEST
+    - PUSH_IS_GOVERNED_BY_USER_INSTRUCTION_9
+run_authorization:
+  authorization_token_id: ph0x_identifiability_20260804_v1
+  maximum_primary_run_count: 1
+  maximum_concurrent_runs: 1
+  same_run_checkpoint_resume_allowed: true
+  terminal_run_consumes_authority: true
+  run_id_must_be: ph0x_identifiability_20260804_v1
+  isolated_clean_worktree_required_before_execution: true
+terminal_routes:
+  on_pass: STOP_AWAIT_B0X_AUTHORITY_AMENDMENT
+  on_fail: STOP_AWAIT_REPORT_X_OR_REPAIR_AUTHORITY
+  automatic_downstream_unlock: false
+embedded_self_sha256: FORBIDDEN

@@ -1,0 +1,31 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_m0x_epro_scope_20260805
+project_task_id: reactflow_delta
+approved_at: '2026-08-05T03:00:00+08:00'
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: 确认投入预算，立即开始执行 EPRO_DEV_03 阶段，按新设计调整容量阶梯和校准策略。预算方面我允许直接使用一整张显卡，也就是40G的显存预算。数据量方面可以全部投入进去，模型参数也尽可能的上调。总之服务器上的单卡资源你可以随意使用，迭代轮次现在也不限次数了，直到我们的模型强于baseline为止。
+approval_kind: M0X_EPRO_SCOPE_EXPANSION
+approved_contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+approved_amendment_path: docs/contracts/amendments/reactflow_delta_v4_m0x_epro_scope_20260805.yaml
+approved_amendment_sha256: 5715eebd5da22343b026d330f8f0962e710ce9858573e8935a7712eef30956fa
+approval_scope:
+- M0X_CONTROLLED_DEVELOPMENT_CONTINUATION
+- capacity_ceiling: EXPANDED_TO_SINGLE_CARD_TRAINABLE
+- gpu_budget: SINGLE_CARD_40G_FREE_USE
+- iteration_limit: UNLIMITED_UNTIL_BEATS_P2_BASELINE
+- training_data: ALL_TRAIN_AND_VALIDATION
+- test_split: SEALED (NOT USED FOR TRAINING; CONFIRMATORY ONLY)
+- calibration_strategy: MULTI_LAYER (temperature + isotonic)
+- pretraining_arm_B: ENABLED_AND_EXTENDED
+- gpu4_exclusion: REQUIRED (calibrate PID authority)
+explicit_denials:
+- TEST_UNSEAL_OR_TRAIN_ON_TEST
+- CROSS_PROJECT_EXPORT
+- WET_LAB
+- CONFIRMATORY_TEST_UNSEAL
+- IGNORE_GPU4_EXCLUSION
+signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
+scope_assurance: EXPLICIT_USER_MESSAGE_CONTEXT
+signed_by: user (explicit message 2026-08-05)
+signed_at: '2026-08-05T03:00:00+08:00'

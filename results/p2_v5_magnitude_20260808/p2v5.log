@@ -1,0 +1,30 @@
+[p2v5] GPU OK: cuda_visible=6 idx=0 name=NVIDIA A100-PCIE-40GB MIG 1g.5gb free=4.5GB
+[p2v5] pool_studies=['16SFWJ', '5SRRNA', 'ADD140', 'ADDRSW', 'AGSARNA', 'CIDGMP', 'CL1LIG', 'ETBSTR', 'GLYCFN', 'HC16M2R', 'MDLOOP', 'PSL2IAV', 'RNAPZ18', 'RNAPZ5', 'RNAPZ6', 'RNASEP', 'SRPDIV', 'TRNAPH', 'TRP4P6'] n_pairs_usable=6385 missing=0
+[p2v5] precomputed features for 6385 pairs
+[fold] held=UNKNOWN_PUBLICATION:5SRRNA SKIP (train_ch=2395 held_ch=0)
+[fold] held=UNKNOWN_PUBLICATION:ADDRSW SKIP (train_ch=2395 held_ch=0)
+[fold] held=UNKNOWN_PUBLICATION:AGSARNA SKIP (train_ch=2395 held_ch=0)
+[fold] held=UNKNOWN_PUBLICATION:CL1LIG train_ch=2282 held_ch=113 t=1597.8s
+[fold] held=UNKNOWN_PUBLICATION:GLYCFN SKIP (train_ch=2395 held_ch=0)
+[fold] held=UNKNOWN_PUBLICATION:HC16M2R train_ch=2387 held_ch=3 t=2042.2s
+[fold] held=UNKNOWN_PUBLICATION:MDLOOP SKIP (train_ch=2395 held_ch=0)
+[fold] held=UNKNOWN_PUBLICATION:RNAPZ6 SKIP (train_ch=2380 held_ch=0)
+[fold] held=UNKNOWN_PUBLICATION:RNASEP train_ch=2380 held_ch=15 t=2161.9s
+[fold] held=UNKNOWN_PUBLICATION:SRPDIV SKIP (train_ch=2395 held_ch=0)
+[fold] held=UNKNOWN_PUBLICATION:TRNAPH SKIP (train_ch=2395 held_ch=0)
+[fold] held=pmid_24469816 train_ch=2280 held_ch=110 t=1714.1s
+[fold] held=pmid_25183835 train_ch=2292 held_ch=298 t=1926.4s
+[fold] held=pmid_25303992 train_ch=2523 held_ch=58 t=1845.9s
+[fold] held=pmid_25883046 train_ch=2324 held_ch=68 t=1807.0s
+[fold] held=pmid_29446752 train_ch=587 held_ch=1792 t=1635.0s
+[fold] held=pmid_35982307 train_ch=2324 held_ch=68 t=1646.5s
+[fold] held=pub_RNAPuzzle18_daslab train_ch=2326 held_ch=69 t=1497.6s
+
+[p2v5] conditional WMAE skill by model x seed:
+  trivial: [0.0, 0.0, 0.0, 0.0, 0.0]
+  linear: [0.3084524923294414, 0.3084524923294414, 0.3084524923294414, 0.3084524923294414, 0.3084524923294414]
+  gbm: [0.3189649056000391, 0.3189649056000391, 0.3189649056000391, 0.3189649056000391, 0.3189649056000391]
+  p2_mlp: [0.596425584732944, 0.6141337803013375, 0.6042159725226581, 0.5858345878219071, 0.6086340002264533]
+  deepsets: [0.7012959860898564, 0.6771982322003781, 0.6526586613817368, 0.6962808669900188, 0.6568627695793102]
+
+DONE conditional magnitude LOOCV -> results/p2_v5_magnitude_20260808

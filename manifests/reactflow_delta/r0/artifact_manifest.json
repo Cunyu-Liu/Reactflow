@@ -1,0 +1,108 @@
+{
+  "schema_version": "reactflow-delta-r0-artifact-manifest-v1",
+  "stage": "R0",
+  "status": "accepted_for_d0_with_explicit_user_authorized_r0_2_exception",
+  "generated_at": "2026-07-29T14:16:11+08:00",
+  "contract": {
+    "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+    "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+  },
+  "worktrees": {
+    "protected_legacy": "/home/cunyuliu/reactflow_c1_3_stage_20260722",
+    "quota_snapshot": "/home/cunyuliu/reactflow_delta_goal_20260729",
+    "active_clean_clone": "/mnt/cunyuliu/reactflow_delta_goal_20260729",
+    "branch": "codex/reactflow-delta-r0",
+    "active_clone_parent_head": "f29086889cdb1717667da54c0197c1a4ec0385b4"
+  },
+  "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0",
+  "evidence_classes": {
+    "legacy_run_and_results": "historical-only",
+    "r0_records": "prospective-setup-only"
+  },
+  "legacy_termination_override": {
+    "default_contract_rule": "wait for natural completion; do not kill, restart, or append a seed",
+    "user_authorized_exception": "direct SIGTERM stop of the named old C1-3 v4 task",
+    "exception_scope": "only the named legacy task; no restart, no new seed, no scientific claim"
+  },
+  "last_updated_at": "2026-07-30T12:14:40+08:00",
+  "task_commits": {
+    "T-R0.8": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479",
+    "T-R0.9_source": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
+  },
+  "files": [
+    {
+      "task_id": "T-R0.1",
+      "kind": "machine_readable_preflight",
+      "repo_path": "manifests/reactflow_delta/r0/preflight_snapshot.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/preflight_snapshot.json",
+      "sha256": "80d8da7c8dee2ff8ab89033f9dcdd198b0a5143a1e7aa6bb52e3b8879921ff35"
+    },
+    {
+      "task_id": "T-R0.1",
+      "kind": "human_readable_preflight",
+      "repo_path": "reports/r0_read_only_preflight.md",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/r0_read_only_preflight.md",
+      "sha256": "978124d2ac826bf430d30daf7d026d8725d67b2b106ee4018fdaf5271000c132"
+    },
+    {
+      "task_id": "T-R0.6",
+      "kind": "frozen_contract",
+      "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+      "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+    },
+    {
+      "task_id": "T-R0.8",
+      "kind": "contract_provenance_helper",
+      "repo_path": "src/reactflow/delta/manifests.py",
+      "sha256": "8b56c2afe86f60396273301d15808543d00da22937dd02f7c47ca0198de10025",
+      "git_commit": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
+    },
+    {
+      "task_id": "T-R0.9",
+      "kind": "targeted_import_and_contract_test_source",
+      "repo_path": "tests/reactflow_delta/test_manifests.py",
+      "sha256": "4f60500dc2c9c2e2b79afe1d6247abecd18ff25b90bafced0945e315f3690bd1",
+      "precheck_runtime": "Python 3.10.20",
+      "precheck_result": "3 passed; not R0 acceptance because V3 requires Python 3.11",
+      "git_commit": "4aaa8e107bc7cc1d74d0b59a57cfa7987c162479"
+    },
+    {
+      "task_id": "T-R0.3",
+      "kind": "historical_only_archive_manifest",
+      "repo_path": "manifests/reactflow_delta/r0/legacy_c1_3_v4_archive_manifest.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/legacy_c1_3_v4_archive_manifest.json",
+      "sha256": "847ea2a879b7f6922edd862391367b00c2673231d119d8d408e2f7c6dcef0fab"
+    },
+    {
+      "task_id": "T-R0.3",
+      "kind": "historical_only_raw_launch_log",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/legacy_c1_3_v4_launch.log",
+      "sha256": "4e18b652b330a0e7370c19693daf3bb142a958ba229322d487d0b5e211edcf56",
+      "line_count": 879
+    },
+    {
+      "task_id": "T-R0.3",
+      "kind": "historical_only_human_readable_report",
+      "repo_path": "reports/r0_legacy_c1_3_v4_archive.md",
+      "sha256": "01af199c224cbf812fba02f97c4ce52847418c55aad6d37898af0073f9d0691e"
+    },
+    {
+      "task_id": "T-R0.9",
+      "kind": "python311_import_and_contract_acceptance",
+      "repo_path": "manifests/reactflow_delta/r0/r0_python311_import_acceptance.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/r0_python311_import_acceptance.json",
+      "sha256": "a7551117d563c25954642a2b291d7a2f32f5621f92ca38a13f6fb3d01c6e7c5e",
+      "runtime": "Python 3.11.15",
+      "result": "3 passed"
+    },
+    {
+      "task_id": "R0-GATE",
+      "kind": "external_final_acceptance_certificate",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/r0/r0_acceptance_5771e534.json",
+      "sha256": "29e32c9d28706ccf7f5202419cd0819881a2adaf971579132914c1a9190ec1ab",
+      "verification_commit": "5771e534cb2421e163307d4c7bde535270443661"
+    }
+  ],
+  "pending": [],
+  "scientific_boundary": "R0 setup records and legacy historical evidence are not EPRO efficacy evidence and cannot authorize D0 until every R0 acceptance condition passes."
+}

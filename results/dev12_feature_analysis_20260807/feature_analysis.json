@@ -1,0 +1,358 @@
+{
+  "report": "m0x_dev12_feature_analysis.v1",
+  "model_dir": "results/epro_dev12_regression_std_20260807b",
+  "feature_dim": 42,
+  "feature_importance_top20": [
+    {
+      "feature": "dist_to_mut",
+      "dim": 1,
+      "grad_x_input": 0.035194311290979385
+    },
+    {
+      "feature": "wt_reactivity",
+      "dim": 0,
+      "grad_x_input": 0.02000521495938301
+    },
+    {
+      "feature": "delta_thermo_3",
+      "dim": 34,
+      "grad_x_input": 0.012695856392383575
+    },
+    {
+      "feature": "delta_thermo_4",
+      "dim": 35,
+      "grad_x_input": 0.011342542245984077
+    },
+    {
+      "feature": "struct_aware_4",
+      "dim": 40,
+      "grad_x_input": 0.003437033388763666
+    },
+    {
+      "feature": "struct_aware_0",
+      "dim": 36,
+      "grad_x_input": 0.0028687892481684685
+    },
+    {
+      "feature": "ctx0_A",
+      "dim": 10,
+      "grad_x_input": 0.0026809985283762217
+    },
+    {
+      "feature": "struct_aware_2",
+      "dim": 38,
+      "grad_x_input": 0.0026139160618185997
+    },
+    {
+      "feature": "ctx-1_U",
+      "dim": 9,
+      "grad_x_input": 0.002371768932789564
+    },
+    {
+      "feature": "ctx1_A",
+      "dim": 14,
+      "grad_x_input": 0.002294388134032488
+    },
+    {
+      "feature": "ctx0_U",
+      "dim": 13,
+      "grad_x_input": 0.0020733478013426065
+    },
+    {
+      "feature": "ctx2_U",
+      "dim": 21,
+      "grad_x_input": 0.00203904346562922
+    },
+    {
+      "feature": "struct_aware_1",
+      "dim": 37,
+      "grad_x_input": 0.0019599096849560738
+    },
+    {
+      "feature": "ctx-2_U",
+      "dim": 5,
+      "grad_x_input": 0.0018277125200256705
+    },
+    {
+      "feature": "ctx-2_A",
+      "dim": 2,
+      "grad_x_input": 0.00179011351428926
+    },
+    {
+      "feature": "ctx-1_A",
+      "dim": 6,
+      "grad_x_input": 0.0017802754882723093
+    },
+    {
+      "feature": "ctx-1_G",
+      "dim": 8,
+      "grad_x_input": 0.0016694958321750164
+    },
+    {
+      "feature": "ctx2_G",
+      "dim": 20,
+      "grad_x_input": 0.0016618049703538418
+    },
+    {
+      "feature": "ref_U",
+      "dim": 25,
+      "grad_x_input": 0.001654633553698659
+    },
+    {
+      "feature": "ctx1_U",
+      "dim": 17,
+      "grad_x_input": 0.0016365714836865664
+    }
+  ],
+  "feature_importance_block": {
+    "b0x_31d": 0.09526495635509491,
+    "delta_thermo_5d": 0.02806204743683338,
+    "struct_aware_6d": 0.011888587847352028
+  },
+  "feature_target_corr": {
+    "wt_reactivity": {
+      "dim": 0,
+      "corr_target_train": -0.13166991253885843,
+      "corr_target_val": -0.29608915584388074
+    },
+    "dist_to_mut": {
+      "dim": 1,
+      "corr_target_train": 0.11337217368294963,
+      "corr_target_val": -0.0017569482971585746
+    },
+    "ctx-2_A": {
+      "dim": 2,
+      "corr_target_train": -0.055281384627088134,
+      "corr_target_val": -0.03950252267018103
+    },
+    "ctx-2_C": {
+      "dim": 3,
+      "corr_target_train": -0.06834179313837344,
+      "corr_target_val": -0.015206642119128142
+    },
+    "ctx-2_G": {
+      "dim": 4,
+      "corr_target_train": 0.062090849399081584,
+      "corr_target_val": 0.0989659538277839
+    },
+    "ctx-2_U": {
+      "dim": 5,
+      "corr_target_train": -0.004060031245870909,
+      "corr_target_val": 0.022014943190370763
+    },
+    "ctx-1_A": {
+      "dim": 6,
+      "corr_target_train": 0.05611050755585151,
+      "corr_target_val": -0.04699945537123805
+    },
+    "ctx-1_C": {
+      "dim": 7,
+      "corr_target_train": -0.06719812848146837,
+      "corr_target_val": 0.014253783688311511
+    },
+    "ctx-1_G": {
+      "dim": 8,
+      "corr_target_train": 0.06099060371911271,
+      "corr_target_val": 0.0992158068456533
+    },
+    "ctx-1_U": {
+      "dim": 9,
+      "corr_target_train": -0.11384940003819685,
+      "corr_target_val": -0.009845653532159602
+    },
+    "ctx0_A": {
+      "dim": 10,
+      "corr_target_train": -0.05537362635630101,
+      "corr_target_val": -0.033032874134561414
+    },
+    "ctx0_C": {
+      "dim": 11,
+      "corr_target_train": 0.08077272129317054,
+      "corr_target_val": 0.015985159905063214
+    },
+    "ctx0_G": {
+      "dim": 12,
+      "corr_target_train": 0.05733565668932958,
+      "corr_target_val": 0.0439061555444247
+    },
+    "ctx0_U": {
+      "dim": 13,
+      "corr_target_train": -0.011624325657385127,
+      "corr_target_val": -0.037075113771132984
+    },
+    "ctx1_A": {
+      "dim": 14,
+      "corr_target_train": -0.054498612463259585,
+      "corr_target_val": 0.008547438865588616
+    },
+    "ctx1_C": {
+      "dim": 15,
+      "corr_target_train": 0.08145474569811988,
+      "corr_target_val": -0.03359448132305398
+    },
+    "ctx1_G": {
+      "dim": 16,
+      "corr_target_train": -0.09260881353879322,
+      "corr_target_val": 0.036323209540586564
+    },
+    "ctx1_U": {
+      "dim": 17,
+      "corr_target_train": -0.0002182486342961034,
+      "corr_target_val": 0.03425094832799872
+    },
+    "ctx2_A": {
+      "dim": 18,
+      "corr_target_train": -0.07775976881043543,
+      "corr_target_val": 0.005982777025810893
+    },
+    "ctx2_C": {
+      "dim": 19,
+      "corr_target_train": -0.06277029807841908,
+      "corr_target_val": -0.007035417002216841
+    },
+    "ctx2_G": {
+      "dim": 20,
+      "corr_target_train": -0.07127198236107968,
+      "corr_target_val": -0.03185918846719352
+    },
+    "ctx2_U": {
+      "dim": 21,
+      "corr_target_train": -0.05202050970293446,
+      "corr_target_val": 0.03620222517841409
+    },
+    "ref_A": {
+      "dim": 22,
+      "corr_target_train": -0.06934640536860792,
+      "corr_target_val": -0.016451397073299883
+    },
+    "ref_C": {
+      "dim": 23,
+      "corr_target_train": -0.07317604458220534,
+      "corr_target_val": 0.027548729972194246
+    },
+    "ref_G": {
+      "dim": 24,
+      "corr_target_train": -0.06257201542331454,
+      "corr_target_val": 0.018520229332655597
+    },
+    "ref_U": {
+      "dim": 25,
+      "corr_target_train": -0.10814714433758352,
+      "corr_target_val": 0.01812835544958417
+    },
+    "alt_A": {
+      "dim": 26,
+      "corr_target_train": -0.09558717331980837,
+      "corr_target_val": 0.01884840259223615
+    },
+    "alt_C": {
+      "dim": 27,
+      "corr_target_train": -0.06787087956192596,
+      "corr_target_val": 0.01953116276877008
+    },
+    "alt_G": {
+      "dim": 28,
+      "corr_target_train": -0.08708291428853497,
+      "corr_target_val": 0.023420612442124695
+    },
+    "alt_U": {
+      "dim": 29,
+      "corr_target_train": -0.06376257361668403,
+      "corr_target_val": -0.014494023826348986
+    },
+    "is_mutation": {
+      "dim": 30,
+      "corr_target_train": -0.11307820014858883,
+      "corr_target_val": 0.030852212206265838
+    },
+    "delta_thermo_0": {
+      "dim": 31,
+      "corr_target_train": 0.04213392113013408,
+      "corr_target_val": 0.005989102977778544
+    },
+    "delta_thermo_1": {
+      "dim": 32,
+      "corr_target_train": 0.009677525671379089,
+      "corr_target_val": 0.07061177600932311
+    },
+    "delta_thermo_2": {
+      "dim": 33,
+      "corr_target_train": -0.04196808615226757,
+      "corr_target_val": -0.006026133450403675
+    },
+    "delta_thermo_3": {
+      "dim": 34,
+      "corr_target_train": 0.047599810567016156,
+      "corr_target_val": 0.01288194739257722
+    },
+    "delta_thermo_4": {
+      "dim": 35,
+      "corr_target_train": 0.037698514117224614,
+      "corr_target_val": 0.013411687571180199
+    },
+    "struct_aware_0": {
+      "dim": 36,
+      "corr_target_train": -0.011972050937446162,
+      "corr_target_val": 0.08326250163593518
+    },
+    "struct_aware_1": {
+      "dim": 37,
+      "corr_target_train": -0.008768876209249857,
+      "corr_target_val": 0.002350930467892459
+    },
+    "struct_aware_2": {
+      "dim": 38,
+      "corr_target_train": -0.0031221120511508793,
+      "corr_target_val": 0.04616761646324281
+    },
+    "struct_aware_3": {
+      "dim": 39,
+      "corr_target_train": -0.04552735305871331,
+      "corr_target_val": -0.04081863668816118
+    },
+    "struct_aware_4": {
+      "dim": 40,
+      "corr_target_train": 0.0169057638317377,
+      "corr_target_val": -0.04888337779425962
+    },
+    "struct_aware_5": {
+      "dim": 41,
+      "corr_target_train": 0.027245553256209518,
+      "corr_target_val": 0.018038568158273666
+    }
+  },
+  "burden_distribution": {
+    "train": {
+      "n": 3516,
+      "mean": 0.12497474693301129,
+      "std": 0.0876981997209479,
+      "median": 0.1045240239833842,
+      "p10": 0.0589882395104201,
+      "p90": 0.20227000928824368
+    },
+    "val": {
+      "n": 548,
+      "mean": 0.14400472314178042,
+      "std": 0.07841858262924782,
+      "median": 0.13697979060572224,
+      "p10": 0.07976293856093188,
+      "p90": 0.21266260200763584
+    },
+    "kl_train_vs_val": null,
+    "ttest_p": null,
+    "ks_stat": 0.25071414929041796,
+    "ks_p": 1.0424031908890426e-26
+  },
+  "model_margin": {
+    "train_pos": {
+      "n": 471344,
+      "spearman_abs_vs_true": 0.2640981071724664,
+      "spearman_signed_vs_true": -0.11926635053699484
+    },
+    "val_pos": {
+      "n": 86126,
+      "spearman_abs_vs_true": 0.44552922560619,
+      "spearman_signed_vs_true": -0.21728846365654134
+    }
+  }
+}

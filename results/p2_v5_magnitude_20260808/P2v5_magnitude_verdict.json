@@ -1,0 +1,201 @@
+{
+  "adjudicated_at_utc": "2026-08-08T16:00:40.760058+00:00",
+  "authority_epoch": 17,
+  "best_ci_low_min": 0.323234737835169,
+  "best_model": "deepsets",
+  "best_skill_mean": 0.67685930324826,
+  "caller": "caller_v3 (empirical-scatter noise recalibration)",
+  "criteria_checks": {
+    "best_bootstrap_ci_low_gt_0": true,
+    "best_skill_gt_0": true,
+    "estimand_identifiable_skill_numeric": true,
+    "n_seeds>=5_all_models": true
+  },
+  "direction_consistency_seed0": {
+    "n_positive": 10,
+    "n_pubs_with_changers": 10,
+    "per_pub_skill_seed0": {
+      "UNKNOWN_PUBLICATION:CL1LIG": 0.5521357060760701,
+      "UNKNOWN_PUBLICATION:HC16M2R": 0.14356591321098588,
+      "UNKNOWN_PUBLICATION:RNASEP": 0.7856879660279981,
+      "pmid_24469816": 0.5589329086724916,
+      "pmid_25183835": 0.3462065697432464,
+      "pmid_25303992": 0.7826594635276607,
+      "pmid_25883046": 0.4844543940753202,
+      "pmid_29446752": 0.82438460221962,
+      "pmid_35982307": 0.4839445384056147,
+      "pub_RNAPuzzle18_daslab": 0.36467190534840566
+    }
+  },
+  "endpoint": "endpoint_v5",
+  "estimand_status": "IDENTIFIABLE",
+  "fold_info": {
+    "UNKNOWN_PUBLICATION:5SRRNA": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:ADDRSW": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:AGSARNA": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:CL1LIG": {
+      "n_held_changers": 113,
+      "n_train_changers": 2282,
+      "seconds": 1597.8
+    },
+    "UNKNOWN_PUBLICATION:GLYCFN": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:HC16M2R": {
+      "n_held_changers": 3,
+      "n_train_changers": 2387,
+      "seconds": 2042.2
+    },
+    "UNKNOWN_PUBLICATION:MDLOOP": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:RNAPZ6": {
+      "n_held_changers": 0,
+      "n_train_changers": 2380
+    },
+    "UNKNOWN_PUBLICATION:RNASEP": {
+      "n_held_changers": 15,
+      "n_train_changers": 2380,
+      "seconds": 2161.9
+    },
+    "UNKNOWN_PUBLICATION:SRPDIV": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "UNKNOWN_PUBLICATION:TRNAPH": {
+      "n_held_changers": 0,
+      "n_train_changers": 2395
+    },
+    "pmid_24469816": {
+      "n_held_changers": 110,
+      "n_train_changers": 2280,
+      "seconds": 1714.1
+    },
+    "pmid_25183835": {
+      "n_held_changers": 298,
+      "n_train_changers": 2292,
+      "seconds": 1926.4
+    },
+    "pmid_25303992": {
+      "n_held_changers": 58,
+      "n_train_changers": 2523,
+      "seconds": 1845.9
+    },
+    "pmid_25883046": {
+      "n_held_changers": 68,
+      "n_train_changers": 2324,
+      "seconds": 1807.0
+    },
+    "pmid_29446752": {
+      "n_held_changers": 1792,
+      "n_train_changers": 587,
+      "seconds": 1635.0
+    },
+    "pmid_35982307": {
+      "n_held_changers": 68,
+      "n_train_changers": 2324,
+      "seconds": 1646.5
+    },
+    "pub_RNAPuzzle18_daslab": {
+      "n_held_changers": 69,
+      "n_train_changers": 2326,
+      "seconds": 1497.6
+    }
+  },
+  "metric_semantics": "CONDITIONAL_WMAE_SKILL_OVER_TRUE_CHANGERS",
+  "n_distinct_publications": 18,
+  "note": "endpoint_v5 conditional-magnitude re-adjudication (Route B, authority epoch 17). Metric computed over the held-out TRUE CHANGERS (caller_v3 C_i=1) from the p2_v5_magnitude_20260808 GPU run. baseline = train-fold weighted-mean trivial constant (no held-out leakage). Primary endpoint_v4 STOP is preserved (frozen epoch 16).",
+  "per_model": {
+    "deepsets": {
+      "ci_low_min": 0.323234737835169,
+      "ci_low_seeds": [
+        0.3792680447455682,
+        0.346192402384362,
+        0.33348549143717565,
+        0.3438850572557425,
+        0.323234737835169
+      ],
+      "permutation_p_min": 1.0,
+      "skill_mean": 0.67685930324826,
+      "skill_seeds": [
+        0.7012959860898564,
+        0.6771982322003781,
+        0.6526586613817368,
+        0.6962808669900188,
+        0.6568627695793102
+      ]
+    },
+    "gbm": {
+      "ci_low_min": 0.2614895305988437,
+      "ci_low_seeds": [
+        0.26290275540695374,
+        0.2614895305988437,
+        0.26298456905173795,
+        0.2632477973594878,
+        0.26252104243067087
+      ],
+      "permutation_p_min": 1.0,
+      "skill_mean": 0.3189649056000391,
+      "skill_seeds": [
+        0.3189649056000391,
+        0.3189649056000391,
+        0.3189649056000391,
+        0.3189649056000391,
+        0.3189649056000391
+      ]
+    },
+    "linear": {
+      "ci_low_min": 0.2562262794637101,
+      "ci_low_seeds": [
+        0.2573561889821383,
+        0.25650236519154,
+        0.2562262794637101,
+        0.2572657590617239,
+        0.25871189507073145
+      ],
+      "permutation_p_min": 1.0,
+      "skill_mean": 0.3084524923294414,
+      "skill_seeds": [
+        0.3084524923294414,
+        0.3084524923294414,
+        0.3084524923294414,
+        0.3084524923294414,
+        0.3084524923294414
+      ]
+    },
+    "p2_mlp": {
+      "ci_low_min": 0.31487618299974507,
+      "ci_low_seeds": [
+        0.3286007252427219,
+        0.34522598647466474,
+        0.3387792638751723,
+        0.32632101820827586,
+        0.31487618299974507
+      ],
+      "permutation_p_min": 1.0,
+      "skill_mean": 0.60184878512106,
+      "skill_seeds": [
+        0.596425584732944,
+        0.6141337803013375,
+        0.6042159725226581,
+        0.5858345878219071,
+        0.6086340002264533
+      ]
+    }
+  },
+  "primary_v4_verdict": "STOP_FROZEN_EPOCH16",
+  "run_id": "p2_v5_magnitude_20260808",
+  "schema": "reactflow_delta.p2v5_magnitude.v1.rebuild",
+  "verdict": "GO"
+}

@@ -1,0 +1,52 @@
+schema_version: reactflow_delta.source_universe.v1
+universe_id: reactflow_delta_d0x_source_universe_20260803_v1
+phase_id: D0-X
+status: FROZEN_METADATA_ONLY_RAW_RECALL_NOT_RUN
+created_at: "2026-08-03T23:15:00+08:00"
+contract_sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+source_code_binding:
+  git_commit: 3e9d596ade3568beeba0f538ab762401d589d03e
+  generator_path: scripts/reactflow_delta/d0x_freeze_rmdb_release_index.py
+  generator_sha256: 73333079f63783f6a8b5ab7e25c8ab0d8c1f0eec64897e199e6fd202ce61abec
+policy_bindings:
+  declaration_path: configs/reactflow_delta/d0x_source_declaration_v1.yaml
+  declaration_sha256: d22a830baac86f553430d57a15c3cdc13abf7014f3b36a31d2c119aa32b73af8
+  license_policy_path: configs/reactflow_delta/d0x_license_policy_v1.yaml
+  license_policy_sha256: f03f11beebe2e8371b9ec241c0d847cf019e804afc629237f076467f01201965
+rmdb_snapshot:
+  repository: DasLab/rmdb.github.io
+  repository_commit: 339b4fefc9a7092d0847d1d4017a3eadf0771fd7
+  release_asset_records_path: data_registry/d0x/rmdb_release_assets_20260803.jsonl
+  release_asset_records_sha256: f8b421a798ba23e947457497661ffc6ede78f0c6c5a01f74f37a29a86f4ff254
+  release_asset_record_count: 1024
+  summary_path: data_registry/d0x/rmdb_release_assets_20260803.summary.json
+  summary_sha256: 8013a14b3851f3ada290fb8b15b986245f4a09f4202edf0aaef67cd14c83bdb0
+  registry_membership_match: true
+  initial_disposition_for_all_assets: NOT_SEARCHED
+  raw_api_artifact_root: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0x/source_content_metadata_20260803T231500+0800_r1/raw_api
+  raw_api_sha256:
+    data-eterna: d64aefb313e6a0e0f12625b258a8a2c0a2b95e9560671e9bfcb264f20ba94342
+    data-puzzle: 2b9f15cb7993672132b93aaccc55008953693f433edae2c7b69a75acbfd0db7c
+    data-riboswitches: 6daa552913fdb9555d34843bf9e17f164086ed836c081a9bb568feafebe0cefe
+    data-rna-structures: ea08a18d75c07fe66872dc7e583965abaa761047a1fffcc61b949b75da221453
+    data-general: 7e5f286e96d66d3466524617ad3a9493bff82fc64f3d50da4e14746d9c3cec5f
+declared_non_rmdb_channels:
+  M2_SEQ_PRIMARY_PAPERS: NOT_SEARCHED
+  MUTATE_MAP_RESCUE: NOT_SEARCHED
+  CLASS_SNITCH: NOT_SEARCHED
+  RIBONANZA: NOT_SEARCHED
+  GEO_SRA: NOT_SEARCHED
+  PAPER_SUPPLEMENTS: NOT_SEARCHED
+  ETERNA_OPENKNOT_NON_RMDB: NOT_SEARCHED
+counts:
+  rmdb_asset_records: 1024
+  rmdb_assets_searched_or_parsed: 0
+  exact_delta_pairs: null
+  exact_delta_pairs_status: NOT_RUN_NOT_ZERO
+manual_audit:
+  status: NOT_RUN
+  reason: FULL_D0X_RECALL_HAS_NOT_STARTED
+finalization:
+  status: SOURCE_CONTENT_FROZEN_NOT_D0X_PHASE_FINALIZED
+scientific_boundary: METADATA_SCOPE_ONLY_NO_PAIR_TIER_OR_LEARNABILITY_CLAIM
+

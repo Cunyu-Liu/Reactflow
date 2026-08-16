@@ -1,0 +1,20 @@
+{
+  "categories": {
+    "Eterna": 55,
+    "General": 879,
+    "RNA_Puzzles": 90
+  },
+  "entries_dir": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/entries_clone_20260730/_entries",
+  "entries_with_doi": 827,
+  "entries_with_masked_sequence": 311,
+  "entries_with_pubmed": 839,
+  "entries_with_rdat_url": 1024,
+  "generated_at": "2026-07-30T17:40:40.093264+08:00",
+  "output_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/d0r_accession_registry.jsonl",
+  "parse_error_count": 0,
+  "parse_errors": [],
+  "schema_version": "reactflow-delta-d0r-accession-registry-v1",
+  "scientific_boundary": "Paper-accession registry only. Each record maps an RMDB entry to its citation (doi/pubmed) and RDAT asset URL. No construct, pair, tier, or model claim is made. Masked header sequences require per-profile RDAT parsing to recover actual construct sequences.",
+  "stage": "D0-R",
+  "total_entries": 1024
+}

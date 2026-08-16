@@ -1,0 +1,321 @@
+{
+  "schema_version": "reactflow-delta-d0-artifact-manifest-v1",
+  "stage": "D0",
+  "status": "complete_gate_not_passed_no_advance",
+  "contract": {
+    "repo_path": "docs/contracts/ReactFlow分阶段执行提示词_ReactFlowDelta科研合同_v3_EPRO_20260729.md",
+    "sha256": "3efcc1504208d8089236dfe4e7d41553741441d3b86b6174c8b5af52d614ec10"
+  },
+  "artifact_root": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0",
+  "last_updated_at": "2026-07-30T14:15:19+08:00",
+  "task_commits": {
+    "T-D0.1": "ca8a3fb0f341b3d4c1f131536542f61569a96cc6",
+    "T-D0.2": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa",
+    "T-D0.3": "1beed04af9d53f4259f3edbc68783669e34e9e5b",
+    "T-D0.4": "148dc2add8526c687fa89a1dbccefbaea0cfa20f",
+    "T-D0.5": "940d1a9411c8cb034e3ac814e4129f741a23882a",
+    "T-D0.6": "9158f2214c81888c88ad6b25fe18820c2a273276",
+    "T-D0.7": "1b9f32396b8b9d5e297e44aa8cce18d98b24035c",
+    "T-D0.8": "e8bfa4fb66bee124b3a38530d97850387fd5bed3",
+    "T-D0.9": "de4f5134f8db90970f25c90ee7bfb9ae3e4ff775",
+    "T-D0.10": "169778e9687387ec3dcc0bdd903c36ab0acedea4",
+    "T-D0.11": "a79fd073dd1d28ab8b2a2554efd6e8050e52550d",
+    "T-D0.12": "a79fd073dd1d28ab8b2a2554efd6e8050e52550d"
+  },
+  "files": [
+    {
+      "task_id": "T-D0.1",
+      "kind": "source_registry_schema",
+      "repo_path": "data_registry/source_registry.schema.json",
+      "sha256": "7fe820d1a1bbd6f74f35534911bdc71779bbda5a39be6bdb2faedf5fc00c26b7"
+    },
+    {
+      "task_id": "T-D0.1",
+      "kind": "fail_closed_schema_validator",
+      "repo_path": "src/reactflow/delta/schema.py",
+      "sha256": "fa609f818cd22963efecdc07a9430d4e47308c831b2701014d235a8b5ca5d0ac"
+    },
+    {
+      "task_id": "T-D0.1",
+      "kind": "schema_failure_tests",
+      "repo_path": "tests/reactflow_delta/test_schema.py",
+      "sha256": "e26a6cbb20dcb2ac6ef54a8740ee23fd0f9473c9a854885e317be152f41e03a1"
+    },
+    {
+      "task_id": "T-D0.2",
+      "kind": "rmdb_metadata_registry_builder",
+      "repo_path": "src/reactflow/delta/data.py",
+      "sha256": "49236c4f4f40e29d58494773f632f702c92bf5cb995adc628ac082ddb6d66bd1",
+      "git_commit": "fabc0ee562ffafd8ba58a5eddd5c557c588106aa"
+    },
+    {
+      "task_id": "T-D0.2",
+      "kind": "rmdb_metadata_registry_cli",
+      "repo_path": "scripts/reactflow_delta/build_source_registry.py",
+      "sha256": "80d6b26e0ec7dd370442cd6fa1f4c13850422b634caa455599ebc760e60a1b68"
+    },
+    {
+      "task_id": "T-D0.2",
+      "kind": "rmdb_metadata_registry_tests",
+      "repo_path": "tests/reactflow_delta/test_source_registry_builder.py",
+      "sha256": "9cabe0e31937d46c80b68d18c6306d1e6c5a83ebde9fe2163445154ede934dbb"
+    },
+    {
+      "task_id": "T-D0.2",
+      "kind": "source_registry",
+      "repo_path": "data_registry/source_registry.jsonl",
+      "sha256": "f324d5d01d1e88c6359e37f52f5f13b1ba6c6a8f193fe313a85e8edc08c9e366",
+      "record_count": 6,
+      "scope": "RMDB metadata only; no RDAT payloads"
+    },
+    {
+      "task_id": "T-D0.2",
+      "kind": "raw_manifest",
+      "repo_path": "data_registry/raw_manifest.json",
+      "sha256": "d3e1696a1fcc382ea9036c2a2e7ab3ea54b77406796096996cdce4e7d38ff350",
+      "raw_metadata_snapshot": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/metadata_20260730T123010+0800",
+      "release_count": 5,
+      "advertised_release_asset_bytes": 12513787682,
+      "scope": "release/index/format/license metadata only; no RDAT payloads"
+    },
+    {
+      "task_id": "T-D0.3",
+      "kind": "filename_only_candidate_builder",
+      "repo_path": "src/reactflow/delta/data.py",
+      "sha256": "7a246764e3d96bfc3b0d92ccc4c948126f87e6d437c0cd917f4b5f9180279137"
+    },
+    {
+      "task_id": "T-D0.3",
+      "kind": "filename_only_candidate_cli_and_tests",
+      "repo_paths": ["scripts/reactflow_delta/classify_rmdb_candidates.py", "tests/reactflow_delta/test_rmdb_candidates.py"],
+      "sha256": {
+        "scripts/reactflow_delta/classify_rmdb_candidates.py": "f624a365a5da3176a8979ba06c3f87d9ab6bd5e59184f0a028f3e714631fc363",
+        "tests/reactflow_delta/test_rmdb_candidates.py": "40f7555f119dbd4ffe83133adf0460df9a7673e60bf4e8fa02563750d67c31f1"
+      }
+    },
+    {
+      "task_id": "T-D0.3",
+      "kind": "rmdb_filename_candidate_manifest",
+      "repo_path": "data_registry/rmdb_filename_candidates.json",
+      "sha256": "345170bf131889a866345ea0ade7020466eff52d791b312d207bdd4f228ff925",
+      "fixture_selection_count": 6,
+      "strict_filename_candidate_counts": {
+        "m2_named": 15,
+        "m2r_unconfirmed": 11,
+        "variant_or_library_named": 108,
+        "explicit_rescue_or_compensatory_named": 0
+      },
+      "scientific_status": "unconfirmed until entry metadata and RDAT parsing"
+    },
+    {
+      "task_id": "T-D0.4",
+      "kind": "rdat_fixture_byte_verifier",
+      "repo_paths": ["src/reactflow/delta/data.py", "scripts/reactflow_delta/verify_rdat_fixtures.py", "tests/reactflow_delta/test_rdat_fixtures.py"],
+      "sha256": {
+        "src/reactflow/delta/data.py": "dfc0bdc950c9322976c4b9dc90d7f14d7a54c10287a015e24b51a9098c5ff700",
+        "scripts/reactflow_delta/verify_rdat_fixtures.py": "0740447aba4402b06c7a6835bd3f2f039d912f04017bc06206774757d323bfe3",
+        "tests/reactflow_delta/test_rdat_fixtures.py": "6eaefa83e01610b54ac59070cc4b0624069c1406fc79261fb2a950774f588080"
+      }
+    },
+    {
+      "task_id": "T-D0.4",
+      "kind": "byte_verified_rdat_fixture_manifest",
+      "repo_path": "data_registry/rdat_fixture_manifest.json",
+      "sha256": "52b2ebf7235e4b742e7c5d40903834a319e3dc1ade921b684e1a8a560dddcc53",
+      "raw_fixture_directory": "/mnt/cunyuliu/reactflow_delta_raw/rmdb/fixtures_20260730T125000+0800",
+      "fixture_count": 6,
+      "fixture_counts_by_filename_candidate_category": {"m2_named_candidate": 3, "variant_or_library_named_candidate": 3},
+      "scientific_status": "byte-verified only; RDAT parsing remains pending"
+    },
+    {
+      "task_id": "T-D0.5",
+      "kind": "fail_closed_rdat_construct_parser",
+      "repo_paths": ["src/reactflow/delta/rdat.py", "scripts/reactflow_delta/parse_rdat_constructs.py", "tests/reactflow_delta/test_rdat_parser.py"],
+      "sha256": {
+        "src/reactflow/delta/rdat.py": "70f76469462c87832be80991ce76a74abeee99d6d177a8cd2db6e1834928db11",
+        "scripts/reactflow_delta/parse_rdat_constructs.py": "6cbb16d0bc359dccad69a4aac714cf1431a4a738a99bdf07e2d95ccdd59ca061",
+        "tests/reactflow_delta/test_rdat_parser.py": "c06db9ca27d2c599d180820ac8ce8215f0afcafd1b1241dd5b68b50f745e7d8b"
+      },
+      "parser_scope": "RDAT 0.34 structural validation, profile annotations, and missing-value counts only; no reactivity imputation"
+    },
+    {
+      "task_id": "T-D0.5",
+      "kind": "byte_verified_rdat_construct_parse_manifest",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rdat_construct_parse_manifest_6fixtures.json",
+      "sha256": "e3b9d5a18ca337c3ae599a128f294fdaa26db51ada133ee2351a990117ef399e",
+      "fixture_count": 6,
+      "profile_counts_by_fixture": {"SPINACH_M2G4_0001.rdat": 160, "M2SL5_2A3_0000.rdat": 2499, "M2SL5_DMS_0000.rdat": 2499, "ETERNA_TOD_0000.rdat": 3, "ETERNA_R42_0004.rdat": 6, "ETERNA_R42_0005.rdat": 8},
+      "scientific_status": "structural parse only; no construct, pair, tier, or model claim"
+    },
+    {
+      "task_id": "T-D0.5",
+      "kind": "retained_duplicate_parse_artifact_with_noncanonical_filename",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rdat_construct_parse_manifest_20260730T131600+0800.json",
+      "sha256": "e3b9d5a18ca337c3ae599a128f294fdaa26db51ada133ee2351a990117ef399e",
+      "administrative_note": "Retained without deletion because its manually supplied filename timestamp is not reliable; canonical artifact above has no timestamp in its filename."
+    },
+    {
+      "task_id": "T-D0.6",
+      "kind": "fail_closed_rmdb_construct_and_replicate_auditor",
+      "repo_paths": ["src/reactflow/delta/pairing.py", "scripts/reactflow_delta/audit_rmdb_constructs.py", "scripts/reactflow_delta/parse_rmdb.py", "tests/reactflow_delta/test_pairing.py"],
+      "sha256": {
+        "src/reactflow/delta/pairing.py": "67a07637ea7a9e7210097f1f1420322a2a4cc1a081b1ccdc8acde19ef873a804",
+        "scripts/reactflow_delta/audit_rmdb_constructs.py": "3ec4eac875d733fd5d9caf60831b53fa2f360306b60ca9b3bc310c5bcb762dbf",
+        "scripts/reactflow_delta/parse_rmdb.py": "7b3e5b7fe148bdeda8c6750510409e7ba94478e8c871541a2c2a57be7911c979",
+        "tests/reactflow_delta/test_pairing.py": "cb8faa596fdb7c99c5f95945f9e926394696c1f1534836965a8b25b33f182b8d"
+      },
+      "parser_scope": "explicit mutation labels, endpoint identity, parent masking, same-sequence repeats, and pair ineligibility only"
+    },
+    {
+      "task_id": "T-D0.6",
+      "kind": "rmdb_construct_audit",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rmdb_construct_audit_6fixtures.json",
+      "sha256": "d8829ab89e405f4a13fa95ba040ebfeabf1f7d1ac97f084a540fceef9ff4a504",
+      "scope": "six frozen byte-verified RDAT fixtures only",
+      "profile_record_count": 5175,
+      "explicit_wt_profile_count": 1,
+      "single_site_endpoint_unknown_profile_count": 159,
+      "confirmed_single_mutant_profile_count": 0,
+      "confirmed_double_mutant_profile_count": 0,
+      "same_sequence_replicate_group_count": 7,
+      "pair_eligible_profile_count": 0,
+      "scientific_status": "no true WT-mutant pair is established in this fixture scope"
+    },
+    {
+      "task_id": "T-D0.6",
+      "kind": "retained_noncanonical_construct_audit_artifact",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/rmdb_construct_audit_6fixtures_noncanonical_quoted_path.json",
+      "sha256": "d8829ab89e405f4a13fa95ba040ebfeabf1f7d1ac97f084a540fceef9ff4a504",
+      "administrative_note": "The first D0.6 write had literal quote characters in its relative path. Its byte-identical output was moved without deletion to this clearly marked noncanonical retention path; the canonical audit artifact above is the normative reference."
+    },
+    {
+      "task_id": "T-D0.7",
+      "kind": "ribonanza_availability_auditor",
+      "repo_paths": ["src/reactflow/delta/availability.py", "scripts/reactflow_delta/audit_ribonanza_availability.py", "tests/reactflow_delta/test_availability.py"],
+      "sha256": {
+        "src/reactflow/delta/availability.py": "a7f8222a5e06c43b2e490e048b42ac6810f31907312bd013eeeb753501e218ff",
+        "scripts/reactflow_delta/audit_ribonanza_availability.py": "af6dc6fb914cf135e801176ce3d23b2137cb334602327dfb5df2541b1c3e976f",
+        "tests/reactflow_delta/test_availability.py": "6fdcbe59ab7f07ae54334ff8fa313aa2a55322c89b0dfaf14867d272d9e60bd5"
+      },
+      "network_scope": "HTTP HEAD probes only; no Ribonanza raw payload download"
+    },
+    {
+      "task_id": "T-D0.7",
+      "kind": "ribonanza_unavailability_report",
+      "repo_path": "data_registry/ribonanza_availability.json",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/ribonanza_availability.json",
+      "sha256": "437a9371ea85e80c52a9cb4477859e6c1de2f52f5632c6d7dc1aec1536712e83",
+      "source_registry_sha256_after_append": "8fad72fc9b8cb2a2cf317fa23f7e7c810d584ce90589b2b54865e083cf66cbc4",
+      "same_condition_single_edit_pair_count": null,
+      "scientific_status": "unknown because no immutable raw Ribonanza table was acquired"
+    },
+    {
+      "task_id": "T-D0.8",
+      "kind": "candidate_pair_registry_builder",
+      "repo_paths": ["src/reactflow/delta/registry.py", "scripts/reactflow_delta/build_pair_registry.py", "tests/reactflow_delta/test_registry.py", ".gitignore"],
+      "sha256": {
+        "src/reactflow/delta/registry.py": "f19f9c3deb66c6c9b268e13dfc30da917a613b6c8f016ea439e9f508452ecb2a",
+        "scripts/reactflow_delta/build_pair_registry.py": "c7ef97e8e7ac169bd32c659df4d61242ffe4e9ed31e452a72efd9bc79a76500a",
+        "tests/reactflow_delta/test_registry.py": "c73796a7bd177979881897b546d1f268c86b4f4d161965da3ca30ea40524f83c",
+        ".gitignore": "7e69cc903838f713b989337b99a142399d8c4f59fd3d30d1fd52f0e0c24acb38"
+      },
+      "parquet_runtime": "pyarrow 25.0.0 in /mnt/cunyuliu/reactflow_delta_runtime_py311"
+    },
+    {
+      "task_id": "T-D0.8",
+      "kind": "candidate_registry_outputs_not_committed_as_data",
+      "construct_candidates_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/construct_candidates.parquet",
+      "construct_candidates_sha256": "6ac19d10502cdf8e4f6c9c3641bf159532065c355dfaec7885406fe1fc5e3be4",
+      "construct_candidate_row_count": 5175,
+      "pair_candidates_path": "/home/cunyuliu/reactflow_delta_goal_20260729/data_registry/pair_candidates.parquet",
+      "pair_candidates_sha256": "a7ea8d6a31353a4b4923cd96bd689ee56b3ad79f32ae099d4781f589552b5766",
+      "pair_candidate_row_count": 0,
+      "registry_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/candidate_pair_registry_6fixtures.json",
+      "registry_artifact_sha256": "bb213ba866dce0095c566bcfbfc4aa28653bddfdad9b1d5454cdade623ba393a",
+      "scientific_status": "RMDB candidate count=0; Ribonanza and total candidate counts remain unknown; no normalization attempted"
+    },
+    {
+      "task_id": "T-D0.9",
+      "kind": "source_study_parent_probe_condition_pair_matrix_builder",
+      "repo_paths": ["src/reactflow/delta/matrix.py", "scripts/reactflow_delta/build_source_pair_matrix.py", "tests/reactflow_delta/test_matrix.py"],
+      "sha256": {
+        "src/reactflow/delta/matrix.py": "92b53f5bf1fd9b515525357dc1191f7fb36db3c6d58a50d55629c7b9f4d709e6",
+        "scripts/reactflow_delta/build_source_pair_matrix.py": "a5864ca4538da09c32fee9cd0de41a67c2c53f024a093167b8e342e35fb0aded",
+        "tests/reactflow_delta/test_matrix.py": "21867d67f29e2602783f1223bc6665d9eb4e2e1b4d24b88e8aa6a52bac25b352"
+      }
+    },
+    {
+      "task_id": "T-D0.9",
+      "kind": "source_study_parent_probe_condition_pair_matrix",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/source_study_parent_probe_condition_pair_matrix.json",
+      "sha256": "3ab96ae1dba9d4a744228791e779704d6fd4363f577bc80e6c933e13ab6ffdd7",
+      "observed_rmdb_matrix_row_count": 5,
+      "rmdb_candidate_pair_count": 0,
+      "ribonanza_pair_count": null,
+      "scientific_status": "five observed RMDB zero strata and one distinct Ribonanza unknown-not-acquired row"
+    },
+    {
+      "task_id": "T-D0.10",
+      "kind": "pair_relation_taxonomy_auditor",
+      "repo_paths": ["src/reactflow/delta/relations.py", "scripts/reactflow_delta/audit_pair_relations.py", "tests/reactflow_delta/test_relations.py"],
+      "sha256": {
+        "src/reactflow/delta/relations.py": "e7ce4c33770f25a7cf912d55c411495519dc6240dd4df80af345f279503dec2e",
+        "scripts/reactflow_delta/audit_pair_relations.py": "d4b2759eab5504b68e9fc3731fe5b27cee9055a4754e7c1b76344d01623e2afd",
+        "tests/reactflow_delta/test_relations.py": "e5819ed286c4347bb05f99c2b6bbecdf4c32af37ba73756d2364206a3bc087c8"
+      }
+    },
+    {
+      "task_id": "T-D0.10",
+      "kind": "pair_relation_audit",
+      "artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/pair_relation_audit_6fixtures.json",
+      "sha256": "09fe744680deddd92d8a945b32f3a8b4034b6b14283f08f6f7cfdcdb5ff3d0b8",
+      "true_pair_count": 0,
+      "designed_neighbour_count": 0,
+      "synthetic_pair_count": 0,
+      "same_sequence_replicate_group_count": 7,
+      "scientific_status": "no pair candidates were classified; constructs and replicates were not promoted"
+    },
+    {
+      "task_id": "T-D0.11",
+      "kind": "fail_closed_feasibility_synthesizer",
+      "repo_paths": ["src/reactflow/delta/feasibility.py", "scripts/reactflow_delta/build_d0_feasibility_report.py", "tests/reactflow_delta/test_feasibility.py"],
+      "sha256": {
+        "src/reactflow/delta/feasibility.py": "3ad150b25c859afc949d7650e921b7554560e5e1e946103ba828354265358c3d",
+        "scripts/reactflow_delta/build_d0_feasibility_report.py": "7ee642080963b29d19671c21df9dcbb92dfee786e801d70d2552330f7d54db91",
+        "tests/reactflow_delta/test_feasibility.py": "074f172e7faac5930e2f8afc71b475531884e308f2f715717800f9150fcba85b"
+      }
+    },
+    {
+      "task_id": "T-D0.11",
+      "kind": "d0_feasibility_outputs",
+      "summary_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/data_feasibility_summary.json",
+      "summary_sha256": "22397ffc11eba6fa3e344ee90aadbd5dfe96e33d76068a4a07d2a5413c94d97b",
+      "parser_fixture_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/parser_fixture_results.json",
+      "parser_fixture_sha256": "f3af7976b900d04cb2b55e8ac77391f8b7128810808a3b365c5a4c47d02648a8",
+      "report_repo_path": "reports/d0_data_feasibility_audit.md",
+      "report_sha256_at_evidence_commit": "71fe27561ae78c4e637ecea122b947d9798225cc248e7b2d6f1d91bbc0a80a17",
+      "report_sha256_with_version_control": "b424e5fb47023c4a35c676c4061b40a2d1a776abde0e415422be688ecbdc4c16",
+      "highest_currently_supported": "below_Tier_B_audit_only",
+      "d1_allowed": false,
+      "learned_training_started": false,
+      "scientific_status": "D1 and learned training blocked; no threshold lowered"
+    },
+    {
+      "task_id": "T-D0.12",
+      "kind": "fail_closed_d0_acceptance_certificate",
+      "repo_paths": ["src/reactflow/delta/acceptance.py", "scripts/reactflow_delta/record_d0_acceptance.py", "tests/reactflow_delta/test_acceptance.py"],
+      "sha256": {
+        "src/reactflow/delta/acceptance.py": "c3f080f8146bee245a5265e4a7d3a75e7ba35988f321661a123b71fb763c5676",
+        "scripts/reactflow_delta/record_d0_acceptance.py": "56f3d855261d8167a535704cfc96dc69e85f0be295ae558c179334fa66a118ed",
+        "tests/reactflow_delta/test_acceptance.py": "afc69df2af5090e512dc7edf318792da988221251455d73acfebf42a8cf7da1f"
+      },
+      "acceptance_artifact_path": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/d0/d0_acceptance_a79fd073.json",
+      "acceptance_artifact_sha256": "48cf7006d7b040ce4e6fb4ffa904f0fe25ece68d4d7c172463d3a9cf2a4d80b9",
+      "acceptance_status": "complete_gate_not_passed_no_advance",
+      "d1_allowed": false,
+      "learned_training_started": false,
+      "scientific_status": "D0 closure is a non-advancing availability/provenance finding, not a final scientific conclusion"
+    }
+  ],
+  "scientific_boundary": "D0 is a public-data feasibility audit only. It must not start learned training or claim pair counts until parsed artifacts exist."
+}

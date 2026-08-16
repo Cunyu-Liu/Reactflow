@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "contract_name": "static_v1",
+  "frozen_date": "2026-07-21",
+  "source_yaml": "configs/evaluation/static_v1.yaml",
+  "pair_types": {
+    "canonical": ["AU", "UA", "GC", "CG"],
+    "wobble": ["GU", "UG"]
+  },
+  "constraints": {
+    "allow_wobble": true,
+    "allow_pseudoknot": false,
+    "min_loop": 3,
+    "min_pair_distance": 4
+  },
+  "indexing": {
+    "base": 0,
+    "storage": "upper_triangle",
+    "self_pair_rejection": true,
+    "out_of_range_rejection": true
+  },
+  "scoring": {
+    "f1_formula": "2*TP / (2*TP + FP + FN)",
+    "f1_undefined_value": 0.0,
+    "shifted_f1_tolerance": 1,
+    "threshold_matrix_cell": 0.5,
+    "threshold_decoder_min_score": 0.0
+  },
+  "aggregation": {
+    "primary": "micro_f1",
+    "secondary": "macro_f1",
+    "per_tier": true
+  },
+  "distance_bins": [
+    {"name": "short", "min_distance": 1, "max_distance": 11},
+    {"name": "medium", "min_distance": 12, "max_distance": 23},
+    {"name": "long", "min_distance": 24, "max_distance": null}
+  ],
+  "empty_structure": {
+    "contract_adopts": "reactflow_convention",
+    "reactflow_empty_vs_empty_f1": 0.0,
+    "efold_empty_vs_empty_f1": 1.0
+  },
+  "decoder": {
+    "default_mode": "calibrated_marginal",
+    "default_policy": "nested_dp",
+    "temperature": 1.0,
+    "min_loop": 3,
+    "min_score": 0.0
+  },
+  "test_data": {
+    "split_preference": "mmseqs",
+    "excluded_tiers": ["human_mRNA"]
+  },
+  "gate_status": {
+    "criterion_1_fixtures_pass": true,
+    "criterion_2_evaluator_aligned": true,
+    "criterion_3_efold_reasonable": true,
+    "criterion_4_no_unexplained_diffs": true,
+    "overall": "PASS"
+  }
+}

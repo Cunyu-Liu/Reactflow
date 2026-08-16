@@ -1,0 +1,68 @@
+{
+  "caveats": [
+    "RNAformer is a published pretrained model (its own learned weights), NOT trained on our data; pure CPU inference, no training performed here.",
+    "Sequences are length <= 500 (all validation seqs length 135), within RNAformer max_len.",
+    "P_pair uses marginal BPP (sum over partners), a continuous score richer than the dot-bracket binary used by classical baselines."
+  ],
+  "comparison_table": [
+    {
+      "auprc": 0.7353243279593717,
+      "method": "structure_aware_changer"
+    },
+    {
+      "auprc": 0.6935987036031102,
+      "method": "p2_paired_baseline"
+    },
+    {
+      "auprc": 0.6748415894316261,
+      "method": "wt_only"
+    },
+    {
+      "auprc": 0.5553804507376294,
+      "method": "rnaformer_published_dl"
+    },
+    {
+      "auprc": 0.4534433843952393,
+      "method": "vienna_physics_published"
+    }
+  ],
+  "created_at_utc": "2026-08-05T16:51:10.876973+00:00",
+  "data": {
+    "test_accessed": false,
+    "test_sealed": true,
+    "validation_pairs": 548
+  },
+  "iteration_id": "M0X_SOTA_DL_RNAFORMER",
+  "our_reference_auprc": {
+    "p2_paired_baseline": 0.6935987036031102,
+    "structure_aware_changer": 0.7353243279593717,
+    "vienna_physics_published": 0.4534433843952393,
+    "wt_only": 0.6748415894316261
+  },
+  "point_gain_vs_ours": {
+    "note": "point difference of study-macro AUPRC (our structure-aware classifier minus RNAformer)",
+    "point_gain": 0.17994387722174232
+  },
+  "protocol": {
+    "P_pair": "sum_j BPP[i,j] (marginal base-pair probability) from RNAformer sigmoid(logits[0,:,:,-1])",
+    "changer_definition": "|delta_true| > CHANGER_TOL * pair_scale",
+    "changer_tol": 0.05,
+    "metric": "study-macro AUPRC (mean over studies of per-study AP)",
+    "mutants": "3 alternative substitutions via build_mutant_sequences",
+    "our_method": "EPRO_DEV_06 structure-aware changer classifier (trained, GPU)",
+    "reference": "M. Becker et al., Predicting RNA secondary structure by learning unrolled algorithms, Nature Machine Intelligence 2023",
+    "score": "|P_pair(mutant_avg) - P_pair(wt)| per position"
+  },
+  "rnaformer": {
+    "auprc": 0.5553804507376294,
+    "config": "/home/cunyuliu/rna_baselines_src/RNAformer_pretrained/RNAformer_32M_config_intra_family_finetuned.yml",
+    "max_len": 500,
+    "note": "Published pretrained DL folding model; untrained in-silico mutagenesis on our data",
+    "param_count": "32M (published)",
+    "weights": "/home/cunyuliu/rna_baselines_src/RNAformer_pretrained/RNAformer_32M_state_dict_intra_family_finetuned.pth"
+  },
+  "run_id": "m0x_sota_dl_rnaformer_20260805",
+  "schema_version": "reactflow_delta.m0x_sota_dl_rnaformer_manifest.v1",
+  "seed": 20260804,
+  "warning": "EVALUATION_ONLY_NO_TRAINING"
+}

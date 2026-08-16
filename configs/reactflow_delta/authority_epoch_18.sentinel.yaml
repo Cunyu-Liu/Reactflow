@@ -1,0 +1,15 @@
+schema_version: reactflow_delta.authority_epoch_sentinel.v1
+authority_epoch: 18
+current_authority_state: PHASE3_ARCH_EPOCH18_ENDPOINT_V5_AUTHORIZED
+current_phase: PHASE3-ARCH
+active_manifest_sha256: 3a3353a9b25f8c306d864ffdd4fcc5b061154c8c52c049d0eeb4872f034f587d
+bundle_ledger_path: configs/reactflow_delta/authority_epoch_18.bundle.sha256
+bundle_ledger_sha256: 1d83665201d6dfffbf98c260147300a674a3deb77f32c0ff4a25cf0220fd3c73
+created_at: '2026-08-08T21:00:00+08:00'
+emitted_after: BUNDLE_LEDGER
+embedded_self_sha256: FORBIDDEN
+endpoint_version: endpoint_v5
+metric_semantics: CONDITIONAL_WMAE_SKILL
+primary_v4_verdict: STOP_FROZEN_EPOCH16
+phase3_max_rounds_per_scheme: 2
+phase3_primary_scheme: pair_v1_conditional_magnitude_head

@@ -1,0 +1,55 @@
+{
+  "schema": "reactflow_delta.p2_learnability.v1.diag",
+  "run_id": "p2_v1_learnability_20260808",
+  "verdict": "STOP_METHOD_ROUTE",
+  "estimand_status": {
+    "primary": "UNIDENTIFIABLE",
+    "reason": "frozen caller_v2 on frozen d1x_v2 data yields an effectively constant binary changer label (3 changers / 3178 non / 3204 NO_CALL); endpoint degenerate_policies.constant_label applies -> no numeric AUPRC produced, per contract."
+  },
+  "label_degeneracy_evidence": {
+    "total_pairs_in_pool": 6385,
+    "reliable_pairs_called": 3181,
+    "changers": 3,
+    "nonchangers": 3178,
+    "no_call": 3204,
+    "changer_publications": ["UNKNOWN_PUBLICATION:CL1LIG", "pmid_25183835", "pmid_29446752"],
+    "changers_per_pub": "exactly 1 each; all other publications have 0 changers -> held-out AP constant/degenerate in 7+ folds"
+  },
+  "root_cause_diagnostics": {
+    "cross_study_reactivity_scale_heterogeneity": {
+      "react_median_range": [0.0005, 4.08],
+      "react_max_range": [0.121, 47222.5],
+      "notes": "TRP4P6 react_max=47222, ETBSTR=2413, HC16M2R=1814; RNASEP react_max=0.121. ~4000x median spread, studies on incompatible scales."
+    },
+    "error_miscalibration": {
+      "reported_error_distribution": {"min": -1.578, "median": 0.0337, "mean": 0.6821, "max": 644.3},
+      "negative_errors_present": true,
+      "empirical_sd_over_reported_err": {"median": 2.52, "mean": 8.37, "p90": 19.29, "max": 642.0, "frac_gt_1": 0.719},
+      "interpretation": "reported per-position errors are 2.5-8x (up to 642x) smaller than actual cross-replicate scatter -> caller z-scores and null systematically inflated"
+    },
+    "null_inflation": {
+      "pooled_null_median_cluster_stat": 44.27,
+      "wt_wt_replicate_abs_z": {"median": 3.425, "mean": 5.956, "p99": 44.3, "max": 1521.0}
+    }
+  },
+  "position_level_signal_note": {
+    "eligible_positions": 458532,
+    "frac_abs_delta_gt_0.3": 0.2271,
+    "interpretation": "mutations do change per-position reactivity (mixing scales); degeneracy is a caller/null calibration artifact, NOT evidence that mutations do not change reactivity"
+  },
+  "run_execution_status": {
+    "n_distinct_publications": 18,
+    "n_folds_processed": 18,
+    "n_folds_with_eligible_heldout": 10,
+    "n_folds_skipped_all_no_call": 8,
+    "folds_with_eligible_heldout": ["UNKNOWN_PUBLICATION:CL1LIG", "UNKNOWN_PUBLICATION:HC16M2R", "UNKNOWN_PUBLICATION:RNASEP", "pmid_24469816", "pmid_25183835", "pmid_25303992", "pmid_25883046", "pmid_29446752", "pmid_35982307", "pub_RNAPuzzle18_daslab"],
+    "crash": "evaluation crashed on 2D score arrays from neural models (TypeError float() list); since fixed in run_p2_v1.py (predict_torch/predict_deepsets now squeeze(-1))",
+    "gpu_used": {"device_index": 0, "name": "NVIDIA A100-PCIE-40GB", "cuda_available": true}
+  },
+  "recommendation": {
+    "blocked_action": "primary binary changer AUPRC table + learning curve CANNOT be produced meaningfully with frozen caller/data (contract degenerate_policies -> UNIDENTIFIABLE, no fabricated numbers)",
+    "fix_path": "per-study reactivity normalization to a common scale + error recalibration using empirical replicate scatter as noise, then re-derive labels -> requires caller_v3/endpoint_v3 amendment (authority approval), NOT a silent in-place change",
+    "alternative_estimand": "conditional/secondary regression task (|delta_r| magnitude) has real signal but is gated by endpoint to require identifiable primary + reliable caller -> currently not enabled",
+    "note": "do NOT interpret 3-changers as 'mutations rarely change reactivity'; it is an error-scale/null-calibration artifact"
+  }
+}

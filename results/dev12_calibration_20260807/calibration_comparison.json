@@ -1,0 +1,61 @@
+{
+  "report": "m0x_dev12_pair_magnitude_calibration.v1",
+  "model_dir": "results/epro_dev12_regression_std_20260807c_big/predictions.npz",
+  "n_pairs": 548,
+  "true_burden": {
+    "mean": 0.14400472314178042,
+    "std": 0.07841858262924782
+  },
+  "proxies": {
+    "raw": {
+      "spearman": -0.2846845853571105,
+      "kendall": -0.20232478997484368,
+      "ndcg_at_10": 0.1316858354114255,
+      "n": 548,
+      "sign_fixed": false
+    },
+    "log": {
+      "spearman": -0.2877182366977237,
+      "kendall": -0.2045801832340204,
+      "ndcg_at_10": 0.12957683551033475,
+      "n": 548,
+      "sign_fixed": false
+    },
+    "max": {
+      "spearman": -0.022179277761577597,
+      "kendall": -0.021726655189440953,
+      "ndcg_at_10": 0.14351754281927673,
+      "n": 548,
+      "sign_fixed": false
+    },
+    "global_rank": {
+      "spearman": -0.31347149597884244,
+      "kendall": -0.22573283599020438,
+      "ndcg_at_10": 0.13392335078918258,
+      "n": 548,
+      "sign_fixed": false
+    },
+    "within_pair_z_max": {
+      "spearman": 0.4076949434355972,
+      "kendall": 0.26404783035172125,
+      "ndcg_at_10": 0.24549831286503732,
+      "n": 548,
+      "sign_fixed": true
+    },
+    "within_pair_z_top20": {
+      "spearman": -0.5454936499536928,
+      "kendall": -0.36999793144405224,
+      "ndcg_at_10": 0.10907541007474436,
+      "n": 548,
+      "sign_fixed": false
+    },
+    "within_rank_concentration": {
+      "spearman": -0.46861706173115525,
+      "kendall": -0.5163481329020876,
+      "ndcg_at_10": 0.12442311308861273,
+      "n": 548,
+      "sign_fixed": false
+    }
+  },
+  "note": "sign_fixed=True means the proxy's Spearman vs true burden > 0"
+}

@@ -1,0 +1,117 @@
+schema_version: reactflow_delta.d0x_source_declaration.v1
+declaration_id: reactflow_delta_d0x_source_universe_20260803_v1
+project_task_id: reactflow_delta
+phase_id: D0-X
+created_at: "2026-08-03T23:08:38+08:00"
+status: FROZEN_DECLARATION_CONTENT_NOT_YET_SEARCHED
+contract_binding:
+  path: docs/contracts/ReactFlowDelta科研合同_v4_data_first.md
+  sha256: 631962f88790103aa3383c9ed22de2943f6874455b4fcb587e18eb2a7d277c15
+exhaustiveness_definition:
+  source_universe_frozen_before_raw_recall: true
+  per_accession_or_search_channel_disposition_required: true
+  unchecked_sources_must_be_not_searched: true
+  unchecked_sources_must_not_have_zero_counts: true
+  parser_coverage_and_field_retention_required: true
+  manual_audit_required: true
+  new_source_requires_new_authority_amendment: true
+declared_sources:
+  - source_class: RMDB
+    source_namespace: RMDB
+    source_kind: DATABASE_RELEASE_ASSETS
+    candidate_use: DELTA_RECALL_CANDIDATE
+    current_snapshot_repository: DasLab/rmdb.github.io
+    current_snapshot_commit: 339b4fefc9a7092d0847d1d4017a3eadf0771fd7
+    release_tags:
+      - data-eterna
+      - data-puzzle
+      - data-riboswitches
+      - data-rna-structures
+      - data-general
+    historical_registry_seed_path: data_registry/d0r_accession_registry.jsonl
+    historical_registry_seed_sha256: 37eb17dab6c314e648dc7d367535a0dce0e791e90472662e2febcdcc5c878f08
+    historical_seed_record_count: 1024
+    seed_role: ACCESSION_CROSSWALK_SEED_NOT_D0X_RESULT
+    initial_disposition: NOT_SEARCHED
+  - source_class: M2_SEQ_PRIMARY_PAPERS
+    source_namespace: RMDB_PUBLICATION_CROSSWALK
+    source_kind: PRIMARY_PAPER_ACCESSION_SET
+    candidate_use: DELTA_RECALL_CANDIDATE
+    known_accession_seeds:
+      - TRP4P6_DMS_0005
+      - TRP4P6_DMS_0006
+      - TRP4P6_DMS_0007
+      - TRP4P6_DMS_0008
+      - TRP4P6_DMS_0009
+      - TRP4P6_DMS_0010
+      - TRP4P6_DMS_0011
+      - BSTHPN
+      - ADDSCHW
+      - MSTBL
+      - TBWND
+      - ETERNA_R72
+    primary_evidence_uris:
+      - https://pmc.ncbi.nlm.nih.gov/articles/PMC5603990/
+      - https://pmc.ncbi.nlm.nih.gov/articles/PMC4643908/
+    initial_disposition: NOT_SEARCHED
+  - source_class: MUTATE_MAP_RESCUE
+    source_namespace: RMDB_PUBLICATION_CROSSWALK
+    source_kind: PRIMARY_PAPER_ACCESSION_SET
+    candidate_use: RESCUE_CANDIDATE
+    accession_prefix_seeds:
+      - 16SFWJ_
+    primary_evidence_uri: https://pmc.ncbi.nlm.nih.gov/articles/PMC4201832/
+    initial_disposition: NOT_SEARCHED
+  - source_class: CLASS_SNITCH
+    source_namespace: CLASS_SNITCH_RMDB_CROSSWALK
+    source_kind: PRIMARY_PAPER_DERIVED_CROSSWALK
+    candidate_use: EXTERNAL_EVAL_CANDIDATE
+    reported_scope:
+      rna_count: 17
+      wt_single_mutant_trace_pair_count: 2019
+      count_role: REPORTED_CROSSWALK_SCOPE_NOT_INDEPENDENT_TRAINING_EVIDENCE
+    primary_evidence_uri: https://academic.oup.com/bioinformatics/article/33/11/1647/2953246
+    initial_disposition: NOT_SEARCHED
+  - source_class: RIBONANZA
+    source_namespace: RIBONANZA_STATIC_CHEMICAL_MAPPING
+    source_kind: COMPETITION_AND_PRIMARY_PAPER_DATASET
+    candidate_use: STATIC_PRETRAINING_CANDIDATE
+    reported_profile_scale: APPROXIMATELY_TWO_MILLION
+    count_role: STATIC_PROFILE_SCALE_NOT_DELTA_PAIR_COUNT
+    primary_evidence_uri: https://pmc.ncbi.nlm.nih.gov/articles/PMC10925082/
+    exact_delta_upgrade_rule: ONLY_EXPLICIT_MATCHED_INTERVENTION_RECONSTRUCTION_MAY_APPLY
+    initial_disposition: NOT_SEARCHED
+  - source_class: GEO_SRA
+    source_namespace: NCBI_GEO_SRA
+    source_kind: ACCESSION_SEARCH_CHANNEL
+    candidate_use: DELTA_RECALL_CANDIDATE
+    frozen_queries:
+      - 'RNA mutate-and-map OR M2-seq chemical mapping'
+      - 'RNA mutational profiling DMS SHAPE single mutant'
+      - 'riboswitch variant chemical probing mutation'
+    query_execution_status: NOT_SEARCHED
+    initial_disposition: NOT_SEARCHED
+  - source_class: PAPER_SUPPLEMENTS
+    source_namespace: PRIMARY_PAPER_SUPPLEMENT
+    source_kind: PUBLICATION_SEARCH_CHANNEL
+    candidate_use: DELTA_RECALL_CANDIDATE
+    search_routes:
+      - DOI_SUPPLEMENT
+      - JOURNAL_DATA_AVAILABILITY
+      - AUTHOR_REPOSITORY_LINK
+    query_execution_status: NOT_SEARCHED
+    initial_disposition: NOT_SEARCHED
+  - source_class: ETERNA_OPENKNOT
+    source_namespace: ETERNA_OPENKNOT_PUBLIC
+    source_kind: COMMUNITY_EXPERIMENT_SEARCH_CHANNEL
+    candidate_use: DELTA_RECALL_CANDIDATE
+    rmdb_members_are_deduplicated_against_rmdb: true
+    non_rmdb_search_status: NOT_SEARCHED
+    initial_disposition: NOT_SEARCHED
+prohibited_interpretations:
+  - RMDB_CONSTRUCT_COUNT_AS_DELTA_PAIR_COUNT
+  - RIBONANZA_PROFILE_COUNT_AS_DELTA_PAIR_COUNT
+  - CLASS_SNITCH_PAIR_COUNT_AS_INDEPENDENT_TRAINING_EVIDENCE
+  - NOT_SEARCHED_AS_ZERO
+  - FILENAME_FILTER_AS_EXHAUSTIVE_RECALL
+

@@ -1,0 +1,18 @@
+{
+  "schema_version": "reactflow_delta.r1_endpoint_v2_acceptance.v1",
+  "task_id": "R1",
+  "status": "PASS",
+  "completed_at": "2026-08-07T09:35:58.537213+00:00",
+  "endpoint_id": "RFD_ENDPOINT_V2",
+  "endpoint_version": 2,
+  "authority_epoch": 14,
+  "endpoint_sha256": "698593803cec4346b7f752346785bf15918d35c59a8486edb654e75533cb2478",
+  "ledger_path": "configs/reactflow_delta/endpoint_v2.sha256",
+  "ledger_sha256": "fd0c8a1ad1a974fa2fa033bc0dae0ac4d7eca7036045c25079925dcdf7f2870e",
+  "test_path": "tests/reactflow_delta/test_endpoint_v2_spec.py",
+  "pytest_exit_code": 0,
+  "pytest_passed": [],
+  "errors": [],
+  "evidence_class": "BENCHMARK_QUALIFICATION_ONLY",
+  "claim_eligibility": "NO_CONFIRMATORY_CLAIM"
+}

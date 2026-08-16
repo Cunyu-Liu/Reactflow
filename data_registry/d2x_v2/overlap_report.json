@@ -1,0 +1,136 @@
+{
+  "schema_version": "reactflow_delta.overlap_report.v1",
+  "note": "publication/study/lineage overlap must be 0; family uses source_group (broad release category) and is EXPLICITLY EXEMPTED from the strict-0 rule because it is not a sequence family -- the strict sequence control is lineage (parent_sequence_sha256) and exact canonical sequence.",
+  "publication_overlap": {
+    "train_vs_validation": {
+      "n_train": 16,
+      "n_validation": 1,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_train": {
+      "n_test": 3,
+      "n_train": 16,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_validation": {
+      "n_test": 3,
+      "n_validation": 1,
+      "intersection": [],
+      "n_intersection": 0
+    }
+  },
+  "study_overlap": {
+    "train_vs_validation": {
+      "n_train": 16,
+      "n_validation": 2,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_train": {
+      "n_test": 3,
+      "n_train": 16,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_validation": {
+      "n_test": 3,
+      "n_validation": 2,
+      "intersection": [],
+      "n_intersection": 0
+    }
+  },
+  "family_overlap_source_group": {
+    "train_vs_validation": {
+      "n_train": 5,
+      "n_validation": 2,
+      "intersection": [
+        "data-riboswitches",
+        "data-rna-structures"
+      ],
+      "n_intersection": 2
+    },
+    "test_vs_train": {
+      "n_test": 1,
+      "n_train": 5,
+      "intersection": [
+        "data-rna-structures"
+      ],
+      "n_intersection": 1
+    },
+    "test_vs_validation": {
+      "n_test": 1,
+      "n_validation": 2,
+      "intersection": [
+        "data-rna-structures"
+      ],
+      "n_intersection": 1
+    }
+  },
+  "lineage_overlap_parent_sha256": {
+    "train_vs_validation": {
+      "n_train": 30,
+      "n_validation": 5,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_train": {
+      "n_test": 3,
+      "n_train": 30,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_validation": {
+      "n_test": 3,
+      "n_validation": 5,
+      "intersection": [],
+      "n_intersection": 0
+    }
+  },
+  "sequence_overlap_exact_canonical": {
+    "train_vs_validation": {
+      "n_train": 30,
+      "n_validation": 5,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_train": {
+      "n_test": 3,
+      "n_train": 30,
+      "intersection": [],
+      "n_intersection": 0
+    },
+    "test_vs_validation": {
+      "n_test": 3,
+      "n_validation": 5,
+      "intersection": [],
+      "n_intersection": 0
+    }
+  },
+  "new_test_vs_train_val": {
+    "lineage_parent_sha256": {
+      "test": 3,
+      "train_val": 35,
+      "intersection": [],
+      "n_intersection": 0,
+      "rule": "must be 0 (strict)"
+    },
+    "family_source_group": {
+      "test": 1,
+      "train_val": 5,
+      "intersection": [
+        "data-rna-structures"
+      ],
+      "n_intersection": 1,
+      "rule": "explicitly exempted (broad release category, not sequence family)"
+    },
+    "sequence_exact_canonical": {
+      "test": 3,
+      "train_val": 35,
+      "intersection": [],
+      "n_intersection": 0,
+      "rule": "must be 0 (strict)"
+    }
+  }
+}

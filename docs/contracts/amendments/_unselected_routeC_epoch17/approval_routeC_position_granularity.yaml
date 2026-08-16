@@ -1,0 +1,43 @@
+schema_version: reactflow_delta.approval_record.v1
+approval_id: reactflow_delta_v4_epoch17_endpoint_v5_approval_20260808
+project_task_id: reactflow_delta
+approved_at: '2026-08-08T18:45:00+08:00'
+approval_source: EXPLICIT_USER_MESSAGE_CONTEXT_VERIFIED
+user_instruction: >-
+  User explicitly approved Path 2 (position-granularity) after reviewing two unlock
+  options: (1) raw per-replicate counts archive -> raw-replicate kill test, vs
+  (2) a new endpoint/estimand amendment at higher unit resolution. User chose Path 2
+  in response to AskUserQuestion ("Path 2 position 粒度 (Recommended)"). This defines
+  endpoint_v5 position-granularity (Route C): reduce the P2 learnability evaluation
+  unit from pair to eligible position, keep the same core scientific question
+  (mutation-induced reactivity response cross-publication learnable), repair statistical
+  power by giving each publication thousands of position units, pre-register Z_CUT=2.0
+  and confirmatory thresholds BEFORE the run, re-run P2 on GPU under nested
+  leave-one-publication-out, and re-adjudicate GO/STOP while preserving the primary
+  endpoint_v4 STOP verdict.
+approval_kind: REBUILD_AUTHORITY_ACTIVATION_EPOCH17_ENDPOINT_V5_POSITION_GRANULARITY
+approved_contract_path: docs/contracts/ReactFlowDelta_M0X_strict_scientific_engineering_audit_20260807.md
+approved_epoch: 17
+approval_scope:
+- ENDPOINT_V5_POSITION_GRANULARITY_FREEZE
+- POSITION_GRANULARITY_LOOCV_GPU
+- PUBLICATION_MACRO_POSITION_AUPRC_METRIC
+- Z_CUT_PREREGISTERED_2_0
+- PRIMARY_V4_STOP_PRESERVED
+- TRAIN_FOLD_ONLY_BASELINE
+explicit_denials:
+- SEALED_TEST_UNSEAL
+- TEST_OUTCOME_FITTING
+- CROSS_PROJECT_EXPORT
+- WET_LAB
+- EPRO_SOTA_CLAIM
+- OVERWRITE_LEGACY_ARTIFACTS
+- HIDE_M0X_FAILURE
+- LOWER_GATE_THRESHOLDS
+- UNSEAL_ENDPOINT_V4_PRIMARY_STOP
+- USE_HELDOUT_MEAN_AS_BASELINE
+- SILENT_EXCLUSION
+- POST_HOC_THRESHOLD_ADJUSTMENT
+signature_status: SIGNED_BY_EXPLICIT_USER_MESSAGE
+external_identity_status: VERIFIED_VIA_EXPLICIT_USER_MESSAGE
+signed_by: user (explicit message 2026-08-08)

@@ -1,0 +1,10 @@
+schema_version: reactflow_delta.authority_epoch_sentinel.v1
+authority_epoch: 5
+current_authority_state: D1X_AUTHORIZED
+current_phase: D1-X
+active_manifest_sha256: be100d86d6e4d3e113efb50d09c9875a88222f1d559be81c6077499255283ebe
+bundle_ledger_path: configs/reactflow_delta/authority_epoch_5.bundle.sha256
+bundle_ledger_sha256: 09298eae6c7abc6ec7cec63fd3e43cf3b44000d9c2314a439f1afd704d36c8d9
+created_at: "2026-08-04T00:00:00+08:00"
+emitted_after: BUNDLE_LEDGER
+embedded_self_sha256: FORBIDDEN

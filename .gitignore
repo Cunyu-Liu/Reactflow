@@ -1,5 +1,11 @@
 artifacts/
+data_registry/*.parquet
 __pycache__/
 .pytest_cache/
 *.pyc
 .coverage
+
+# C1-3 stage extras
+*.bak_pre_fix
+.c1_2_stage_mirror/
+output.txt
