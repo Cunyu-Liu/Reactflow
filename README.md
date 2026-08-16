@@ -696,4 +696,22 @@ SymPy checks（`reactflow.symbolic.run_all_symbolic_checks`，共 **14** 项，�
 3. 对 best RF-CF 配置做 3-seed pilot，最终推进 10-seed + bootstrap CI + permutation test。
 4. 复现或清晰标注同 split baseline（eFold/RNADiffFold/RibonanzaNet2-derived），避免 cited/local 数字混用。
 5. 建立 eFold-inspired 数据多样性路线：`data_diversity_audit` 已完成首轮审计，下一步先补 family/clan metadata join 和 pseudo-clan 清洗，再做 source/family/length/complexity curriculum。
-6. C6：在已实现的 `L_contact_denoising_aux` / `L_ensemble_calibration` 基础上，继续加入 Gumbel-Softmax / Monte-Carlo correction estimator、co-reactivity/second-moment 数据接口和多 encoder adapter 消融。
+6.- **C6：** 在已实现的 `L_contact_denoising_aux` / `L_ensemble_calibration` 基础上，继续加入 Gumbel-Softmax / Monte-Carlo correction estimator、co-reactivity/second-moment 数据接口和多 encoder adapter 消融。
+
+---
+
+## 附属项目：ReactFlow-Delta 全谱突变响应基准测试（prospective_v2）
+
+**P3 阶段正式完成**（2026-08-16，合同 12.5 PASS）。详见 [prospective_v2 文档索引](docs/prospective_v2/) 和 PR [#1](https://github.com/Cunyu-Liu/Reactflow/pull/1)。
+
+| 阶段 | 裁决 | 摘要 |
+|------|------|-------|
+| P0 | AUTHORITY_RECONCILIATION_PASS | 权威 epoch 21 激活，fail-closed gate 修复 |
+| P1 | FAIL_CLOSED_OPEN | evaluator/isolation PASS，非阻塞 |
+| P2 | PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT | 20-puzzle D_p = +0.0127 [95% CI +0.0079, +0.0175] |
+| **P3** | **LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT** | 规范重跑后 LRSO 在开发集超越 Direct*（rank2/4/8 D_p^P3 = +0.0147/+0.0155/+0.0154，CI lower 全 > 0，20/20 puzzle 正向，sign-flip p=1.9e-6）。v1/v2 因实现失败已撤回。 |
+| P4 | EXTERNAL_STATISTICAL_PASS | 24 组件外部集 D_p = +0.0410 [+0.0153, +0.0667] |
+| P5 | MECHANISM_EVIDENCE_PASS（overall） | 529 组件/6 条合取全部 PASS；外部可移植性获双重确认 |
+| P6 | REPRODUCIBILITY_DELIVERED | 一键重放 + 手稿/补充材料/卡片齐全 |
+
+> **诚实限制**：LRSO 的优势仅在开发集确立；外部可移植性未测（外部协议冻结于 direct candidate），已如实声明为未来方向。v1/v2 的 `NO_INCREMENTAL_LRSO_SKILL` 是训练实现失败伪影，永久撤回、永不引用。
