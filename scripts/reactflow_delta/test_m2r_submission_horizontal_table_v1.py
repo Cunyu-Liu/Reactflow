@@ -32,6 +32,9 @@ THREEWAY_S = f"{BASE}/m2r_3way_strong_20260817/m2r_3way_strong_report.json"
 THREEWAY_SP = f"{BASE}/m2r_3way_strong_20260817/m2r_3way_strong_permtest.json"
 THREEWAY_SPZ = f"{BASE}/m2r_3way_strong_puzzle_20260817/m2r_3way_strong_puzzle_report.json"
 CEILING = f"{BASE}/m2r_ceiling_audit_lean_20260817/m2r_ceiling_audit_report.json"
+V2 = f"{BASE}/m2r_features_v2_ablation_20260817/m2r_features_v2_ablation_report.json"
+V2_P = f"{BASE}/m2r_features_v2_ablation_20260817/m2r_features_v2_permtest.json"
+V2_PZ = f"{BASE}/m2r_features_v2_ablation_20260817/m2r_features_v2_puzzle_report.json"
 
 
 @pytest.fixture(scope="module")
@@ -39,19 +42,20 @@ def report(tmp_path_factory):
     out = tmp_path_factory.mktemp("sub")
     sub.build_table(TRANSFER, ROBUST, ROBUST_P, PUZZLE, NOISE, str(out),
                     THREEWAY, THREEWAY_P, THREEWAY_PZ,
-                    THREEWAY_S, THREEWAY_SP, THREEWAY_SPZ, CEILING)
+                    THREEWAY_S, THREEWAY_SP, THREEWAY_SPZ, CEILING,
+                    V2, V2_P, V2_PZ)
     d = json.loads((out / "submission_horizontal_table_m2r.json").read_text(encoding="utf-8"))
     return d, out
 
 
-def test_headline_matches_strong_threeway_report(report):
+def test_headline_matches_v2_report(report):
     d, _ = report
-    tws = json.loads(Path(THREEWAY_S).read_text(encoding="utf-8"))["headline"]
+    fv2 = json.loads(Path(V2).read_text(encoding="utf-8"))["results"]["v1_v2_3way"]
     hl = [r for r in d["rows"] if r.get("headline")][0]
-    assert hl["model"] == "strong 3-way ensemble (300-tr base GBDTs)"
-    assert abs(hl["skill"] - tws["strong"]["skill"]) < 1e-12
-    assert abs(hl["r2"] - tws["strong"]["r2"]) < 1e-12
-    assert abs(hl["r2"] - 0.387) < 0.005
+    assert hl["model"] == "strong 3-way + v2 features (NEW headline)"
+    assert abs(hl["skill"] - fv2["skill"]) < 1e-12
+    assert abs(hl["r2"] - fv2["r2"]) < 1e-12
+    assert abs(hl["r2"] - 0.3975) < 0.005
 
 
 def test_headline_is_best(report):
@@ -59,8 +63,8 @@ def test_headline_is_best(report):
     skills = [r["skill"] for r in d["rows"] if r.get("skill") is not None]
     hl = [r for r in d["rows"] if r.get("headline")][0]
     assert hl["skill"] == max(skills)
-    # strong 3-way must beat the default 3-way and the L1 full-stack blend
-    tw = [r for r in d["rows"] if r["model"] == "3-way ensemble (L1+L2 GBDT + Ridge)"][0]
+    # v2 headline must beat the strong 3-way (236 dims) and the L1 full-stack blend
+    tw = [r for r in d["rows"] if r["model"] == "strong 3-way ensemble (300-tr base GBDTs)"][0]
     l1 = [r for r in d["rows"] if r["model"] == "L1 full-stack blend (a=0.80)"][0]
     assert hl["skill"] > tw["skill"]
     assert hl["skill"] > l1["skill"]
@@ -69,8 +73,8 @@ def test_headline_is_best(report):
 def test_puzzle_row_present(report):
     d, _ = report
     pz_rows = [r for r in d["rows"] if r["split"] == "puzzle-level LOO"]
-    assert len(pz_rows) == 1
-    assert pz_rows[0]["skill"] > 0.24
+    assert len(pz_rows) == 2
+    assert all(r["skill"] > 0.24 for r in pz_rows)
 
 
 def test_artifacts_written(report):
@@ -78,8 +82,8 @@ def test_artifacts_written(report):
     assert (out / "submission_horizontal_table_m2r.json").exists()
     assert (out / "submission_horizontal_table_m2r.md").exists()
     md = (out / "submission_horizontal_table_m2r.md").read_text(encoding="utf-8")
-    assert "+28.11%" in md
-    assert "0.387" in md
+    assert "+28.91%" in md
+    assert "0.3975" in md
     assert "ceiling audit" in md
 
 

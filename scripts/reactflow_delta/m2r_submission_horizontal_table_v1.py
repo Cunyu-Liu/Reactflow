@@ -31,7 +31,10 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 threeway_strong_report: str = None,
                 threeway_strong_permtest: str = None,
                 threeway_strong_puzzle_report: str = None,
-                ceiling_audit_report: str = None) -> dict:
+                ceiling_audit_report: str = None,
+                features_v2_report: str = None,
+                features_v2_permtest: str = None,
+                features_v2_puzzle_report: str = None) -> dict:
     tr = _load(transfer_report)
     rob = _load(robust_report)
     perm = _load(robust_permtest)
@@ -44,6 +47,9 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
     twsp = _load(threeway_strong_permtest) if threeway_strong_permtest else None
     twspz = _load(threeway_strong_puzzle_report) if threeway_strong_puzzle_report else None
     ca = _load(ceiling_audit_report) if ceiling_audit_report else None
+    fv2 = _load(features_v2_report) if features_v2_report else None
+    fv2p = _load(features_v2_permtest) if features_v2_permtest else None
+    fv2pz = _load(features_v2_puzzle_report) if features_v2_puzzle_report else None
 
     baseline_mae = tr["baseline_mae"]
     rows = [
@@ -122,6 +128,15 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             "skill": tws["headline"]["strong"]["skill"],
             "r2": tws["headline"]["strong"]["r2"],
             "source": "m2r_3way_strong_report.json headline.strong",
+        },
+        {
+            "model": "strong 3-way + v2 features (NEW headline)",
+            "feature_set": "258 dims (v1 + cross-mutant + stem context)",
+            "split": "design-level LOO",
+            "mae": fv2["results"]["v1_v2_3way"]["mae"],
+            "skill": fv2["results"]["v1_v2_3way"]["skill"],
+            "r2": fv2["results"]["v1_v2_3way"]["r2"],
+            "source": "m2r_features_v2_ablation_report.json v1_v2_3way",
             "headline": True,
         },
         {
@@ -133,6 +148,15 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             "r2": pz["results"]["puzzle_transfer_blend_a80"]["r2"],
             "source": "m2r_transfer_puzzle_report.json (L2 blend)",
             "note": "strong 3-way at puzzle level reaches +27.42% (m2r_3way_strong_puzzle_report.json)",
+        },
+        {
+            "model": "strong 3-way + v2 features [puzzle]",
+            "feature_set": "258 dims (puzzle-transfer)",
+            "split": "puzzle-level LOO",
+            "mae": fv2pz["results"]["v1_v2_3way"]["mae"],
+            "skill": fv2pz["results"]["v1_v2_3way"]["skill"],
+            "r2": fv2pz["results"]["v1_v2_3way"]["r2"],
+            "source": "m2r_features_v2_puzzle_report.json v1_v2_3way",
         },
     ]
 
@@ -157,6 +181,12 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
     if twspz is not None:
         significance["strong_threeway_puzzle_perm_p"] = twspz["permutation_p"]
         significance["strong_threeway_puzzle_gain_vs_default"] = twspz["per_puzzle_gain_vs_default"]
+    if fv2p is not None:
+        significance["v2_vs_v1"] = fv2p["v2_vs_v1"]
+        significance["v2_vs_v1_perm_p"] = fv2p["v2_vs_v1"]["permutation_p"]
+    if fv2pz is not None:
+        significance["v2_puzzle_perm_p"] = fv2pz["permutation_p"]
+        significance["v2_puzzle_gain_vs_v1"] = fv2pz["per_puzzle_gain_vs_v1"]
 
     noise_floor = {
         "rescue_total_std": nf["rescue_total_std"],
@@ -186,9 +216,10 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
         "schema": "reactflow_delta.m2r_submission_horizontal_table.v1",
         "dataset": "OpenKnot_M2R",
         "n_samples": tr["n_samples"], "n_designs": tr["n_designs"],
-        "headline": "strong 3-way ensemble (L1+L2 GBDT + Ridge, 300-tr base, 236 dims) "
-                    "= +28.11% skill (R2 0.387), design-level LOO",
-        "headline_puzzle": "+27.42% (strong 3-way, puzzle-level LOO)",
+        "headline": "strong 3-way + v2 features (L1+L2 GBDT + Ridge, 300-tr base, "
+                    "258 dims incl. cross-mutant disruption magnitudes + stem context) "
+                    "= +28.91% skill (R2 0.3975), design-level LOO",
+        "headline_puzzle": "+27.74% (strong 3-way + v2 features, puzzle-level LOO)",
         "baseline_mae": baseline_mae,
         "rows": rows,
         "significance": significance,
@@ -199,9 +230,11 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 "gbdt_l1_230": "+25.94%",
                 "+m2_transfer_l1": "+26.38% (with blend)",
                 "3way_ensemble": "+26.59% (L1+L2 GBDT + Ridge)",
-                "strong_3way": "+28.11% (300-tr base GBDTs, new headline)",
+                "strong_3way": "+28.11% (300-tr base GBDTs, 236 dims)",
+                "v2_features": "+28.91% (v1 + v2 features, 258 dims, NEW headline)",
                 "l1_vs_l2": "+0.56pp (100% LOO-exclusion positive)",
                 "strong_vs_default_3way": "+1.52pp (perm p=0.0005, 100% LOO-exclusion positive)",
+                "v2_vs_v1_3way": "+0.80pp (perm p=0.010, 100% LOO-exclusion positive)",
                 "m2_structure": "+0.42pp (100% positive)",
                 "transfer": "+0.21pp design / +0.32pp puzzle (leak-free)",
             },
@@ -215,6 +248,9 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 "global full-profile features NEGATIVE for GBDT",
                 "puzzle-level leak diagnostic: design-OOF vs puzzle-OOF diff 0.04pp",
                 "3-way weight plateau wide (w1 0.5-0.7, w2 0.2-0.4 all within 0.3pp)",
+                "4-way XGB architecture decorrelation CLOSED (+0.07pp, perm p=0.256)",
+                "v2 cross-mutant overlap features (group A) NEGATIVE alone (-0.05pp)",
+                "v2 M2-structure cross context (group D) NEGATIVE alone (-0.09pp)",
             ],
             "honest_caveats": [
                 "2/160 designs lack M2 preds (zero transfer features)",
@@ -243,11 +279,15 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                      f"{r['split']} | {mae} | {sk} | {r2} |")
     lines += [
         "",
-        "**Headline**: strong 3-way ensemble (L1+L2 GBDT + Ridge, 300-tr base, "
-        "236 dims) = +28.11% skill (R² 0.387) at design-level LOO; +27.42% "
-        "(strong 3-way) at puzzle-level.",
+        "**Headline**: strong 3-way + v2 features (L1+L2 GBDT + Ridge, 300-tr "
+        "base, 258 dims incl. cross-mutant disruption magnitudes + stem "
+        "context) = +28.91% skill (R² 0.3975) at design-level LOO; +27.74% at "
+        "puzzle-level.",
         "",
-        "**Significance**: strong-vs-default 3-way perm p = 0.0005, "
+        "**Significance**: v2-vs-v1 perm p = 0.010, "
+        "LOO-exclusion gain +0.80pp, 100% of 159 folds positive "
+        "(range [+0.75, +0.91]pp).  "
+        "strong-vs-default 3-way perm p = 0.0005, "
         "CI (0.262, 0.298); LOO-exclusion gain +1.52pp, 100% of 159 folds "
         "positive (range [+1.46, +1.61]pp).  "
         "Full-stack L1 perm p = 0.002, CI (0.245, 0.281); "
@@ -280,6 +320,9 @@ def main():
     ap.add_argument("--threeway-strong-permtest", default=None)
     ap.add_argument("--threeway-strong-puzzle-report", default=None)
     ap.add_argument("--ceiling-audit-report", default=None)
+    ap.add_argument("--features-v2-report", default=None)
+    ap.add_argument("--features-v2-permtest", default=None)
+    ap.add_argument("--features-v2-puzzle-report", default=None)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     build_table(args.transfer_report, args.robust_report, args.robust_permtest,
@@ -288,7 +331,9 @@ def main():
                 args.threeway_puzzle_report,
                 args.threeway_strong_report, args.threeway_strong_permtest,
                 args.threeway_strong_puzzle_report,
-                args.ceiling_audit_report)
+                args.ceiling_audit_report,
+                args.features_v2_report, args.features_v2_permtest,
+                args.features_v2_puzzle_report)
     return 0
 
 
