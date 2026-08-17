@@ -39,7 +39,8 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 formula_blend_report: str = None,
                 multiseed_report: str = None,
                 multiseed_permtest: str = None,
-                multiseed_puzzle_report: str = None) -> dict:
+                multiseed_puzzle_report: str = None,
+                stack_report: str = None) -> dict:
     tr = _load(transfer_report)
     rob = _load(robust_report)
     perm = _load(robust_permtest)
@@ -60,6 +61,7 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
     msrep = _load(multiseed_report) if multiseed_report else None
     msp = _load(multiseed_permtest) if multiseed_permtest else None
     mspz = _load(multiseed_puzzle_report) if multiseed_puzzle_report else None
+    stk = _load(stack_report) if stack_report else None
 
     baseline_mae = tr["baseline_mae"]
     rows = [
@@ -307,6 +309,8 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 "v2 M2-structure cross context (group D) NEGATIVE alone (-0.09pp)",
                 "rD auxiliary predictor: rD ~49% predictable (corr 0.70, R2 0.493) but rD_pred as a feature NEGATIVE (-0.40pp, 0% positive)",
                 "physics-constrained formula blend f=1-rD_pred/rnorm CLOSED (-0.03pp; corr with 3-way 0.913 => 3-way already captures full legal rD signal)",
+                "stacking / learned blend weights (NNLS -0.65pp, Ridge -0.53pp, Ridge+quad -0.42pp; p~1.0) — fixed 0.6/0.3/0.1 already optimal",
+                "residual boosting (GBDT on blend residual) NEGATIVE -0.60 to -5.33pp — no learnable structure left in the 3-way blend error",
             ],
             "honest_caveats": [
                 "2/160 designs lack M2 preds (zero transfer features)",
@@ -393,6 +397,7 @@ def main():
     ap.add_argument("--multiseed-report", default=None)
     ap.add_argument("--multiseed-permtest", default=None)
     ap.add_argument("--multiseed-puzzle-report", default=None)
+    ap.add_argument("--stack-report", default=None)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     build_table(args.transfer_report, args.robust_report, args.robust_permtest,
@@ -406,7 +411,7 @@ def main():
                 args.features_v2_puzzle_report,
                 args.doublemut_report, args.formula_blend_report,
                 args.multiseed_report, args.multiseed_permtest,
-                args.multiseed_puzzle_report)
+                args.multiseed_puzzle_report, args.stack_report)
     return 0
 
 
