@@ -34,7 +34,12 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 ceiling_audit_report: str = None,
                 features_v2_report: str = None,
                 features_v2_permtest: str = None,
-                features_v2_puzzle_report: str = None) -> dict:
+                features_v2_puzzle_report: str = None,
+                doublemut_report: str = None,
+                formula_blend_report: str = None,
+                multiseed_report: str = None,
+                multiseed_permtest: str = None,
+                multiseed_puzzle_report: str = None) -> dict:
     tr = _load(transfer_report)
     rob = _load(robust_report)
     perm = _load(robust_permtest)
@@ -50,6 +55,11 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
     fv2 = _load(features_v2_report) if features_v2_report else None
     fv2p = _load(features_v2_permtest) if features_v2_permtest else None
     fv2pz = _load(features_v2_puzzle_report) if features_v2_puzzle_report else None
+    dmut = _load(doublemut_report) if doublemut_report else None
+    fb = _load(formula_blend_report) if formula_blend_report else None
+    msrep = _load(multiseed_report) if multiseed_report else None
+    msp = _load(multiseed_permtest) if multiseed_permtest else None
+    mspz = _load(multiseed_puzzle_report) if multiseed_puzzle_report else None
 
     baseline_mae = tr["baseline_mae"]
     rows = [
@@ -137,6 +147,15 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             "skill": fv2["results"]["v1_v2_3way"]["skill"],
             "r2": fv2["results"]["v1_v2_3way"]["r2"],
             "source": "m2r_features_v2_ablation_report.json v1_v2_3way",
+        },
+        {
+            "model": "multi-seed strong 3-way + v2 (K=5, NEW headline)",
+            "feature_set": "258 dims (v1+v2) + 5-seed L1/L2 averaging",
+            "split": "design-level LOO",
+            "mae": msrep["results"]["multiseed_3way"]["mae"],
+            "skill": msrep["results"]["multiseed_3way"]["skill"],
+            "r2": msrep["results"]["multiseed_3way"]["r2"],
+            "source": "m2r_multiseed_report.json multiseed_3way",
             "headline": True,
         },
         {
@@ -159,6 +178,16 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             "source": "m2r_features_v2_puzzle_report.json v1_v2_3way",
         },
     ]
+    if mspz is not None:
+        rows.append({
+            "model": "multi-seed strong 3-way + v2 (K=5) [puzzle]",
+            "feature_set": "258 dims (puzzle-transfer) + 5-seed L1/L2 averaging",
+            "split": "puzzle-level LOO",
+            "mae": mspz["results"]["multiseed_3way"]["mae"],
+            "skill": mspz["results"]["multiseed_3way"]["skill"],
+            "r2": mspz["results"]["multiseed_3way"]["r2"],
+            "source": "m2r_multiseed_puzzle_report.json multiseed_3way",
+        })
 
     significance = {
         "full_stack_l1": perm["models"]["l1_fullstack_blend"],
@@ -187,6 +216,12 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
     if fv2pz is not None:
         significance["v2_puzzle_perm_p"] = fv2pz["permutation_p"]
         significance["v2_puzzle_gain_vs_v1"] = fv2pz["per_puzzle_gain_vs_v1"]
+    if msp is not None:
+        significance["multiseed_vs_single"] = msp["multiseed_vs_single"]
+        significance["multiseed_perm_p"] = msp["multiseed_vs_single"]["permutation_p"]
+    if mspz is not None:
+        significance["multiseed_puzzle_perm_p"] = mspz["permutation_p"]
+        significance["multiseed_puzzle_gain"] = mspz["multiseed_gain"]
 
     noise_floor = {
         "rescue_total_std": nf["rescue_total_std"],
@@ -211,15 +246,32 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             "q1_conclusion": ca["comparisons"]["q1_oracle_default_vs_strong"]["conclusion"],
             "q2_legal_dr_gain_r2": ca["comparisons"]["q2_legal_vs_legal_dr"]["delta_r2_strong"],
         }
+    if dmut is not None:
+        noise_floor["double_mutant_audit"] = {
+            "rD_predictability_corr": dmut["rd_predictability"]["corr"],
+            "rD_predictability_r2": dmut["rd_predictability"]["r2"],
+            "rD_pred_as_feature_gain_pp": dmut["rD_gain"]["pooled_gain_pp"],
+            "rD_pred_as_feature_pct_positive": dmut["rD_gain"]["loo_exclusion"]["pct_positive"],
+        }
+    if fb is not None:
+        noise_floor["double_mutant_audit"]["formula_blend_gain_pp"] = \
+            fb["formula_blend_gain"]["pooled_gain_pp"]
+        noise_floor["double_mutant_audit"]["formula_blend_decorr_corr"] = \
+            fb["decorrelation_corr"]
+        noise_floor["double_mutant_audit"]["formula_member_skill"] = \
+            fb["formula_member"]["skill"]
 
     report = {
         "schema": "reactflow_delta.m2r_submission_horizontal_table.v1",
         "dataset": "OpenKnot_M2R",
         "n_samples": tr["n_samples"], "n_designs": tr["n_designs"],
-        "headline": "strong 3-way + v2 features (L1+L2 GBDT + Ridge, 300-tr base, "
-                    "258 dims incl. cross-mutant disruption magnitudes + stem context) "
-                    "= +28.91% skill (R2 0.3975), design-level LOO",
-        "headline_puzzle": "+27.74% (strong 3-way + v2 features, puzzle-level LOO)",
+        "headline": "multi-seed strong 3-way + v2 (K=5, L1/L2 OOF averaging) "
+                    "= +29.22% skill (R2 0.400), design-level LOO "
+                    "(v1+v2 features, 258 dims, 300-tr base)",
+        "headline_puzzle": "+27.74% (v1+v2 strong 3-way, puzzle-level LOO)"
+                           if mspz is None else
+                           f"{mspz['results']['multiseed_3way']['skill']*100:+.2f}% "
+                           f"(multi-seed K=5, puzzle-level LOO)",
         "baseline_mae": baseline_mae,
         "rows": rows,
         "significance": significance,
@@ -231,10 +283,12 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 "+m2_transfer_l1": "+26.38% (with blend)",
                 "3way_ensemble": "+26.59% (L1+L2 GBDT + Ridge)",
                 "strong_3way": "+28.11% (300-tr base GBDTs, 236 dims)",
-                "v2_features": "+28.91% (v1 + v2 features, 258 dims, NEW headline)",
+                "v2_features": "+28.91% (v1 + v2 features, 258 dims)",
+                "multi_seed_K5": "+29.22% (5-seed L1/L2 OOF averaging, NEW headline)",
                 "l1_vs_l2": "+0.56pp (100% LOO-exclusion positive)",
                 "strong_vs_default_3way": "+1.52pp (perm p=0.0005, 100% LOO-exclusion positive)",
                 "v2_vs_v1_3way": "+0.80pp (perm p=0.010, 100% LOO-exclusion positive)",
+                "multiseed_vs_single": "+0.31pp (perm p=0.014, 100% LOO-exclusion positive)",
                 "m2_structure": "+0.42pp (100% positive)",
                 "transfer": "+0.21pp design / +0.32pp puzzle (leak-free)",
             },
@@ -251,6 +305,8 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 "4-way XGB architecture decorrelation CLOSED (+0.07pp, perm p=0.256)",
                 "v2 cross-mutant overlap features (group A) NEGATIVE alone (-0.05pp)",
                 "v2 M2-structure cross context (group D) NEGATIVE alone (-0.09pp)",
+                "rD auxiliary predictor: rD ~49% predictable (corr 0.70, R2 0.493) but rD_pred as a feature NEGATIVE (-0.40pp, 0% positive)",
+                "physics-constrained formula blend f=1-rD_pred/rnorm CLOSED (-0.03pp; corr with 3-way 0.913 => 3-way already captures full legal rD signal)",
             ],
             "honest_caveats": [
                 "2/160 designs lack M2 preds (zero transfer features)",
@@ -277,16 +333,21 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
         hlc = "**" if r.get("headline") else ""
         lines.append(f"| {hl}{r['model']}{hlc} | {r['feature_set']} | "
                      f"{r['split']} | {mae} | {sk} | {r2} |")
+    ms_pp = (msrep["results"]["multiseed_3way"]["skill"] * 100
+             if msrep else None)
+    ms_r2 = msrep["results"]["multiseed_3way"]["r2"] if msrep else None
     lines += [
         "",
-        "**Headline**: strong 3-way + v2 features (L1+L2 GBDT + Ridge, 300-tr "
-        "base, 258 dims incl. cross-mutant disruption magnitudes + stem "
-        "context) = +28.91% skill (R² 0.3975) at design-level LOO; +27.74% at "
-        "puzzle-level.",
+        "**Headline**: multi-seed strong 3-way + v2 (L1+L2 GBDT + Ridge, 300-tr "
+        f"base, 258 dims, 5-seed L1/L2 OOF averaging) = +{ms_pp:.2f}% skill "
+        f"(R² {ms_r2:.3f}) at design-level LOO.",
         "",
-        "**Significance**: v2-vs-v1 perm p = 0.010, "
-        "LOO-exclusion gain +0.80pp, 100% of 159 folds positive "
-        "(range [+0.75, +0.91]pp).  "
+        "**Significance**: multi-seed-vs-single-seed perm p = 0.014 "
+        "(paired design-block, n=500); pooled gain +0.31pp (R² +0.0030), "
+        "100% of 159 LOO-exclusion folds positive (range [+0.28, +0.34]pp); "
+        "CI (0.273, 0.310).  "
+        "v2-vs-v1 perm p = 0.010, LOO-exclusion gain +0.80pp, 100% of 159 folds "
+        "positive (range [+0.75, +0.91]pp).  "
         "strong-vs-default 3-way perm p = 0.0005, "
         "CI (0.262, 0.298); LOO-exclusion gain +1.52pp, 100% of 159 folds "
         "positive (range [+1.46, +1.61]pp).  "
@@ -297,7 +358,11 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
         "R² ceiling (mean-noise) 0.82; "
         "legal-feature representation saturates ~0.36-0.39 (strong-model audit); "
         "oracle (knowing double-mutant RMSD) reaches R² 0.73-0.96.  "
-        "Old 'circular oracle 0.407' was a weak-feature artifact — corrected.",
+        "Old 'circular oracle 0.407' was a weak-feature artifact — corrected.  "
+        "Double-mutant audit: rD is 49% predictable (corr 0.70), but both "
+        "rD_pred-as-feature (−0.40pp) and a physics-constrained formula blend "
+        "(−0.03pp; corr 0.913 with the 3-way) are neutral/negative — the 3-way "
+        "already extracts the full legally-reachable double-mutant signal.",
     ]
     (out / "submission_horizontal_table_m2r.md").write_text(
         "\n".join(lines) + "\n", encoding="utf-8")
@@ -323,6 +388,11 @@ def main():
     ap.add_argument("--features-v2-report", default=None)
     ap.add_argument("--features-v2-permtest", default=None)
     ap.add_argument("--features-v2-puzzle-report", default=None)
+    ap.add_argument("--doublemut-report", default=None)
+    ap.add_argument("--formula-blend-report", default=None)
+    ap.add_argument("--multiseed-report", default=None)
+    ap.add_argument("--multiseed-permtest", default=None)
+    ap.add_argument("--multiseed-puzzle-report", default=None)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     build_table(args.transfer_report, args.robust_report, args.robust_permtest,
@@ -333,7 +403,10 @@ def main():
                 args.threeway_strong_puzzle_report,
                 args.ceiling_audit_report,
                 args.features_v2_report, args.features_v2_permtest,
-                args.features_v2_puzzle_report)
+                args.features_v2_puzzle_report,
+                args.doublemut_report, args.formula_blend_report,
+                args.multiseed_report, args.multiseed_permtest,
+                args.multiseed_puzzle_report)
     return 0
 
 
