@@ -27,7 +27,11 @@ def _load(p):
 def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 puzzle_report: str, noise_floor: str, out: str,
                 threeway_report: str = None, threeway_permtest: str = None,
-                threeway_puzzle_report: str = None) -> dict:
+                threeway_puzzle_report: str = None,
+                threeway_strong_report: str = None,
+                threeway_strong_permtest: str = None,
+                threeway_strong_puzzle_report: str = None,
+                ceiling_audit_report: str = None) -> dict:
     tr = _load(transfer_report)
     rob = _load(robust_report)
     perm = _load(robust_permtest)
@@ -36,6 +40,10 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
     tw = _load(threeway_report) if threeway_report else None
     twp = _load(threeway_permtest) if threeway_permtest else None
     twpz = _load(threeway_puzzle_report) if threeway_puzzle_report else None
+    tws = _load(threeway_strong_report) if threeway_strong_report else None
+    twsp = _load(threeway_strong_permtest) if threeway_strong_permtest else None
+    twspz = _load(threeway_strong_puzzle_report) if threeway_strong_puzzle_report else None
+    ca = _load(ceiling_audit_report) if ceiling_audit_report else None
 
     baseline_mae = tr["baseline_mae"]
     rows = [
@@ -105,6 +113,15 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             "skill": tw["results"]["threeway_blend_a_priori"]["skill"],
             "r2": tw["results"]["threeway_blend_a_priori"]["r2"],
             "source": "m2r_3way_ensemble_report.json threeway_blend_a_priori",
+        },
+        {
+            "model": "strong 3-way ensemble (300-tr base GBDTs)",
+            "feature_set": "236 dims",
+            "split": "design-level LOO",
+            "mae": tws["headline"]["strong"]["mae"],
+            "skill": tws["headline"]["strong"]["skill"],
+            "r2": tws["headline"]["strong"]["r2"],
+            "source": "m2r_3way_strong_report.json headline.strong",
             "headline": True,
         },
         {
@@ -115,7 +132,7 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             "skill": pz["results"]["puzzle_transfer_blend_a80"]["skill"],
             "r2": pz["results"]["puzzle_transfer_blend_a80"]["r2"],
             "source": "m2r_transfer_puzzle_report.json (L2 blend)",
-            "note": "L1 objective at puzzle level reaches +25.30% (audit, 2026-08-17)",
+            "note": "strong 3-way at puzzle level reaches +27.42% (m2r_3way_strong_puzzle_report.json)",
         },
     ]
 
@@ -134,6 +151,12 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
     if twpz is not None:
         significance["threeway_puzzle_perm_p"] = twpz["permutation_p"]
         significance["threeway_puzzle_gain_vs_prev"] = twpz["per_puzzle_gain_vs_prev"]
+    if twsp is not None:
+        significance["strong_threeway_vs_default"] = twsp["strong_vs_default"]
+        significance["strong_threeway_perm_p"] = twsp["strong_vs_default"]["permutation_p"]
+    if twspz is not None:
+        significance["strong_threeway_puzzle_perm_p"] = twspz["permutation_p"]
+        significance["strong_threeway_puzzle_gain_vs_default"] = twspz["per_puzzle_gain_vs_default"]
 
     noise_floor = {
         "rescue_total_std": nf["rescue_total_std"],
@@ -141,17 +164,31 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
         "sigma_noise_mean": nf["sigma_noise"]["mean"],
         "r2_ceiling_mean_noise": nf["r2_ceiling_mean_noise"],
         "learnable_fraction_median": nf["learnable_variance_fraction_median"],
-        "circular_oracle_r2": 0.407,
-        "note": "legal-feature representation saturates ~0.37-0.41 at this data size",
+        "oracle_r2": None,
+        "ceiling_audit": None,
+        "note": "legal-feature representation saturates ~0.36-0.39; oracle 0.73-0.96 (see ceiling audit)",
     }
+    if ca is not None:
+        noise_floor["oracle_r2"] = ca["cells"]["oracle_strong"]["r2"]
+        noise_floor["oracle_dr_strong_r2"] = ca["cells"]["oracle_dr_strong"]["r2"]
+        noise_floor["legal_strong_r2"] = ca["cells"]["legal_strong"]["r2"]
+        noise_floor["ceiling_audit"] = {
+            "legal_default_r2": ca["cells"]["legal_default"]["r2"],
+            "legal_strong_r2": ca["cells"]["legal_strong"]["r2"],
+            "oracle_default_r2": ca["cells"]["oracle_default"]["r2"],
+            "oracle_strong_r2": ca["cells"]["oracle_strong"]["r2"],
+            "oracle_dr_strong_r2": ca["cells"]["oracle_dr_strong"]["r2"],
+            "q1_conclusion": ca["comparisons"]["q1_oracle_default_vs_strong"]["conclusion"],
+            "q2_legal_dr_gain_r2": ca["comparisons"]["q2_legal_vs_legal_dr"]["delta_r2_strong"],
+        }
 
     report = {
         "schema": "reactflow_delta.m2r_submission_horizontal_table.v1",
         "dataset": "OpenKnot_M2R",
         "n_samples": tr["n_samples"], "n_designs": tr["n_designs"],
-        "headline": "3-way ensemble (L1+L2 GBDT + Ridge, 236 dims) "
-                    "= +26.59% skill (R2 0.370), design-level LOO",
-        "headline_puzzle": "+25.77% (3-way, puzzle-level LOO)",
+        "headline": "strong 3-way ensemble (L1+L2 GBDT + Ridge, 300-tr base, 236 dims) "
+                    "= +28.11% skill (R2 0.387), design-level LOO",
+        "headline_puzzle": "+27.42% (strong 3-way, puzzle-level LOO)",
         "baseline_mae": baseline_mae,
         "rows": rows,
         "significance": significance,
@@ -162,13 +199,17 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 "gbdt_l1_230": "+25.94%",
                 "+m2_transfer_l1": "+26.38% (with blend)",
                 "3way_ensemble": "+26.59% (L1+L2 GBDT + Ridge)",
+                "strong_3way": "+28.11% (300-tr base GBDTs, new headline)",
                 "l1_vs_l2": "+0.56pp (100% LOO-exclusion positive)",
-                "threeway_vs_prev": "+0.21pp (100% LOO-exclusion positive)",
+                "strong_vs_default_3way": "+1.52pp (perm p=0.0005, 100% LOO-exclusion positive)",
                 "m2_structure": "+0.42pp (100% positive)",
                 "transfer": "+0.21pp design / +0.32pp puzzle (leak-free)",
             },
             "fail_closed_audited": [
                 "noise floor verified (formula corr=1.0000, MC error propagation)",
+                "ceiling AUDIT (m2r_ceiling_audit_v1.py): oracle reaches R2 0.73-0.96 with strong model, not the old 0.407",
+                "old 'circular oracle 0.407' was a weak-feature artifact — corrected in submission table",
+                "legal design-region features (incl. legal rescue denominator) NEGATIVE — lever closed",
                 "full-profile Transformer NEGATIVE (R2 0.056) — overfits",
                 "inverse-variance weighting NEGATIVE — L1 already handles tail",
                 "global full-profile features NEGATIVE for GBDT",
@@ -177,9 +218,9 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
             ],
             "honest_caveats": [
                 "2/160 designs lack M2 preds (zero transfer features)",
-                "per-design L1 gain smaller (+0.21pp, 56% positive); pooled LOO-exclusion is the reliable statement",
-                "legal-feature R2 ceiling ~0.41 (circular oracle); residual headroom is the double-mutant effect",
-                "3-way per-design (unpooled) gain +0.07pp, 51% positive; pooled LOO-exclusion +0.21pp 100% positive is the reliable statement",
+                "strong-3way per-design (unpooled) gain +0.63pp, 69% positive; pooled LOO-exclusion +1.52pp 100% positive is the reliable statement",
+                "legal-feature R2 ceiling ~0.36-0.39 (strong-model audit); residual headroom is the double-mutant effect",
+                "oracle R2 0.73-0.96 > legal 0.36 confirms the gap is the (illegal) double-mutant RMSD, not model capacity",
             ],
         },
     }
@@ -202,19 +243,21 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                      f"{r['split']} | {mae} | {sk} | {r2} |")
     lines += [
         "",
-        "**Headline**: 3-way ensemble (L1+L2 GBDT + Ridge, 236 dims) = "
-        "+26.59% skill (R² 0.370) at design-level LOO; +25.77% (3-way) at "
-        "puzzle-level.",
+        "**Headline**: strong 3-way ensemble (L1+L2 GBDT + Ridge, 300-tr base, "
+        "236 dims) = +28.11% skill (R² 0.387) at design-level LOO; +27.42% "
+        "(strong 3-way) at puzzle-level.",
         "",
-        "**Significance**: full-stack L1 perm p = 0.002, CI (0.245, 0.281); "
-        "L1-vs-L2 gain +0.56pp, 100% of 159 LOO-exclusion folds positive "
-        "(range [+0.45, +0.63]pp).  "
-        "3-way vs prev headline: +0.21pp, 100% of 159 LOO-exclusion folds positive "
-        "(range [+0.09, +0.24]pp).",
+        "**Significance**: strong-vs-default 3-way perm p = 0.0005, "
+        "CI (0.262, 0.298); LOO-exclusion gain +1.52pp, 100% of 159 folds "
+        "positive (range [+1.46, +1.61]pp).  "
+        "Full-stack L1 perm p = 0.002, CI (0.245, 0.281); "
+        "L1-vs-L2 gain +0.56pp, 100% positive.",
         "",
-        "**Noise floor**: median σ_noise 0.024, R² ceiling (mean-noise) 0.82; "
-        "legal-feature representation saturates ~0.37-0.41 (circular double-"
-        "mutant oracle = 0.407).",
+        "**Noise floor / ceiling audit**: median σ_noise 0.024, "
+        "R² ceiling (mean-noise) 0.82; "
+        "legal-feature representation saturates ~0.36-0.39 (strong-model audit); "
+        "oracle (knowing double-mutant RMSD) reaches R² 0.73-0.96.  "
+        "Old 'circular oracle 0.407' was a weak-feature artifact — corrected.",
     ]
     (out / "submission_horizontal_table_m2r.md").write_text(
         "\n".join(lines) + "\n", encoding="utf-8")
@@ -233,12 +276,19 @@ def main():
     ap.add_argument("--threeway-report", default=None)
     ap.add_argument("--threeway-permtest", default=None)
     ap.add_argument("--threeway-puzzle-report", default=None)
+    ap.add_argument("--threeway-strong-report", default=None)
+    ap.add_argument("--threeway-strong-permtest", default=None)
+    ap.add_argument("--threeway-strong-puzzle-report", default=None)
+    ap.add_argument("--ceiling-audit-report", default=None)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     build_table(args.transfer_report, args.robust_report, args.robust_permtest,
                 args.puzzle_report, args.noise_floor, args.out,
                 args.threeway_report, args.threeway_permtest,
-                args.threeway_puzzle_report)
+                args.threeway_puzzle_report,
+                args.threeway_strong_report, args.threeway_strong_permtest,
+                args.threeway_strong_puzzle_report,
+                args.ceiling_audit_report)
     return 0
 
 

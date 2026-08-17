@@ -28,25 +28,30 @@ NOISE = f"{BASE}/m2r_noise_floor_20260817/m2r_noise_floor.json"
 THREEWAY = f"{BASE}/m2r_3way_ensemble_20260817/m2r_3way_ensemble_report.json"
 THREEWAY_P = f"{BASE}/m2r_3way_ensemble_20260817/m2r_3way_permtest.json"
 THREEWAY_PZ = f"{BASE}/m2r_3way_puzzle_20260817/m2r_3way_puzzle_report.json"
+THREEWAY_S = f"{BASE}/m2r_3way_strong_20260817/m2r_3way_strong_report.json"
+THREEWAY_SP = f"{BASE}/m2r_3way_strong_20260817/m2r_3way_strong_permtest.json"
+THREEWAY_SPZ = f"{BASE}/m2r_3way_strong_puzzle_20260817/m2r_3way_strong_puzzle_report.json"
+CEILING = f"{BASE}/m2r_ceiling_audit_lean_20260817/m2r_ceiling_audit_report.json"
 
 
 @pytest.fixture(scope="module")
 def report(tmp_path_factory):
     out = tmp_path_factory.mktemp("sub")
     sub.build_table(TRANSFER, ROBUST, ROBUST_P, PUZZLE, NOISE, str(out),
-                    THREEWAY, THREEWAY_P, THREEWAY_PZ)
+                    THREEWAY, THREEWAY_P, THREEWAY_PZ,
+                    THREEWAY_S, THREEWAY_SP, THREEWAY_SPZ, CEILING)
     d = json.loads((out / "submission_horizontal_table_m2r.json").read_text(encoding="utf-8"))
     return d, out
 
 
-def test_headline_matches_threeway_report(report):
+def test_headline_matches_strong_threeway_report(report):
     d, _ = report
-    tw = json.loads(Path(THREEWAY).read_text(encoding="utf-8"))["results"]
+    tws = json.loads(Path(THREEWAY_S).read_text(encoding="utf-8"))["headline"]
     hl = [r for r in d["rows"] if r.get("headline")][0]
-    assert hl["model"] == "3-way ensemble (L1+L2 GBDT + Ridge)"
-    assert abs(hl["skill"] - tw["threeway_blend_a_priori"]["skill"]) < 1e-12
-    assert abs(hl["r2"] - tw["threeway_blend_a_priori"]["r2"]) < 1e-12
-    assert abs(hl["r2"] - 0.370) < 0.005
+    assert hl["model"] == "strong 3-way ensemble (300-tr base GBDTs)"
+    assert abs(hl["skill"] - tws["strong"]["skill"]) < 1e-12
+    assert abs(hl["r2"] - tws["strong"]["r2"]) < 1e-12
+    assert abs(hl["r2"] - 0.387) < 0.005
 
 
 def test_headline_is_best(report):
@@ -54,8 +59,10 @@ def test_headline_is_best(report):
     skills = [r["skill"] for r in d["rows"] if r.get("skill") is not None]
     hl = [r for r in d["rows"] if r.get("headline")][0]
     assert hl["skill"] == max(skills)
-    # 3-way must beat the L1 full-stack blend
+    # strong 3-way must beat the default 3-way and the L1 full-stack blend
+    tw = [r for r in d["rows"] if r["model"] == "3-way ensemble (L1+L2 GBDT + Ridge)"][0]
     l1 = [r for r in d["rows"] if r["model"] == "L1 full-stack blend (a=0.80)"][0]
+    assert hl["skill"] > tw["skill"]
     assert hl["skill"] > l1["skill"]
 
 
@@ -71,8 +78,17 @@ def test_artifacts_written(report):
     assert (out / "submission_horizontal_table_m2r.json").exists()
     assert (out / "submission_horizontal_table_m2r.md").exists()
     md = (out / "submission_horizontal_table_m2r.md").read_text(encoding="utf-8")
-    assert "+26.59%" in md
-    assert "0.370" in md
+    assert "+28.11%" in md
+    assert "0.387" in md
+    assert "ceiling audit" in md
+
+
+def test_ceiling_audit_in_noise_floor(report):
+    d, _ = report
+    nf = d["noise_floor"]
+    assert nf["ceiling_audit"] is not None
+    assert nf["ceiling_audit"]["oracle_strong_r2"] > 0.5
+    assert nf["ceiling_audit"]["legal_strong_r2"] < 0.45
 
 
 if __name__ == "__main__":
