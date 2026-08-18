@@ -343,6 +343,8 @@ def build_table(transfer_report: str, robust_report: str, robust_permtest: str,
                 "stacking / learned blend weights (NNLS -0.65pp, Ridge -0.53pp, Ridge+quad -0.42pp; p~1.0) — fixed 0.6/0.3/0.1 already optimal",
                 "residual boosting (GBDT on blend residual) NEGATIVE -0.60 to -5.33pp — no learnable structure left in the 3-way blend error",
                 "config-soup (500-tr/depth-8 CFG_B) CLOSED (-0.08pp, 0% positive) — 300-tr/depth-6 already at capacity limit",
+                "BPP partition-function features: single-seed screen +0.28pp BUT K=5 multi-seed audit +0.03pp, perm p=0.577 NOT significant (puzzle +0.15pp, 70% positive) — CLOSED, plain-MFE already captures the soft ensemble signal",
+                "SHAPE-guided (Deigan-constrained) folding features CLOSED (-0.07pp, 0% of 159 folds positive) — per-site SHAPE reactivity already a feature; whole-molecule constrained fold adds noise",
             ],
             "honest_caveats": [
                 "2/160 designs lack M2 preds (zero transfer features)",

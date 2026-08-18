@@ -86,5 +86,62 @@ def test_build_mfe_features(monkeypatch):
     assert f[names.index("rescue_cue_1")] >= 0.0
 
 
+def test_build_bpp_features(monkeypatch):
+    def fake_bpp(seq):
+        # diagonal-only: position pairs with itself with prob 0; 17-dim zeros
+        n = len(_sample().sequence)
+        return np.zeros((n, n))
+
+    def fake_pfdg(seq):
+        if all(c == "A" for c in seq):
+            return -2.0
+        if all(c == "C" for c in seq):
+            return -0.5
+        if "G" in seq and "C" in seq:
+            return -1.9
+        return -0.5
+
+    monkeypatch.setattr(mfe, "_bpp", fake_bpp)
+    monkeypatch.setattr(mfe, "_pf_dG", fake_pfdg)
+
+    f = mfe.build_bpp_features(_sample())
+    names = mfe.bpp_feature_names()
+    assert len(f) == len(names) == 17
+    # with zero pair probs, rescue cue ~ 0 and pij values 0
+    assert f[names.index("bpp_rescue_cue")] == 0.0
+    assert f[names.index("pf_rescue")] > 0.5  # D restores energy-wise
+
+
+def test_pf_dG_handles_tuple_return(monkeypatch):
+    """ViennaRNA 2.7.x pf() returns [structure, dG] on first call; _pf_dG
+    must extract the scalar energy instead of crashing with float(list)."""
+    class FakeFC:
+        def pf(self):
+            return ["(((...)))", -7.5]
+
+    fake_rna = type("FakeRNA", (), {
+        "fold_compound": staticmethod(lambda seq: FakeFC())
+    })
+    monkeypatch.setitem(sys.modules, "RNA", fake_rna)
+    monkeypatch.setattr(mfe, "CACHE", {})
+    assert mfe._pf_dG("ACGUACGU") == -7.5
+    # cached second call (no new fold_compound)
+    assert mfe._pf_dG("ACGUACGU") == -7.5
+
+
+def test_pf_dG_handles_scalar_return(monkeypatch):
+    """Some ViennaRNA builds return a plain float from pf(); keep both paths."""
+    class FakeFC:
+        def pf(self):
+            return -3.2
+
+    fake_rna = type("FakeRNA", (), {
+        "fold_compound": staticmethod(lambda seq: FakeFC())
+    })
+    monkeypatch.setitem(sys.modules, "RNA", fake_rna)
+    monkeypatch.setattr(mfe, "CACHE", {})
+    assert mfe._pf_dG("ACGUACGU") == -3.2
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

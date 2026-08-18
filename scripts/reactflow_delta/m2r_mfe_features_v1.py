@@ -95,6 +95,103 @@ def pairing_status(structure: str, i: int, j: int) -> tuple[int, int, int]:
     return pi, pj, both
 
 
+# ---- partition-function (base-pair probability) features ----
+# Softer, continuous thermodynamic signal: p(i,j) from the full ensemble,
+# robust to MFE degeneracy.  All still sequence-based / legal.
+
+def _bpp(seq: str):
+    """(i,j) base-pair probability matrix via the partition function (cached).
+
+    Also caches the ensemble free energy under ("pfdg", seq) so `_pf_dG`
+    reuses the same partition-function computation.
+    """
+    key = ("bpp", seq)
+    if key not in CACHE:
+        import RNA
+        fd = RNA.fold_compound(seq)
+        val = fd.pf()
+        if isinstance(val, (list, tuple)):
+            dg = float(val[1])
+        else:
+            dg = float(val)
+        CACHE[("pfdg", seq)] = dg
+        CACHE[key] = fd.bpp()
+    return CACHE[key]
+
+
+def _pf_dG(seq: str):
+    """Ensemble (partition-function) free energy in kcal/mol (cached).
+
+    ViennaRNA 2.7.x `fold_compound.pf()` returns [structure, dG] on the first
+    call; extract the scalar energy robustly.
+    """
+    key = ("pfdg", seq)
+    if key not in CACHE:
+        import RNA
+        fd = RNA.fold_compound(seq)
+        val = fd.pf()
+        if isinstance(val, (list, tuple)):
+            val = val[1]
+        CACHE[key] = float(val)
+    return CACHE[key]
+
+
+def _bpp_pair_prob(bpp, i, j):
+    """Probability that position i pairs with j (symmetric matrix)."""
+    n = len(bpp)
+    if 0 <= i < n and 0 <= j < n:
+        return float(bpp[i][j] + bpp[j][i])
+    return 0.0
+
+
+def build_bpp_features(s) -> np.ndarray:
+    """Partition-function base-pair-probability features (legal)."""
+    seq = s.sequence
+    i, j = s.editA_seq_pos, s.editB_seq_pos
+    seqA = s.mutA_seq if s.mutA_seq else seq
+    seqB = s.mutB_seq if s.mutB_seq else seq
+    seqD = list(seqA)
+    if 0 <= j < len(seqD) and 0 <= j < len(seqB):
+        seqD[j] = seqB[j]
+    seqD = "".join(seqD)
+
+    b_wt, b_a, b_b, b_d = _bpp(seq), _bpp(seqA), _bpp(seqB), _bpp(seqD)
+    g_wt, g_a, g_b, g_d = _pf_dG(seq), _pf_dG(seqA), _pf_dG(seqB), _pf_dG(seqD)
+
+    # (i,j) pairing probability in each ensemble
+    pij_wt = _bpp_pair_prob(b_wt, i, j)
+    pij_a = _bpp_pair_prob(b_a, i, j)
+    pij_b = _bpp_pair_prob(b_b, i, j)
+    pij_d = _bpp_pair_prob(b_d, i, j)
+    # max pairing probability at each site (over all partners)
+    def _max_site(bpp, pos):
+        n = len(bpp)
+        if not (0 <= pos < n):
+            return 0.0
+        return max(float(x) for x in bpp[pos])
+    ms_wt_i, ms_wt_j = _max_site(b_wt, i), _max_site(b_wt, j)
+    ms_d_i, ms_d_j = _max_site(b_d, i), _max_site(b_d, j)
+
+    # ensemble-energy rescue analog
+    da = abs(g_a - g_wt); db = abs(g_b - g_wt); dd = abs(g_d - g_wt)
+    pf_rescue = 1.0 - dd / (da + db + 1e-9)
+
+    return np.array([
+        pij_wt, pij_a, pij_b, pij_d,
+        pij_d - max(pij_a, pij_b),     # rescue cue (soft)
+        ms_wt_i, ms_wt_j, ms_d_i, ms_d_j,
+        g_wt, g_a, g_b, g_d, da, db, dd, pf_rescue,
+    ], dtype=np.float64)
+
+
+def bpp_feature_names() -> list[str]:
+    return ["bpp_wt_ij", "bpp_a_ij", "bpp_b_ij", "bpp_d_ij",
+            "bpp_rescue_cue", "bpp_ms_wt_i", "bpp_ms_wt_j",
+            "bpp_ms_d_i", "bpp_ms_d_j",
+            "pfG_wt", "pfG_a", "pfG_b", "pfG_d",
+            "pf_da", "pf_db", "pf_dd", "pf_rescue"]
+
+
 def build_mfe_features(s) -> np.ndarray:
     """MFE feature vector for one M2RPair.  All legal (sequence-based)."""
     seq = s.sequence
