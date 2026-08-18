@@ -2,10 +2,11 @@
 
 - 生成日期：2026-08-18（Asia/Shanghai）
 - 分支：`codex/reactflow-delta-benchmark-v3-20260809`
-- HEAD commit：`2766ff5`
+- HEAD commit：`883b4d6`（设计级 2766ff5 + 复现确认 fce79e7 + puzzle 级 883b4d6）
 - 远端：`git@github.com:Cunyu-Liu/Reactflow.git`（push 成功 ✅）
 - 提交包目录：`/mnt/cunyuliu/m2_spectrum_submission_final_20260818/`
 - headline 产物：`/mnt/cunyuliu/m2_gbdt_3way_ensemble_matched_20260818/m2_masked_eval_report.json`
+- puzzle 级产物：`/mnt/cunyuliu/m2_gbdt_puzzle_ensemble_20260818/m2_gbdt_puzzle_ensemble_report.json`
 
 ## 1. Headline（design-level LOO，matched 272,988 positions，158 designs）
 
@@ -76,14 +77,17 @@
 cd /home/cunyuliu/reactflow_delta_worktrees/benchmark_v3_20260809/scripts/reactflow_delta
 # 本地/服务器单元测试
 python -m pytest test_m2_gbdt_features_v1.py test_m2_gbdt_ensemble_v1.py \
-  test_m2_masked_eval_from_oof.py test_m2_spectrum_submission_table_v1.py -q
+  test_m2_masked_eval_from_oof.py test_m2_spectrum_submission_table_v1.py \
+  test_m2_gbdt_puzzle_ensemble_v1.py -q
 # 完整重跑（含 BPP 特征构建 ~30-50 min + GBDT LOO ~14 min）
 bash run_m2_gbdt_3way_ensemble.sh        # 全量版（作审计基线）
 # matched-only 诚实评估（从 OOF 直接计算，秒级）
 python m2_masked_eval_from_oof.py \
   --oof /mnt/cunyuliu/m2_gbdt_3way_ensemble_20260818/m2_gbdt_ensemble_oof.npz \
   --out /mnt/cunyuliu/m2_gbdt_3way_ensemble_matched_20260818
-# 提交表
+# puzzle 级泛化（19 puzzles → held-out，leak-free）
+bash run_m2_gbdt_puzzle_ensemble.sh
+# 提交表（含 design + puzzle 级行）
 bash run_m2_submission_final.sh
 ```
 
