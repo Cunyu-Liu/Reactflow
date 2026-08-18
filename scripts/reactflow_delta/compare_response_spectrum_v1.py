@@ -186,7 +186,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--dominant-pub", default="pmid_29446752")
     ap.add_argument("--model-variant", default="wmae_mlp_spectrum",
-                    choices=["wmae_mlp_spectrum", "wmae_resid_spectrum", "wmae_resid_deepsets_seq"])
+                    choices=["wmae_mlp_spectrum", "wmae_resid_spectrum",
+                             "wmae_resid_deepsets_seq_m2"])
     ap.add_argument("--n-perm", type=int, default=200)
     ap.add_argument("--n-boot", type=int, default=200)
     ap.add_argument("--perm-seed", type=int, default=20260812)
