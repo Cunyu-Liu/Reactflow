@@ -28,12 +28,14 @@ def _load(p):
 
 def build_table(attn_summary: str, crossarch_report: str,
                 threeway_report: str, fourway_report: str,
-                gbdt_report: str, out: str) -> dict:
+                gbdt_report: str, out: str,
+                puzzle_report: str = None) -> dict:
     s = _load(attn_summary)
     ca = _load(crossarch_report)
     tw = _load(threeway_report)
     fw = _load(fourway_report)
     gb = _load(gbdt_report)
+    pzR = _load(puzzle_report) if puzzle_report else None
 
     baseline_mae = s["wmae_skill"]["plain_residual_mlp"]["wmae_baseline"]
     w = s["wmae_skill"]
@@ -153,6 +155,39 @@ def build_table(attn_summary: str, crossarch_report: str,
         "source": "m2_four_way_ensemble_report.json grid.ens4_attn_heavy",
     })
 
+    # ---- puzzle-level rows (leak-free LOPO: train 19 puzzles -> predict 1) ----
+    if pzR is not None:
+        pr = pzR["results"]
+        rows.append({
+            "model": "attn deep [puzzle-level LOPO]",
+            "feature_set": "puzzle-level attn 1-layer OOF (5-seed mu)",
+            "split": "puzzle-level LOPO (matched %d rows)" % pzR["n_rows_matched"],
+            "mae": pr["deep_attn_puzzle"]["mae"],
+            "skill": pr["deep_attn_puzzle"]["skill"],
+            "source": "m2_gbdt_puzzle_ensemble_report.json",
+            "puzzle_level": True,
+        })
+        rows.append({
+            "model": "GBDT leak-free [puzzle-level LOPO]",
+            "feature_set": "31-dim per-position MFE/seq",
+            "split": "puzzle-level LOPO (matched %d rows)" % pzR["n_rows_matched"],
+            "mae": pr["gbdt_puzzle"]["mae"],
+            "skill": pr["gbdt_puzzle"]["skill"],
+            "source": "m2_gbdt_puzzle_ensemble_report.json",
+            "puzzle_level": True,
+        })
+        rows.append({
+            "model": "GBDT + attn deep blend (a=0.5) [puzzle-level LOPO]",
+            "feature_set": "puzzle-level GBDT + attn deep",
+            "split": "puzzle-level LOPO (matched %d rows)" % pzR["n_rows_matched"],
+            "mae": pr["blend"]["mae"],
+            "skill": pr["blend"]["skill"],
+            "ci": (pr["blend"]["sig"]["ci_low"], pr["blend"]["sig"]["ci_high"]),
+            "perm_p": pr["blend"]["sig"]["permutation_p"],
+            "source": "m2_gbdt_puzzle_ensemble_report.json",
+            "puzzle_level": True, "puzzle_headline": True,
+        })
+
     significance = {
         "baseline": "wmed_spectrum",
         "baseline_wmae": baseline_mae,
@@ -171,6 +206,22 @@ def build_table(attn_summary: str, crossarch_report: str,
             "loo_exclusion": gb["blend_vs_deep"]["loo_exclusion"],
         },
     }
+    if pzR is not None:
+        significance["puzzle_level"] = {
+            "exchangeable_unit": "puzzle",
+            "n_puzzles": pzR["n_puzzles"],
+            "fold_unit": "puzzle",
+            "headline": {
+                "skill": pzR["results"]["blend"]["skill"],
+                "ci": [pzR["results"]["blend"]["sig"]["ci_low"],
+                       pzR["results"]["blend"]["sig"]["ci_high"]],
+                "permutation_p": pzR["results"]["blend"]["sig"]["permutation_p"],
+                "blend_vs_deep_pp": pzR["blend_vs_deep"]["pooled_gain_pp"],
+                "per_puzzle_pp": pzR["blend_vs_deep"]["per_puzzle_mean_pp"],
+                "loo_exclusion": pzR["blend_vs_deep"]["loo_exclusion"],
+            },
+            "deep_component": pzR["deep_component"],
+        }
 
     report = {
         "schema": "reactflow_delta.response_spectrum.m2_submission_horizontal_table.v1",
@@ -209,6 +260,21 @@ def build_table(attn_summary: str, crossarch_report: str,
         loo["gain_mean_pp"], loo["gain_min_pp"], loo["gain_max_pp"],
         int(loo["pct_positive"] * loo["n_folds"]), loo["n_folds"]))
 
+    if "puzzle_level" in sg:
+        pz = sg["puzzle_level"]
+        md.append("")
+        md.append("## Puzzle-level LOPO (leak-free: train 19 puzzles -> predict held-out)")
+        md.append("- exchangeable unit = %s, n_puzzles = %d" % (pz["exchangeable_unit"], pz["n_puzzles"]))
+        md.append("- deep component: %s" % pz["deep_component"])
+        h2 = pz["headline"]
+        md.append("- **puzzle headline blend** skill = +%.2f%%, CI=(%.4f, %.4f), perm_p=%.4f" % (
+            h2["skill"] * 100, h2["ci"][0], h2["ci"][1], h2["permutation_p"]))
+        md.append("- blend vs attn deep: pooled +%.2fpp, per-puzzle +%.2fpp" % (h2["blend_vs_deep_pp"], h2["per_puzzle_pp"]))
+        loo2 = h2["loo_exclusion"]
+        md.append("- LOO-exclusion: mean +%.2fpp, range [%+.2f, %+.2f]pp, %d/%d puzzles positive" % (
+            loo2["gain_mean_pp"], loo2["gain_min_pp"], loo2["gain_max_pp"],
+            int(loo2["pct_positive"] * loo2["n_folds"]), loo2["n_folds"]))
+
     (out_p / "submission_horizontal_table_m2.md").write_text(
         "\n".join(md), encoding="utf-8")
 
@@ -225,10 +291,12 @@ def main():
     ap.add_argument("--threeway-report", required=True)
     ap.add_argument("--fourway-report", required=True)
     ap.add_argument("--gbdt-report", required=True)
+    ap.add_argument("--puzzle-report", default=None)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     build_table(args.attn_summary, args.crossarch_report, args.threeway_report,
-                args.fourway_report, args.gbdt_report, args.out)
+                args.fourway_report, args.gbdt_report, args.out,
+                puzzle_report=args.puzzle_report)
 
 
 if __name__ == "__main__":

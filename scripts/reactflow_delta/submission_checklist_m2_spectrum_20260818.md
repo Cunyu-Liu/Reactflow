@@ -22,6 +22,21 @@
 
 **blend vs 3-way deep**：pooled **+1.21pp**（per-design +1.11pp，66% positive）；LOO-exclusion：mean **+1.21pp**，range [+1.03, +1.24]pp，**158/158 folds positive**。
 
+### 1.1 Puzzle 级泛化（leak-free LOPO：train 19 puzzles → predict held-out）
+
+| 组件 | WMAE skill | WMAE |
+|---|---|---|
+| GBDT (puzzle-LOPO, leak-free) | +11.72% | 0.6662 |
+| attn deep (puzzle 级 OOF, 5-seed mu) | +11.71% | 0.6663 |
+| **blend (a=0.5) [puzzle headline]** | **+13.30%** | **0.6542** |
+
+- **显著性**：CI (0.1243, 0.1448)，puzzle-block **perm p=0.0033**
+- **blend vs attn deep**：pooled **+1.60pp**，per-puzzle +1.57pp（95% positive）
+- **LOO-exclusion**：mean +1.60pp，range [+1.44, +1.67]pp，**19/19 puzzles 100% positive**
+- **关键结论**：跨架构集成增益在 puzzle 级（+1.60pp）> 设计级（+1.21pp）——对完全未见过的 puzzle 泛化更强
+- 产物：`/mnt/cunyuliu/m2_gbdt_puzzle_ensemble_20260818/m2_gbdt_puzzle_ensemble_report.json`
+- **Coverage note**：匹配集覆盖 19/20 puzzles；P01 因上游 puzzle OOF（m2_attn_puzzle_20260817）的重复写入缺陷（10 rows/pair = 2×5 seeds 值不一致）被 loader 排除，其余 19 puzzles 的 attn OOF 均干净（5 seeds 齐全）。完整 20-puzzle 3-way deep claim 需 v3/v4/v5 的 puzzle 级 OOF（GPU 重训，属 future work）
+
 ## 2. 数据来源（authentic, non-circular）
 
 | 数据 | 路径 | 说明 |

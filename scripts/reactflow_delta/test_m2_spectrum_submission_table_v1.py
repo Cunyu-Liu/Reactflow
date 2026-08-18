@@ -64,15 +64,33 @@ def _fixture_reports(tmp_path):
                               "n_folds": 159},
         },
     }
+    puzzle = {
+        "n_rows_matched": 272988, "n_puzzles": 20,
+        "deep_component": "attn_1layer_puzzle_oof",
+        "results": {
+            "gbdt_puzzle": {"mae": 0.66, "skill": 0.10},
+            "deep_attn_puzzle": {"mae": 0.67, "skill": 0.09},
+            "blend": {"mae": 0.64, "skill": 0.15,
+                      "sig": {"ci_low": 0.14, "ci_high": 0.16,
+                              "permutation_p": 0.0033}},
+        },
+        "blend_vs_deep": {
+            "pooled_gain_pp": 1.0, "per_puzzle_mean_pp": 0.8,
+            "loo_exclusion": {"gain_mean_pp": 1.0, "gain_min_pp": 0.7,
+                              "gain_max_pp": 1.3, "pct_positive": 1.0,
+                              "n_folds": 20},
+        },
+    }
     return (_write(tmp_path, "attn.json", attn),
             _write(tmp_path, "cross.json", cross),
             _write(tmp_path, "threeway.json", threeway),
             _write(tmp_path, "fourway.json", fourway),
-            _write(tmp_path, "gbdt.json", gbdt))
+            _write(tmp_path, "gbdt.json", gbdt),
+            _write(tmp_path, "puzzle.json", puzzle))
 
 
 def test_build_table_structure(tmp_path):
-    a, c, t, f, g = _fixture_reports(tmp_path)
+    a, c, t, f, g, pz = _fixture_reports(tmp_path)
     rep = st.build_table(a, c, t, f, g, str(tmp_path / "out"))
     rows = rep["rows"]
     assert rows[0]["model"].startswith("baseline")
@@ -91,9 +109,24 @@ def test_build_table_structure(tmp_path):
     assert sum(1 for r in rows if r.get("closed")) == 2
 
 
+def test_build_table_puzzle_rows(tmp_path):
+    a, c, t, f, g, pz = _fixture_reports(tmp_path)
+    rep = st.build_table(a, c, t, f, g, str(tmp_path / "out"), puzzle_report=pz)
+    rows = rep["rows"]
+    # 10 design rows + 3 puzzle rows
+    assert len(rows) == 13
+    pz_rows = [r for r in rows if r.get("puzzle_level")]
+    assert len(pz_rows) == 3
+    ph = [r for r in pz_rows if r.get("puzzle_headline")][0]
+    assert ph["skill"] == 0.15
+    assert ph["perm_p"] == 0.0033
+    assert rep["significance"]["puzzle_level"]["n_puzzles"] == 20
+    assert rep["significance"]["puzzle_level"]["headline"]["blend_vs_deep_pp"] == 1.0
+
+
 def test_outputs_written(tmp_path):
-    a, c, t, f, g = _fixture_reports(tmp_path)
-    st.build_table(a, c, t, f, g, str(tmp_path / "out"))
+    a, c, t, f, g, pz = _fixture_reports(tmp_path)
+    st.build_table(a, c, t, f, g, str(tmp_path / "out"), puzzle_report=pz)
     jp = Path(tmp_path) / "out" / "submission_horizontal_table_m2.json"
     mp = Path(tmp_path) / "out" / "submission_horizontal_table_m2.md"
     assert jp.exists() and mp.exists()
@@ -101,3 +134,4 @@ def test_outputs_written(tmp_path):
     assert j["schema"].endswith("m2_submission_horizontal_table.v1")
     md = mp.read_text(encoding="utf-8")
     assert "headline" in md and "perm_p" in md and "LOO-exclusion" in md
+    assert "Puzzle-level LOPO" in md and "puzzle headline" in md
