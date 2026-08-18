@@ -75,5 +75,6 @@ bash run_m2_submission_final.sh
 ## 7. 测试状态
 
 - 新增/修改测试：test_m2_gbdt_features_v1（leak-free 强制）、test_m2_gbdt_ensemble_v1（mask 对齐）、test_m2_masked_eval_from_oof（mask 检测 + block CI/perm）、test_m2_spectrum_submission_table_v1（提交表结构）
-- 本地 `9 passed`（features+ensemble）+ `3 passed`（masked-eval）+ `2 passed`（submission table）
-- 服务器完整套件在提交时一并运行验证
+- 本地 `9 passed`（features+ensemble）+ `3 passed`（masked-eval）+ `2 passed`（submission table）；服务器 `14 passed`
+- **复现确认（2026-08-18 22:55 完成）**：mask 版完整重跑（`m2_gbdt_ensemble_v1.py`，含 BPP 特征构建 ~25 min + GBDT LOO 845s）产出 blend **+14.06%**（MAE 0.6477，CI (0.1346, 0.1484)，p=0.0033），blend-vs-deep +1.21pp，LOO-exclusion 100% positive —— 与 OOF 权威结果逐位一致，**headline 完全可复现**。复现产物：`/mnt/cunyuliu/m2_gbdt_3way_ensemble_matched_20260818/m2_gbdt_ensemble_report.json` + `m2_gbdt_ensemble_oof.npz`
+- 提交包：`/mnt/cunyuliu/m2_spectrum_submission_final_20260818/`（`commit_manifest.json` + `submission_horizontal_table_m2.{json,md}`，4 文件 SHA-256 已固定）
