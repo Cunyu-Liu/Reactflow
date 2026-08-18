@@ -29,5 +29,8 @@ cd /home/cunyuliu/reactflow_delta_worktrees/benchmark_v3_20260809/scripts/reactf
   --multiseed-permtest "$BASE/m2r_multiseed_20260817/m2r_multiseed_permtest.json" \
   --multiseed-puzzle-report "$BASE/m2r_multiseed_puzzle_20260817/m2r_multiseed_puzzle_report.json" \
   --stack-report "$BASE/m2r_stack_20260817/m2r_stack_report.json" \
+  --mfe-report "$BASE/m2r_mfe_multiseed_20260818/m2r_mfe_multiseed_report.json" \
+  --mfe-puzzle-report "$BASE/m2r_mfe_puzzle_20260818/m2r_mfe_puzzle_report.json" \
+  --mfe-eval-report "$BASE/m2r_mfe_eval_20260818/m2r_mfe_eval_report.json" \
   --out "$OUT"
 echo "EXIT=$?"
