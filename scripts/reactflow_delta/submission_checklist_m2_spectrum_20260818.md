@@ -2,7 +2,8 @@
 
 - 生成日期：2026-08-18（Asia/Shanghai）
 - 分支：`codex/reactflow-delta-benchmark-v3-20260809`
-- 远端：`git@github.com:Cunyu-Liu/Reactflow.git`
+- HEAD commit：`2766ff5`
+- 远端：`git@github.com:Cunyu-Liu/Reactflow.git`（push 成功 ✅）
 - 提交包目录：`/mnt/cunyuliu/m2_spectrum_submission_final_20260818/`
 - headline 产物：`/mnt/cunyuliu/m2_gbdt_3way_ensemble_matched_20260818/m2_masked_eval_report.json`
 
