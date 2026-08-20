@@ -15,6 +15,7 @@ from typing import Any
 import numpy as np
 import torch
 
+from scripts.reactflow_delta import evaluator_v2 as E
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.model_rescue_v1 import AlignedDeltaModel, aligned_wt_ctx_tensors
 from scripts.reactflow_delta.run_model_rescue_m2_v1 import (
@@ -23,6 +24,7 @@ from scripts.reactflow_delta.run_model_rescue_m2_v1 import (
     predict_held,
     score_predictions,
 )
+from scripts.reactflow_delta.run_p2_v3 import _bio_key
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
@@ -118,6 +120,25 @@ def _score_validation_puzzles(
         score = score_predictions(prediction, univ, puzzle_records)
         rows.append({"puzzle": puzzle, **score})
     return rows
+
+
+def score_wt_anchor_signed_delta_mae(univ: M2Universe, held_records: list[Any]) -> float:
+    """Method-balanced signed-delta MAE for the no-change WT anchor."""
+    losses: dict[str, float] = {}
+    for record in held_records:
+        construct = univ.get_construct(record.construct_id)
+        target, _ = univ.mutant_full_profile(record.wt_id, record.pos, record.ref, record.alt)
+        if target is None:
+            continue
+        for pos in range(len(construct.sequence)):
+            if construct.wt_observed[pos] and np.isfinite(target[pos]):
+                losses[_bio_key(univ, record, pos)] = abs(
+                    float(target[pos]) - float(construct.wt_reactivity[pos])
+                )
+    result = E.score_position_losses(losses, method_balanced=True)
+    if len(result["puzzles"]) != 1:
+        raise ValueError("WT anchor scoring expects exactly one outer-held puzzle")
+    return float(next(iter(result["puzzles"].values()))["L"])
 
 
 def inner_evaluate(
@@ -265,16 +286,21 @@ def run_outer_fold(
     comparator = selection["selected_comparator"]
     candidate_score = scores[selected]
     comparator_score = scores[comparator]
+    wt_anchor_delta_mae = score_wt_anchor_signed_delta_mae(univ, held)
     return {
         "outer_fold": int(fold.outer_fold),
         "held_puzzle": fold.held_puzzle,
         "inner_results": inner,
         "selection": selection,
         "outer_scores": scores,
+        "wt_anchor_signed_delta_mae": wt_anchor_delta_mae,
         "effects": {
             "crps_gain": float(comparator_score["crps"] - candidate_score["crps"]),
             "signed_delta_mae_gain": float(
                 comparator_score["signed_delta_mae"] - candidate_score["signed_delta_mae"]
+            ),
+            "signed_delta_mae_gain_vs_wt_anchor": float(
+                wt_anchor_delta_mae - candidate_score["signed_delta_mae"]
             ),
         },
     }

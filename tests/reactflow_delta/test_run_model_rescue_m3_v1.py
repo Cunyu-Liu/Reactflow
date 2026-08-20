@@ -7,7 +7,32 @@ from scripts.reactflow_delta.run_model_rescue_m3_v1 import (
     choose_from_inner,
     combine_seed_predictions,
     eligible_specs,
+    score_wt_anchor_signed_delta_mae,
 )
+
+
+class _Construct:
+    sequence = "AC"
+    wt_observed = np.array([True, True])
+    wt_reactivity = np.array([0.0, 0.2])
+
+
+class _Record:
+    puzzle = "P01"
+    method = "M"
+    construct_id = "P01_M"
+    wt_id = "P01_M_wt"
+    pos = 0
+    ref = "A"
+    alt = "G"
+
+
+class _Universe:
+    def get_construct(self, _construct_id):
+        return _Construct()
+
+    def mutant_full_profile(self, *_args):
+        return np.array([0.1, 0.5]), np.array([0.1, 0.1])
 
 
 def test_m3_fails_closed_without_m2_pass():
@@ -58,3 +83,8 @@ def test_five_seed_predictions_form_one_normalized_mixture():
     assert mixture["locations"].shape == (1, 10)
     assert np.allclose(mixture["weights"].sum(axis=1), 1.0)
     assert np.allclose(mixture["weights"][0, :2], [0.05, 0.15])
+
+
+def test_wt_anchor_signed_delta_mae_uses_method_balanced_evaluator():
+    score = score_wt_anchor_signed_delta_mae(_Universe(), [_Record()])
+    assert np.isclose(score, np.mean([0.1, 0.3]))
