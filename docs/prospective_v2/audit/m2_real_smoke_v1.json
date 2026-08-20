@@ -1,0 +1,444 @@
+{
+  "device": "cuda:0",
+  "epochs": 3,
+  "evidence_status": "ENGINEERING_SMOKE_ONLY",
+  "folds": [
+    {
+      "candidates": {
+        "b1_rfd_direct_aligned": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_b1_rfd_direct_aligned_fold0.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_b1_rfd_direct_aligned_fold0.npz",
+          "score": {
+            "coverage68": 0.6871153846153847,
+            "coverage95": 0.8465625000000001,
+            "crps": 0.2728017507657952,
+            "crps_methods": {
+              "Eterna": 0.2801877388709004,
+              "MPNN-RFdiff": 0.2806409451466505,
+              "MPNN-fixbb": 0.22967678704717095,
+              "Rosetta": 0.2813435213206716,
+              "Shujun_shape_struct2seq": 0.26878121293116813,
+              "Shujun_struct2seq": 0.2512275175828874,
+              "Starting sequence": 0.31660489926642776,
+              "gRNAde-no3d": 0.27395138396048474
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.352727498579986,
+              "MPNN-RFdiff": 0.35541977750813875,
+              "MPNN-fixbb": 0.28764687826737856,
+              "Rosetta": 0.3575221987665595,
+              "Shujun_shape_struct2seq": 0.34042442002063616,
+              "Shujun_struct2seq": 0.32011993526950766,
+              "Starting sequence": 0.40017509179473854,
+              "gRNAde-no3d": 0.345010161628284
+            },
+            "n_qualified_positions": 41600,
+            "prediction_coverage": 73632,
+            "signed_delta_mae": 0.3448807452294036
+          },
+          "spec": {
+            "huber_lambda": 0.0,
+            "k_rank": 0,
+            "model_id": "b1_rfd_direct_aligned",
+            "sparse": false
+          },
+          "train_loss": [
+            0.7602310953970184,
+            0.6968857553102915,
+            0.6796406186401647
+          ]
+        },
+        "l2_aligned_rank2": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_l2_aligned_rank2_fold0.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_l2_aligned_rank2_fold0.npz",
+          "score": {
+            "coverage68": 0.7167788461538462,
+            "coverage95": 0.8551442307692307,
+            "crps": 0.2533758473088801,
+            "crps_methods": {
+              "Eterna": 0.2500472299726089,
+              "MPNN-RFdiff": 0.25551696177277994,
+              "MPNN-fixbb": 0.21312478771703572,
+              "Rosetta": 0.2680197945531079,
+              "Shujun_shape_struct2seq": 0.24775966231919763,
+              "Shujun_struct2seq": 0.2287247065730484,
+              "Starting sequence": 0.298754314991957,
+              "gRNAde-no3d": 0.2650593205713055
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.299974633690336,
+              "MPNN-RFdiff": 0.30338160763975397,
+              "MPNN-fixbb": 0.2538593481968314,
+              "Rosetta": 0.33467309197299544,
+              "Shujun_shape_struct2seq": 0.29207993539886906,
+              "Shujun_struct2seq": 0.27206355964205936,
+              "Starting sequence": 0.36867186196858637,
+              "gRNAde-no3d": 0.32383312400346564
+            },
+            "n_qualified_positions": 41600,
+            "prediction_coverage": 73632,
+            "signed_delta_mae": 0.30606714531411217
+          },
+          "spec": {
+            "huber_lambda": 0.0,
+            "k_rank": 2,
+            "model_id": "l2_aligned_rank2",
+            "sparse": false
+          },
+          "train_loss": [
+            0.7784613172017926,
+            0.7095358534253492,
+            0.6733266729632137
+          ]
+        },
+        "sparse_delta_mdn_h0": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_sparse_delta_mdn_h0_fold0.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_sparse_delta_mdn_h0_fold0.npz",
+          "score": {
+            "coverage68": 0.7675000000000001,
+            "coverage95": 0.9135576923076923,
+            "crps": 0.2462270405272532,
+            "crps_methods": {
+              "Eterna": 0.22938814497945653,
+              "MPNN-RFdiff": 0.24450404679349386,
+              "MPNN-fixbb": 0.20742134688174999,
+              "Rosetta": 0.27058529423338823,
+              "Shujun_shape_struct2seq": 0.23998258960007823,
+              "Shujun_struct2seq": 0.21859416825784697,
+              "Starting sequence": 0.2923906100913328,
+              "gRNAde-no3d": 0.2669501233806789
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.32008042138200876,
+              "MPNN-RFdiff": 0.3360825617452851,
+              "MPNN-fixbb": 0.31126205093990506,
+              "Rosetta": 0.3794125740725724,
+              "Shujun_shape_struct2seq": 0.3352740253982635,
+              "Shujun_struct2seq": 0.3105843447811294,
+              "Starting sequence": 0.39917989714129964,
+              "gRNAde-no3d": 0.3789396914670293
+            },
+            "n_qualified_positions": 41600,
+            "prediction_coverage": 73632,
+            "signed_delta_mae": 0.34635194586593665
+          },
+          "spec": {
+            "huber_lambda": 0.0,
+            "k_rank": 0,
+            "model_id": "sparse_delta_mdn_h0",
+            "sparse": true
+          },
+          "train_loss": [
+            0.23006419699935132,
+            0.19443901192199514,
+            0.14699433199114578
+          ]
+        },
+        "sparse_delta_mdn_h01": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_sparse_delta_mdn_h01_fold0.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_sparse_delta_mdn_h01_fold0.npz",
+          "score": {
+            "coverage68": 0.7738942307692307,
+            "coverage95": 0.9045913461538462,
+            "crps": 0.24642778447515848,
+            "crps_methods": {
+              "Eterna": 0.2440363929477392,
+              "MPNN-RFdiff": 0.2487336786286206,
+              "MPNN-fixbb": 0.20364591414839336,
+              "Rosetta": 0.26497998011332224,
+              "Shujun_shape_struct2seq": 0.24215656814198558,
+              "Shujun_struct2seq": 0.2204469983304111,
+              "Starting sequence": 0.2931009780615166,
+              "gRNAde-no3d": 0.25432176542927915
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.3068425290885691,
+              "MPNN-RFdiff": 0.3090170354645995,
+              "MPNN-fixbb": 0.250810880487582,
+              "Rosetta": 0.3314189823583572,
+              "Shujun_shape_struct2seq": 0.29686004144196826,
+              "Shujun_struct2seq": 0.27366253400126417,
+              "Starting sequence": 0.36248153635582375,
+              "gRNAde-no3d": 0.31688732016819743
+            },
+            "n_qualified_positions": 41600,
+            "prediction_coverage": 73632,
+            "signed_delta_mae": 0.3059976074207952
+          },
+          "spec": {
+            "huber_lambda": 0.1,
+            "k_rank": 0,
+            "model_id": "sparse_delta_mdn_h01",
+            "sparse": true
+          },
+          "train_loss": [
+            0.25133237036697514,
+            0.21674548577369246,
+            0.19060853122431315
+          ]
+        }
+      },
+      "held_puzzle": "P01",
+      "outer_fold": 0
+    },
+    {
+      "candidates": {
+        "b1_rfd_direct_aligned": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_b1_rfd_direct_aligned_fold1.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_b1_rfd_direct_aligned_fold1.npz",
+          "score": {
+            "coverage68": 0.7544666666666666,
+            "coverage95": 0.8946166666666667,
+            "crps": 0.23327308379114245,
+            "crps_methods": {
+              "Eterna": 0.19210892578711986,
+              "MPNN-RFdiff": 0.20796761938891856,
+              "MPNN-fixbb": 0.2108929318382406,
+              "Rosetta": 0.1906112979077044,
+              "Shujun_shape_struct2seq": 0.213183529325265,
+              "Shujun_struct2seq": 0.20452550499214636,
+              "Starting sequence": 0.29844513192503835,
+              "gRNAde-no3d": 0.3484497291647065
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.23937293774004278,
+              "MPNN-RFdiff": 0.26296936341835087,
+              "MPNN-fixbb": 0.26881170676559457,
+              "Rosetta": 0.23418566202694524,
+              "Shujun_shape_struct2seq": 0.2679111387472733,
+              "Shujun_struct2seq": 0.2511976957867077,
+              "Starting sequence": 0.3883311570266138,
+              "gRNAde-no3d": 0.431629179391857
+            },
+            "n_qualified_positions": 60000,
+            "prediction_coverage": 106200,
+            "signed_delta_mae": 0.29305110511292315
+          },
+          "spec": {
+            "huber_lambda": 0.0,
+            "k_rank": 0,
+            "model_id": "b1_rfd_direct_aligned",
+            "sparse": false
+          },
+          "train_loss": [
+            0.7770954457000638,
+            0.7218970277914099,
+            0.6752073042563452
+          ]
+        },
+        "l2_aligned_rank2": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_l2_aligned_rank2_fold1.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_l2_aligned_rank2_fold1.npz",
+          "score": {
+            "coverage68": 0.6769833333333333,
+            "coverage95": 0.8475,
+            "crps": 0.23876679820925803,
+            "crps_methods": {
+              "Eterna": 0.19686393093176782,
+              "MPNN-RFdiff": 0.21487141062170992,
+              "MPNN-fixbb": 0.21783051624679356,
+              "Rosetta": 0.19326406214146252,
+              "Shujun_shape_struct2seq": 0.2169840813025385,
+              "Shujun_struct2seq": 0.20745449486105627,
+              "Starting sequence": 0.30435090742569776,
+              "gRNAde-no3d": 0.35851498214303773
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.25754558614002965,
+              "MPNN-RFdiff": 0.28059735966353216,
+              "MPNN-fixbb": 0.28493733387571824,
+              "Rosetta": 0.2488719818889138,
+              "Shujun_shape_struct2seq": 0.2800329845392446,
+              "Shujun_struct2seq": 0.2631967112916352,
+              "Starting sequence": 0.3878513847784042,
+              "gRNAde-no3d": 0.44043831228124825
+            },
+            "n_qualified_positions": 60000,
+            "prediction_coverage": 106200,
+            "signed_delta_mae": 0.30543395680734076
+          },
+          "spec": {
+            "huber_lambda": 0.0,
+            "k_rank": 2,
+            "model_id": "l2_aligned_rank2",
+            "sparse": false
+          },
+          "train_loss": [
+            0.7997957568874718,
+            0.7149368434626338,
+            0.7147827523865349
+          ]
+        },
+        "sparse_delta_mdn_h0": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_sparse_delta_mdn_h0_fold1.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_sparse_delta_mdn_h0_fold1.npz",
+          "score": {
+            "coverage68": 0.78695,
+            "coverage95": 0.9252833333333333,
+            "crps": 0.2087692658003238,
+            "crps_methods": {
+              "Eterna": 0.15213208276387707,
+              "MPNN-RFdiff": 0.17372515580611475,
+              "MPNN-fixbb": 0.17527772345375767,
+              "Rosetta": 0.162278656714419,
+              "Shujun_shape_struct2seq": 0.19480415495899414,
+              "Shujun_struct2seq": 0.17966968662088112,
+              "Starting sequence": 0.3087697804709928,
+              "gRNAde-no3d": 0.3234968856135537
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.19823541387500063,
+              "MPNN-RFdiff": 0.22960412860833118,
+              "MPNN-fixbb": 0.22664721107161268,
+              "Rosetta": 0.2187080203298648,
+              "Shujun_shape_struct2seq": 0.2570770499797729,
+              "Shujun_struct2seq": 0.23964183790250512,
+              "Starting sequence": 0.40341922801399,
+              "gRNAde-no3d": 0.4010680881347174
+            },
+            "n_qualified_positions": 60000,
+            "prediction_coverage": 106200,
+            "signed_delta_mae": 0.27180012223947436
+          },
+          "spec": {
+            "huber_lambda": 0.0,
+            "k_rank": 0,
+            "model_id": "sparse_delta_mdn_h0",
+            "sparse": true
+          },
+          "train_loss": [
+            0.24280851189132288,
+            0.20621980689943997,
+            0.175905469706319
+          ]
+        },
+        "sparse_delta_mdn_h01": {
+          "checkpoint": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_checkpoint_sparse_delta_mdn_h01_fold1.pt",
+          "epochs": 3,
+          "prediction_artifact": "/mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_smoke_gpu2_20260820/m2_predictions_sparse_delta_mdn_h01_fold1.npz",
+          "score": {
+            "coverage68": 0.7753166666666667,
+            "coverage95": 0.9002166666666667,
+            "crps": 0.22125091447486797,
+            "crps_methods": {
+              "Eterna": 0.1559507548040332,
+              "MPNN-RFdiff": 0.18593941113205079,
+              "MPNN-fixbb": 0.1813791694080122,
+              "Rosetta": 0.16987909705015733,
+              "Shujun_shape_struct2seq": 0.20542207893080455,
+              "Shujun_struct2seq": 0.19398363461586238,
+              "Starting sequence": 0.3300228775256887,
+              "gRNAde-no3d": 0.34743029233233474
+            },
+            "delta_mae_methods": {
+              "Eterna": 0.19330344134753838,
+              "MPNN-RFdiff": 0.23441319717769754,
+              "MPNN-fixbb": 0.2266054873956396,
+              "Rosetta": 0.2196729036329988,
+              "Shujun_shape_struct2seq": 0.2608072027694159,
+              "Shujun_struct2seq": 0.2485036209771136,
+              "Starting sequence": 0.42014434358684094,
+              "gRNAde-no3d": 0.42039345894364144
+            },
+            "n_qualified_positions": 60000,
+            "prediction_coverage": 106200,
+            "signed_delta_mae": 0.2779804569788608
+          },
+          "spec": {
+            "huber_lambda": 0.1,
+            "k_rank": 0,
+            "model_id": "sparse_delta_mdn_h01",
+            "sparse": true
+          },
+          "train_loss": [
+            0.26339271000358244,
+            0.2281558197916837,
+            0.19941752399040374
+          ]
+        }
+      },
+      "held_puzzle": "P02",
+      "outer_fold": 1
+    }
+  ],
+  "qualification": {
+    "external": "NOT_ACCESSED",
+    "selection_warning": "two-fold smoke is not candidate selection",
+    "sota": "NOT_ESTABLISHED"
+  },
+  "schema_version": "reactflow_delta.model_rescue_m2.v1",
+  "seed": 0,
+  "summary": {
+    "candidates": {
+      "b1_rfd_direct_aligned": {
+        "crps_gain_vs_b1": 0.0,
+        "directional_both_primary": true,
+        "mean_crps": 0.25303741727846885,
+        "mean_signed_delta_mae": 0.3189659251711634,
+        "per_fold_crps": [
+          0.2728017507657952,
+          0.23327308379114245
+        ],
+        "per_fold_signed_delta_mae": [
+          0.3448807452294036,
+          0.29305110511292315
+        ],
+        "signed_delta_mae_gain_vs_b1": 0.0
+      },
+      "l2_aligned_rank2": {
+        "crps_gain_vs_b1": 0.006966094519399779,
+        "directional_both_primary": true,
+        "mean_crps": 0.24607132275906907,
+        "mean_signed_delta_mae": 0.30575055106072646,
+        "per_fold_crps": [
+          0.2533758473088801,
+          0.23876679820925803
+        ],
+        "per_fold_signed_delta_mae": [
+          0.30606714531411217,
+          0.30543395680734076
+        ],
+        "signed_delta_mae_gain_vs_b1": 0.01321537411043694
+      },
+      "sparse_delta_mdn_h0": {
+        "crps_gain_vs_b1": 0.025539264114680355,
+        "directional_both_primary": true,
+        "mean_crps": 0.2274981531637885,
+        "mean_signed_delta_mae": 0.3090760340527055,
+        "per_fold_crps": [
+          0.2462270405272532,
+          0.2087692658003238
+        ],
+        "per_fold_signed_delta_mae": [
+          0.34635194586593665,
+          0.27180012223947436
+        ],
+        "signed_delta_mae_gain_vs_b1": 0.009889891118457894
+      },
+      "sparse_delta_mdn_h01": {
+        "crps_gain_vs_b1": 0.01919806780345562,
+        "directional_both_primary": true,
+        "mean_crps": 0.23383934947501323,
+        "mean_signed_delta_mae": 0.29198903219982797,
+        "per_fold_crps": [
+          0.24642778447515848,
+          0.22125091447486797
+        ],
+        "per_fold_signed_delta_mae": [
+          0.3059976074207952,
+          0.2779804569788608
+        ],
+        "signed_delta_mae_gain_vs_b1": 0.02697689297133543
+      }
+    },
+    "n_folds": 2,
+    "status": "ENGINEERING_SMOKE_ONLY"
+  }
+}

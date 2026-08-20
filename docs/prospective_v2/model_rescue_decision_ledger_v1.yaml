@@ -79,6 +79,25 @@ facts:
       absolute_delta_gain: 0.00012419872083890837
       disposition: STRUCT_DELTA_EXCLUDED_M2
     evidence: docs/prospective_v2/audit/m1_structure_probe_v1.json
+  - id: F_M2_REAL_SMOKE
+    status: CONFIRMED_FACT
+    value:
+      data: REAL_OPENKNOT_M2_V4_5_2
+      folds: [0, 1]
+      seed: 0
+      epochs: 3
+      l2_crps_gain_vs_b1: 0.006966094519399779
+      l2_delta_mae_gain_vs_b1: 0.01321537411043694
+      sparse_h0_crps_gain_vs_b1: 0.025539264114680355
+      sparse_h0_delta_mae_gain_vs_b1: 0.009889891118457894
+      sparse_h01_crps_gain_vs_b1: 0.01919806780345562
+      sparse_h01_delta_mae_gain_vs_b1: 0.02697689297133543
+      scientific_qualification: ENGINEERING_SMOKE_ONLY
+    evidence: docs/prospective_v2/audit/m2_real_smoke_v1.json
+  - id: F_SYNTHETIC_DATA_ROLE
+    status: CONFIRMED_FACT
+    value: ENGINEERING_PIPELINE_TEST_ONLY_NOT_USED_FOR_MODEL_SELECTION_OR_CLAIMS
+    evidence: scripts/reactflow_delta/_smoke_make_csv.py and model-rescue execution log
   - id: F_OLD_EXTERNAL_ALIGNMENT
     status: CONFIRMED_FACT
     value: INVALID_SEQPOS_ALIGNMENT

@@ -242,6 +242,14 @@ MAE 都优于 WT anchor，selected-rank 的 puzzle-macro gain 为 `+0.012978`。
 每个实现先进行 2-fold×1-seed smoke，再进行 20-fold×1-seed screen。eligible set 为 B1、
 L2-aligned、SparseDelta，以及通过结构 probe 的 StructDelta。明显失败候选永久退出。
 
+2-fold smoke 已在真实 OpenKnot M2 v4.5.2 上完成；合成数据只用于事前管线通电，
+不进入任何科学评分或候选选择。两折真实 smoke 中，L2-aligned、SparseDelta
+`lambda=0` 和 `lambda=0.1` 都在 CRPS 与 signed-Δ MAE 上对 B1 同向，因此全部进入
+20-fold screen。完整 screen 在看到其结果前固定为：seed 0、40 epochs、learning
+rate `1e-3`、weight decay `0`，使用 evaluator_v2。候选只有在平均 CRPS 和
+signed-Δ MAE 都不差于 B1、两个指标各至少 10/20 puzzle 改善、prediction key
+coverage 为 100% 且 failure rate 为 0 时才可进入 M3。
+
 ### M3：内部 nested development
 
 运行唯一 adaptive ModelRescue* procedure，保存完整 prediction-only OOF ledger、inner

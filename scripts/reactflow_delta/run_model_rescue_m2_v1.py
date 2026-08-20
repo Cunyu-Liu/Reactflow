@@ -258,6 +258,11 @@ def run_fold(
         "candidates": {},
     }
     for spec in CANDIDATES:
+        print(
+            f"[M2] fold={fold.outer_fold} held={fold.held_puzzle} "
+            f"candidate={spec.model_id} start epochs={epochs}",
+            flush=True,
+        )
         torch.manual_seed(seed)
         model = AlignedDeltaModel(k_rank=spec.k_rank, sparse=spec.sparse).to(device)
         history = fit_candidate(
@@ -285,6 +290,11 @@ def run_fold(
             "prediction_artifact": str(prediction_path),
             "checkpoint": str(checkpoint_path),
         }
+        print(
+            f"[M2] fold={fold.outer_fold} candidate={spec.model_id} "
+            f"crps={score['crps']:.8f} delta_mae={score['signed_delta_mae']:.8f} done",
+            flush=True,
+        )
         del model
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
@@ -341,8 +351,9 @@ def main(argv: list[str] | None = None) -> int:
     folds = [fold for fold in splits["folds"] if fold.outer_fold in selected_folds]
     if not folds:
         raise ValueError("no requested outer folds")
-    fold_results = [
-        run_fold(
+    fold_results = []
+    for fold in folds:
+        fold_result = run_fold(
             univ,
             fold,
             all_records,
@@ -353,8 +364,12 @@ def main(argv: list[str] | None = None) -> int:
             args.weight_decay,
             args.seed,
         )
-        for fold in folds
-    ]
+        fold_results.append(fold_result)
+        fold_path = args.out_dir / f"m2_fold_result_fold{fold.outer_fold}.json"
+        fold_path.write_text(
+            json.dumps(fold_result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        print(f"[M2] fold={fold.outer_fold} artifact={fold_path} complete", flush=True)
     result = {
         "schema_version": SCHEMA,
         "evidence_status": "ENGINEERING_SMOKE_ONLY" if args.smoke else "DEVELOPMENT_CONSUMED_SCREEN",

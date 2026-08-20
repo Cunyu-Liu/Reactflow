@@ -200,6 +200,45 @@ controlled_models:
     role: CONDITIONAL_COMBINATION
     allowed_only_if_both_individual_candidates_screen_pass: true
 
+m2_screen_protocol:
+  status: FROZEN_AFTER_REAL_TWO_FOLD_ENGINEERING_SMOKE_BEFORE_FULL_SCREEN
+  data: REAL_OPENKNOT_M2_V4_5_2
+  synthetic_data_role: ENGINEERING_PIPELINE_TEST_ONLY_NEVER_SCIENTIFIC
+  smoke_result: docs/prospective_v2/audit/m2_real_smoke_v1.json
+  outer_folds: 20
+  seed: 0
+  epochs: 40
+  learning_rate: 0.001
+  weight_decay: 0.0
+  evaluator: evaluator_v2_method_balanced_target_invariant
+  candidates:
+    - b1_rfd_direct_aligned
+    - l2_aligned_rank2
+    - sparse_delta_mdn_h0
+    - sparse_delta_mdn_h01
+  screen_rule:
+    comparator: b1_rfd_direct_aligned
+    mean_crps_gain_nonnegative: true
+    mean_signed_delta_mae_gain_nonnegative: true
+    crps_positive_puzzles_min: 10
+    signed_delta_mae_positive_puzzles_min: 10
+    prediction_key_coverage_required: 1.0
+    failure_rate_max: 0.0
+  interpretation: >-
+    M2 uses consumed development outer-fold results only to remove clearly failed
+    families. It is not confirmation. M3 must perform all final family and
+    hyperparameter selection inside each outer-train set.
+  smoke_summary:
+    l2_aligned_rank2:
+      crps_gain_vs_b1: 0.006966094519399779
+      signed_delta_mae_gain_vs_b1: 0.01321537411043694
+    sparse_delta_mdn_h0:
+      crps_gain_vs_b1: 0.025539264114680355
+      signed_delta_mae_gain_vs_b1: 0.009889891118457894
+    sparse_delta_mdn_h01:
+      crps_gain_vs_b1: 0.01919806780345562
+      signed_delta_mae_gain_vs_b1: 0.02697689297133543
+
 selection:
   outer_held_used_for_selection: false
   candidate_selection_location: OUTER_TRAIN_INNER_FOLDS_ONLY
