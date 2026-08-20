@@ -1,0 +1,61 @@
+schema_version: reactflow_delta.model_rescue_v2_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v2_20260820
+as_of: '2026-08-20'
+parent_head: 00c0cf3a804effb89ff99a8e9ea009963dc650d0
+
+facts:
+  - id: F_V1_TERMINAL
+    status: CONFIRMED_FACT
+    value: M2_NO_RESCUE_CANDIDATE
+    evidence: docs/prospective_v2/audit/m2_qualification_v1.json
+  - id: F_L2_SCREEN
+    status: CONFIRMED_FACT
+    value:
+      crps_gain: 0.0006994185901454438
+      signed_delta_mae_gain: -5.237811735690767e-06
+    evidence: docs/prospective_v2/audit/m2_qualification_v1.json
+  - id: F_SPARSE_SCREEN
+    status: CONFIRMED_FACT
+    value:
+      h0_crps_gain: 0.009060097762432275
+      h0_signed_delta_mae_gain: -0.00958523316499289
+      h01_crps_gain: 0.008865626446699481
+      h01_signed_delta_mae_gain: -0.012405016288547495
+    evidence: docs/prospective_v2/audit/m2_qualification_v1.json
+
+hypothesis:
+  status: NEW_EXPERIMENT_REQUIRED
+  statement: >-
+    Separating method-balanced signed-delta mean learning from zero-mean
+    residual calibration can retain probabilistic skill without degrading the
+    mutation-effect point mean.
+  falsifier:
+    - MEAN_ALIGNED_RELATIVE_SIGNED_DELTA_GAIN_BELOW_1_PERCENT
+    - CALIBRATED_RESIDUAL_CRPS_GAIN_NOT_POSITIVE_WITH_IDENTICAL_POINT_MEAN
+
+decisions:
+  - MEAN_LOSS_EXACT_L1
+  - MEAN_TRAINED_FROM_SCRATCH
+  - MEAN_FROZEN_BEFORE_CALIBRATION
+  - ZERO_MEAN_GLOBAL_GAUSSIAN_ABLATION
+  - ZERO_MEAN_TWO_GAUSSIAN_CONDITIONAL_SCALE_MIXTURE
+  - EXACT_CRPS_CALIBRATION_LOSS
+  - NO_NESTED_SELECTION
+  - SCREEN_SEED_0
+  - FORMAL_SEEDS_0_TO_4_ONLY_AFTER_SCREEN_PASS
+
+phase_state:
+  R2M0: PASS
+  R2M1: IN_PROGRESS
+  R2M2: NOT_RUN
+  R2M3: NOT_RUN
+  R2M4: NOT_RUN
+  R2M5: NOT_RUN
+
+claims:
+  model_rescue_v1: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
+  model_rescue_v2: NOT_RUN
+  external_replication: NOT_ESTABLISHED
+  mechanism: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication: PUBLICATION_NOT_READY
