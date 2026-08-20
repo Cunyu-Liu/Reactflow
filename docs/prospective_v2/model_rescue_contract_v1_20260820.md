@@ -219,6 +219,13 @@ claim downgrade 与本合同已在独立分支形成 focused commit `5ee52e7`。
 
 M1 只分析已消耗 development outcomes，不读取新 external outcome。
 
+结构 probe 在执行前固定为 20-puzzle LOPO ridge：sequence-only 特征只包含序列
+距离、edit/receiver 位置、mutation identity 和 receiver region；structure 版本只新增
+ViennaRNA MFE graph distance 和 ensemble base-pair probability。对 signed-Δ 和 |signed-Δ|
+分别计算 method-balanced puzzle-macro MAE。只有当结构特征在至少一个 target 上
+20-puzzle paired CI 下界大于 0、至少 12/20 puzzle 改善，且另一 target 的相对恶化
+不超过 0.5%，StructDelta 才可进入 M2。
+
 ### M2：候选 screening
 
 每个实现先进行 2-fold×1-seed smoke，再进行 20-fold×1-seed screen。eligible set 为 B1、

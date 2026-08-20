@@ -107,6 +107,34 @@ primary_metrics:
     - design_region_effect
     - other_region_effect
 
+m1_structure_probe:
+  status: FROZEN_BEFORE_PROBE_EXECUTION
+  split: split_v4_lopo_puzzle
+  inputs:
+    sequence_only:
+      - signed_sequence_distance
+      - absolute_sequence_distance
+      - edit_position
+      - receiver_position
+      - mutation_identity
+      - receiver_region
+    structure_additions:
+      - viennarna_mfe_graph_distance
+      - viennarna_ensemble_base_pair_probability
+  targets:
+    - signed_delta
+    - absolute_delta
+  learner: TRAIN_ONLY_STANDARDIZED_RIDGE_FIXED_ALPHA_1
+  aggregation: method_balanced_puzzle_macro_mae
+  eligibility_rule: >-
+    Structure additions must have a paired 20-puzzle CI lower bound above zero
+    on at least one target, improve at least 12 of 20 puzzles on that target,
+    and worsen the other target by no more than 0.5 percent relative.
+  positive_puzzles_min: 12
+  max_other_target_relative_worsening: 0.005
+  use_if_pass: STRUCT_DELTA_ENTERS_M2_SCREEN
+  use_if_fail: STRUCT_DELTA_EXCLUDED_FROM_M2
+
 controlled_models:
   B0:
     id: rfd_direct_rank0_current
