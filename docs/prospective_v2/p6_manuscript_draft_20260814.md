@@ -67,8 +67,11 @@ incremental capability — 见 contract §6 论文逻辑链。)
   train-median +0.0692 — same signal (audit §7.1 closed positively).
 - RFD-Direct (K_rank=0) vs ridge = +0.0153 [CI +0.0098, +0.0208] (full
   network/uncertainty stack).
-- Mandatory secondary: signed-delta point MAE is negative vs no-change anchor —
-  the CRPS advantage is tail-driven; honest per-method calibration raises D_p.
+- Mandatory secondary (M1 evaluator_v2 reanalysis): RFD-Direct rank0 and the
+  selected-rank network improve signed-delta MAE over the no-change WT anchor by
+  +0.01221 and +0.01298, respectively (20/20 puzzles positive). The old negative
+  result is restricted to the P2-v2 ridge analysis and does not describe the
+  current network.
 - **Verdict: DIRECT_DEVELOPMENT_LEARNABILITY_PASS.**
 
 ### 2.2 Low-rank increment over the rank-0 network on development (P2-v3 + P3, downgraded)
@@ -79,6 +82,8 @@ incremental capability — 见 contract §6 论文逻辑链。)
   (selected rank vs same-architecture rank-0)** adds a **small but significant**
   +0.0018 [CI +0.0003, +0.0033] (sign-flip p=0.0164; 15/20 puzzles positive;
   selected rank = 2 on 18/20 folds). This is the honest headline magnitude:
+  M1 signed-delta MAE increment +0.00077, about 0.32%, below the 2% practical
+  model-rescue gate; near-zero responses worsen by -0.00275.
   the low-rank term is real but constitutes ~11% of the network-vs-ridge gain, not
   a dominant effect.
 - **P3 v3 spec-compliant re-run** (`run_p3_lrso_v3.py`): trainable WT-context encoder,
@@ -89,7 +94,7 @@ incremental capability — 见 contract §6 论文逻辑链。)
   by the network/uncertainty stack (rank0 vs ridge, +0.0153), NOT by the low-rank
   term.
 - **Verdict (downgraded):** the incremental low-rank signal is
-  `SMALL_BUT_SIGNIFICANT_ON_DEVELOPMENT` (NOT "LRSO_EXCEEDS_DIRECT"; not
+  `SMALL_SIGNIFICANT_BELOW_PRACTICAL_GATE` (NOT "LRSO_EXCEEDS_DIRECT"; not
   "low-rank dominates"). The earlier `NO_INCREMENTAL_LRSO_SKILL` (v1/v2) remains
   retracted as an implementation-failure artifact.
 

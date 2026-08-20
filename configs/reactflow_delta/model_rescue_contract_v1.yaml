@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_contract.v1
 contract_id: reactflow_delta_model_rescue_v1_20260820
 created_at: '2026-08-20T14:00:00+08:00'
-contract_status: ACTIVE_M1_FAILURE_DECOMPOSITION
+contract_status: ACTIVE_M2_CANDIDATE_SCREEN
 
 owner_instruction:
   raw_message: 继续
@@ -55,7 +55,7 @@ evidence_baseline:
   qualification:
     direct_crps_development: POST_HOC_DEVELOPMENT_PASS
     low_rank_increment: SMALL_BUT_SIGNIFICANT_DEVELOPMENT
-    signed_delta_point_skill: FAIL_VS_WT_ANCHOR
+    signed_delta_point_skill: CURRENT_NETWORK_DEVELOPMENT_PASS_VS_WT
     external_study_replication: NOT_ESTABLISHED
     mechanism: NOT_ESTABLISHED
     sota: NOT_ESTABLISHED
@@ -108,7 +108,7 @@ primary_metrics:
     - other_region_effect
 
 m1_structure_probe:
-  status: FROZEN_BEFORE_PROBE_EXECUTION
+  status: COMPLETED_STRUCTDELTA_EXCLUDED
   split: split_v4_lopo_puzzle
   inputs:
     sequence_only:
@@ -134,6 +134,31 @@ m1_structure_probe:
   max_other_target_relative_worsening: 0.005
   use_if_pass: STRUCT_DELTA_ENTERS_M2_SCREEN
   use_if_fail: STRUCT_DELTA_EXCLUDED_FROM_M2
+
+m1_results:
+  failure_atlas: docs/prospective_v2/audit/m1_failure_atlas_v1.json
+  structure_probe: docs/prospective_v2/audit/m1_structure_probe_v1.json
+  current_network_signed_delta_mae_gain_vs_wt: 0.012978322093460417
+  low_rank_signed_delta_mae_gain_vs_rank0: 0.0007691653969666553
+  low_rank_relative_delta_mae_gain_vs_rank0: 0.0031853
+  low_rank_crps_gain_vs_rank0: 0.0017957060889348063
+  low_rank_crps_mean_shapley: 0.0012259507867934502
+  low_rank_crps_scale_shapley: 0.000569755302141356
+  near_zero_low_rank_delta_mae_gain: -0.002745203301206897
+  structure_signed_delta_gain: -0.0005727973750599136
+  structure_signed_delta_ci95:
+    - -0.0009795781219513596
+    - -0.0001660166281684676
+  structure_absolute_delta_gain: 0.00012419872083890837
+  structure_absolute_delta_ci95:
+    - -0.00039320947514082127
+    - 0.000641606916818638
+  m2_eligible_candidates:
+    - B1_RFD_DIRECT_ALIGNED
+    - L2_ALIGNED_FIXED_RANK2_CONTROL
+    - SPARSE_DELTA_MDN
+  excluded_candidate:
+    - STRUCT_DELTA
 
 controlled_models:
   B0:

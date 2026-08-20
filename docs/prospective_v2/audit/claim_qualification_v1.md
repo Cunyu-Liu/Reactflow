@@ -18,9 +18,9 @@
 
 ## 2. 主张—证据表（重建后）
 
-| 主张 | 所需证据 | 当前证据状态（2026-08-18） |
+| 主张 | 所需证据 | 当前证据状态（2026-08-20） |
 |---|---|---|
-| 任务存在 prospective learnability（Direct* 胜 T*） | 正确 estimand 下 20-puzzle CRPS CI lower>0；secondary 不反向 | `RESOLVED_PASS`：20-fold 正式运行完成。ridge vs WT-anchor +0.02677 (CI +0.0237..+0.0298)，vs train-median +0.06909；独立 MLP 同向；CI lower>0 全部成立 |
+| 任务存在 development learnability | 正确 estimand 下 CRPS 与 signed-Δ MAE 都优于合法基线 | `RESOLVED_DEVELOPMENT_PASS`：ridge CRPS vs WT-anchor +0.02677；M1 重算表明 rank0/selected-rank 的 signed-Δ MAE gain vs WT 分别为 +0.01221/+0.01298，均 20/20 puzzle 为正 |
 | 低秩项带来增量（rank-positive 胜 rank0） | 同架构/同 likelihood/同 seed/同 epoch 下 CI lower>0 | `RESOLVED_PASS`：20-fold 正式运行完成。selected-rank vs K_rank=0 主 null D_p=+0.00180 (CI +0.00031..+0.00328, ci_low_gt_0=True, sign-flip p=0.016)。低秩增量真实但量级小（网络 stack 贡献 +0.0153，低秩仅 +0.0018） |
 | 外部 study-level 泛化 | publication/study/batch 聚类后最终 LRSO 复制 | `NOT_ESTABLISHED`：7 数据集/718 anchors → K_joint=2（SL5 + Ribonanza 两 study）；seqpos-correct 最终 LRSO 已完成，SL5 cluster effect 约 +0.00075、Ribonanza cluster 约 +0.03496，cluster CI 跨零且 LOSO 显示不一致；只能作 consumed exploratory evidence |
 | 机制：跨位置低秩 susceptibility | rank0 + source/receiver randomization + 独立 negative control | `NOT_ESTABLISHED`：rank0 nested null 已通过（selected-rank vs rank0，D_p=+0.0018）；最终 LRSO external 未一致复制；source/receiver randomization 与新的独立 negative control 仍缺失 |
@@ -36,10 +36,10 @@
 | P0-7 Direct*/rank0 正式重算 | `run_p2_v3.py` + sharded 20-fold run | `/mnt/cunyuliu/prospective_v2_p2v3_sharded/p2_v3_scores_merged.json`；20 folds；40 prediction-only OOF ledgers；rank0 与 selected-rank 同 cfg/epochs/seeds | `POST_HOC_DEVELOPMENT_COMPLETE` |
 | P0-4/6 external qualification | `joint_dependency_component_v1.py` + corrected LRSO run | 7 datasets/718 anchors → K_joint=2；旧结果 seqpos-invalid；corrected final LRSO study-level replication fails | `EXPLORATORY_NOT_CONFIRMATORY` |
 
-## 4. model-rescue M1 前仍未关闭的问题
+## 4. model-rescue M1 结论与 M2 边界
 
-1. 当前 model-rescue 代码、20-fold result path、claim ledger 与稿件尚需 focused commit 绑定；绑定前不得启动候选训练。
-2. signed-Δ MAE 仍差于 WT/no-change anchor；必须先完成 failure atlas，不能用 CRPS PASS 代替 point-skill。
-3. low-rank 虽有 `+0.00180` development 增量，但 direct/nonlocal 功能重叠、source control 和机制证据仍未关闭。
-4. 新 confirmatory external 必须在 outcome-blind metadata 上达到 `K_joint_new>=9`；现有 K_joint=2 永久为 consumed exploratory。
-5. RNet checkpoint/exposure 与任务匹配性未闭合；现阶段只能作 contextual reference。
+1. M1 failure atlas 已完成；旧“signed-Δ 差于 WT”只能限定为 P2-v2 ridge，不得用于当前 rank0/rank-positive 网络。
+2. low-rank CRPS gain `+0.001796` 中 mean/scale Shapley 分别为 `+0.001226/+0.000570`；其 signed-Δ MAE 增量仅 `+0.000769`（约 0.32%），低于 2% practical gate。
+3. near-zero 位置上 low-rank 使 signed-Δ MAE 恶化 `-0.002745`；因此 M2 的主救援候选是 aligned-direct 与 SparseDelta，L2-aligned 仅作 fixed control。
+4. ViennaRNA 结构 probe 对 signed-Δ 显著恶化且 absolute-Δ CI 跨 0；StructDelta 已按预冻结规则退出 M2。
+5. 新 confirmatory external 仍必须在 outcome-blind metadata 上达到 `K_joint_new>=9`；现有 K_joint=2 永久为 consumed exploratory。

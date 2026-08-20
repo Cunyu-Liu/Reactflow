@@ -1,0 +1,363 @@
+{
+  "counts": {
+    "methods": [
+      "Eterna",
+      "MPNN-RFdiff",
+      "MPNN-fixbb",
+      "Rosetta",
+      "Shujun_shape_struct2seq",
+      "Shujun_struct2seq",
+      "Starting sequence",
+      "gRNAde",
+      "gRNAde-no3d"
+    ],
+    "n_puzzles_scored": 20,
+    "n_puzzles_total": 20,
+    "n_registered_snv_mutants": 13976,
+    "n_unique_sequences": 160,
+    "sequence_feature_count": 15,
+    "structure_feature_count": 2
+  },
+  "evidence_status": "DEVELOPMENT_CONSUMED_POST_HOC_PROBE",
+  "features": {
+    "sequence_only": [
+      "signed_sequence_distance",
+      "absolute_sequence_distance",
+      "log_absolute_sequence_distance",
+      "edit_position",
+      "receiver_position",
+      "same_site",
+      "receiver_design_region",
+      "mutation_ref_one_hot",
+      "mutation_alt_one_hot"
+    ],
+    "structure_additions": [
+      "viennarna_mfe_graph_distance",
+      "viennarna_ensemble_direct_base_pair_probability"
+    ]
+  },
+  "gate": {
+    "other_target_guardrail": {
+      "absolute_delta": true,
+      "signed_delta": true
+    },
+    "status": "STRUCT_DELTA_EXCLUDED_M2",
+    "target_pass": {
+      "absolute_delta": false,
+      "signed_delta": false
+    }
+  },
+  "input": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv",
+  "learner": "train-only standardized ridge alpha=1",
+  "per_puzzle": [
+    {
+      "absolute_delta": {
+        "gain": 0.0017071045526304562,
+        "sequence_mae": 0.3046085985613508,
+        "structure_mae": 0.30290149400872035
+      },
+      "n_positions": 41600,
+      "puzzle": "P01",
+      "signed_delta": {
+        "gain": -0.0007149883261683421,
+        "sequence_mae": 0.324821263525399,
+        "structure_mae": 0.3255362518515673
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.000248045382115758,
+        "sequence_mae": 0.26494545442684825,
+        "structure_mae": 0.265193499808964
+      },
+      "n_positions": 60000,
+      "puzzle": "P02",
+      "signed_delta": {
+        "gain": 0.0002611097377746008,
+        "sequence_mae": 0.2822472657455868,
+        "structure_mae": 0.2819861560078122
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.0005870277649033806,
+        "sequence_mae": 0.25781004300808463,
+        "structure_mae": 0.25722301524318125
+      },
+      "n_positions": 58400,
+      "puzzle": "P03",
+      "signed_delta": {
+        "gain": -0.0008844582696301284,
+        "sequence_mae": 0.28497601197757017,
+        "structure_mae": 0.2858604702472003
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 5.034635393003084e-06,
+        "sequence_mae": 0.23424128538883096,
+        "structure_mae": 0.23423625075343796
+      },
+      "n_positions": 74400,
+      "puzzle": "P04",
+      "signed_delta": {
+        "gain": -0.0005128336009638523,
+        "sequence_mae": 0.2416347220403893,
+        "structure_mae": 0.24214755564135315
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.00015611501428330898,
+        "sequence_mae": 0.31162760101963555,
+        "structure_mae": 0.31178371603391886
+      },
+      "n_positions": 47200,
+      "puzzle": "P05",
+      "signed_delta": {
+        "gain": 0.0006260535122784017,
+        "sequence_mae": 0.3588500974475338,
+        "structure_mae": 0.3582240439352554
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.00032384806520924236,
+        "sequence_mae": 0.27074008528718074,
+        "structure_mae": 0.2704162372219715
+      },
+      "n_positions": 60000,
+      "puzzle": "P06",
+      "signed_delta": {
+        "gain": 8.190392533280466e-05,
+        "sequence_mae": 0.27927819819587607,
+        "structure_mae": 0.27919629427054327
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.00023727283486413286,
+        "sequence_mae": 0.2616668750776242,
+        "structure_mae": 0.2614296022427601
+      },
+      "n_positions": 64000,
+      "puzzle": "P07",
+      "signed_delta": {
+        "gain": -0.0008159217618171621,
+        "sequence_mae": 0.24320820453409384,
+        "structure_mae": 0.244024126295911
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.0017563832671406432,
+        "sequence_mae": 0.24517120684657395,
+        "structure_mae": 0.2434148235794333
+      },
+      "n_positions": 76800,
+      "puzzle": "P08",
+      "signed_delta": {
+        "gain": -0.000858891144600249,
+        "sequence_mae": 0.24243743100218274,
+        "structure_mae": 0.24329632214678298
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.0022673539621184124,
+        "sequence_mae": 0.2978617530493023,
+        "structure_mae": 0.3001291070114207
+      },
+      "n_positions": 54400,
+      "puzzle": "P09",
+      "signed_delta": {
+        "gain": 0.001101464825489895,
+        "sequence_mae": 0.3254506256859687,
+        "structure_mae": 0.3243491608604788
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.000570377156373314,
+        "sequence_mae": 0.2876040981339278,
+        "structure_mae": 0.2881744752903011
+      },
+      "n_positions": 60800,
+      "puzzle": "P10",
+      "signed_delta": {
+        "gain": -0.0003040342118900141,
+        "sequence_mae": 0.3000453532775282,
+        "structure_mae": 0.3003493874894182
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.0005787337877214416,
+        "sequence_mae": 0.2736449514889212,
+        "structure_mae": 0.27422368527664265
+      },
+      "n_positions": 80000,
+      "puzzle": "P11",
+      "signed_delta": {
+        "gain": 0.000628117869745759,
+        "sequence_mae": 0.28155107274882757,
+        "structure_mae": 0.2809229548790818
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.00050720947822816,
+        "sequence_mae": 0.2472611861981477,
+        "structure_mae": 0.24675397671991953
+      },
+      "n_positions": 78200,
+      "puzzle": "P12",
+      "signed_delta": {
+        "gain": -0.00039223349762607107,
+        "sequence_mae": 0.2255541922633051,
+        "structure_mae": 0.22594642576093116
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.0009047799095323328,
+        "sequence_mae": 0.23004186687731232,
+        "structure_mae": 0.22913708696777998
+      },
+      "n_positions": 80000,
+      "puzzle": "P13",
+      "signed_delta": {
+        "gain": -0.0013432301899435617,
+        "sequence_mae": 0.22370878904425615,
+        "structure_mae": 0.2250520192341997
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.0016177277076745433,
+        "sequence_mae": 0.23380859509977814,
+        "structure_mae": 0.23542632280745268
+      },
+      "n_positions": 80000,
+      "puzzle": "P14",
+      "signed_delta": {
+        "gain": -0.0009309697709959375,
+        "sequence_mae": 0.19793417785670633,
+        "structure_mae": 0.19886514762770227
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 8.159381896896689e-05,
+        "sequence_mae": 0.2430557820334643,
+        "structure_mae": 0.24297418821449535
+      },
+      "n_positions": 80000,
+      "puzzle": "P15",
+      "signed_delta": {
+        "gain": -0.001146591922902146,
+        "sequence_mae": 0.20129046447647989,
+        "structure_mae": 0.20243705639938203
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.0011717607148498954,
+        "sequence_mae": 0.2345335368646385,
+        "structure_mae": 0.23570529757948838
+      },
+      "n_positions": 80000,
+      "puzzle": "P16",
+      "signed_delta": {
+        "gain": -0.0011391519730851452,
+        "sequence_mae": 0.22620277088669996,
+        "structure_mae": 0.2273419228597851
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.001123230341950776,
+        "sequence_mae": 0.22963552399761172,
+        "structure_mae": 0.22851229365566095
+      },
+      "n_positions": 80000,
+      "puzzle": "P17",
+      "signed_delta": {
+        "gain": -0.002341589567124658,
+        "sequence_mae": 0.23354732020090221,
+        "structure_mae": 0.23588890976802687
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.0011251382712270386,
+        "sequence_mae": 0.22431736044693573,
+        "structure_mae": 0.2231922221757087
+      },
+      "n_positions": 80000,
+      "puzzle": "P18",
+      "signed_delta": {
+        "gain": -0.001986551612848525,
+        "sequence_mae": 0.1866075831484676,
+        "structure_mae": 0.18859413476131612
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": -0.0009105525603461118,
+        "sequence_mae": 0.2215135221911536,
+        "structure_mae": 0.22242407475149972
+      },
+      "n_positions": 79900,
+      "puzzle": "P19",
+      "signed_delta": {
+        "gain": 0.00016304324599961117,
+        "sequence_mae": 0.23903839126768606,
+        "structure_mae": 0.23887534802168645
+      }
+    },
+    {
+      "absolute_delta": {
+        "gain": 0.0016460177622128203,
+        "sequence_mae": 0.24146275906775574,
+        "structure_mae": 0.23981674130554292
+      },
+      "n_positions": 70000,
+      "puzzle": "P20",
+      "signed_delta": {
+        "gain": -0.0009461947682235516,
+        "sequence_mae": 0.22890905708810022,
+        "structure_mae": 0.22985525185632377
+      }
+    }
+  ],
+  "qualification": {
+    "allowed_interpretation": "screening evidence for whether StructDelta may enter M2",
+    "external": "NOT_ASSESSED",
+    "mechanism": "NOT_ESTABLISHED"
+  },
+  "schema_version": "reactflow_delta.model_rescue_structure_probe.v1",
+  "split": "split_v4_lopo_puzzle",
+  "summary": {
+    "absolute_delta": {
+      "ci95": [
+        -0.00039320947514082127,
+        0.000641606916818638
+      ],
+      "mean_gain": 0.00012419872083890837,
+      "n": 20,
+      "positive_puzzles": 12,
+      "sequence_mae": 0.25577760425325385
+    },
+    "signed_delta": {
+      "ci95": [
+        -0.0009795781219513596,
+        -0.0001660166281684676
+      ],
+      "mean_gain": -0.0005727973750599136,
+      "n": 20,
+      "positive_puzzles": 6,
+      "sequence_mae": 0.25636464962067795
+    }
+  }
+}

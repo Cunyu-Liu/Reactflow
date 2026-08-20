@@ -1,7 +1,7 @@
 # ReactFlow-Delta 模型救援与投稿再资格化合同 v1
 
 日期：2026-08-20
-状态：`ACTIVE_M1_FAILURE_DECOMPOSITION`
+状态：`ACTIVE_M2_CANDIDATE_SCREEN`
 对应 machine contract：`configs/reactflow_delta/model_rescue_contract_v1.yaml`
 
 ## 0. 合同地位与边界
@@ -225,6 +225,17 @@ ViennaRNA MFE graph distance 和 ensemble base-pair probability。对 signed-Δ 
 分别计算 method-balanced puzzle-macro MAE。只有当结构特征在至少一个 target 上
 20-puzzle paired CI 下界大于 0、至少 12/20 puzzle 改善，且另一 target 的相对恶化
 不超过 0.5%，StructDelta 才可进入 M2。
+
+M1 于 2026-08-20 完成。新 evaluator 下，rank-0 和 selected-rank 网络的 signed-Δ
+MAE 都优于 WT anchor，selected-rank 的 puzzle-macro gain 为 `+0.012978`。但低秩项
+相对 rank-0 的 signed-Δ MAE gain 只有 `+0.000769`（约 0.32%），低于 2% 实用门槛；
+对 `|signed-Δ|<=0.05` 的 near-zero 位置反而恶化 `-0.002745`。CRPS 的
+`+0.001796` 增益中，Shapley mean 贡献为 `+0.001226`，scale 贡献为
+`+0.000570`。
+
+预冻结 ViennaRNA 探针失败：signed-Δ MAE gain `-0.000573`，95% CI
+`[-0.000980,-0.000166]`，只有 6/20 puzzle 改善；absolute-Δ gain `+0.000124`，CI
+跨 0。因此 StructDelta 退出本轮 M2，不允许为了保留结构路线修改门槛。
 
 ### M2：候选 screening
 

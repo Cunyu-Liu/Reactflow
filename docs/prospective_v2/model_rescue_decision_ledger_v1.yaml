@@ -51,10 +51,34 @@ facts:
       selected_rank_2_folds: 18
       selected_rank_8_folds: 2
     evidence: p2_v3_scores_merged.json rfd_direct_rankpos__vs__rfd_direct_rank0
-  - id: F_SIGNED_DELTA_FAILURE
+  - id: F_OLD_RIDGE_SIGNED_DELTA_FAILURE
     status: CONFIRMED_FACT
-    value: SIGNED_DELTA_MAE_WORSE_THAN_WT_ANCHOR
-    evidence: docs/prospective_v2/p6_manuscript_draft_20260814.md
+    value: P2_V2_RIDGE_SIGNED_DELTA_MAE_WORSE_THAN_WT_ANCHOR
+    evidence: historical P2-v2 point-metric analysis
+  - id: F_CURRENT_NETWORK_SIGNED_DELTA
+    status: CONFIRMED_FACT
+    value:
+      rank0_gain_vs_wt: 0.012209156696493766
+      selected_rank_gain_vs_wt: 0.012978322093460417
+      positive_puzzles_selected_rank: 20
+    evidence: docs/prospective_v2/audit/m1_failure_atlas_v1.json
+  - id: F_LOW_RANK_M1_DECOMPOSITION
+    status: CONFIRMED_FACT
+    value:
+      crps_gain: 0.0017957060889348063
+      mean_shapley: 0.0012259507867934502
+      scale_shapley: 0.000569755302141356
+      delta_mae_gain: 0.0007691653969666553
+      near_zero_delta_mae_gain: -0.002745203301206897
+    evidence: docs/prospective_v2/audit/m1_failure_atlas_v1.json
+  - id: F_STRUCTURE_PROBE
+    status: CONFIRMED_FACT
+    value:
+      signed_delta_gain: -0.0005727973750599136
+      signed_delta_ci95: [-0.0009795781219513596, -0.0001660166281684676]
+      absolute_delta_gain: 0.00012419872083890837
+      disposition: STRUCT_DELTA_EXCLUDED_M2
+    evidence: docs/prospective_v2/audit/m1_structure_probe_v1.json
   - id: F_OLD_EXTERNAL_ALIGNMENT
     status: CONFIRMED_FACT
     value: INVALID_SEQPOS_ALIGNMENT
@@ -96,12 +120,13 @@ claims:
     allowed_text: Direct models improve development-set full-construct CRPS.
     prohibited_upgrade: PROSPECTIVE_CONFIRMATION
   - id: C_LOW_RANK_METHOD
-    current_status: SMALL_BUT_SIGNIFICANT_DEVELOPMENT
-    allowed_text: A selected positive rank adds a small development CRPS increment over rank zero.
+    current_status: SMALL_SIGNIFICANT_BELOW_PRACTICAL_GATE
+    allowed_text: A selected positive rank adds a small development CRPS and delta-MAE increment over rank zero, below the practical gate.
     prohibited_text: Low-rank susceptibility is the dominant source of performance.
   - id: C_SIGNED_MUTATION_EFFECT
-    current_status: FAIL_VS_WT_ANCHOR
-    prohibited_text: The current model improves signed mutation-effect prediction.
+    current_status: CURRENT_NETWORK_DEVELOPMENT_PASS_VS_WT
+    allowed_text: Under evaluator_v2, the current rank-zero and selected-rank networks improve development signed-delta MAE over WT anchor.
+    prohibited_text: This is prospective or externally replicated signed mutation-effect evidence.
   - id: C_EXTERNAL_GENERALIZATION
     current_status: NOT_ESTABLISHED
     prohibited_text: The final method replicates across independent external studies.
@@ -131,8 +156,8 @@ route_rules:
 
 phase_state:
   M0: PASS
-  M1: IN_PROGRESS
-  M2: NOT_RUN
+  M1: PASS
+  M2: IN_PROGRESS
   M3: NOT_RUN
   M4: NOT_RUN
   M5: NOT_RUN

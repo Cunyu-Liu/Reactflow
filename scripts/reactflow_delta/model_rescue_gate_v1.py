@@ -51,12 +51,13 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         "active_points_to_ledger": active["authority"]["decision_ledger_path"]
         == DECISION_LEDGER.as_posix(),
         "phase_order": phase_ids == ["M0", "M1", "M2", "M3", "M4", "M5", "M6"],
-        "m0_complete_m1_active": active["authority"]["current_phase"] == "M1"
+        "m0_m1_complete_m2_active": active["authority"]["current_phase"] == "M2"
         and active["gate_state"]["M0"] == "PASS"
-        and active["gate_state"]["M1"] == "IN_PROGRESS"
+        and active["gate_state"]["M1"] == "PASS"
+        and active["gate_state"]["M2"] == "IN_PROGRESS"
         and active["authority"]["binding_status"] == "M0_FOCUSED_COMMIT_COMPLETE",
-        "m1_candidate_training_closed": active["training_allowed"] is False
-        and active["candidate_model_training_allowed"] is False,
+        "m2_candidate_training_open": active["training_allowed"] is True
+        and active["candidate_model_training_allowed"] is True,
         "new_external_outcomes_closed": active["new_external_outcome_access_allowed"]
         is False,
         "development_consumed": machine["scope"]["development_status"]
@@ -68,9 +69,11 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         "lrso_kill_allowed": active["authorization"]["scope"]
         == "PERFORMANCE_FIRST_MODEL_RESCUE_WITH_LRSO_KILL_ALLOWED",
         "low_rank_claim_downgraded": claims.get("C_LOW_RANK_METHOD")
-        == "SMALL_BUT_SIGNIFICANT_DEVELOPMENT",
-        "signed_delta_failure_recorded": claims.get("C_SIGNED_MUTATION_EFFECT")
-        == "FAIL_VS_WT_ANCHOR",
+        == "SMALL_SIGNIFICANT_BELOW_PRACTICAL_GATE",
+        "current_network_signed_delta_qualified": claims.get("C_SIGNED_MUTATION_EFFECT")
+        == "CURRENT_NETWORK_DEVELOPMENT_PASS_VS_WT",
+        "structure_candidate_excluded": machine["m1_structure_probe"]["status"]
+        == "COMPLETED_STRUCTDELTA_EXCLUDED",
         "external_not_established": claims.get("C_EXTERNAL_GENERALIZATION")
         == "NOT_ESTABLISHED",
         "sota_not_established": claims.get("C_SOTA") == "SOTA_NOT_ESTABLISHED",
