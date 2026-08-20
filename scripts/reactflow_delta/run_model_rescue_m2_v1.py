@@ -178,8 +178,12 @@ def score_predictions(
 ) -> dict[str, Any]:
     """Evaluator-side target join and method-balanced CRPS/signed-delta MAE."""
     target_map: dict[str, tuple[float, float]] = {}
+    expected_keys: set[str] = set()
     for record in held_records:
         construct = univ.get_construct(record.construct_id)
+        expected_keys.update(
+            _bio_key(univ, record, pos) for pos in range(len(construct.sequence))
+        )
         target, _ = univ.mutant_full_profile(record.wt_id, record.pos, record.ref, record.alt)
         if target is None:
             continue
@@ -194,6 +198,20 @@ def score_predictions(
     coverage68: dict[str, float] = {}
     coverage95: dict[str, float] = {}
     key_to_index = {str(key): i for i, key in enumerate(prediction["keys"])}
+    predicted_keys = set(key_to_index)
+    valid_prediction_rows = np.isfinite(prediction["locations"]).all(axis=1)
+    valid_prediction_rows &= np.isfinite(prediction["scales"]).all(axis=1)
+    valid_prediction_rows &= np.isfinite(prediction["weights"]).all(axis=1)
+    valid_prediction_rows &= (prediction["scales"] > 0).all(axis=1)
+    valid_prediction_rows &= prediction["weights"].sum(axis=1) > 0
+    valid_by_key = {
+        str(key): bool(valid_prediction_rows[i])
+        for i, key in enumerate(prediction["keys"])
+    }
+    covered_expected = expected_keys & predicted_keys
+    finite_expected = sum(valid_by_key.get(key, False) for key in expected_keys)
+    registered_coverage = len(covered_expected) / max(len(expected_keys), 1)
+    failure_rate = 1.0 - finite_expected / max(len(expected_keys), 1)
     if set(target_map) - set(key_to_index):
         raise ValueError("qualified target key missing from prediction-only ledger")
     for key, (target, wt) in target_map.items():
@@ -230,7 +248,11 @@ def score_predictions(
         "coverage68": cov68,
         "coverage95": cov95,
         "n_qualified_positions": len(crps_losses),
-        "prediction_coverage": len(key_to_index),
+        "n_registered_prediction_keys_expected": len(expected_keys),
+        "n_registered_prediction_keys_observed": len(predicted_keys),
+        "registered_prediction_coverage": registered_coverage,
+        "failure_rate": failure_rate,
+        "n_unexpected_prediction_keys": len(predicted_keys - expected_keys),
         "crps_methods": crps_detail["methods"],
         "delta_mae_methods": delta_detail["methods"],
     }
