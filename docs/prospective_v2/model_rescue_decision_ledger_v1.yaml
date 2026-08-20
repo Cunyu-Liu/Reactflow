@@ -4,6 +4,10 @@ as_of: '2026-08-20T14:00:00+08:00'
 default_route: BENCHMARK_MEASUREMENT_MAINLINE
 
 facts:
+  - id: F_M0_FOCUSED_COMMIT
+    status: CONFIRMED_FACT
+    value: 5ee52e7ab9f05b641008e5988db616d19d827379
+    evidence: 'git commit: audit: freeze qualified model rescue baseline'
   - id: F_CURRENT_BRANCH
     status: CONFIRMED_FACT
     value: codex/reactflow-delta-model-rescue-v1-20260820
@@ -124,3 +128,12 @@ route_rules:
     then: METHOD_AUGMENTED_BENCHMARK_ELIGIBLE
   - if: ONLY_CRPS_PASS_AND_SIGNED_DELTA_FAIL
     then: CALIBRATION_BASELINE_ONLY
+
+phase_state:
+  M0: PASS
+  M1: IN_PROGRESS
+  M2: NOT_RUN
+  M3: NOT_RUN
+  M4: NOT_RUN
+  M5: NOT_RUN
+  M6: NOT_RUN

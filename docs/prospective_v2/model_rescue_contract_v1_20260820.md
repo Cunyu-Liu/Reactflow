@@ -1,7 +1,7 @@
 # ReactFlow-Delta 模型救援与投稿再资格化合同 v1
 
 日期：2026-08-20
-状态：`ACTIVE_M0_EVIDENCE_FREEZE`
+状态：`ACTIVE_M1_FAILURE_DECOMPOSITION`
 对应 machine contract：`configs/reactflow_delta/model_rescue_contract_v1.yaml`
 
 ## 0. 合同地位与边界
@@ -202,6 +202,9 @@ manuscript 主表。
 - 登记当前 raw artifacts 与旧无效结果；
 - 激活本合同，training 保持 false；
 - 通过 contract/state/claim 一致性测试后进入 M1。
+
+M0 于 2026-08-20 通过：基线、evaluator、rank-0 对照、external qualification、
+claim downgrade 与本合同已在独立分支形成 focused commit `5ee52e7`。
 
 ### M1：failure decomposition 与结构 probe
 

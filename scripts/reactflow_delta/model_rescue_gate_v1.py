@@ -51,8 +51,11 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         "active_points_to_ledger": active["authority"]["decision_ledger_path"]
         == DECISION_LEDGER.as_posix(),
         "phase_order": phase_ids == ["M0", "M1", "M2", "M3", "M4", "M5", "M6"],
-        "m0_is_active": active["authority"]["current_phase"] == "M0",
-        "m0_training_closed": active["training_allowed"] is False
+        "m0_complete_m1_active": active["authority"]["current_phase"] == "M1"
+        and active["gate_state"]["M0"] == "PASS"
+        and active["gate_state"]["M1"] == "IN_PROGRESS"
+        and active["authority"]["binding_status"] == "M0_FOCUSED_COMMIT_COMPLETE",
+        "m1_candidate_training_closed": active["training_allowed"] is False
         and active["candidate_model_training_allowed"] is False,
         "new_external_outcomes_closed": active["new_external_outcome_access_allowed"]
         is False,
