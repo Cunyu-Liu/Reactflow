@@ -256,6 +256,14 @@ coverage 为 100% 且 failure rate 为 0 时才可进入 M3。
 selection ledger、双主指标、secondary metrics 和 influence analyses。结果只能标记
 `POST_HOC_DEVELOPMENT`。
 
+M3 协议在完整 M2 screen 结果出现前固定。每个 outer fold 只接收 M2
+qualification 保留的 families；在 19 个 outer-train puzzles 内做 4-fold inner OOF。inner
+排序用 seed 0 与固定 10 epochs；可行性要求 CRPS 与 signed-Δ MAE 都不差于
+B1，然后最小化两个相对 loss 的等权平均。SparseDelta `lambda=0/0.1`、
+family 和 B1/L2 comparator 全部在 inner puzzles 内选，outer-held 不参与。选定后在完整
+outer-train 上用 40 epochs 训练 seeds 0–4，以等权 Gaussian-component mixture 一次性预测
+outer-held puzzle，并只保存不含 target 的 OOF artifact。
+
 ### M4：必要消融与冻结
 
 只对 M3 胜者做 component/structure/source 消融。删除无贡献组件，随后冻结 model

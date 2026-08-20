@@ -239,6 +239,39 @@ m2_screen_protocol:
       crps_gain_vs_b1: 0.01919806780345562
       signed_delta_mae_gain_vs_b1: 0.02697689297133543
 
+m3_nested_protocol:
+  status: FROZEN_BEFORE_COMPLETE_M2_SCREEN_RESULT
+  prerequisite: M2_SCREEN_PASS
+  runner: scripts/reactflow_delta/run_model_rescue_m3_v1.py
+  split: split_v4_lopo_puzzle
+  outer_folds: 20
+  inner_folds_per_outer: 4
+  inner_selection_seed: 0
+  inner_epochs: 10
+  final_epochs: 40
+  final_seeds: [0, 1, 2, 3, 4]
+  learning_rate: 0.001
+  weight_decay: 0.0
+  family_source: M2_QUALIFICATION_ELIGIBLE_FAMILIES_ONLY
+  sparse_lambda_policy: INNER_SELECT_0_OR_0_1_WITHIN_EACH_OUTER_TRAIN
+  candidate_selection:
+    score: 0.5*(candidate_crps/B1_crps)+0.5*(candidate_delta_mae/B1_delta_mae)
+    feasibility: NEITHER_PRIMARY_WORSE_THAN_B1
+    tie_breaker: FEWER_PARAMETERS_THEN_STABLE_ID
+  comparator_selection:
+    eligible: [b1_rfd_direct_aligned, l2_aligned_rank2_if_m2_eligible]
+    location: OUTER_TRAIN_INNER_FOLDS_ONLY
+    rule: LOWEST_FEASIBLE_AGGREGATE_INNER_SCORE
+  outer_held_access:
+    family_selection: false
+    lambda_selection: false
+    comparator_selection: false
+    epoch_selection: false
+    scoring_after_freeze: true
+  deployment_distribution: EQUAL_WEIGHT_FIVE_SEED_GAUSSIAN_COMPONENT_MIXTURE
+  oof_artifact: PREDICTION_ONLY_NO_TARGET
+  evidence_status: POST_HOC_DEVELOPMENT_NESTED
+
 selection:
   outer_held_used_for_selection: false
   candidate_selection_location: OUTER_TRAIN_INNER_FOLDS_ONLY
