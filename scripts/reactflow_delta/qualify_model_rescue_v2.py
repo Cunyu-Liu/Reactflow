@@ -18,6 +18,7 @@ from scripts.reactflow_delta.run_model_rescue_v2 import BASELINE
 
 
 SCHEMA = "reactflow_delta.model_rescue_v2_screen_qualification.v1"
+SMOKE_SCHEMA = "reactflow_delta.model_rescue_v2_smoke_qualification.v1"
 
 
 def _load_folds(path: Path) -> list[dict[str, Any]]:
@@ -55,6 +56,140 @@ def _integrity(score: dict[str, Any]) -> dict[str, bool]:
             score.get("n_unexpected_prediction_keys", -1)
         )
         == 0,
+    }
+
+
+def _prediction_checks(path: Path, candidate: str, components: int) -> tuple[dict[str, bool], dict[str, np.ndarray]]:
+    with np.load(path, allow_pickle=True) as handle:
+        prediction = {name: handle[name] for name in handle.files}
+    prohibited = {
+        "target",
+        "target_error",
+        "target_mask",
+        "qualified_target_mask",
+        "score",
+    }
+    n_rows = len(prediction.get("keys", []))
+    required = {
+        "biological_scoring_key",
+        "candidate_id",
+        "outer_fold",
+        "seed",
+        "delta_mean",
+        "point_mean",
+        "locations",
+        "scales",
+        "weights",
+        "registered_status",
+        "mean_checkpoint_path",
+        "calibration_checkpoint_path",
+    }
+    checks = {
+        "required_prediction_fields_present": required.issubset(prediction),
+        "prohibited_target_fields_absent": prohibited.isdisjoint(prediction),
+        "nonempty_prediction_ledger": n_rows > 0,
+        "biological_key_matches_scorer_key": np.array_equal(
+            prediction.get("keys"), prediction.get("biological_scoring_key")
+        ),
+        "candidate_id_constant": n_rows > 0
+        and set(map(str, prediction.get("candidate_id", []))) == {candidate},
+        "registered_status_covered": n_rows > 0
+        and set(map(str, prediction.get("registered_status", []))) == {"covered"},
+        "component_count": prediction.get("locations", np.empty((0, 0))).shape
+        == (n_rows, components)
+        and prediction.get("scales", np.empty((0, 0))).shape == (n_rows, components)
+        and prediction.get("weights", np.empty((0, 0))).shape == (n_rows, components),
+        "locations_equal_point_mean": n_rows > 0
+        and np.allclose(
+            prediction.get("locations"),
+            prediction.get("point_mean", np.empty(0))[:, None],
+            atol=1e-7,
+            rtol=0,
+        ),
+        "weights_sum_to_one": n_rows > 0
+        and np.allclose(
+            prediction.get("weights", np.empty((0, 0))).sum(axis=1),
+            1.0,
+            atol=1e-7,
+            rtol=0,
+        ),
+        "positive_finite_scales": n_rows > 0
+        and np.isfinite(prediction.get("scales", np.empty(0))).all()
+        and (prediction.get("scales", np.empty(0)) > 0).all(),
+    }
+    return checks, prediction
+
+
+def qualify_smoke(folds: list[dict[str, Any]]) -> dict[str, Any]:
+    fold_ids = [int(row["outer_fold"]) for row in folds]
+    if len(set(fold_ids)) != len(fold_ids):
+        raise ValueError("duplicate outer fold result")
+    if sorted(fold_ids) != [0, 1] or len(folds) != 2:
+        raise ValueError("R2M2 smoke requires exactly folds 0 and 1")
+    fold_results = []
+    for row in sorted(folds, key=lambda item: int(item["outer_fold"])):
+        if int(row.get("seed", -1)) != 0:
+            raise ValueError("R2M2 smoke accepts seed 0 only")
+        candidate_checks = {}
+        predictions = {}
+        for candidate, components in ((MEAN_CANDIDATE, 1), (CALIBRATED_CANDIDATE, 2)):
+            candidate_row = row["candidates"][candidate]
+            artifact_checks, prediction = _prediction_checks(
+                Path(candidate_row["prediction_artifact"]), candidate, components
+            )
+            histories = candidate_row["mean_loss"] + candidate_row["calibration_loss"]
+            score_checks = _integrity(candidate_row["score"])
+            candidate_checks[candidate] = {
+                **artifact_checks,
+                **score_checks,
+                "three_or_fewer_epochs_each_stage": len(candidate_row["mean_loss"]) <= 3
+                and len(candidate_row["calibration_loss"]) <= 3,
+                "finite_training_losses": len(histories) > 0
+                and bool(np.isfinite(np.asarray(histories, dtype=float)).all()),
+            }
+            predictions[candidate] = prediction
+        pair_checks = {
+            "candidate_keys_identical": np.array_equal(
+                predictions[MEAN_CANDIDATE]["keys"],
+                predictions[CALIBRATED_CANDIDATE]["keys"],
+            ),
+            "candidate_delta_mean_identical": np.array_equal(
+                predictions[MEAN_CANDIDATE]["delta_mean"],
+                predictions[CALIBRATED_CANDIDATE]["delta_mean"],
+            ),
+            "candidate_point_mean_identical": np.array_equal(
+                predictions[MEAN_CANDIDATE]["point_mean"],
+                predictions[CALIBRATED_CANDIDATE]["point_mean"],
+            ),
+            "held_target_error_mask_invariance": row.get(
+                "held_target_error_mask_invariance"
+            )
+            is True,
+            "reported_point_difference_atol_1e_7": float(
+                row.get("point_mean_max_abs_difference", float("inf"))
+            )
+            <= 1e-7,
+        }
+        passed = all(pair_checks.values()) and all(
+            all(checks.values()) for checks in candidate_checks.values()
+        )
+        fold_results.append(
+            {
+                "outer_fold": int(row["outer_fold"]),
+                "held_puzzle": row["held_puzzle"],
+                "candidate_checks": candidate_checks,
+                "pair_checks": pair_checks,
+                "status": "ENGINEERING_SMOKE_FOLD_PASS" if passed else "ENGINEERING_SMOKE_FOLD_FAIL",
+            }
+        )
+    passed = all(row["status"] == "ENGINEERING_SMOKE_FOLD_PASS" for row in fold_results)
+    return {
+        "schema_version": SMOKE_SCHEMA,
+        "evidence_status": "ENGINEERING_SMOKE_ONLY",
+        "folds": fold_results,
+        "overall_status": "R2M2_REAL_DATA_ENGINEERING_SMOKE_PASS" if passed else "R2M2_FAIL",
+        "r2m3_authorized": passed,
+        "scientific_interpretation_prohibited": True,
     }
 
 
@@ -195,6 +330,17 @@ def qualify_screen(folds: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def render_markdown(result: dict[str, Any]) -> str:
+    if result["schema_version"] == SMOKE_SCHEMA:
+        return "\n".join(
+            [
+                "# ReactFlow-Delta Model Rescue v2 real-data engineering smoke",
+                "",
+                f"Overall status: `{result['overall_status']}`.",
+                "",
+                "This artifact establishes engineering invariants only. Smoke scores are not eligible for model selection or scientific interpretation.",
+                "",
+            ]
+        )
     mean = result["mean_gate"]
     calibration = result["calibration_gate"]
     return "\n".join(
@@ -222,15 +368,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     parser.add_argument("--out-md", type=Path, required=True)
+    parser.add_argument("--phase", choices=["R2M2", "R2M3"], default="R2M3")
     args = parser.parse_args(argv)
-    result = qualify_screen(_load_folds(args.input))
+    folds = _load_folds(args.input)
+    result = qualify_smoke(folds) if args.phase == "R2M2" else qualify_screen(folds)
     args.out_json.parent.mkdir(parents=True, exist_ok=True)
     args.out_md.parent.mkdir(parents=True, exist_ok=True)
     args.out_json.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     args.out_md.write_text(render_markdown(result), encoding="utf-8")
-    print(json.dumps({"status": result["overall_status"], "r2m4_authorized": result["r2m4_authorized"]}, indent=2))
+    print(json.dumps({"status": result["overall_status"]}, indent=2))
     return 0
 
 
