@@ -1,710 +1,460 @@
 #!/usr/bin/env python3
-"""P2v3 — nested leave-one-publication-out learnability gate (development diagnostic).
+"""run_p2_v3: unified target-invariant prediction ledger + frozen method-balanced
+evaluator + genuinely distinct Direct* vs K_rank=0 comparison (audit 2026-08-17).
 
-Rebuilds the direct baseline / P2 gate for the endpoint_v3 primary task:
-under ALLOWED inputs only (WT sequence + exact single-nucleotide mutation +
-allowed WT reactivity state + condition, WITHOUT the mutant profile), is the
-mutation-induced reactivity response cross-publication learnable, and which
-simple/generic models give incremental skill over trivial baselines.
+Implements the audit's Phase 1/2/3 (P0) prerequisites in ONE protocol:
+  * frozen split_v4 20-fold LOPO (held puzzle fully excluded from fit/tuning/calib)
+  * prediction/score separation: the model API takes only WT inputs + mutation
+    identity (target-invariance); targets are joined by the evaluator-side ledger
+  * frozen method-balanced estimand (position -> mutant -> cell -> method -> puzzle)
+    via evaluator_v2 for BOTH single-distribution and 5-seed mixture models
+  * genuinely distinct baselines: ZeroResponse, TrainMedian, RidgeDirect,
+    NonlinearDirect (independent MLP), RFD-Direct (LRSOv3 k_rank=0)
+  * nested rank selection: per outer fold, one rank is inner-selected from the
+    pre-frozen {2,4,8} (inner 4-fold puzzle-grouped, outer-train only); the final
+    comparison is rank0 -> selected-rank paired effect, NOT three separate
+    significances vs ridge.
 
-Design (per audit contract §13.2 R5 / Phase 2; endpoint_v3 amendment):
-  * Outer unit = publication (same PMID = one publication).
-  * For each outer fold: hold out ONE publication, fit the fold-local caller
-    (caller_v3) on the REMAINING train publications, generate binary changer
-    labels C_i for ALL pool pairs with that caller, train models on the train
-    publications, predict scores on the held-out publication.
-  * Score = pair-level P(C_i=1) (direct output); metric = publication-macro AUPRC
-    (evaluate_v2.publication_macro_auprc / evaluate_primary).
-  * NO_CALL units are excluded from the metric (never zero-filled).
-  * Reuses caller_v3.py (empirical-scatter noise recalibration per endpoint_v3)
-    and evaluate_v2.py read-only (imported, not modified).  The statistical null
-    is train-fold only; the per-group empirical scatter is sourced from the full
-    pool's WT replicate groups (an ALLOWED input, needed for per-study scaling).
+Protocol parity between rank0 and the selected positive rank (audit §9.2 / §6.5):
+  * same LRSOv3 architecture (encoder + nonlinear direct head + learned scale)
+  * same likelihood (frozen HP: Student-t), same cfg {lr=1e-3, wd=0}
+  * same seeds {0..4}, same inner-selected epoch count, same WT-context inputs
+  * only K_rank differs (0 vs the inner-selected positive rank)
 
-Models (Phase 2): trivial (constant), logistic (sklearn), GBM tree (sklearn),
-P2 pair-level generic MLP (PyTorch, CUDA), DeepSets generic (PyTorch, CUDA).
-Every neural model MUST run on CUDA; if CUDA is unavailable the run STOPS.
+Outputs (all keyed, outcome-blind):
+  * per-fold keyed OOF prediction ledger (.npz, prediction only, NO target)
+  * p2_v3_scores.json : per-model per-puzzle method-balanced L + paired effects + CI
+  * p2_v3_selection_ledger.json : per-fold selected rank / cfg / epochs / inner CRPS
 
-Ablations: sequence-only vs WT-anchor (and exact-alt / condition variants).
-Learning curve: retrain from scratch at train-publication fractions.
-Negative control: publication-level label permutation p = (b+1)/(B+1).
-Single-study dominance: leave-one-study-out sensitivity.
+--smoke runs 2 outer folds with tiny epoch budgets (P0-7 engineering smoke ONLY;
+smoke numbers must never enter any scientific conclusion).
 """
+
 from __future__ import annotations
 
-import argparse, hashlib, json, math, os, pickle, random, shutil, sys, time
-from collections import Counter, defaultdict
+import argparse
+import json
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
 
 import numpy as np
-import yaml
+import torch
 
-import torch  # noqa: E402  (needed for DeepSetsGeneric class definition / CUDA guard)
-
-# --- read-only reuse of caller_v3 (endpoint_v3) & evaluator_v2 ---
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from caller_v3 import CallerV3
-from caller_v2 import (
-    ReplicateGroup, PairFeatures, compute_eligible_mask,
-    build_pair_features as _caller_build_pair_features,
+from scripts.reactflow_delta.m2_universe_v1 import M2Universe
+from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
+from scripts.reactflow_delta import evaluator_v2 as E
+from scripts.reactflow_delta import baseline_v1 as B
+from scripts.reactflow_delta.run_p3_lrso_v3 import (
+    LRSOv3, _wt_ctx_tensors, _fit_epochs, _epoch_select_fixed_cfg,
+    _maybe_compile, _mixture_crps_vec, _wt_filled, _target_matrix,
+    SEEDS, SCALE_FLOOR,
 )
-from evaluate_v2 import evaluate_primary, is_unidentifiable, publication_macro_auprc
+from scripts.reactflow_delta.p2_learnability import (
+    puzzle_level_ci20, studentized_sign_flip, leave_one_puzzle_influence,
+)
 
-# ---------------------------------------------------------------------------
-# Frozen / documented constants
-# ---------------------------------------------------------------------------
-SEEDS = [0, 1, 2, 3, 4]            # documented deterministic seeds
-TRAIN_FRACTIONS = [0.25, 0.5, 1.0]
-WINDOW = 21                        # local window around the edited site (positions)
-HALF = WINDOW // 2
-BASE_MAP = {"A": 0, "C": 1, "G": 2, "U": 3, "T": 3}
-LEARNING_CURVE_MODELS = ["logistic", "p2_mlp"]
-LEARNING_CURVE_SEEDS = [0, 1, 2, 3, 4]
+SCHEMA = "reactflow_delta.run_p2_v3.v1"
+FROZEN_CFG = {"lr": 1e-3, "wd": 0.0, "likelihood": "student_t"}
+CANDIDATE_RANKS = [2, 4, 8]
+FAST_MODELS = ["zero", "train_median", "reg_direct", "nonlinear"]
+RANK0_ID = "rfd_direct_rank0"
+RANKPOS_ID = "rfd_direct_rankpos"
 
 
-def _study_of(sa: str) -> str:
-    return (sa or "").split("_")[0]
+# --------------------------------------------------------------------------- #
+# ledger builders (prediction side is target-invariant)
+# --------------------------------------------------------------------------- #
+def _bio_key(univ, r, pos: int) -> str:
+    return f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.pos}|{r.ref}>{r.alt}|{pos}"
 
 
-def load_cache(path: str) -> dict:
-    with open(path, "rb") as fh:
-        return pickle.load(fh)
+def _target_ledger(univ, held_records) -> list[E.TargetPoint]:
+    """Evaluator-side held target ledger (outcome data lives HERE, never in the
+    prediction file). Missing target -> target=None, qualified=WT-observed; the
+    frozen evaluator excludes target=None positions (never scores them as 0)."""
+    rows = []
+    for r in held_records:
+        c = univ.get_construct(r.construct_id)
+        wt_obs = c.wt_observed.astype(bool)
+        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        for pos in range(len(wt_obs)):
+            y = None
+            if tprof is not None and not np.isnan(tprof[pos]):
+                y = float(tprof[pos])
+            rows.append(E.TargetPoint(
+                biological_scoring_key=_bio_key(univ, r, pos),
+                target=y, qualified=bool(wt_obs[pos])))
+    return rows
 
 
-def sanitize_records(rec_index: dict) -> dict:
-    """Truncate train_frozen reactivity/error arrays to a common per-record
-    length so caller_v2 (which assumes aligned arrays) does not IndexError on
-    records whose error array is shorter than its reactivity array."""
-    n_mismatch = 0
-    for r in rec_index.values():
-        tf = r.get("reactivity_layers", {}).get("train_frozen")
-        if not isinstance(tf, dict):
+def _ledger_from_profile(pred_profile: dict[str, tuple], model_id: str, outer_fold: int,
+                         seed: int = 0) -> list[E.PredPoint]:
+    """Wrap a {bio_key: (loc, scale, family, df)} profile into PredPoint rows.
+    Non-finite predictions are marked failure (never silently zeroed)."""
+    rows = []
+    for k, (loc, scale, _fam, _dfv) in pred_profile.items():
+        if not np.isfinite(scale) or scale <= 0 or not np.isfinite(loc):
+            rows.append(E.PredPoint(biological_scoring_key=k, model_id=model_id,
+                                    seed_or_component_id=seed, outer_fold=outer_fold,
+                                    family="gaussian", location=0.0, scale=SCALE_FLOOR,
+                                    df=None, status="failure",
+                                    failure_reason="non-finite loc/scale"))
             continue
-        react = tf.get("reactivity")
-        err = tf.get("error")
-        if isinstance(react, list) and isinstance(err, list) and len(react) != len(err):
-            L = min(len(react), len(err))
-            tf["reactivity"] = react[:L]
-            tf["error"] = err[:L]
-            n_mismatch += 1
-    if n_mismatch:
-        print(f"[p2] sanitized {n_mismatch} records with reactivity/error length mismatch", flush=True)
-    return rec_index
+        rows.append(E.PredPoint(biological_scoring_key=k, model_id=model_id,
+                                seed_or_component_id=seed, outer_fold=outer_fold,
+                                family="gaussian", location=float(loc), scale=float(scale),
+                                df=None))
+    return rows
 
 
-# ---------------------------------------------------------------------------
-# Replicate groups from cached WT records (whole pool, then filtered per fold)
-# ---------------------------------------------------------------------------
-def build_rep_groups(rec_index: dict, study_whitelist=None) -> list:
-    wt_by_key: dict = {}
-    for key, r in rec_index.items():
-        if not r.get("is_wt"):
+def _per_seed_ledger(univ, held_records, model, seed, device, outer_fold,
+                     model_id: str, ctx_cache) -> list[E.PredPoint]:
+    """Per-seed prediction ledger for one LRSO model (target-invariant)."""
+    rows = []
+    by = {}
+    for r in held_records:
+        by.setdefault(r.construct_id, []).append(r)
+    with torch.no_grad():
+        for cid, recs in by.items():
+            if not recs:
+                continue
+            ctx = ctx_cache[cid]
+            H = model.encode(ctx)
+            L = H.shape[0]
+            wt_obs = univ.get_construct(cid).wt_observed.astype(bool)
+            wt = _wt_filled(univ, cid)
+            for r in recs:
+                edit_idx = torch.tensor([r.pos], device=device)
+                dists = torch.tensor((np.arange(L) - r.pos).astype(np.float32),
+                                     device=device)[None, :]
+                delta, scale_t = model.forward_op(
+                    H, edit_idx, dists, [r.ref], [r.alt],
+                    torch.tensor(wt_obs[None], device=device))
+                pred = wt[None, :] + delta.cpu().numpy()
+                scl = scale_t.cpu().numpy()
+                for pos in range(L):
+                    rows.append(E.PredPoint(
+                        biological_scoring_key=_bio_key(univ, r, pos),
+                        model_id=model_id, seed_or_component_id=seed,
+                        outer_fold=outer_fold, family="gaussian",
+                        location=float(pred[0, pos]), scale=float(scl[pos]), df=None))
+    return rows
+
+
+def _mixture_position_losses(univ, held_records, models: list, ctx_cache, device,
+                             model_id: str) -> dict[str, float]:
+    """Per-bio-key five-seed equal-weight Gaussian-mixture CRPS (contract 9.1),
+    target-invariant: forward_op receives the WT-observed mask ONLY. Returns
+    {bio_key: mixture CRPS} over target-qualified & WT-observed positions."""
+    models = [m.eval() for m in models]
+    losses: dict[str, float] = {}
+    by = {}
+    for r in held_records:
+        by.setdefault(r.construct_id, []).append(r)
+    with torch.no_grad():
+        for cid, recs in by.items():
+            if not recs:
+                continue
+            tmat, wt_obs = _target_matrix(univ, recs)
+            obs = wt_obs[0]
+            edit_idx = torch.tensor([r.pos for r in recs], device=device)
+            dists = (torch.arange(tmat.shape[1], device=device)[None, :] - edit_idx[:, None]).float()
+            refs = [r.ref for r in recs]; alts = [r.alt for r in recs]
+            ctx = ctx_cache[cid]
+            masks = torch.tensor(wt_obs, device=device)  # WT-obs ONLY (target-invariant)
+            preds = []; scales = []
+            for m in models:
+                H = m.encode(ctx)
+                delta, scale = m.forward_op(H, edit_idx, dists, refs, alts, masks)
+                pred = torch.tensor(_wt_filled(univ, cid), device=device)[None, :] + delta
+                preds.append(pred.cpu().numpy()); scales.append(scale.cpu().numpy())
+            for bi, r in enumerate(recs):
+                tprof = tmat[bi]
+                q = np.where(~np.isnan(tprof) & obs)[0]
+                if q.size == 0:
+                    continue
+                locs = [p[bi][q] for p in preds]
+                scs = [s[q] for s in scales]
+                mix = _mixture_crps_vec(locs, scs, tprof[q])
+                for j, pos in enumerate(q):
+                    losses[_bio_key(univ, r, int(pos))] = float(mix[j])
+    return losses
+
+
+def _puzzle_l_map(pos_losses: dict[str, float]) -> dict[str, float]:
+    """Per-puzzle method-balanced L from per-key position losses (frozen evaluator)."""
+    res = E.score_position_losses(pos_losses, method_balanced=True)
+    return {p: res["puzzles"][p]["L"] for p in sorted(res["puzzles"])}
+
+
+# --------------------------------------------------------------------------- #
+# nested rank selection (inner 4-fold, outer-train only)
+# --------------------------------------------------------------------------- #
+def _select_rank_inner(univ, train_records, inner_groups, ctx_cache, device,
+                       candidate_ranks, cfg, max_epochs, patience, seed=0):
+    """Inner 4-fold puzzle-grouped rank selection over candidate_ranks (frozen cfg).
+    max_epochs/patience here are the RANKING-SCAN budget (reduced, e.g. 40/10, so
+    selecting a rank costs a fraction of a full-budget fit — mirrors the P3
+    hp_max_epochs=40 HP-ranking scan). Returns (best_rank, best_epochs,
+    {rank: {"inner_crps","epochs"}}); best_epochs is the chosen rank's mean best
+    inner epoch and is the shared training length for BOTH rank0 and the selected
+    positive rank (parity)."""
+    best_rank = None; best_score = float("inf"); best_ep = 0
+    scores = {}
+    for k in candidate_ranks:
+        ep, val = _epoch_select_fixed_cfg(univ, train_records, inner_groups, ctx_cache,
+                                          device, k, cfg, max_epochs, patience, seed)
+        scores[k] = {"inner_crps": float(val) if np.isfinite(val) else None,
+                     "epochs": int(ep)}
+        if np.isfinite(val) and val < best_score:
+            best_score = val; best_rank = k; best_ep = ep
+    if best_rank is None:
+        best_rank = candidate_ranks[0]; best_ep = 0
+    return best_rank, best_ep, scores
+
+
+def _fit_lrso_family(univ, train_records, ctx_cache, device, k_rank, cfg, epochs):
+    """Fit five seeds of LRSOv3(k_rank) with the shared frozen cfg + epoch count."""
+    models = []
+    for seed in SEEDS:
+        torch.manual_seed(seed)
+        m = _maybe_compile(LRSOv3(k_rank=k_rank, likelihood=cfg["likelihood"]).to(device))
+        _fit_epochs(m, univ, train_records, ctx_cache, device, cfg, max(epochs, 1))
+        m.eval()
+        models.append(m)
+    return models
+
+
+# --------------------------------------------------------------------------- #
+# per-fold driver
+# --------------------------------------------------------------------------- #
+def run_fold(univ, fold, all_records, ctx_cache, device, *, fast_models,
+             cfg, candidate_ranks, rank_max_epochs, rank_patience, seed=0):
+    """Run one outer fold; returns per-model per-puzzle method-balanced L + the
+    per-seed ledgers (prediction only) + the rank-selection fragment.
+    rank_max_epochs/rank_patience bound the inner rank-selection SCAN only; the
+    final rank0 + selected positive rank are both trained for the SAME
+    inner-selected epoch count (protocol parity)."""
+    held = fold.held_puzzle
+    train_records = [r for r in all_records if r.puzzle in set(fold.train_puzzles)]
+    held_records = [r for r in all_records if r.puzzle == held]
+    out: dict = {"outer_fold": fold.outer_fold, "held_puzzle": held,
+                 "models": {}, "seed_ledgers": {}, "selection": None}
+
+    # ---- fast baselines: genuinely distinct, independently fitted on outer-train
+    for model_id in fast_models:
+        model = B.BASELINES[model_id]()
+        model.fit(univ, train_records, device)
+        prof = model.predict_full_profile(univ, held_records, device)
+        pred_rows = _ledger_from_profile(prof, model_id, fold.outer_fold)
+        tgt = _target_ledger(univ, held_records)
+        score = E.score_ledger(pred_rows, tgt, method_balanced=True)
+        out["models"][model_id] = {
+            p: score["puzzles"][p]["L"] for p in sorted(score["puzzles"])}
+        out["models"][model_id + "_n_positions"] = score["n_matched_positions"]
+
+    # ---- LRSO family: rank0 + inner-selected positive rank, shared protocol
+    rank_pos, rank_pos_epochs, inner_scores = _select_rank_inner(
+        univ, train_records, fold.inner_groups, ctx_cache, device,
+        candidate_ranks, cfg, rank_max_epochs, rank_patience, seed=seed)
+    out["selection"] = {
+        "selected_rank": rank_pos,
+        "epochs": rank_pos_epochs,
+        "cfg": cfg,
+        "inner_rank_scores": inner_scores,
+    }
+    # rank0 uses the SAME epoch count as the selected positive rank (parity), so
+    # the only difference is K_rank.
+    models_r0 = _fit_lrso_family(univ, train_records, ctx_cache, device,
+                                 0, cfg, rank_pos_epochs)
+    models_rp = _fit_lrso_family(univ, train_records, ctx_cache, device,
+                                 rank_pos, cfg, rank_pos_epochs)
+    out["seed_ledgers"]["rank0"] = {
+        seed: _per_seed_ledger(univ, held_records, m, seed, device, fold.outer_fold,
+                               RANK0_ID, ctx_cache)
+        for seed, m in enumerate(models_r0)}
+    out["seed_ledgers"]["rankpos"] = {
+        seed: _per_seed_ledger(univ, held_records, m, seed, device, fold.outer_fold,
+                               RANKPOS_ID, ctx_cache)
+        for seed, m in enumerate(models_rp)}
+    pos_r0 = _mixture_position_losses(univ, held_records, models_r0, ctx_cache,
+                                      device, RANK0_ID)
+    pos_rp = _mixture_position_losses(univ, held_records, models_rp, ctx_cache,
+                                      device, RANKPOS_ID)
+    out["models"][RANK0_ID] = _puzzle_l_map(pos_r0)
+    out["models"][RANKPOS_ID] = _puzzle_l_map(pos_rp)
+    out["models"][RANK0_ID + "_n_positions"] = len(pos_r0)
+    out["models"][RANKPOS_ID + "_n_positions"] = len(pos_rp)
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# artifact persistence
+# --------------------------------------------------------------------------- #
+def _dump_seed_ledgers(out: Path, fold: int, tag: str, seed_ledgers: dict) -> None:
+    """Persist per-seed prediction ledgers as .npz (prediction only, no target)."""
+    if not seed_ledgers:
+        return
+    all_rows = []
+    for seed in sorted(seed_ledgers):
+        all_rows.extend((seed, r) for r in seed_ledgers[seed])
+    keys = np.asarray([r.biological_scoring_key for _, r in all_rows], dtype=object)
+    loc = np.array([r.location for _, r in all_rows], dtype=np.float64)
+    scale = np.array([r.scale for _, r in all_rows], dtype=np.float64)
+    seeds = np.array([s for s, _ in all_rows], dtype=np.int64)
+    np.savez_compressed(
+        out / f"p2_v3_oof_predictions_{tag}_fold{fold}.npz",
+        keys=keys, loc=loc, scale=scale, seed=seeds)
+
+
+# --------------------------------------------------------------------------- #
+# main
+# --------------------------------------------------------------------------- #
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="Unified Direct*/K_rank=0 protocol (audit P0)")
+    ap.add_argument("--m2-csv", required=True)
+    ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--device", default="cuda:0")
+    ap.add_argument("--folds", default="",
+                    help="comma-separated outer fold indices to run (default: all)")
+    ap.add_argument("--smoke", action="store_true",
+                    help="P0-7 engineering smoke: 2 folds, tiny epochs (never scientific)")
+    ap.add_argument("--max-epochs", type=int, default=200,
+                    help="cap for the final model training length (unused when the "
+                         "inner-selected epoch count is lower; kept for protocol parity)")
+    ap.add_argument("--patience", type=int, default=20)
+    ap.add_argument("--rank-max-epochs", type=int, default=40,
+                    help="epoch budget for the inner rank-selection SCAN (P3 "
+                         "hp_max_epochs=40 precedent); the chosen rank's mean best "
+                         "epoch is the shared training length for rank0 + selected rank")
+    ap.add_argument("--rank-patience", type=int, default=10)
+    ap.add_argument("--compile", action="store_true")
+    ap.add_argument("--fast-models", default=",".join(FAST_MODELS))
+    args = ap.parse_args(argv)
+
+    out = Path(args.out_dir); out.mkdir(parents=True, exist_ok=True)
+    device = args.device if torch.cuda.is_available() else "cpu"
+    fast_models = [x for x in args.fast_models.split(",") if x]
+
+    # wire the torch.compile engineering flag through to the shared P3 machinery
+    # (the LRSOv3 fit path reads run_p3_lrso_v3._COMPILE_FLAG via _maybe_compile).
+    import scripts.reactflow_delta.run_p3_lrso_v3 as _P3
+    _P3._COMPILE_FLAG = args.compile
+
+    max_epochs = args.max_epochs; patience = args.patience
+    rank_max_epochs = args.rank_max_epochs; rank_patience = args.rank_patience
+    if args.smoke:
+        max_epochs = min(max_epochs, 3)
+        patience = min(patience, 1)
+        rank_max_epochs = min(rank_max_epochs, 3)
+        rank_patience = min(rank_patience, 1)
+
+    univ = M2Universe(Path(args.m2_csv)); univ.build()
+    puzzles = sorted(set(r.puzzle for r in univ.get_records()))
+    split = build_split_v4(puzzles)
+    all_records = univ.get_records()
+
+    fold_ids = [int(x) for x in args.folds.split(",") if x]
+    if not fold_ids:
+        fold_ids = [f.outer_fold for f in split["folds"]]
+    if args.smoke:
+        fold_ids = fold_ids[:2]
+
+    print(f"[p2_v3] device={device} folds={fold_ids} frozen_cfg={FROZEN_CFG} "
+          f"candidate_ranks={CANDIDATE_RANKS} rank_scan_budget=({rank_max_epochs},{rank_patience}) "
+          f"final_cap={max_epochs} fast_models={fast_models}", flush=True)
+
+    # precompute all WT contexts once (outcome-blind)
+    ctx_cache = {}
+    for cid in sorted({r.construct_id for r in all_records}):
+        ctx_cache[cid] = _wt_ctx_tensors(univ, cid, device)
+
+    per_fold = {}
+    selection_ledger = {}
+    import time as _time
+    for fold in split["folds"]:
+        if fold.outer_fold not in fold_ids:
             continue
-        st = _study_of(r.get("source_accession") or "")
-        if study_whitelist is not None and st not in study_whitelist:
-            continue
-        gk = (st, r.get("canonical_sequence"), tuple(r.get("probe") or []),
-              tuple(r.get("temperature") or []))
-        wt_by_key.setdefault(gk, []).append(r)
-    groups = []
-    for (st, seq, probe, temp), recs in wt_by_key.items():
-        if len(recs) < 2:
-            continue
-        rl0 = recs[0].get("reactivity_layers", {})
-        mask = compute_eligible_mask(rl0.get("eligibility_reason_codes") or [])
-        profs = []
-        errs = []
-        for r in recs:
-            tf = r.get("reactivity_layers", {}).get("train_frozen", {}) or {}
-            react = list(tf.get("reactivity") or [])
-            err = list(tf.get("error") or [])
-            L = min(len(react), len(err))   # sanitize length mismatch (robustness)
-            profs.append(react[:L])
-            errs.append(err[:L])
-        groups.append(ReplicateGroup(
-            group_key=(st, seq, tuple(probe), tuple(temp)),
-            wt_profiles=profs, wt_errors=errs,
-            eligibility_mask=mask, study=st))
-    return groups
+        t0 = _time.time()
+        fo = run_fold(univ, fold, all_records, ctx_cache, device,
+                      fast_models=fast_models, cfg=FROZEN_CFG,
+                      candidate_ranks=CANDIDATE_RANKS,
+                      rank_max_epochs=rank_max_epochs,
+                      rank_patience=rank_patience)
+        sel = fo["selection"]
+        selection_ledger[fold.outer_fold] = sel
+        _dump_seed_ledgers(out, fold.outer_fold, "rank0", fo["seed_ledgers"]["rank0"])
+        _dump_seed_ledgers(out, fold.outer_fold, "rankpos", fo["seed_ledgers"]["rankpos"])
+        fo.pop("seed_ledgers", None)
+        fo.pop("selection", None)
+        per_fold[fold.outer_fold] = fo
+        print(f"fold {fold.outer_fold} ({fold.held_puzzle}) selection={sel} "
+              f"elapsed={_time.time()-t0:.0f}s", flush=True)
 
+    # ---- aggregate per-puzzle method-balanced L for each model (puzzle -> L)
+    model_l: dict[str, dict[str, float]] = {}
+    for m in fast_models + [RANK0_ID, RANKPOS_ID]:
+        model_l[m] = {}
+        for fid in fold_ids:
+            fo = per_fold.get(fid)
+            if fo is not None and m in fo["models"]:
+                model_l[m].update(fo["models"][m])
 
-def rep_groups_for_train(all_groups, train_studies) -> list:
-    return [g for g in all_groups if g.study in train_studies]
+    # ---- paired effects (per-puzzle D_p = L_baseline - L_candidate; positive => cand better)
+    contrasts = [
+        ("reg_direct", "zero", "Direct(ridge) vs WT-anchor"),
+        ("reg_direct", "train_median", "Direct(ridge) vs train-median"),
+        ("nonlinear", "zero", "Direct(MLP) vs WT-anchor"),
+        ("nonlinear", "train_median", "Direct(MLP) vs train-median"),
+        (RANK0_ID, "reg_direct", "RFD-Direct(K_rank=0) vs ridge"),
+        (RANKPOS_ID, RANK0_ID, "selected-rank vs K_rank=0 (main null)"),
+    ]
+    effects_out = {}
+    for cand, base, label in contrasts:
+        puzzle_effects = {}
+        for fid in fold_ids:
+            fo = per_fold.get(fid)
+            if fo is None:
+                continue
+            held = fo["held_puzzle"]
+            lc = model_l[cand].get(held); lb = model_l[base].get(held)
+            if lc is not None and lb is not None:
+                puzzle_effects[held] = lb - lc
+        eff_list = list(puzzle_effects.values())
+        ci = puzzle_level_ci20(eff_list) if len(eff_list) >= 2 else {}
+        effects_out[f"{cand}__vs__{base}"] = {
+            "label": label,
+            "per_puzzle": puzzle_effects,
+            "mean": float(np.mean(eff_list)) if eff_list else None,
+            "n": len(eff_list),
+            "ci95": ci,
+            "sign_flip": studentized_sign_flip(eff_list) if eff_list else None,
+            "lop": leave_one_puzzle_influence(eff_list,
+                                              [per_fold[fid]["held_puzzle"] for fid in fold_ids
+                                               if per_fold.get(fid) is not None])
+                   if eff_list else None,
+        }
 
-
-def build_pair_features_aligned(pair, wt_rec, mut_rec) -> PairFeatures:
-    """Like caller_v2.build_pair_features but truncates all aligned arrays to a
-    common length so caller_v2.per_position_z never IndexErrors when a pair's
-    eligibility mask is longer than a record's reactivity/error arrays
-    (robustness handling; keeps the same replicate-group identity)."""
-    def get(r, key):
-        rl = r.get("reactivity_layers", {})
-        return list(rl.get("train_frozen", {}).get(key)
-                    or rl.get("raw", {}).get(key) or [])
-    wt_react = get(wt_rec, "reactivity"); wt_err = get(wt_rec, "error")
-    mut_react = get(mut_rec, "reactivity"); mut_err = get(mut_rec, "error")
-    mask = compute_eligible_mask(pair.get("eligibility_reason_codes") or [])
-    L = min(len(mask), len(wt_react), len(wt_err), len(mut_react), len(mut_err))
-    grp = (_study_of(pair.get("source_accession") or ""),
-           wt_rec.get("canonical_sequence") or "",
-           tuple(wt_rec.get("probe") or []),
-           tuple(wt_rec.get("temperature") or []))
-    return PairFeatures(
-        pair_id=f"{pair.get('source_accession')}:{pair.get('mutant_profile_index')}",
-        wt_reactivity=wt_react[:L], mutant_reactivity=mut_react[:L],
-        wt_error=wt_err[:L], mutant_error=mut_err[:L],
-        eligibility_mask=mask[:L], group_key=grp, role="train")
-
-
-# ---------------------------------------------------------------------------
-# Feature construction (ALLOWED inputs only)
-# ---------------------------------------------------------------------------
-PROBES = ["1M7", "DMS", "2A3", "SHAPE", "NMIA", "NOMe", "CMC", "R1J", "LCK", "RSQ", "SHP", "NMD"]
-MODIFIERS = ["1M7", "DMS", "2A3", "NMIA", "NOMe", "CMC", "R1J", "LCK", "RSQ", "SHP", "NMD", "Lys", "CMCT", "glyoxal"]
-EXPTYPES = ["MutateAndMap", "MapAll", "SingleHit", "MutateMap"]
-BASE_OTHER = 4  # 'other' base slot
-
-
-def _oh(val, index_of, size):
-    """One-hot with an explicit 'other' slot at the end (deterministic size)."""
-    v = np.zeros(size + 1, dtype=np.float32)
-    i = index_of.get(str(val))
-    if i is None:
-        v[size] = 1.0
-    else:
-        v[i] = 1.0
-    return v
-
-
-def _base_oh(base):
-    v = np.zeros(5, dtype=np.float32)
-    i = BASE_MAP.get(base)
-    if i is None:
-        v[BASE_OTHER] = 1.0
-    else:
-        v[i] = 1.0
-    return v
-
-
-def _norm_react(v):
-    return float(np.clip(v, 0.0, 3.0) / 3.0)
-
-
-def _norm_err(v):
-    return float(np.clip(v, 0.0, 1.0))
-
-
-def edited_index(pair) -> int:
-    codes = pair.get("eligibility_reason_codes") or []
-    for i, c in enumerate(codes):
-        if c == "EDITED_SITE":
-            return i
-    coord = pair.get("coordinate") or {}
-    off = coord.get("offset")
-    if isinstance(off, int):
-        return off
+    result = {
+        "schema_version": SCHEMA,
+        "device": device,
+        "smoke": args.smoke,
+        "folds_run": fold_ids,
+        "frozen_cfg": FROZEN_CFG,
+        "candidate_ranks": CANDIDATE_RANKS,
+        "fast_models": fast_models,
+        "model_puzzle_L": model_l,
+        "effects": effects_out,
+        "selection_ledger": selection_ledger,
+    }
+    (out / "p2_v3_scores.json").write_text(json.dumps(result, indent=2, default=str))
+    (out / "p2_v3_selection_ledger.json").write_text(
+        json.dumps(selection_ledger, indent=2, default=str))
+    for k, v in effects_out.items():
+        lo = v["ci95"].get("ci_low") if v["ci95"] else None
+        hi = v["ci95"].get("ci_high") if v["ci95"] else None
+        print(f"effect {k}: mean={v['mean']:.5f} n={v['n']} ci95=[{lo}..{hi}]", flush=True)
     return 0
 
 
-def build_feature(pair, wt_rec, use_wt_anchor=True, use_exact_alt=True,
-                  use_condition=True) -> np.ndarray:
-    seq = wt_rec.get("canonical_sequence") or ""
-    rl = wt_rec.get("reactivity_layers", {})
-    tf = rl.get("train_frozen", {}) or rl.get("raw", {})
-    react = tf.get("reactivity") or []
-    err = tf.get("error") or []
-    react = np.nan_to_num(np.asarray(react, dtype=np.float32), nan=0.0)
-    err = np.nan_to_num(np.asarray(err, dtype=np.float32), nan=0.0)
-    n = len(seq)
-    ei = edited_index(pair)
-    parts = []
-    for k in range(WINDOW):
-        idx = ei - HALF + k
-        if 0 <= idx < n:
-            base = _base_oh(seq[idx])
-        else:
-            base = np.zeros(5, dtype=np.float32)
-        if use_wt_anchor:
-            r = _norm_react(react[idx]) if 0 <= idx < len(react) else 0.0
-            e = _norm_err(err[idx]) if 0 <= idx < len(err) else 0.0
-            base = np.concatenate([base, [r, e]])
-        parts.append(base)
-    feats = np.concatenate(parts)
-    if use_exact_alt:
-        feats = np.concatenate([feats, _base_oh(pair.get("ref_allele")),
-                                _base_oh(pair.get("alt_allele"))])
-    feats = np.concatenate([feats, [float(ei) / max(n, 1)]])
-    if use_condition:
-        cond = pair.get("condition") or {}
-        probe = wt_rec.get("probe") or []
-        feats = np.concatenate([feats, _oh(probe[0] if probe else "", _oh_index(PROBES), len(PROBES))])
-        mod = cond.get("modifier") or []
-        feats = np.concatenate([feats, _oh(mod[0] if mod else "", _oh_index(MODIFIERS), len(MODIFIERS))])
-        et = cond.get("experimentType") or []
-        feats = np.concatenate([feats, _oh(et[0] if et else "", _oh_index(EXPTYPES), len(EXPTYPES))])
-        temps = [t for t in (cond.get("temperature") or []) if str(t).replace(".", "").replace("C", "").isdigit()]
-        tval = float(str(temps[0]).replace("C", "")) if temps else 37.0
-        feats = np.concatenate([feats, [tval / 100.0]])
-    return feats.astype(np.float32)
-
-
-def _oh_index(lst):
-    return {str(v): i for i, v in enumerate(lst)}
-
-
-# ---------------------------------------------------------------------------
-# CUDA guard (contract: STOP, never silent CPU fallback for neural models)
-# ---------------------------------------------------------------------------
-def require_cuda():
-    import torch
-    if not torch.cuda.is_available():
-        raise RuntimeError(
-            "CUDA is NOT available. Contract requires GPU for all neural P2 "
-            "training; refusing to silently train on CPU. STOP.")
-    return torch.device("cuda")
-
-
-# ---------------------------------------------------------------------------
-# Neural models (PyTorch)
-# ---------------------------------------------------------------------------
-def _make_mlp(in_dim, hidden, out, seed):
-    import torch, torch.nn as nn
-    torch.manual_seed(seed)
-    return nn.Sequential(
-        nn.Linear(in_dim, hidden), nn.ReLU(),
-        nn.Linear(hidden, hidden // 2), nn.ReLU(),
-        nn.Linear(hidden // 2, out),
-    )
-
-
-class DeepSetsGeneric(torch.nn.Module):
-    def __init__(self, pos_dim, hidden, glob_dim, seed):
-        super().__init__()
-        import torch, torch.nn as nn
-        torch.manual_seed(seed)
-        self.phi = nn.Sequential(nn.Linear(pos_dim, hidden), nn.ReLU(),
-                                 nn.Linear(hidden, hidden))
-        self.rho = nn.Sequential(nn.Linear(hidden + glob_dim, hidden), nn.ReLU(),
-                                 nn.Linear(hidden, 1))
-
-    def forward(self, pos_set, glob):
-        e = self.phi(pos_set)              # (B, W, hidden)
-        pooled = e.sum(dim=1)              # (B, hidden)
-        x = torch.cat([pooled, glob], dim=1)
-        return self.rho(x).squeeze(-1)
-
-
-def train_torch(model, X, y, device, epochs=30, bs=256, lr=1e-3, seed=0):
-    import torch
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    model = model.to(device)
-    Xt = torch.from_numpy(np.asarray(X, dtype=np.float32)).to(device)
-    yt = torch.from_numpy(np.asarray(y, dtype=np.float32)).to(device)
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
-    lossf = torch.nn.BCEWithLogitsLoss()
-    n = Xt.shape[0]
-    model.train()
-    for ep in range(epochs):
-        perm = torch.randperm(n, device=device)
-        for i in range(0, n, bs):
-            idx = perm[i:i + bs]
-            xb, yb = Xt[idx], yt[idx]
-            opt.zero_grad()
-            logits = model(xb).squeeze(-1)
-            loss = lossf(logits, yb)
-            loss.backward()
-            opt.step()
-    return model
-
-
-def predict_torch(model, X, device):
-    import torch
-    model.eval()
-    with torch.no_grad():
-        Xt = torch.from_numpy(np.asarray(X, dtype=np.float32)).to(device)
-        return torch.sigmoid(model(Xt)).cpu().numpy().squeeze(-1)
-
-
-def deepsets_from_flat(Xflat, W, pos_dim, glob_dim, seed):
-    # split flat feature (W*pos_dim + glob_dim) into pos set + globals
-    import torch
-    n = Xflat.shape[0]
-    pos = Xflat[:, :W * pos_dim].reshape(n, W, pos_dim)
-    glob = Xflat[:, W * pos_dim:]
-    return pos, glob
-
-
-# ---------------------------------------------------------------------------
-# Models dispatch
-# ---------------------------------------------------------------------------
-class ModelRunner:
-    def __init__(self, device, use_wt_anchor=True):
-        self.device = device
-        self.use_wt_anchor = use_wt_anchor
-        self.pos_dim = 7 if use_wt_anchor else 5
-        self.glob_dim = None  # set after first feature
-
-    def fit_predict(self, name, Xtr, ytr, Xte, seed):
-        if name == "trivial":
-            p = float(np.mean(ytr))
-            return np.full(len(Xte), p, dtype=np.float32)
-        if name == "logistic":
-            from sklearn.linear_model import LogisticRegression
-            m = LogisticRegression(max_iter=2000, C=0.5, solver="liblinear", random_state=seed)
-            m.fit(Xtr, ytr)
-            return m.predict_proba(Xte)[:, 1].astype(np.float32)
-        if name == "gbm":
-            from sklearn.ensemble import HistGradientBoostingClassifier
-            m = HistGradientBoostingClassifier(max_iter=100, max_depth=3,
-                                               learning_rate=0.05, early_stopping=True,
-                                               validation_fraction=0.1, n_iter_no_change=20,
-                                               random_state=seed)
-            m.fit(Xtr, ytr)
-            return m.predict_proba(Xte)[:, 1].astype(np.float32)
-        if name == "p2_mlp":
-            import torch
-            in_dim = Xtr.shape[1]
-            model = _make_mlp(in_dim, 128, 1, seed)
-            train_torch(model, Xtr, ytr, self.device, seed=seed)
-            return predict_torch(model, Xte, self.device).astype(np.float32)
-        if name == "deepsets":
-            W, pos_dim = WINDOW, self.pos_dim
-            glob_dim = Xtr.shape[1] - W * pos_dim
-            model = DeepSetsGeneric(pos_dim, 64, glob_dim, seed)
-            pos_tr, gl_tr = deepsets_from_flat(Xtr, W, pos_dim, glob_dim, seed)
-            train_deepsets(model, pos_tr, gl_tr, ytr, self.device, seed=seed)
-            pos_te, gl_te = deepsets_from_flat(Xte, W, pos_dim, glob_dim, seed)
-            return predict_deepsets(model, pos_te, gl_te, self.device).astype(np.float32)
-        raise ValueError(name)
-
-
-def train_deepsets(model, pos, glob, y, device, epochs=30, bs=256, lr=1e-3, seed=0):
-    import torch
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    model = model.to(device)
-    yt = torch.from_numpy(np.asarray(y, dtype=np.float32)).to(device)
-    opt = torch.optim.Adam(model.parameters(), lr=lr)
-    lossf = torch.nn.BCEWithLogitsLoss()
-    n = pos.shape[0]
-    model.train()
-    for ep in range(epochs):
-        perm = np.random.permutation(n)
-        for i in range(0, n, bs):
-            idx = perm[i:i + bs]
-            pb = torch.from_numpy(pos[idx]).to(device)
-            gb = torch.from_numpy(glob[idx]).to(device)
-            yb = yt[idx]
-            opt.zero_grad()
-            loss = lossf(model(pb, gb).squeeze(-1), yb)
-            loss.backward()
-            opt.step()
-    return model
-
-
-def predict_deepsets(model, pos, glob, device):
-    import torch
-    model.eval()
-    with torch.no_grad():
-        pos_t = torch.from_numpy(np.asarray(pos, dtype=np.float32)).to(device)
-        glob_t = torch.from_numpy(np.asarray(glob, dtype=np.float32)).to(device)
-        # DeepSetsGeneric.forward already returns shape (B,) via .squeeze(-1),
-        # so do NOT squeeze again here (double-squeeze fails when B > 1).
-        return torch.sigmoid(model(pos_t, glob_t)).cpu().numpy()
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-def load_split(split_path):
-    split = yaml.safe_load(Path(split_path).read_text(encoding="utf-8"))
-    return split
-
-
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--cache", required=True, help="path to cache_p2.pkl")
-    ap.add_argument("--split-yaml", required=True)
-    ap.add_argument("--out-dir", required=True, help="results/p2_v1/<run_id>")
-    ap.add_argument("--cuda-device", default="0", help="CUDA_VISIBLE_DEVICES index")
-    ap.add_argument("--explore-only", action="store_true")
-    ap.add_argument("--models", default="trivial,logistic,gbm,p2_mlp,deepsets")
-    args = ap.parse_args()
-
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda_device
-    import torch
-    if not torch.cuda.is_available():
-        raise RuntimeError("CUDA unavailable after CUDA_VISIBLE_DEVICES=" + args.cuda_device +
-                           ". Contract: STOP, no silent CPU fallback. Cannot run P2 neural models.")
-    device = require_cuda()
-    gpu_index = torch.cuda.current_device()
-    gpu_name = torch.cuda.get_device_name(gpu_index)
-    free_mem, tot_mem = torch.cuda.mem_get_info(gpu_index)
-    print(f"[p2] GPU OK: cuda_visible={args.cuda_device} current_idx={gpu_index} "
-          f"name={gpu_name} free={free_mem/1e9:.1f}GB", flush=True)
-
-    out = Path(args.out_dir)
-    out.mkdir(parents=True, exist_ok=True)
-
-    split = load_split(args.split_yaml)
-    pub_map = split["publication_map"]          # study -> publication
-    study_roles = split["study_roles"]          # study -> role
-
-    cache = load_cache(args.cache)
-    rec_index = cache["rec_index"]
-    sanitize_records(rec_index)
-    pairs = cache["pairs"]
-    pool_studies = set(cache["pool"])
-
-    # Exclude the sealed SL5 test family from the P2 pool entirely.
-    test_studies = {s for s, r in study_roles.items() if r == "test"}
-    pool_studies = pool_studies - test_studies
-
-    # pair metadata: pair_id -> (pair, wt_rec, mut_rec, PairFeatures)
-    pair_recs = {}
-    missing = 0
-    for p in pairs:
-        if _study_of(p["source_accession"]) in test_studies:
-            continue
-        wt = rec_index.get((p["source_accession"], p["wt_profile_index"], p["asset_name"]))
-        mu = rec_index.get((p["source_accession"], p["mutant_profile_index"], p["asset_name"]))
-        if wt is None or mu is None:
-            missing += 1
-            continue
-        pair_recs[p["source_accession"] + ":" + str(p["mutant_profile_index"])] = {
-            "pair": p, "wt": wt, "mut": mu,
-            "study": _study_of(p["source_accession"]),
-            "pub": pub_map.get(_study_of(p["source_accession"]), "UNKNOWN"),
-        }
-    print(f"[p2] pool_studies={sorted(pool_studies)} n_pairs_usable={len(pair_recs)} missing={missing}", flush=True)
-
-    # all replicate groups (pool studies) for the caller
-    all_rep_groups = build_rep_groups(rec_index, study_whitelist=pool_studies)
-
-    # distinct publications in pool
-    pubs = sorted({v["pub"] for v in pair_recs.values()})
-    print(f"[p2] distinct publications in pool: {len(pubs)} -> {pubs}", flush=True)
-    caller_seed = 20260807
-    pub_study = {}
-    for v in pair_recs.values():
-        pub_study.setdefault(v["pub"], set()).add(v["study"])
-    print(f"[p2] publication->studies: { {p: sorted(s) for p, s in pub_study.items()} }", flush=True)
-
-    # ---- explore mode ----
-    if args.explore_only:
-        t0 = time.time()
-        caller = CallerV3(seed=caller_seed).fit(all_rep_groups, [], noise_replicate_groups=all_rep_groups)
-        print(f"[explore] caller fit time={time.time()-t0:.1f}s null_median={caller.null_median}", flush=True)
-        results = []
-        for pid, v in pair_recs.items():
-            pf = build_pair_features_aligned(v["pair"], v["wt"], v["mut"])
-            results.append((v["pub"], v["study"], caller.call(pf)))
-        lab_by_pub = defaultdict(Counter)
-        for pub, study, r in results:
-            lab_by_pub[pub].update([r.label])
-        print("[explore] label distribution by publication:")
-        for pub in pubs:
-            c = lab_by_pub.get(pub, Counter())
-            print(f"   {pub}: {dict(c)}", flush=True)
-        n_ch = sum(1 for _, _, r in results if r.label == "1")
-        n_nc = sum(1 for _, _, r in results if r.label == "NO_CALL")
-        n0 = sum(1 for _, _, r in results if r.label == "0")
-        print(f"[explore] total labels change={n_ch} non={n0} no_call={n_nc}", flush=True)
-        return
-
-    models = [m.strip() for m in args.models.split(",") if m.strip()]
-
-    # Precompute features once per ablation setting (allowed-input invariant).
-    def featset(use_wt_anchor, use_exact_alt, use_condition):
-        fx = {}
-        for pid, v in pair_recs.items():
-            fx[pid] = build_feature(v["pair"], v["wt"], use_wt_anchor, use_exact_alt, use_condition)
-        return fx
-
-    # ---- main LOOCV ----
-    # For each outer fold, fit caller on train pubs, label all pairs, train
-    # models on train pubs, predict held-out pub.  Record held-out predictions.
-    heldout = {m: {s: {"pub": [], "label": [], "score": [], "study": []} for s in SEEDS}
-               for m in models}
-
-    caller_seed = 20260807
-    fold_timing = {}
-    fold_labels = {}
-    fx_full = featset(True, True, True)   # WT-anchor features (fold-invariant)
-
-    # Fold-invariant PairFeatures: depend only on (pair, wt, mut), NOT on the
-    # fold-local caller.  Precompute once to avoid rebuilding all pool pair
-    # features on every fold (was the dominant per-fold cost).
-    print("[p2] precomputing fold-invariant pair features...", flush=True)
-    t_pf = time.time()
-    pf_all = {}
-    for pid, v in pair_recs.items():
-        pf_all[pid] = build_pair_features_aligned(v["pair"], v["wt"], v["mut"])
-    print(f"[p2] precomputed {len(pf_all)} pair features in {time.time()-t_pf:.1f}s", flush=True)
-
-    for fold, held_pub in enumerate(pubs):
-        t0 = time.time()
-        train_studies = set()
-        for p_ in pubs:
-            if p_ != held_pub:
-                train_studies |= pub_study[p_]
-        train_groups = rep_groups_for_train(all_rep_groups, train_studies)
-
-        caller = CallerV3(seed=caller_seed).fit(train_groups, [], noise_replicate_groups=all_rep_groups)
-        # label all pairs in pool with this fold-local caller
-        labels = {}
-        for pid, v in pair_recs.items():
-            labels[pid] = caller.call(pf_all[pid])
-        fold_labels[held_pub] = {pid: labels[pid].label for pid in pair_recs}
-        # training split (pairs in train publications, not NO_CALL)
-        train_pids = [pid for pid, v in pair_recs.items() if v["pub"] != held_pub]
-        held_pids = [pid for pid, v in pair_recs.items() if v["pub"] == held_pub]
-
-        # feature set (WT-anchor default for main)
-        Xtr = np.stack([fx_full[pid] for pid in train_pids])
-        ytr = np.array([1.0 if labels[pid].label == "1" else 0.0 for pid in train_pids])
-        tr_ok = np.array([labels[pid].label != "NO_CALL" for pid in train_pids])
-        Xtr_ok = Xtr[tr_ok]; ytr_ok = ytr[tr_ok]
-
-        Xte = np.stack([fx_full[pid] for pid in held_pids])
-        te_ok = np.array([labels[pid].label != "NO_CALL" for pid in held_pids])
-        Xte_ok = Xte[te_ok]
-        te_labels = np.array([1.0 if labels[pid].label == "1" else 0.0 for pid in held_pids])[te_ok]
-
-        if int(np.sum(te_ok)) == 0 or int(np.sum(tr_ok)) == 0:
-            fold_timing[held_pub] = {"train_studies": len(train_studies),
-                                     "n_train_pairs": int(np.sum(tr_ok)),
-                                     "n_held_pairs": int(np.sum(te_ok)),
-                                     "skipped": True,
-                                     "seconds": round(time.time() - t0, 1)}
-            print(f"[fold] held={held_pub} SKIPPED (empty eligible: train_ok={int(np.sum(tr_ok))} held_ok={int(np.sum(te_ok))})", flush=True)
-            continue
-
-        runner = ModelRunner(device, use_wt_anchor=True)
-        for m in models:
-            for seed in SEEDS:
-                scores = runner.fit_predict(m, Xtr_ok, ytr_ok, Xte_ok, seed)
-                h = heldout[m][seed]
-                h["pub"].extend([held_pub] * len(scores))
-                h["label"].extend(te_labels.tolist())
-                h["score"].extend(scores.tolist())
-                h["study"].extend([v["study"] for pid, v in pair_recs.items()
-                                   if v["pub"] == held_pub and labels[pid].label != "NO_CALL"])
-
-        fold_timing[held_pub] = {"train_studies": len(train_studies),
-                                 "n_train_pairs": int(np.sum(tr_ok)),
-                                 "n_held_pairs": int(np.sum(te_ok)),
-                                 "seconds": round(time.time() - t0, 1)}
-        print(f"[fold] held={held_pub} train_studies={len(train_studies)} "
-              f"train_ok={int(np.sum(tr_ok))} held_ok={int(np.sum(te_ok))} "
-              f"t={time.time()-t0:.1f}s", flush=True)
-
-    # ---- evaluate each model x seed (pooled held-out) ----
-    table = {}
-    per_pub_aps = {}
-    for m in models:
-        for seed in SEEDS:
-            h = heldout[m][seed]
-            # drop NO_CALL (already excluded in te_ok), but keep for counting
-            pubs_arr = h["pub"]; labs = h["label"]; scos = h["score"]
-            res = evaluate_primary(pubs_arr, labs, scos, seed=seed, n_perm=1000, n_boot=1000)
-            table[(m, seed)] = res
-    print("\n[p2] publication-macro AUPRC by model x seed:", flush=True)
-    for m in models:
-        vals = [table[(m, s)]["metric"] for s in SEEDS]
-        print(f"  {m}: {vals}", flush=True)
-
-    # per-publication AP for reporting / degeneracy inspection (seed 0)
-    ap_report = {}
-    for m in models:
-        h = heldout[m][SEEDS[0]]
-        groups = defaultdict(list)
-        for p, l, s in zip(h["pub"], h["label"], h["score"]):
-            groups[p].append((int(bool(l)), float(s)))
-        ap_report[m] = {}
-        for p in sorted(groups, key=str):
-            gl = [t for t, _ in groups[p]]; gs = [s for _, s in groups[p]]
-            if len(set(gl)) <= 1:
-                ap_report[m][p] = "DEGENERATE"
-            else:
-                ap_report[m][p] = publication_macro_auprc([p] * len(gl), gl, gs)
-    print("\n[p2] per-publication AP (seed 0):", flush=True)
-    for m in models:
-        print(f"  {m}: {ap_report[m]}", flush=True)
-
-    # ---- write results ----
-    results = {
-        "run_id": out.name,
-        "n_pool_studies": len(pool_studies),
-        "n_pool_pairs": len(pair_recs),
-        "n_distinct_publications": len(pubs),
-        "publications": pubs,
-        "publication_studies": {p: sorted(s) for p, s in pub_study.items()},
-        "fold_timing": fold_timing,
-        "models": models,
-        "seeds": SEEDS,
-        "table": {f"{m}:{s}": {
-            "metric": table[(m, s)]["metric"],
-            "ci": table[(m, s)]["ci"],
-            "permutation_p": table[(m, s)]["permutation"]["p_value"],
-        } for m in models for s in SEEDS},
-        "per_publication_ap_seed0": ap_report,
-    }
-    (out / "results.json").write_text(json.dumps(results, indent=2, sort_keys=True), encoding="utf-8")
-
-    # save held-out predictions (parquet-like via npz for each model/seed)
-    for m in models:
-        for seed in SEEDS:
-            h = heldout[m][seed]
-            np.savez_compressed(
-                out / f"heldout_{m}_seed{seed}.npz",
-                pub=np.array(h["pub"]), label=np.array(h["label"]),
-                score=np.array(h["score"]), study=np.array(h["study"]))
-
-    # ---- fold-local labels (reused by ablations / learning curve) ----
-    (out / "fold_labels.json").write_text(
-        json.dumps(fold_labels, sort_keys=True), encoding="utf-8")
-
-    # ---- source hashes + manifest ----
-    def sha(p):
-        return hashlib.sha256(Path(p).read_bytes()).hexdigest()
-    proj = Path(__file__).resolve().parent.parent.parent
-    source_hashes = {}
-    for rel in ["configs/reactflow_delta/endpoint_v3.yaml",
-                "configs/reactflow_delta/split_v2.yaml",
-                "scripts/reactflow_delta/caller_v3.py",
-                "scripts/reactflow_delta/evaluate_v2.py",
-                "scripts/reactflow_delta/run_p2_v3.py"]:
-        fp = proj / rel
-        source_hashes[rel] = sha(fp) if fp.exists() else None
-
-    manifest = {
-        "schema": "reactflow_delta.p2_learnability.v1",
-        "run_id": out.name,
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "gpu": {"cuda_available": bool(torch.cuda.is_available()),
-                "device_index": gpu_index, "device_name": gpu_name,
-                "free_bytes": int(free_mem), "total_bytes": int(tot_mem),
-                "cuda_visible_devices": args.cuda_device},
-        "n_pool_studies": len(pool_studies),
-        "n_pool_pairs": len(pair_recs),
-        "n_distinct_publications": len(pubs),
-        "publications": pubs,
-        "publication_studies": {p: sorted(s) for p, s in pub_study.items()},
-        "source_hashes": source_hashes,
-        "models": models,
-        "seeds": SEEDS,
-        "table": results["table"],
-        "per_publication_ap_seed0": ap_report,
-        "fold_timing": fold_timing,
-    }
-    (out / "P2_learnability_manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
-
-    print("\nDONE main LOOCV ->", out, flush=True)
-
-
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

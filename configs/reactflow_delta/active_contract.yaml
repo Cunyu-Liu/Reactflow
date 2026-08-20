@@ -1,223 +1,88 @@
-schema_version: reactflow_delta.active_contract.v1
-manifest_id: reactflow_delta_prospective_v2_authority_epoch_21_20260813
+schema_version: reactflow_delta.active_contract.v2
+manifest_id: reactflow_delta_model_rescue_authority_20260820
 project_task_id: reactflow_delta
-created_at: '2026-08-13T18:10:00+08:00'
+created_at: '2026-08-20T14:00:00+08:00'
+
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  authority_epoch: 21
-  manifest_repo_path: configs/reactflow_delta/active_contract.yaml
-  current_phase: P0
-  current_authority_state: PROSPECTIVE_V2_EPOCH21_ACTIVE
-  current_runnable_phase: P0
+  current_phase: M0
+  current_authority_state: MODEL_RESCUE_V1_M0_ACTIVE
+  current_runnable_phase: M0
   conflict_policy: FAIL_CLOSED
+  branch: codex/reactflow-delta-model-rescue-v1-20260820
+  human_contract_path: docs/prospective_v2/model_rescue_contract_v1_20260820.md
+  machine_contract_path: configs/reactflow_delta/model_rescue_contract_v1.yaml
+  decision_ledger_path: docs/prospective_v2/model_rescue_decision_ledger_v1.yaml
+  binding_status: PENDING_M0_FOCUSED_COMMIT
   precedence:
-  - ACTIVE_CONTRACT_MANIFEST
-  - PROSPECTIVE_V2_CONTRACT_DOCUMENT
-  - MASTER_EXECUTION_PROMPT
-  - HISTORICAL_DOCUMENTS
-active_contract:
-  id: reactflow_delta_prospective_v2
-  version: v2_20260813
-  path: /Users/liucunyu/Documents/all_code/ZJU/mRNA_editflow/提示词/ReactFlowDelta_prospective_full_spectrum_scientific_contract_v2_20260813.md
-  sha256: c1ea88c1532530576e726064501b66b52cad3fa3acaaf7379ea37cf73bd3d5c8
-  hash_mode: RAW_FILE_BYTES
-  hash_status: VERIFIED
-  raw_document_declared_status: DRAFT_AWAITING_EXPLICIT_EXECUTION
-  effective_authority_status: ACTIVE_PROSPECTIVE_V2_P0_P3
-  effective_authority_basis:
-    owner_authorization_line: 'OWNER_AUTHORIZATION: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_P0_P3'
-    owner_authorization_status: PROVIDED_EXACT_MATCH
-    scientific_objective: ALL_MUTANT/OUTCOME_BLIND/CONTINUOUS_FULL_SPECTRUM/NEW_PUZZLE_GENERALIZATION/WT_ASSAY_AVAILABLE
-  supersedes:
-  - contract_id: reactflow_delta_v4_benchmark_v3_epoch20
-    path: configs/reactflow_delta/authority_epoch_20.sentinel.yaml
-    authority_disposition: SUPERSEDED_HISTORICAL_ONLY
-    supersession_effective_when: EPOCH21_ACTIVE
-    preservation_status: PRESERVE_UNCHANGED
+    - THIS_ACTIVE_CONTRACT
+    - MODEL_RESCUE_MACHINE_CONTRACT
+    - MODEL_RESCUE_HUMAN_CONTRACT
+    - HISTORICAL_PROSPECTIVE_V2_CONTRACTS
+
 authorization:
-  status: ACTIVE_PROSPECTIVE_V2_P0_P3
-  approval_status: EXPLICIT_OWNER_AUTHORIZATION_LINE_VERIFIED
-  signed_by: owner
-  signed_at: '2026-08-13T17:50:00+08:00'
-  cryptographic_signature_status: SIGNED_BY_EXPLICIT_OWNER_AUTHORIZATION_LINE
-  approval_scope:
-  - P0_P3
-  - AUTHORITY_VNEXT_RECONCILIATION
-  does_not_authorize:
-  - P4_LOCKED_EXTERNAL_OUTCOME_ACCESS
-  - P5_P6_RELEASE
-  - WET_LAB
-  - PUSH_PR_PUBLICATION
-  - DELETION_OF_HISTORICAL_ARTIFACTS
-  - INTERFERENCE_WITH_UNRELATED_JOBS
-  - LOWERING_GATES_OR_SWAPPING_ENDPOINT_AFTER_THE_FACT
-program:
-  task_tags:
-  - ALL_MUTANT
-  - OUTCOME_BLIND
-  - CONTINUOUS_FULL_SPECTRUM
-  - NEW_PUZZLE_GENERALIZATION
-  - WT_ASSAY_AVAILABLE
-  endpoint_version: endpoint_v7_all_mutant_full_spectrum
-  split_version: split_v4_lopo_puzzle
-  caller_version: CALLER_FREE_PRIMARY
-  metric_semantics: PUZZLE_MACRO_FULL_CONSTRUCT_CRPS
-  deployment: five_seed_mixture
+  owner_instruction: 继续
+  owner_instruction_date: '2026-08-20'
+  scope: PERFORMANCE_FIRST_MODEL_RESCUE_WITH_LRSO_KILL_ALLOWED
+  development_training_authorized_after_m1_pass: true
+  new_external_outcome_access_authorized: false
+  wet_lab_authorized: false
+  public_release_authorized: false
+
+scientific_state:
+  development_data: DEVELOPMENT_CONSUMED
+  existing_external_data: CONSUMED_DEVELOPMENT_K_JOINT_2
+  new_external_data: SEALED_REQUIRED_K_JOINT_AT_LEAST_9
+  direct_crps: POST_HOC_DEVELOPMENT_PASS
+  signed_delta_point_skill: FAIL_VS_WT_ANCHOR
+  low_rank_increment: SMALL_BUT_SIGNIFICANT_DEVELOPMENT
+  external_replication: NOT_ESTABLISHED
+  mechanism: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_route: BENCHMARK_MEASUREMENT_MAINLINE
+
 allowed_phases:
-- P0
-- P1
-- P2
-- P3
+  - M0
+  - M1
+  - M2
+  - M3
+  - M4
+  - M5
+  - M6
 runnable_phases:
-- P0
+  - M0
 training_allowed: false
 candidate_model_training_allowed: false
-confirmatory_test_outcome_access_allowed: false
+diagnostic_analysis_allowed: true
+new_external_outcome_access_allowed: false
+new_external_metadata_access_allowed: true
 new_split_allowed: false
-full_data_recall_allowed: true
+full_development_data_recall_allowed: true
 cross_project_export_allowed: false
 new_wet_lab_allowed: false
-gpu_policy: USE_FREE_VRAM_ANY_GPU_NO_EXCLUSIVITY
-authority_gates:
-  p0_gate: AUTH
-  p1_gate: NOT_RUN
-  p2_gate: NOT_RUN
-  p3_gate: NOT_RUN
-  p4_gate: NOT_RUN
-  p5_gate: NOT_RUN
-  p6_gate: NOT_RUN
-  primary_caller_exclusion: NOT_ESTABLISHED
-  primary_locked_outcome_exclusion: NOT_ESTABLISHED
-  confirmatory_store_availability: NOT_ESTABLISHED
-  confirmatory_statistical_sufficiency: NOT_ESTABLISHED
-  locked_external_access_control: NOT_ESTABLISHED
-phase_graph:
-- phase_id: P0
-  dependencies: []
-  lifecycle_status: RUNNING
-  gate_result: IN_PROGRESS
-  evidence_class: GOVERNANCE_AND_EVIDENCE_QUALIFICATION
-  execution_authorized: true
-  training_required: false
-  next_on_pass:
-  - P1
-  next_on_fail:
-  - STOP_PRESERVE_EVIDENCE
-- phase_id: P1
-  dependencies:
-  - P0
-  lifecycle_status: PLANNED
-  gate_result: NOT_RUN
-  evidence_class: DATA_MEASUREMENT_SPLIT_EVALUATOR
-  execution_authorized: false
-  training_required: false
-  next_on_pass:
-  - P2
-  next_on_fail:
-  - STOP_TRAINING_ROUTE_OR_OWNER_REVIEW
-- phase_id: P2
-  dependencies:
-  - P1
-  lifecycle_status: PLANNED
-  gate_result: NOT_RUN
-  evidence_class: DIRECT_DEVELOPMENT_LEARNABILITY
-  execution_authorized: false
-  training_required: true
-  gpu_required: true
-  cuda_unavailable_policy: STOP_AND_PRESERVE_EVIDENCE
-  next_on_pass:
-  - P3
-  next_on_fail:
-  - PROSPECTIVE_SIGNAL_NOT_ESTABLISHED
-- phase_id: P3
-  dependencies:
-  - P2
-  lifecycle_status: PLANNED
-  gate_result: NOT_RUN
-  evidence_class: BESPOKE_LRSO_METHOD
-  execution_authorized: false
-  training_required: true
-  gpu_required: true
-  cuda_unavailable_policy: STOP_AND_PRESERVE_EVIDENCE
-  next_on_pass:
-  - P4
-  next_on_fail:
-  - NO_INCREMENTAL_LRSO_SKILL
-- phase_id: P4
-  dependencies:
-  - P3
-  lifecycle_status: PLANNED
-  gate_result: NOT_RUN
-  evidence_class: LOCKED_PUBLIC_EXTERNAL
-  execution_authorized: false
-  training_required: false
-  token_required: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_PHASE4_LOCKED_EXTERNAL
-  next_on_pass:
-  - P5
-  next_on_fail:
-  - PUBLIC_EXTERNAL_NOT_QUALIFIED_OR_UNDERPOWERED
-- phase_id: P5
-  dependencies:
-  - P4
-  lifecycle_status: PLANNED
-  gate_result: NOT_RUN
-  evidence_class: MECHANISM_AND_STORY
-  execution_authorized: false
-  token_required: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_PHASE5_6_RELEASE
-  next_on_pass:
-  - P6
-  next_on_fail:
-  - MECHANISM_NOT_ESTABLISHED
-- phase_id: P6
-  dependencies:
-  - P5
-  lifecycle_status: PLANNED
-  gate_result: NOT_RUN
-  evidence_class: REPRODUCIBILITY_SUBMISSION
-  execution_authorized: false
-  token_required: AUTHORIZE_REACTFLOW_DELTA_PROSPECTIVE_V2_PHASE5_6_RELEASE
-  next_on_pass:
-  - STOP_AWAIT_OWNER_RELEASE
-  next_on_fail:
-  - BLOCK_SUBMISSION
-gate_catalog:
-  P0:
-    status: IN_PROGRESS
-  P1:
-    status: NOT_RUN
-  P2:
-    status: NOT_RUN
-  P3:
-    status: NOT_RUN
-  P4:
-    status: NOT_RUN
-  P5:
-    status: NOT_RUN
-  P6:
-    status: NOT_RUN
-  PRIMARY_CALLER_EXCLUSION:
-    status: NOT_ESTABLISHED
-  PRIMARY_LOCKED_OUTCOME_EXCLUSION:
-    status: NOT_ESTABLISHED
-  CONFIRMATORY_SUFFICIENCY:
-    status: NOT_ESTABLISHED
-integrity:
-  hash_algorithm: SHA256
-  file_hash_mode: RAW_FILE_BYTES
-  embedded_manifest_sha256: FORBIDDEN_SELF_REFERENCE
-  detached_bundle_ledger_path: configs/reactflow_delta/authority_epoch_21.bundle.sha256
-  detached_bundle_ledger_status: REQUIRED_AND_VERIFIED_BY_SENTINEL
-  authority_sentinel_path: configs/reactflow_delta/authority_epoch_21.sentinel.yaml
-  bundle_member_paths:
-  - configs/reactflow_delta/active_contract.yaml
-  - docs/prospective_v2/p0_fresh_snapshot_20260813.yaml
-  - docs/prospective_v2/p0_action_resolution_matrix_20260813.yaml
-  - docs/prospective_v2/p0_historical_evidence_inventory_20260813.yaml
-governance_resolution:
-  epoch19_disposition: SUPERSEDED_HISTORICAL_ONLY
-  epoch20_disposition: SUPERSEDED_HISTORICAL_ONLY
-  m2_owner_decision_axis: AUTHORIZED_ORACLE_CONDITIONED_DEVELOPMENT_SECONDARY
-  m2_result_replay_axis: REPOSITORY_REPORTED_NOT_REPLAYED
-  current_phase: P0
-  next_allowed_action: P0_RECONCILIATION_COMPLETE_THEN_P1_DESIGN_FREEZE
-  blocked_until: authority_vNext_validated_and_active_evidence
+unrelated_job_interference_allowed: false
+
+gate_state:
+  M0: IN_PROGRESS
+  M1: NOT_RUN
+  M2: NOT_RUN
+  M3: NOT_RUN
+  M4: NOT_RUN
+  M5: NOT_RUN
+  M6: NOT_RUN
+  INTERNAL_DUAL_PRIMARY: NOT_RUN
+  NEW_EXTERNAL_ELIGIBILITY: NOT_ESTABLISHED
+  NEW_EXTERNAL_DUAL_PRIMARY: NOT_RUN
+
+historical_authority:
+  predecessor_manifest_id: reactflow_delta_prospective_v2_authority_epoch_21_20260813
+  predecessor_branch: codex/reactflow-delta-prospective-v2-20260813
+  predecessor_head: bf45996ef74220de33ae2e41bdf4bdc1acb4c965
+  disposition: SUPERSEDED_FOR_NEW_ACTIONS_PRESERVE_UNCHANGED
+  old_p4_p5_p5b_disposition: INVALID_SEQPOS_ALIGNMENT
+
+next_allowed_action: M0_FREEZE_CODE_RESULTS_CONTRACT_AND_CLAIMS
+blocked_until_m0_pass:
+  - MODEL_TRAINING
+  - CANDIDATE_SCREEN
+  - NEW_EXTERNAL_OUTCOME_ACCESS

@@ -1,0 +1,126 @@
+schema_version: reactflow_delta.model_rescue_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_20260820
+as_of: '2026-08-20T14:00:00+08:00'
+default_route: BENCHMARK_MEASUREMENT_MAINLINE
+
+facts:
+  - id: F_CURRENT_BRANCH
+    status: CONFIRMED_FACT
+    value: codex/reactflow-delta-model-rescue-v1-20260820
+    evidence: git branch --show-current
+  - id: F_PREDECESSOR_HEAD
+    status: CONFIRMED_FACT
+    value: bf45996ef74220de33ae2e41bdf4bdc1acb4c965
+    evidence: git rev-parse HEAD before model-rescue branch creation
+  - id: F_P2_V3_RAW_ARTIFACT
+    status: CONFIRMED_FACT
+    value: /mnt/cunyuliu/prospective_v2_p2v3_sharded/p2_v3_scores_merged.json
+    evidence: file exists with 20 folds and paired-effect records
+  - id: F_P2_V3_OOF
+    status: CONFIRMED_FACT
+    value: 40 prediction-only rank0/rank-positive fold ledgers
+    evidence: /mnt/cunyuliu/prospective_v2_p2v3_sharded/shard_gpu*/p2_v3_oof_predictions_*.npz
+  - id: F_DIRECT_CRPS
+    status: CONFIRMED_FACT
+    value:
+      effect: 0.026769218141686153
+      ci_low: 0.02372621669735792
+      ci_high: 0.029812219586014387
+      comparator: WT_ANCHOR
+    evidence: p2_v3_scores_merged.json reg_direct__vs__zero
+  - id: F_RANK0_STACK
+    status: CONFIRMED_FACT
+    value:
+      effect: 0.015259866346467333
+      ci_low: 0.009774403883902327
+      ci_high: 0.020745328809032338
+      comparator: RIDGE_DIRECT
+    evidence: p2_v3_scores_merged.json rfd_direct_rank0__vs__reg_direct
+  - id: F_LOW_RANK_INCREMENT
+    status: CONFIRMED_FACT
+    value:
+      effect: 0.0017957060651656851
+      ci_low: 0.00030801934033929503
+      ci_high: 0.0032833927899920752
+      sign_flip_p: 0.016447067260742188
+      positive_puzzles: 15
+      selected_rank_2_folds: 18
+      selected_rank_8_folds: 2
+    evidence: p2_v3_scores_merged.json rfd_direct_rankpos__vs__rfd_direct_rank0
+  - id: F_SIGNED_DELTA_FAILURE
+    status: CONFIRMED_FACT
+    value: SIGNED_DELTA_MAE_WORSE_THAN_WT_ANCHOR
+    evidence: docs/prospective_v2/p6_manuscript_draft_20260814.md
+  - id: F_OLD_EXTERNAL_ALIGNMENT
+    status: CONFIRMED_FACT
+    value: INVALID_SEQPOS_ALIGNMENT
+    evidence: docs/prospective_v2/audit/external_qualification_v1.md
+  - id: F_CORRECTED_EXTERNAL
+    status: CONFIRMED_FACT
+    value:
+      joint_units: 2
+      sl5_effect: 0.00075
+      ribonanza_effect: 0.03496
+      replication: NOT_ESTABLISHED
+    evidence: docs/prospective_v2/audit/p4_external_lrso_result_v1.md
+
+inferences:
+  - id: I_DIRECT_LOW_RANK_OVERLAP
+    status: REASONED_INFERENCE
+    statement: >-
+      The nonlinear direct branch already consumes global WT receiver context,
+      mutation identity and distance, so it can absorb source-receiver functions
+      that the low-rank branch was intended to isolate.
+    required_test: LOCAL_ONLY_DIRECT_VS_NONLOCAL_SOURCE_RECEIVER_CONTROL
+  - id: I_OBJECTIVE_MISMATCH
+    status: REASONED_INFERENCE
+    statement: >-
+      CRPS improvement with negative signed-delta point skill is consistent with
+      a near-zero-dominated response distribution and uncertainty/tail gains that
+      do not improve the mutation-effect mean.
+    required_test: FAILURE_ATLAS_AND_SPARSE_DELTA_MDN
+  - id: I_STRUCTURE_DISTANCE
+    status: NEW_EXPERIMENT_REQUIRED
+    statement: >-
+      WT ensemble base-pair proximity may explain sequence-distant mutation
+      responses better than signed sequence distance.
+    required_test: OUTCOME_BLIND_STRUCTURE_FEATURE_PROBE
+
+claims:
+  - id: C_DIRECT_LEARNABILITY
+    current_status: POST_HOC_DEVELOPMENT_PASS
+    allowed_text: Direct models improve development-set full-construct CRPS.
+    prohibited_upgrade: PROSPECTIVE_CONFIRMATION
+  - id: C_LOW_RANK_METHOD
+    current_status: SMALL_BUT_SIGNIFICANT_DEVELOPMENT
+    allowed_text: A selected positive rank adds a small development CRPS increment over rank zero.
+    prohibited_text: Low-rank susceptibility is the dominant source of performance.
+  - id: C_SIGNED_MUTATION_EFFECT
+    current_status: FAIL_VS_WT_ANCHOR
+    prohibited_text: The current model improves signed mutation-effect prediction.
+  - id: C_EXTERNAL_GENERALIZATION
+    current_status: NOT_ESTABLISHED
+    prohibited_text: The final method replicates across independent external studies.
+  - id: C_MECHANISM
+    current_status: NOT_ESTABLISHED
+    prohibited_text: The model establishes an RNA propagation mechanism.
+  - id: C_SOTA
+    current_status: SOTA_NOT_ESTABLISHED
+    prohibited_text: ReactFlow-Delta is task SOTA.
+  - id: C_PUBLICATION
+    current_status: PUBLICATION_NOT_READY
+    next_required_evidence:
+      - INTERNAL_DUAL_PRIMARY_PASS
+      - FINAL_MODEL_FROZEN
+      - NEW_EXTERNAL_K_JOINT_AT_LEAST_9
+      - NEW_EXTERNAL_DUAL_PRIMARY_PASS
+
+route_rules:
+  - if: INTERNAL_DUAL_PRIMARY_FAIL
+    then: BENCHMARK_ROUTE_LOCKED
+  - if: INTERNAL_PASS_AND_EXTERNAL_NOT_ESTABLISHED
+    then: BENCHMARK_WITH_DEVELOPMENT_MODEL_BASELINE
+  - if: INTERNAL_AND_NEW_EXTERNAL_DUAL_PASS
+    then: METHOD_AUGMENTED_BENCHMARK_ELIGIBLE
+  - if: ONLY_CRPS_PASS_AND_SIGNED_DELTA_FAIL
+    then: CALIBRATION_BASELINE_ONLY

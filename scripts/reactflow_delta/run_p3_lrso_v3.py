@@ -315,7 +315,12 @@ def _fit_epochs(model, univ, train_records, ctx_cache, device, cfg, epochs):
 
 def _crps_constructs(model, univ, by_construct, ctx_cache, device):
     """Mean held/inner CRPS over records, scored on target-qualified AND
-    WT-observed positions at the model-predicted per-position scale (vectorized)."""
+    WT-observed positions at the model-predicted per-position scale (vectorized).
+
+    TARGET-INVARIANCE (audit P0-5): forward_op receives the WT-OBSERVED mask
+    ONLY. The prediction ledger must not depend on target availability, so the
+    target-qualified mask is used EXCLUSIVELY to decide which positions are
+    scored (evaluator side), never to zero deltas in the predictor."""
     model.eval()
     total = 0.0; n = 0
     with torch.no_grad():
@@ -328,7 +333,7 @@ def _crps_constructs(model, univ, by_construct, ctx_cache, device):
             dists = (torch.arange(tmat.shape[1], device=device)[None, :] - edit_idx[:, None]).float()
             refs = [r.ref for r in recs]; alts = [r.alt for r in recs]
             H = model.encode(ctx_cache[cid])
-            masks = torch.tensor(_qualified_mask(tmat, wt_obs), device=device)
+            masks = torch.tensor(wt_obs, device=device)  # WT-obs ONLY (target-invariant)
             delta, scale = model.forward_op(H, edit_idx, dists, refs, alts, masks)
             pred = torch.tensor(_wt_filled(univ, cid), device=device)[None, :] + delta
             pred_np = pred.cpu().numpy(); scale_np = scale.cpu().numpy()
@@ -470,7 +475,10 @@ def _early_stop_fit(model, univ, train_records, val_records, ctx_cache, device,
 
 def _mixture_held_crps(models, univ, held_by, ctx_cache, device):
     """Five-seed equal-weight Gaussian-mixture CRPS (contract 9.1): score the
-    mixture CDF directly, NOT the mean of per-seed CRPS (vectorized)."""
+    mixture CDF directly, NOT the mean of per-seed CRPS (vectorized).
+
+    TARGET-INVARIANCE (audit P0-5): forward_op receives the WT-OBSERVED mask
+    ONLY (see _crps_constructs); target-qualified positions decide SCORING only."""
     if len(models) != len(SEEDS):
         raise ValueError("deployment requires exactly 5 seeds")
     models = [m.eval() for m in models]
@@ -485,7 +493,7 @@ def _mixture_held_crps(models, univ, held_by, ctx_cache, device):
             dists = (torch.arange(tmat.shape[1], device=device)[None, :] - edit_idx[:, None]).float()
             refs = [r.ref for r in recs]; alts = [r.alt for r in recs]
             ctx = ctx_cache[cid]
-            masks = torch.tensor(_qualified_mask(tmat, wt_obs), device=device)
+            masks = torch.tensor(wt_obs, device=device)  # WT-obs ONLY (target-invariant)
             preds = []; scales = []
             for m in models:
                 H = m.encode(ctx)

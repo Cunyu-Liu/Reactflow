@@ -1,0 +1,269 @@
+schema_version: reactflow_delta.model_rescue_contract.v1
+contract_id: reactflow_delta_model_rescue_v1_20260820
+created_at: '2026-08-20T14:00:00+08:00'
+contract_status: ACTIVE_M0_EVIDENCE_FREEZE
+
+owner_instruction:
+  raw_message: 继续
+  received_at: '2026-08-20'
+  interpretation: >-
+    Continue the agreed performance-first model-rescue plan. LRSO may be retired;
+    development analysis and bounded model training are authorized after M0 and M1
+    gates. New external outcomes remain locked until the final model is frozen.
+
+scope:
+  project_task_id: reactflow_delta
+  primary_task: >-
+    Given a WT sequence, its WT chemical-reactivity profile and measurement
+    availability, and an exact single-nucleotide mutation, predict the complete
+    mutant reactivity distribution for an unseen puzzle without mutant outcomes.
+  endpoint_version: endpoint_v7_all_mutant_full_spectrum
+  split_version: split_v4_lopo_puzzle
+  evaluator_version: evaluator_v2_method_balanced_target_invariant
+  primary_unit: puzzle
+  development_puzzles: 20
+  development_status: DEVELOPMENT_CONSUMED
+  manuscript_default_route: BENCHMARK_MEASUREMENT_MAINLINE
+  method_upgrade_policy: REQUIRES_INTERNAL_DUAL_GATE_AND_NEW_EXTERNAL_DUAL_GATE
+
+authorization:
+  allowed:
+    - FREEZE_CURRENT_EVIDENCE_AND_RESULTS
+    - ANALYZE_ALREADY_CONSUMED_DEVELOPMENT_OUTCOMES
+    - COMPUTE_OUTCOME_BLIND_VIENNARNA_STRUCTURE_PRIORS
+    - RUN_BOUNDED_DEVELOPMENT_MODEL_TRAINING_AFTER_M1_PASS
+    - RUN_INTERNAL_NESTED_LOPO_AFTER_CANDIDATE_SCREEN
+    - PREPARE_OUTCOME_BLIND_NEW_EXTERNAL_MANIFEST_AND_POWER
+    - UPDATE_BENCHMARK_MANUSCRIPT_TO_MATCH_QUALIFIED_EVIDENCE
+  prohibited:
+    - ACCESS_NEW_EXTERNAL_OUTCOMES_BEFORE_M4_FINAL_MODEL_FROZEN
+    - USE_HELD_TARGET_ERROR_OR_MASK_IN_PREDICTION
+    - INTERFERE_WITH_UNRELATED_RUNNING_JOBS
+    - START_OR_AUTHORIZE_WET_LAB_WORK
+    - CLAIM_SOTA_WITHOUT_TASK_MATCHED_REPRODUCED_COMPARATORS
+    - UPGRADE_DEVELOPMENT_PASS_TO_EXTERNAL_OR_MECHANISM_PASS
+    - DELETE_OR_REWRITE_HISTORICAL_RESULTS
+
+evidence_baseline:
+  repository_branch: codex/reactflow-delta-model-rescue-v1-20260820
+  predecessor_branch: codex/reactflow-delta-prospective-v2-20260813
+  predecessor_head: bf45996ef74220de33ae2e41bdf4bdc1acb4c965
+  p2_v3_result: /mnt/cunyuliu/prospective_v2_p2v3_sharded/p2_v3_scores_merged.json
+  p2_v3_oof_root: /mnt/cunyuliu/prospective_v2_p2v3_sharded
+  corrected_external_result: docs/prospective_v2/audit/p4_external_lrso_result_v1.json
+  current_claim_ledger: docs/prospective_v2/model_rescue_decision_ledger_v1.yaml
+  qualification:
+    direct_crps_development: POST_HOC_DEVELOPMENT_PASS
+    low_rank_increment: SMALL_BUT_SIGNIFICANT_DEVELOPMENT
+    signed_delta_point_skill: FAIL_VS_WT_ANCHOR
+    external_study_replication: NOT_ESTABLISHED
+    mechanism: NOT_ESTABLISHED
+    sota: NOT_ESTABLISHED
+
+compute_budget:
+  calendar_days: 14
+  a100_gpu_days_max: 5.0
+  single_gpu_sufficient: true
+  unrelated_job_interference_allowed: false
+  stop_when_either_budget_exhausted: true
+  allocations:
+    M1_FAILURE_DECOMPOSITION: 0.25
+    M2_CANDIDATE_SCREEN: 1.25
+    M3_INTERNAL_NESTED: 2.50
+    M4_ABLATION_AND_FREEZE: 0.75
+    M5_EXTERNAL_SCORING_RESERVE: 0.25
+
+estimand:
+  hierarchy:
+    - position
+    - mutant
+    - cell
+    - method_balanced_puzzle
+    - puzzle_macro_mean
+  prediction_before_scoring: true
+  registered_full_output_required: true
+  target_invariant_prediction_required: true
+  held_target_access: SCORER_ONLY
+  held_error_access: SCORER_ONLY
+  held_target_mask_access: SCORER_ONLY
+
+primary_metrics:
+  rule: INTERSECTION_UNION_BOTH_MUST_PASS
+  metrics:
+    - id: full_construct_crps
+      direction: lower_is_better
+      aggregation: method_balanced_puzzle_macro
+    - id: signed_delta_mae
+      direction: lower_is_better
+      aggregation: method_balanced_puzzle_macro
+  secondary:
+    - signed_delta_wmae
+    - mutant_reactivity_mae
+    - calibration_error
+    - coverage_68
+    - coverage_95
+    - registered_prediction_coverage
+    - failure_rate
+    - design_region_effect
+    - other_region_effect
+
+controlled_models:
+  B0:
+    id: rfd_direct_rank0_current
+    role: HISTORICAL_DEVELOPMENT_REFERENCE
+  B1:
+    id: rfd_direct_aligned
+    role: CONTROLLED_REFERENCE
+    requirements:
+      - FOLD_LEGAL_INPUT_NORMALIZATION
+      - DELTA_PARAMETERIZATION
+      - TRAIN_EVAL_DISTRIBUTION_ALIGNMENT
+      - METHOD_BALANCED_TRAINING
+      - TRAIN_ONLY_CALIBRATION
+  L2_ALIGNED:
+    id: lrso_rank2_aligned
+    role: FIXED_LOW_RANK_COMPARATOR
+    rank: 2
+    rank_search_allowed: false
+  SPARSE_DELTA:
+    id: sparse_delta_mdn
+    role: UNCONDITIONAL_MODEL_RESCUE_CANDIDATE
+    zero_component_mean: 0.0
+    changer_labels_allowed: false
+    outcome_threshold_allowed: false
+    huber_lambda_candidates:
+      - 0.0
+      - 0.1
+  STRUCT_DELTA:
+    id: structure_aware_mutation_receiver
+    role: CONDITIONAL_MODEL_RESCUE_CANDIDATE
+    structure_source: VIENNARNA_WT_ENSEMBLE_BASE_PAIR_PROBABILITY
+    pretrained_features_allowed: false
+    message_passing_layers: 1
+    mutation_receiver_cross_attention_layers: 1
+    max_parameter_ratio_vs_B1: 1.25
+  COMBINED:
+    id: sparse_struct_delta
+    role: CONDITIONAL_COMBINATION
+    allowed_only_if_both_individual_candidates_screen_pass: true
+
+selection:
+  outer_held_used_for_selection: false
+  candidate_selection_location: OUTER_TRAIN_INNER_FOLDS_ONLY
+  inner_score: 0.5*(candidate_crps/B1_crps)+0.5*(candidate_delta_mae/B1_delta_mae)
+  feasibility_constraint: NEITHER_PRIMARY_METRIC_WORSE_THAN_B1
+  tie_breakers:
+    - INNER_SELECTION_FREQUENCY
+    - LOWER_AGGREGATE_INNER_SCORE
+    - FEWER_PARAMETERS
+  seed_policy:
+    screening_seeds:
+      - 0
+    formal_seeds:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+
+internal_success_gate:
+  comparator: STRONGEST_ELIGIBLE_OF_B1_AND_L2_ALIGNED
+  crps:
+    paired_ci_low_gt_zero: true
+    minimum_absolute_gain: 0.003
+    minimum_relative_gain: 0.02
+    practical_rule: MAX_OF_ABSOLUTE_AND_RELATIVE
+  signed_delta_mae:
+    paired_ci_low_gt_zero: true
+    minimum_relative_gain: 0.02
+    must_also_beat_wt_anchor: true
+  robustness:
+    crps_positive_puzzles_min: 14
+    delta_mae_positive_puzzles_min: 12
+    leave_one_puzzle_effect_positive: true
+    max_single_puzzle_total_effect_fraction: 0.25
+  engineering:
+    registered_prediction_coverage_min: 0.995
+    failure_rate_max: 0.0
+    max_coverage_error_worsening_percentage_points: 2.0
+  fail_status: METHOD_RESCUE_FAIL
+
+structure_probe_gate:
+  comparator: SEQUENCE_DISTANCE_MATCHED_DIRECT_PROBE
+  improve_at_least_one_primary: true
+  other_primary_max_relative_worsening: 0.01
+  directionally_positive_puzzles_min: 12
+  fail_action: SKIP_STRUCT_DELTA
+
+new_external_gate:
+  existing_consumed_external_excluded_from_primary: true
+  joint_independent_units_min: 9
+  study_or_publication_lineages_min: 3
+  max_single_lineage_fraction: 0.50
+  model_and_calibrator_frozen_before_outcome_access: true
+  external_finetuning_allowed: false
+  outcome_based_recalibration_allowed: false
+  crps_cluster_ci_low_gt_zero: true
+  signed_delta_mae_cluster_ci_low_gt_zero: true
+  minimum_relative_gain_each_primary: 0.02
+  leave_one_lineage_out_nonnegative: true
+  underpowered_status: EXPLORATORY_EXTERNAL_ONLY
+
+phase_graph:
+  - id: M0
+    name: EVIDENCE_AND_AUTHORITY_FREEZE
+    training_allowed: false
+    new_external_outcome_access_allowed: false
+    next_on_pass: M1
+    next_on_fail: STOP_PRESERVE_EVIDENCE
+  - id: M1
+    name: FAILURE_DECOMPOSITION_AND_STRUCTURE_PROBE
+    training_allowed: DIAGNOSTIC_ONLY
+    new_external_outcome_access_allowed: false
+    next_on_pass: M2
+    next_on_fail: BENCHMARK_ROUTE_LOCKED
+  - id: M2
+    name: CANDIDATE_SCREEN
+    training_allowed: true
+    new_external_outcome_access_allowed: false
+    next_on_pass: M3
+    next_on_fail: METHOD_RESCUE_FAIL
+  - id: M3
+    name: INTERNAL_NESTED_DEVELOPMENT
+    training_allowed: true
+    new_external_outcome_access_allowed: false
+    next_on_pass: M4
+    next_on_fail: BENCHMARK_ROUTE_LOCKED
+  - id: M4
+    name: ABLATION_AND_FINAL_MODEL_FREEZE
+    training_allowed: true
+    new_external_outcome_access_allowed: false
+    next_on_pass: M5
+    next_on_fail: BENCHMARK_ROUTE_LOCKED
+  - id: M5
+    name: SEALED_NEW_EXTERNAL_EVALUATION
+    training_allowed: false
+    new_external_outcome_access_allowed: REQUIRES_ELIGIBILITY_AND_FINAL_FREEZE
+    next_on_pass: M6_METHOD_AUGMENTED_BENCHMARK
+    next_on_fail: M6_BENCHMARK_ONLY
+  - id: M6
+    name: MANUSCRIPT_REQUALIFICATION
+    training_allowed: false
+    new_external_outcome_access_allowed: false
+    next_on_pass: COMPLETE
+    next_on_fail: PUBLICATION_NOT_READY
+
+automatic_stop_rules:
+  - INTERNAL_DUAL_PRIMARY_GATE_FAILS
+  - COMPUTE_BUDGET_EXHAUSTED
+  - CALENDAR_BUDGET_EXHAUSTED
+  - PREDICTION_DEPENDS_ON_HELD_TARGET_OR_TARGET_MASK
+  - IMPROVEMENT_EXISTS_ONLY_AFTER_SEED_SCALE_RANK_OR_PUZZLE_SELECTION
+  - NEW_EXTERNAL_JOINT_UNIT_COUNT_BELOW_NINE_FOR_CONFIRMATORY_CLAIM
+
+claim_policy:
+  low_rank_headline_requires: INTERNAL_AND_NEW_EXTERNAL_DUAL_PASS_PLUS_SOURCE_CONTROL
+  method_headline_requires: INTERNAL_AND_NEW_EXTERNAL_DUAL_PASS
+  mechanism_headline_requires: SEPARATE_PROSPECTIVE_MECHANISM_CONTRACT
+  sota_headline_requires: TASK_MATCHED_REPRODUCED_COMPARATOR_CLOSURE
+  default_if_any_required_evidence_missing: BENCHMARK_ROUTE_LOCKED

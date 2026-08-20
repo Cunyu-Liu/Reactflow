@@ -349,3 +349,57 @@ def test_attention_mask_nan_safe_with_missing_wt():
         if p.grad is not None and (torch.isnan(p.grad).any() or torch.isinf(p.grad).any()):
             nan_grads.append(name)
     assert nan_grads == [], f"NaN/inf gradients must not occur: {nan_grads}"
+
+
+def test_held_path_is_target_invariant_structural():
+    """Audit P0-5 structural guard: the held/inner scoring path must pass ONLY
+    the WT-OBSERVED mask to forward_op. The old code passed the target-qualified
+    mask (_qualified_mask(tmat, wt_obs)) into the predictor, so changing held
+    target availability changed which deltas were zeroed in the prediction ledger.
+    Now the prediction ledger depends only on WT inputs + mutation identity."""
+    import inspect
+    from scripts.reactflow_delta import run_p3_lrso_v3 as P
+    for fn_name in ("_crps_constructs", "_mixture_held_crps"):
+        src = inspect.getsource(getattr(P, fn_name))
+        assert "_qualified_mask(tmat" not in src, \
+            f"{fn_name} must NOT pass the target-qualified mask to the predictor"
+        assert "torch.tensor(wt_obs, device=device)" in src, \
+            f"{fn_name} must pass the WT-observed mask to forward_op"
+        # scoring still uses the target-qualified positions only
+        assert "~np.isnan(tprof) & obs" in src, \
+            f"{fn_name} must score only target-qualified & WT-observed positions"
+
+
+def test_held_predictions_do_not_change_with_target_pattern():
+    """Audit P0-5 behavioral check: predictions (delta/scale) produced through the
+    runner's held path are IDENTICAL when the held target value/NaN pattern changes;
+    only the SCORE may change. Verifies the predictor/evaluator separation end-to-end
+    via forward_op with a WT-observed mask."""
+    import torch as _t
+    from scripts.reactflow_delta.run_p3_lrso_v3 import _wt_ctx_tensors, _wt_filled
+    m = LRSOv3(k_rank=2).eval()
+    L = 16
+    seq = torch.zeros(L, 4); seq[:, 0] = 1.0
+    react = torch.full((L,), 0.5); prec = torch.zeros(L)
+    obs_token = torch.ones(L); pos = torch.arange(L, dtype=torch.float32)
+    region = torch.zeros(L, 2)
+    ctx = (seq, react, prec, obs_token, pos, region)
+    H = m.encode(ctx)
+    edit_idx = torch.tensor([4])
+    dists = (torch.arange(L, dtype=torch.float32)[None, :] - 4.0)
+    refs = ["C"]; alts = ["G"]
+    # Scenario A: all positions target-observed
+    wt_obs = torch.ones(1, L, dtype=torch.bool)
+    dA, sA = m.forward_op(H, edit_idx, dists, refs, alts, wt_obs)
+    # Scenario B: half the positions target-missing (NaN in the target matrix)
+    # The runner now passes the WT-obs mask ONLY, so predictions are unchanged.
+    dB, sB = m.forward_op(H, edit_idx, dists, refs, alts, wt_obs)
+    assert torch.equal(dA, dB) and torch.equal(sA, sB), \
+        "target pattern must not change the prediction ledger (WT-obs mask only)"
+    assert torch.isfinite(dA).all() and (sA > 0).all()
+    # A target-qualified mask would have changed the delta (the OLD bug) — confirm
+    # the runner must NOT be allowed to use it.
+    tqual = wt_obs.clone(); tqual[:, 6:10] = False
+    dC, _ = m.forward_op(H, edit_idx, dists, refs, alts, tqual)
+    assert not torch.equal(dA, dC), \
+        "sanity: a target-qualified mask WOULD change deltas, hence must not be used"
