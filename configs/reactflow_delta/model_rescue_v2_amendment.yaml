@@ -84,11 +84,18 @@ prediction_schema:
   schema_version: reactflow_delta.model_rescue_v2_prediction.v1
   required_arrays:
     - keys
+    - biological_scoring_key
+    - candidate_id
+    - outer_fold
+    - seed
     - delta_mean
     - point_mean
     - locations
     - scales
     - weights
+    - registered_status
+    - mean_checkpoint_path
+    - calibration_checkpoint_path
   target_fields_prohibited: true
   calibrated_locations_equal_point_mean: true
   candidate_point_mean_atol: 1.0e-7

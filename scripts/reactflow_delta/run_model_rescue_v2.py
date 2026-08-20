@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import random
 from pathlib import Path
@@ -76,6 +77,12 @@ def _epoch_order(n_cells: int, seed: int, epoch: int) -> list[int]:
     return order
 
 
+def _require_finite_gradients(module: torch.nn.Module, stage: str) -> None:
+    for name, parameter in module.named_parameters():
+        if parameter.grad is not None and not bool(torch.isfinite(parameter.grad).all()):
+            raise RuntimeError(f"nonfinite gradient in {stage}: {name}")
+
+
 def fit_mean(
     model: MeanAlignedModel,
     cells: list[dict[str, Any]],
@@ -111,6 +118,7 @@ def fit_mean(
             )
             optimizer.zero_grad()
             loss.backward()
+            _require_finite_gradients(model, "mean")
             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
             optimizer.step()
             losses.append(float(loss.detach().cpu()))
@@ -165,6 +173,7 @@ def fit_calibrator(
             )
             optimizer.zero_grad()
             loss.backward()
+            _require_finite_gradients(calibrator, "calibration")
             torch.nn.utils.clip_grad_norm_(calibrator.parameters(), 5.0)
             optimizer.step()
             losses.append(float(loss.detach().cpu()))
@@ -190,9 +199,10 @@ def _prediction_arrays(
     calibration_checkpoint: Path,
 ) -> dict[str, np.ndarray]:
     n_rows = len(keys)
-    return {
+    result = {
         "schema_version": np.asarray(PREDICTION_SCHEMA),
         "keys": np.asarray(keys, dtype=object),
+        "biological_scoring_key": np.asarray(keys, dtype=object),
         "candidate_id": np.full(n_rows, candidate_id, dtype=object),
         "outer_fold": np.full(n_rows, outer_fold, dtype=np.int64),
         "seed": np.full(n_rows, seed, dtype=np.int64),
@@ -207,6 +217,13 @@ def _prediction_arrays(
             n_rows, str(calibration_checkpoint), dtype=object
         ),
     }
+    if not np.allclose(result["weights"].sum(axis=1), 1.0, atol=1e-7, rtol=0):
+        raise RuntimeError(f"{candidate_id} mixture weights do not sum to one")
+    if not np.all(np.isfinite(result["scales"])) or not np.all(result["scales"] > 0):
+        raise RuntimeError(f"{candidate_id} contains invalid residual scale")
+    if not np.all(np.isfinite(result["locations"])):
+        raise RuntimeError(f"{candidate_id} contains invalid location")
+    return result
 
 
 def predict_pair(
@@ -304,6 +321,58 @@ def predict_pair(
     return global_prediction, mixture_prediction
 
 
+def assert_held_target_invariance(
+    expected: tuple[dict[str, np.ndarray], dict[str, np.ndarray]],
+    mean_model: MeanAlignedModel,
+    global_calibrator: GlobalResidualCalibrator,
+    mixture_calibrator: ConditionalScaleMixtureCalibrator,
+    univ: M2Universe,
+    held_records: list[Any],
+    ctx_cache: dict[str, Any],
+    device: str,
+    outer_fold: int,
+    seed: int,
+    mean_checkpoint: Path,
+    global_checkpoint: Path,
+    mixture_checkpoint: Path,
+) -> None:
+    perturbed = copy.deepcopy(held_records)
+    for record in perturbed:
+        record.target_reactivity = 12345.0
+        record.target_error = 9876.0
+        record.target_observed = not bool(record.target_observed)
+        record.target_mask = np.logical_not(record.target_mask)
+    actual = predict_pair(
+        mean_model,
+        global_calibrator,
+        mixture_calibrator,
+        univ,
+        perturbed,
+        ctx_cache,
+        device,
+        outer_fold,
+        seed,
+        mean_checkpoint,
+        global_checkpoint,
+        mixture_checkpoint,
+    )
+    fields = (
+        "keys",
+        "delta_mean",
+        "point_mean",
+        "locations",
+        "scales",
+        "weights",
+        "registered_status",
+    )
+    for candidate_index, candidate_id in enumerate((MEAN_CANDIDATE, CALIBRATED_CANDIDATE)):
+        for field in fields:
+            if not np.array_equal(expected[candidate_index][field], actual[candidate_index][field]):
+                raise RuntimeError(
+                    f"held target/error/mask changed {candidate_id} prediction field {field}"
+                )
+
+
 def _load_frozen_baseline(result_dir: Path | None, fold: int) -> dict[str, Any] | None:
     if result_dir is None:
         return None
@@ -397,6 +466,21 @@ def run_fold(
         global_checkpoint,
         mixture_checkpoint,
     )
+    assert_held_target_invariance(
+        (global_prediction, mixture_prediction),
+        mean_model,
+        global_calibrator,
+        mixture_calibrator,
+        univ,
+        held_records,
+        ctx_cache,
+        device,
+        int(fold.outer_fold),
+        seed,
+        mean_checkpoint,
+        global_checkpoint,
+        mixture_checkpoint,
+    )
     global_path = out_dir / f"v2_predictions_{MEAN_CANDIDATE}_fold{fold.outer_fold}_seed{seed}.npz"
     mixture_path = out_dir / f"v2_predictions_{CALIBRATED_CANDIDATE}_fold{fold.outer_fold}_seed{seed}.npz"
     np.savez_compressed(global_path, **global_prediction)
@@ -404,6 +488,10 @@ def run_fold(
     point_difference = float(
         np.max(np.abs(global_prediction["point_mean"] - mixture_prediction["point_mean"]))
     )
+    if point_difference > 1e-7:
+        raise RuntimeError(
+            f"calibration changed point mean by {point_difference}, exceeding 1e-7"
+        )
     result = {
         "schema_version": SCHEMA,
         "outer_fold": int(fold.outer_fold),
@@ -411,6 +499,7 @@ def run_fold(
         "seed": seed,
         "baseline": _load_frozen_baseline(b1_result_dir, int(fold.outer_fold)),
         "point_mean_max_abs_difference": point_difference,
+        "held_target_error_mask_invariance": True,
         "candidates": {
             MEAN_CANDIDATE: {
                 "score": score_predictions(global_prediction, univ, held_records),
