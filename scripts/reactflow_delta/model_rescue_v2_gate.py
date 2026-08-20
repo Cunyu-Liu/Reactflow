@@ -33,6 +33,8 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     parent = _load_yaml(repo_root / PARENT_MACHINE)
     parent_result = json.loads((repo_root / PARENT_RESULT).read_text(encoding="utf-8"))
     phase_ids = [row["id"] for row in machine["phase_graph"]]
+    phase_status = {row["id"]: row["status"] for row in machine["phase_graph"]}
+    current_phase = active["authority"]["current_phase"]
     prohibited = set(machine["authorization"]["prohibited"])
     checks = {
         "machine_schema": machine.get("schema_version")
@@ -58,14 +60,20 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         == "MEAN_FIRST_ZERO_MEAN_RESIDUAL_ONLY",
         "phase_order": phase_ids
         == ["R2M0", "R2M1", "R2M2", "R2M3", "R2M4", "R2M5"],
-        "r2m1_active": active["authority"]["current_phase"] == "R2M1"
-        and active["gate_state"]["R2M0"] == "PASS"
-        and active["gate_state"]["R2M1"] == "IN_PROGRESS",
-        "training_closed_during_implementation": active["training_allowed"] is False
-        and active["candidate_model_training_allowed"] is False,
+        "phase_state_aligned": current_phase in phase_ids
+        and active["authority"]["current_runnable_phase"] == current_phase
+        and active["runnable_phases"] == [current_phase]
+        and phase_status == {phase: active["gate_state"][phase] for phase in phase_ids}
+        and phase_status == ledger["phase_state"]
+        and phase_status[current_phase] == "IN_PROGRESS",
+        "training_authority_matches_phase": (
+            active["training_allowed"] is (current_phase in {"R2M2", "R2M3", "R2M4"})
+            and active["candidate_model_training_allowed"]
+            is (current_phase in {"R2M2", "R2M3", "R2M4"})
+        ),
         "external_closed": active["new_external_outcome_access_allowed"] is False
         and machine["claim_policy"]["external_replication"] == "NOT_ESTABLISHED",
-        "only_two_candidates": set(machine["models"])
+        "only_frozen_model_components": set(machine["models"])
         == {"mean_aligned", "global_residual", "calibrated_residual"},
         "fixed_mean_loss": machine["models"]["mean_aligned"]["loss"]
         == "METHOD_BALANCED_EXACT_SIGNED_DELTA_L1",

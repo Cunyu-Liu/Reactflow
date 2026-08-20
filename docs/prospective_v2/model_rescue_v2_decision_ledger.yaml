@@ -46,8 +46,8 @@ decisions:
 
 phase_state:
   R2M0: PASS
-  R2M1: IN_PROGRESS
-  R2M2: NOT_RUN
+  R2M1: PASS
+  R2M2: IN_PROGRESS
   R2M3: NOT_RUN
   R2M4: NOT_RUN
   R2M5: NOT_RUN
@@ -59,3 +59,14 @@ claims:
   mechanism: NOT_ESTABLISHED
   sota: NOT_ESTABLISHED
   publication: PUBLICATION_NOT_READY
+
+r2m1_implementation:
+  status: R2M1_IMPLEMENTATION_AND_INVARIANTS_PASS
+  focused_commit: 730ca56
+  tests:
+    command: >-
+      python -m pytest -q tests/reactflow_delta/test_model_rescue_v2.py
+      tests/reactflow_delta/test_qualify_model_rescue_v2.py
+      tests/reactflow_delta/test_model_rescue_v2_gate.py
+    result: 11_PASSED
+  scientific_interpretation: ENGINEERING_ONLY

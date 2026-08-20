@@ -5,15 +5,15 @@ created_at: '2026-08-20T14:00:00+08:00'
 
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  current_phase: R2M1
-  current_authority_state: MODEL_RESCUE_V2_IMPLEMENTATION_ACTIVE
-  current_runnable_phase: R2M1
+  current_phase: R2M2
+  current_authority_state: MODEL_RESCUE_V2_ENGINEERING_SMOKE_ACTIVE
+  current_runnable_phase: R2M2
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v2-20260820
   human_contract_path: docs/prospective_v2/model_rescue_v2_amendment_20260820.md
   machine_contract_path: configs/reactflow_delta/model_rescue_v2_amendment.yaml
   decision_ledger_path: docs/prospective_v2/model_rescue_v2_decision_ledger.yaml
-  binding_status: R2M0_FOCUSED_COMMIT_COMPLETE
+  binding_status: R2M1_IMPLEMENTATION_AND_INVARIANTS_PASS
   precedence:
     - THIS_ACTIVE_CONTRACT
     - MODEL_RESCUE_V2_MACHINE_AMENDMENT
@@ -42,7 +42,7 @@ scientific_state:
   sota: NOT_ESTABLISHED
   publication_route: BENCHMARK_MEASUREMENT_MAINLINE
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
-  model_rescue_v2: R2M1_IMPLEMENTATION_ACTIVE
+  model_rescue_v2: R2M2_ENGINEERING_SMOKE_ACTIVE
 
 allowed_phases:
   - R2M0
@@ -52,9 +52,9 @@ allowed_phases:
   - R2M4
   - R2M5
 runnable_phases:
-  - R2M1
-training_allowed: false
-candidate_model_training_allowed: false
+  - R2M2
+training_allowed: true
+candidate_model_training_allowed: true
 diagnostic_analysis_allowed: true
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -66,8 +66,8 @@ unrelated_job_interference_allowed: false
 
 gate_state:
   R2M0: PASS
-  R2M1: IN_PROGRESS
-  R2M2: NOT_RUN
+  R2M1: PASS
+  R2M2: IN_PROGRESS
   R2M3: NOT_RUN
   R2M4: NOT_RUN
   R2M5: NOT_RUN
@@ -84,7 +84,8 @@ historical_authority:
   disposition: SUPERSEDED_FOR_NEW_ACTIONS_PRESERVE_UNCHANGED
   old_p4_p5_p5b_disposition: INVALID_SEQPOS_ALIGNMENT
 
-next_allowed_action: R2M1_IMPLEMENTATION_AND_INVARIANTS
-blocked_during_r2m1:
-  - REAL_DATA_TRAINING
+next_allowed_action: R2M2_REAL_DATA_ENGINEERING_SMOKE_P01_P02_MAX_3_EPOCHS
+blocked_during_r2m2:
+  - FULL_TWENTY_FOLD_SCREEN
+  - SCIENTIFIC_INTERPRETATION_OF_SMOKE_SCORES
   - NEW_EXTERNAL_OUTCOME_ACCESS
