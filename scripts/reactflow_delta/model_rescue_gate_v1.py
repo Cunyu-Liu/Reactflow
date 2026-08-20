@@ -51,13 +51,19 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         "active_points_to_ledger": active["authority"]["decision_ledger_path"]
         == DECISION_LEDGER.as_posix(),
         "phase_order": phase_ids == ["M0", "M1", "M2", "M3", "M4", "M5", "M6"],
-        "m0_m1_complete_m2_active": active["authority"]["current_phase"] == "M2"
+        "m2_terminal_benchmark_route": active["authority"]["current_phase"] == "M6"
         and active["gate_state"]["M0"] == "PASS"
         and active["gate_state"]["M1"] == "PASS"
-        and active["gate_state"]["M2"] == "IN_PROGRESS"
-        and active["authority"]["binding_status"] == "M0_FOCUSED_COMMIT_COMPLETE",
-        "m2_candidate_training_open": active["training_allowed"] is True
-        and active["candidate_model_training_allowed"] is True,
+        and active["gate_state"]["M2"] == "FAIL_NO_RESCUE_CANDIDATE"
+        and active["gate_state"]["M3"] == "NOT_RUN_PREREQUISITE_FAILED"
+        and machine["contract_status"]
+        == "TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED"
+        and ledger["phase_state"]["M2"] == "FAIL_NO_RESCUE_CANDIDATE"
+        and ledger["terminal_route"] == "BENCHMARK_ROUTE_LOCKED"
+        and active["authority"]["binding_status"]
+        == "M2_TERMINAL_RESULT_FOCUSED_COMMIT_COMPLETE",
+        "candidate_training_closed": active["training_allowed"] is False
+        and active["candidate_model_training_allowed"] is False,
         "new_external_outcomes_closed": active["new_external_outcome_access_allowed"]
         is False,
         "development_consumed": machine["scope"]["development_status"]
@@ -77,6 +83,7 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         "external_not_established": claims.get("C_EXTERNAL_GENERALIZATION")
         == "NOT_ESTABLISHED",
         "sota_not_established": claims.get("C_SOTA") == "SOTA_NOT_ESTABLISHED",
+        "model_rescue_failed": claims.get("C_MODEL_RESCUE") == "METHOD_RESCUE_FAIL",
     }
     return {
         "schema_version": "reactflow_delta.model_rescue_contract_validation.v1",

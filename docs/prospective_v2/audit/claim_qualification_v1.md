@@ -43,3 +43,14 @@
 3. near-zero 位置上 low-rank 使 signed-Δ MAE 恶化 `-0.002745`；因此 M2 的主救援候选是 aligned-direct 与 SparseDelta，L2-aligned 仅作 fixed control。
 4. ViennaRNA 结构 probe 对 signed-Δ 显著恶化且 absolute-Δ CI 跨 0；StructDelta 已按预冻结规则退出 M2。
 5. 新 confirmatory external 仍必须在 outcome-blind metadata 上达到 `K_joint_new>=9`；现有 K_joint=2 永久为 consumed exploratory。
+
+## 5. model-rescue M2 终局
+
+真实 OpenKnot M2 v4.5.2 的 20-fold、seed-0、40-epoch screen 已按冻结协议完成；
+四个模型在每个 fold 均实现 100% registered-key coverage、0 failure 和 0 unexpected
+keys。正式 qualification 是 `M2_NO_RESCUE_CANDIDATE`：L2-aligned 的 CRPS gain
+为 `+0.00069942`，但 signed-Δ MAE gain 为 `-0.00000524`；SparseDelta
+`lambda=0/0.1` 的 CRPS gain 分别为 `+0.00906010/+0.00886563`，但 signed-Δ MAE
+gain 分别为 `-0.00958523/-0.01240502`。因此 L2 与 SparseDelta 均为
+`M2_SCREEN_FAIL`，M3 不得运行，项目锁定 benchmark 路线；SparseDelta 只可作为
+CRPS/calibration baseline，不可表述为 mutation-effect mean predictor 改进。

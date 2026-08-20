@@ -1,0 +1,820 @@
+{
+  "candidate_results": {
+    "l2_aligned_rank2": {
+      "checks": {
+        "crps_positive_puzzles_min_10": true,
+        "failure_rate_zero": true,
+        "mean_crps_gain_nonnegative": true,
+        "mean_signed_delta_mae_gain_nonnegative": false,
+        "registered_prediction_coverage_100pct": true,
+        "signed_delta_mae_positive_puzzles_min_10": true,
+        "twenty_folds_complete": true,
+        "unexpected_prediction_keys_zero": true
+      },
+      "crps": {
+        "ci95_descriptive": [
+          -0.0002794430147449029,
+          0.0016782801950357906
+        ],
+        "mean": 0.0006994185901454438,
+        "n": 20,
+        "nonnegative_puzzles": 15,
+        "per_puzzle": [
+          0.001993689170676105,
+          1.734299678621265e-05,
+          0.0025887537709268493,
+          0.003601906231300356,
+          -0.003899809839289836,
+          0.0030743655055157915,
+          -0.0005463434451946914,
+          -0.001435222177570139,
+          -0.0033654177193366275,
+          0.004663626338416632,
+          -0.00021464437401597092,
+          0.00039776717132469774,
+          0.0021713402528915626,
+          0.0003255441113158841,
+          0.0012051746896152293,
+          0.0007699575916711165,
+          0.00029727510373936394,
+          0.0006650082061182561,
+          0.0011083605325372115,
+          0.0005696976854808744
+        ],
+        "positive_puzzles": 15
+      },
+      "per_fold": [
+        {
+          "crps_gain_vs_b1": 0.001993689170676105,
+          "failure_rate": 0.0,
+          "held_puzzle": "P01",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 0,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.00057120068224642
+        },
+        {
+          "crps_gain_vs_b1": 1.734299678621265e-05,
+          "failure_rate": 0.0,
+          "held_puzzle": "P02",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 1,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0007922372716188675
+        },
+        {
+          "crps_gain_vs_b1": 0.0025887537709268493,
+          "failure_rate": 0.0,
+          "held_puzzle": "P03",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 2,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.001593205916696372
+        },
+        {
+          "crps_gain_vs_b1": 0.003601906231300356,
+          "failure_rate": 0.0,
+          "held_puzzle": "P04",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 3,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0011718620310013916
+        },
+        {
+          "crps_gain_vs_b1": -0.003899809839289836,
+          "failure_rate": 0.0,
+          "held_puzzle": "P05",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 4,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0003032832006421571
+        },
+        {
+          "crps_gain_vs_b1": 0.0030743655055157915,
+          "failure_rate": 0.0,
+          "held_puzzle": "P06",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 5,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0022776145815275317
+        },
+        {
+          "crps_gain_vs_b1": -0.0005463434451946914,
+          "failure_rate": 0.0,
+          "held_puzzle": "P07",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 6,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -6.990813927465478e-06
+        },
+        {
+          "crps_gain_vs_b1": -0.001435222177570139,
+          "failure_rate": 0.0,
+          "held_puzzle": "P08",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 7,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0071344895941881925
+        },
+        {
+          "crps_gain_vs_b1": -0.0033654177193366275,
+          "failure_rate": 0.0,
+          "held_puzzle": "P09",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 8,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0009571963939111194
+        },
+        {
+          "crps_gain_vs_b1": 0.004663626338416632,
+          "failure_rate": 0.0,
+          "held_puzzle": "P10",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 9,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.00414971464774766
+        },
+        {
+          "crps_gain_vs_b1": -0.00021464437401597092,
+          "failure_rate": 0.0,
+          "held_puzzle": "P11",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 10,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0022562148842869556
+        },
+        {
+          "crps_gain_vs_b1": 0.00039776717132469774,
+          "failure_rate": 0.0,
+          "held_puzzle": "P12",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 11,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0007730961007365034
+        },
+        {
+          "crps_gain_vs_b1": 0.0021713402528915626,
+          "failure_rate": 0.0,
+          "held_puzzle": "P13",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 12,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0037892448042359805
+        },
+        {
+          "crps_gain_vs_b1": 0.0003255441113158841,
+          "failure_rate": 0.0,
+          "held_puzzle": "P14",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 13,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0017150906668083332
+        },
+        {
+          "crps_gain_vs_b1": 0.0012051746896152293,
+          "failure_rate": 0.0,
+          "held_puzzle": "P15",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 14,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0005487334457256188
+        },
+        {
+          "crps_gain_vs_b1": 0.0007699575916711165,
+          "failure_rate": 0.0,
+          "held_puzzle": "P16",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 15,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0012928893572937972
+        },
+        {
+          "crps_gain_vs_b1": 0.00029727510373936394,
+          "failure_rate": 0.0,
+          "held_puzzle": "P17",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 16,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.00023090195346628373
+        },
+        {
+          "crps_gain_vs_b1": 0.0006650082061182561,
+          "failure_rate": 0.0,
+          "held_puzzle": "P18",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 17,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0031393071489098368
+        },
+        {
+          "crps_gain_vs_b1": 0.0011083605325372115,
+          "failure_rate": 0.0,
+          "held_puzzle": "P19",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 18,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0011594162412389974
+        },
+        {
+          "crps_gain_vs_b1": 0.0005696976854808744,
+          "failure_rate": 0.0,
+          "held_puzzle": "P20",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 19,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0018175481371386637
+        }
+      ],
+      "signed_delta_mae": {
+        "ci95_descriptive": [
+          -0.0011750217735993081,
+          0.0011645461501279266
+        ],
+        "mean": -5.237811735690767e-06,
+        "n": 20,
+        "nonnegative_puzzles": 11,
+        "per_puzzle": [
+          0.00057120068224642,
+          0.0007922372716188675,
+          0.001593205916696372,
+          0.0011718620310013916,
+          0.0003032832006421571,
+          0.0022776145815275317,
+          -6.990813927465478e-06,
+          -0.0071344895941881925,
+          -0.0009571963939111194,
+          0.00414971464774766,
+          -0.0022562148842869556,
+          0.0007730961007365034,
+          0.0037892448042359805,
+          -0.0017150906668083332,
+          0.0005487334457256188,
+          -0.0012928893572937972,
+          -0.00023090195346628373,
+          -0.0031393071489098368,
+          -0.0011594162412389974,
+          0.0018175481371386637
+        ],
+        "positive_puzzles": 11
+      },
+      "status": "M2_SCREEN_FAIL"
+    },
+    "sparse_delta_mdn_h0": {
+      "checks": {
+        "crps_positive_puzzles_min_10": true,
+        "failure_rate_zero": true,
+        "mean_crps_gain_nonnegative": true,
+        "mean_signed_delta_mae_gain_nonnegative": false,
+        "registered_prediction_coverage_100pct": true,
+        "signed_delta_mae_positive_puzzles_min_10": false,
+        "twenty_folds_complete": true,
+        "unexpected_prediction_keys_zero": true
+      },
+      "crps": {
+        "ci95_descriptive": [
+          0.0075597083690919714,
+          0.01056048715577258
+        ],
+        "mean": 0.009060097762432275,
+        "n": 20,
+        "nonnegative_puzzles": 20,
+        "per_puzzle": [
+          0.005507357851427974,
+          0.008878609526740244,
+          0.006339723119430096,
+          0.009281564040388185,
+          0.004905683125602217,
+          0.011240102802554164,
+          0.00914978782156703,
+          0.009838413998958795,
+          0.00826854357750631,
+          0.013530670582756366,
+          0.00940972292615369,
+          0.008895689075218066,
+          0.01351017546775421,
+          0.010633567949228179,
+          0.013813606325933314,
+          0.012907249048477065,
+          0.0017448559687765486,
+          0.010291573740004334,
+          0.005069917560770798,
+          0.007985140739397906
+        ],
+        "positive_puzzles": 20
+      },
+      "per_fold": [
+        {
+          "crps_gain_vs_b1": 0.005507357851427974,
+          "failure_rate": 0.0,
+          "held_puzzle": "P01",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 0,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.002706125474113308
+        },
+        {
+          "crps_gain_vs_b1": 0.008878609526740244,
+          "failure_rate": 0.0,
+          "held_puzzle": "P02",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 1,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.008378941988055222
+        },
+        {
+          "crps_gain_vs_b1": 0.006339723119430096,
+          "failure_rate": 0.0,
+          "held_puzzle": "P03",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 2,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.004385445737873417
+        },
+        {
+          "crps_gain_vs_b1": 0.009281564040388185,
+          "failure_rate": 0.0,
+          "held_puzzle": "P04",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 3,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.010844147377878477
+        },
+        {
+          "crps_gain_vs_b1": 0.004905683125602217,
+          "failure_rate": 0.0,
+          "held_puzzle": "P05",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 4,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.006249662273671075
+        },
+        {
+          "crps_gain_vs_b1": 0.011240102802554164,
+          "failure_rate": 0.0,
+          "held_puzzle": "P06",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 5,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0001927530292470392
+        },
+        {
+          "crps_gain_vs_b1": 0.00914978782156703,
+          "failure_rate": 0.0,
+          "held_puzzle": "P07",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 6,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.013223673940773478
+        },
+        {
+          "crps_gain_vs_b1": 0.009838413998958795,
+          "failure_rate": 0.0,
+          "held_puzzle": "P08",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 7,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.007130977436625857
+        },
+        {
+          "crps_gain_vs_b1": 0.00826854357750631,
+          "failure_rate": 0.0,
+          "held_puzzle": "P09",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 8,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.00038420075309331114
+        },
+        {
+          "crps_gain_vs_b1": 0.013530670582756366,
+          "failure_rate": 0.0,
+          "held_puzzle": "P10",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 9,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0003203056408973004
+        },
+        {
+          "crps_gain_vs_b1": 0.00940972292615369,
+          "failure_rate": 0.0,
+          "held_puzzle": "P11",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 10,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.007833917545535085
+        },
+        {
+          "crps_gain_vs_b1": 0.008895689075218066,
+          "failure_rate": 0.0,
+          "held_puzzle": "P12",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 11,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.025586313969612584
+        },
+        {
+          "crps_gain_vs_b1": 0.01351017546775421,
+          "failure_rate": 0.0,
+          "held_puzzle": "P13",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 12,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0003138661714343627
+        },
+        {
+          "crps_gain_vs_b1": 0.010633567949228179,
+          "failure_rate": 0.0,
+          "held_puzzle": "P14",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 13,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.02346031757393044
+        },
+        {
+          "crps_gain_vs_b1": 0.013813606325933314,
+          "failure_rate": 0.0,
+          "held_puzzle": "P15",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 14,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.012662348159436704
+        },
+        {
+          "crps_gain_vs_b1": 0.012907249048477065,
+          "failure_rate": 0.0,
+          "held_puzzle": "P16",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 15,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.011630628794930042
+        },
+        {
+          "crps_gain_vs_b1": 0.0017448559687765486,
+          "failure_rate": 0.0,
+          "held_puzzle": "P17",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 16,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.04320546655627988
+        },
+        {
+          "crps_gain_vs_b1": 0.010291573740004334,
+          "failure_rate": 0.0,
+          "held_puzzle": "P18",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 17,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.019090604097395963
+        },
+        {
+          "crps_gain_vs_b1": 0.005069917560770798,
+          "failure_rate": 0.0,
+          "held_puzzle": "P19",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 18,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.02131205805101888
+        },
+        {
+          "crps_gain_vs_b1": 0.007985140739397906,
+          "failure_rate": 0.0,
+          "held_puzzle": "P20",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 19,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0015121208302209255
+        }
+      ],
+      "signed_delta_mae": {
+        "ci95_descriptive": [
+          -0.015358958112239649,
+          -0.00381150821774613
+        ],
+        "mean": -0.00958523316499289,
+        "n": 20,
+        "nonnegative_puzzles": 6,
+        "per_puzzle": [
+          0.002706125474113308,
+          -0.008378941988055222,
+          0.004385445737873417,
+          -0.010844147377878477,
+          0.006249662273671075,
+          -0.0001927530292470392,
+          -0.013223673940773478,
+          -0.007130977436625857,
+          0.00038420075309331114,
+          0.0003203056408973004,
+          -0.007833917545535085,
+          -0.025586313969612584,
+          0.0003138661714343627,
+          -0.02346031757393044,
+          -0.012662348159436704,
+          -0.011630628794930042,
+          -0.04320546655627988,
+          -0.019090604097395963,
+          -0.02131205805101888,
+          -0.0015121208302209255
+        ],
+        "positive_puzzles": 6
+      },
+      "status": "M2_SCREEN_FAIL"
+    },
+    "sparse_delta_mdn_h01": {
+      "checks": {
+        "crps_positive_puzzles_min_10": true,
+        "failure_rate_zero": true,
+        "mean_crps_gain_nonnegative": true,
+        "mean_signed_delta_mae_gain_nonnegative": false,
+        "registered_prediction_coverage_100pct": true,
+        "signed_delta_mae_positive_puzzles_min_10": false,
+        "twenty_folds_complete": true,
+        "unexpected_prediction_keys_zero": true
+      },
+      "crps": {
+        "ci95_descriptive": [
+          0.005248779587549192,
+          0.01248247330584977
+        ],
+        "mean": 0.008865626446699481,
+        "n": 20,
+        "nonnegative_puzzles": 19,
+        "per_puzzle": [
+          0.010587131637308511,
+          0.011409986884479195,
+          0.008358986297982762,
+          0.010527222994400731,
+          0.007704539119760989,
+          0.008792297487595246,
+          0.008361989094229999,
+          0.01256914238565085,
+          0.011499049367691694,
+          0.012844819048113743,
+          0.008928592617863579,
+          0.008917989684179312,
+          0.012313537545164455,
+          0.012643349262515119,
+          0.013952625712944783,
+          0.012783152006672294,
+          0.008955624618989577,
+          0.011327635190902186,
+          -0.02290647272138141,
+          0.007741330698925991
+        ],
+        "positive_puzzles": 19
+      },
+      "per_fold": [
+        {
+          "crps_gain_vs_b1": 0.010587131637308511,
+          "failure_rate": 0.0,
+          "held_puzzle": "P01",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 0,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0011288832277119853
+        },
+        {
+          "crps_gain_vs_b1": 0.011409986884479195,
+          "failure_rate": 0.0,
+          "held_puzzle": "P02",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 1,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.005515292736365696
+        },
+        {
+          "crps_gain_vs_b1": 0.008358986297982762,
+          "failure_rate": 0.0,
+          "held_puzzle": "P03",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 2,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.0002891743441497674
+        },
+        {
+          "crps_gain_vs_b1": 0.010527222994400731,
+          "failure_rate": 0.0,
+          "held_puzzle": "P04",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 3,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.013121874108994874
+        },
+        {
+          "crps_gain_vs_b1": 0.007704539119760989,
+          "failure_rate": 0.0,
+          "held_puzzle": "P05",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 4,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.003106617209607976
+        },
+        {
+          "crps_gain_vs_b1": 0.008792297487595246,
+          "failure_rate": 0.0,
+          "held_puzzle": "P06",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 5,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0013846327710498318
+        },
+        {
+          "crps_gain_vs_b1": 0.008361989094229999,
+          "failure_rate": 0.0,
+          "held_puzzle": "P07",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 6,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.021792051537219304
+        },
+        {
+          "crps_gain_vs_b1": 0.01256914238565085,
+          "failure_rate": 0.0,
+          "held_puzzle": "P08",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 7,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.015420755834700511
+        },
+        {
+          "crps_gain_vs_b1": 0.011499049367691694,
+          "failure_rate": 0.0,
+          "held_puzzle": "P09",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 8,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.001694450029043837
+        },
+        {
+          "crps_gain_vs_b1": 0.012844819048113743,
+          "failure_rate": 0.0,
+          "held_puzzle": "P10",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 9,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": 0.003643079801330773
+        },
+        {
+          "crps_gain_vs_b1": 0.008928592617863579,
+          "failure_rate": 0.0,
+          "held_puzzle": "P11",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 10,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.020447115045367947
+        },
+        {
+          "crps_gain_vs_b1": 0.008917989684179312,
+          "failure_rate": 0.0,
+          "held_puzzle": "P12",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 11,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.01722078266768126
+        },
+        {
+          "crps_gain_vs_b1": 0.012313537545164455,
+          "failure_rate": 0.0,
+          "held_puzzle": "P13",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 12,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0014523572391497985
+        },
+        {
+          "crps_gain_vs_b1": 0.012643349262515119,
+          "failure_rate": 0.0,
+          "held_puzzle": "P14",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 13,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.0124612800836634
+        },
+        {
+          "crps_gain_vs_b1": 0.013952625712944783,
+          "failure_rate": 0.0,
+          "held_puzzle": "P15",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 14,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.007654899357116218
+        },
+        {
+          "crps_gain_vs_b1": 0.012783152006672294,
+          "failure_rate": 0.0,
+          "held_puzzle": "P16",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 15,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.009343529547306634
+        },
+        {
+          "crps_gain_vs_b1": 0.008955624618989577,
+          "failure_rate": 0.0,
+          "held_puzzle": "P17",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 16,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.011863742123278731
+        },
+        {
+          "crps_gain_vs_b1": 0.011327635190902186,
+          "failure_rate": 0.0,
+          "held_puzzle": "P18",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 17,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.023358644935111972
+        },
+        {
+          "crps_gain_vs_b1": -0.02290647272138141,
+          "failure_rate": 0.0,
+          "held_puzzle": "P19",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 18,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.09271797851889652
+        },
+        {
+          "crps_gain_vs_b1": 0.007741330698925991,
+          "failure_rate": 0.0,
+          "held_puzzle": "P20",
+          "n_unexpected_prediction_keys": 0,
+          "outer_fold": 19,
+          "registered_prediction_coverage": 1.0,
+          "signed_delta_mae_gain_vs_b1": -0.011849279291535258
+        }
+      ],
+      "signed_delta_mae": {
+        "ci95_descriptive": [
+          -0.022191596638406932,
+          -0.0026184359386880567
+        ],
+        "mean": -0.012405016288547495,
+        "n": 20,
+        "nonnegative_puzzles": 5,
+        "per_puzzle": [
+          0.0011288832277119853,
+          0.005515292736365696,
+          0.0002891743441497674,
+          -0.013121874108994874,
+          0.003106617209607976,
+          -0.0013846327710498318,
+          -0.021792051537219304,
+          -0.015420755834700511,
+          -0.001694450029043837,
+          0.003643079801330773,
+          -0.020447115045367947,
+          -0.01722078266768126,
+          -0.0014523572391497985,
+          -0.0124612800836634,
+          -0.007654899357116218,
+          -0.009343529547306634,
+          -0.011863742123278731,
+          -0.023358644935111972,
+          -0.09271797851889652,
+          -0.011849279291535258
+        ],
+        "positive_puzzles": 5
+      },
+      "status": "M2_SCREEN_FAIL"
+    }
+  },
+  "evidence_status": "DEVELOPMENT_CONSUMED_SCREEN_NOT_CONFIRMATION",
+  "fold_integrity": {
+    "complete_0_through_19": true,
+    "n_fold_artifacts": 20,
+    "unique_fold_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ]
+  },
+  "lambda_policy": "SPARSE_DELTA_FAMILY_EXCLUDED",
+  "m3_eligible_families": [
+    "b1_rfd_direct_aligned"
+  ],
+  "overall_status": "M2_NO_RESCUE_CANDIDATE",
+  "prohibited_interpretation": [
+    "PROSPECTIVE_PASS",
+    "EXTERNAL_REPLICATION",
+    "SOTA",
+    "SELECT_LAMBDA_FROM_OUTER_M2_EFFECT"
+  ],
+  "schema_version": "reactflow_delta.model_rescue_m2_qualification.v1"
+}

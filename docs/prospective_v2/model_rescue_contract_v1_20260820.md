@@ -1,7 +1,7 @@
 # ReactFlow-Delta 模型救援与投稿再资格化合同 v1
 
 日期：2026-08-20
-状态：`ACTIVE_M2_CANDIDATE_SCREEN`
+状态：`TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED`
 对应 machine contract：`configs/reactflow_delta/model_rescue_contract_v1.yaml`
 
 ## 0. 合同地位与边界
@@ -250,6 +250,22 @@ rate `1e-3`、weight decay `0`，使用 evaluator_v2。候选只有在平均 CRP
 signed-Δ MAE 都不差于 B1、两个指标各至少 10/20 puzzle 改善、prediction key
 coverage 为 100% 且 failure rate 为 0 时才可进入 M3。
 
+M2 全量 screen 已于 2026-08-20 在真实 OpenKnot M2 v4.5.2 上完成，20 个 outer
+fold、seed 0、40 epochs 均按冻结配置执行；所有候选 prediction key coverage 为
+100%，failure rate 为 0。正式 qualification 为 `M2_NO_RESCUE_CANDIDATE`：
+
+- L2-aligned 的平均 CRPS gain 为 `+0.00069942`（15/20 puzzles 正向），但
+  signed-Δ MAE gain 为 `-0.00000524`（11/20 正向），未通过双指标均值门槛；
+- SparseDelta `lambda=0` 的 CRPS gain 为 `+0.00906010`（20/20 正向），但
+  signed-Δ MAE gain 为 `-0.00958523`（6/20 正向）；
+- SparseDelta `lambda=0.1` 的 CRPS gain 为 `+0.00886563`（19/20 正向），但
+  signed-Δ MAE gain 为 `-0.01240502`（5/20 正向）。
+
+因此 SparseDelta 的改善只具 calibration/probabilistic-baseline 解释，不能称为更好的
+mutation-effect mean predictor；L2 虽接近零差异，也未达到预冻结 eligibility rule。
+依据 `next_on_fail: METHOD_RESCUE_FAIL`，M3 前置条件未满足，模型救援停止并锁定
+benchmark 路线。完整结果见 `docs/prospective_v2/audit/m2_qualification_v1.json`。
+
 ### M3：内部 nested development
 
 运行唯一 adaptive ModelRescue* procedure，保存完整 prediction-only OOF ledger、inner
@@ -263,6 +279,9 @@ B1，然后最小化两个相对 loss 的等权平均。SparseDelta `lambda=0/0.
 family 和 B1/L2 comparator 全部在 inner puzzles 内选，outer-held 不参与。选定后在完整
 outer-train 上用 40 epochs 训练 seeds 0–4，以等权 Gaussian-component mixture 一次性预测
 outer-held puzzle，并只保存不含 target 的 OOF artifact。
+
+M3 未运行。原因不是工程阻塞，而是 M2 正式 screen 没有产生任何 eligible rescue
+family；事后放宽 signed-Δ 门槛或只按 CRPS 选择均违反本合同。
 
 ### M4：必要消融与冻结
 

@@ -94,6 +94,34 @@ facts:
       sparse_h01_delta_mae_gain_vs_b1: 0.02697689297133543
       scientific_qualification: ENGINEERING_SMOKE_ONLY
     evidence: docs/prospective_v2/audit/m2_real_smoke_v1.json
+  - id: F_M2_FULL_SCREEN
+    status: CONFIRMED_FACT
+    value:
+      data: REAL_OPENKNOT_M2_V4_5_2
+      outer_folds: 20
+      seed: 0
+      epochs: 40
+      evaluator: evaluator_v2_method_balanced_target_invariant
+      overall_status: M2_NO_RESCUE_CANDIDATE
+      l2_aligned_rank2:
+        crps_gain_vs_b1: 0.0006994185901454438
+        crps_positive_puzzles: 15
+        signed_delta_mae_gain_vs_b1: -5.237811735690767e-06
+        signed_delta_mae_positive_puzzles: 11
+        status: M2_SCREEN_FAIL
+      sparse_delta_mdn_h0:
+        crps_gain_vs_b1: 0.009060097762432275
+        crps_positive_puzzles: 20
+        signed_delta_mae_gain_vs_b1: -0.00958523316499289
+        signed_delta_mae_positive_puzzles: 6
+        status: M2_SCREEN_FAIL
+      sparse_delta_mdn_h01:
+        crps_gain_vs_b1: 0.008865626446699481
+        crps_positive_puzzles: 19
+        signed_delta_mae_gain_vs_b1: -0.012405016288547495
+        signed_delta_mae_positive_puzzles: 5
+        status: M2_SCREEN_FAIL
+    evidence: docs/prospective_v2/audit/m2_qualification_v1.json
   - id: F_SYNTHETIC_DATA_ROLE
     status: CONFIRMED_FACT
     value: ENGINEERING_PIPELINE_TEST_ONLY_NOT_USED_FOR_MODEL_SELECTION_OR_CLAIMS
@@ -162,6 +190,15 @@ claims:
       - FINAL_MODEL_FROZEN
       - NEW_EXTERNAL_K_JOINT_AT_LEAST_9
       - NEW_EXTERNAL_DUAL_PRIMARY_PASS
+  - id: C_MODEL_RESCUE
+    current_status: METHOD_RESCUE_FAIL
+    allowed_text: >-
+      In the frozen 20-puzzle development screen, none of the three rescue
+      candidates simultaneously met the CRPS and signed-delta MAE eligibility
+      rules versus B1.
+    prohibited_text: >-
+      CRPS-only gains from SparseDelta establish better mutation-effect
+      prediction or justify proceeding to M3.
 
 route_rules:
   - if: INTERNAL_DUAL_PRIMARY_FAIL
@@ -176,8 +213,9 @@ route_rules:
 phase_state:
   M0: PASS
   M1: PASS
-  M2: IN_PROGRESS
-  M3: NOT_RUN
-  M4: NOT_RUN
-  M5: NOT_RUN
+  M2: FAIL_NO_RESCUE_CANDIDATE
+  M3: NOT_RUN_PREREQUISITE_FAILED
+  M4: NOT_RUN_M3_BLOCKED
+  M5: NOT_RUN_FINAL_MODEL_NOT_FROZEN
   M6: NOT_RUN
+terminal_route: BENCHMARK_ROUTE_LOCKED

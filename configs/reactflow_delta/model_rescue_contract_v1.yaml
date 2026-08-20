@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_contract.v1
 contract_id: reactflow_delta_model_rescue_v1_20260820
 created_at: '2026-08-20T14:00:00+08:00'
-contract_status: ACTIVE_M2_CANDIDATE_SCREEN
+contract_status: TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED
 
 owner_instruction:
   raw_message: 继续
@@ -201,7 +201,7 @@ controlled_models:
     allowed_only_if_both_individual_candidates_screen_pass: true
 
 m2_screen_protocol:
-  status: FROZEN_AFTER_REAL_TWO_FOLD_ENGINEERING_SMOKE_BEFORE_FULL_SCREEN
+  status: COMPLETED_NO_RESCUE_CANDIDATE
   data: REAL_OPENKNOT_M2_V4_5_2
   synthetic_data_role: ENGINEERING_PIPELINE_TEST_ONLY_NEVER_SCIENTIFIC
   smoke_result: docs/prospective_v2/audit/m2_real_smoke_v1.json
@@ -238,6 +238,32 @@ m2_screen_protocol:
     sparse_delta_mdn_h01:
       crps_gain_vs_b1: 0.01919806780345562
       signed_delta_mae_gain_vs_b1: 0.02697689297133543
+  full_screen_result:
+    qualification_artifact: docs/prospective_v2/audit/m2_qualification_v1.json
+    raw_merged_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_fullscreen_merged_20260820
+    evidence_status: DEVELOPMENT_CONSUMED_SCREEN_NOT_CONFIRMATION
+    overall_status: M2_NO_RESCUE_CANDIDATE
+    l2_aligned_rank2:
+      crps_gain_vs_b1: 0.0006994185901454438
+      crps_positive_puzzles: 15
+      signed_delta_mae_gain_vs_b1: -5.237811735690767e-06
+      signed_delta_mae_positive_puzzles: 11
+      status: M2_SCREEN_FAIL
+    sparse_delta_mdn_h0:
+      crps_gain_vs_b1: 0.009060097762432275
+      crps_positive_puzzles: 20
+      signed_delta_mae_gain_vs_b1: -0.00958523316499289
+      signed_delta_mae_positive_puzzles: 6
+      status: M2_SCREEN_FAIL
+    sparse_delta_mdn_h01:
+      crps_gain_vs_b1: 0.008865626446699481
+      crps_positive_puzzles: 19
+      signed_delta_mae_gain_vs_b1: -0.012405016288547495
+      signed_delta_mae_positive_puzzles: 5
+      status: M2_SCREEN_FAIL
+    m3_eligible_families:
+      - b1_rfd_direct_aligned
+    stop_action: METHOD_RESCUE_FAIL_BENCHMARK_ROUTE_LOCKED
 
 m3_nested_protocol:
   status: FROZEN_BEFORE_COMPLETE_M2_SCREEN_RESULT
