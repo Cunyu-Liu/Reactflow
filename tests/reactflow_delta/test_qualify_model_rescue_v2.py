@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
@@ -130,3 +132,4 @@ def test_smoke_qualifier_opens_r2m3_only_for_real_artifact_invariants(tmp_path):
     result = qualify_smoke(folds)
     assert result["overall_status"] == "R2M2_REAL_DATA_ENGINEERING_SMOKE_PASS"
     assert result["r2m3_authorized"] is True
+    json.dumps(result)

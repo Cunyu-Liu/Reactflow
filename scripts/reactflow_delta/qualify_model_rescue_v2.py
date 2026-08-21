@@ -139,13 +139,16 @@ def qualify_smoke(folds: list[dict[str, Any]]) -> dict[str, Any]:
             )
             histories = candidate_row["mean_loss"] + candidate_row["calibration_loss"]
             score_checks = _integrity(candidate_row["score"])
-            candidate_checks[candidate] = {
+            checks = {
                 **artifact_checks,
                 **score_checks,
                 "three_or_fewer_epochs_each_stage": len(candidate_row["mean_loss"]) <= 3
                 and len(candidate_row["calibration_loss"]) <= 3,
                 "finite_training_losses": len(histories) > 0
                 and bool(np.isfinite(np.asarray(histories, dtype=float)).all()),
+            }
+            candidate_checks[candidate] = {
+                name: bool(value) for name, value in checks.items()
             }
             predictions[candidate] = prediction
         pair_checks = {
@@ -170,6 +173,7 @@ def qualify_smoke(folds: list[dict[str, Any]]) -> dict[str, Any]:
             )
             <= 1e-7,
         }
+        pair_checks = {name: bool(value) for name, value in pair_checks.items()}
         passed = all(pair_checks.values()) and all(
             all(checks.values()) for checks in candidate_checks.values()
         )
