@@ -80,6 +80,8 @@ r2m2_real_data_smoke:
   mean_epochs: 3
   calibration_epochs: 3
   physical_gpu: 2
+  runner_launch_head: 325b0c933effecdca49fb18ee32ab56110d954aa
+  runner_entrypoint: python_-m_scripts.reactflow_delta.run_model_rescue_v2
   result: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m2_real_smoke/v2_result_seed0.json
   qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m2_real_smoke/r2m2_qualification.json
   qualifier_fix_commit: d600591
@@ -91,3 +93,29 @@ r2m2_real_data_smoke:
     candidate_point_mean_identity: true
     shared_mean_checkpoint: true
   scientific_interpretation: ENGINEERING_SMOKE_ONLY
+
+r2m3_seed0_screen:
+  status: IN_PROGRESS
+  started_at: '2026-08-21T18:30:38+08:00'
+  physical_gpu: 2
+  runner_launch_head: b81a2516901db860648a35a59b682a7159942a4c
+  runner_entrypoint: python_-m_scripts.reactflow_delta.run_model_rescue_v2
+  data: REAL_OPENKNOT_M2_V4_5_2
+  folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  seed: 0
+  mean_epochs: 40
+  calibration_epochs: 40
+  output: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0
+  comparator_source: /mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_fullscreen_merged_20260820
+  comparator_audit:
+    n_folds: 20
+    epochs: 40
+    model_id: b1_rfd_direct_aligned
+    k_rank: 0
+    sparse: false
+    huber_lambda: 0.0
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_prediction_keys: 0
+  partial_fold_scores_inspected: false
+  external_outcome_access: false
