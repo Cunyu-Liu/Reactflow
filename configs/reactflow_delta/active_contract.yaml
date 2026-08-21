@@ -6,7 +6,7 @@ created_at: '2026-08-20T14:00:00+08:00'
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
   current_phase: R2M3
-  current_authority_state: MODEL_RESCUE_V2_SEED0_SCREEN_ACTIVE
+  current_authority_state: R2M3_INTERRUPTED_RECOVERABLE
   current_runnable_phase: R2M3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v2-20260820
@@ -42,7 +42,7 @@ scientific_state:
   sota: NOT_ESTABLISHED
   publication_route: BENCHMARK_MEASUREMENT_MAINLINE
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
-  model_rescue_v2: R2M3_SEED0_SCREEN_ACTIVE
+  model_rescue_v2: R2M3_INTERRUPTED_RECOVERABLE
 
 allowed_phases:
   - R2M0
@@ -84,8 +84,21 @@ historical_authority:
   disposition: SUPERSEDED_FOR_NEW_ACTIONS_PRESERVE_UNCHANGED
   old_p4_p5_p5b_disposition: INVALID_SEQPOS_ALIGNMENT
 
-next_allowed_action: R2M3_FIXED_SEED0_TWENTY_FOLD_SCREEN_40_PLUS_40
+next_allowed_action: R2M3_RESUME_MISSING_FOLDS_2_TO_19_IN_PERSISTENT_SESSION
+execution_recovery:
+  status: R2M3_INTERRUPTED_RECOVERABLE
+  scientific_gate_status: IN_PROGRESS
+  completed_folds_verified: [0, 1]
+  missing_folds_authorized: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  preserve_completed_folds: true
+  partial_fold_scores_inspected: false
+  partial_fold_score_inspection_allowed: false
+  persistent_session_required: true
+  monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
+  r2m4_authorized: false
 blocked_during_r2m3:
   - PARTIAL_FOLD_MODEL_OR_GATE_CHANGES
+  - PARTIAL_FOLD_SCORE_INSPECTION
+  - OVERWRITE_COMPLETED_FOLDS_0_OR_1
   - R2M4_FORMAL_CONFIRMATION_BEFORE_COMPLETE_R2M3_QUALIFICATION
   - NEW_EXTERNAL_OUTCOME_ACCESS

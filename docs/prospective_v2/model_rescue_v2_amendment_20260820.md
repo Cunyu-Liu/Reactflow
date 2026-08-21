@@ -1,7 +1,7 @@
 # ReactFlow-Delta Model Rescue v2 阶段性合同
 
 日期：2026-08-20
-状态：`ACTIVE_R2M3_SEED0_SCREEN`（R2M2 real-data engineering smoke 已通过）
+状态：`ACTIVE_R2M3_INTERRUPTED_RECOVERABLE`（R2M3 科学 Gate 仍为 `IN_PROGRESS`）
 父合同终局：`M2_NO_RESCUE_CANDIDATE`，commit `00c0cf3a804effb89ff99a8e9ea009963dc650d0`
 
 ## 1. 合同地位
@@ -103,6 +103,23 @@ target-invariance 与 Candidate A/B point-mean identity。score 不用于选择�
 至少 12/20 puzzles 正向。Calibration Gate 要求逐 key point mean 与 Candidate A 在
 1e-7 内一致、CRPS gain >0、至少 12/20 puzzles 正向。coverage 必须 100%，failure 与
 unexpected keys 必须为 0。两个 Gate 都通过才进入 R2M4。
+
+#### 2026-08-22 可恢复中断登记
+
+原始 R2M3 进程在完成 fold 0 和 fold 1 后停止，停止原因当前为
+`UNKNOWN_NOT_ASSERTED`。这不是科学 FAIL 或 PASS；R2M3 Gate 保持 `IN_PROGRESS`，执行
+子状态登记为 `R2M3_INTERRUPTED_RECOVERABLE`。
+
+fold 0/1 的 result、两类 prediction、mean/global/mixture checkpoints 已完成结构审计：
+checkpoint 可加载且 tensor 有限，prediction schema、key identity、共享 mean、严格同中心
+mixture、正 scale、权重归一、target 字段隔离和 target-invariance 全部通过。该审计没有读取
+CRPS、signed-delta MAE 或任何部分 Gate 结果。
+
+恢复只允许在持久化会话中运行缺失 folds 2--19，并保存完整日志。fold 0/1 必须保留且不得
+覆盖；20 folds 完成前禁止检查部分分数、修改模型、阈值、epoch 或 Gate。低频监控只检查
+进程存活、资源冲突、日志是否继续和新增 fold artifact 是否结构完整，默认间隔 4 小时，
+不得输出或解释部分指标。只有 20 folds 完整合并并由预冻结 qualifier 裁决后，才能决定
+R2M3 PASS/FAIL；Mean Gate 与 Calibration Gate 必须同时通过才可开放 R2M4。
 
 ### R2M4：固定五 seed 正式确认
 

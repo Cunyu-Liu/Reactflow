@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v2_amendment.v1
 contract_id: reactflow_delta_model_rescue_v2_20260820
-contract_status: ACTIVE_R2M3_SEED0_SCREEN
+contract_status: ACTIVE_R2M3_INTERRUPTED_RECOVERABLE
 created_at: '2026-08-20T00:00:00+08:00'
 
 parent:
@@ -106,6 +106,27 @@ compute:
   physical_gpus_allowed: [0, 1, 2, 3, 4, 5]
   unrelated_job_interference_allowed: false
   model_search_allowed: false
+
+r2m3_recovery:
+  execution_status: R2M3_INTERRUPTED_RECOVERABLE
+  scientific_gate_status: IN_PROGRESS
+  detected_at: '2026-08-22T00:06:22+08:00'
+  registered_at: '2026-08-22T00:27:12+08:00'
+  original_started_at: '2026-08-21T18:30:38+08:00'
+  last_completed_artifact_at: '2026-08-21T19:24:28+08:00'
+  interruption_cause: UNKNOWN_NOT_ASSERTED
+  completed_folds_verified: [0, 1]
+  missing_folds_authorized: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  preserve_completed_folds: true
+  overwrite_completed_folds_allowed: false
+  partial_fold_scores_inspected: false
+  partial_fold_score_inspection_allowed: false
+  persistent_session_required: true
+  persistent_session: reactflow_delta_r2m3_recovery_20260822
+  run_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
+  monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
+  monitor_interval_hours: 4
+  r2m4_authorized: false
 
 screen:
   phase: R2M3

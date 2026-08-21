@@ -95,8 +95,13 @@ r2m2_real_data_smoke:
   scientific_interpretation: ENGINEERING_SMOKE_ONLY
 
 r2m3_seed0_screen:
-  status: IN_PROGRESS
+  status: R2M3_INTERRUPTED_RECOVERABLE
+  scientific_gate_status: IN_PROGRESS
   started_at: '2026-08-21T18:30:38+08:00'
+  interruption_detected_at: '2026-08-22T00:06:22+08:00'
+  interruption_registered_at: '2026-08-22T00:27:12+08:00'
+  last_completed_artifact_at: '2026-08-21T19:24:28+08:00'
+  interruption_cause: UNKNOWN_NOT_ASSERTED
   physical_gpu: 2
   runner_launch_head: b81a2516901db860648a35a59b682a7159942a4c
   runner_entrypoint: python_-m_scripts.reactflow_delta.run_model_rescue_v2
@@ -119,3 +124,16 @@ r2m3_seed0_screen:
     unexpected_prediction_keys: 0
   partial_fold_scores_inspected: false
   external_outcome_access: false
+  recovery:
+    artifact_audit: docs/prospective_v2/audit/r2m3_interruption_recovery_20260822.yaml
+    completed_folds_verified: [0, 1]
+    missing_folds_authorized: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    reuse_completed_folds: true
+    overwrite_completed_folds_allowed: false
+    persistent_session: reactflow_delta_r2m3_recovery_20260822
+    run_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
+    monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
+    monitor_interval_hours: 4
+    merge_only_after_all_twenty_folds: true
+    qualify_only_after_merge: true
+    r2m4_requires_both_mean_and_calibration_gate: true

@@ -58,6 +58,15 @@
 
 **Independent review:** Yes — R2M3 determines whether formal computation is authorized.
 
+**Recovery note (2026-08-22):** The original R2M3 process stopped after verified folds 0 and 1.
+Record the execution substate as `R2M3_INTERRUPTED_RECOVERABLE` while leaving the scientific
+Gate `IN_PROGRESS`. Preserve folds 0/1, run only missing folds 2--19 in the persistent tmux
+session `reactflow_delta_r2m3_recovery_20260822`, and save a persistent log. Monitor at most
+once every four hours unless the process exits. Monitoring is health-only: do not inspect
+partial CRPS, signed-delta MAE, puzzle effects, or Gate direction. Merge all 20 folds and run
+the frozen qualifier only after every fold artifact exists. R2M4 remains closed unless both
+the Mean Gate and Calibration Gate pass.
+
 ### Batch 5: Formal confirmation and handoff
 
 **Files:** `run_model_rescue_v2_formal.py`, formal artifacts, decision ledger, active

@@ -1,0 +1,47 @@
+schema_version: reactflow_delta.r2m3_interruption_recovery_audit.v1
+status: R2M3_INTERRUPTED_RECOVERABLE
+scientific_gate_status: IN_PROGRESS
+detected_at: '2026-08-22T00:06:22+08:00'
+registered_at: '2026-08-22T00:27:12+08:00'
+original_run:
+  started_at: '2026-08-21T18:30:38+08:00'
+  last_completed_artifact_at: '2026-08-21T19:24:28+08:00'
+  last_observed_pid: 558186
+  process_present_at_detection: false
+  interruption_cause: UNKNOWN_NOT_ASSERTED
+artifact_root: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0
+artifact_audit:
+  completed_folds: [0, 1]
+  overall_status: PASS
+  aggregate_result_exists: false
+  partial_scores_inspected: false
+  fold_0_prediction_rows: 73632
+  fold_1_prediction_rows: 106200
+  checks:
+    fold_result_present: true
+    mean_checkpoint_present_loadable_finite: true
+    global_checkpoint_present_loadable_finite: true
+    mixture_checkpoint_present_loadable_finite: true
+    both_prediction_artifacts_present: true
+    required_prediction_fields_present: true
+    target_fields_absent: true
+    row_lengths_consistent: true
+    candidate_key_universe_identical: true
+    candidate_delta_mean_identical: true
+    candidate_point_mean_identical: true
+    shared_mean_checkpoint: true
+    component_locations_equal_point_mean: true
+    scales_positive_and_finite: true
+    weights_finite_and_sum_to_one: true
+    held_target_error_mask_invariance_reported: true
+recovery_authority:
+  preserve_folds: [0, 1]
+  overwrite_preserved_folds_allowed: false
+  run_missing_folds: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  persistent_session: reactflow_delta_r2m3_recovery_20260822
+  log_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
+  monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
+  monitor_interval_hours: 4
+  merge_after_all_folds_only: true
+  qualify_after_merge_only: true
+  r2m4_requires_mean_and_calibration_gate: true
