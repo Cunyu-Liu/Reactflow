@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v2_amendment.v1
 contract_id: reactflow_delta_model_rescue_v2_20260820
-contract_status: ACTIVE_R2M2_ENGINEERING_SMOKE
+contract_status: ACTIVE_R2M3_SEED0_SCREEN
 created_at: '2026-08-20T00:00:00+08:00'
 
 parent:
@@ -158,12 +158,12 @@ phase_graph:
     next_on_pass: R2M2
     next_on_fail: FAIL_CLOSED
   - id: R2M2
-    status: IN_PROGRESS
+    status: PASS
     training_allowed: ENGINEERING_SMOKE_ONLY
     next_on_pass: R2M3
     next_on_fail: FAIL_CLOSED
   - id: R2M3
-    status: NOT_RUN
+    status: IN_PROGRESS
     training_allowed: true
     next_on_pass: R2M4
     next_on_fail: R2M5_BENCHMARK_ROUTE_LOCKED

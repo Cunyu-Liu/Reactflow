@@ -1,7 +1,7 @@
 # ReactFlow-Delta Model Rescue v2 阶段性合同
 
 日期：2026-08-20
-状态：`ACTIVE_R2M1_IMPLEMENTATION`
+状态：`ACTIVE_R2M3_SEED0_SCREEN`（R2M2 real-data engineering smoke 已通过）
 父合同终局：`M2_NO_RESCUE_CANDIDATE`，commit `00c0cf3a804effb89ff99a8e9ea009963dc650d0`
 
 ## 1. 合同地位

@@ -47,8 +47,8 @@ decisions:
 phase_state:
   R2M0: PASS
   R2M1: PASS
-  R2M2: IN_PROGRESS
-  R2M3: NOT_RUN
+  R2M2: PASS
+  R2M3: IN_PROGRESS
   R2M4: NOT_RUN
   R2M5: NOT_RUN
 
@@ -70,3 +70,24 @@ r2m1_implementation:
       tests/reactflow_delta/test_model_rescue_v2_gate.py
     result: 11_PASSED
   scientific_interpretation: ENGINEERING_ONLY
+
+r2m2_real_data_smoke:
+  status: R2M2_REAL_DATA_ENGINEERING_SMOKE_PASS
+  data: REAL_OPENKNOT_M2_V4_5_2
+  folds: [0, 1]
+  held_puzzles: [P01, P02]
+  seed: 0
+  mean_epochs: 3
+  calibration_epochs: 3
+  physical_gpu: 2
+  result: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m2_real_smoke/v2_result_seed0.json
+  qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m2_real_smoke/r2m2_qualification.json
+  qualifier_fix_commit: d600591
+  checks:
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_prediction_keys: 0
+    target_error_mask_invariance: true
+    candidate_point_mean_identity: true
+    shared_mean_checkpoint: true
+  scientific_interpretation: ENGINEERING_SMOKE_ONLY
