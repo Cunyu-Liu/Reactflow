@@ -51,3 +51,25 @@ recovery_authority:
   r2m4_requires_mean_and_calibration_gate: true
   merge_tool: scripts/reactflow_delta/merge_model_rescue_v2.py
   merge_tool_commit: 42f3d3df6a0ae49f927fdb5b537a05725aa182b8
+parallel_validation:
+  contract_validator: PASS
+  focused_tests:
+    status: PASS
+    passed: 23
+    scope:
+      - model_and_zero_mean_invariants
+      - active_contract_gate
+      - r2m2_and_r2m3_qualifier
+      - r2m4_formal_runner_and_qualifier
+      - complete_fold_merge
+  data_binding:
+    status: PASS
+    data_file_exists_nonempty: true
+    puzzles: 20
+    split_folds: 20
+    split_fold_ids_exact_0_19: true
+    held_puzzles_unique: true
+    preserved_folds_match_current_split: true
+    frozen_b1_fold_results_and_predictions_complete: true
+    scores_inspected: false
+    external_outcome_access: false
