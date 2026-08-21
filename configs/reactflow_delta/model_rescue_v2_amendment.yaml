@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v2_amendment.v1
 contract_id: reactflow_delta_model_rescue_v2_20260820
-contract_status: ACTIVE_R2M3_INTERRUPTED_RECOVERABLE
+contract_status: ACTIVE_R2M3_RECOVERY
 created_at: '2026-08-20T00:00:00+08:00'
 
 parent:
@@ -108,7 +108,8 @@ compute:
   model_search_allowed: false
 
 r2m3_recovery:
-  execution_status: R2M3_INTERRUPTED_RECOVERABLE
+  interruption_disposition: R2M3_INTERRUPTED_RECOVERABLE
+  execution_status: R2M3_RECOVERY_ACTIVE
   scientific_gate_status: IN_PROGRESS
   detected_at: '2026-08-22T00:06:22+08:00'
   registered_at: '2026-08-22T00:27:12+08:00'
@@ -123,6 +124,9 @@ r2m3_recovery:
   partial_fold_score_inspection_allowed: false
   persistent_session_required: true
   persistent_session: reactflow_delta_r2m3_recovery_20260822
+  recovery_started_at: '2026-08-22T00:29:57+08:00'
+  recovery_launch_head: 935e32e49815a84a9ba9d663d7916e62394a6ea6
+  recovery_pid_at_launch: 1863889
   run_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
   monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
   monitor_interval_hours: 4

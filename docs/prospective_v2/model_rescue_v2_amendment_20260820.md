@@ -1,7 +1,7 @@
 # ReactFlow-Delta Model Rescue v2 阶段性合同
 
 日期：2026-08-20
-状态：`ACTIVE_R2M3_INTERRUPTED_RECOVERABLE`（R2M3 科学 Gate 仍为 `IN_PROGRESS`）
+状态：`ACTIVE_R2M3_RECOVERY`（中断处置为 `R2M3_INTERRUPTED_RECOVERABLE`；科学 Gate 仍为 `IN_PROGRESS`）
 父合同终局：`M2_NO_RESCUE_CANDIDATE`，commit `00c0cf3a804effb89ff99a8e9ea009963dc650d0`
 
 ## 1. 合同地位
@@ -120,6 +120,12 @@ CRPS、signed-delta MAE 或任何部分 Gate 结果。
 进程存活、资源冲突、日志是否继续和新增 fold artifact 是否结构完整，默认间隔 4 小时，
 不得输出或解释部分指标。只有 20 folds 完整合并并由预冻结 qualifier 裁决后，才能决定
 R2M3 PASS/FAIL；Mean Gate 与 Calibration Gate 必须同时通过才可开放 R2M4。
+
+恢复已于 2026-08-22 00:29:57 +08:00 从 commit `935e32e` 启动，固定使用物理 GPU2，
+tmux session 为 `reactflow_delta_r2m3_recovery_20260822`。恢复进程只接收 folds 2--19，
+日志写入合同登记路径。合并工具固定为 `scripts/reactflow_delta/merge_model_rescue_v2.py`
+（commit `42f3d3d`）；它在 fold universe 不完整、重复、seed 非 0、候选不符或被引用
+artifact 缺失时拒绝合并，并且不会自行授权 R2M4。
 
 ### R2M4：固定五 seed 正式确认
 

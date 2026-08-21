@@ -95,7 +95,8 @@ r2m2_real_data_smoke:
   scientific_interpretation: ENGINEERING_SMOKE_ONLY
 
 r2m3_seed0_screen:
-  status: R2M3_INTERRUPTED_RECOVERABLE
+  status: R2M3_RECOVERY_ACTIVE
+  interruption_disposition: R2M3_INTERRUPTED_RECOVERABLE
   scientific_gate_status: IN_PROGRESS
   started_at: '2026-08-21T18:30:38+08:00'
   interruption_detected_at: '2026-08-22T00:06:22+08:00'
@@ -131,9 +132,14 @@ r2m3_seed0_screen:
     reuse_completed_folds: true
     overwrite_completed_folds_allowed: false
     persistent_session: reactflow_delta_r2m3_recovery_20260822
+    recovery_started_at: '2026-08-22T00:29:57+08:00'
+    recovery_launch_head: 935e32e49815a84a9ba9d663d7916e62394a6ea6
+    recovery_pid_at_launch: 1863889
     run_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
     monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
     monitor_interval_hours: 4
     merge_only_after_all_twenty_folds: true
     qualify_only_after_merge: true
     r2m4_requires_both_mean_and_calibration_gate: true
+    merge_tool: scripts/reactflow_delta/merge_model_rescue_v2.py
+    merge_tool_commit: 42f3d3df6a0ae49f927fdb5b537a05725aa182b8

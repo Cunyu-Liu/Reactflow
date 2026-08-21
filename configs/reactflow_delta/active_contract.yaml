@@ -6,7 +6,7 @@ created_at: '2026-08-20T14:00:00+08:00'
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
   current_phase: R2M3
-  current_authority_state: R2M3_INTERRUPTED_RECOVERABLE
+  current_authority_state: R2M3_RECOVERY_ACTIVE_FROM_INTERRUPTED_RECOVERABLE
   current_runnable_phase: R2M3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v2-20260820
@@ -42,7 +42,7 @@ scientific_state:
   sota: NOT_ESTABLISHED
   publication_route: BENCHMARK_MEASUREMENT_MAINLINE
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
-  model_rescue_v2: R2M3_INTERRUPTED_RECOVERABLE
+  model_rescue_v2: R2M3_RECOVERY_ACTIVE_FROM_INTERRUPTED_RECOVERABLE
 
 allowed_phases:
   - R2M0
@@ -86,7 +86,8 @@ historical_authority:
 
 next_allowed_action: R2M3_RESUME_MISSING_FOLDS_2_TO_19_IN_PERSISTENT_SESSION
 execution_recovery:
-  status: R2M3_INTERRUPTED_RECOVERABLE
+  interruption_disposition: R2M3_INTERRUPTED_RECOVERABLE
+  status: R2M3_RECOVERY_ACTIVE
   scientific_gate_status: IN_PROGRESS
   completed_folds_verified: [0, 1]
   missing_folds_authorized: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
@@ -94,6 +95,10 @@ execution_recovery:
   partial_fold_scores_inspected: false
   partial_fold_score_inspection_allowed: false
   persistent_session_required: true
+  persistent_session: reactflow_delta_r2m3_recovery_20260822
+  recovery_started_at: '2026-08-22T00:29:57+08:00'
+  recovery_launch_head: 935e32e49815a84a9ba9d663d7916e62394a6ea6
+  run_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
   monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
   r2m4_authorized: false
 blocked_during_r2m3:

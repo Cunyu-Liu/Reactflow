@@ -39,9 +39,15 @@ recovery_authority:
   overwrite_preserved_folds_allowed: false
   run_missing_folds: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   persistent_session: reactflow_delta_r2m3_recovery_20260822
+  recovery_status: R2M3_RECOVERY_ACTIVE
+  recovery_started_at: '2026-08-22T00:29:57+08:00'
+  recovery_launch_head: 935e32e49815a84a9ba9d663d7916e62394a6ea6
+  recovery_pid_at_launch: 1863889
   log_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
   monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
   monitor_interval_hours: 4
   merge_after_all_folds_only: true
   qualify_after_merge_only: true
   r2m4_requires_mean_and_calibration_gate: true
+  merge_tool: scripts/reactflow_delta/merge_model_rescue_v2.py
+  merge_tool_commit: 42f3d3df6a0ae49f927fdb5b537a05725aa182b8
