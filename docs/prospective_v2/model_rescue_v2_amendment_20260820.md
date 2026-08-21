@@ -112,6 +112,12 @@ CRPS 与 signed-delta puzzle-paired CI lower 均须 >0；CRPS 至少改善
 LOO 均正、单 puzzle influence 不超过 25%；coverage 100%、failure 0；68%/95%
 coverage error 不恶化超过 2 个百分点。
 
+CI 固定为 20 个 puzzle-level paired effects 上的双侧 Student-t 95% CI。单 puzzle
+influence 沿用 v1 正式定义：先计算每个 puzzle 的
+`0.5 × CRPS_gain / mean_B1_CRPS + 0.5 × delta_gain / mean_B1_delta_MAE`，再以最大
+绝对值除以 20 个绝对值之和。68% 与 95% coverage absolute-error guardrail 分别判断，
+不得先平均两个 coverage level 后掩盖其中一个失败。
+
 ### R2M5：主合同衔接
 
 PASS 时模型仅为 `POST_HOC_DEVELOPMENT_PASS`，主合同回到 M6，route 为

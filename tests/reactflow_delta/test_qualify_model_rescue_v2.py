@@ -9,7 +9,11 @@ from scripts.reactflow_delta.model_rescue_v2 import (
     CALIBRATED_CANDIDATE,
     MEAN_CANDIDATE,
 )
-from scripts.reactflow_delta.qualify_model_rescue_v2 import qualify_screen, qualify_smoke
+from scripts.reactflow_delta.qualify_model_rescue_v2 import (
+    qualify_formal,
+    qualify_screen,
+    qualify_smoke,
+)
 
 
 def _score(crps: float, delta: float) -> dict:
@@ -133,3 +137,88 @@ def test_smoke_qualifier_opens_r2m3_only_for_real_artifact_invariants(tmp_path):
     assert result["overall_status"] == "R2M2_REAL_DATA_ENGINEERING_SMOKE_PASS"
     assert result["r2m3_authorized"] is True
     json.dumps(result)
+
+
+def _write_formal_prediction(path, candidate: str) -> None:
+    keys = np.asarray(["k1", "k2"], dtype=object)
+    seed_means = np.asarray([[0.10, 0.11, 0.09, 0.10, 0.10], [0.20] * 5])
+    if candidate == "b1_rfd_direct_aligned":
+        locations = seed_means.copy()
+        scales = np.full((2, 5), 0.3)
+        weights = np.full((2, 5), 0.2)
+    else:
+        locations = np.repeat(seed_means, 2, axis=1)
+        scales = np.tile(np.asarray([0.2, 0.5]), (2, 5))
+        weights = np.full((2, 10), 0.1)
+    point_mean = np.sum(locations * weights, axis=1)
+    np.savez_compressed(
+        path,
+        keys=keys,
+        candidate_id=np.full(2, candidate, dtype=object),
+        seed_universe=np.arange(5),
+        seed_point_means=seed_means,
+        point_mean=point_mean,
+        locations=locations,
+        scales=scales,
+        weights=weights,
+        registered_status=np.full(2, "covered", dtype=object),
+    )
+
+
+def _formal_fold(tmp_path, index: int, *, crps_gain: float = 0.005, delta_gain: float = 0.004):
+    baseline_path = tmp_path / f"formal_b1_{index}.npz"
+    candidate_path = tmp_path / f"formal_candidate_{index}.npz"
+    _write_formal_prediction(baseline_path, "b1_rfd_direct_aligned")
+    _write_formal_prediction(candidate_path, CALIBRATED_CANDIDATE)
+    return {
+        "outer_fold": index,
+        "held_puzzle": f"P{index + 1:02d}",
+        "all_seed_target_error_mask_invariance": True,
+        "baseline": {
+            "model_id": "b1_rfd_direct_aligned",
+            "seed_universe": list(range(5)),
+            "prediction_artifact": str(baseline_path),
+            "score": _score(0.20, 0.20),
+        },
+        "candidate": {
+            "model_id": CALIBRATED_CANDIDATE,
+            "seed_universe": list(range(5)),
+            "prediction_artifact": str(candidate_path),
+            "score": _score(0.20 - crps_gain, 0.20 - delta_gain),
+        },
+    }
+
+
+def test_formal_qualifier_requires_unique_five_seed_mixtures_and_all_gates(tmp_path):
+    result = qualify_formal([_formal_fold(tmp_path, index) for index in range(20)])
+    assert result["overall_status"] == "R2M4_POST_HOC_DEVELOPMENT_PASS"
+    assert result["model_qualification"] == "POST_HOC_DEVELOPMENT_PASS"
+    assert all(result["checks"].values())
+    json.dumps(result)
+
+
+def test_formal_qualifier_marks_crps_only_result_as_calibration_baseline(tmp_path):
+    result = qualify_formal(
+        [_formal_fold(tmp_path, index, delta_gain=-0.001) for index in range(20)]
+    )
+    assert result["overall_status"] == "MODEL_RESCUE_V2_FAIL"
+    assert result["model_qualification"] == "CALIBRATION_BASELINE_ONLY"
+    assert not result["checks"]["signed_delta_mae_ci95_lower_positive"]
+
+
+def test_formal_qualifier_rejects_wrong_seed_or_incomplete_fold_universe(tmp_path):
+    folds = [_formal_fold(tmp_path, index) for index in range(20)]
+    folds[0]["candidate"]["seed_universe"] = [0, 1, 2, 3]
+    with pytest.raises(ValueError, match="candidate seed universe"):
+        qualify_formal(folds)
+    with pytest.raises(ValueError, match="exactly folds 0 through 19"):
+        qualify_formal([_formal_fold(tmp_path, index) for index in range(19)])
+
+
+def test_formal_qualifier_enforces_each_coverage_level_guardrail(tmp_path):
+    folds = [_formal_fold(tmp_path, index) for index in range(20)]
+    for fold in folds:
+        fold["candidate"]["score"]["coverage95"] = 0.90
+    result = qualify_formal(folds)
+    assert not result["checks"]["coverage95_absolute_error_worsening_at_most_2pp"]
+    assert result["overall_status"] == "MODEL_RESCUE_V2_FAIL"
