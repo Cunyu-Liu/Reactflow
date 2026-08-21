@@ -131,6 +131,8 @@ screen:
 formal_confirmation:
   phase: R2M4
   prerequisite: R2M3_SCREEN_PASS
+  runner: scripts/reactflow_delta/run_model_rescue_v2_formal.py
+  qualifier: scripts/reactflow_delta/qualify_model_rescue_v2.py
   seeds: [0, 1, 2, 3, 4]
   outer_folds: 20
   nested_selection: false

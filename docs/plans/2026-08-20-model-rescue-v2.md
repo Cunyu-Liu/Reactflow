@@ -60,7 +60,8 @@
 
 ### Batch 5: Formal confirmation and handoff
 
-**Files:** formal artifacts, decision ledger, active contract and manuscript handoff.
+**Files:** `run_model_rescue_v2_formal.py`, formal artifacts, decision ledger, active
+contract and manuscript handoff.
 
 **Risk:** High — final evidence qualification and return to the main contract.
 
