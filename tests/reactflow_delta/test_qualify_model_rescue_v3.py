@@ -197,3 +197,76 @@ def test_screen_preserves_one_percent_mean_gate(monkeypatch) -> None:
     assert failed["mean_gate"]["status"] == "MEAN_GATE_FAIL"
     assert failed["overall_status"] == "MODEL_RESCUE_V3_FAIL"
     assert failed["r3m4_authorized"] is False
+
+
+def _formal_rows(*, candidate_crps: float, candidate_delta: float) -> list[dict]:
+    baseline_score = {
+        **_score(0.2, 0.2),
+        "coverage68": 0.68,
+        "coverage95": 0.95,
+    }
+    candidate_score = {
+        **_score(candidate_crps, candidate_delta),
+        "coverage68": 0.68,
+        "coverage95": 0.95,
+    }
+    return [
+        {
+            "outer_fold": fold,
+            "held_puzzle": f"P{fold + 1:02d}",
+            "all_seed_target_error_mask_invariance": True,
+            "all_seed_inner_crossfit_complete": True,
+            "baseline": {
+                "model_id": BASELINE,
+                "seed_universe": list(range(5)),
+                "prediction_artifact": f"baseline_{fold}.npz",
+                "score": dict(baseline_score),
+            },
+            "candidate": {
+                "model_id": CANDIDATE,
+                "seed_universe": list(range(5)),
+                "prediction_artifact": f"candidate_{fold}.npz",
+                "score": dict(candidate_score),
+            },
+        }
+        for fold in range(20)
+    ]
+
+
+def test_formal_exact_pass_status_requires_all_original_r2m4_gates(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(Q, "_formal_prediction_checks", lambda *_args: {"valid": True})
+
+    result = Q.qualify_formal(
+        _formal_rows(candidate_crps=0.195, candidate_delta=0.197)
+    )
+
+    assert all(result["checks"].values())
+    assert result["overall_status"] == "R2M4_POST_HOC_DEVELOPMENT_PASS"
+    assert result["r3_phase_status"] == "R3M4_ORIGINAL_R2M4_GATE_PASS"
+    assert result["model_qualification"] == "POST_HOC_DEVELOPMENT_PASS"
+
+
+def test_formal_never_passes_on_crps_only_or_sub_one_percent_mean_gain(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(Q, "_formal_prediction_checks", lambda *_args: {"valid": True})
+
+    crps_too_small = Q.qualify_formal(
+        _formal_rows(candidate_crps=0.198, candidate_delta=0.197)
+    )
+    assert (
+        crps_too_small["checks"]["crps_gain_at_least_max_0_003_or_2pct"]
+        is False
+    )
+    assert crps_too_small["overall_status"] == "MODEL_RESCUE_V3_FAIL"
+
+    mean_too_small = Q.qualify_formal(
+        _formal_rows(candidate_crps=0.195, candidate_delta=0.1982)
+    )
+    assert (
+        mean_too_small["checks"]["signed_delta_mae_relative_gain_at_least_1pct"]
+        is False
+    )
+    assert mean_too_small["overall_status"] == "MODEL_RESCUE_V3_FAIL"
