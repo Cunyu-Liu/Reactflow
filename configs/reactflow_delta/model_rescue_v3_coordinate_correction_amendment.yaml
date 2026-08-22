@@ -1,0 +1,113 @@
+schema_version: reactflow_delta.model_rescue_v3_coordinate_correction_amendment.v1
+contract_id: reactflow_delta_model_rescue_v3_coordinate_correction_20260823
+contract_status: R3C1_IMPLEMENTATION_AUTHORIZED_TRAINING_CLOSED
+created_at: '2026-08-23T00:56:55+08:00'
+
+parent:
+  contract: configs/reactflow_delta/model_rescue_v3_amendment.yaml
+  parent_status_before_audit: R3M3_SEED0_SCREEN_AUTHORIZED
+  parent_candidate: b1_meanaligned_disagreement_gate_calibrated_residual
+  disposition: PRESERVE_METHOD_AND_GATES_INVALIDATE_COORDINATE_FRAME
+
+confirmed_failure:
+  status: CONFIRMED_FACT
+  component: scripts.reactflow_delta.m2_universe_v1.M2Universe.build
+  incorrect_behavior: DESIGN_LOCAL_ZERO_BASED_MUTATION_POSITION_USED_AS_FULL_PADDED_SEQUENCE_INDEX
+  official_coordinate_definition:
+    mutA: ONE_BASED_WITHIN_DESIGNED_SEQUENCE
+    sub_start: ONE_BASED_START_WITHIN_FULL_PADDED_SEQUENCE
+  frozen_mapping:
+    design_pos: ID_MM_POSITION_ZERO_BASED
+    full_pos_formula: sub_start_minus_one_plus_design_pos
+  real_data_evidence:
+    registered_records: 13976
+    raw_sequence_hamming_one: 13976
+    formula_matches_raw_difference: 13976
+    formula_ref_match: 13976
+    formula_alt_match: 13976
+    mutA_equals_design_pos_plus_one: 13976
+    old_direct_full_sequence_ref_match: 3726
+  official_source: https://github.com/eternagame/OpenKnotAIDesignData
+
+scientific_effect:
+  affected_inputs:
+    - EDIT_SITE_HIDDEN_STATE
+    - SIGNED_DISTANCE_TO_EDIT
+    - EDIT_SITE_WT_REACTIVITY_AND_ERROR
+    - EDIT_SITE_REGION
+    - STRUCTURE_GRAPH_EDIT_INDEX
+  unaffected_identifiers:
+    - RAW_MUTANT_ROW_ID_USES_DESIGN_POS
+    - BIOLOGICAL_SCORING_KEY_USES_DESIGN_POS
+    - RECEIVER_POSITION_USES_FULL_SEQUENCE_POSITION
+  invalidated_artifact_classes:
+    - PRE_CORRECTION_B1_TRAINING_AND_PREDICTIONS
+    - PRE_CORRECTION_MEANALIGNED_TRAINING_AND_PREDICTIONS
+    - PRE_CORRECTION_V3_ENGINEERING_SMOKE
+    - PRE_CORRECTION_V3_EXPERT_REUSE_AUDIT
+  historical_terminal_policy: V1_AND_V2_TERMINAL_TEXT_REMAINS_IMMUTABLE_BUT_ARTIFACTS_NOT_REUSABLE
+
+corrected_internal_contract:
+  record_fields:
+    design_pos: ZERO_BASED_WITHIN_DESIGNED_SEQUENCE_FOR_ID_AND_KEYS
+    full_pos: ZERO_BASED_WITHIN_FULL_PADDED_SEQUENCE_FOR_MODEL_AND_DISTANCE
+  target_profile_lookup_coordinate: design_pos
+  model_edit_coordinate: full_pos
+  biological_key_edit_coordinate: design_pos
+  receiver_coordinate: full_pos
+  required_invariants:
+    - FULL_POS_EQUALS_SUB_START_MINUS_ONE_PLUS_DESIGN_POS
+    - FULL_SEQUENCE_AT_FULL_POS_EQUALS_REF
+    - RAW_MUTANT_SEQUENCE_AT_FULL_POS_EQUALS_ALT
+    - RAW_WT_TO_MUTANT_HAMMING_DISTANCE_EQUALS_ONE
+    - TARGET_LOOKUP_STILL_JOINS_ALL_13976_REGISTERED_MUTANTS
+    - PREDICTION_KEYS_REMAIN_UNCHANGED
+    - HELD_OUTCOME_TARGET_MASK_DO_NOT_ENTER_PREDICTION
+
+phase_graph:
+  - id: R3C0
+    status: PASS
+    meaning: COORDINATE_AUDIT_CONFIRMED_AND_OLD_WAITERS_STOPPED_AT_ZERO_COMPLETE_FOLDS
+  - id: R3C1
+    status: IN_PROGRESS
+    training_allowed: false
+    next_on_pass: R3C2
+  - id: R3C2
+    status: NOT_RUN
+    training_allowed: ENGINEERING_SMOKE_ONLY
+    next_on_pass: R3C3
+  - id: R3C3
+    status: NOT_RUN
+    training_allowed: CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY
+    next_on_pass: R3M3
+  - id: R3M3
+    status: INVALID_BEFORE_FIRST_FOLD_REQUIRES_CORRECTED_RESTART
+  - id: R3M4
+    status: NOT_RUN
+
+authorization:
+  current_phase: R3C1
+  training_allowed: false
+  allowed:
+    - IMPLEMENT_LOCAL_AND_FULL_COORDINATE_SEPARATION
+    - UPDATE_ONLY_AFFECTED_INTERNAL_CALL_PATHS
+    - ADD_FOCUSED_REAL_METADATA_AND_UNIT_REGRESSION_TESTS
+    - RUN_NON_TRAINING_TESTS_AND_VALIDATORS
+  prohibited:
+    - REUSE_PRE_CORRECTION_B1_OR_MEANALIGNED_ARTIFACTS
+    - RESTART_R3M3_BEFORE_R3C2_AND_R3C3_PASS
+    - MODIFY_MODEL_ARCHITECTURE_EPOCH_SEED_GATE_OR_THRESHOLDS
+    - READ_PARTIAL_R3M3_SCORES
+    - ACCESS_NEW_EXTERNAL_OUTCOMES
+    - MODIFY_V1_OR_V2_TERMINAL_CONCLUSIONS
+    - INTERFERE_WITH_UNRELATED_GPU_JOBS
+
+success_transition:
+  required_before_training_reopens:
+    - R3C1_IMPLEMENTATION_AND_COORDINATE_INVARIANTS_PASS
+    - R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS
+  required_before_r3m3_reopens:
+    - CORRECTED_B1_SEED0_TWENTY_FOLD_ARTIFACT_COMPLETE
+    - CORRECTED_MEANALIGNED_SEED0_TWENTY_FOLD_ARTIFACT_COMPLETE
+    - CORRECTED_EXPERT_KEY_UNIVERSE_IDENTITY_PASS
+  gates_after_restart: UNCHANGED_FROM_PARENT_V3

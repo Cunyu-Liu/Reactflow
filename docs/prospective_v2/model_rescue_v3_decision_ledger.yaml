@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v3_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v3_20260822
-as_of: '2026-08-23T00:32:00+08:00'
+as_of: '2026-08-23T00:56:55+08:00'
 parent_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
 diagnostic_freeze_head: ac58c7ba45c87c7ff3a9dffb6eda010b0d80604c
 
@@ -71,10 +71,14 @@ decisions:
     - RANK_STRUCTURE_TEACHER_FOUNDATION_LARGER_BACKBONE
 
 phase_state:
-  R3M0: PASS
-  R3M1: PASS
-  R3M2: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
-  R3M3: IN_PROGRESS
+  R3C0: COORDINATE_AUDIT_AND_INVALID_RUN_INTERRUPTION_PASS
+  R3C1: IN_PROGRESS
+  R3C2: NOT_RUN
+  R3C3: NOT_RUN
+  R3M0: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
+  R3M1: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
+  R3M2: INVALIDATED_COORDINATE_FRAME
+  R3M3: INVALID_BEFORE_FIRST_FOLD
   R3M4: NOT_RUN
   R3M5: NOT_RUN
 
@@ -127,6 +131,7 @@ seed0_outer_expert_reuse_audit:
   allowed_use: R3M3_SEED0_OUTER_EXPERT_REUSE_ONLY
   prohibited_use: R3M2_ENGINEERING_SMOKE
   scores_read: false
+  post_coordinate_audit_qualification: INVALID_COORDINATE_FRAME_NOT_REUSABLE
 
 seed0_b1_current_evaluator_replay:
   status: PASS_EXACT
@@ -146,6 +151,7 @@ seed0_b1_current_evaluator_replay:
   maximum_absolute_difference: 0.0
   implication: REUSED_B1_SCORE_IS_EXACTLY_CURRENT_EVALUATOR_COMPATIBLE
   current_r3m3_candidate_scores_read: false
+  post_coordinate_audit_qualification: NUMERIC_REPLAY_EXACT_BUT_COORDINATE_FRAME_INVALID
 
 r3m3_training_estimand_audit:
   status: PASS
@@ -184,7 +190,7 @@ r3m3_gate_algorithm_replay:
   current_r3m3_candidate_scores_read: false
 
 r3m2_engineering_smoke:
-  status: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
+  status: INVALIDATED_COORDINATE_FRAME
   evidence_status: ENGINEERING_SMOKE_ONLY
   completed_at: '2026-08-22T23:59:14+08:00'
   authority_transition_parent_head: 69e8cfd90f80c8eefe537c50640e6ddf44297320
@@ -215,10 +221,10 @@ r3m2_engineering_smoke:
     invariant and a regression test still rejects 2e-6 corruption. Original smoke
     artifacts were not modified; the qualifier was replayed on those artifacts.
   scores_read_or_used_for_selection: false
-  next_authorized_phase: R3M3
+  next_authorized_phase: NONE_REQUIRES_R3C1_AND_R3C2
 
 r3m3_execution:
-  status: WAITING_FOR_NONINTERFERING_GPU0_TO5_CAPACITY
+  status: R3M3_INVALID_BEFORE_FIRST_FOLD_COORDINATE_FRAME
   launched_at: '2026-08-23T00:11:43+08:00'
   seed: 0
   folds: 20
@@ -246,3 +252,37 @@ r3m3_execution:
   partial_score_access: PROHIBITED
   merge_before_all_twenty_folds: PROHIBITED
   r3m4_authorized: false
+  stopped_at: '2026-08-23T00:56:55+08:00'
+  complete_fold_artifacts_at_stop: 0
+  partial_scores_read: false
+  waiters_stopped: 6
+  runner_processes_after_stop: 0
+  artifacts_deleted_or_overwritten: false
+
+coordinate_frame_correction:
+  status: CONFIRMED_FACT
+  evidence: docs/prospective_v2/audit/r3m3_coordinate_frame_interruption_20260823.yaml
+  official_source: https://github.com/eternagame/OpenKnotAIDesignData
+  failure: DESIGN_LOCAL_ZERO_BASED_POSITION_USED_AS_FULL_PADDED_SEQUENCE_INDEX
+  correct_formula: full_pos = sub_start - 1 + design_pos
+  real_data_counts:
+    registered_records: 13976
+    raw_hamming_one: 13976
+    formula_matches_raw_diff: 13976
+    formula_ref_match: 13976
+    formula_alt_match: 13976
+    mutA_equals_design_pos_plus_one: 13976
+    old_direct_full_sequence_ref_match: 3726
+  affected_inputs:
+    - EDIT_SITE_HIDDEN_STATE
+    - SIGNED_DISTANCE_TO_EDIT
+    - EDIT_SITE_WT_REACTIVITY_AND_ERROR
+    - EDIT_SITE_REGION
+  invalidated_for_corrected_reuse:
+    - PRE_CORRECTION_B1_ARTIFACTS
+    - PRE_CORRECTION_MEANALIGNED_ARTIFACTS
+    - PRE_CORRECTION_R3M2_SMOKE
+  required_next:
+    - R3C1_IMPLEMENTATION_AND_COORDINATE_INVARIANTS
+    - R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE
+    - R3C3_CORRECTED_B1_AND_MEANALIGNED_SEED0_REBUILD

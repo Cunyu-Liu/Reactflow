@@ -1,0 +1,25 @@
+schema_version: reactflow_delta.r3m3_coordinate_frame_interruption.v1
+status: R3M3_INVALID_BEFORE_FIRST_FOLD_COORDINATE_FRAME
+recorded_at: '2026-08-23T00:56:55+08:00'
+complete_fold_artifacts: 0
+partial_scores_read: false
+waiters_stopped: 6
+runner_processes_after_stop: 0
+artifacts_deleted_or_overwritten: false
+external_outcomes_accessed: false
+confirmed_counts:
+  registered_records: 13976
+  raw_hamming_one: 13976
+  corrected_formula_matches_raw_diff: 13976
+  corrected_ref_match: 13976
+  corrected_alt_match: 13976
+  mutA_equals_design_pos_plus_one: 13976
+  old_direct_index_ref_match: 3726
+corrected_formula: full_pos = sub_start - 1 + design_pos
+affected_code_root: scripts/reactflow_delta/m2_universe_v1.py
+disposition:
+  old_r3m2_smoke: INVALID_COORDINATE_FRAME
+  old_b1_reuse: PROHIBITED_FOR_CORRECTED_RUN
+  old_meanaligned_reuse: PROHIBITED_FOR_CORRECTED_RUN
+  old_r3m3: NOT_PASS_NOT_FAIL_INVALID_BEFORE_FIRST_FOLD
+  next_phase: R3C1
