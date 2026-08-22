@@ -141,9 +141,9 @@ def _prediction_checks(path: Path) -> dict[str, bool]:
         and set(map(str, prediction.get("registered_status", []))) == {"covered"},
         "component_and_vector_shapes": shapes,
         "expert_disagreement_replays": shapes
-        and bool(np.allclose(disagreement, expected_disagreement, atol=1e-12, rtol=0)),
+        and bool(np.allclose(disagreement, expected_disagreement, atol=1e-7, rtol=0)),
         "gate_alpha_replays": shapes
-        and bool(np.allclose(alpha, expected_alpha, atol=1e-12, rtol=0)),
+        and bool(np.allclose(alpha, expected_alpha, atol=1e-7, rtol=0)),
         "alpha_convex": shapes and bool(((0 <= alpha) & (alpha <= 1)).all()),
         "blended_delta_replays": shapes
         and bool(np.allclose(delta, expected_delta, atol=1e-7, rtol=0)),

@@ -5,15 +5,15 @@ created_at: '2026-08-22T23:10:00+08:00'
 
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  current_phase: R3M2
-  current_authority_state: MODEL_RESCUE_V3_REAL_DATA_ENGINEERING_SMOKE_ONLY
-  current_runnable_phase: R3M2
+  current_phase: R3M3
+  current_authority_state: MODEL_RESCUE_V3_SEED0_SCREEN_AUTHORIZED
+  current_runnable_phase: R3M3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v3-20260822
   human_contract_path: docs/prospective_v2/model_rescue_v3_amendment_20260822.md
   machine_contract_path: configs/reactflow_delta/model_rescue_v3_amendment.yaml
   decision_ledger_path: docs/prospective_v2/model_rescue_v3_decision_ledger.yaml
-  binding_status: R3M1_IMPLEMENTATION_AND_INVARIANTS_PASS
+  binding_status: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
   precedence:
     - THIS_ACTIVE_CONTRACT
     - MODEL_RESCUE_V3_MACHINE_AMENDMENT
@@ -45,9 +45,9 @@ scientific_state:
   publication_route: BENCHMARK_MEASUREMENT_MAINLINE
 
 allowed_phases: [R3M0, R3M1, R3M2, R3M3, R3M4, R3M5, M6]
-runnable_phases: [R3M2]
-training_allowed: ENGINEERING_SMOKE_ONLY
-candidate_model_training_allowed: ENGINEERING_SMOKE_ONLY
+runnable_phases: [R3M3]
+training_allowed: true
+candidate_model_training_allowed: true
 diagnostic_analysis_allowed: true
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -60,8 +60,8 @@ unrelated_job_interference_allowed: false
 gate_state:
   R3M0: PASS
   R3M1: PASS
-  R3M2: IN_PROGRESS_ENGINEERING_SMOKE_ONLY
-  R3M3: NOT_RUN
+  R3M2: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
+  R3M3: IN_PROGRESS
   R3M4: NOT_RUN
   R3M5: NOT_RUN
   ORIGINAL_R2M4_DUAL_PRIMARY: NOT_ESTABLISHED
@@ -74,8 +74,7 @@ historical_authority:
   model_rescue_v2_terminal_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
   disposition: PRESERVE_UNCHANGED
 
-next_allowed_action: RUN_REAL_P01_P02_R3M2_ENGINEERING_SMOKE
-blocked_until_r3m2_pass:
-  - R3M3_SEED0_SCREEN
+next_allowed_action: RUN_FIXED_SEED0_TWENTY_FOLD_R3M3_SCREEN
+blocked_until_r3m3_dual_gate_pass:
   - R3M4_FIVE_SEED_FORMAL
   - NEW_EXTERNAL_OUTCOME_ACCESS

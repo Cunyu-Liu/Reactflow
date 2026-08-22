@@ -64,6 +64,26 @@ def test_prediction_checks_replay_gate_and_reject_blend_tampering(tmp_path: Path
     assert checks["blended_delta_replays"] is False
 
 
+def test_prediction_checks_accept_reachable_float32_replay_rounding(tmp_path: Path) -> None:
+    source = tmp_path / "source.npz"
+    _write_prediction(source)
+    with np.load(source, allow_pickle=True) as stored:
+        arrays = {name: stored[name] for name in stored.files}
+    arrays["expert_disagreement"] = arrays["expert_disagreement"] + 2.98e-8
+    arrays["gate_alpha_applied"] = arrays["gate_alpha_applied"] + 1.46e-8
+    rounded = tmp_path / "rounded.npz"
+    np.savez_compressed(rounded, **arrays)
+
+    checks = Q._prediction_checks(rounded)
+    assert checks["expert_disagreement_replays"] is True
+    assert checks["gate_alpha_replays"] is True
+
+    arrays["expert_disagreement"] = arrays["expert_disagreement"] + 2e-6
+    outside_tolerance = tmp_path / "outside_tolerance.npz"
+    np.savez_compressed(outside_tolerance, **arrays)
+    assert Q._prediction_checks(outside_tolerance)["expert_disagreement_replays"] is False
+
+
 def test_inner_ledger_checks_complete_disjoint_crossfit(tmp_path: Path) -> None:
     puzzles = [f"P{i:02d}" for i in range(1, 20)]
     groups = [puzzles[index::4] for index in range(4)]

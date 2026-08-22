@@ -1,7 +1,7 @@
 # ReactFlow-Delta Model Rescue v3 阶段性合同
 
 日期：2026-08-22  
-当前执行状态：`R3M2_ENGINEERING_SMOKE_ONLY`
+当前执行状态：`R3M3_SEED0_TWENTY_FOLD_SCREEN_AUTHORIZED`
 父合同：Model Rescue v2 终局 `TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY`  
 父合同终局 commit：`97ce496c4dda944d0554b49342ce388d8f9d97c1`
 
@@ -212,3 +212,20 @@ runner、zero-mean residual 和 R3M2/R3M3/R3M4 qualifier。v2/v3 聚焦回归共
 通过，覆盖 exact hierarchy weights、inner-held 排除与完整覆盖、blend 算术重放、禁止
 method/target 字段、calibration gradient 隔离及原 Gate parity。该结果只授权真实 P01/P02
 三 epoch engineering smoke；R3M3 与 R3M4 继续关闭。
+
+## 12. R3M2 真实数据工程 smoke 记录（2026-08-23）
+
+R3M2 在真实 OpenKnot M2 v4.5.2 的 P01/P02、seed 0、CPU 上完成；B1、MeanAligned
+和 residual 各运行 3 epochs，outer experts 均从头训练且没有复用正式 checkpoint。预冻结
+qualifier 在原始 artifacts 上确认 inner-crossfit 完整且 disjoint、训练有限、held
+target/error/mask 不改变 prediction、zero-mean residual 不改变 point mean、registered coverage
+100%、failure 0、unexpected keys 0。
+
+首次 qualifier replay 的两个失败项来自等价 float32 路径的舍入差，而非 gate 分支或模型
+语义不一致：expert disagreement 最大差 `2.98e-8`，alpha 最大差 `1.46e-8`，gate branch
+不一致数为 0。replay 容差随后与既有 prediction invariant 统一为 `1e-7`，回归测试仍拒绝
+`2e-6` 篡改；原始 smoke artifacts 未被修改，重放状态为
+`R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS`。本 smoke 的任何 score 均未读取或用于选择。
+
+据此，R3M3 seed-0 20-fold screen 成为唯一可运行阶段。R3M4 与 external outcome 继续
+关闭；只有 R3M3 Mean Gate 和 Calibration Gate 同时通过才可开放 R3M4。

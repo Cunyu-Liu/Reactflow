@@ -1,7 +1,8 @@
 schema_version: reactflow_delta.model_rescue_v3_amendment.v1
 contract_id: reactflow_delta_model_rescue_v3_20260822
-contract_status: R3M2_ENGINEERING_SMOKE_ONLY
+contract_status: R3M3_SEED0_SCREEN_AUTHORIZED
 created_at: '2026-08-22T23:10:00+08:00'
+updated_at: '2026-08-23T00:06:21+08:00'
 
 parent:
   contract: configs/reactflow_delta/model_rescue_v2_amendment.yaml
@@ -109,8 +110,8 @@ models:
     equal_compute_claim_allowed: false
 
 authorization:
-  current_phase: R3M2
-  training_allowed: ENGINEERING_SMOKE_ONLY
+  current_phase: R3M3
+  training_allowed: true
   allowed:
     - IMPLEMENT_V3_MODEL_GATE_RUNNER_QUALIFIER
     - RUN_FOCUSED_TESTS_AND_CONTRACT_VALIDATOR
@@ -172,8 +173,8 @@ formal_confirmation:
 phase_graph:
   - {id: R3M0, status: PASS, next_on_pass: R3M1}
   - {id: R3M1, status: PASS, training_allowed: false, next_on_pass: R3M2}
-  - {id: R3M2, status: IN_PROGRESS, training_allowed: ENGINEERING_SMOKE_ONLY, next_on_pass: R3M3}
-  - {id: R3M3, status: NOT_RUN, next_on_pass: R3M4, next_on_fail: R3M5_FAIL}
+  - {id: R3M2, status: PASS, training_allowed: ENGINEERING_SMOKE_ONLY, next_on_pass: R3M3}
+  - {id: R3M3, status: IN_PROGRESS, training_allowed: true, next_on_pass: R3M4, next_on_fail: R3M5_FAIL}
   - {id: R3M4, status: NOT_RUN, next_on_pass: R3M5_PASS, next_on_fail: R3M5_FAIL}
   - {id: R3M5, status: NOT_RUN, handoff_phase: M6}
 
@@ -183,3 +184,17 @@ claim_policy:
   mechanism: NOT_ESTABLISHED
   sota: NOT_ESTABLISHED
   publication_ready: false
+
+r3m2_engineering_smoke:
+  status: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
+  completed_at: '2026-08-22T23:59:14+08:00'
+  authority_transition_parent_head: 69e8cfd90f80c8eefe537c50640e6ddf44297320
+  folds: [0, 1]
+  seed: 0
+  device: CPU
+  expert_epochs: 3
+  residual_epochs: 3
+  artifact_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m2_real_smoke_cpu
+  result: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m2_real_smoke_cpu/v3_result_seed0.json
+  qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m2_real_smoke_cpu/r3m2_qualification.json
+  scientific_interpretation: ENGINEERING_SMOKE_ONLY_SCORES_NOT_USED

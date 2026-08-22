@@ -21,14 +21,21 @@ def test_v3_authority_is_fail_closed_and_preserves_terminal_parents() -> None:
     assert active["authority"]["machine_contract_path"] == (
         "configs/reactflow_delta/model_rescue_v3_amendment.yaml"
     )
-    assert active["authority"]["current_phase"] == "R3M2"
-    assert active["runnable_phases"] == ["R3M2"]
-    assert active["training_allowed"] == "ENGINEERING_SMOKE_ONLY"
-    assert active["candidate_model_training_allowed"] == "ENGINEERING_SMOKE_ONLY"
+    assert active["authority"]["current_phase"] == "R3M3"
+    assert active["authority"]["binding_status"] == (
+        "R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS"
+    )
+    assert active["runnable_phases"] == ["R3M3"]
+    assert active["training_allowed"] is True
+    assert active["candidate_model_training_allowed"] is True
     assert active["new_external_outcome_access_allowed"] is False
-    assert v3["authorization"]["training_allowed"] == "ENGINEERING_SMOKE_ONLY"
-    assert v3["phase_graph"][2]["status"] == "IN_PROGRESS"
-    assert v3["phase_graph"][3]["status"] == "NOT_RUN"
+    assert v3["authorization"]["current_phase"] == "R3M3"
+    assert v3["authorization"]["training_allowed"] is True
+    assert v3["phase_graph"][2]["status"] == "PASS"
+    assert v3["phase_graph"][3]["status"] == "IN_PROGRESS"
+    assert v3["r3m2_engineering_smoke"]["status"] == (
+        "R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS"
+    )
     assert v3["parent"]["disposition"] == "IMMUTABLE_PRESERVE_UNCHANGED"
     assert v2["contract_status"] == (
         "TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY"

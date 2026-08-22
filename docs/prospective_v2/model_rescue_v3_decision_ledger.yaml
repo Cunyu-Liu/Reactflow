@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v3_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v3_20260822
-as_of: '2026-08-22T23:10:00+08:00'
+as_of: '2026-08-23T00:06:21+08:00'
 parent_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
 diagnostic_freeze_head: ac58c7ba45c87c7ff3a9dffb6eda010b0d80604c
 
@@ -73,8 +73,8 @@ decisions:
 phase_state:
   R3M0: PASS
   R3M1: PASS
-  R3M2: IN_PROGRESS_ENGINEERING_SMOKE_ONLY
-  R3M3: NOT_RUN
+  R3M2: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
+  R3M3: IN_PROGRESS
   R3M4: NOT_RUN
   R3M5: NOT_RUN
 
@@ -127,3 +127,37 @@ seed0_outer_expert_reuse_audit:
   allowed_use: R3M3_SEED0_OUTER_EXPERT_REUSE_ONLY
   prohibited_use: R3M2_ENGINEERING_SMOKE
   scores_read: false
+
+r3m2_engineering_smoke:
+  status: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
+  evidence_status: ENGINEERING_SMOKE_ONLY
+  completed_at: '2026-08-22T23:59:14+08:00'
+  authority_transition_parent_head: 69e8cfd90f80c8eefe537c50640e6ddf44297320
+  execution:
+    folds: [0, 1]
+    seed: 0
+    device: CPU
+    expert_epochs: 3
+    residual_epochs: 3
+    outer_experts_reused: false
+  artifacts:
+    directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m2_real_smoke_cpu
+    result: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m2_real_smoke_cpu/v3_result_seed0.json
+    qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m2_real_smoke_cpu/r3m2_qualification.json
+  verified_invariants:
+    - FOUR_FOLD_INNER_CROSSFIT_COMPLETE_AND_DISJOINT
+    - OUTER_EXPERTS_TRAINED_AT_MOST_THREE_EPOCHS_AND_NOT_REUSED
+    - FINITE_EXPERT_AND_RESIDUAL_TRAINING
+    - TARGET_ERROR_MASK_INVARIANT_PREDICTIONS
+    - EXPERT_DISAGREEMENT_GATE_AND_BLEND_REPLAY
+    - ZERO_MEAN_RESIDUAL_DID_NOT_CHANGE_POINT_MEAN
+    - FULL_REGISTERED_COVERAGE_ZERO_FAILURE_ZERO_UNEXPECTED_KEYS
+  qualifier_note: >-
+    The initial engineering replay used an unrealistically strict 1e-12 tolerance
+    for two values computed along equivalent float32 tensor paths. Observed maximum
+    differences were 2.98e-8 for disagreement and 1.46e-8 for alpha, with zero gate
+    branch mismatches. The tolerance was aligned to the existing 1e-7 prediction
+    invariant and a regression test still rejects 2e-6 corruption. Original smoke
+    artifacts were not modified; the qualifier was replayed on those artifacts.
+  scores_read_or_used_for_selection: false
+  next_authorized_phase: R3M3
