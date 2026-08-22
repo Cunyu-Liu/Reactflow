@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v3_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v3_20260822
-as_of: '2026-08-23T00:29:00+08:00'
+as_of: '2026-08-23T00:32:00+08:00'
 parent_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
 diagnostic_freeze_head: ac58c7ba45c87c7ff3a9dffb6eda010b0d80604c
 
@@ -166,6 +166,21 @@ r3m3_training_estimand_audit:
     prediction_input_mask: WT_OBSERVED_ONLY
     target_qualified_mask_usage: LOSS_ONLY
     held_target_error_or_mask_in_prediction: false
+  current_r3m3_candidate_scores_read: false
+
+r3m3_gate_algorithm_replay:
+  status: PASS_EXACT
+  audited_at: '2026-08-23T00:32:00+08:00'
+  source: autoresearch/loop-260822-1700/cycle2-tail-gate-probe.json
+  folds: 20
+  exact_folds: 20
+  compared_parameters: [threshold, alpha_low, alpha_high]
+  maximum_absolute_difference: 0.0
+  interpretation: >-
+    On identical frozen historical rows, the production fixed-q95 fitting code is
+    exactly identical to the selected legal diagnostic gate. Current R3M3 uses new
+    four-fold outer-train inner-OOF predictions instead of the historical meta-OOF
+    rows in order to eliminate indirect outer-held leakage.
   current_r3m3_candidate_scores_read: false
 
 r3m2_engineering_smoke:
