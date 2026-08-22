@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v3_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v3_20260822
-as_of: '2026-08-23T00:06:21+08:00'
+as_of: '2026-08-23T00:11:43+08:00'
 parent_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
 diagnostic_freeze_head: ac58c7ba45c87c7ff3a9dffb6eda010b0d80604c
 
@@ -161,3 +161,33 @@ r3m2_engineering_smoke:
     artifacts were not modified; the qualifier was replayed on those artifacts.
   scores_read_or_used_for_selection: false
   next_authorized_phase: R3M3
+
+r3m3_execution:
+  status: WAITING_FOR_NONINTERFERING_GPU0_TO5_CAPACITY
+  launched_at: '2026-08-23T00:11:43+08:00'
+  seed: 0
+  folds: 20
+  expert_epochs: 40
+  residual_epochs: 40
+  artifact_root: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m3_screen_seed0
+  controller: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3m3_screen_seed0/controller/launch_r3m3_seed0_waiter.sh
+  outer_expert_reuse:
+    b1: /mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_fullscreen_merged_20260820
+    meanaligned: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0
+    status: PREVIOUSLY_AUDITED_SEED0_ONLY
+  gpu_wait_policy:
+    physical_gpus: [0, 1, 2, 3, 4, 5]
+    poll_interval_seconds: 900
+    launch_only_if_free_memory_mb_at_least: 20000
+    launch_only_if_utilization_percent_at_most: 10
+    unrelated_job_interference: PROHIBITED
+  shards:
+    - {session: reactflow_v3_r3m3_gpu0, physical_gpu: 0, folds: [0, 6, 12, 18], output: shards/shard_gpu0, log: logs/shard_gpu0.log}
+    - {session: reactflow_v3_r3m3_gpu1, physical_gpu: 1, folds: [1, 7, 13, 19], output: shards/shard_gpu1, log: logs/shard_gpu1.log}
+    - {session: reactflow_v3_r3m3_gpu2, physical_gpu: 2, folds: [2, 8, 14], output: shards/shard_gpu2, log: logs/shard_gpu2.log}
+    - {session: reactflow_v3_r3m3_gpu3, physical_gpu: 3, folds: [3, 9, 15], output: shards/shard_gpu3, log: logs/shard_gpu3.log}
+    - {session: reactflow_v3_r3m3_gpu4, physical_gpu: 4, folds: [4, 10, 16], output: shards/shard_gpu4, log: logs/shard_gpu4.log}
+    - {session: reactflow_v3_r3m3_gpu5, physical_gpu: 5, folds: [5, 11, 17], output: shards/shard_gpu5, log: logs/shard_gpu5.log}
+  partial_score_access: PROHIBITED
+  merge_before_all_twenty_folds: PROHIBITED
+  r3m4_authorized: false
