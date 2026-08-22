@@ -62,9 +62,9 @@ def assert_run_authority(repo_root: Path, phase: str, *, smoke: bool) -> None:
         )
     if active.get("runnable_phases") != [phase]:
         raise RuntimeError("v3 runner requires a single matching runnable phase")
-    if phase == "R3M2":
+    if phase in {"R3M2", "R3C2"}:
         if not smoke or active.get("training_allowed") != "ENGINEERING_SMOKE_ONLY":
-            raise RuntimeError("R3M2 authorizes engineering smoke only")
+            raise RuntimeError(f"{phase} authorizes engineering smoke only")
     else:
         if smoke or active.get("training_allowed") is not True:
             raise RuntimeError(f"{phase} requires full active training authority")

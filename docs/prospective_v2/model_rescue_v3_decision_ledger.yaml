@@ -72,8 +72,8 @@ decisions:
 
 phase_state:
   R3C0: COORDINATE_AUDIT_AND_INVALID_RUN_INTERRUPTION_PASS
-  R3C1: IN_PROGRESS
-  R3C2: NOT_RUN
+  R3C1: IMPLEMENTATION_AND_COORDINATE_INVARIANTS_PASS
+  R3C2: AUTHORIZED_NOT_RUN
   R3C3: NOT_RUN
   R3M0: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
   R3M1: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
@@ -283,6 +283,39 @@ coordinate_frame_correction:
     - PRE_CORRECTION_MEANALIGNED_ARTIFACTS
     - PRE_CORRECTION_R3M2_SMOKE
   required_next:
-    - R3C1_IMPLEMENTATION_AND_COORDINATE_INVARIANTS
     - R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE
     - R3C3_CORRECTED_B1_AND_MEANALIGNED_SEED0_REBUILD
+
+r3c1_coordinate_correction_validation:
+  status: R3C1_IMPLEMENTATION_AND_COORDINATE_INVARIANTS_PASS
+  completed_at: '2026-08-23T01:31:41+08:00'
+  focused_commit: 38f72ab
+  evidence: docs/prospective_v2/audit/r3c1_coordinate_correction_validation_20260823.yaml
+  implementation:
+    record_coordinates: [design_pos, full_pos]
+    target_profile_lookup: design_pos
+    model_edit_and_distance_coordinate: full_pos
+    biological_key_edit_coordinate: design_pos
+    prediction_receiver_coordinate: full_pos
+  real_data_validation:
+    registered_records: 13976
+    raw_hamming_one: 13976
+    formula_matches_raw_diff: 13976
+    formula_ref_match: 13976
+    formula_alt_match: 13976
+    mutA_equals_design_pos_plus_one: 13976
+  prediction_key_universe:
+    fold: 0
+    held_puzzle: P01
+    expected_keys: 73632
+    existing_keys: 73632
+    missing: 0
+    unexpected: 0
+    exact_identity: true
+    score_fields_read: false
+  tests:
+    focused_coordinate_and_contract: 38_PASSED
+    cross_flow_compatibility: 19_PASSED
+    staged_diff_check: PASS
+  scientific_interpretation: ENGINEERING_AND_DATA_COORDINATE_VALIDATION_ONLY
+  next_authorized_phase: R3C2

@@ -99,6 +99,25 @@ def test_runner_enforces_phase_specific_training_authority(tmp_path) -> None:
         assert_run_authority(tmp_path, "R3M2", smoke=False)
 
 
+def test_runner_accepts_coordinate_corrected_engineering_smoke_authority(
+    tmp_path,
+) -> None:
+    config = tmp_path / "configs" / "reactflow_delta"
+    config.mkdir(parents=True)
+    active = {
+        "authority": {"current_phase": "R3C2"},
+        "runnable_phases": ["R3C2"],
+        "training_allowed": "ENGINEERING_SMOKE_ONLY",
+        "new_external_outcome_access_allowed": False,
+    }
+    (config / "active_contract.yaml").write_text(
+        yaml.safe_dump(active), encoding="utf-8"
+    )
+    assert_run_authority(tmp_path, "R3C2", smoke=True)
+    with pytest.raises(RuntimeError, match="engineering smoke only"):
+        assert_run_authority(tmp_path, "R3C2", smoke=False)
+
+
 def test_smoke_rejects_forty_epoch_outer_expert_reuse(tmp_path) -> None:
     with pytest.raises(ValueError, match="at most three epochs"):
         validate_outer_expert_reuse(

@@ -1,0 +1,65 @@
+schema_version: reactflow_delta.r3c1_coordinate_correction_validation.v1
+status: R3C1_IMPLEMENTATION_AND_COORDINATE_INVARIANTS_PASS
+completed_at: '2026-08-23T01:31:41+08:00'
+focused_commit: 38f72ab
+
+scope:
+  scientific_training_run: false
+  partial_score_access: false
+  external_outcome_access: false
+  v1_v2_terminal_files_modified: false
+
+implementation:
+  record_fields:
+    design_pos: ZERO_BASED_WITHIN_DESIGNED_SEQUENCE
+    full_pos: ZERO_BASED_WITHIN_FULL_PADDED_CONSTRUCT
+  full_pos_formula: sub_start_minus_one_plus_design_pos
+  target_profile_lookup_coordinate: design_pos
+  model_edit_coordinate: full_pos
+  biological_key_edit_coordinate: design_pos
+  receiver_coordinate: full_pos
+
+real_openknot_validation:
+  data: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  registered_records: 13976
+  constructs: 160
+  puzzle_method_cells: 160
+  sequence_length: 177
+  raw_hamming_one: 13976
+  formula_matches_raw_diff: 13976
+  formula_ref_match: 13976
+  formula_alt_match: 13976
+  mutA_equals_design_pos_plus_one: 13976
+
+prediction_key_identity:
+  fold: 0
+  held_puzzle: P01
+  corrected_expected_keys: 73632
+  pre_correction_artifact_keys: 73632
+  missing: 0
+  unexpected: 0
+  exact_identity: true
+  artifact_used_for_key_only: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/v2_predictions_b1_mean_aligned_fold0_seed0.npz
+
+verification:
+  focused_coordinate_and_contract_suite:
+    result: 38_PASSED
+  cross_flow_suites:
+    test_run_p2_v3: 4_PASSED
+    test_model_rescue_v2: 6_PASSED
+    test_model_rescue_v3: 7_PASSED
+    test_analyze_model_rescue_v3: 2_PASSED
+  ambiguous_mutant_record_pos_references: 0
+  git_diff_check: PASS
+
+decision:
+  r3c1: PASS
+  r3c2: AUTHORIZED
+  training_scope: P01_P02_ENGINEERING_SMOKE_ONLY
+  max_expert_epochs: 3
+  max_residual_epochs: 3
+  old_expert_reuse: PROHIBITED
+  score_direction_for_model_selection: PROHIBITED
+  r3c3: NOT_AUTHORIZED
+  r3m3: NOT_AUTHORIZED
+  r3m4: NOT_AUTHORIZED
