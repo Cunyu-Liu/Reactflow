@@ -14,7 +14,10 @@ from scripts.reactflow_delta.model_rescue_v3 import (
     fit_disagreement_gate,
     hierarchy_position_weights,
 )
-from scripts.reactflow_delta.run_model_rescue_v3 import assert_run_authority
+from scripts.reactflow_delta.run_model_rescue_v3 import (
+    assert_run_authority,
+    validate_outer_expert_reuse,
+)
 
 
 def test_exact_convex_l1_and_frozen_disagreement_gate() -> None:
@@ -94,3 +97,19 @@ def test_runner_enforces_phase_specific_training_authority(tmp_path) -> None:
         assert_run_authority(tmp_path, "R3M3", smoke=False)
     with pytest.raises(RuntimeError, match="smoke only"):
         assert_run_authority(tmp_path, "R3M2", smoke=False)
+
+
+def test_smoke_rejects_forty_epoch_outer_expert_reuse(tmp_path) -> None:
+    with pytest.raises(ValueError, match="at most three epochs"):
+        validate_outer_expert_reuse(
+            seed=0,
+            smoke=True,
+            b1_result_dir=tmp_path / "b1",
+            mean_result_dir=tmp_path / "mean",
+        )
+    validate_outer_expert_reuse(
+        seed=0,
+        smoke=False,
+        b1_result_dir=tmp_path / "b1",
+        mean_result_dir=tmp_path / "mean",
+    )

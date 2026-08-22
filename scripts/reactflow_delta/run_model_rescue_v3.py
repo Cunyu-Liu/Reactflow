@@ -72,6 +72,21 @@ def assert_run_authority(repo_root: Path, phase: str, *, smoke: bool) -> None:
         raise RuntimeError("v3 runner requires external outcomes to remain locked")
 
 
+def validate_outer_expert_reuse(
+    *,
+    seed: int,
+    smoke: bool,
+    b1_result_dir: Path | None,
+    mean_result_dir: Path | None,
+) -> None:
+    if (b1_result_dir is None) != (mean_result_dir is None):
+        raise ValueError("outer expert reuse requires both B1 and MeanAligned result dirs")
+    if seed != 0 and b1_result_dir is not None:
+        raise ValueError("existing v1/v2 outer expert reuse is authorized only for seed 0")
+    if smoke and b1_result_dir is not None:
+        raise ValueError("R3M2 smoke must train its outer experts for at most three epochs")
+
+
 def _module_snapshot(module: torch.nn.Module) -> dict[str, torch.Tensor]:
     return {
         name: tensor.detach().cpu().clone()
@@ -751,8 +766,12 @@ def run_fold(
         weight_decay=weight_decay,
         seed=seed,
     )
-    if (reuse_b1_result_dir is None) != (reuse_mean_result_dir is None):
-        raise ValueError("outer expert reuse requires both B1 and MeanAligned result dirs")
+    validate_outer_expert_reuse(
+        seed=seed,
+        smoke=False,
+        b1_result_dir=reuse_b1_result_dir,
+        mean_result_dir=reuse_mean_result_dir,
+    )
     if reuse_b1_result_dir is not None and reuse_mean_result_dir is not None:
         b1_model, mean_model, b1_checkpoint, mean_checkpoint, baseline = (
             _load_reused_outer_experts(
@@ -869,10 +888,12 @@ def main(argv: list[str] | None = None) -> int:
     device = args.device if torch.cuda.is_available() else "cpu"
     expert_epochs = min(args.expert_epochs, 3) if args.smoke else args.expert_epochs
     residual_epochs = min(args.residual_epochs, 3) if args.smoke else args.residual_epochs
-    if args.seed != 0 and (
-        args.reuse_b1_result_dir is not None or args.reuse_mean_result_dir is not None
-    ):
-        raise ValueError("existing v1/v2 outer expert reuse is authorized only for seed 0")
+    validate_outer_expert_reuse(
+        seed=args.seed,
+        smoke=args.smoke,
+        b1_result_dir=args.reuse_b1_result_dir,
+        mean_result_dir=args.reuse_mean_result_dir,
+    )
     universe = M2Universe(args.m2_csv)
     universe.build()
     records = universe.get_records()

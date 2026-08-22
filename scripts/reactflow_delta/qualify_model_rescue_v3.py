@@ -258,6 +258,18 @@ def _fold_checks(row: dict[str, Any], *, smoke: bool) -> dict[str, Any]:
         is False,
     }
     if smoke:
+        baseline = row.get("baseline", {})
+        b1_history = baseline.get("b1_train_loss", [])
+        mean_history = baseline.get("meanaligned_train_loss", [])
+        invariants["outer_experts_not_reused"] = baseline.get(
+            "reused_exact_seed0_outer_expert"
+        ) is False
+        invariants["outer_expert_epochs_at_most_three"] = (
+            0 < len(b1_history) <= 3 and 0 < len(mean_history) <= 3
+        )
+        invariants["finite_outer_expert_losses"] = bool(
+            np.isfinite(np.asarray(b1_history + mean_history, dtype=float)).all()
+        )
         invariants["residual_epochs_at_most_three"] = len(
             candidate.get("residual_calibration_loss", [])
         ) <= 3

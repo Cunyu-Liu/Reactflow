@@ -110,3 +110,20 @@ r3m1_implementation:
     - ORIGINAL_ONE_PERCENT_SCREEN_GATE
     - ORIGINAL_R2M4_THRESHOLD_PARITY
   scientific_interpretation: ENGINEERING_ONLY
+
+seed0_outer_expert_reuse_audit:
+  status: PASS
+  audited_at: '2026-08-22T23:35:00+08:00'
+  b1_source: /mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_fullscreen_merged_20260820
+  meanaligned_source: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0
+  folds: 20
+  seeds: [0]
+  checks:
+    fold_and_seed_identity: PASS
+    strict_b1_state_dict_load: PASS
+    strict_meanaligned_state_dict_load: PASS
+    held_prediction_key_universe_identity: PASS
+    unique_prediction_keys: PASS
+  allowed_use: R3M3_SEED0_OUTER_EXPERT_REUSE_ONLY
+  prohibited_use: R3M2_ENGINEERING_SMOKE
+  scores_read: false
