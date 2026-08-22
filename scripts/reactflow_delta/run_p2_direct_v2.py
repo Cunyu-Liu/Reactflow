@@ -88,16 +88,18 @@ def _build_pool(univ, records) -> dict[str, Any]:
     feats_list = []; targets = []; keys = []
     for r in records:
         c = univ.get_construct(r.construct_id)
-        target_prof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        target_prof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if target_prof is None:
             continue
         wt = c.wt_reactivity
         nz = ~np.isnan(wt) & ~np.isnan(target_prof)
         if not nz.any():
             continue
-        we = wt[r.pos] if not np.isnan(wt[r.pos]) else 0.0
+        we = wt[r.full_pos] if not np.isnan(wt[r.full_pos]) else 0.0
         idx = np.where(nz)[0]
-        dist = (idx - r.pos).astype(np.float32)
+        dist = (idx - r.full_pos).astype(np.float32)
         wt_i = wt[idx]
         r_onehot = np.zeros(4, dtype=np.float32); a_onehot = np.zeros(4, dtype=np.float32)
         r_onehot[ALPHA.get(r.ref, 3)] = 1.0
@@ -109,7 +111,7 @@ def _build_pool(univ, records) -> dict[str, Any]:
         ])
         feats_list.append(F)
         targets.append(target_prof[idx].astype(np.float32))
-        keys.extend((r.construct_id, r.pos, int(i)) for i in idx)
+        keys.extend((r.construct_id, r.design_pos, int(i)) for i in idx)
     if feats_list:
         X = np.vstack(feats_list)
         y = np.concatenate(targets)
@@ -126,8 +128,8 @@ def _full_profile_predict(univ, held_records, model, kind: str, device: str) -> 
         L = len(c.wt_reactivity); wt = c.wt_reactivity
         nz = ~np.isnan(wt)
         idx = np.where(nz)[0]
-        we = wt[r.pos] if not np.isnan(wt[r.pos]) else 0.0
-        dist = (idx - r.pos).astype(np.float32)
+        we = wt[r.full_pos] if not np.isnan(wt[r.full_pos]) else 0.0
+        dist = (idx - r.full_pos).astype(np.float32)
         wt_i = wt[idx]
         r_onehot = np.zeros(4, dtype=np.float32); a_onehot = np.zeros(4, dtype=np.float32)
         r_onehot[ALPHA.get(r.ref, 3)] = 1.0
@@ -217,8 +219,12 @@ def main() -> int:
                 if not r.target_observed or r.target_reactivity is None:
                     continue
                 c = univ.get_construct(r.construct_id)
-                we = c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0
-                wi = c.wt_reactivity[r.pos]
+                we = (
+                    c.wt_reactivity[r.full_pos]
+                    if not np.isnan(c.wt_reactivity[r.full_pos])
+                    else 0.0
+                )
+                wi = c.wt_reactivity[r.full_pos]
                 if np.isnan(wi):
                     continue
                 yv = float(r.target_reactivity)
@@ -253,7 +259,9 @@ def main() -> int:
         held_crps = {m: 0.0 for m in METHODS}; hcnt = 0
         for r in held_records:
             c = univ.get_construct(r.construct_id)
-            target_prof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+            target_prof, _ = univ.mutant_full_profile(
+                r.wt_id, r.design_pos, r.ref, r.alt
+            )
             if target_prof is None or not r.target_observed:
                 continue
             wt = c.wt_reactivity
@@ -263,8 +271,9 @@ def main() -> int:
                     continue
                 pred_rows.append({
                     "puzzle": r.puzzle, "method": r.method, "construct": r.construct_id,
-                    "edit_pos": r.pos, "ref": r.ref, "alt": r.alt, "pos": i,
-                    "region": str(c.region_map[i]), "dist": int(i - r.pos),
+                    "edit_pos": r.design_pos, "full_edit_pos": r.full_pos,
+                    "ref": r.ref, "alt": r.alt, "pos": i,
+                    "region": str(c.region_map[i]), "dist": int(i - r.full_pos),
                     "wt": float(wt[i]) if not np.isnan(wt[i]) else None,
                     "target": float(target_prof[i]),
                     "pred_direct": float(pred_direct[i]) if not np.isnan(pred_direct[i]) else None,

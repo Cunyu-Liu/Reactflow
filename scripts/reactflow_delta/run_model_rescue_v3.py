@@ -146,7 +146,7 @@ def predict_expert_means(
         for construct_id, recs in sorted(by_construct.items()):
             construct = univ.get_construct(construct_id)
             length = len(construct.sequence)
-            edit = torch.tensor([record.pos for record in recs], device=device)
+            edit = torch.tensor([record.full_pos for record in recs], device=device)
             distance = (torch.arange(length, device=device)[None, :] - edit[:, None]).float()
             prediction_mask = torch.tensor(
                 np.tile(construct.wt_observed.astype(bool), (len(recs), 1)),
@@ -219,7 +219,7 @@ def _gate_training_rows(
     for record in records:
         construct = univ.get_construct(record.construct_id)
         target, _error = univ.mutant_full_profile(
-            record.wt_id, record.pos, record.ref, record.alt
+            record.wt_id, record.design_pos, record.ref, record.alt
         )
         if target is None:
             continue
@@ -236,7 +236,9 @@ def _gate_training_rows(
                 f"inner OOF prediction missing {len(missing)} qualified keys for {record.puzzle}"
             )
         values = [prediction[key] for key in biological_keys]
-        mutant_id = f"{record.construct_id}|{record.pos}|{record.ref}>{record.alt}"
+        mutant_id = (
+            f"{record.construct_id}|{record.design_pos}|{record.ref}>{record.alt}"
+        )
         rows["target"].extend(
             (target[positions] - construct.wt_reactivity[positions]).tolist()
         )
@@ -556,7 +558,7 @@ def predict_candidate(
         for construct_id, recs in sorted(by_construct.items()):
             construct = univ.get_construct(construct_id)
             length = len(construct.sequence)
-            edit = torch.tensor([record.pos for record in recs], device=device)
+            edit = torch.tensor([record.full_pos for record in recs], device=device)
             distance = (torch.arange(length, device=device)[None, :] - edit[:, None]).float()
             prediction_mask = torch.tensor(
                 np.tile(construct.wt_observed.astype(bool), (len(recs), 1)),

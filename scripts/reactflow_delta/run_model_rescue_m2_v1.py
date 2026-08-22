@@ -59,7 +59,7 @@ def _make_batches(univ: M2Universe, records: list[Any], device: str):
         if qualified.sum() == 0:
             continue
         length = target.shape[1]
-        edit = torch.tensor([r.pos for r in recs], device=device)
+        edit = torch.tensor([r.full_pos for r in recs], device=device)
         distance = (torch.arange(length, device=device)[None, :] - edit[:, None]).float()
         batches.append(
             {
@@ -138,7 +138,7 @@ def predict_held(
         for construct_id, recs in sorted(by.items()):
             construct = univ.get_construct(construct_id)
             length = len(construct.sequence)
-            edit = torch.tensor([r.pos for r in recs], device=device)
+            edit = torch.tensor([r.full_pos for r in recs], device=device)
             distance = (torch.arange(length, device=device)[None, :] - edit[:, None]).float()
             prediction_mask = torch.tensor(
                 np.tile(construct.wt_observed.astype(bool), (len(recs), 1)), device=device
@@ -184,7 +184,9 @@ def score_predictions(
         expected_keys.update(
             _bio_key(univ, record, pos) for pos in range(len(construct.sequence))
         )
-        target, _ = univ.mutant_full_profile(record.wt_id, record.pos, record.ref, record.alt)
+        target, _ = univ.mutant_full_profile(
+            record.wt_id, record.design_pos, record.ref, record.alt
+        )
         if target is None:
             continue
         for pos in range(len(construct.sequence)):

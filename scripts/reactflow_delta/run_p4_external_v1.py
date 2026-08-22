@@ -67,16 +67,18 @@ def _fit_bstar_external(dev_csv: Path) -> np.ndarray:
     feats, targets = [], []
     for r in records:
         c = univ.get_construct(r.construct_id)
-        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tprof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if tprof is None:
             continue
         wt = c.wt_reactivity
         nz = ~np.isnan(wt) & ~np.isnan(tprof)
         if not nz.any():
             continue
-        we = wt[r.pos] if not np.isnan(wt[r.pos]) else 0.0
+        we = wt[r.full_pos] if not np.isnan(wt[r.full_pos]) else 0.0
         idx = np.where(nz)[0]
-        dist = (idx - r.pos).astype(np.float32)
+        dist = (idx - r.full_pos).astype(np.float32)
         F = np.column_stack([_feat(we, wt[i], dist[j], r.ref, r.alt)
                             for j, i in enumerate(idx)]).T
         feats.append(F); targets.append(tprof[idx])

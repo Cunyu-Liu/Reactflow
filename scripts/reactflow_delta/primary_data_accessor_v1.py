@@ -31,7 +31,8 @@ import numpy as np
 class TrainSample:
     construct_id: str
     puzzle: str
-    pos: int
+    design_pos: int
+    full_pos: int
     ref: str
     alt: str
     wt_reactivity: np.ndarray  # full-construct WT profile (length L)
@@ -47,7 +48,8 @@ class TrainSample:
 class HeldPredictInput:
     construct_id: str
     puzzle: str
-    pos: int
+    design_pos: int
+    full_pos: int
     ref: str
     alt: str
     wt_reactivity: np.ndarray
@@ -89,7 +91,8 @@ class PrimaryDataAccessor:
         for r in self._records_by_fold[outer_fold]["train"]:
             c = self.universe.get_construct(r.construct_id)
             yield TrainSample(
-                construct_id=r.construct_id, puzzle=r.puzzle, pos=r.pos,
+                construct_id=r.construct_id, puzzle=r.puzzle,
+                design_pos=r.design_pos, full_pos=r.full_pos,
                 ref=r.ref, alt=r.alt, wt_reactivity=c.wt_reactivity.copy(),
                 wt_error=c.wt_error.copy(), wt_mask=c.wt_observed.copy(),
                 region_map=c.region_map.copy(),
@@ -102,7 +105,8 @@ class PrimaryDataAccessor:
         for r in self._records_by_fold[outer_fold]["held"]:
             c = self.universe.get_construct(r.construct_id)
             yield HeldPredictInput(
-                construct_id=r.construct_id, puzzle=r.puzzle, pos=r.pos,
+                construct_id=r.construct_id, puzzle=r.puzzle,
+                design_pos=r.design_pos, full_pos=r.full_pos,
                 ref=r.ref, alt=r.alt, wt_reactivity=c.wt_reactivity.copy(),
                 wt_error=c.wt_error.copy(), wt_mask=c.wt_observed.copy(),
                 region_map=c.region_map.copy(),

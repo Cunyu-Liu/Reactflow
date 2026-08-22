@@ -26,7 +26,7 @@ class MutationInput:
     puzzle: str
     method: str
     construct_id: str
-    pos: int
+    full_pos: int
     ref: str
     alt: str
 
@@ -53,7 +53,7 @@ def onehot_base(b: str) -> np.ndarray:
 def build_features(mut: MutationInput, wt_reactivity: np.ndarray, wt_error: np.ndarray,
                    wt_mask: np.ndarray, region_map: np.ndarray) -> FeatureVector:
     """Build features strictly from WT profile + mutation identity. Outcome-blind."""
-    pos = mut.pos
+    pos = mut.full_pos
     L = len(wt_reactivity)
     region_onehot = np.zeros(L)
     region_onehot[region_map == "design_region"] = 1.0

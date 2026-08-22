@@ -53,7 +53,7 @@ def _make_cells(univ: M2Universe, records: list[Any], device: str) -> list[dict[
         if qualified.sum() == 0:
             continue
         length = target.shape[1]
-        edit = torch.tensor([record.pos for record in recs], device=device)
+        edit = torch.tensor([record.full_pos for record in recs], device=device)
         distance = (torch.arange(length, device=device)[None, :] - edit[:, None]).float()
         cells.append(
             {
@@ -260,7 +260,7 @@ def predict_pair(
         for construct_id, recs in sorted(by_construct.items()):
             construct = univ.get_construct(construct_id)
             length = len(construct.sequence)
-            edit = torch.tensor([record.pos for record in recs], device=device)
+            edit = torch.tensor([record.full_pos for record in recs], device=device)
             distance = (torch.arange(length, device=device)[None, :] - edit[:, None]).float()
             prediction_mask = torch.tensor(
                 np.tile(construct.wt_observed.astype(bool), (len(recs), 1)),

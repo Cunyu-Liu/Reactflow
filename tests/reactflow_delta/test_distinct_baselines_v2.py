@@ -28,21 +28,31 @@ def _make_synthetic_csv(path: Path) -> Path:
         for method in ["Eterna", "Rosetta"]:
             rec = {"id": f"{puzzle}_{method}_wt", "sequence": seq,
                    "experiment_type": "2A3_MaP", "dataset_name": "X",
-                   "puzzle": puzzle, "method": method, "sub_start": 8,
-                   "sub_end": 16, "target_structure": "", "mutA": 0,
+                   "puzzle": puzzle, "method": method, "sub_start": 9,
+                   "sub_end": 16, "design_length": 8,
+                   "design_sequence": seq[8:16],
+                   "target_structure": "", "mutA": 0,
                    "M2_structure": "AAAA"}
             for i in range(1, 21):
                 rec[f"reactivity_{i:04d}"] = float(i) / 20
                 rec[f"reactivity_error_{i:04d}"] = 0.1
             rows.append(rec)
-            for p in range(8, 16):
-                for alt in ["G", "A"]:
+            for design_pos in range(8):
+                full_pos = 8 + design_pos
+                ref = seq[full_pos]
+                for alt in [base for base in "ACGU" if base != ref][:2]:
                     m = dict(rec)
-                    m["id"] = f"{puzzle}_{method}_mm_{p}_C_{alt}"
-                    m["sequence"] = seq[:p] + alt + seq[p + 1:]
-                    m["mutA"] = p - 7
+                    m["id"] = (
+                        f"{puzzle}_{method}_mm_{design_pos}_{ref}_{alt}"
+                    )
+                    m["sequence"] = (
+                        seq[:full_pos] + alt + seq[full_pos + 1:]
+                    )
+                    m["mutA"] = design_pos + 1
                     for i in range(1, 21):
-                        m[f"reactivity_{i:04d}"] = float((i + p) % 20) / 20
+                        m[f"reactivity_{i:04d}"] = (
+                            float((i + full_pos) % 20) / 20
+                        )
                         m[f"reactivity_error_{i:04d}"] = 0.1
                     rows.append(m)
     pd.DataFrame(rows).to_csv(path, index=False)
@@ -106,7 +116,9 @@ def test_train_median_is_real_trainfold_statistic(universe, train_held):
     # expected per-position median over train mutant target values
     expected: dict[int, list] = {}
     for r in train:
-        tp, _ = universe.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tp, _ = universe.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if tp is None:
             continue
         for i in range(len(tp)):

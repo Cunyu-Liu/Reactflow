@@ -53,16 +53,18 @@ def build_direct_pool(univ, records) -> dict[str, Any]:
     feats_list = []; targets = []; keys = []
     for r in records:
         c = univ.get_construct(r.construct_id)
-        target_prof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        target_prof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if target_prof is None:
             continue
         wt = c.wt_reactivity
         nz = ~np.isnan(wt) & ~np.isnan(target_prof)
         if not nz.any():
             continue
-        we = wt[r.pos] if not np.isnan(wt[r.pos]) else 0.0
+        we = wt[r.full_pos] if not np.isnan(wt[r.full_pos]) else 0.0
         idx = np.where(nz)[0]
-        dist = (idx - r.pos).astype(np.float32)
+        dist = (idx - r.full_pos).astype(np.float32)
         wt_i = wt[idx]
         r_onehot = np.zeros(4, dtype=np.float32); a_onehot = np.zeros(4, dtype=np.float32)
         r_onehot[ALPHA.get(r.ref, 3)] = 1.0
@@ -74,7 +76,7 @@ def build_direct_pool(univ, records) -> dict[str, Any]:
         ])
         feats_list.append(F)
         targets.append(target_prof[idx].astype(np.float32))
-        keys.extend((r.construct_id, r.pos, int(i)) for i in idx)
+        keys.extend((r.construct_id, r.design_pos, int(i)) for i in idx)
     if feats_list:
         X = np.vstack(feats_list); y = np.concatenate(targets)
     else:
@@ -132,8 +134,8 @@ class DirectBaseline:
             L = len(c.wt_reactivity); wt = c.wt_reactivity
             nz = ~np.isnan(wt)
             idx = np.where(nz)[0]
-            we = wt[r.pos] if not np.isnan(wt[r.pos]) else 0.0
-            dist = (idx - r.pos).astype(np.float32)
+            we = wt[r.full_pos] if not np.isnan(wt[r.full_pos]) else 0.0
+            dist = (idx - r.full_pos).astype(np.float32)
             wt_i = wt[idx]
             r_onehot = np.zeros(4, dtype=np.float32); a_onehot = np.zeros(4, dtype=np.float32)
             r_onehot[ALPHA.get(r.ref, 3)] = 1.0
@@ -150,7 +152,7 @@ class DirectBaseline:
                 prof[idx] = pred
                 sc[idx] = self._scale(scale)
             for pos in range(L):
-                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.pos}|"
+                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.design_pos}|"
                     f"{r.ref}>{r.alt}|{pos}"] = (float(prof[pos]), float(sc[pos]),
                                                  "gaussian", None)
         return out
@@ -177,7 +179,7 @@ class ZeroResponse(DirectBaseline):
             wt = c.wt_reactivity
             sc = self.resid_scale if self.fitted else (scale or 0.3)
             for pos in range(len(wt)):
-                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.pos}|"
+                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.design_pos}|"
                     f"{r.ref}>{r.alt}|{pos}"] = (float(wt[pos]), float(sc), "gaussian", None)
         return out
 
@@ -190,7 +192,9 @@ class TrainMedian(DirectBaseline):
         self.median: dict[str, float] = {}
         vals: dict[str, list] = {}
         for r in train_records:
-            tp, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+            tp, _ = univ.mutant_full_profile(
+                r.wt_id, r.design_pos, r.ref, r.alt
+            )
             if tp is None:
                 continue
             c = univ.get_construct(r.construct_id)
@@ -212,7 +216,7 @@ class TrainMedian(DirectBaseline):
             L = len(c.wt_reactivity)
             for pos in range(L):
                 loc = self.median.get(pos, float(c.wt_reactivity[pos]))
-                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.pos}|"
+                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.design_pos}|"
                     f"{r.ref}>{r.alt}|{pos}"] = (float(loc), float(sc), "gaussian", None)
         return out
 
@@ -331,9 +335,9 @@ class RFDDirectRank0(DirectBaseline):
                 cache[cid] = _wt_ctx_tensors(univ, cid, device)
             H = self.model.encode(cache[cid])
             L = H.shape[0]
-            dists = torch.tensor((np.arange(L) - r.pos).astype(np.float32),
+            dists = torch.tensor((np.arange(L) - r.full_pos).astype(np.float32),
                                  device=device)[None, :]
-            edit_idx = torch.tensor([r.pos], device=device)
+            edit_idx = torch.tensor([r.full_pos], device=device)
             # TARGET-INVARIANCE (audit P0-5): prediction mask is the WT-observed
             # mask ONLY; target availability never enters the predictor.
             wt_obs = univ.get_construct(cid).wt_observed.astype(bool)
@@ -345,7 +349,7 @@ class RFDDirectRank0(DirectBaseline):
             pred = wt[None, :] + delta.cpu().numpy()
             scl = scale_t.cpu().numpy()
             for pos in range(L):
-                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.pos}|"
+                out[f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.design_pos}|"
                     f"{r.ref}>{r.alt}|{pos}"] = (float(pred[0, pos]), float(scl[pos]),
                                                  self.likelihood,
                                                  5.0 if self.likelihood == "student_t" else None)

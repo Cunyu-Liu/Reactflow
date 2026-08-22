@@ -52,7 +52,14 @@ def run_p1_gate(m2_csv: Path, *, puzzles: list[str] | None = None) -> dict[str, 
     # 3. outcome-blind held-response invariance (on a real construct)
     rec0 = next(r for r in univ.get_records())
     c = univ.get_construct(rec0.construct_id)
-    mut = MutationInput(rec0.puzzle, rec0.method, rec0.construct_id, rec0.pos, rec0.ref, rec0.alt)
+    mut = MutationInput(
+        rec0.puzzle,
+        rec0.method,
+        rec0.construct_id,
+        rec0.full_pos,
+        rec0.ref,
+        rec0.alt,
+    )
     f1 = build_features(mut, c.wt_reactivity, c.wt_error, c.wt_observed, c.region_map)
     f2 = build_features(mut, c.wt_reactivity, c.wt_error, c.wt_observed, c.region_map)
     inv_ok = held_response_invariance(f1, f2)

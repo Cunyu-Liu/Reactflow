@@ -64,7 +64,10 @@ RANKPOS_ID = "rfd_direct_rankpos"
 # ledger builders (prediction side is target-invariant)
 # --------------------------------------------------------------------------- #
 def _bio_key(univ, r, pos: int) -> str:
-    return f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|{r.pos}|{r.ref}>{r.alt}|{pos}"
+    return (
+        f"openknot_m2|{r.puzzle}|{r.method}|{r.construct_id}|"
+        f"{r.design_pos}|{r.ref}>{r.alt}|{pos}"
+    )
 
 
 def _target_ledger(univ, held_records) -> list[E.TargetPoint]:
@@ -75,7 +78,9 @@ def _target_ledger(univ, held_records) -> list[E.TargetPoint]:
     for r in held_records:
         c = univ.get_construct(r.construct_id)
         wt_obs = c.wt_observed.astype(bool)
-        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tprof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         for pos in range(len(wt_obs)):
             y = None
             if tprof is not None and not np.isnan(tprof[pos]):
@@ -123,8 +128,8 @@ def _per_seed_ledger(univ, held_records, model, seed, device, outer_fold,
             wt_obs = univ.get_construct(cid).wt_observed.astype(bool)
             wt = _wt_filled(univ, cid)
             for r in recs:
-                edit_idx = torch.tensor([r.pos], device=device)
-                dists = torch.tensor((np.arange(L) - r.pos).astype(np.float32),
+                edit_idx = torch.tensor([r.full_pos], device=device)
+                dists = torch.tensor((np.arange(L) - r.full_pos).astype(np.float32),
                                      device=device)[None, :]
                 delta, scale_t = model.forward_op(
                     H, edit_idx, dists, [r.ref], [r.alt],
@@ -156,7 +161,7 @@ def _mixture_position_losses(univ, held_records, models: list, ctx_cache, device
                 continue
             tmat, wt_obs = _target_matrix(univ, recs)
             obs = wt_obs[0]
-            edit_idx = torch.tensor([r.pos for r in recs], device=device)
+            edit_idx = torch.tensor([r.full_pos for r in recs], device=device)
             dists = (torch.arange(tmat.shape[1], device=device)[None, :] - edit_idx[:, None]).float()
             refs = [r.ref for r in recs]; alts = [r.alt for r in recs]
             ctx = ctx_cache[cid]

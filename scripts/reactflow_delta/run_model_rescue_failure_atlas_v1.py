@@ -197,7 +197,9 @@ def _target_metadata(
         if rec is None:
             raise KeyError(f"registered mutation absent for {key}")
         if rec_key not in profile_cache:
-            profile_cache[rec_key] = univ.mutant_full_profile(rec.wt_id, rec.pos, rec.ref, rec.alt)
+            profile_cache[rec_key] = univ.mutant_full_profile(
+                rec.wt_id, rec.design_pos, rec.ref, rec.alt
+            )
         tprof, eprof = profile_cache[rec_key]
         c = univ.get_construct(cid)
         target[i] = np.nan if tprof is None else float(tprof[receiver_pos])
@@ -302,7 +304,10 @@ def _safe_float(value: Any) -> Any:
 def build_failure_atlas(m2_csv: Path, oof_root: Path, max_folds: int | None = None) -> dict[str, Any]:
     univ = M2Universe(m2_csv)
     universe = univ.build()
-    record_index = {(r.construct_id, r.pos, r.ref, r.alt): r for r in univ.get_records()}
+    record_index = {
+        (r.construct_id, r.design_pos, r.ref, r.alt): r
+        for r in univ.get_records()
+    }
     profile_cache: dict[tuple[str, int, str, str], tuple[np.ndarray | None, np.ndarray | None]] = {}
     pairs = discover_oof_pairs(oof_root)
     if max_folds is not None:

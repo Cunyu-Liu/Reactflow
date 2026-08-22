@@ -147,21 +147,30 @@ def _make_synthetic_csv(path: Path) -> Path:
             # WT row
             rec = {"id": f"{puzzle}_{method}_wt", "sequence": seq, "experiment_type": "2A3_MaP",
                    "dataset_name": "X", "puzzle": puzzle, "method": method,
-                   "sub_start": 8, "sub_end": 16, "target_structure": "", "mutA": 0,
+                   "sub_start": 9, "sub_end": 16, "design_length": 8,
+                   "design_sequence": seq[8:16], "target_structure": "", "mutA": 0,
                    "M2_structure": "AAAA"}
             for i in range(1, 21):
                 rec[f"reactivity_{i:04d}"] = float(i) / 20
                 rec[f"reactivity_error_{i:04d}"] = 0.1
             rows.append(rec)
-            # mutants: pos 8..15 -> C->G and U->A (T/U canonical)
-            for p in range(8, 16):
-                for alt in ["G", "A"]:
+            # design-local positions 0..7 map to full sequence indices 8..15.
+            for design_pos in range(8):
+                full_pos = 8 + design_pos
+                ref = seq[full_pos]
+                for alt in [base for base in "ACGU" if base != ref][:2]:
                     m = dict(rec)
-                    m["id"] = f"{puzzle}_{method}_mm_{p}_C_{alt}"
-                    m["sequence"] = seq[:p] + alt + seq[p + 1:]
-                    m["mutA"] = p - 7
+                    m["id"] = (
+                        f"{puzzle}_{method}_mm_{design_pos}_{ref}_{alt}"
+                    )
+                    m["sequence"] = (
+                        seq[:full_pos] + alt + seq[full_pos + 1:]
+                    )
+                    m["mutA"] = design_pos + 1
                     for i in range(1, 21):
-                        m[f"reactivity_{i:04d}"] = float((i + p) % 20) / 20
+                        m[f"reactivity_{i:04d}"] = (
+                            float((i + full_pos) % 20) / 20
+                        )
                         m[f"reactivity_error_{i:04d}"] = 0.1
                     rows.append(m)
     pd.DataFrame(rows).to_csv(path, index=False)
@@ -179,9 +188,18 @@ def test_m2_universe_builds_counts():
         assert ledger["seq_len"] == 20
         assert ledger["m_p_raw_qualified"] == {"P01": 2, "P02": 2}
         assert all(r.ref in "ACGU" for r in u.get_records())
+        assert all(r.full_pos == 8 + r.design_pos for r in u.get_records())
+        assert all(u.get_construct(r.construct_id).sequence[r.full_pos] == r.ref
+                   for r in u.get_records())
+        frame = ledger["coordinate_frame"]
+        assert frame["formula_matches_raw_diff"] == 64
+        assert frame["formula_ref_match"] == 64
+        assert frame["formula_alt_match"] == 64
         # mutation keys canonical and all unique
-        keys = [r.mutation_key for r in u.get_records()]
-        assert len(set(keys)) == len(keys) or True  # dedup by group happens in ledger
+        keys = [
+            (r.construct_id, r.mutation_key) for r in u.get_records()
+        ]
+        assert len(set(keys)) == len(keys)
 
 
 # ------------------------- data_capability_ledger_v2 -----------------------

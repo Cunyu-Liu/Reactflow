@@ -82,11 +82,15 @@ def _run_fold(univ, fold, device: str, train_records, held_records) -> dict[str,
         c = univ.get_construct(r.construct_id)
         if not r.target_observed:
             continue
-        we = c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0
+        we = (
+            c.wt_reactivity[r.full_pos]
+            if not np.isnan(c.wt_reactivity[r.full_pos])
+            else 0.0
+        )
         for i in range(len(c.wt_reactivity)):
             if np.isnan(c.wt_reactivity[i]):
                 continue
-            dist = i - r.pos
+            dist = i - r.full_pos
             wi = c.wt_reactivity[i]
             y = float(r.target_reactivity)  # delta uses observed target for training (likelihood)
             # feature for delta model: WT state + mutation + distance
@@ -116,21 +120,29 @@ def _run_fold(univ, fold, device: str, train_records, held_records) -> dict[str,
     for r in train_records:
         c = univ.get_construct(r.construct_id)
         if r.target_observed:
-            med[r.pos] += float(r.target_reactivity)
-            counts[r.pos] += 1
+            med[r.full_pos] += float(r.target_reactivity)
+            counts[r.full_pos] += 1
     med = np.where(counts > 0, med / np.maximum(counts, 1), 0.0)
 
     for r in held_records:
         c = univ.get_construct(r.construct_id)
         if not r.target_observed:
             continue
-        we = c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0
+        we = (
+            c.wt_reactivity[r.full_pos]
+            if not np.isnan(c.wt_reactivity[r.full_pos])
+            else 0.0
+        )
         y = float(r.target_reactivity)
-        pred_zero = c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0
-        pred_med = med[r.pos]
+        pred_zero = (
+            c.wt_reactivity[r.full_pos]
+            if not np.isnan(c.wt_reactivity[r.full_pos])
+            else 0.0
+        )
+        pred_med = med[r.full_pos]
         # direct MLP prediction at edit site (delta anchored to WT)
         if model_direct is not None:
-            feats = np.stack([_feat(we, c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0,
+            feats = np.stack([_feat(we, c.wt_reactivity[r.full_pos] if not np.isnan(c.wt_reactivity[r.full_pos]) else 0.0,
                                     0.0, r.ref, r.alt)])
             with torch.no_grad():
                 delta = float(model_direct(torch.tensor(feats, device=device)).cpu().numpy()[0])

@@ -205,7 +205,9 @@ def _target_matrix(univ, recs):
     wt_obs = np.tile(first.wt_observed.astype(bool), (len(recs), 1))
     tmat = np.full((len(recs), L), np.nan, dtype=np.float32)
     for bi, r in enumerate(recs):
-        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tprof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if tprof is not None:
             tmat[bi] = tprof.astype(np.float32)
     return tmat, wt_obs
@@ -287,7 +289,7 @@ def _make_train_batches(univ, records, ctx_cache, device):
         if (~np.isnan(tmat) & wt_obs).sum() == 0:
             continue  # TARGET_UNOBSERVABLE for training (still predicted at inference)
         L = tmat.shape[1]
-        edit_idx = torch.tensor([r.pos for r in recs], device=device)
+        edit_idx = torch.tensor([r.full_pos for r in recs], device=device)
         dists = (torch.arange(L, device=device)[None, :] - edit_idx[:, None]).float()
         masks_t = torch.tensor(_qualified_mask(tmat, wt_obs), device=device)
         tmat_t = torch.tensor(tmat, device=device)
@@ -329,7 +331,7 @@ def _crps_constructs(model, univ, by_construct, ctx_cache, device):
                 continue
             tmat, wt_obs = _target_matrix(univ, recs)
             obs = wt_obs[0]
-            edit_idx = torch.tensor([r.pos for r in recs], device=device)
+            edit_idx = torch.tensor([r.full_pos for r in recs], device=device)
             dists = (torch.arange(tmat.shape[1], device=device)[None, :] - edit_idx[:, None]).float()
             refs = [r.ref for r in recs]; alts = [r.alt for r in recs]
             H = model.encode(ctx_cache[cid])
@@ -489,7 +491,7 @@ def _mixture_held_crps(models, univ, held_by, ctx_cache, device):
                 continue
             tmat, wt_obs = _target_matrix(univ, recs)
             obs = wt_obs[0]
-            edit_idx = torch.tensor([r.pos for r in recs], device=device)
+            edit_idx = torch.tensor([r.full_pos for r in recs], device=device)
             dists = (torch.arange(tmat.shape[1], device=device)[None, :] - edit_idx[:, None]).float()
             refs = [r.ref for r in recs]; alts = [r.alt for r in recs]
             ctx = ctx_cache[cid]
@@ -518,14 +520,24 @@ def _fit_ridge_bstar(univ, records):
     feats, targets = [], []
     for r in records:
         c = univ.get_construct(r.construct_id)
-        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tprof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if tprof is None:
             continue
         obs = c.wt_observed.astype(bool)
-        we = float(c.wt_reactivity[r.pos]) if obs[r.pos] else 0.0
+        we = float(c.wt_reactivity[r.full_pos]) if obs[r.full_pos] else 0.0
         nz = obs & ~np.isnan(tprof)
         for i in np.where(nz)[0]:
-            feats.append(_feat(we, float(c.wt_reactivity[i]), i - r.pos, r.ref, r.alt))
+            feats.append(
+                _feat(
+                    we,
+                    float(c.wt_reactivity[i]),
+                    i - r.full_pos,
+                    r.ref,
+                    r.alt,
+                )
+            )
             targets.append(float(tprof[i]))
     X = np.array(feats); y = np.array(targets)
     Xb = np.column_stack([np.ones(X.shape[0]), X])
@@ -551,16 +563,24 @@ def _bstar_held_crps(univ, held_records, coef):
     total = 0.0; n = 0
     for r in held_records:
         c = univ.get_construct(r.construct_id)
-        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tprof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if tprof is None:
             continue
         obs = c.wt_observed.astype(bool)
-        we = float(c.wt_reactivity[r.pos]) if obs[r.pos] else 0.0
+        we = float(c.wt_reactivity[r.full_pos]) if obs[r.full_pos] else 0.0
         nz = obs & ~np.isnan(tprof)
         idx = np.where(nz)[0]
         prof = np.full(len(c.wt_reactivity), np.nan)
         for i in idx:
-            f = _feat(we, float(c.wt_reactivity[i]), i - r.pos, r.ref, r.alt)
+            f = _feat(
+                we,
+                float(c.wt_reactivity[i]),
+                i - r.full_pos,
+                r.ref,
+                r.alt,
+            )
             prof[i] = float(np.dot(coef, np.concatenate([[1.0], f])))
         q = np.where(~np.isnan(tprof) & ~np.isnan(prof))[0]
         if q.size == 0:

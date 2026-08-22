@@ -32,10 +32,11 @@ class MutantRecord:
     method: str
     construct_id: str  # biological_scoring construct key (puzzle+method)
     wt_id: str
-    pos: int  # 0-based within full construct
+    design_pos: int  # 0-based within the submitted design; raw ID/key coordinate
+    full_pos: int  # 0-based within the full padded construct; model coordinate
     ref: str
     alt: str
-    mutation_key: str  # canonical pos_ref>alt
+    mutation_key: str  # canonical design_pos_ref>alt
     biological_scoring_key: str  # dataset+puzzle+method+construct+mutation+position+outer_fold (outer_fold filled by split)
     wt_reactivity: Optional[float]
     wt_error: Optional[float]
@@ -85,13 +86,19 @@ class M2Universe:
             self._full_profiles[rid] = arr
             self._full_errors[rid] = earr
 
-    def mutant_full_profile(self, wt_id: str, pos: int, ref: str, alt: str) -> tuple[np.ndarray, np.ndarray]:
+    def mutant_full_profile(
+        self, wt_id: str, design_pos: int, ref: str, alt: str
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Return (full reactivity, full error) for a mutant row by constructing its canonical id."""
         alt_c = alt.replace("T", "U")
-        rid = f"{wt_id.replace('_wt', '')}_mm_{pos}_{ref}_{alt_c}"
+        rid = f"{wt_id.replace('_wt', '')}_mm_{design_pos}_{ref}_{alt_c}"
         if rid not in self._full_profiles:
             # fallback: search by prefix (id may use original allele casing)
-            cands = [k for k in self._full_profiles if k.endswith(f"_mm_{pos}_{ref}_{alt_c}")]
+            cands = [
+                k
+                for k in self._full_profiles
+                if k.endswith(f"_mm_{design_pos}_{ref}_{alt_c}")
+            ]
             rid = cands[0] if cands else rid
         return self._full_profiles.get(rid), self._full_errors.get(rid)
 
@@ -134,10 +141,16 @@ class M2Universe:
             rv = np.asarray([getattr(r, c) for c in react], dtype=float)
             ev = np.asarray([getattr(r, c) for c in err], dtype=float)
             mask = ~np.isnan(rv)
-            start = int(r.sub_start) if not pd.isna(r.sub_start) else 0
+            # OpenKnot defines sub_start/sub_end as one-based full-sequence
+            # positions. Store Python coordinates as zero-based, end-exclusive.
+            start = int(r.sub_start) - 1 if not pd.isna(r.sub_start) else 0
             end = int(r.sub_end) if not pd.isna(r.sub_end) else seq_len
+            if not (0 <= start < end <= seq_len):
+                raise ValueError(
+                    f"invalid design interval for {cid}: start={start}, end={end}, L={seq_len}"
+                )
             region = np.full(seq_len, "other_assay_region", dtype=object)
-            region[max(0, start):end] = "design_region"
+            region[start:end] = "design_region"
             constructs[cid] = Construct(
                 puzzle=r.puzzle, method=r.method, construct_id=cid,
                 sequence=r.sequence_canon, wt_reactivity=rv, wt_error=ev,
@@ -151,30 +164,93 @@ class M2Universe:
         # registered mutant universe (exact SNV, canonical)
         mm = df[~df["is_wt"]].copy()
         records: list[MutantRecord] = []
+        coordinate_counts = {
+            "raw_hamming_one": 0,
+            "formula_matches_raw_diff": 0,
+            "formula_ref_match": 0,
+            "formula_alt_match": 0,
+            "mutA_equals_design_pos_plus_one": 0,
+        }
         for r in mm.itertuples():
             if pd.isna(r.mut_pos):
                 continue
             cid = r.construct_id
-            pos = int(r.mut_pos)
+            design_pos = int(r.mut_pos)
             ref = r.mut_ref
             alt = r.mut_alt
+            full_pos = constructs[cid].design_start + design_pos
+            wt_sequence = constructs[cid].sequence
+            mutant_sequence = r.sequence_canon
+            if not (0 <= full_pos < len(wt_sequence)):
+                raise ValueError(
+                    f"mutation full_pos outside construct for {r.id}: {full_pos}"
+                )
+            differences = [
+                i
+                for i, (wt_base, mutant_base) in enumerate(
+                    zip(wt_sequence, mutant_sequence)
+                )
+                if wt_base != mutant_base
+            ]
+            coordinate_counts["raw_hamming_one"] += int(len(differences) == 1)
+            coordinate_counts["formula_matches_raw_diff"] += int(
+                differences == [full_pos]
+            )
+            coordinate_counts["formula_ref_match"] += int(
+                wt_sequence[full_pos] == ref
+            )
+            coordinate_counts["formula_alt_match"] += int(
+                mutant_sequence[full_pos] == alt
+            )
+            coordinate_counts["mutA_equals_design_pos_plus_one"] += int(
+                not pd.isna(r.mutA) and int(r.mutA) == design_pos + 1
+            )
             # WT anchor at this position
-            wt_react = float(wt_profiles[cid][pos]) if not np.isnan(wt_profiles[cid][pos]) else None
-            wt_err = float(wt_errors[cid][pos]) if not np.isnan(wt_errors[cid][pos]) else None
-            wt_obs = bool(wt_masks[cid][pos])
-            target_react = float(getattr(r, react[pos])) if not pd.isna(getattr(r, react[pos])) else None
-            target_err = float(getattr(r, err[pos])) if not pd.isna(getattr(r, err[pos])) else None
-            target_obs = not np.isnan(getattr(r, react[pos]))
-            region = str(constructs[cid].region_map[pos])
+            wt_react = (
+                float(wt_profiles[cid][full_pos])
+                if not np.isnan(wt_profiles[cid][full_pos])
+                else None
+            )
+            wt_err = (
+                float(wt_errors[cid][full_pos])
+                if not np.isnan(wt_errors[cid][full_pos])
+                else None
+            )
+            wt_obs = bool(wt_masks[cid][full_pos])
+            target_react = (
+                float(getattr(r, react[full_pos]))
+                if not pd.isna(getattr(r, react[full_pos]))
+                else None
+            )
+            target_err = (
+                float(getattr(r, err[full_pos]))
+                if not pd.isna(getattr(r, err[full_pos]))
+                else None
+            )
+            target_obs = not np.isnan(getattr(r, react[full_pos]))
+            region = str(constructs[cid].region_map[full_pos])
             records.append(MutantRecord(
                 puzzle=r.puzzle, method=r.method, construct_id=cid,
-                wt_id=cid + "_wt", pos=pos, ref=ref, alt=alt,
-                mutation_key=f"{pos}_{ref}>{alt}",
-                biological_scoring_key=f"openknot_m2|{r.puzzle}|{r.method}|{cid}|{pos}|{ref}>{alt}|{pos}",
+                wt_id=cid + "_wt", design_pos=design_pos, full_pos=full_pos,
+                ref=ref, alt=alt,
+                mutation_key=f"{design_pos}_{ref}>{alt}",
+                biological_scoring_key=(
+                    f"openknot_m2|{r.puzzle}|{r.method}|{cid}|"
+                    f"{design_pos}|{ref}>{alt}|{full_pos}"
+                ),
                 wt_reactivity=wt_react, wt_error=wt_err, wt_observed=wt_obs,
                 target_reactivity=target_react, target_error=target_err,
                 target_observed=target_obs, region=region,
             ))
+
+        coordinate_failures = {
+            name: len(records) - count for name, count in coordinate_counts.items()
+        }
+        if any(coordinate_failures.values()):
+            raise ValueError(
+                "OpenKnot mutation coordinate validation failed: "
+                f"{coordinate_failures}"
+            )
 
         # attrition ledger
         cells = mm.groupby(["puzzle", "method"]).size()
@@ -190,6 +266,12 @@ class M2Universe:
             "n_registered_snv_mutants": len(records),
             "n_methods_total_distinct": int(mm["method"].nunique()),
             "seq_len": seq_len,
+            "coordinate_frame": {
+                "design_pos": "zero_based_within_designed_sequence",
+                "full_pos_formula": "sub_start_minus_one_plus_design_pos",
+                "full_pos": "zero_based_within_full_padded_sequence",
+                **coordinate_counts,
+            },
             "attrition_note": (
                 "160 cells = official 20 puzzles x 8 methods (CONFIRMED). "
                 "n_registered_snv_mutants = 13976 exact SNVs with canonical RNA "

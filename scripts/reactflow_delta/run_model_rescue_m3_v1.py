@@ -127,7 +127,9 @@ def score_wt_anchor_signed_delta_mae(univ: M2Universe, held_records: list[Any]) 
     losses: dict[str, float] = {}
     for record in held_records:
         construct = univ.get_construct(record.construct_id)
-        target, _ = univ.mutant_full_profile(record.wt_id, record.pos, record.ref, record.alt)
+        target, _ = univ.mutant_full_profile(
+            record.wt_id, record.design_pos, record.ref, record.alt
+        )
         if target is None:
             continue
         for pos in range(len(construct.sequence)):

@@ -16,7 +16,8 @@ class _Record:
     method = "M"
     construct_id = "P01_M"
     wt_id = "P01_M_wt"
-    pos = 0
+    design_pos = 0
+    full_pos = 0
     ref = "A"
     alt = "G"
 

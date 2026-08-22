@@ -29,16 +29,22 @@ if not np.all(np.isfinite(coef)):
 total = 0.0; n = 0
 for r in held_records:
     c = univ.get_construct(r.construct_id)
-    tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+    tprof, _ = univ.mutant_full_profile(
+        r.wt_id, r.design_pos, r.ref, r.alt
+    )
     if tprof is None or not r.target_observed:
         continue
-    we = c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0
+    we = (
+        c.wt_reactivity[r.full_pos]
+        if not np.isnan(c.wt_reactivity[r.full_pos])
+        else 0.0
+    )
     nz = ~np.isnan(c.wt_reactivity) & ~np.isnan(tprof)
     idx = np.where(nz)[0]
     prof = np.full(len(c.wt_reactivity), np.nan)
     for i in idx:
         if coef is not None:
-            f = _feat(we, c.wt_reactivity[i], i - r.pos, r.ref, r.alt)
+            f = _feat(we, c.wt_reactivity[i], i - r.full_pos, r.ref, r.alt)
             prof[i] = float(np.dot(coef, np.concatenate([[1.0], f])))
         else:
             prof[i] = c.wt_reactivity[i]  # WT-profile fallback (zero response)

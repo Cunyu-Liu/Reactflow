@@ -64,14 +64,22 @@ def _fit_ridge_bstar(univ, records, device):
     feats, targets = [], []
     for r in records:
         c = univ.get_construct(r.construct_id)
-        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tprof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if tprof is None:
             continue
-        we = c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0
+        we = (
+            c.wt_reactivity[r.full_pos]
+            if not np.isnan(c.wt_reactivity[r.full_pos])
+            else 0.0
+        )
         nz = ~np.isnan(c.wt_reactivity) & ~np.isnan(tprof)
         idx = np.where(nz)[0]
         for i in idx:
-            feats.append(_feat(we, c.wt_reactivity[i], i - r.pos, r.ref, r.alt))
+            feats.append(
+                _feat(we, c.wt_reactivity[i], i - r.full_pos, r.ref, r.alt)
+            )
             targets.append(float(tprof[i]))
     X = np.array(feats); y = np.array(targets)
     Xb = np.column_stack([np.ones(X.shape[0]), X])
@@ -88,15 +96,21 @@ def _bstar_held_crps(univ, held_records, coef, device):
     total = 0.0; n = 0
     for r in held_records:
         c = univ.get_construct(r.construct_id)
-        tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+        tprof, _ = univ.mutant_full_profile(
+            r.wt_id, r.design_pos, r.ref, r.alt
+        )
         if tprof is None or not r.target_observed:
             continue
-        we = c.wt_reactivity[r.pos] if not np.isnan(c.wt_reactivity[r.pos]) else 0.0
+        we = (
+            c.wt_reactivity[r.full_pos]
+            if not np.isnan(c.wt_reactivity[r.full_pos])
+            else 0.0
+        )
         nz = ~np.isnan(c.wt_reactivity) & ~np.isnan(tprof)
         idx = np.where(nz)[0]
         prof = np.full(len(c.wt_reactivity), np.nan)
         for i in idx:
-            f = _feat(we, c.wt_reactivity[i], i - r.pos, r.ref, r.alt)
+            f = _feat(we, c.wt_reactivity[i], i - r.full_pos, r.ref, r.alt)
             prof[i] = float(np.dot(coef, np.concatenate([[1.0], f])))
         q = np.where(~np.isnan(tprof) & ~np.isnan(prof))[0]
         if q.size == 0:
@@ -121,9 +135,9 @@ def _train_lrso(model, univ, train_records, ctx_cache, device):
         c = univ.get_construct(cid)
         wt_t = torch.nan_to_num(torch.tensor(c.wt_reactivity, device=device))
         L = len(c.wt_reactivity)
-        edit_idx = torch.tensor([r.pos for r in recs], device=device)
+        edit_idx = torch.tensor([r.full_pos for r in recs], device=device)
         dists = (torch.arange(L, device=device)[None, :] - edit_idx[:, None]).float()
-        targets = np.stack([np.nan_to_num(univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)[0])
+        targets = np.stack([np.nan_to_num(univ.mutant_full_profile(r.wt_id, r.design_pos, r.ref, r.alt)[0])
                             for r in recs])
         masks_t = torch.tensor(~np.isnan(targets), device=device)
         targets_t = torch.tensor(targets, device=device)
@@ -151,15 +165,17 @@ def _lrso_held_crps(model, univ, held_records, ctx_cache, device):
             continue
         with torch.no_grad():
             H = model.encoder(seq[None], react[None], prec[None], mask[None], pos[None], region[None])[0]
-            edit_idx = torch.tensor([r.pos for r in recs], device=device)
+            edit_idx = torch.tensor([r.full_pos for r in recs], device=device)
             dists = (torch.arange(L, device=device)[None, :] - edit_idx[:, None]).float()
-            qmask = torch.tensor(np.stack([~np.isnan(univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)[0])
+            qmask = torch.tensor(np.stack([~np.isnan(univ.mutant_full_profile(r.wt_id, r.design_pos, r.ref, r.alt)[0])
                                            for r in recs]), device=device)
             refs = [r.ref for r in recs]; alts = [r.alt for r in recs]
             delta = model.delta_batch(H, edit_idx, dists, refs, alts, qmask)
         wt = np.nan_to_num(c.wt_reactivity)
         for bi, r in enumerate(recs):
-            tprof, _ = univ.mutant_full_profile(r.wt_id, r.pos, r.ref, r.alt)
+            tprof, _ = univ.mutant_full_profile(
+                r.wt_id, r.design_pos, r.ref, r.alt
+            )
             pred_prof = wt + delta[bi].cpu().numpy()
             q = np.where(~np.isnan(tprof) & ~np.isnan(pred_prof))[0]
             if q.size == 0:

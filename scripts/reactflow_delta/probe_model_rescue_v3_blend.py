@@ -157,7 +157,7 @@ def load_examples(m2_csv: Path, merged_result: Path) -> tuple[list[MutantExample
         for record in records_by_puzzle[puzzle]:
             construct = universe.get_construct(record.construct_id)
             target, _error = universe.mutant_full_profile(
-                record.wt_id, record.pos, record.ref, record.alt
+                record.wt_id, record.design_pos, record.ref, record.alt
             )
             if target is None:
                 continue

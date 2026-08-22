@@ -237,7 +237,7 @@ def analyze(m2_csv: Path, merged_result: Path) -> dict[str, Any]:
         for record in records_by_puzzle[puzzle]:
             construct = univ.get_construct(record.construct_id)
             target, _error = univ.mutant_full_profile(
-                record.wt_id, record.pos, record.ref, record.alt
+                record.wt_id, record.design_pos, record.ref, record.alt
             )
             if target is None:
                 continue
@@ -281,7 +281,7 @@ def analyze(m2_csv: Path, merged_result: Path) -> dict[str, Any]:
                     "candidate_crps": candidate_crps,
                 },
                 group_arrays={
-                    "distance": _distance_group(positions - record.pos),
+                    "distance": _distance_group(positions - record.full_pos),
                     "target_magnitude": _magnitude_group(true_delta),
                     "readout_region": construct.region_map[positions],
                     "method": np.full(len(positions), record.method, dtype=object),

@@ -230,7 +230,9 @@ def _build_puzzle_data(univ: M2Universe) -> tuple[dict[str, dict[str, np.ndarray
         if sequence not in structure_cache:
             structure_cache[sequence] = vienna_pair_features(sequence)
         graph_distance, bpp, _ = structure_cache[sequence]
-        target, _ = univ.mutant_full_profile(rec.wt_id, rec.pos, rec.ref, rec.alt)
+        target, _ = univ.mutant_full_profile(
+            rec.wt_id, rec.design_pos, rec.ref, rec.alt
+        )
         if target is None:
             continue
         qualified = construct.wt_observed & np.isfinite(target)
@@ -240,7 +242,7 @@ def _build_puzzle_data(univ: M2Universe) -> tuple[dict[str, dict[str, np.ndarray
         length = len(sequence)
         seq_x = _sequence_features(
             length,
-            rec.pos,
+            rec.full_pos,
             receiver,
             rec.ref,
             rec.alt,
@@ -248,8 +250,8 @@ def _build_puzzle_data(univ: M2Universe) -> tuple[dict[str, dict[str, np.ndarray
         )
         struct_x = np.column_stack(
             [
-                graph_distance[rec.pos, receiver] / max(length - 1, 1),
-                bpp[rec.pos, receiver],
+                graph_distance[rec.full_pos, receiver] / max(length - 1, 1),
+                bpp[rec.full_pos, receiver],
             ]
         ).astype(np.float32)
         signed = target[receiver].astype(np.float32) - construct.wt_reactivity[receiver].astype(np.float32)
