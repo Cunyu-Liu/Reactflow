@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v3_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v3_20260822
-as_of: '2026-08-23T00:11:43+08:00'
+as_of: '2026-08-23T00:22:00+08:00'
 parent_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
 diagnostic_freeze_head: ac58c7ba45c87c7ff3a9dffb6eda010b0d80604c
 
@@ -127,6 +127,25 @@ seed0_outer_expert_reuse_audit:
   allowed_use: R3M3_SEED0_OUTER_EXPERT_REUSE_ONLY
   prohibited_use: R3M2_ENGINEERING_SMOKE
   scores_read: false
+
+seed0_b1_current_evaluator_replay:
+  status: PASS_EXACT
+  audited_at: '2026-08-23T00:22:00+08:00'
+  folds: 20
+  source: /mnt/cunyuliu/reactflow_delta_model_rescue_v1/m2_real_fullscreen_merged_20260820
+  evaluator: scripts.reactflow_delta.run_model_rescue_m2_v1.score_predictions
+  compared_fields:
+    - crps
+    - signed_delta_mae
+    - coverage68
+    - coverage95
+    - registered_prediction_coverage
+    - failure_rate
+    - n_unexpected_prediction_keys
+  all_fields_all_folds_exact: true
+  maximum_absolute_difference: 0.0
+  implication: REUSED_B1_SCORE_IS_EXACTLY_CURRENT_EVALUATOR_COMPATIBLE
+  current_r3m3_candidate_scores_read: false
 
 r3m2_engineering_smoke:
   status: R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS
