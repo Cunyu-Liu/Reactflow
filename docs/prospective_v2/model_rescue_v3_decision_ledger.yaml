@@ -73,8 +73,8 @@ decisions:
 phase_state:
   R3C0: COORDINATE_AUDIT_AND_INVALID_RUN_INTERRUPTION_PASS
   R3C1: IMPLEMENTATION_AND_COORDINATE_INVARIANTS_PASS
-  R3C2: AUTHORIZED_NOT_RUN
-  R3C3: NOT_RUN
+  R3C2: CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS
+  R3C3: AUTHORIZED_NOT_RUN
   R3M0: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
   R3M1: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
   R3M2: INVALIDATED_COORDINATE_FRAME
@@ -319,3 +319,34 @@ r3c1_coordinate_correction_validation:
     staged_diff_check: PASS
   scientific_interpretation: ENGINEERING_AND_DATA_COORDINATE_VALIDATION_ONLY
   next_authorized_phase: R3C2
+
+r3c2_corrected_real_data_smoke:
+  status: R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS
+  completed_at: '2026-08-23T01:58:00+08:00'
+  execution_head: 4700bd0
+  evidence: docs/prospective_v2/audit/r3c2_corrected_real_data_smoke_20260823.yaml
+  artifacts:
+    directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu
+    result: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu/v3_result_seed0.json
+    qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu/r3c2_qualification.json
+    log: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu/logs/runner.log
+  execution:
+    folds: [0, 1]
+    seed: 0
+    device: CPU
+    expert_epochs: 3
+    residual_epochs: 3
+    pre_correction_expert_reuse: false
+  qualifier:
+    folds_passed: 2
+    prediction_invariants: PASS
+    inner_crossfit_invariants: PASS
+    target_error_mask_invariance: PASS
+    zero_mean_residual_invariance: PASS
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_prediction_keys: 0
+  score_direction_read_or_used_for_selection: false
+  scientific_interpretation: ENGINEERING_SMOKE_ONLY
+  r3c3_authorized: true
+  r3m3_authorized: false

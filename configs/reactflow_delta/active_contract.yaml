@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v3
 manifest_id: reactflow_delta_model_rescue_v3_coordinate_correction_authority_20260823
 project_task_id: reactflow_delta
 created_at: '2026-08-22T23:10:00+08:00'
-updated_at: '2026-08-23T01:31:41+08:00'
+updated_at: '2026-08-23T02:01:14+08:00'
 
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  current_phase: R3C2
-  current_authority_state: CORRECTED_REAL_DATA_ENGINEERING_SMOKE_ONLY
-  current_runnable_phase: R3C2
+  current_phase: R3C3
+  current_authority_state: CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY
+  current_runnable_phase: R3C3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v3-20260822
   human_contract_path: docs/prospective_v2/model_rescue_v3_coordinate_correction_amendment_20260823.md
@@ -41,7 +41,7 @@ scientific_state:
   model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY_IMMUTABLE
   model_rescue_v3_diagnostic: LEGAL_DIRECTION_SUPPORTED_NOT_GATE_EVIDENCE
   m2_coordinate_frame: CONFIRMED_INVALID_IN_EXISTING_IMPLEMENTATION
-  corrected_coordinate_results: R3C1_IMPLEMENTATION_AND_REAL_MAPPING_VALIDATION_PASS
+  corrected_coordinate_results: R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS
   internal_dual_gate: NOT_ESTABLISHED
   external_replication: NOT_ESTABLISHED
   mechanism: NOT_ESTABLISHED
@@ -49,9 +49,9 @@ scientific_state:
   publication_route: BENCHMARK_MEASUREMENT_MAINLINE
 
 allowed_phases: [R3C0, R3C1, R3C2, R3C3, R3M3, R3M4, R3M5, M6]
-runnable_phases: [R3C2]
-training_allowed: ENGINEERING_SMOKE_ONLY
-candidate_model_training_allowed: ENGINEERING_SMOKE_ONLY
+runnable_phases: [R3C3]
+training_allowed: CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY
+candidate_model_training_allowed: CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY
 diagnostic_analysis_allowed: true
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -64,8 +64,8 @@ unrelated_job_interference_allowed: false
 gate_state:
   R3C0: COORDINATE_AUDIT_AND_INVALID_RUN_INTERRUPTION_PASS
   R3C1: IMPLEMENTATION_AND_COORDINATE_INVARIANTS_PASS
-  R3C2: AUTHORIZED_NOT_RUN
-  R3C3: NOT_RUN
+  R3C2: CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS
+  R3C3: AUTHORIZED_NOT_RUN
   R3M0: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
   R3M1: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
   R3M2: INVALIDATED_COORDINATE_FRAME
@@ -82,7 +82,7 @@ historical_authority:
   model_rescue_v2_terminal_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
   disposition: PRESERVE_UNCHANGED
 
-next_allowed_action: RUN_CORRECTED_P01_P02_ENGINEERING_SMOKE_WITH_THREE_EPOCH_CAP
+next_allowed_action: REBUILD_CORRECTED_B1_AND_MEANALIGNED_SEED0_FOLDS_ZERO_THROUGH_NINETEEN
 blocked_until_corrected_coordinate_smoke_and_expert_rebuild:
   - R3M3_SEED0_SCREEN
   - R3M4_FIVE_SEED_FORMAL

@@ -24,21 +24,26 @@ def test_coordinate_correction_authority_is_fail_closed_and_preserves_parents() 
     assert active["authority"]["machine_contract_path"] == (
         "configs/reactflow_delta/model_rescue_v3_coordinate_correction_amendment.yaml"
     )
-    assert active["authority"]["current_phase"] == "R3C2"
+    assert active["authority"]["current_phase"] == "R3C3"
     assert active["authority"]["binding_status"] == (
         "R3M3_INVALID_BEFORE_FIRST_FOLD_COORDINATE_FRAME"
     )
-    assert active["runnable_phases"] == ["R3C2"]
-    assert active["training_allowed"] == "ENGINEERING_SMOKE_ONLY"
-    assert active["candidate_model_training_allowed"] == "ENGINEERING_SMOKE_ONLY"
+    assert active["runnable_phases"] == ["R3C3"]
+    assert active["training_allowed"] == (
+        "CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY"
+    )
+    assert active["candidate_model_training_allowed"] == (
+        "CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY"
+    )
     assert active["new_external_outcome_access_allowed"] is False
-    assert correction["authorization"]["current_phase"] == "R3C2"
+    assert correction["authorization"]["current_phase"] == "R3C3"
     assert correction["authorization"]["training_allowed"] == (
-        "ENGINEERING_SMOKE_ONLY"
+        "CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY"
     )
     assert correction["phase_graph"][0]["status"] == "PASS"
     assert correction["phase_graph"][1]["status"] == "PASS"
-    assert correction["phase_graph"][2]["status"] == "AUTHORIZED_NOT_RUN"
+    assert correction["phase_graph"][2]["status"] == "PASS"
+    assert correction["phase_graph"][3]["status"] == "AUTHORIZED_NOT_RUN"
     assert correction["confirmed_failure"]["real_data_evidence"][
         "formula_matches_raw_difference"
     ] == 13976

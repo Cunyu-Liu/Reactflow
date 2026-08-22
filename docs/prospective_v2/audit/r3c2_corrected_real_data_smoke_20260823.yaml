@@ -1,0 +1,43 @@
+schema_version: reactflow_delta.r3c2_corrected_real_data_smoke.v1
+status: R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS
+completed_at: '2026-08-23T01:58:00+08:00'
+execution_head: 4700bd0
+
+scope:
+  data: OPENKNOT_M2_V4_5_2
+  folds: [0, 1]
+  held_puzzles: [P01, P02]
+  seed: 0
+  expert_epochs: 3
+  residual_epochs: 3
+  device: CPU
+  old_expert_reuse: false
+  score_direction_read_or_used_for_selection: false
+  external_outcome_access: false
+
+artifacts:
+  directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu
+  result: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu/v3_result_seed0.json
+  qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu/r3c2_qualification.json
+  qualification_markdown: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu/r3c2_qualification.md
+  log: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c2_coordinate_corrected_smoke_cpu/logs/runner.log
+
+qualification:
+  folds_complete: [0, 1]
+  folds_passed: [0, 1]
+  prediction_schema_and_replay: PASS
+  inner_crossfit_complete_disjoint_target_blind: PASS
+  held_target_error_mask_invariance: PASS
+  outer_experts_fresh_three_epoch_cap: PASS
+  finite_outer_expert_and_residual_losses: PASS
+  residual_did_not_change_point_mean: PASS
+  registered_prediction_coverage_100pct: PASS
+  failure_rate_zero: PASS
+  unexpected_prediction_keys_zero: PASS
+
+decision:
+  r3c2: PASS
+  r3c3: AUTHORIZED
+  r3m3: NOT_AUTHORIZED
+  r3m4: NOT_AUTHORIZED
+  scientific_claim: ENGINEERING_SMOKE_ONLY
