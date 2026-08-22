@@ -1,0 +1,87 @@
+schema_version: reactflow_delta.model_rescue_v3_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v3_20260822
+as_of: '2026-08-22T23:10:00+08:00'
+parent_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
+diagnostic_freeze_head: ac58c7ba45c87c7ff3a9dffb6eda010b0d80604c
+
+immutable_parents:
+  model_rescue_v1: M2_NO_RESCUE_CANDIDATE
+  model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
+
+facts:
+  - id: V2_SEED0_MEAN_GATE
+    status: CONFIRMED_FACT
+    value:
+      relative_signed_delta_gain: 0.008833092321119973
+      signed_delta_positive_puzzles: 16
+      crps_gain: 0.005478315318756037
+      crps_positive_puzzles: 20
+    evidence: docs/prospective_v2/audit/r2m3_qualification_20260822.json
+  - id: OOF_FAILURE_ATLAS
+    status: CONFIRMED_DEVELOPMENT_DIAGNOSIS
+    value:
+      large_effect_relative_signed_delta_gain: -0.025066
+      near_zero_relative_signed_delta_gain: 0.347801
+      estimator_mismatch_numerically_material: false
+    evidence: autoresearch/loop-260822-1700/cycle0-oof-diagnosis.json
+  - id: GLOBAL_BLEND_PROBE
+    status: POST_HOC_OOF_DIAGNOSTIC_NOT_GATE_EVIDENCE
+    value:
+      relative_signed_delta_gain: 0.011298614164347095
+      signed_delta_positive_puzzles: 17
+      crps_gain: 0.0065228605349080815
+    evidence: autoresearch/loop-260822-1700/cycle1-blend-probe.json
+  - id: DISAGREEMENT_GATE_PROBE
+    status: POST_HOC_OOF_DIAGNOSTIC_NOT_GATE_EVIDENCE
+    value:
+      relative_signed_delta_gain: 0.012393360997278855
+      signed_delta_positive_puzzles: 19
+      crps_gain: 0.006575134037142771
+      crps_positive_puzzles: 20
+      selected_quantile_all_folds: 0.95
+    evidence: autoresearch/loop-260822-1700/cycle2-tail-gate-probe.json
+  - id: METHOD_GATE_INPUT_PERMISSION
+    status: CONFIRMED_FACT
+    value: INELIGIBLE_ENDPOINT_V7_INPUT
+    evidence: configs/reactflow_delta/endpoint_v7_all_mutant_full_spectrum.yaml
+
+hypothesis:
+  status: NEW_EXPERIMENT_REQUIRED
+  statement: >-
+    A two-bin convex gate based only on legal B1/MeanAligned prediction disagreement,
+    fitted from outer-train inner-OOF predictions, preserves B1 tail skill while
+    retaining MeanAligned near-zero skill and zero-mean residual calibration.
+  falsifier:
+    - R3M3_SEED0_DUAL_GATE_FAIL
+    - R3M4_ORIGINAL_DUAL_GATE_FAIL
+    - INNER_CROSSFIT_OR_TARGET_INVARIANCE_FAIL
+
+decisions:
+  kept:
+    - TWO_EXPERT_B1_AND_MEANALIGNED
+    - ABSOLUTE_EXPERT_DISAGREEMENT_ONLY
+    - FIXED_WEIGHTED_95TH_PERCENTILE_THRESHOLD
+    - TWO_CONVEX_EXACT_L1_WEIGHTS
+    - FOUR_FOLD_PUZZLE_GROUPED_INNER_CROSSFIT
+    - ZERO_MEAN_TWO_GAUSSIAN_RESIDUAL_CRPS
+  discarded:
+    - METHOD_CONDITIONED_GATE_INPUT_ILLEGAL
+    - FOUR_BIN_GATE_NO_INCREMENT
+    - EVALUATOR_ONLY_RESCUE_NUMERICALLY_INERT
+    - RANK_STRUCTURE_TEACHER_FOUNDATION_LARGER_BACKBONE
+
+phase_state:
+  R3M0: PASS
+  R3M1: IN_PROGRESS_IMPLEMENTATION_ONLY
+  R3M2: NOT_RUN
+  R3M3: NOT_RUN
+  R3M4: NOT_RUN
+  R3M5: NOT_RUN
+
+claims:
+  diagnostic_direction: SUPPORTED_FOR_IMPLEMENTATION
+  internal_dual_gate: NOT_ESTABLISHED
+  external_replication: NOT_ESTABLISHED
+  mechanism: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication: PUBLICATION_NOT_READY

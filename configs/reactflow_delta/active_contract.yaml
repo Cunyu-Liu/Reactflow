@@ -1,61 +1,51 @@
-schema_version: reactflow_delta.active_contract.v2
-manifest_id: reactflow_delta_model_rescue_v2_authority_20260820
+schema_version: reactflow_delta.active_contract.v3
+manifest_id: reactflow_delta_model_rescue_v3_authority_20260822
 project_task_id: reactflow_delta
-created_at: '2026-08-20T14:00:00+08:00'
+created_at: '2026-08-22T23:10:00+08:00'
 
 authority:
   pointer_role: SINGLE_ACTIVE_AUTHORITY
-  current_phase: M6
-  current_authority_state: BENCHMARK_ROUTE_LOCKED_AFTER_R2M3_MEAN_GATE_FAIL
-  current_runnable_phase: M6
+  current_phase: R3M1
+  current_authority_state: MODEL_RESCUE_V3_IMPLEMENTATION_ONLY
+  current_runnable_phase: R3M1
   conflict_policy: FAIL_CLOSED
-  branch: codex/reactflow-delta-model-rescue-v2-20260820
-  human_contract_path: docs/prospective_v2/model_rescue_v2_amendment_20260820.md
-  machine_contract_path: configs/reactflow_delta/model_rescue_v2_amendment.yaml
-  decision_ledger_path: docs/prospective_v2/model_rescue_v2_decision_ledger.yaml
-  binding_status: R2M5_TERMINAL_HANDOFF_COMPLETE
+  branch: codex/reactflow-delta-model-rescue-v3-20260822
+  human_contract_path: docs/prospective_v2/model_rescue_v3_amendment_20260822.md
+  machine_contract_path: configs/reactflow_delta/model_rescue_v3_amendment.yaml
+  decision_ledger_path: docs/prospective_v2/model_rescue_v3_decision_ledger.yaml
+  binding_status: R3M0_CONTRACT_AND_DIAGNOSTIC_FREEZE_PASS
   precedence:
     - THIS_ACTIVE_CONTRACT
-    - MODEL_RESCUE_V2_MACHINE_AMENDMENT
-    - MODEL_RESCUE_V2_HUMAN_AMENDMENT
-    - MODEL_RESCUE_V1_TERMINAL_CONTRACT
+    - MODEL_RESCUE_V3_MACHINE_AMENDMENT
+    - MODEL_RESCUE_V3_HUMAN_AMENDMENT
+    - MODEL_RESCUE_V2_TERMINAL_AMENDMENT_IMMUTABLE
+    - MODEL_RESCUE_V1_TERMINAL_CONTRACT_IMMUTABLE
     - HISTORICAL_PROSPECTIVE_V2_CONTRACTS
 
 authorization:
-  owner_instruction: PLEASE_IMPLEMENT_MODEL_RESCUE_V2_AMENDMENT
-  owner_instruction_date: '2026-08-20'
-  scope: MEAN_FIRST_ZERO_MEAN_RESIDUAL_ONLY
-  development_training_authorized_after_r2m1_pass: true
+  owner_instruction: CONTINUE_IMPROVING_MODEL_UNTIL_ORIGINAL_R2M4_GATE
+  owner_instruction_date: '2026-08-22'
+  scope: LEGAL_TWO_EXPERT_DISAGREEMENT_GATE_ONLY
+  owner_override_of_v2_future_action_block: true
+  owner_override_changes_v2_terminal_result: false
+  development_training_authorized_after_r3m1_pass: true
   new_external_outcome_access_authorized: false
   wet_lab_authorized: false
   public_release_authorized: false
 
 scientific_state:
   development_data: DEVELOPMENT_CONSUMED
-  existing_external_data: CONSUMED_DEVELOPMENT_K_JOINT_2
-  new_external_data: SEALED_REQUIRED_K_JOINT_AT_LEAST_9
-  direct_crps: POST_HOC_DEVELOPMENT_PASS
-  signed_delta_point_skill: CURRENT_NETWORK_DEVELOPMENT_PASS_VS_WT
-  low_rank_increment: SMALL_SIGNIFICANT_BELOW_PRACTICAL_GATE
+  model_rescue_v1: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
+  model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY_IMMUTABLE
+  model_rescue_v3_diagnostic: LEGAL_DIRECTION_SUPPORTED_NOT_GATE_EVIDENCE
+  internal_dual_gate: NOT_ESTABLISHED
   external_replication: NOT_ESTABLISHED
   mechanism: NOT_ESTABLISHED
   sota: NOT_ESTABLISHED
   publication_route: BENCHMARK_MEASUREMENT_MAINLINE
-  model_rescue_v1: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
-  model_rescue_v2: CALIBRATION_BASELINE_ONLY
-  mean_first_point_skill: POSITIVE_0_883_PERCENT_BELOW_PREREGISTERED_1_PERCENT_GATE
-  zero_mean_residual_calibration: DEVELOPMENT_CALIBRATION_GATE_PASS
 
-allowed_phases:
-  - R2M0
-  - R2M1
-  - R2M2
-  - R2M3
-  - R2M4
-  - R2M5
-  - M6
-runnable_phases:
-  - M6
+allowed_phases: [R3M0, R3M1, R3M2, R3M3, R3M4, R3M5, M6]
+runnable_phases: [R3M1]
 training_allowed: false
 candidate_model_training_allowed: false
 diagnostic_analysis_allowed: true
@@ -68,47 +58,25 @@ new_wet_lab_allowed: false
 unrelated_job_interference_allowed: false
 
 gate_state:
-  R2M0: PASS
-  R2M1: PASS
-  R2M2: PASS
-  R2M3: FAIL_MEAN_GATE_BELOW_1_PERCENT
-  R2M4: NOT_RUN_PREREQUISITE_FAILED
-  R2M5: PASS_HANDOFF_TO_M6
-  V2_INTERNAL_DUAL_PRIMARY: FAIL_R2M3_MEAN_GATE
-  NEW_EXTERNAL_ELIGIBILITY: NOT_ESTABLISHED
+  R3M0: PASS
+  R3M1: IN_PROGRESS_IMPLEMENTATION_ONLY
+  R3M2: NOT_RUN
+  R3M3: NOT_RUN
+  R3M4: NOT_RUN
+  R3M5: NOT_RUN
+  ORIGINAL_R2M4_DUAL_PRIMARY: NOT_ESTABLISHED
   NEW_EXTERNAL_DUAL_PRIMARY: NOT_RUN
 
 historical_authority:
   model_rescue_v1_terminal_head: 00c0cf3a804effb89ff99a8e9ea009963dc650d0
   model_rescue_v1_terminal_status: M2_NO_RESCUE_CANDIDATE
-  predecessor_manifest_id: reactflow_delta_prospective_v2_authority_epoch_21_20260813
-  predecessor_branch: codex/reactflow-delta-prospective-v2-20260813
-  predecessor_head: bf45996ef74220de33ae2e41bdf4bdc1acb4c965
-  disposition: SUPERSEDED_FOR_NEW_ACTIONS_PRESERVE_UNCHANGED
-  old_p4_p5_p5b_disposition: INVALID_SEQPOS_ALIGNMENT
+  model_rescue_v2_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
+  model_rescue_v2_terminal_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
+  disposition: PRESERVE_UNCHANGED
 
-next_allowed_action: M6_BENCHMARK_MANUSCRIPT_REQUALIFICATION
-execution_recovery:
-  interruption_disposition: R2M3_INTERRUPTED_RECOVERABLE
-  status: R2M3_RECOVERY_COMPLETED
-  scientific_gate_status: FAIL_MEAN_GATE_BELOW_1_PERCENT
-  completed_folds_verified: [0, 1]
-  missing_folds_authorized: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-  preserve_completed_folds: true
-  partial_fold_scores_inspected: false
-  partial_fold_score_inspection_allowed: false
-  persistent_session_required: true
-  persistent_session: reactflow_delta_r2m3_recovery_20260822
-  recovery_started_at: '2026-08-22T00:29:57+08:00'
-  recovery_launch_head: 935e32e49815a84a9ba9d663d7916e62394a6ea6
-  run_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_recovery_folds2_19_20260822.log
-  monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
-  r2m4_authorized: false
-  completed_folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-  merged_result: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/v2_result_seed0_merged.json
-  qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/r2m3_qualification.json
-blocked_after_r2m3_fail:
-  - R2M4_FORMAL_CONFIRMATION
-  - FURTHER_MODEL_RESCUE_TRAINING
-  - THIRD_MODEL_RESCUE_AMENDMENT
+next_allowed_action: IMPLEMENT_AND_TEST_R3M1_ONLY
+blocked_until_r3m1_pass:
+  - REAL_DATA_ENGINEERING_SMOKE
+  - R3M3_SEED0_SCREEN
+  - R3M4_FIVE_SEED_FORMAL
   - NEW_EXTERNAL_OUTCOME_ACCESS

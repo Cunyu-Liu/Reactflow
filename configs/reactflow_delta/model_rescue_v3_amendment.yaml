@@ -1,0 +1,185 @@
+schema_version: reactflow_delta.model_rescue_v3_amendment.v1
+contract_id: reactflow_delta_model_rescue_v3_20260822
+contract_status: R3M1_IMPLEMENTATION_ONLY
+created_at: '2026-08-22T23:10:00+08:00'
+
+parent:
+  contract: configs/reactflow_delta/model_rescue_v2_amendment.yaml
+  parent_terminal_head: 97ce496c4dda944d0554b49342ce388d8f9d97c1
+  parent_status: TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY
+  parent_result: MODEL_RESCUE_V2_FAIL
+  disposition: IMMUTABLE_PRESERVE_UNCHANGED
+  owner_override: >-
+    The 2026-08-22 user instruction explicitly authorizes continued model improvement.
+    This opens v3 prospectively and does not alter the v2 prohibition or terminal result.
+
+authority:
+  branch: codex/reactflow-delta-model-rescue-v3-20260822
+  diagnostic_freeze_head: ac58c7ba45c87c7ff3a9dffb6eda010b0d80604c
+  scope: LEGAL_TWO_EXPERT_DISAGREEMENT_GATE_ONLY
+  human_contract: docs/prospective_v2/model_rescue_v3_amendment_20260822.md
+  decision_ledger: docs/prospective_v2/model_rescue_v3_decision_ledger.yaml
+  implementation_plan: docs/plans/2026-08-22-model-rescue-v3.md
+
+scientific_scope:
+  task: endpoint_v7_all_mutant_full_spectrum
+  data: REAL_OPENKNOT_M2_V4_5_2
+  data_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  development_status: DEVELOPMENT_CONSUMED
+  split: split_v4_lopo_puzzle
+  evaluator: evaluator_v2_method_balanced_target_invariant
+  outer_puzzles: 20
+  comparator: b1_rfd_direct_aligned
+  candidate: b1_meanaligned_disagreement_gate_calibrated_residual
+  primary_metrics: [full_construct_crps, signed_delta_mae]
+
+diagnostic_evidence:
+  oof_atlas: autoresearch/loop-260822-1700/cycle0-oof-diagnosis.json
+  blend_probe: autoresearch/loop-260822-1700/cycle1-blend-probe.json
+  tail_gate_probe: autoresearch/loop-260822-1700/cycle2-tail-gate-probe.json
+  evidence_status: POST_HOC_OOF_DIAGNOSTIC_NOT_GATE_EVIDENCE
+  seed0_probe_signed_delta_relative_gain: 0.012393360997278855
+  seed0_probe_signed_delta_positive_puzzles: 19
+  seed0_probe_crps_gain: 0.006575134037142771
+  seed0_probe_crps_positive_puzzles: 20
+  method_conditioned_variant_eligible: false
+
+input_permission:
+  endpoint_contract: configs/reactflow_delta/endpoint_v7_all_mutant_full_spectrum.yaml
+  gate_allowed_inputs:
+    - b1_signed_delta_prediction
+    - meanaligned_signed_delta_prediction
+    - absolute_expert_disagreement
+  gate_forbidden_inputs:
+    - design_method
+    - puzzle_id
+    - dataset_id
+    - publication_id
+    - held_target
+    - held_target_error
+    - held_target_mask
+    - external_outcome
+
+models:
+  b1_expert:
+    id: b1_rfd_direct_aligned
+    d: 96
+    heads: 4
+    hidden: 64
+    k_rank: 0
+    epochs: 40
+    optimizer: ADAM
+    learning_rate: 0.001
+    weight_decay: 0.0
+  meanaligned_expert:
+    id: b1_mean_aligned
+    d: 96
+    heads: 4
+    hidden: 64
+    k_rank: 0
+    loss: METHOD_BALANCED_EXACT_SIGNED_DELTA_L1
+    epochs: 40
+    optimizer: ADAM
+    learning_rate: 0.001
+    weight_decay: 0.0
+    gradient_clip: 5.0
+  gate:
+    family: TWO_BIN_CONVEX_EXPERT_DISAGREEMENT
+    feature: ABS_B1_DELTA_MINUS_MEANALIGNED_DELTA
+    threshold_quantile: 0.95
+    threshold_search_allowed: false
+    bins: 2
+    alpha_fit: EXACT_HIERARCHICAL_WEIGHTED_L1_BREAKPOINT_MEDIAN
+    alpha_bounds: [0.0, 1.0]
+    inner_crossfit_folds: 4
+    inner_split_unit: PUZZLE
+    in_sample_gate_fit_allowed: false
+    outer_held_outcome_allowed: false
+  residual:
+    family: CONDITIONAL_TWO_GAUSSIAN_ZERO_MEAN_SCALE_MIXTURE
+    center: FROZEN_BLENDED_MEAN
+    hidden: 64
+    loss: EXACT_GAUSSIAN_MIXTURE_CRPS
+    epochs: 40
+    mean_gradient_allowed: false
+  compute_disclosure:
+    single_backbone_capacity_increased: false
+    backbone_count_at_inference: 2
+    approximate_mean_path_compute_ratio_vs_b1: 2.0
+    equal_compute_claim_allowed: false
+
+authorization:
+  current_phase: R3M1
+  training_allowed: false
+  allowed:
+    - IMPLEMENT_V3_MODEL_GATE_RUNNER_QUALIFIER
+    - RUN_FOCUSED_TESTS_AND_CONTRACT_VALIDATOR
+    - RUN_REAL_P01_P02_ENGINEERING_SMOKE_AFTER_R3M1_PASS
+    - RUN_FIXED_SEED0_TWENTY_FOLD_SCREEN_AFTER_R3M2_PASS
+    - RUN_FIXED_FIVE_SEED_CONFIRMATION_ONLY_AFTER_R3M3_DUAL_GATE_PASS
+    - USE_GPU0_TO5_WITHOUT_INTERFERING_WITH_UNRELATED_JOBS
+  prohibited:
+    - MODIFY_V1_OR_V2_TERMINAL_RESULT
+    - ACCESS_NEW_EXTERNAL_OUTCOMES
+    - USE_EXISTING_EXTERNAL_OUTCOMES_FOR_SELECTION
+    - USE_DESIGN_METHOD_AS_PREDICTOR
+    - USE_HELD_TARGET_ERROR_OR_MASK_IN_PREDICTION
+    - FIT_GATE_ON_OUTER_TRAIN_IN_SAMPLE_PREDICTIONS
+    - SEARCH_THRESHOLD_QUANTILE_OR_BIN_COUNT
+    - ADD_RANK_STRUCTURE_TEACHER_FOUNDATION_OR_LARGER_BACKBONE
+    - SELECT_SEED_SUBSET
+    - INTERFERE_WITH_UNRELATED_RUNNING_JOBS
+
+screen:
+  phase: R3M3
+  seed: 0
+  outer_folds: 20
+  inner_crossfit_folds: 4
+  expert_epochs: 40
+  residual_epochs: 40
+  signed_delta_mae_gain_gt: 0.0
+  signed_delta_mae_relative_gain_min: 0.01
+  signed_delta_positive_puzzles_min: 12
+  crps_gain_gt: 0.0
+  crps_positive_puzzles_min: 12
+  prediction_coverage: 1.0
+  failure_rate: 0.0
+  unexpected_keys: 0
+  residual_point_mean_atol: 1.0e-7
+
+formal_confirmation:
+  phase: R3M4
+  required_qualification_status: R2M4_POST_HOC_DEVELOPMENT_PASS
+  seeds: [0, 1, 2, 3, 4]
+  outer_folds: 20
+  inner_crossfit_folds: 4
+  ci_method: TWO_SIDED_STUDENT_T_95_PERCENT_OVER_20_PUZZLE_EFFECTS
+  crps_ci_low_gt: 0.0
+  crps_gain_min_absolute: 0.003
+  crps_gain_min_relative: 0.02
+  signed_delta_mae_ci_low_gt: 0.0
+  signed_delta_mae_gain_min_relative: 0.01
+  crps_positive_puzzles_min: 14
+  signed_delta_mae_positive_puzzles_min: 12
+  leave_one_puzzle_effect_positive: true
+  max_single_puzzle_effect_fraction: 0.25
+  prediction_coverage: 1.0
+  failure_rate: 0.0
+  unexpected_keys: 0
+  max_coverage_error_worsening_pp: 2.0
+  coverage_guardrail_applies_separately_to: [coverage68, coverage95]
+
+phase_graph:
+  - {id: R3M0, status: PASS, next_on_pass: R3M1}
+  - {id: R3M1, status: IN_PROGRESS, training_allowed: false, next_on_pass: R3M2}
+  - {id: R3M2, status: NOT_RUN, next_on_pass: R3M3}
+  - {id: R3M3, status: NOT_RUN, next_on_pass: R3M4, next_on_fail: R3M5_FAIL}
+  - {id: R3M4, status: NOT_RUN, next_on_pass: R3M5_PASS, next_on_fail: R3M5_FAIL}
+  - {id: R3M5, status: NOT_RUN, handoff_phase: M6}
+
+claim_policy:
+  pass_status: POST_HOC_DEVELOPMENT_PASS
+  external_replication: NOT_ESTABLISHED
+  mechanism: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
