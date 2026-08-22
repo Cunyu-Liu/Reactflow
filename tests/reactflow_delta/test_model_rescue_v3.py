@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 import torch
 import yaml
 
 from scripts.reactflow_delta.model_rescue_v2 import ConditionalScaleMixtureCalibrator
+from scripts.reactflow_delta import run_model_rescue_v3 as R
 from scripts.reactflow_delta.model_rescue_v3 import (
     DisagreementGate,
     apply_disagreement_gate_numpy,
@@ -16,6 +19,7 @@ from scripts.reactflow_delta.model_rescue_v3 import (
 )
 from scripts.reactflow_delta.run_model_rescue_v3 import (
     assert_run_authority,
+    validate_corrected_expert_reuse,
     validate_outer_expert_reuse,
 )
 
@@ -132,3 +136,82 @@ def test_smoke_rejects_forty_epoch_outer_expert_reuse(tmp_path) -> None:
         b1_result_dir=tmp_path / "b1",
         mean_result_dir=tmp_path / "mean",
     )
+
+
+def test_corrected_expert_reuse_rejects_smoke_legacy_mix_and_nonzero_seed(
+    tmp_path,
+) -> None:
+    with pytest.raises(ValueError, match="three-epoch cap"):
+        validate_corrected_expert_reuse(
+            seed=0,
+            smoke=True,
+            corrected_result_dir=tmp_path / "corrected",
+            legacy_b1_result_dir=None,
+            legacy_mean_result_dir=None,
+        )
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        validate_corrected_expert_reuse(
+            seed=0,
+            smoke=False,
+            corrected_result_dir=tmp_path / "corrected",
+            legacy_b1_result_dir=tmp_path / "old_b1",
+            legacy_mean_result_dir=tmp_path / "old_mean",
+        )
+    with pytest.raises(ValueError, match="seed 0"):
+        validate_corrected_expert_reuse(
+            seed=1,
+            smoke=False,
+            corrected_result_dir=tmp_path / "corrected",
+            legacy_b1_result_dir=None,
+            legacy_mean_result_dir=None,
+        )
+
+
+def test_corrected_expert_loader_strictly_loads_frozen_models(
+    tmp_path, monkeypatch
+) -> None:
+    b1_checkpoint = tmp_path / "b1.pt"
+    mean_checkpoint = tmp_path / "mean.pt"
+    torch.save(R.AlignedDeltaModel(k_rank=0, sparse=False).state_dict(), b1_checkpoint)
+    torch.save(R.MeanAlignedModel().state_dict(), mean_checkpoint)
+    result_path = tmp_path / "v3_corrected_expert_fold_result_fold2_seed0.json"
+    result_path.write_text(
+        json.dumps(
+            {
+                "schema_version": (
+                    "reactflow_delta.model_rescue_v3_corrected_expert_rebuild.v1"
+                ),
+                "outer_fold": 2,
+                "seed": 0,
+                "epochs": 40,
+                "held_score_computed": False,
+                "b1_checkpoint": str(b1_checkpoint),
+                "meanaligned_checkpoint": str(mean_checkpoint),
+            }
+        ),
+        encoding="utf-8",
+    )
+    prediction = {
+        "keys": np.asarray(["k0"], dtype=object),
+        "locations": np.asarray([[0.1]]),
+        "scales": np.asarray([[0.2]]),
+        "weights": np.asarray([[1.0]]),
+    }
+    monkeypatch.setattr(R, "predict_held", lambda *_args, **_kwargs: prediction)
+    monkeypatch.setattr(R, "score_predictions", lambda *_args, **_kwargs: {"ok": 1})
+
+    _, _, loaded_b1, loaded_mean, baseline = R._load_corrected_outer_experts(
+        fold=2,
+        seed=0,
+        result_dir=tmp_path,
+        univ=object(),
+        held_records=[],
+        ctx_cache={},
+        device="cpu",
+        out_dir=tmp_path,
+    )
+
+    assert loaded_b1 == b1_checkpoint
+    assert loaded_mean == mean_checkpoint
+    assert baseline["score"] == {"ok": 1}
+    assert baseline["reused_corrected_coordinate_seed0_outer_expert"] is True

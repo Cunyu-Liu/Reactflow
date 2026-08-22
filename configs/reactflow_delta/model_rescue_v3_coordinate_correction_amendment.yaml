@@ -113,3 +113,33 @@ success_transition:
     - CORRECTED_MEANALIGNED_SEED0_TWENTY_FOLD_ARTIFACT_COMPLETE
     - CORRECTED_EXPERT_KEY_UNIVERSE_IDENTITY_PASS
   gates_after_restart: UNCHANGED_FROM_PARENT_V3
+
+r3c3_expert_rebuild:
+  runner: scripts/reactflow_delta/run_model_rescue_v3_expert_rebuild.py
+  qualifier: scripts/reactflow_delta/qualify_model_rescue_v3_expert_rebuild.py
+  models: [B1, MEANALIGNED]
+  outer_folds: 20
+  seed: 0
+  epochs: 40
+  optimizer: ADAM
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gate_training_allowed: false
+  residual_calibration_allowed: false
+  held_score_computation_allowed: false
+  prediction_artifact_fields:
+    - keys
+    - b1_delta_mean
+    - meanaligned_delta_mean
+    - outer_fold
+    - seed
+  qualifier_requires:
+    - FOLDS_ZERO_THROUGH_NINETEEN_COMPLETE_AND_UNIQUE
+    - BOTH_TRAINING_HISTORIES_HAVE_FORTY_FINITE_EPOCHS
+    - BOTH_CHECKPOINTS_EXIST_PER_FOLD
+    - HELD_PREDICTION_KEY_UNIVERSE_EXACT_PER_FOLD
+    - NO_TARGET_OR_SCORE_FIELD_IN_EXPERT_PREDICTIONS
+  shard_policy:
+    physical_gpus: [0, 1, 2, 3, 4, 5]
+    non_overlapping_folds: true
+    unrelated_job_interference: PROHIBITED

@@ -87,6 +87,24 @@ def validate_outer_expert_reuse(
         raise ValueError("R3M2 smoke must train its outer experts for at most three epochs")
 
 
+def validate_corrected_expert_reuse(
+    *,
+    seed: int,
+    smoke: bool,
+    corrected_result_dir: Path | None,
+    legacy_b1_result_dir: Path | None,
+    legacy_mean_result_dir: Path | None,
+) -> None:
+    if corrected_result_dir is not None and (
+        legacy_b1_result_dir is not None or legacy_mean_result_dir is not None
+    ):
+        raise ValueError("corrected and pre-correction expert sources are mutually exclusive")
+    if corrected_result_dir is not None and seed != 0:
+        raise ValueError("R3C3 corrected expert reuse is authorized only for seed 0")
+    if corrected_result_dir is not None and smoke:
+        raise ValueError("engineering smoke must train fresh at the three-epoch cap")
+
+
 def _module_snapshot(module: torch.nn.Module) -> dict[str, torch.Tensor]:
     return {
         name: tensor.detach().cpu().clone()
@@ -674,6 +692,55 @@ def _load_reused_outer_experts(
     return b1_model, mean_model, b1_checkpoint, mean_checkpoint, baseline
 
 
+def _load_corrected_outer_experts(
+    *,
+    fold: int,
+    seed: int,
+    result_dir: Path,
+    univ: M2Universe,
+    held_records: list[Any],
+    ctx_cache: dict[str, Any],
+    device: str,
+    out_dir: Path,
+) -> tuple[AlignedDeltaModel, MeanAlignedModel, Path, Path, dict[str, Any]]:
+    result_path = result_dir / (
+        f"v3_corrected_expert_fold_result_fold{fold}_seed{seed}.json"
+    )
+    row = json.loads(result_path.read_text(encoding="utf-8"))
+    if row.get("schema_version") != (
+        "reactflow_delta.model_rescue_v3_corrected_expert_rebuild.v1"
+    ):
+        raise ValueError("corrected expert artifact has the wrong schema")
+    if int(row["outer_fold"]) != fold or int(row["seed"]) != seed:
+        raise ValueError("corrected expert artifact has the wrong fold or seed")
+    if int(row["epochs"]) != 40 or row.get("held_score_computed") is not False:
+        raise ValueError("corrected expert artifact violates the frozen rebuild protocol")
+    b1_checkpoint = Path(row["b1_checkpoint"])
+    mean_checkpoint = Path(row["meanaligned_checkpoint"])
+    b1_model = AlignedDeltaModel(k_rank=0, sparse=False).to(device)
+    mean_model = MeanAlignedModel().to(device)
+    b1_model.load_state_dict(
+        torch.load(b1_checkpoint, map_location=device, weights_only=True)
+    )
+    mean_model.load_state_dict(
+        torch.load(mean_checkpoint, map_location=device, weights_only=True)
+    )
+    baseline_prediction = predict_held(
+        b1_model, univ, held_records, ctx_cache, device
+    )
+    baseline_path = out_dir / f"v3_baseline_predictions_fold{fold}_seed{seed}.npz"
+    np.savez_compressed(baseline_path, **baseline_prediction)
+    baseline = {
+        "model_id": BASELINE,
+        "score": score_predictions(baseline_prediction, univ, held_records),
+        "prediction_artifact": str(baseline_path),
+        "checkpoint": str(b1_checkpoint),
+        "source_fold_artifact": str(result_path),
+        "reused_corrected_coordinate_seed0_outer_expert": True,
+    }
+    return b1_model, mean_model, b1_checkpoint, mean_checkpoint, baseline
+
+
 def _train_outer_experts(
     *,
     univ: M2Universe,
@@ -747,6 +814,7 @@ def run_fold(
     seed: int,
     reuse_b1_result_dir: Path | None,
     reuse_mean_result_dir: Path | None,
+    reuse_corrected_expert_dir: Path | None,
 ) -> dict[str, Any]:
     train_set = set(fold.train_puzzles)
     train_records = [record for record in records if record.puzzle in train_set]
@@ -774,7 +842,27 @@ def run_fold(
         b1_result_dir=reuse_b1_result_dir,
         mean_result_dir=reuse_mean_result_dir,
     )
-    if reuse_b1_result_dir is not None and reuse_mean_result_dir is not None:
+    validate_corrected_expert_reuse(
+        seed=seed,
+        smoke=False,
+        corrected_result_dir=reuse_corrected_expert_dir,
+        legacy_b1_result_dir=reuse_b1_result_dir,
+        legacy_mean_result_dir=reuse_mean_result_dir,
+    )
+    if reuse_corrected_expert_dir is not None:
+        b1_model, mean_model, b1_checkpoint, mean_checkpoint, baseline = (
+            _load_corrected_outer_experts(
+                fold=int(fold.outer_fold),
+                seed=seed,
+                result_dir=reuse_corrected_expert_dir,
+                univ=univ,
+                held_records=held_records,
+                ctx_cache=ctx_cache,
+                device=device,
+                out_dir=out_dir,
+            )
+        )
+    elif reuse_b1_result_dir is not None and reuse_mean_result_dir is not None:
         b1_model, mean_model, b1_checkpoint, mean_checkpoint, baseline = (
             _load_reused_outer_experts(
                 fold=int(fold.outer_fold),
@@ -885,6 +973,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--reuse-b1-result-dir", type=Path)
     parser.add_argument("--reuse-mean-result-dir", type=Path)
+    parser.add_argument("--reuse-corrected-expert-dir", type=Path)
     parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args(argv)
     assert_run_authority(args.repo_root.resolve(), args.phase, smoke=args.smoke)
@@ -897,6 +986,13 @@ def main(argv: list[str] | None = None) -> int:
         smoke=args.smoke,
         b1_result_dir=args.reuse_b1_result_dir,
         mean_result_dir=args.reuse_mean_result_dir,
+    )
+    validate_corrected_expert_reuse(
+        seed=args.seed,
+        smoke=args.smoke,
+        corrected_result_dir=args.reuse_corrected_expert_dir,
+        legacy_b1_result_dir=args.reuse_b1_result_dir,
+        legacy_mean_result_dir=args.reuse_mean_result_dir,
     )
     universe = M2Universe(args.m2_csv)
     universe.build()
@@ -925,6 +1021,7 @@ def main(argv: list[str] | None = None) -> int:
             seed=args.seed,
             reuse_b1_result_dir=args.reuse_b1_result_dir,
             reuse_mean_result_dir=args.reuse_mean_result_dir,
+            reuse_corrected_expert_dir=args.reuse_corrected_expert_dir,
         )
         results.append(result)
         path = args.out_dir / f"v3_fold_result_fold{fold.outer_fold}_seed{args.seed}.json"

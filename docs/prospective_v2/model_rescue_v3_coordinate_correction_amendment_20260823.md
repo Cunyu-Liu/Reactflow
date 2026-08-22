@@ -51,6 +51,17 @@
 5. 只有 R3C3 完整后，才用同一 v3 candidate、同一 frozen Gate 重新运行 R3M3。
 6. 只有修复后的 R3M3 Mean Gate 与 Calibration Gate 同时 PASS，才允许原始 R3M4。
 
+R3C3 使用唯一的 expert-only 执行路径：
+
+- runner：`scripts/reactflow_delta/run_model_rescue_v3_expert_rebuild.py`；
+- qualifier：`scripts/reactflow_delta/qualify_model_rescue_v3_expert_rebuild.py`；
+- 每个 outer fold 从头训练同一 B1 与 MeanAligned，固定 seed 0、40 epochs、Adam、learning rate `1e-3`、weight decay `0`；
+- 不运行 gate、residual calibration、rank、architecture 或 loss search；
+- 每 fold 只输出两个 checkpoint、训练历史和 prediction-only expert ledger，不计算 held score；
+- 20 folds 可以在 GPU0–5 上按不重叠 fold shards 并行，但不得抢占无关任务；
+- 只有 qualifier 确认 folds 0–19 完整、loss finite、checkpoint 完整且每个 held puzzle key universe 精确一致，才开放 corrected R3M3；
+- R3M3 加载 R3C3 checkpoint 后才生成 baseline/candidate held predictions 和分数；任何 partial fold score 仍禁止查看。
+
 ## 6. 不可协商边界
 
 - 不改变模型容量、结构、loss、epoch、seed、threshold、Gate 或统计门槛；
