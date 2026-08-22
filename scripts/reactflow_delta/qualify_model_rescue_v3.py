@@ -290,12 +290,16 @@ def _fold_checks(row: dict[str, Any], *, smoke: bool) -> dict[str, Any]:
     }
 
 
-def qualify_smoke(folds: list[dict[str, Any]]) -> dict[str, Any]:
+def qualify_smoke(
+    folds: list[dict[str, Any]], phase: str = "R3M2"
+) -> dict[str, Any]:
+    if phase not in {"R3M2", "R3C2"}:
+        raise ValueError(f"{phase} is not an engineering-smoke phase")
     fold_ids = sorted(int(row["outer_fold"]) for row in folds)
     if fold_ids != [0, 1] or len(folds) != 2:
-        raise ValueError("R3M2 smoke requires exactly folds 0 and 1")
+        raise ValueError(f"{phase} smoke requires exactly folds 0 and 1")
     if any(int(row.get("seed", -1)) != 0 for row in folds):
-        raise ValueError("R3M2 smoke accepts seed 0 only")
+        raise ValueError(f"{phase} smoke accepts seed 0 only")
     rows = []
     for row in sorted(folds, key=lambda value: int(value["outer_fold"])):
         checks = _fold_checks(row, smoke=True)
@@ -307,12 +311,19 @@ def qualify_smoke(folds: list[dict[str, Any]]) -> dict[str, Any]:
             }
         )
     passed = all(row["passed"] for row in rows)
+    pass_status = (
+        "R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS"
+        if phase == "R3C2"
+        else "R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS"
+    )
     return {
         "schema_version": SMOKE_SCHEMA,
+        "phase": phase,
         "evidence_status": "ENGINEERING_SMOKE_ONLY",
         "folds": rows,
-        "overall_status": "R3M2_REAL_DATA_ENGINEERING_SMOKE_PASS" if passed else "R3M2_FAIL",
-        "r3m3_authorized": passed,
+        "overall_status": pass_status if passed else f"{phase}_FAIL",
+        "r3c3_authorized": passed if phase == "R3C2" else False,
+        "r3m3_authorized": passed if phase == "R3M2" else False,
         "scientific_interpretation_prohibited": True,
     }
 
@@ -596,12 +607,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     parser.add_argument("--out-md", type=Path, required=True)
-    parser.add_argument("--phase", choices=["R3M2", "R3M3", "R3M4"], default="R3M3")
+    parser.add_argument(
+        "--phase", choices=["R3M2", "R3C2", "R3M3", "R3M4"], default="R3M3"
+    )
     args = parser.parse_args(argv)
     folds = _load_folds(args.input, args.phase)
     result = (
-        qualify_smoke(folds)
-        if args.phase == "R3M2"
+        qualify_smoke(folds, phase=args.phase)
+        if args.phase in {"R3M2", "R3C2"}
         else qualify_screen(folds)
         if args.phase == "R3M3"
         else qualify_formal(folds)

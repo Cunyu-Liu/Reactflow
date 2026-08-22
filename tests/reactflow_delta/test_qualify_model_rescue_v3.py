@@ -14,6 +14,32 @@ from scripts.reactflow_delta.model_rescue_v3 import (
 from scripts.reactflow_delta.run_model_rescue_v2 import BASELINE
 
 
+def test_corrected_smoke_pass_opens_r3c3_but_not_r3m3(monkeypatch) -> None:
+    rows = [
+        {"outer_fold": 0, "held_puzzle": "P01", "seed": 0},
+        {"outer_fold": 1, "held_puzzle": "P02", "seed": 0},
+    ]
+    monkeypatch.setattr(
+        Q,
+        "_fold_checks",
+        lambda _row, *, smoke: {
+            "prediction": {"valid": smoke},
+            "inner_crossfit": {"valid": smoke},
+            "score_integrity": {"valid": smoke},
+            "invariants": {"valid": smoke},
+            "passed": smoke,
+        },
+    )
+
+    result = Q.qualify_smoke(rows, phase="R3C2")
+
+    assert result["overall_status"] == (
+        "R3C2_CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS"
+    )
+    assert result["r3c3_authorized"] is True
+    assert result["r3m3_authorized"] is False
+
+
 def _write_prediction(path: Path, *, corrupt_delta: bool = False) -> None:
     b1 = np.asarray([0.0, 0.0, 1.0])
     mean = np.asarray([1.0, 2.0, -1.0])

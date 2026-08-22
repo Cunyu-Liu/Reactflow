@@ -871,7 +871,9 @@ def run_fold(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
-    parser.add_argument("--phase", choices=["R3M2", "R3M3", "R3M4"], required=True)
+    parser.add_argument(
+        "--phase", choices=["R3M2", "R3C2", "R3M3", "R3M4"], required=True
+    )
     parser.add_argument("--m2-csv", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
