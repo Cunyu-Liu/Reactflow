@@ -95,3 +95,29 @@ thresholds/weights on the other 19 puzzle OOF cells and apply them to the held p
 Keep only if it materially exceeds the 1.129861% global-blend incumbent while CRPS
 stays positive in at least 12/20 puzzles. Any kept version must later fit the gate on
 outer-train outcomes only; this probe itself remains non-qualifying.
+
+## Cycle 2 result — disagreement tail gate kept
+
+- Global exact-L1 blend reproduces Cycle 1: 1.129841% signed-delta relative gain,
+  17/20 positive puzzles, +0.00652265 CRPS and 20/20 CRPS-positive puzzles.
+- B1-magnitude two-bin gate reaches 1.199368%, 19/20, and +0.00664998 CRPS.
+- Expert-disagreement two-bin gate is best: 1.239336%, 19/20, and +0.00657513
+  CRPS with 20/20 CRPS-positive puzzles.
+- A magnitude+disagreement four-bin gate does not improve further (1.238133%); the
+  extra bins are discarded.
+- The selected disagreement gate is stable across excluded puzzles: every fit chooses
+  the fixed 95th-percentile split; thresholds range 0.0991--0.1054, low-disagreement
+  alpha has median 0.8303, and high-disagreement alpha has median 0.3674.
+- Only the low-capacity two-bin disagreement gate is retained. It uses endpoint-v7
+  legal predictions and no method, target, target mask, or external input.
+
+## Cycle 3 hypothesis and frozen implementation direction
+
+Rebuild the retained gate legally inside every outer fold. Generate B1 and MeanAligned
+predictions for the 19 outer-train puzzles using fixed four-fold puzzle-grouped inner
+cross-fitting. Set the threshold to the weighted 95th percentile of
+`abs(mu_B1 - mu_MeanAligned)` and fit the two convex alphas by the exact hierarchical
+L1 weighted-median solution. Then train the final outer B1/Mean experts, freeze the
+blended mean, and refit the v2 zero-mean residual CRPS head around it. No method label,
+threshold search, bin-count search, or held-puzzle outcome is permitted. The complete
+seed-0 20-fold run is the first Gate-eligible evidence for this candidate.

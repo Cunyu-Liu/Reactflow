@@ -23,17 +23,17 @@
     "autoresearch/loop-260822-1700/*"
   ],
   "max_cycles": 50,
-  "cycle": 2,
+  "cycle": 3,
   "pending_verify": false,
-  "current_incumbent": "global_b1_mean_blend_probe_1_129861_percent",
+  "current_incumbent": "legal_disagreement_tail_gate_probe_1_239336_percent",
   "last_completed_cycle": {
-    "cycle": 1,
-    "hypothesis": "B1 and MeanAligned have complementary error regimes that a convex blend can exploit",
-    "verdict": "GLOBAL_BLEND_KEPT_METHOD_CONDITIONING_EXCLUDED_BY_INPUT_PERMISSION",
-    "evidence": "cycle1-blend-probe.json",
-    "working_metric_percent": 1.1298614164347096,
-    "guard": "CRPS_GAIN_0.00652286_POSITIVE_20_OF_20",
-    "next_action": "probe a legal outcome-blind tail-conditioned blend for more formal-gate margin"
+    "cycle": 2,
+    "hypothesis": "a legal outcome-blind expert-disagreement tail gate can preserve B1 tail skill",
+    "verdict": "KEEP_TWO_BIN_DISAGREEMENT_GATE_DISCARD_FOUR_BIN",
+    "evidence": "cycle2-tail-gate-probe.json",
+    "working_metric_percent": 1.2393360997278855,
+    "guard": "CRPS_GAIN_0.00657513_POSITIVE_20_OF_20",
+    "next_action": "freeze v3 amendment and implement inner-crossfit gate fitting inside each outer fold"
   },
   "units_remaining": "formal_r2m4_dual_gate_not_passed",
   "pipeline": ["diagnose", "plan", "classic_loop", "holdout_verify", "evals"]

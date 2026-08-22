@@ -1,0 +1,951 @@
+{
+  "evidence_status": "POST_HOC_OOF_DIAGNOSTIC_NOT_GATE_EVIDENCE",
+  "input": {
+    "folds": 20,
+    "forbidden_gate_inputs": [
+      "design_method",
+      "held_target",
+      "held_mask"
+    ],
+    "legal_gate_inputs": [
+      "absolute_b1_signed_delta_prediction",
+      "absolute_b1_meanaligned_prediction_disagreement"
+    ],
+    "m2_csv": "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv",
+    "merged_result": "/mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/v2_result_seed0_merged.json",
+    "seed": 0
+  },
+  "interpretation_boundary": {
+    "may_claim_gate_pass": false,
+    "may_retroactively_change_v2": false,
+    "may_select_v3_direction": true,
+    "reason": "the base OOF experts are meta-cross-fold artifacts; a kept gate must be fitted inside each outer-training fold and evaluated by a new end-to-end run"
+  },
+  "invariants": {
+    "alpha_range": [
+      0.0,
+      1.0
+    ],
+    "held_puzzle_excluded_from_gate_fit": true,
+    "max_original_residual_center_error": 4.634857173613227e-07
+  },
+  "schema_version": "reactflow_delta.model_rescue_v3_tail_gate_probe.v1",
+  "variants": {
+    "b1_magnitude_two_bin": {
+      "metrics": {
+        "crps": {
+          "baseline_mean": 0.19552047647077514,
+          "candidate_mean": 0.18887049258264282,
+          "mean_gain": 0.006649983888132316,
+          "per_puzzle_gain": {
+            "P01": 0.005499409570942637,
+            "P02": 0.006496338884007025,
+            "P03": 0.003983837636736376,
+            "P04": 0.007819605044708244,
+            "P05": 0.0033828984217978975,
+            "P06": 0.006522131392610986,
+            "P07": 0.005429542561036449,
+            "P08": 0.006051436496778556,
+            "P09": 0.005774782288918784,
+            "P10": 0.008819773447561963,
+            "P11": 0.0061918600704488624,
+            "P12": 0.008367032891325482,
+            "P13": 0.009043780066764207,
+            "P14": 0.008451080304762465,
+            "P15": 0.006587574931923412,
+            "P16": 0.009831003362867158,
+            "P17": 0.004992431066568159,
+            "P18": 0.00976238136154059,
+            "P19": 0.0056251327644477045,
+            "P20": 0.004367645196900083
+          },
+          "positive_puzzles": 20,
+          "relative_gain": 0.034011700504045686
+        },
+        "signed_delta_mae": {
+          "baseline_mean": 0.24259835475232477,
+          "candidate_mean": 0.2396887086285986,
+          "mean_gain": 0.002909646123726184,
+          "per_puzzle_gain": {
+            "P01": -0.00047063914899442283,
+            "P02": 0.003423623194474701,
+            "P03": 0.0013121533933905805,
+            "P04": 0.003693855499580484,
+            "P05": 0.0009539060609721206,
+            "P06": 0.0022968529573614838,
+            "P07": 0.0020095989223246624,
+            "P08": 0.0024496720511591463,
+            "P09": 0.0010155419546988287,
+            "P10": 0.0013033923200320152,
+            "P11": 0.0009446987498113457,
+            "P12": 0.0052239495684885395,
+            "P13": 0.00706699461440663,
+            "P14": 0.0016805853830702544,
+            "P15": 0.0017521733493842673,
+            "P16": 0.005634487923734499,
+            "P17": 0.004419476533391892,
+            "P18": 0.004277427861362398,
+            "P19": 0.0068717318981232345,
+            "P20": 0.0023334393877517956
+          },
+          "positive_puzzles": 19,
+          "relative_gain": 0.011993676241937916
+        }
+      },
+      "specs": {
+        "P01": {
+          "alpha_high": 0.3885478718289151,
+          "alpha_low": 0.8318780654729455,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.9,
+          "threshold": 0.1455039048194885
+        },
+        "P02": {
+          "alpha_high": 0.32829655492128956,
+          "alpha_low": 0.81612860983141,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.9,
+          "threshold": 0.14564839363098137
+        },
+        "P03": {
+          "alpha_high": 0.4377415966473991,
+          "alpha_low": 0.8619576484721386,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08355032968521117
+        },
+        "P04": {
+          "alpha_high": 0.42952241868037777,
+          "alpha_low": 0.855740366051693,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08138547736406326
+        },
+        "P05": {
+          "alpha_high": 0.4955290261871266,
+          "alpha_low": 0.8581364471999542,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.07903439569473267
+        },
+        "P06": {
+          "alpha_high": 0.3487315691495256,
+          "alpha_low": 0.8222598855844769,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.9,
+          "threshold": 0.1439501123428345
+        },
+        "P07": {
+          "alpha_high": 0.46100225022512054,
+          "alpha_low": 0.8546474267702645,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08353452724218369
+        },
+        "P08": {
+          "alpha_high": 0.45072014389287957,
+          "alpha_low": 0.8651573200942959,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08240926980972291
+        },
+        "P09": {
+          "alpha_high": 0.39220048151149506,
+          "alpha_low": 0.8348567524858277,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.9,
+          "threshold": 0.14258037996292106
+        },
+        "P10": {
+          "alpha_high": 0.446595004214035,
+          "alpha_low": 0.8657832839803374,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08368409299850466
+        },
+        "P11": {
+          "alpha_high": 0.49128675442010317,
+          "alpha_low": 0.8604826632924343,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08152952289581294
+        },
+        "P12": {
+          "alpha_high": 0.4418382990241913,
+          "alpha_low": 0.8683241564786375,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08218518209457398
+        },
+        "P13": {
+          "alpha_high": 0.3633491436566976,
+          "alpha_low": 0.7907202067415209,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.9,
+          "threshold": 0.14573049354553214
+        },
+        "P14": {
+          "alpha_high": 0.45233588784232387,
+          "alpha_low": 0.8718116257403375,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.0840572624206543
+        },
+        "P15": {
+          "alpha_high": 0.45122712468312237,
+          "alpha_low": 0.878210337150329,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08315141630172729
+        },
+        "P16": {
+          "alpha_high": 0.46703585420967064,
+          "alpha_low": 0.8569291522238852,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08147853696346283
+        },
+        "P17": {
+          "alpha_high": 0.45607035137054197,
+          "alpha_low": 0.8544638437544666,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08202608847618104
+        },
+        "P18": {
+          "alpha_high": 0.45459429225401454,
+          "alpha_low": 0.8694938920864849,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08370132195949555
+        },
+        "P19": {
+          "alpha_high": 0.46812686046460467,
+          "alpha_low": 0.8422814236753612,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08097659814357758
+        },
+        "P20": {
+          "alpha_high": 0.4538351217587405,
+          "alpha_low": 0.8742558186210823,
+          "family": "two_bin",
+          "feature": "b1_magnitude",
+          "quantile": 0.8,
+          "threshold": 0.08324755215644836
+        }
+      }
+    },
+    "expert_disagreement_two_bin": {
+      "metrics": {
+        "crps": {
+          "baseline_mean": 0.19552047647077514,
+          "candidate_mean": 0.18894534243363237,
+          "mean_gain": 0.006575134037142771,
+          "per_puzzle_gain": {
+            "P01": 0.005530972501813919,
+            "P02": 0.006399288921839941,
+            "P03": 0.003872916603076565,
+            "P04": 0.007620596072446306,
+            "P05": 0.0026902817483323016,
+            "P06": 0.0062830020390599595,
+            "P07": 0.005438939010397825,
+            "P08": 0.005932666045213447,
+            "P09": 0.005761889412904148,
+            "P10": 0.008750312992116871,
+            "P11": 0.0061448987638447194,
+            "P12": 0.008015541822409572,
+            "P13": 0.008904941581437259,
+            "P14": 0.00849307088324025,
+            "P15": 0.0064820399600726,
+            "P16": 0.010121173572311043,
+            "P17": 0.004947621468536417,
+            "P18": 0.009906815018929621,
+            "P19": 0.005803605575222609,
+            "P20": 0.004402106749650886
+          },
+          "positive_puzzles": 20,
+          "relative_gain": 0.033628876912672474
+        },
+        "signed_delta_mae": {
+          "baseline_mean": 0.24259835475232477,
+          "candidate_mean": 0.2395917457645333,
+          "mean_gain": 0.0030066089877914814,
+          "per_puzzle_gain": {
+            "P01": -0.00043195177061222667,
+            "P02": 0.003392372056065296,
+            "P03": 0.0011239349737779958,
+            "P04": 0.003921705098333533,
+            "P05": 0.0008392657837414386,
+            "P06": 0.002125878572124318,
+            "P07": 0.00214608865418886,
+            "P08": 0.0024343857543886738,
+            "P09": 0.0010716050836268587,
+            "P10": 0.0011706761096713092,
+            "P11": 0.0012660685892742496,
+            "P12": 0.005095313422604192,
+            "P13": 0.007132754443451156,
+            "P14": 0.0018145792941059447,
+            "P15": 0.0019044799057253148,
+            "P16": 0.006110170218273148,
+            "P17": 0.0045919564570859606,
+            "P18": 0.004544847824500903,
+            "P19": 0.007526754256623747,
+            "P20": 0.002351295028879846
+          },
+          "positive_puzzles": 19,
+          "relative_gain": 0.012393360997278856
+        }
+      },
+      "specs": {
+        "P01": {
+          "alpha_high": 0.37603251008849703,
+          "alpha_low": 0.8423982425120674,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10452387738227845
+        },
+        "P02": {
+          "alpha_high": 0.31949744253383194,
+          "alpha_low": 0.8275150007223301,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10428470993041983
+        },
+        "P03": {
+          "alpha_high": 0.3478545996353684,
+          "alpha_low": 0.82855540246318,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10542216807603835
+        },
+        "P04": {
+          "alpha_high": 0.34683401975615213,
+          "alpha_low": 0.8213271310206244,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10321673083305358
+        },
+        "P05": {
+          "alpha_high": 0.40447380742744665,
+          "alpha_low": 0.8331176894987156,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.1036011610031128
+        },
+        "P06": {
+          "alpha_high": 0.33647706861939536,
+          "alpha_low": 0.8347414140174032,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10317414581775665
+        },
+        "P07": {
+          "alpha_high": 0.37990832305057104,
+          "alpha_low": 0.8222415555011643,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10320539164543152
+        },
+        "P08": {
+          "alpha_high": 0.36430703839818346,
+          "alpha_low": 0.8315619904372943,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.1038889423608782
+        },
+        "P09": {
+          "alpha_high": 0.3809907905204819,
+          "alpha_low": 0.8443908087344351,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10296078372001638
+        },
+        "P10": {
+          "alpha_high": 0.3569118834483277,
+          "alpha_low": 0.832350376472316,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10416460418701168
+        },
+        "P11": {
+          "alpha_high": 0.4132190868992021,
+          "alpha_low": 0.828411653563422,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10140405613183975
+        },
+        "P12": {
+          "alpha_high": 0.354147958736932,
+          "alpha_low": 0.8370988674029145,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.1030180430412293
+        },
+        "P13": {
+          "alpha_high": 0.3505360091703701,
+          "alpha_low": 0.8017948262317065,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10494084674119952
+        },
+        "P14": {
+          "alpha_high": 0.3676123057659185,
+          "alpha_low": 0.8335740714578059,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.1049251799583435
+        },
+        "P15": {
+          "alpha_high": 0.36714773281283636,
+          "alpha_low": 0.8383969086621748,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10527868270874041
+        },
+        "P16": {
+          "alpha_high": 0.37603251008849703,
+          "alpha_low": 0.8234365646689561,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.09907545894384384
+        },
+        "P17": {
+          "alpha_high": 0.37211788957109215,
+          "alpha_low": 0.8194968607118751,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10426156944036485
+        },
+        "P18": {
+          "alpha_high": 0.37587910989078854,
+          "alpha_low": 0.8290382550575898,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10460175156593321
+        },
+        "P19": {
+          "alpha_high": 0.40430661228619613,
+          "alpha_low": 0.8064898164366631,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10200292420387269
+        },
+        "P20": {
+          "alpha_high": 0.3660843712910451,
+          "alpha_low": 0.8372891386608823,
+          "family": "two_bin",
+          "feature": "expert_disagreement",
+          "quantile": 0.95,
+          "threshold": 0.10462138885259631
+        }
+      }
+    },
+    "global_exact_l1": {
+      "metrics": {
+        "crps": {
+          "baseline_mean": 0.19552047647077514,
+          "candidate_mean": 0.18899782539106985,
+          "mean_gain": 0.006522651079705288,
+          "per_puzzle_gain": {
+            "P01": 0.005598677723948647,
+            "P02": 0.007298541537622549,
+            "P03": 0.004297001302057402,
+            "P04": 0.0077896982681961435,
+            "P05": 0.002497261433679343,
+            "P06": 0.006908511375326554,
+            "P07": 0.005115635429192966,
+            "P08": 0.006078659351953536,
+            "P09": 0.005689687667740667,
+            "P10": 0.008984447842506571,
+            "P11": 0.005369577379437662,
+            "P12": 0.007919722068265383,
+            "P13": 0.008744458544330314,
+            "P14": 0.008533395619193529,
+            "P15": 0.006799490790275559,
+            "P16": 0.008978021702723327,
+            "P17": 0.004629077595076331,
+            "P18": 0.00983983932420468,
+            "P19": 0.004971884173205238,
+            "P20": 0.004409432465169866
+          },
+          "positive_puzzles": 20,
+          "relative_gain": 0.03336045000217787
+        },
+        "signed_delta_mae": {
+          "baseline_mean": 0.24259835475232477,
+          "candidate_mean": 0.23985737880944819,
+          "mean_gain": 0.002740975942876589,
+          "per_puzzle_gain": {
+            "P01": -0.0005217506201511402,
+            "P02": 0.004489171053496777,
+            "P03": 0.0015807368665965993,
+            "P04": 0.004013016857781243,
+            "P05": -2.1138772925199945e-05,
+            "P06": 0.0029584925194155454,
+            "P07": 0.0014779728720934748,
+            "P08": 0.002409946343815972,
+            "P09": 0.0008659422190034904,
+            "P10": 0.001413465015846882,
+            "P11": -8.008596644920596e-05,
+            "P12": 0.005219889643191283,
+            "P13": 0.006656280163496148,
+            "P14": 0.0017215967404083377,
+            "P15": 0.0020195841351027533,
+            "P16": 0.004427895818783278,
+            "P17": 0.003966080212116169,
+            "P18": 0.004069190982404741,
+            "P19": 0.00583022680986342,
+            "P20": 0.0023230059636416
+          },
+          "positive_puzzles": 17,
+          "relative_gain": 0.011298411094646233
+        }
+      },
+      "specs": {
+        "P01": {
+          "alpha": 0.706275640986623,
+          "family": "global"
+        },
+        "P02": {
+          "alpha": 0.6753632666464565,
+          "family": "global"
+        },
+        "P03": {
+          "alpha": 0.6863776674899033,
+          "family": "global"
+        },
+        "P04": {
+          "alpha": 0.6803637800620207,
+          "family": "global"
+        },
+        "P05": {
+          "alpha": 0.7036734509594202,
+          "family": "global"
+        },
+        "P06": {
+          "alpha": 0.6854755120281242,
+          "family": "global"
+        },
+        "P07": {
+          "alpha": 0.6932366450288646,
+          "family": "global"
+        },
+        "P08": {
+          "alpha": 0.6915813335746214,
+          "family": "global"
+        },
+        "P09": {
+          "alpha": 0.704116651057477,
+          "family": "global"
+        },
+        "P10": {
+          "alpha": 0.6911664778824436,
+          "family": "global"
+        },
+        "P11": {
+          "alpha": 0.7086486330777519,
+          "family": "global"
+        },
+        "P12": {
+          "alpha": 0.6880428315427041,
+          "family": "global"
+        },
+        "P13": {
+          "alpha": 0.664776175684661,
+          "family": "global"
+        },
+        "P14": {
+          "alpha": 0.695126796050474,
+          "family": "global"
+        },
+        "P15": {
+          "alpha": 0.6944152506825962,
+          "family": "global"
+        },
+        "P16": {
+          "alpha": 0.7107967499351571,
+          "family": "global"
+        },
+        "P17": {
+          "alpha": 0.6858728440742041,
+          "family": "global"
+        },
+        "P18": {
+          "alpha": 0.6890633479159621,
+          "family": "global"
+        },
+        "P19": {
+          "alpha": 0.6839404777296304,
+          "family": "global"
+        },
+        "P20": {
+          "alpha": 0.6977634823865988,
+          "family": "global"
+        }
+      }
+    },
+    "magnitude_disagreement_four_bin": {
+      "metrics": {
+        "crps": {
+          "baseline_mean": 0.19552047647077514,
+          "candidate_mean": 0.18889224671359375,
+          "mean_gain": 0.006628229757181386,
+          "per_puzzle_gain": {
+            "P01": 0.005493060635004016,
+            "P02": 0.006419772727247752,
+            "P03": 0.0038848039908079,
+            "P04": 0.0076776889724292086,
+            "P05": 0.003124741103452233,
+            "P06": 0.006547863320593483,
+            "P07": 0.00545367603109051,
+            "P08": 0.005934324364919669,
+            "P09": 0.00589652495732515,
+            "P10": 0.00874809107570318,
+            "P11": 0.006297830634562268,
+            "P12": 0.00812744847845695,
+            "P13": 0.009078025767190134,
+            "P14": 0.00846906814383308,
+            "P15": 0.006441669665913807,
+            "P16": 0.010030764672243397,
+            "P17": 0.005102746577039768,
+            "P18": 0.009815561031081471,
+            "P19": 0.005672954701776783,
+            "P20": 0.004347978292957522
+          },
+          "positive_puzzles": 20,
+          "relative_gain": 0.033900437830470004
+        },
+        "signed_delta_mae": {
+          "baseline_mean": 0.24259835475232477,
+          "candidate_mean": 0.23959466465666787,
+          "mean_gain": 0.0030036900956569024,
+          "per_puzzle_gain": {
+            "P01": -0.00042571408347513717,
+            "P02": 0.003427471740462318,
+            "P03": 0.0011677143063682505,
+            "P04": 0.003687938741785718,
+            "P05": 0.0012000499202058923,
+            "P06": 0.00241181430540649,
+            "P07": 0.0020682108754145334,
+            "P08": 0.0024143629310188763,
+            "P09": 0.0012498641775946506,
+            "P10": 0.0011743283453801157,
+            "P11": 0.0012882629710773141,
+            "P12": 0.005192861938332405,
+            "P13": 0.007277321454510183,
+            "P14": 0.001803642783166054,
+            "P15": 0.0016363694601336243,
+            "P16": 0.005924899760230029,
+            "P17": 0.004762943222625299,
+            "P18": 0.004466687798621416,
+            "P19": 0.007053489807926416,
+            "P20": 0.0022912814563547934
+          },
+          "positive_puzzles": 19,
+          "relative_gain": 0.012381329208615
+        }
+      },
+      "specs": {
+        "P01": {
+          "alphas": [
+            0.8807230315618624,
+            0.24925900001192863,
+            0.5549753204793201,
+            0.3877854948042446
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10452387738227845,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10262453353404999
+        },
+        "P02": {
+          "alphas": [
+            0.8660473321858096,
+            0.25380545650393965,
+            0.5322408998859807,
+            0.32597956161720826
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10428470993041983,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10270635849237442
+        },
+        "P03": {
+          "alphas": [
+            0.8661576314118947,
+            0.25380545650393965,
+            0.5356548889492916,
+            0.35621829969918856
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10542216807603835,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10316437149047841
+        },
+        "P04": {
+          "alphas": [
+            0.8610320502533959,
+            0.2181060729183608,
+            0.4894935369078685,
+            0.3581422451108675
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10321673083305358,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10045559078454971
+        },
+        "P05": {
+          "alphas": [
+            0.8622525089701837,
+            0.2716005064751604,
+            0.6131519916287592,
+            0.4174926309899381
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.1036011610031128,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.09817030829191208
+        },
+        "P06": {
+          "alphas": [
+            0.8671251890129834,
+            0.2823154352252185,
+            0.5884033593919221,
+            0.3418037811512436
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10317414581775665,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10167362833023064
+        },
+        "P07": {
+          "alphas": [
+            0.8605418354029768,
+            0.26549279728859065,
+            0.5095503595046879,
+            0.3924224888731388
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10320539164543152,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.1032168036699295
+        },
+        "P08": {
+          "alphas": [
+            0.8706756312461355,
+            0.25380545650393965,
+            0.5293675035451367,
+            0.37458440799663784
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.1038889423608782,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10183323651552201
+        },
+        "P09": {
+          "alphas": [
+            0.8804596716559415,
+            0.32124598211037875,
+            0.58076493634125,
+            0.38651516755117693
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10296078372001638,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10120934295654294
+        },
+        "P10": {
+          "alphas": [
+            0.8703815274397407,
+            0.2378936429385708,
+            0.535354955286655,
+            0.36882243840220724
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10416460418701168,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10348811328411102
+        },
+        "P11": {
+          "alphas": [
+            0.8643532707160725,
+            0.28105847965421216,
+            0.5454398755923301,
+            0.42549339133372166
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10140405613183975,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10036691665649422
+        },
+        "P12": {
+          "alphas": [
+            0.875295146388934,
+            0.25380545650393965,
+            0.5472347731742944,
+            0.36533985256640944
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.1030180430412293,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.1025963482856751
+        },
+        "P13": {
+          "alphas": [
+            0.8385784718570175,
+            0.22915201365237373,
+            0.5229142105787108,
+            0.3631381639018589
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10494084674119952,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10266450905799865
+        },
+        "P14": {
+          "alphas": [
+            0.8724268571699977,
+            0.22331914367885647,
+            0.5344783651320382,
+            0.37873081165166556
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.1049251799583435,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10402910733222961
+        },
+        "P15": {
+          "alphas": [
+            0.8832390095394372,
+            0.25074989076866766,
+            0.5096417230733841,
+            0.37747481830762913
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10527868270874041,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10279378288984299
+        },
+        "P16": {
+          "alphas": [
+            0.8622872053149091,
+            0.2807581260771175,
+            0.5018093334138531,
+            0.3912371408015275
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.09907545894384384,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10003995776176453
+        },
+        "P17": {
+          "alphas": [
+            0.85572240261553,
+            0.2746446116831327,
+            0.5473266035245153,
+            0.3794409609485341
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10426156944036485,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10178720289468765
+        },
+        "P18": {
+          "alphas": [
+            0.8709048480542239,
+            0.22915201365237373,
+            0.5229819815612649,
+            0.38893117116026255
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10460175156593321,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.1041104459762573
+        },
+        "P19": {
+          "alphas": [
+            0.8687838977866551,
+            0.6911344833157195,
+            0.0,
+            0.4504709130633357
+          ],
+          "disagreement_quantile": 0.85,
+          "disagreement_threshold": 0.059298320889472955,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10062710666656494
+        },
+        "P20": {
+          "alphas": [
+            0.8780823220008689,
+            0.2550345824013964,
+            0.5332833683739329,
+            0.3761672909309491
+          ],
+          "disagreement_quantile": 0.95,
+          "disagreement_threshold": 0.10462138885259631,
+          "family": "four_bin",
+          "magnitude_quantile": 0.85,
+          "magnitude_threshold": 0.10323835563659678
+        }
+      }
+    }
+  }
+}
