@@ -69,3 +69,29 @@ base OOF experts were not trained as a nested meta-learning procedure; it cannot
 used as Gate evidence. Keep this direction only if the leave-one-puzzle probe exceeds
 1% signed-delta relative gain and preserves positive CRPS gain. A kept implementation
 must fit the gate inside each outer-training fold and be rerun end to end.
+
+## Cycle 1 result — global blend kept; method-conditioned result ineligible
+
+- Global leave-one-puzzle alpha probe: 1.129861% signed-delta relative gain,
+  17/20 positive puzzles, +0.00652286 CRPS gain and 20/20 CRPS-positive puzzles.
+- Method-conditioned probe: 1.724694% signed-delta relative gain, 19/20 positive
+  puzzles, +0.00759215 CRPS gain and 20/20 CRPS-positive puzzles.
+- The method alphas are stable and mechanistically coherent: all available folds select
+  alpha=0 for `Starting sequence`, `gRNAde`, and `gRNAde-no3d`; Rosetta/Shujun are near
+  alpha=1. This confirms expert complementarity rather than a one-puzzle accident.
+- The frozen endpoint-v7 legal inputs do not include design-method provenance. The
+  method-conditioned variant is therefore excluded from candidate eligibility: using
+  it would change the prediction task and make comparison with B1 unfair.
+- The global blend uses no new predictor input and is retained as the current working
+  incumbent. The probe remains meta-cross-fold and is not Gate evidence; alpha must be
+  made fold-legal and the candidate rerun end to end.
+
+## Cycle 2 hypothesis
+
+The tail failure can be gated using legal, outcome-blind expert outputs rather than an
+illegal method label. Probe a low-capacity blend in which alpha depends only on frozen
+B1/Mean predictions, especially `abs(B1 signed-delta)` and expert disagreement. Fit all
+thresholds/weights on the other 19 puzzle OOF cells and apply them to the held puzzle.
+Keep only if it materially exceeds the 1.129861% global-blend incumbent while CRPS
+stays positive in at least 12/20 puzzles. Any kept version must later fit the gate on
+outer-train outcomes only; this probe itself remains non-qualifying.
