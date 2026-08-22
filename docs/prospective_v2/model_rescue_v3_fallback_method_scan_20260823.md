@@ -17,11 +17,22 @@
 
 `CONFIRMED_FACT`：既有完整 development OOF failure atlas 显示 signed-delta 改善高度依赖 effect magnitude：`autoresearch/loop-260822-1700/cycle0-oof-diagnosis.json` 中，大效应 `|delta| > 0.20` 子集相对恶化约 2.51%，moderate 子集改善约 2.32%，near-zero 子集改善很大。该证据只用于提出“尾部学习不足”假设，不是新候选的有效性证据。
 
+### 1.1 历史 mutant-sequence 实验的非重复性审计
+
+`CONFIRMED_FACT`：仓库过去确实构造过 mutant sequences，但没有在当前 OpenKnot M2、exact-alt、unseen-puzzle、full-profile signed-delta 任务上训练共享 WT–mutant encoder。
+
+- `scripts/reactflow_delta/m0x_sota_dl_rnaformer.py` 在另一套 B0-X/GSE 数据上进行 RNAformer 零样本结构 proxy：对 WT 和三个可能替代碱基分别推理，再把 mutant BPP 平均，输出 `|P_pair(mutant_avg)-P_pair(WT)|`。结果 artifact `results/sota_dl_rnaformer_20260805_pubsplit/rnaformer_comparison_manifest.json` 报 study-macro changer AUPRC 0.5554，低于该任务的 structure-aware classifier 0.7353。它不是 exact-alt response predictor，也没有输出 experimental full-profile delta。
+- `scripts/reactflow_delta/m0x_epro_dev07.py` 的 sequence-context GRU 在 B0-X changer 端点上出现 train/validation gap 0.1662，AUPRC 0.7005，未超过 dev06 0.7353；`m0x_epro_dev09.py` 增加 edit distance、mutation position、BPP-to-mutation 与 ref token 后 AUPRC 0.7060，仍低于 dev06。这说明“增加序列上下文/突变 metadata”本身不足，且存在明显过拟合风险。
+- `docs/audits/reactflow_delta_phase3_scheme3_epro_fail_closed_20260809.md` 记录非局部 EPRO contact propagation 未超过同容量 generic concat，random contacts 甚至略高于真实 contacts。该负结果继续排除恢复 contact/rank/propagation 模块。
+- `results/m0x_rnaformer_features_20260806/rnaformer_features_manifest.json` 只证明 WT pairing probability 与三-alt平均 delta pairing probability 特征已经生成；当前仓库没有找到把这两个 frozen features 注入后并完成正式验收的结果 artifact。
+
+因此，路线 A 的可检验增量必须严格限定为：**在当前 B1 同容量共享 encoder 中，仅用 exact observed alt 构造 mutant sequence，并比较 `H_mut-H_wt` 是否提供超出 WT hidden + mutation one-hot 的增量。** 它不能重新包装为更大 sequence model、静态 BPP proxy、三-alt平均或 contact propagation。
+
 ## 2. 三条窄后备路线
 
 | 优先路线 | 明确瓶颈 | 最小架构/目标修改 | 直接依据 | 主要风险 | 最小证伪实验 |
 |---|---|---|---|---|---|
-| A. Shared-weight paired WT–mutant encoder | WT-only `H` 无法表达突变后 receiver context 的改变 | 保持 B1 encoder 宽度、层数和参数共享；构造 exact mutant sequence，以同一个 encoder 分别得到 `H_wt`、`H_mut`；mean head 只增加 `H_mut-H_wt` 与原 B1 features；仍使用 method-balanced signed-delta L1，校准仍在 mean freeze 后进行 | RibonanzaNet 的公开服务提供 sequence-conditioned mutate-and-map 计算；MutaRNA/remuRNA 以 WT 与 mutant ensemble 差异定义突变效应 | 两次 encoder pass 增加约 2 倍 encoder 计算；WT reactivity 作为 mutant encoder 的固定 anchor 必须严格解释；小样本下差分 hidden 可能过拟合 | 单 seed、20-fold、同容量共享权重 screen；与 B1 和“只把 alt token 加到 WT encoder”的同预算 null 比较；必须同时过原 mean/calibration Gate |
+| A. Shared-weight paired WT–mutant encoder | WT-only `H` 无法表达突变后 receiver context 的改变 | 保持 B1 encoder 宽度、层数和参数共享；只用 exact observed alt 构造 mutant sequence，以同一个 encoder 分别得到 `H_wt`、`H_mut`；mean head 只增加 `H_mut-H_wt` 与原 B1 features；仍使用 method-balanced signed-delta L1，校准仍在 mean freeze 后进行 | RibonanzaNet 的公开服务提供 sequence-conditioned mutate-and-map 计算；MutaRNA/remuRNA 以 WT 与 mutant ensemble 差异定义突变效应 | 两次 encoder pass 增加约 2 倍 encoder 计算；WT reactivity 作为 mutant encoder 的固定 anchor 必须严格解释；旧 B0-X GRU 已显示小样本过拟合风险 | 单 seed、20-fold、同容量共享权重 screen；与 B1 和“同结构但令 `H_mut=H_wt`”的同预算 null 比较；必须同时过原 mean/calibration Gate |
 | B. Tail-balanced signed-delta expert | method-balanced L1 被大量 near-zero positions 主导，稀有大效应的梯度不足 | 保留 B1 backbone；只增加一个基于 outer-train signed-delta density 的 tail expert。候选必须通过合法、train-only gate 与 B1 组合，不替换 B1；density bin/kernel、权重截断和 gate 规则在 outcome screen 前冻结 | Deep Imbalanced Regression 提出 LDS/FDS；Balanced MSE给出连续标签失衡的统计修正。二者证明问题类型真实存在，但不证明适用于本任务 | 训练目标可能偏离全分布 MAE；稀有标签权重可放大噪声；如果 gate 使用 target magnitude 会构成泄漏 | 先在历史完整 OOF 上只做 train-only crossfit probe；正式候选只能使用 prediction-time legal features。若大效应改善但总体 signed-delta 或 CRPS 失败，立即终止 |
 | C. Latent structural-state reweighting mean | 单一逐位置 direct mean 难以表达“一个 mutation 使整条 RNA 在少数反应模板间切换” | 不扩大 encoder；从 WT context 产生固定 2–3 个 full-profile delta templates，mutation head 只预测 simplex state weights；最终 mean 为模板加权和；概率 residual 仍严格零均值且后拟合 | M2-REEFFIT 的实验与模拟结果表明单突变可稳定 alternative structures，mutant profiles 可由共享状态及其 population reweighting解释 | 状态不可识别、模板置换、20 puzzles 数据不足、可能把 method/batch pattern 当结构状态；复杂度和科学主张风险最高 | 仅在完整 failure atlas 出现跨 mutation 重复的全局 profile modes 后开放；与等参数 low-rank profile head 比较。没有稳定跨 puzzle state reuse 则终止 |
 
