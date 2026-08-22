@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.r2m3_interruption_recovery_audit.v1
-status: R2M3_INTERRUPTED_RECOVERABLE
-scientific_gate_status: IN_PROGRESS
+status: R2M3_RECOVERY_COMPLETED_MODEL_RESCUE_V2_FAIL
+scientific_gate_status: FAIL_MEAN_GATE_BELOW_1_PERCENT
 detected_at: '2026-08-22T00:06:22+08:00'
 registered_at: '2026-08-22T00:27:12+08:00'
 original_run:
@@ -13,7 +13,7 @@ artifact_root: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0
 artifact_audit:
   completed_folds: [0, 1]
   overall_status: PASS
-  aggregate_result_exists: false
+  aggregate_result_exists: true
   partial_scores_inspected: false
   fold_0_prediction_rows: 73632
   fold_1_prediction_rows: 106200
@@ -39,7 +39,7 @@ recovery_authority:
   overwrite_preserved_folds_allowed: false
   run_missing_folds: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   persistent_session: reactflow_delta_r2m3_recovery_20260822
-  recovery_status: R2M3_RECOVERY_ACTIVE
+  recovery_status: R2M3_RECOVERY_COMPLETED
   recovery_started_at: '2026-08-22T00:29:57+08:00'
   recovery_launch_head: 935e32e49815a84a9ba9d663d7916e62394a6ea6
   recovery_pid_at_launch: 1863889
@@ -73,3 +73,20 @@ parallel_validation:
     frozen_b1_fold_results_and_predictions_complete: true
     scores_inspected: false
     external_outcome_access: false
+qualification:
+  qualified_at: '2026-08-22T16:37:44+08:00'
+  complete_folds: 20
+  merged_result: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/v2_result_seed0_merged.json
+  artifact: docs/prospective_v2/audit/r2m3_qualification_20260822.json
+  overall_status: MODEL_RESCUE_V2_FAIL
+  mean_gate_status: MEAN_GATE_FAIL
+  mean_signed_delta_mae_gain: 0.0021428936644790992
+  mean_relative_signed_delta_mae_gain: 0.008833092321119973
+  mean_positive_puzzles: 16
+  calibration_gate_status: CALIBRATION_GATE_PASS
+  calibration_crps_gain: 0.005478315318756037
+  calibration_positive_puzzles: 20
+  point_mean_max_abs_difference: 0.0
+  r2m4_authorized: false
+  terminal_model_qualification: CALIBRATION_BASELINE_ONLY
+  terminal_route: BENCHMARK_ROUTE_LOCKED

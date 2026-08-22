@@ -79,3 +79,9 @@ contract and manuscript handoff.
 **Minimum verification:** complete 20×5 universe for both models, headline-mixture replay, Gate validation, clean-checkout contract/table replay.
 
 **Independent review:** Yes — final delivery and claim boundary.
+
+**Terminal execution result (2026-08-22):** R2M3 completed all 20 seed-0 folds. The
+Calibration Gate passed, but the Mean Gate failed because the relative signed-delta MAE
+gain was 0.883%, below the frozen 1% threshold. R2M4 was therefore not authorized or run.
+R2M5 closed training and returned the project to main-contract M6 with
+`CALIBRATION_BASELINE_ONLY / BENCHMARK_ROUTE_LOCKED`. No third rescue is permitted.

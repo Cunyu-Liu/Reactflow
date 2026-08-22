@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v2_amendment.v1
 contract_id: reactflow_delta_model_rescue_v2_20260820
-contract_status: ACTIVE_R2M3_RECOVERY
+contract_status: TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY
 created_at: '2026-08-20T00:00:00+08:00'
 
 parent:
@@ -50,6 +50,8 @@ authorization:
     - SEARCH_LOSS_EPOCH_HIDDEN_SIZE_OR_COMPONENT_COUNT
     - USE_HELD_TARGET_ERROR_OR_TARGET_MASK_IN_PREDICTION
     - INTERFERE_WITH_UNRELATED_RUNNING_JOBS
+    - START_R2M4_AFTER_R2M3_FAIL
+    - OPEN_THIRD_MODEL_RESCUE_AMENDMENT
 
 models:
   mean_aligned:
@@ -109,8 +111,8 @@ compute:
 
 r2m3_recovery:
   interruption_disposition: R2M3_INTERRUPTED_RECOVERABLE
-  execution_status: R2M3_RECOVERY_ACTIVE
-  scientific_gate_status: IN_PROGRESS
+  execution_status: R2M3_RECOVERY_COMPLETED
+  scientific_gate_status: FAIL_MEAN_GATE_BELOW_1_PERCENT
   detected_at: '2026-08-22T00:06:22+08:00'
   registered_at: '2026-08-22T00:27:12+08:00'
   original_started_at: '2026-08-21T18:30:38+08:00'
@@ -131,6 +133,29 @@ r2m3_recovery:
   monitor_policy: LOW_FREQUENCY_HEALTH_ONLY_NO_PARTIAL_SCORES
   monitor_interval_hours: 4
   r2m4_authorized: false
+
+r2m3_result:
+  qualified_at: '2026-08-22T16:37:44+08:00'
+  merged_result: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/v2_result_seed0_merged.json
+  qualification: docs/prospective_v2/audit/r2m3_qualification_20260822.json
+  evidence_status: DEVELOPMENT_CONSUMED_SCREEN_NOT_CONFIRMATION
+  complete_folds: 20
+  overall_status: MODEL_RESCUE_V2_FAIL
+  mean_gate:
+    status: MEAN_GATE_FAIL
+    signed_delta_mae_gain: 0.0021428936644790992
+    relative_signed_delta_mae_gain: 0.008833092321119973
+    positive_puzzles: 16
+    failed_check: SIGNED_DELTA_MAE_RELATIVE_GAIN_AT_LEAST_1_PERCENT
+  calibration_gate:
+    status: CALIBRATION_GATE_PASS
+    crps_gain: 0.005478315318756037
+    positive_puzzles: 20
+    point_mean_max_abs_difference: 0.0
+    signed_delta_mae_max_abs_difference: 0.0
+  r2m4_authorized: false
+  model_qualification: CALIBRATION_BASELINE_ONLY
+  route: BENCHMARK_ROUTE_LOCKED
 
 screen:
   phase: R2M3
@@ -199,17 +224,17 @@ phase_graph:
     next_on_pass: R2M3
     next_on_fail: FAIL_CLOSED
   - id: R2M3
-    status: IN_PROGRESS
-    training_allowed: true
+    status: FAIL_MEAN_GATE_BELOW_1_PERCENT
+    training_allowed: false
     next_on_pass: R2M4
     next_on_fail: R2M5_BENCHMARK_ROUTE_LOCKED
   - id: R2M4
-    status: NOT_RUN
-    training_allowed: true
+    status: NOT_RUN_PREREQUISITE_FAILED
+    training_allowed: false
     next_on_pass: R2M5_POST_HOC_DEVELOPMENT_PASS
     next_on_fail: R2M5_BENCHMARK_ROUTE_LOCKED
   - id: R2M5
-    status: NOT_RUN
+    status: PASS_HANDOFF_TO_M6
     training_allowed: false
     handoff_phase: M6
 
@@ -221,3 +246,5 @@ claim_policy:
   mechanism: NOT_ESTABLISHED
   sota: NOT_ESTABLISHED
   publication_ready: false
+  terminal_model_qualification: CALIBRATION_BASELINE_ONLY
+  terminal_route: BENCHMARK_ROUTE_LOCKED

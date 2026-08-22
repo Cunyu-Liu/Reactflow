@@ -36,6 +36,32 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     phase_status = {row["id"]: row["status"] for row in machine["phase_graph"]}
     current_phase = active["authority"]["current_phase"]
     prohibited = set(machine["authorization"]["prohibited"])
+    terminal = machine.get("contract_status") == (
+        "TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY"
+    )
+    active_phase_state = {
+        phase: active["gate_state"][phase] for phase in phase_ids
+    }
+    if terminal:
+        phase_state_aligned = (
+            current_phase == "M6"
+            and active["authority"]["current_runnable_phase"] == "M6"
+            and active["runnable_phases"] == ["M6"]
+            and phase_status == active_phase_state
+            and phase_status == ledger["phase_state"]
+            and phase_status["R2M3"] == "FAIL_MEAN_GATE_BELOW_1_PERCENT"
+            and phase_status["R2M4"] == "NOT_RUN_PREREQUISITE_FAILED"
+            and phase_status["R2M5"] == "PASS_HANDOFF_TO_M6"
+        )
+    else:
+        phase_state_aligned = (
+            current_phase in phase_ids
+            and active["authority"]["current_runnable_phase"] == current_phase
+            and active["runnable_phases"] == [current_phase]
+            and phase_status == active_phase_state
+            and phase_status == ledger["phase_state"]
+            and phase_status[current_phase] == "IN_PROGRESS"
+        )
     checks = {
         "machine_schema": machine.get("schema_version")
         == "reactflow_delta.model_rescue_v2_amendment.v1",
@@ -60,14 +86,13 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         == "MEAN_FIRST_ZERO_MEAN_RESIDUAL_ONLY",
         "phase_order": phase_ids
         == ["R2M0", "R2M1", "R2M2", "R2M3", "R2M4", "R2M5"],
-        "phase_state_aligned": current_phase in phase_ids
-        and active["authority"]["current_runnable_phase"] == current_phase
-        and active["runnable_phases"] == [current_phase]
-        and phase_status == {phase: active["gate_state"][phase] for phase in phase_ids}
-        and phase_status == ledger["phase_state"]
-        and phase_status[current_phase] == "IN_PROGRESS",
+        "phase_state_aligned": phase_state_aligned,
         "training_authority_matches_phase": (
-            active["training_allowed"] is (current_phase in {"R2M2", "R2M3", "R2M4"})
+            active["training_allowed"] is False
+            and active["candidate_model_training_allowed"] is False
+            if terminal
+            else active["training_allowed"]
+            is (current_phase in {"R2M2", "R2M3", "R2M4"})
             and active["candidate_model_training_allowed"]
             is (current_phase in {"R2M2", "R2M3", "R2M4"})
         ),
@@ -93,6 +118,16 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         == "NOT_ESTABLISHED"
         and ledger["claims"]["sota"] == "NOT_ESTABLISHED"
         and ledger["claims"]["publication"] == "PUBLICATION_NOT_READY",
+        "terminal_failure_handoff": not terminal
+        or (
+            ledger["claims"]["model_rescue_v2"] == "CALIBRATION_BASELINE_ONLY"
+            and machine["r2m3_result"]["overall_status"]
+            == "MODEL_RESCUE_V2_FAIL"
+            and machine["r2m3_result"]["r2m4_authorized"] is False
+            and active["gate_state"]["V2_INTERNAL_DUAL_PRIMARY"]
+            == "FAIL_R2M3_MEAN_GATE"
+            and active["new_external_outcome_access_allowed"] is False
+        ),
     }
     return {
         "schema_version": "reactflow_delta.model_rescue_v2_contract_validation.v1",

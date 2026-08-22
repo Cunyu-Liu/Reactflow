@@ -12,3 +12,4 @@ def test_v2_contract_and_active_authority_are_consistent():
     result = validate_contract(ROOT)
     assert result["status"] == "PASS", result
     assert all(result["checks"].values())
+    assert result["checks"]["terminal_failure_handoff"] is True

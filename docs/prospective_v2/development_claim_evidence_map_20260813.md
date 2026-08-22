@@ -3,6 +3,19 @@
 > 范围：P0–P3 development benchmark 结论。P4/P5 需外部数据/复现；P6 需 release token。
 > 状态边界：`DEVELOPMENT_ONLY / SOTA_NOT_ESTABLISHED / PUBLICATION_NOT_READY`
 
+## 2026-08-22 Model Rescue v2 终局（覆盖后续模型救援表述）
+
+`CONFIRMED_FACT`：在固定 seed-0、20-puzzle LOPO screen 中，MeanAligned 的
+signed-delta MAE 相对 B1 改善 `0.8833%`，16/20 puzzles 正向，但未达到预注册的 `1%`
+Mean Gate；严格零均值 residual calibration 在 point mean 完全不变时取得
+`+0.00547832` CRPS gain，20/20 puzzles 正向并通过 Calibration Gate。由于双 Gate
+必须同时通过，终局为 `MODEL_RESCUE_V2_FAIL / CALIBRATION_BASELINE_ONLY`，R2M4 未运行。
+
+允许表述：零均值残差校准在 consumed-development screen 中改善概率评分且不改变 point
+mean。禁止表述：MeanAligned 已建立 mutation-effect predictor improvement、v2 已通过
+模型救援、五 seed confirmation、external replication、SOTA、mechanism 或 publication
+readiness。证据：`docs/prospective_v2/audit/r2m3_qualification_20260822.json`。
+
 ## 主结论（仅 development benchmark）
 | Claim | 状态 | 证据 |
 |---|---|---|

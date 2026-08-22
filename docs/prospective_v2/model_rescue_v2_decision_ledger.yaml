@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v2_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v2_20260820
-as_of: '2026-08-20'
+as_of: '2026-08-22'
 parent_head: 00c0cf3a804effb89ff99a8e9ea009963dc650d0
 
 facts:
@@ -24,7 +24,7 @@ facts:
     evidence: docs/prospective_v2/audit/m2_qualification_v1.json
 
 hypothesis:
-  status: NEW_EXPERIMENT_REQUIRED
+  status: FALSIFIED_BY_PREREGISTERED_MEAN_GATE
   statement: >-
     Separating method-balanced signed-delta mean learning from zero-mean
     residual calibration can retain probabilistic skill without degrading the
@@ -48,13 +48,13 @@ phase_state:
   R2M0: PASS
   R2M1: PASS
   R2M2: PASS
-  R2M3: IN_PROGRESS
-  R2M4: NOT_RUN
-  R2M5: NOT_RUN
+  R2M3: FAIL_MEAN_GATE_BELOW_1_PERCENT
+  R2M4: NOT_RUN_PREREQUISITE_FAILED
+  R2M5: PASS_HANDOFF_TO_M6
 
 claims:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
-  model_rescue_v2: NOT_RUN
+  model_rescue_v2: CALIBRATION_BASELINE_ONLY
   external_replication: NOT_ESTABLISHED
   mechanism: NOT_ESTABLISHED
   sota: NOT_ESTABLISHED
@@ -95,9 +95,9 @@ r2m2_real_data_smoke:
   scientific_interpretation: ENGINEERING_SMOKE_ONLY
 
 r2m3_seed0_screen:
-  status: R2M3_RECOVERY_ACTIVE
+  status: MODEL_RESCUE_V2_FAIL
   interruption_disposition: R2M3_INTERRUPTED_RECOVERABLE
-  scientific_gate_status: IN_PROGRESS
+  scientific_gate_status: FAIL_MEAN_GATE_BELOW_1_PERCENT
   started_at: '2026-08-21T18:30:38+08:00'
   interruption_detected_at: '2026-08-22T00:06:22+08:00'
   interruption_registered_at: '2026-08-22T00:27:12+08:00'
@@ -143,3 +143,31 @@ r2m3_seed0_screen:
     r2m4_requires_both_mean_and_calibration_gate: true
     merge_tool: scripts/reactflow_delta/merge_model_rescue_v2.py
     merge_tool_commit: 42f3d3df6a0ae49f927fdb5b537a05725aa182b8
+  completed_at: '2026-08-22T16:37:44+08:00'
+  merged_result: /mnt/cunyuliu/reactflow_delta_model_rescue_v2/r2m3_screen_seed0/v2_result_seed0_merged.json
+  qualification: docs/prospective_v2/audit/r2m3_qualification_20260822.json
+  result:
+    overall_status: MODEL_RESCUE_V2_FAIL
+    mean_gate:
+      status: MEAN_GATE_FAIL
+      signed_delta_mae_gain: 0.0021428936644790992
+      relative_signed_delta_mae_gain: 0.008833092321119973
+      positive_puzzles: 16
+      failed_check: SIGNED_DELTA_MAE_RELATIVE_GAIN_AT_LEAST_1_PERCENT
+    calibration_gate:
+      status: CALIBRATION_GATE_PASS
+      crps_gain: 0.005478315318756037
+      positive_puzzles: 20
+      max_point_mean_abs_difference: 0.0
+      max_signed_delta_mae_abs_difference: 0.0
+    r2m4_authorized: false
+    model_qualification: CALIBRATION_BASELINE_ONLY
+
+r2m5_handoff:
+  status: PASS_HANDOFF_TO_M6
+  route: BENCHMARK_ROUTE_LOCKED
+  manuscript_handoff: docs/prospective_v2/model_rescue_v2_r2m5_handoff_20260822.md
+  training_allowed: false
+  candidate_model_training_allowed: false
+  new_external_outcome_access_allowed: false
+  third_model_rescue_allowed: false

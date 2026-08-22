@@ -1,7 +1,7 @@
 # ReactFlow-Delta Model Rescue v2 阶段性合同
 
 日期：2026-08-20
-状态：`ACTIVE_R2M3_RECOVERY`（中断处置为 `R2M3_INTERRUPTED_RECOVERABLE`；科学 Gate 仍为 `IN_PROGRESS`）
+状态：`TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY`
 父合同终局：`M2_NO_RESCUE_CANDIDATE`，commit `00c0cf3a804effb89ff99a8e9ea009963dc650d0`
 
 ## 1. 合同地位
@@ -159,3 +159,18 @@ CRPS-only 改善、最佳 seed、部分 puzzles 或事后阈值均不得升级�
 
 本合同完成不等于模型成功；它要求对唯一假设给出可复现 PASS 或明确 FAIL，并在失败时
 停止，而不是扩大模型空间。
+
+## 7. R2M3 终局与 M6 handoff（2026-08-22）
+
+恢复后的 folds 0--19 已完整合并，预冻结 qualifier 给出
+`MODEL_RESCUE_V2_FAIL`。MeanAligned 的 signed-delta MAE gain 为 `+0.00214289`，
+20 个 puzzles 中 16 个为正，但相对改善为 `0.8833%`，低于预注册的 `1%` 初筛门槛，
+因此 Mean Gate 为 `MEAN_GATE_FAIL`。零均值 residual calibration 的 CRPS gain 为
+`+0.00547832`，20/20 puzzles 为正，Candidate A/B point mean 和 signed-delta MAE
+逐 key 完全相同，因此 Calibration Gate 为 `CALIBRATION_GATE_PASS`。
+
+合同要求两个 Gate 同时通过，故 R2M4 不授权、不运行。v2 的终局模型资格为
+`CALIBRATION_BASELINE_ONLY`，不是 mutation-effect predictor improvement。训练关闭，
+禁止第三次 model rescue，项目返回主合同 M6 的 `BENCHMARK_ROUTE_LOCKED`。该结果只能
+作为 consumed-development negative/ablation evidence，不建立 external replication、
+SOTA、mechanism 或 publication readiness。
