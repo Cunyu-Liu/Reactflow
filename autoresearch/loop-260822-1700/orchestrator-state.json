@@ -1,0 +1,38 @@
+{
+  "version": "2.2.1",
+  "goal": "Improve ReactFlow-Delta until a frozen five-seed 20-fold candidate passes the original R2M4 dual CRPS and signed-delta MAE gate versus the same B1 comparator.",
+  "archetype": "optimize-metric",
+  "mode": "orchestration_loop",
+  "terminal_choice": "stop_at_verified_r2m4_pass",
+  "success_predicate": {
+    "command": "python -c 'import json,sys; q=json.load(open(\"R2M4_QUALIFICATION_JSON\")); sys.exit(0 if q.get(\"overall_status\")==\"R2M4_POST_HOC_DEVELOPMENT_PASS\" else 1)'",
+    "expected": "exit_code_0"
+  },
+  "working_metric": {
+    "name": "seed0_signed_delta_relative_gain_percent",
+    "direction": "higher_is_better",
+    "guard": "calibration CRPS gain > 0; CRPS positive puzzles >= 12; coverage 100%; failure 0; no target leakage"
+  },
+  "scope": [
+    "scripts/reactflow_delta/model_rescue_v3*.py",
+    "scripts/reactflow_delta/run_model_rescue_v3*.py",
+    "scripts/reactflow_delta/qualify_model_rescue_v3*.py",
+    "tests/reactflow_delta/test_*model_rescue_v3*.py",
+    "configs/reactflow_delta/model_rescue_v3*.yaml",
+    "docs/prospective_v2/model_rescue_v3*.md",
+    "autoresearch/loop-260822-1700/*"
+  ],
+  "max_cycles": 50,
+  "cycle": 1,
+  "pending_verify": false,
+  "current_incumbent": "model_rescue_v2_calibrated_residual",
+  "last_completed_cycle": {
+    "cycle": 0,
+    "hypothesis": "contracted mutant-balanced scoring would materially change the v2 result",
+    "verdict": "FALSIFIED_AS_PERFORMANCE_EXPLANATION",
+    "evidence": "cycle0-oof-diagnosis.json",
+    "next_action": "probe method-conditioned B1/Mean expert blending before new training"
+  },
+  "units_remaining": "formal_r2m4_dual_gate_not_passed",
+  "pipeline": ["diagnose", "plan", "classic_loop", "holdout_verify", "evals"]
+}

@@ -1,0 +1,3 @@
+# metric_direction: higher_is_better
+iteration	timestamp	commit	metric	delta	guard	guard-metric	status	description
+0	2026-08-22T17:00:00+08:00	97ce496c4dda944d0554b49342ce388d8f9d97c1	0.883309	0.000000	PASS	CRPS_GAIN_0.00547832_POSITIVE_20_OF_20	baseline	Model Rescue v2 terminal seed-0 result
