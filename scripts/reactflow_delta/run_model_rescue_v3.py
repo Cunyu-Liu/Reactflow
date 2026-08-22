@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 import torch
+import yaml
 
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.model_rescue_v1 import AlignedDeltaModel, aligned_wt_ctx_tensors
@@ -46,6 +47,29 @@ from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
 SCHEMA = "reactflow_delta.model_rescue_v3_run.v1"
+
+
+def assert_run_authority(repo_root: Path, phase: str, *, smoke: bool) -> None:
+    active = yaml.safe_load(
+        (repo_root / "configs/reactflow_delta/active_contract.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    if active["authority"]["current_phase"] != phase:
+        raise RuntimeError(
+            f"v3 runner phase {phase} is closed; active phase is "
+            f"{active['authority']['current_phase']}"
+        )
+    if active.get("runnable_phases") != [phase]:
+        raise RuntimeError("v3 runner requires a single matching runnable phase")
+    if phase == "R3M2":
+        if not smoke or active.get("training_allowed") != "ENGINEERING_SMOKE_ONLY":
+            raise RuntimeError("R3M2 authorizes engineering smoke only")
+    else:
+        if smoke or active.get("training_allowed") is not True:
+            raise RuntimeError(f"{phase} requires full active training authority")
+    if active.get("new_external_outcome_access_allowed") is not False:
+        raise RuntimeError("v3 runner requires external outcomes to remain locked")
 
 
 def _module_snapshot(module: torch.nn.Module) -> dict[str, torch.Tensor]:
@@ -825,6 +849,8 @@ def run_fold(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument("--phase", choices=["R3M2", "R3M3", "R3M4"], required=True)
     parser.add_argument("--m2-csv", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
@@ -838,6 +864,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--reuse-mean-result-dir", type=Path)
     parser.add_argument("--smoke", action="store_true")
     args = parser.parse_args(argv)
+    assert_run_authority(args.repo_root.resolve(), args.phase, smoke=args.smoke)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     device = args.device if torch.cuda.is_available() else "cpu"
     expert_epochs = min(args.expert_epochs, 3) if args.smoke else args.expert_epochs

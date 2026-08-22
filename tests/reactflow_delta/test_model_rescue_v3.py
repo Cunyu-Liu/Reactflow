@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 import torch
+import yaml
 
 from scripts.reactflow_delta.model_rescue_v2 import ConditionalScaleMixtureCalibrator
 from scripts.reactflow_delta.model_rescue_v3 import (
@@ -13,6 +14,7 @@ from scripts.reactflow_delta.model_rescue_v3 import (
     fit_disagreement_gate,
     hierarchy_position_weights,
 )
+from scripts.reactflow_delta.run_model_rescue_v3 import assert_run_authority
 
 
 def test_exact_convex_l1_and_frozen_disagreement_gate() -> None:
@@ -73,3 +75,22 @@ def test_zero_mean_calibrator_cannot_backpropagate_to_blended_mean() -> None:
     assert features.grad is None
     torch.testing.assert_close(locations[..., 0], blended.detach())
     torch.testing.assert_close(locations[..., 1], blended.detach())
+
+
+def test_runner_enforces_phase_specific_training_authority(tmp_path) -> None:
+    config = tmp_path / "configs" / "reactflow_delta"
+    config.mkdir(parents=True)
+    active = {
+        "authority": {"current_phase": "R3M2"},
+        "runnable_phases": ["R3M2"],
+        "training_allowed": "ENGINEERING_SMOKE_ONLY",
+        "new_external_outcome_access_allowed": False,
+    }
+    (config / "active_contract.yaml").write_text(
+        yaml.safe_dump(active), encoding="utf-8"
+    )
+    assert_run_authority(tmp_path, "R3M2", smoke=True)
+    with pytest.raises(RuntimeError, match="closed"):
+        assert_run_authority(tmp_path, "R3M3", smoke=False)
+    with pytest.raises(RuntimeError, match="smoke only"):
+        assert_run_authority(tmp_path, "R3M2", smoke=False)
