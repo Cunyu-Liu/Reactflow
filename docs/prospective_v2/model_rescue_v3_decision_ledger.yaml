@@ -74,7 +74,7 @@ phase_state:
   R3C0: COORDINATE_AUDIT_AND_INVALID_RUN_INTERRUPTION_PASS
   R3C1: IMPLEMENTATION_AND_COORDINATE_INVARIANTS_PASS
   R3C2: CORRECTED_REAL_DATA_ENGINEERING_SMOKE_PASS
-  R3C3: AUTHORIZED_NOT_RUN
+  R3C3: IN_PROGRESS_WAITING_FOR_GPU
   R3M0: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
   R3M1: PASS_UNDER_SUPERSEDED_COORDINATE_FRAME
   R3M2: INVALIDATED_COORDINATE_FRAME
@@ -349,4 +349,32 @@ r3c2_corrected_real_data_smoke:
   score_direction_read_or_used_for_selection: false
   scientific_interpretation: ENGINEERING_SMOKE_ONLY
   r3c3_authorized: true
+  r3m3_authorized: false
+
+r3c3_corrected_expert_rebuild:
+  status: IN_PROGRESS_WAITING_FOR_GPU
+  launched_at: '2026-08-23T02:06:25+08:00'
+  implementation_commit: d6799a4
+  output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c3_corrected_experts_seed0
+  controller: /mnt/cunyuliu/reactflow_delta_model_rescue_v3/r3c3_corrected_experts_seed0/controller/launch_r3c3_corrected_expert_waiter.sh
+  folds: 20
+  seed: 0
+  epochs: 40
+  held_score_computation: PROHIBITED
+  partial_score_access: PROHIBITED
+  gpu_wait_policy:
+    physical_gpus: [0, 1, 2, 3, 4, 5]
+    poll_interval_seconds: 900
+    minimum_free_memory_mb: 20000
+    maximum_utilization_percent: 10
+    unrelated_job_interference: PROHIBITED
+  shards:
+    - {session: reactflow_v3_r3c3_gpu0, physical_gpu: 0, folds: [0, 6, 12, 18], log: logs/gpu0.log}
+    - {session: reactflow_v3_r3c3_gpu1, physical_gpu: 1, folds: [1, 7, 13, 19], log: logs/gpu1.log}
+    - {session: reactflow_v3_r3c3_gpu2, physical_gpu: 2, folds: [2, 8, 14], log: logs/gpu2.log}
+    - {session: reactflow_v3_r3c3_gpu3, physical_gpu: 3, folds: [3, 9, 15], log: logs/gpu3.log}
+    - {session: reactflow_v3_r3c3_gpu4, physical_gpu: 4, folds: [4, 10, 16], log: logs/gpu4.log}
+    - {session: reactflow_v3_r3c3_gpu5, physical_gpu: 5, folds: [5, 11, 17], log: logs/gpu5.log}
+  initial_gpu_state: ALL_SIX_WAITING
+  complete_fold_artifacts_at_launch: 0
   r3m3_authorized: false

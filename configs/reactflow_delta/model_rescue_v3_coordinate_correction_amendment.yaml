@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v3_coordinate_correction_amendment.v1
 contract_id: reactflow_delta_model_rescue_v3_coordinate_correction_20260823
-contract_status: R3C3_CORRECTED_EXPERT_REBUILD_AUTHORIZED
+contract_status: R3C3_CORRECTED_EXPERT_REBUILD_IN_PROGRESS_WAITING_FOR_GPU
 created_at: '2026-08-23T00:56:55+08:00'
 
 parent:
@@ -77,7 +77,7 @@ phase_graph:
     training_allowed: ENGINEERING_SMOKE_ONLY
     next_on_pass: R3C3
   - id: R3C3
-    status: AUTHORIZED_NOT_RUN
+    status: IN_PROGRESS_WAITING_FOR_GPU
     training_allowed: CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY
     next_on_pass: R3M3
   - id: R3M3

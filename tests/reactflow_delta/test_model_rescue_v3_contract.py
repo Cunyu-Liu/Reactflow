@@ -43,7 +43,9 @@ def test_coordinate_correction_authority_is_fail_closed_and_preserves_parents() 
     assert correction["phase_graph"][0]["status"] == "PASS"
     assert correction["phase_graph"][1]["status"] == "PASS"
     assert correction["phase_graph"][2]["status"] == "PASS"
-    assert correction["phase_graph"][3]["status"] == "AUTHORIZED_NOT_RUN"
+    assert correction["phase_graph"][3]["status"] == (
+        "IN_PROGRESS_WAITING_FOR_GPU"
+    )
     assert correction["confirmed_failure"]["real_data_evidence"][
         "formula_matches_raw_difference"
     ] == 13976
