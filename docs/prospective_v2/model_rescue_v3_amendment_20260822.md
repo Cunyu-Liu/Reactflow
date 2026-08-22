@@ -1,7 +1,7 @@
 # ReactFlow-Delta Model Rescue v3 阶段性合同
 
 日期：2026-08-22  
-初始状态：`R3M1_IMPLEMENTATION_ONLY`  
+当前执行状态：`R3M2_ENGINEERING_SMOKE_ONLY`
 父合同：Model Rescue v2 终局 `TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY`  
 父合同终局 commit：`97ce496c4dda944d0554b49342ce388d8f9d97c1`
 
@@ -204,3 +204,11 @@ external replication、task-matched SOTA、机制、广泛泛化或 publication 
 
 R3M3/R3M4 FAIL 时关闭本候选训练并返回 M6；所有 artifact 与负结果保留。无论 PASS/FAIL，
 v1/v2 终局、external lock 和 benchmark 主线均保持可追溯。
+
+## 11. R3M1 实现记录（2026-08-22）
+
+focused commit `91e904a2888ca490fa06b6911042e1199cf7b9ca` 实现生产 gate、inner-crossfit
+runner、zero-mean residual 和 R3M2/R3M3/R3M4 qualifier。v2/v3 聚焦回归共 26 tests
+通过，覆盖 exact hierarchy weights、inner-held 排除与完整覆盖、blend 算术重放、禁止
+method/target 字段、calibration gradient 隔离及原 Gate parity。该结果只授权真实 P01/P02
+三 epoch engineering smoke；R3M3 与 R3M4 继续关闭。

@@ -72,8 +72,8 @@ decisions:
 
 phase_state:
   R3M0: PASS
-  R3M1: IN_PROGRESS_IMPLEMENTATION_ONLY
-  R3M2: NOT_RUN
+  R3M1: PASS
+  R3M2: IN_PROGRESS_ENGINEERING_SMOKE_ONLY
   R3M3: NOT_RUN
   R3M4: NOT_RUN
   R3M5: NOT_RUN
@@ -85,3 +85,28 @@ claims:
   mechanism: NOT_ESTABLISHED
   sota: NOT_ESTABLISHED
   publication: PUBLICATION_NOT_READY
+
+r3m1_implementation:
+  status: R3M1_IMPLEMENTATION_AND_INVARIANTS_PASS
+  focused_commit: 91e904a2888ca490fa06b6911042e1199cf7b9ca
+  files:
+    - scripts/reactflow_delta/model_rescue_v3.py
+    - scripts/reactflow_delta/run_model_rescue_v3.py
+    - scripts/reactflow_delta/qualify_model_rescue_v3.py
+  tests:
+    command: >-
+      python -m pytest -q tests/reactflow_delta/test_model_rescue_v2.py
+      tests/reactflow_delta/test_qualify_model_rescue_v2.py
+      tests/reactflow_delta/test_model_rescue_v3.py
+      tests/reactflow_delta/test_qualify_model_rescue_v3.py
+      tests/reactflow_delta/test_model_rescue_v3_contract.py
+    result: 26_PASSED
+  verified_invariants:
+    - EXACT_HIERARCHICAL_L1_GATE
+    - FOUR_FOLD_INNER_HELD_EXCLUSION_AND_COMPLETE_COVERAGE
+    - LEGAL_DISAGREEMENT_ONLY_GATE_APPLICATION
+    - BLEND_ARITHMETIC_REPLAY
+    - ZERO_MEAN_RESIDUAL_GRADIENT_ISOLATION
+    - ORIGINAL_ONE_PERCENT_SCREEN_GATE
+    - ORIGINAL_R2M4_THRESHOLD_PARITY
+  scientific_interpretation: ENGINEERING_ONLY

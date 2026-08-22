@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v3_amendment.v1
 contract_id: reactflow_delta_model_rescue_v3_20260822
-contract_status: R3M1_IMPLEMENTATION_ONLY
+contract_status: R3M2_ENGINEERING_SMOKE_ONLY
 created_at: '2026-08-22T23:10:00+08:00'
 
 parent:
@@ -109,8 +109,8 @@ models:
     equal_compute_claim_allowed: false
 
 authorization:
-  current_phase: R3M1
-  training_allowed: false
+  current_phase: R3M2
+  training_allowed: ENGINEERING_SMOKE_ONLY
   allowed:
     - IMPLEMENT_V3_MODEL_GATE_RUNNER_QUALIFIER
     - RUN_FOCUSED_TESTS_AND_CONTRACT_VALIDATOR
@@ -171,8 +171,8 @@ formal_confirmation:
 
 phase_graph:
   - {id: R3M0, status: PASS, next_on_pass: R3M1}
-  - {id: R3M1, status: IN_PROGRESS, training_allowed: false, next_on_pass: R3M2}
-  - {id: R3M2, status: NOT_RUN, next_on_pass: R3M3}
+  - {id: R3M1, status: PASS, training_allowed: false, next_on_pass: R3M2}
+  - {id: R3M2, status: IN_PROGRESS, training_allowed: ENGINEERING_SMOKE_ONLY, next_on_pass: R3M3}
   - {id: R3M3, status: NOT_RUN, next_on_pass: R3M4, next_on_fail: R3M5_FAIL}
   - {id: R3M4, status: NOT_RUN, next_on_pass: R3M5_PASS, next_on_fail: R3M5_FAIL}
   - {id: R3M5, status: NOT_RUN, handoff_phase: M6}
