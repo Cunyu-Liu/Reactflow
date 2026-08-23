@@ -197,10 +197,12 @@ phase_graph:
   - {id: V4M6, status: NOT_RUN, handoff_phase: M6}
 
 compute:
-  v4_allowed_physical_gpus: [6, 7]
-  v3_reserved_physical_gpus: [0, 1, 2, 3, 4, 5]
-  idle_only: true
+  v4_allowed_physical_gpus: [0, 1, 2, 3, 4, 5, 6, 7]
+  v3_preferred_physical_gpus: [0, 1, 2, 3, 4, 5]
+  co_location_when_memory_sufficient: true
+  idle_only: false
   unrelated_job_interference_allowed: false
+  preemption_or_termination_allowed: false
   unlimited_budget_means_fixed_protocol_completion_only: true
 
 claim_policy:

@@ -39,9 +39,17 @@ decisions:
     decision: REQUIRE_FIVE_PERCENT_DUAL_METRIC_DEVELOPMENT_GAIN_AND_EXTERNAL_REPLICATION
     rationale: Small statistically positive improvements are inadequate for the requested top-journal route.
   - id: V4D006
-    status: FROZEN
+    status: SUPERSEDED_BY_V4D007_OWNER_AUTHORIZATION
     decision: V3_USES_GPU0_TO5_AND_V4_MAY_USE_ONLY_IDLE_GPU6_OR_GPU7
     rationale: PRESERVE_RUNNING_V3_AND_UNRELATED_TASKS
+  - id: V4D007
+    status: FROZEN
+    decision: V4_MAY_USE_GPU0_TO7_WHEN_CURRENT_STAGE_HAS_SUFFICIENT_AVAILABLE_MEMORY
+    owner_authorized_at: '2026-08-23'
+    rationale: >-
+      Owner explicitly expanded v4 from idle GPU6/7 to GPU0-5 and any card with
+      available memory. Existing processes remain protected from signals,
+      termination, preemption, or mutation.
 
 evidence_state:
   contract_and_design: FROZEN
@@ -62,11 +70,11 @@ evidence_state:
     parameter_count: 99521546
     trainable_parameter_count: 0
     status: PASS
-  outcome_blind_cache: WAITING_FOR_IDLE_GPU6_OR7
+  outcome_blind_cache: READY_TO_LAUNCH_ON_MAX_FREE_MEMORY_GPU0_TO7
   real_data_smoke: NOT_AUTHORIZED
   seed0_screen: NOT_AUTHORIZED
   formal_confirmation: NOT_AUTHORIZED
   external_confirmation: NOT_AUTHORIZED
   current_scientific_qualification: NOT_ESTABLISHED
 
-next_allowed_action: WAIT_FOR_IDLE_GPU6_OR7_AND_BUILD_OUTCOME_BLIND_RNAFM_CACHE
+next_allowed_action: SELECT_MAX_FREE_MEMORY_GPU0_TO7_AND_BUILD_OUTCOME_BLIND_RNAFM_CACHE

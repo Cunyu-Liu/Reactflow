@@ -109,7 +109,7 @@ def assert_run_authority(repo_root: Path, phase: str) -> None:
         raise RuntimeError(f"v4 {phase} training authority is absent")
     if active.get("new_external_outcome_access_allowed") is not False:
         raise RuntimeError("v4 runner requires external outcomes to remain locked")
-    if active["resource_partition"]["v4_allowed_physical_gpus"] != [6, 7]:
+    if active["resource_partition"]["v4_allowed_physical_gpus"] != list(range(8)):
         raise RuntimeError("v4 GPU partition changed")
 
 
@@ -618,7 +618,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--m2-csv", type=Path, required=True)
     parser.add_argument("--foundation-cache", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
-    parser.add_argument("--physical-gpu", type=int, choices=[6, 7], required=True)
+    parser.add_argument("--physical-gpu", type=int, choices=range(8), required=True)
     parser.add_argument("--folds", required=True)
     parser.add_argument("--seed", type=int, required=True)
     args = parser.parse_args(argv)

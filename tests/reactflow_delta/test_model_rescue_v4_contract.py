@@ -24,8 +24,9 @@ def test_v4_authority_is_isolated_fail_closed_and_preserves_prior_results() -> N
     assert active["training_allowed"] is False
     assert active["candidate_model_training_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
-    assert active["resource_partition"]["v4_allowed_physical_gpus"] == [6, 7]
-    assert active["resource_partition"]["v3_reserved_physical_gpus"] == [0, 1, 2, 3, 4, 5]
+    assert active["resource_partition"]["v4_allowed_physical_gpus"] == list(range(8))
+    assert active["resource_partition"]["v3_preferred_physical_gpus"] == [0, 1, 2, 3, 4, 5]
+    assert active["resource_partition"]["co_location_when_memory_sufficient"] is True
     assert active["parent_state"]["model_rescue_v3_disposition"] == "PRESERVE_RUNNING_DIAGNOSTIC_BASELINE_UNCHANGED"
     assert v4["parent"]["disposition"] == "PRESERVE_ALL_PRIOR_RESULTS_AND_RUNNING_V3_UNCHANGED"
     assert v3["parent"]["disposition"] == "PRESERVE_METHOD_AND_GATES_INVALIDATE_COORDINATE_FRAME"
