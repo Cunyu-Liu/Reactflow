@@ -4,6 +4,7 @@ import copy
 import json
 
 import numpy as np
+import pytest
 
 from scripts.reactflow_delta.qualify_model_rescue_v4 import (
     BASELINE,
@@ -12,8 +13,9 @@ from scripts.reactflow_delta.qualify_model_rescue_v4 import (
     PRIMARY,
     PUBLISHED,
     SCRATCH,
-    qualify_engineering_smoke,
     qualify_complete_scores,
+    qualify_engineering_smoke,
+    qualify_foundation_cache,
 )
 
 
@@ -131,3 +133,46 @@ def test_engineering_smoke_qualifies_without_reading_scientific_scores(tmp_path)
     assert result["v4m3_authorized"] is True
     assert result["held_scores_computed"] is False
     assert result["scientific_interpretation_prohibited"] is True
+
+
+def test_foundation_cache_qualifies_complete_frozen_outcome_blind_artifact(
+    tmp_path,
+) -> None:
+    h5py = pytest.importorskip("h5py")
+    cache = tmp_path / "rnafm.h5"
+    with h5py.File(cache, "w") as handle:
+        handle.create_dataset("row_ids", data=np.asarray([b"a", b"b"]))
+        handle.create_dataset("lengths", data=np.asarray([3, 3], dtype=np.int32))
+        handle.create_dataset(
+            "embeddings", data=np.zeros((2, 3, 640), dtype=np.float16)
+        )
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "reactflow_delta.model_rescue_v4_rnafm_cache.v1",
+                "evidence_status": "OUTCOME_BLIND_FROZEN_FOUNDATION_INPUT_ONLY",
+                "official_repository": "https://github.com/ml4bio/RNA-FM",
+                "official_repository_commit": "348951516e0963d22bbb33b3c9fc18c89081d38e",
+                "official_checkpoint_source": "https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth",
+                "checkpoint_path_used": "/frozen/RNA-FM_pretrained.pth",
+                "foundation_parameter_count": 99_000_000,
+                "foundation_trainable_parameter_count": 0,
+                "csv_columns_read": ["id", "puzzle", "method", "sequence"],
+                "mutant_outcome_columns_loaded": False,
+                "external_outcome_accessed": False,
+                "exact_openknot_pretraining_overlap": "UNKNOWN_NOT_ASSERTED",
+                "representation_layer": 12,
+                "representation_width": 640,
+                "n_sequences": 2,
+                "max_sequence_length": 3,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = qualify_foundation_cache(cache, manifest)
+
+    assert result["overall_status"] == "V4M1_IMPLEMENTATION_AND_FOUNDATION_CACHE_PASS"
+    assert result["v4m2_authorized"] is True
+    assert result["held_scores_computed"] is False

@@ -110,6 +110,8 @@ def test_cache_manifest_discloses_columns_and_unknown_sequence_overlap(tmp_path)
         cache_path=cache,
         manifest_path=manifest_path,
         model_location=tmp_path / "RNA-FM_pretrained.pth",
+        foundation_parameter_count=99_000_000,
+        foundation_trainable_parameter_count=0,
     )
     assert cache.exists()
     assert manifest["csv_columns_read"] == list(F.OUTCOME_BLIND_COLUMNS)
@@ -117,4 +119,6 @@ def test_cache_manifest_discloses_columns_and_unknown_sequence_overlap(tmp_path)
     assert manifest["exact_openknot_pretraining_overlap"] == "UNKNOWN_NOT_ASSERTED"
     assert manifest["official_checkpoint_source"] == F.OFFICIAL_CHECKPOINT_SOURCE
     assert manifest["checkpoint_path_used"].endswith("RNA-FM_pretrained.pth")
+    assert manifest["foundation_parameter_count"] == 99_000_000
+    assert manifest["foundation_trainable_parameter_count"] == 0
     assert json.loads(manifest_path.read_text())["n_sequences"] == 2

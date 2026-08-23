@@ -136,6 +136,8 @@ def write_cache(
     cache_path: Path,
     manifest_path: Path,
     model_location: Path,
+    foundation_parameter_count: int,
+    foundation_trainable_parameter_count: int,
 ) -> dict[str, Any]:
     import h5py
 
@@ -172,6 +174,10 @@ def write_cache(
         "official_repository_commit": OFFICIAL_REPOSITORY_COMMIT,
         "official_checkpoint_source": OFFICIAL_CHECKPOINT_SOURCE,
         "checkpoint_path_used": str(Path(model_location).resolve()),
+        "foundation_parameter_count": int(foundation_parameter_count),
+        "foundation_trainable_parameter_count": int(
+            foundation_trainable_parameter_count
+        ),
         "loader": "fm.pretrained.rna_fm_t12",
         "representation_layer": REPRESENTATION_LAYER,
         "representation_width": REPRESENTATION_WIDTH,
@@ -210,6 +216,10 @@ def main(argv: list[str] | None = None) -> int:
         raise RuntimeError("authorized v4 GPU is unavailable")
     entries = load_outcome_blind_sequences(args.m2_csv)
     model, converter = load_official_rnafm(args.model_location)
+    foundation_parameter_count = sum(parameter.numel() for parameter in model.parameters())
+    foundation_trainable_parameter_count = sum(
+        parameter.numel() for parameter in model.parameters() if parameter.requires_grad
+    )
     embedding_batches = (
         extract_batch_embeddings(model, converter, batch, "cuda:0")
         for batch in batches(entries, args.batch_size)
@@ -220,6 +230,8 @@ def main(argv: list[str] | None = None) -> int:
         cache_path=args.cache_path,
         manifest_path=args.manifest_path,
         model_location=args.model_location,
+        foundation_parameter_count=foundation_parameter_count,
+        foundation_trainable_parameter_count=foundation_trainable_parameter_count,
     )
     return 0
 
