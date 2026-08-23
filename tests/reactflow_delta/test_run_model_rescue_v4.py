@@ -4,6 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+import pandas as pd
 import pytest
 import torch
 
@@ -15,11 +16,66 @@ from scripts.reactflow_delta.model_rescue_v4 import (
 from scripts.reactflow_delta import run_model_rescue_v4 as R
 
 
-def test_mutant_row_id_uses_source_csv_dna_alphabet() -> None:
+def test_cache_row_id_canonicalizes_raw_t_and_u_alleles() -> None:
+    assert (
+        R.canonical_cache_row_id("P02_Eterna_mm_1_A_T")
+        == "P02_Eterna_mm_1_A_U"
+    )
+    assert (
+        R.canonical_cache_row_id("P02_Eterna_mm_0_U_A")
+        == "P02_Eterna_mm_0_U_A"
+    )
+
+
+def test_mutant_row_id_preserves_universe_canonical_rna_alphabet() -> None:
     record = SimpleNamespace(
         wt_id="P02_Eterna_wt", design_pos=1, ref="A", alt="U"
     )
-    assert R.mutant_row_id(record) == "P02_Eterna_mm_1_A_T"
+    assert R.mutant_row_id(record) == "P02_Eterna_mm_1_A_U"
+
+
+def test_foundation_cache_resolves_canonical_rna_id_to_raw_t_id(tmp_path) -> None:
+    h5py = pytest.importorskip("h5py")
+    path = tmp_path / "cache.h5"
+    with h5py.File(path, "w") as handle:
+        handle.create_dataset("row_ids", data=np.asarray([b"P02_Eterna_mm_1_A_T"]))
+        handle.create_dataset("lengths", data=np.asarray([2], dtype=np.int32))
+        handle.create_dataset("embeddings", data=np.zeros((1, 2, 640), dtype=np.float16))
+    cache = R.FoundationCache(path)
+    try:
+        assert cache.resolve("P02_Eterna_mm_1_A_U") == "P02_Eterna_mm_1_A_T"
+    finally:
+        cache.close()
+
+
+def test_foundation_cache_binds_construct_alias_to_raw_sequence_id(tmp_path) -> None:
+    h5py = pytest.importorskip("h5py")
+    path = tmp_path / "cache.h5"
+    raw_ids = [b"P01_gRNAde2_wt", b"P01_gRNAde2_mm_0_G_C"]
+    with h5py.File(path, "w") as handle:
+        handle.create_dataset("row_ids", data=np.asarray(raw_ids))
+        handle.create_dataset("lengths", data=np.asarray([2, 2], dtype=np.int32))
+        handle.create_dataset("embeddings", data=np.zeros((2, 2, 640), dtype=np.float16))
+    frame = pd.DataFrame(
+        {
+            "id": ["P01_gRNAde2_wt", "P01_gRNAde2_mm_0_G_C"],
+            "is_wt": [True, False],
+            "construct_id": ["P01_gRNAde-no3d", "P01_gRNAde-no3d"],
+            "mut_pos": [pd.NA, 0],
+            "mut_ref": [None, "G"],
+            "mut_alt": [None, "C"],
+        }
+    )
+    cache = R.FoundationCache(path)
+    try:
+        cache.bind_universe(SimpleNamespace(df=frame))
+        assert cache.resolve("P01_gRNAde-no3d_wt") == "P01_gRNAde2_wt"
+        assert (
+            cache.resolve("P01_gRNAde-no3d_mm_0_G_C")
+            == "P01_gRNAde2_mm_0_G_C"
+        )
+    finally:
+        cache.close()
 
 
 def _tiny_model() -> MutationConditionedDualTower:
