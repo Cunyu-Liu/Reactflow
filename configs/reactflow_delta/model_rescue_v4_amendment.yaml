@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v4_amendment.v1
 contract_id: reactflow_delta_model_rescue_v4_20260823
-contract_status: V4M1_FOUNDATION_CACHE_RUNNING
+contract_status: V4M2_ENGINEERING_SMOKE_ONLY
 created_at: '2026-08-23T11:20:00+08:00'
 
 parent:
@@ -189,8 +189,8 @@ external_gate:
 
 phase_graph:
   - {id: V4M0, status: PASS, next_on_pass: V4M1}
-  - {id: V4M1, status: IN_PROGRESS, training_allowed: false, next_on_pass: V4M2}
-  - {id: V4M2, status: NOT_AUTHORIZED, training_allowed: ENGINEERING_SMOKE_ONLY, next_on_pass: V4M3, next_on_fail: V4M6_FAIL}
+  - {id: V4M1, status: PASS, training_allowed: false, next_on_pass: V4M2}
+  - {id: V4M2, status: IN_PROGRESS, training_allowed: ENGINEERING_SMOKE_ONLY, next_on_pass: V4M3, next_on_fail: V4M6_FAIL}
   - {id: V4M3, status: NOT_AUTHORIZED, next_on_pass: V4M4, next_on_fail: V4M6_FAIL}
   - {id: V4M4, status: NOT_AUTHORIZED, next_on_pass: V4M5, next_on_fail: V4M6_FAIL}
   - {id: V4M5, status: SEPARATE_AMENDMENT_REQUIRED, next_on_pass: V4M6_PASS, next_on_fail: V4M6_DEVELOPMENT_ONLY}
