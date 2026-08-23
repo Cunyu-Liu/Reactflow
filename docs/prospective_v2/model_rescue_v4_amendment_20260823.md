@@ -2,7 +2,7 @@
 
 **合同日期：** 2026-08-23
 
-**当前阶段：** `V4M2_ENGINEERING_SMOKE_ONLY`
+**当前阶段：** `V4M3_SINGLE_SEED_TWENTY_FOLD_PREDICTION_ONLY`
 
 **父 HEAD：** `a560a179d620f5be083c8fce617e3cc0a7016908`
 
@@ -14,7 +14,7 @@
 
 v4 唯一允许检验的研究假设是：在严格正确的 full-sequence mutation coordinate 下，显式建模 WT 一维响应状态、RNA 二维 pair state 和 exact mutation-conditioned receiver state，并加入冻结的 paired RNA-FM sequence representation，能否产生超过容量、foundation 与 calibration 所能解释的 signed-delta mean 增量。
 
-V4M1 已由完整 outcome-blind RNA-FM cache 和预冻结 qualifier 机械裁决为 `V4M1_IMPLEMENTATION_AND_FOUNDATION_CACHE_PASS`。当前只授权真实 M2 的 folds 0/1、seed 0、mean/calibration 各 3 epochs prediction-only 工程 smoke；不得读取或使用科学分数方向。
+V4M1 已由完整 outcome-blind RNA-FM cache 机械裁决为 PASS；V4M2 folds 0/1、seed 0、mean/calibration 各 3 epochs 的 prediction-only smoke 也已由预冻结 qualifier 裁决为 `V4M2_REAL_DATA_ENGINEERING_SMOKE_PASS`。当前授权固定 seed 0、20 folds、80+40 epochs 和全部五个冻结 model families 的 prediction-only V4M3；20 folds 完整前不得合并、评分或读取部分指标方向。
 
 ## 2. 唯一候选和对照
 
