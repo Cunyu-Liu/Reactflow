@@ -9,6 +9,7 @@ import json
 import math
 from pathlib import Path
 import random
+import re
 from typing import Any
 
 import numpy as np
@@ -61,6 +62,15 @@ WEIGHT_DECAY = 1e-2
 GRADIENT_CLIP = 1.0
 
 
+def canonical_cache_row_id(row_id: str) -> str:
+    match = re.search(r"_mm_(\d+)_([ACGTU])_([ACGTU])$", row_id)
+    if match is None:
+        return row_id
+    position, ref, alt = match.groups()
+    prefix = row_id[: match.start()]
+    return f"{prefix}_mm_{position}_{ref.replace('T', 'U')}_{alt.replace('T', 'U')}"
+
+
 class FoundationCache:
     def __init__(self, path: Path) -> None:
         import h5py
@@ -69,20 +79,46 @@ class FoundationCache:
         raw_ids = self.handle["row_ids"][:]
         ids = [value.decode("utf-8") if isinstance(value, bytes) else str(value) for value in raw_ids]
         self.index = {row_id: index for index, row_id in enumerate(ids)}
+        self.canonical_index = {}
+        for row_id in ids:
+            canonical = canonical_cache_row_id(row_id)
+            if canonical in self.canonical_index:
+                raise ValueError(f"foundation cache has duplicate canonical id {canonical}")
+            self.canonical_index[canonical] = row_id
+        self.universe_aliases: dict[str, str] = {}
         self.lengths = self.handle["lengths"][:]
         self.embeddings = self.handle["embeddings"]
 
     def close(self) -> None:
         self.handle.close()
 
+    def bind_universe(self, univ: M2Universe) -> None:
+        aliases: dict[str, str] = {}
+        for row in univ.df.itertuples(index=False):
+            raw_id = str(row.id)
+            if raw_id not in self.index:
+                raise KeyError(f"foundation cache is missing raw M2 row {raw_id}")
+            if bool(row.is_wt):
+                alias = f"{row.construct_id}_wt"
+            else:
+                alias = (
+                    f"{row.construct_id}_mm_{int(row.mut_pos)}_"
+                    f"{row.mut_ref}_{row.mut_alt}"
+                )
+            if alias in aliases:
+                raise ValueError(f"M2 universe has duplicate foundation alias {alias}")
+            aliases[alias] = raw_id
+        self.universe_aliases = aliases
+
     def resolve(self, row_id: str) -> str:
         if row_id in self.index:
             return row_id
-        suffix = row_id.split("_mm_", 1)[-1] if "_mm_" in row_id else row_id
-        matches = [key for key in self.index if key.endswith(suffix)]
-        if len(matches) != 1:
-            raise KeyError(f"foundation cache has no unique row for {row_id}")
-        return matches[0]
+        canonical = canonical_cache_row_id(row_id)
+        if canonical in self.universe_aliases:
+            return self.universe_aliases[canonical]
+        if canonical in self.canonical_index:
+            return self.canonical_index[canonical]
+        raise KeyError(f"foundation cache has no canonical row for {row_id}")
 
     def get(self, row_id: str) -> np.ndarray:
         key = self.resolve(row_id)
@@ -93,9 +129,7 @@ class FoundationCache:
 
 def mutant_row_id(record: Any) -> str:
     prefix = record.wt_id[:-3] if record.wt_id.endswith("_wt") else record.wt_id
-    ref = record.ref.replace("U", "T")
-    alt = record.alt.replace("U", "T")
-    return f"{prefix}_mm_{record.design_pos}_{ref}_{alt}"
+    return f"{prefix}_mm_{record.design_pos}_{record.ref}_{record.alt}"
 
 
 def assert_run_authority(repo_root: Path, phase: str) -> None:
@@ -657,6 +691,7 @@ def main(argv: list[str] | None = None) -> int:
     folds = [fold for fold in split["folds"] if fold.outer_fold in set(selected)]
     foundation = FoundationCache(args.foundation_cache)
     try:
+        foundation.bind_universe(universe)
         for fold in folds:
             print(
                 f"[{args.phase}] fold={fold.outer_fold} held={fold.held_puzzle} seed={args.seed} start",
