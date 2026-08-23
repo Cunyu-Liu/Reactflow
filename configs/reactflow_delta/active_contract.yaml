@@ -2,7 +2,7 @@ schema_version: reactflow_delta.active_contract.v4
 manifest_id: reactflow_delta_model_rescue_v4_authority_20260823
 project_task_id: reactflow_delta_model_rescue_v4
 created_at: '2026-08-23T11:20:00+08:00'
-updated_at: '2026-08-23T12:05:00+08:00'
+updated_at: '2026-08-23T12:06:00+08:00'
 
 authority:
   pointer_role: V4_WORKTREE_SINGLE_ACTIVE_AUTHORITY
@@ -76,4 +76,4 @@ gate_state:
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
 
-next_allowed_action: SELECT_MAX_FREE_MEMORY_GPU0_TO7_AND_BUILD_OUTCOME_BLIND_RNAFM_CACHE
+next_allowed_action: LOW_FREQUENCY_HEALTH_MONITOR_V4M1_FOUNDATION_CACHE
