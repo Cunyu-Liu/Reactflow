@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v4_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v4_20260823
 created_at: '2026-08-23T11:20:00+08:00'
-current_status: V4M2_ENGINEERING_SMOKE_RUNNING
+current_status: V4M3_SINGLE_SEED_TWENTY_FOLD_AUTHORIZED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -82,7 +82,7 @@ evidence_state:
     qualifier_all_checks_pass: true
     scientific_scores_computed: false
   real_data_smoke:
-    status: RUNNING_RECOVERY3
+    status: V4M2_REAL_DATA_ENGINEERING_SMOKE_PASS
     physical_gpu: 5
     folds: [0, 1]
     seed: 0
@@ -92,6 +92,8 @@ evidence_state:
     log: /mnt/cunyuliu/reactflow_delta_model_rescue_v4/logs/v4m2_smoke_gpu5_20260823_recovery3.log
     held_scores_computed: false
     partial_score_accessed: false
+    qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v4/v4m2_real_smoke/v4m2_engineering_qualification.json
+    fold_statuses: [V4M2_FOLD_PASS, V4M2_FOLD_PASS]
   engineering_incidents:
     - attempt: INITIAL
       status: INTERRUPTED_RECOVERABLE_NO_FOLD_ARTIFACT
@@ -106,9 +108,9 @@ evidence_state:
       cause: CONSTRUCT_ID_DIFFERS_FROM_RAW_SEQUENCE_ROW_PREFIX_FOR_GRNADE_AND_RELATED_METHODS
       recovery_commit: e2d70c3
       full_join_audit: 13976_OF_13976_MUTANTS_AND_WT_ROWS_RESOLVED
-  seed0_screen: NOT_AUTHORIZED
+  seed0_screen: AUTHORIZED_PREDICTION_ONLY_COMPLETE_20_FOLDS_BEFORE_SCORE
   formal_confirmation: NOT_AUTHORIZED
   external_confirmation: NOT_AUTHORIZED
   current_scientific_qualification: NOT_ESTABLISHED
 
-next_allowed_action: LOW_FREQUENCY_HEALTH_MONITOR_V4M2_SMOKE_RECOVERY3
+next_allowed_action: LAUNCH_V4M3_SEED0_NONOVERLAPPING_FOLDS_ON_GPU0_TO7
