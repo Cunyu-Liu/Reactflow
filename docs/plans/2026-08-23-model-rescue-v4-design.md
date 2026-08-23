@@ -89,4 +89,4 @@ An internal pass is only `HIGH_EFFECT_POST_HOC_DEVELOPMENT_PASS`. A top-journal 
 
 ## 6. Compute and concurrency
 
-v3 retains GPU0–5 and its existing artifacts, sessions, code, gates, and terminal history. v4 uses only idle GPU6/7. It never preempts or terminates unrelated processes. The v4 implementation, fixtures, and CPU smoke may proceed while v3 runs; v4 real GPU work begins only after its own engineering qualifier opens that phase. GPU availability changes timing, not model family, epochs, seeds, losses, thresholds, or gates.
+v3 retains its existing artifacts, sessions, code, gates, and terminal history. Under the later 2026-08-23 owner authorization, v4 may use GPU0–7 whenever the selected card has sufficient available memory, including co-location with existing tasks. It never preempts, terminates, signals, or modifies unrelated processes. GPU availability changes placement and timing, not model family, epochs, seeds, losses, thresholds, or gates.

@@ -26,7 +26,7 @@ OFFICIAL_CHECKPOINT_SOURCE = (
 OUTCOME_BLIND_COLUMNS = ("id", "puzzle", "method", "sequence")
 REPRESENTATION_LAYER = 12
 REPRESENTATION_WIDTH = 640
-ALLOWED_PHYSICAL_GPUS = {6, 7}
+ALLOWED_PHYSICAL_GPUS = set(range(8))
 
 
 @dataclass(frozen=True)
@@ -253,7 +253,7 @@ def main(argv: list[str] | None = None) -> int:
 
     assert_cache_authority(args.repo_root.resolve())
     if args.physical_gpu not in ALLOWED_PHYSICAL_GPUS:
-        raise ValueError("v4 RNA-FM cache may use only physical GPU6 or GPU7")
+        raise ValueError("v4 RNA-FM cache may use only physical GPU0 through GPU7")
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.physical_gpu)
     import torch
 

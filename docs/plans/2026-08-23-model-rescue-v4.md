@@ -55,7 +55,7 @@
 
 **Risk:** High — pooled-mutant training, partial-fold inspection, held-target leakage, or a hand-edited verdict would make the result scientifically uninterpretable.
 
-**Implementation:** Train each puzzle-method cell with exact hierarchical L1, chunk mutants without changing cell weight, run all fixed controls, serialize prediction-only full-construct ledgers, score by independent evaluator join, reject duplicate/missing folds, and mechanically apply seed-0 and formal gates. The runner accepts only the frozen phases, folds, seeds, epochs, model IDs, GPU6/7 mapping, and artifact roots.
+**Implementation:** Train each puzzle-method cell with exact hierarchical L1, chunk mutants without changing cell weight, run all fixed controls, serialize prediction-only full-construct ledgers, score by independent evaluator join, reject duplicate/missing folds, and mechanically apply seed-0 and formal gates. The runner accepts only the frozen phases, folds, seeds, epochs, model IDs, authorized GPU0–7 mapping, and artifact roots.
 
 **Minimum verification:** Focused tests for cell-weight invariance under mutant duplication, all-position output, held target/error/mask invariance, duplicate/missing fold rejection, no partial qualification, exact gate boundary behavior, and replay-stable verdict generation.
 
@@ -70,7 +70,7 @@
 
 **Risk:** Medium — checkpoint/dependency incompatibility or pair-memory pressure can prevent execution but must not change the scientific candidate.
 
-**Implementation:** Install or create a pinned environment for RNA-FM without changing the v3 environment; generate the outcome-blind embedding cache; run P01/P02, seed 0, at most three mean and calibration epochs on an idle authorized GPU6/7; verify finite gradients, parameter counts, prediction universe, foundation freeze, target invariance, and memory headroom. Do not read or use smoke score direction.
+**Implementation:** Install or create a pinned environment for RNA-FM without changing the v3 environment; generate the outcome-blind embedding cache; run P01/P02, seed 0, at most three mean and calibration epochs on an authorized GPU0–7 with sufficient available memory; verify finite gradients, parameter counts, prediction universe, foundation freeze, target invariance, and memory headroom. Do not read or use smoke score direction.
 
 **Minimum verification:** Run the v4 focused suite in the remote environment and the engineering qualifier. Record `ENGINEERING_SMOKE_ONLY`; open V4M3 only on exact engineering PASS.
 
@@ -86,7 +86,7 @@
 
 **Risk:** High — partial outcome access or post-hoc model changes would invalidate the top-journal gate.
 
-**Implementation:** Use persistent GPU6/7 sessions with non-overlapping folds. Complete all 20 seed-0 folds for all five fixed families before merging and scoring. If and only if the exact V4M3 gate passes, run seeds 0–4 for the pre-frozen model universe. Never delete failed seeds, modify thresholds, or inspect partial metric directions.
+**Implementation:** Use persistent GPU0–7 sessions with non-overlapping folds and sufficient available memory. Complete all 20 seed-0 folds for all five fixed families before merging and scoring. If and only if the exact V4M3 gate passes, run seeds 0–4 for the pre-frozen model universe. Never delete failed seeds, modify thresholds, or inspect partial metric directions.
 
 **Minimum verification:** File-name-only low-frequency monitoring; complete-universe merge; mechanical qualifier; clean replay of headline tables from the sole merged artifacts.
 
