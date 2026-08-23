@@ -81,13 +81,20 @@ def assert_official_source_root(source_root: Path) -> Path:
             f"{OFFICIAL_REPOSITORY_COMMIT}"
         )
     dirty = subprocess.run(
-        ["git", "-C", str(source_root), "status", "--porcelain"],
+        [
+            "git",
+            "-C",
+            str(source_root),
+            "status",
+            "--porcelain",
+            "--untracked-files=no",
+        ],
         capture_output=True,
         text=True,
         check=True,
     ).stdout.strip()
     if dirty:
-        raise RuntimeError("RNA-FM source checkout has local modifications")
+        raise RuntimeError("RNA-FM source checkout has tracked local modifications")
     return source_root
 
 

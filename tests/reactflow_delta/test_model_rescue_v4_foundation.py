@@ -88,12 +88,16 @@ def test_official_source_root_requires_frozen_clean_commit(tmp_path, monkeypatch
     (source_root / "fm").mkdir(parents=True)
     (source_root / "fm" / "__init__.py").write_text("")
 
+    commands = []
+
     def clean_run(command, **_kwargs):
+        commands.append(command)
         output = F.OFFICIAL_REPOSITORY_COMMIT if command[-2:] == ["rev-parse", "HEAD"] else ""
         return SimpleNamespace(stdout=output)
 
     monkeypatch.setattr(F.subprocess, "run", clean_run)
     assert F.assert_official_source_root(source_root) == source_root.resolve()
+    assert any("--untracked-files=no" in command for command in commands)
 
     def wrong_head_run(command, **_kwargs):
         output = "wrong-head" if command[-2:] == ["rev-parse", "HEAD"] else ""
