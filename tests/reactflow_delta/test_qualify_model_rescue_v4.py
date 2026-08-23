@@ -156,6 +156,7 @@ def test_foundation_cache_qualifies_complete_frozen_outcome_blind_artifact(
                 "official_repository_commit": "348951516e0963d22bbb33b3c9fc18c89081d38e",
                 "official_checkpoint_source": "https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth",
                 "checkpoint_path_used": "/frozen/RNA-FM_pretrained.pth",
+                "package_source_root": "/frozen/RNA-FM",
                 "foundation_parameter_count": 99_000_000,
                 "foundation_trainable_parameter_count": 0,
                 "csv_columns_read": ["id", "puzzle", "method", "sequence"],

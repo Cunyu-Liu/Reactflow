@@ -54,17 +54,22 @@ def _fake_converter(data):
 def test_official_loader_requires_and_passes_explicit_checkpoint(tmp_path, monkeypatch) -> None:
     checkpoint = tmp_path / "RNA-FM_pretrained.pth"
     checkpoint.write_bytes(b"fixture")
+    source_root = tmp_path / "RNA-FM"
+    (source_root / "fm").mkdir(parents=True)
+    (source_root / "fm" / "__init__.py").write_text("")
     model = _FakeModel()
     calls = []
     alphabet = SimpleNamespace(get_batch_converter=lambda: _fake_converter)
     fake_fm = SimpleNamespace(
+        __file__=str(source_root / "fm" / "__init__.py"),
         pretrained=SimpleNamespace(
             rna_fm_t12=lambda location: calls.append(location) or (model, alphabet)
         )
     )
     monkeypatch.setitem(sys.modules, "fm", fake_fm)
+    monkeypatch.setattr(F, "assert_official_source_root", lambda value: source_root.resolve())
 
-    loaded, converter = F.load_official_rnafm(checkpoint)
+    loaded, converter = F.load_official_rnafm(checkpoint, source_root)
 
     assert loaded is model
     assert converter is _fake_converter
@@ -75,7 +80,28 @@ def test_official_loader_requires_and_passes_explicit_checkpoint(tmp_path, monke
 
 def test_official_loader_fails_closed_when_checkpoint_is_absent(tmp_path) -> None:
     with pytest.raises(FileNotFoundError, match="official RNA-FM checkpoint is absent"):
-        F.load_official_rnafm(tmp_path / "missing.pth")
+        F.load_official_rnafm(tmp_path / "missing.pth", tmp_path / "RNA-FM")
+
+
+def test_official_source_root_requires_frozen_clean_commit(tmp_path, monkeypatch) -> None:
+    source_root = tmp_path / "RNA-FM"
+    (source_root / "fm").mkdir(parents=True)
+    (source_root / "fm" / "__init__.py").write_text("")
+
+    def clean_run(command, **_kwargs):
+        output = F.OFFICIAL_REPOSITORY_COMMIT if command[-2:] == ["rev-parse", "HEAD"] else ""
+        return SimpleNamespace(stdout=output)
+
+    monkeypatch.setattr(F.subprocess, "run", clean_run)
+    assert F.assert_official_source_root(source_root) == source_root.resolve()
+
+    def wrong_head_run(command, **_kwargs):
+        output = "wrong-head" if command[-2:] == ["rev-parse", "HEAD"] else ""
+        return SimpleNamespace(stdout=output)
+
+    monkeypatch.setattr(F.subprocess, "run", wrong_head_run)
+    with pytest.raises(RuntimeError, match="does not match frozen commit"):
+        F.assert_official_source_root(source_root)
 
 
 def test_embedding_extractor_trims_special_tokens_and_foundation_is_frozen() -> None:
@@ -110,6 +136,7 @@ def test_cache_manifest_discloses_columns_and_unknown_sequence_overlap(tmp_path)
         cache_path=cache,
         manifest_path=manifest_path,
         model_location=tmp_path / "RNA-FM_pretrained.pth",
+        source_root=tmp_path / "RNA-FM",
         foundation_parameter_count=99_000_000,
         foundation_trainable_parameter_count=0,
     )
@@ -119,6 +146,7 @@ def test_cache_manifest_discloses_columns_and_unknown_sequence_overlap(tmp_path)
     assert manifest["exact_openknot_pretraining_overlap"] == "UNKNOWN_NOT_ASSERTED"
     assert manifest["official_checkpoint_source"] == F.OFFICIAL_CHECKPOINT_SOURCE
     assert manifest["checkpoint_path_used"].endswith("RNA-FM_pretrained.pth")
+    assert manifest["package_source_root"].endswith("RNA-FM")
     assert manifest["foundation_parameter_count"] == 99_000_000
     assert manifest["foundation_trainable_parameter_count"] == 0
     assert json.loads(manifest_path.read_text())["n_sequences"] == 2
