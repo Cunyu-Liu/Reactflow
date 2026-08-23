@@ -14,6 +14,7 @@ from scipy.stats import t as student_t
 
 
 SCHEMA = "reactflow_delta.model_rescue_v4_qualification.v1"
+FOUNDATION_SCHEMA = "reactflow_delta.model_rescue_v4_foundation_qualification.v1"
 SMOKE_SCHEMA = "reactflow_delta.model_rescue_v4_engineering_smoke_qualification.v1"
 BASELINE = "corrected_b1"
 PRIMARY = "v4_dual_tower_rnafm"
@@ -23,6 +24,82 @@ CAPACITY_NULL = "v4_capacity_matched_sequence_null"
 PUBLISHED = "task_matched_published_comparator"
 METRICS = ("crps", "signed_delta_mae")
 INTERNAL_MODELS = {BASELINE, PRIMARY, SCRATCH, FOUNDATION_ONLY, CAPACITY_NULL}
+
+
+def qualify_foundation_cache(cache_path: Path, manifest_path: Path) -> dict[str, Any]:
+    import h5py
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    checks = {
+        "cache_schema_exact": manifest.get("schema_version")
+        == "reactflow_delta.model_rescue_v4_rnafm_cache.v1",
+        "outcome_blind_evidence_status": manifest.get("evidence_status")
+        == "OUTCOME_BLIND_FROZEN_FOUNDATION_INPUT_ONLY",
+        "official_repository_exact": manifest.get("official_repository")
+        == "https://github.com/ml4bio/RNA-FM",
+        "official_repository_commit_exact": manifest.get("official_repository_commit")
+        == "348951516e0963d22bbb33b3c9fc18c89081d38e",
+        "official_checkpoint_source_exact": manifest.get("official_checkpoint_source")
+        == "https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth",
+        "explicit_checkpoint_path_recorded": bool(manifest.get("checkpoint_path_used")),
+        "foundation_parameter_count_plausible": int(
+            manifest.get("foundation_parameter_count", 0)
+        )
+        > 90_000_000,
+        "foundation_fully_frozen": int(
+            manifest.get("foundation_trainable_parameter_count", -1)
+        )
+        == 0,
+        "outcome_blind_columns_exact": manifest.get("csv_columns_read")
+        == ["id", "puzzle", "method", "sequence"],
+        "mutant_outcomes_absent": manifest.get("mutant_outcome_columns_loaded") is False,
+        "external_outcomes_absent": manifest.get("external_outcome_accessed") is False,
+        "pretraining_overlap_not_overclaimed": manifest.get(
+            "exact_openknot_pretraining_overlap"
+        )
+        == "UNKNOWN_NOT_ASSERTED",
+        "representation_layer_exact": int(manifest.get("representation_layer", -1)) == 12,
+        "representation_width_exact": int(manifest.get("representation_width", -1))
+        == 640,
+    }
+    with h5py.File(cache_path, "r") as handle:
+        row_ids = handle["row_ids"][:]
+        lengths = handle["lengths"][:]
+        embeddings = handle["embeddings"]
+        decoded = [
+            value.decode("utf-8") if isinstance(value, bytes) else str(value)
+            for value in row_ids
+        ]
+        expected_rows = int(manifest.get("n_sequences", -1))
+        expected_max_length = int(manifest.get("max_sequence_length", -1))
+        checks.update(
+            {
+                "nonempty_unique_row_universe": len(decoded) > 0
+                and len(decoded) == len(set(decoded)),
+                "row_count_matches_manifest": len(decoded) == expected_rows,
+                "length_count_matches_rows": len(lengths) == len(decoded),
+                "positive_lengths_within_matrix": len(lengths) > 0
+                and bool((lengths > 0).all())
+                and int(lengths.max()) == expected_max_length,
+                "embedding_shape_complete": embeddings.shape
+                == (expected_rows, expected_max_length, 640),
+            }
+        )
+    passed = all(checks.values())
+    return {
+        "schema_version": FOUNDATION_SCHEMA,
+        "evidence_status": "ENGINEERING_FOUNDATION_CACHE_ONLY",
+        "checks": checks,
+        "overall_status": (
+            "V4M1_IMPLEMENTATION_AND_FOUNDATION_CACHE_PASS"
+            if passed
+            else "MODEL_RESCUE_V4_IMPLEMENTATION_FAIL"
+        ),
+        "v4m2_authorized": passed,
+        "scientific_interpretation_prohibited": True,
+        "held_scores_computed": False,
+        "external_outcome_accessed": False,
+    }
 
 
 def _smoke_prediction_checks(path: Path, model_id: str) -> dict[str, bool]:
@@ -312,10 +389,20 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--score-json", type=Path)
     parser.add_argument("--fold-dir", type=Path)
+    parser.add_argument("--cache-path", type=Path)
+    parser.add_argument("--cache-manifest", type=Path)
     parser.add_argument("--out-json", type=Path, required=True)
-    parser.add_argument("--phase", choices=["V4M2", "V4M3", "V4M4"], required=True)
+    parser.add_argument(
+        "--phase", choices=["V4M1", "V4M2", "V4M3", "V4M4"], required=True
+    )
     args = parser.parse_args(argv)
-    if args.phase == "V4M2":
+    if args.phase == "V4M1":
+        if args.cache_path is None or args.cache_manifest is None:
+            raise ValueError(
+                "V4M1 qualification requires --cache-path and --cache-manifest"
+            )
+        result = qualify_foundation_cache(args.cache_path, args.cache_manifest)
+    elif args.phase == "V4M2":
         if args.fold_dir is None:
             raise ValueError("V4M2 qualification requires --fold-dir")
         result = qualify_engineering_smoke(args.fold_dir)
