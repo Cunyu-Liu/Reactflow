@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v4_amendment.v1
 contract_id: reactflow_delta_model_rescue_v4_20260823
-contract_status: V4M1_IMPLEMENTATION_AND_INVARIANTS_ONLY
+contract_status: V4M1_FOUNDATION_ENVIRONMENT_READY_CACHE_PENDING
 created_at: '2026-08-23T11:20:00+08:00'
 
 parent:

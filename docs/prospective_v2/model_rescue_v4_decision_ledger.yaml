@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v4_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v4_20260823
 created_at: '2026-08-23T11:20:00+08:00'
-current_status: V4M1_IMPLEMENTATION_IN_PROGRESS
+current_status: V4M1_FOUNDATION_ENVIRONMENT_READY_CACHE_PENDING
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -45,12 +45,28 @@ decisions:
 
 evidence_state:
   contract_and_design: FROZEN
-  implementation: IN_PROGRESS
-  focused_tests: NOT_RUN
+  implementation: IMPLEMENTED
+  focused_tests: REMOTE_30_PASSED_20260823
+  official_checkpoint:
+    source: https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth
+    remote_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v4/foundation_models/RNA-FM_pretrained.pth
+    expected_and_observed_size_bytes: 1194424423
+    load_status: PASS
+  official_source_checkout:
+    remote_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v4/foundation_models/RNA-FM
+    head: 348951516e0963d22bbb33b3c9fc18c89081d38e
+    tracked_files_status: CLEAN
+  foundation_probe:
+    representation_shape: [8, 640]
+    values_finite: true
+    parameter_count: 99521546
+    trainable_parameter_count: 0
+    status: PASS
+  outcome_blind_cache: WAITING_FOR_IDLE_GPU6_OR7
   real_data_smoke: NOT_AUTHORIZED
   seed0_screen: NOT_AUTHORIZED
   formal_confirmation: NOT_AUTHORIZED
   external_confirmation: NOT_AUTHORIZED
   current_scientific_qualification: NOT_ESTABLISHED
 
-next_allowed_action: IMPLEMENT_MODEL_FOUNDATION_CACHE_RUNNER_QUALIFIER_AND_TESTS
+next_allowed_action: WAIT_FOR_IDLE_GPU6_OR7_AND_BUILD_OUTCOME_BLIND_RNAFM_CACHE
