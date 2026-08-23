@@ -20,7 +20,7 @@ v4 唯一允许检验的研究假设是：在严格正确的 full-sequence mutat
 
 唯一主候选是 `v4_dual_tower_rnafm`。其固定配置为 sequence width 512、8 heads、5 个 WT sequence blocks、5 个 mutation-response blocks、pair width 128、5 个 axial pair blocks、FFN width 2048、dropout 0.10。目标 trainable capacity 为 35M–45M；正式 real-data smoke 前必须机械统计。
 
-主 foundation 固定为官方 `ml4bio/RNA-FM` 的 `rna_fm_t12`，仓库版本固定在 `348951516e0963d22bbb33b3c9fc18c89081d38e`。RNA-FM 始终冻结，只生成 WT 与 exact mutant 的 per-nucleotide final-layer embeddings。其 RNAcentral100 自监督序列暴露必须披露；在没有证据时不得声称 OpenKnot exact sequence no-overlap。
+主 foundation 固定为官方 `ml4bio/RNA-FM` 的 `rna_fm_t12`，仓库版本固定在 `348951516e0963d22bbb33b3c9fc18c89081d38e`。checkpoint 固定使用作者发布的 `cuhkaih/rnafm/RNA-FM_pretrained.pth`，并以显式本地路径加载；运行时不得静默改用其他权重。RNA-FM 始终冻结，只生成 WT 与 exact mutant 的 per-nucleotide final-layer embeddings。其 RNAcentral100 自监督序列暴露必须披露；在没有证据时不得声称 OpenKnot exact sequence no-overlap。
 
 以下四个对照必须存在，不能事后删除：corrected B1、scratch dual tower、RNA-FM-only 和 parameter-matched sequence null。capacity null 必须使用相同 paired RNA-FM input，但不得拥有 pair tower 或 mutation source row/column；参数差异不超过 5%，且不能通过未使用参数凑数。
 

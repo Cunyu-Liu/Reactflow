@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -49,6 +51,33 @@ def _fake_converter(data):
     return None, None, torch.zeros(len(data), length, dtype=torch.long)
 
 
+def test_official_loader_requires_and_passes_explicit_checkpoint(tmp_path, monkeypatch) -> None:
+    checkpoint = tmp_path / "RNA-FM_pretrained.pth"
+    checkpoint.write_bytes(b"fixture")
+    model = _FakeModel()
+    calls = []
+    alphabet = SimpleNamespace(get_batch_converter=lambda: _fake_converter)
+    fake_fm = SimpleNamespace(
+        pretrained=SimpleNamespace(
+            rna_fm_t12=lambda location: calls.append(location) or (model, alphabet)
+        )
+    )
+    monkeypatch.setitem(sys.modules, "fm", fake_fm)
+
+    loaded, converter = F.load_official_rnafm(checkpoint)
+
+    assert loaded is model
+    assert converter is _fake_converter
+    assert calls == [str(checkpoint.resolve())]
+    assert loaded.training is False
+    assert all(parameter.requires_grad is False for parameter in loaded.parameters())
+
+
+def test_official_loader_fails_closed_when_checkpoint_is_absent(tmp_path) -> None:
+    with pytest.raises(FileNotFoundError, match="official RNA-FM checkpoint is absent"):
+        F.load_official_rnafm(tmp_path / "missing.pth")
+
+
 def test_embedding_extractor_trims_special_tokens_and_foundation_is_frozen() -> None:
     entries = [
         F.SequenceEntry("a", "P01", "m1", "ACGU"),
@@ -80,9 +109,12 @@ def test_cache_manifest_discloses_columns_and_unknown_sequence_overlap(tmp_path)
         embeddings=rows,
         cache_path=cache,
         manifest_path=manifest_path,
+        model_location=tmp_path / "RNA-FM_pretrained.pth",
     )
     assert cache.exists()
     assert manifest["csv_columns_read"] == list(F.OUTCOME_BLIND_COLUMNS)
     assert manifest["mutant_outcome_columns_loaded"] is False
     assert manifest["exact_openknot_pretraining_overlap"] == "UNKNOWN_NOT_ASSERTED"
+    assert manifest["official_checkpoint_source"] == F.OFFICIAL_CHECKPOINT_SOURCE
+    assert manifest["checkpoint_path_used"].endswith("RNA-FM_pretrained.pth")
     assert json.loads(manifest_path.read_text())["n_sequences"] == 2

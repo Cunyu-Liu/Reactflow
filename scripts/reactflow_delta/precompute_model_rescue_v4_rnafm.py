@@ -18,6 +18,9 @@ import yaml
 SCHEMA = "reactflow_delta.model_rescue_v4_rnafm_cache.v1"
 OFFICIAL_REPOSITORY = "https://github.com/ml4bio/RNA-FM"
 OFFICIAL_REPOSITORY_COMMIT = "348951516e0963d22bbb33b3c9fc18c89081d38e"
+OFFICIAL_CHECKPOINT_SOURCE = (
+    "https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth"
+)
 OUTCOME_BLIND_COLUMNS = ("id", "puzzle", "method", "sequence")
 REPRESENTATION_LAYER = 12
 REPRESENTATION_WIDTH = 640
@@ -60,7 +63,10 @@ def freeze_foundation(model: Any) -> None:
         parameter.grad = None
 
 
-def load_official_rnafm() -> tuple[Any, Callable]:
+def load_official_rnafm(model_location: Path) -> tuple[Any, Callable]:
+    model_location = Path(model_location).resolve()
+    if not model_location.is_file():
+        raise FileNotFoundError(f"official RNA-FM checkpoint is absent: {model_location}")
     try:
         import fm
     except ImportError as exc:
@@ -68,7 +74,7 @@ def load_official_rnafm() -> tuple[Any, Callable]:
             "official RNA-FM package is absent; install the pinned ml4bio/RNA-FM "
             "revision before cache generation"
         ) from exc
-    model, alphabet = fm.pretrained.rna_fm_t12()
+    model, alphabet = fm.pretrained.rna_fm_t12(str(model_location))
     freeze_foundation(model)
     return model, alphabet.get_batch_converter()
 
@@ -129,6 +135,7 @@ def write_cache(
     embeddings: Iterable[list[np.ndarray]],
     cache_path: Path,
     manifest_path: Path,
+    model_location: Path,
 ) -> dict[str, Any]:
     import h5py
 
@@ -163,6 +170,8 @@ def write_cache(
         "evidence_status": "OUTCOME_BLIND_FROZEN_FOUNDATION_INPUT_ONLY",
         "official_repository": OFFICIAL_REPOSITORY,
         "official_repository_commit": OFFICIAL_REPOSITORY_COMMIT,
+        "official_checkpoint_source": OFFICIAL_CHECKPOINT_SOURCE,
+        "checkpoint_path_used": str(Path(model_location).resolve()),
         "loader": "fm.pretrained.rna_fm_t12",
         "representation_layer": REPRESENTATION_LAYER,
         "representation_width": REPRESENTATION_WIDTH,
@@ -186,6 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--m2-csv", type=Path, required=True)
     parser.add_argument("--cache-path", type=Path, required=True)
     parser.add_argument("--manifest-path", type=Path, required=True)
+    parser.add_argument("--model-location", type=Path, required=True)
     parser.add_argument("--physical-gpu", type=int, required=True)
     parser.add_argument("--batch-size", type=int, default=8)
     args = parser.parse_args(argv)
@@ -199,7 +209,7 @@ def main(argv: list[str] | None = None) -> int:
     if not torch.cuda.is_available():
         raise RuntimeError("authorized v4 GPU is unavailable")
     entries = load_outcome_blind_sequences(args.m2_csv)
-    model, converter = load_official_rnafm()
+    model, converter = load_official_rnafm(args.model_location)
     embedding_batches = (
         extract_batch_embeddings(model, converter, batch, "cuda:0")
         for batch in batches(entries, args.batch_size)
@@ -209,6 +219,7 @@ def main(argv: list[str] | None = None) -> int:
         embeddings=embedding_batches,
         cache_path=args.cache_path,
         manifest_path=args.manifest_path,
+        model_location=args.model_location,
     )
     return 0
 
