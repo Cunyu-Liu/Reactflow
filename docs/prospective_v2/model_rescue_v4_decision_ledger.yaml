@@ -1,0 +1,53 @@
+schema_version: reactflow_delta.model_rescue_v4_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v4_20260823
+created_at: '2026-08-23T11:20:00+08:00'
+current_status: V4M1_IMPLEMENTATION_IN_PROGRESS
+
+immutable_history:
+  model_rescue_v1: M2_NO_RESCUE_CANDIDATE
+  model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
+  model_rescue_v3: RUNNING_SEPARATELY_AS_COORDINATE_CORRECTED_DIAGNOSTIC_BASELINE
+
+decisions:
+  - id: V4D001
+    status: FROZEN
+    decision: USE_ONE_MUTATION_CONDITIONED_DUAL_TOWER_PRIMARY_CANDIDATE
+    rationale: >-
+      Corrected B1 does not recompute an exact-mutant receiver representation and has
+      no learned pair field through which source information can reach all positions.
+  - id: V4D002
+    status: FROZEN
+    decision: USE_OFFICIAL_RNA_FM_T12_AS_FROZEN_PRIMARY_FOUNDATION
+    repository_commit: 348951516e0963d22bbb33b3c9fc18c89081d38e
+    rationale: >-
+      RNA-FM provides nucleotide representations without OpenKnot outcome labels and
+      is small enough to cache deterministically; exposure is disclosed rather than
+      claimed absent.
+  - id: V4D003
+    status: FROZEN
+    decision: USE_512_WIDTH_TEN_SEQUENCE_BLOCK_FIVE_PAIR_BLOCK_CONFIGURATION
+    rationale: This is a single 35M-45M trainable-capacity hypothesis, not a size search.
+  - id: V4D004
+    status: FROZEN
+    decision: REQUIRE_SCRATCH_FOUNDATION_ONLY_AND_CAPACITY_MATCHED_NULL_CONTROLS
+    rationale: Separate capacity, foundation representation, and pair/source-row contributions.
+  - id: V4D005
+    status: FROZEN
+    decision: REQUIRE_FIVE_PERCENT_DUAL_METRIC_DEVELOPMENT_GAIN_AND_EXTERNAL_REPLICATION
+    rationale: Small statistically positive improvements are inadequate for the requested top-journal route.
+  - id: V4D006
+    status: FROZEN
+    decision: V3_USES_GPU0_TO5_AND_V4_MAY_USE_ONLY_IDLE_GPU6_OR_GPU7
+    rationale: PRESERVE_RUNNING_V3_AND_UNRELATED_TASKS
+
+evidence_state:
+  contract_and_design: FROZEN
+  implementation: IN_PROGRESS
+  focused_tests: NOT_RUN
+  real_data_smoke: NOT_AUTHORIZED
+  seed0_screen: NOT_AUTHORIZED
+  formal_confirmation: NOT_AUTHORIZED
+  external_confirmation: NOT_AUTHORIZED
+  current_scientific_qualification: NOT_ESTABLISHED
+
+next_allowed_action: IMPLEMENT_MODEL_FOUNDATION_CACHE_RUNNER_QUALIFIER_AND_TESTS
