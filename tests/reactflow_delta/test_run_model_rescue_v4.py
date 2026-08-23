@@ -116,7 +116,8 @@ def test_prediction_schema_is_target_free_and_zero_mean_centered(tmp_path) -> No
     assert np.array_equal(arrays["locations"][:, 1], arrays["point_mean"])
 
 
-def test_v4m1_active_contract_cannot_run_real_training() -> None:
+def test_v4m2_active_contract_opens_only_engineering_smoke() -> None:
     root = Path(__file__).resolve().parents[2]
-    with pytest.raises(RuntimeError, match="closed outside active V4M2"):
-        R.assert_run_authority(root, "V4M2")
+    R.assert_run_authority(root, "V4M2")
+    with pytest.raises(RuntimeError, match="closed outside active V4M3"):
+        R.assert_run_authority(root, "V4M3")
