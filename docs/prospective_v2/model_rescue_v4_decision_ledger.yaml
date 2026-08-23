@@ -120,6 +120,22 @@ evidence_state:
       - {physical_gpu: 6, folds: [8, 9, 10, 11], session: reactflow_v4_v4m3_gpu6_seed0_20260823}
       - {physical_gpu: 0, folds: [12, 13, 14, 15], session: reactflow_v4_v4m3_gpu0_seed0_20260823}
       - {physical_gpu: 7, folds: [16, 17, 18, 19], session: reactflow_v4_v4m3_gpu7_seed0_20260823}
+    recoverable_oom_partitions:
+      - original_physical_gpu: 6
+        original_folds: [8, 9, 10, 11]
+        observed_torch_capacity_gib: 4.75
+        complete_fold_artifacts_before_exit: 0
+        recovery_physical_gpu: 3
+        recovery_session: reactflow_v4_v4m3_recovery_gpu3_wait_20260823
+        recovery_policy: WAIT_FOR_ORIGINAL_GPU3_PARTITION_THEN_RUN_ALL_MISSING_FOLDS
+      - original_physical_gpu: 7
+        original_folds: [16, 17, 18, 19]
+        observed_torch_capacity_gib: 4.75
+        complete_fold_artifacts_before_exit: 0
+        recovery_partitions:
+          - {physical_gpu: 5, folds: [16, 17], session: reactflow_v4_v4m3_recovery_gpu5_wait_20260823}
+          - {physical_gpu: 0, folds: [18, 19], session: reactflow_v4_v4m3_recovery_gpu0_wait_20260823}
+        recovery_policy: WAIT_FOR_ORIGINAL_GPU5_AND_GPU0_PARTITIONS_THEN_RUN_MISSING_FOLDS
     held_scores_computed: false
     partial_score_accessed: false
   formal_confirmation: NOT_AUTHORIZED
