@@ -93,7 +93,9 @@ class FoundationCache:
 
 def mutant_row_id(record: Any) -> str:
     prefix = record.wt_id[:-3] if record.wt_id.endswith("_wt") else record.wt_id
-    return f"{prefix}_mm_{record.design_pos}_{record.ref}_{record.alt}"
+    ref = record.ref.replace("U", "T")
+    alt = record.alt.replace("U", "T")
+    return f"{prefix}_mm_{record.design_pos}_{ref}_{alt}"
 
 
 def assert_run_authority(repo_root: Path, phase: str) -> None:

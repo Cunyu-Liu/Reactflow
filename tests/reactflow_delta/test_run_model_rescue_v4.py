@@ -15,6 +15,13 @@ from scripts.reactflow_delta.model_rescue_v4 import (
 from scripts.reactflow_delta import run_model_rescue_v4 as R
 
 
+def test_mutant_row_id_uses_source_csv_dna_alphabet() -> None:
+    record = SimpleNamespace(
+        wt_id="P02_Eterna_wt", design_pos=1, ref="A", alt="U"
+    )
+    assert R.mutant_row_id(record) == "P02_Eterna_mm_1_A_T"
+
+
 def _tiny_model() -> MutationConditionedDualTower:
     return MutationConditionedDualTower(
         V4ModelConfig(
