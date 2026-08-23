@@ -8,6 +8,8 @@ from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
+import subprocess
+import sys
 from typing import Any, Callable, Iterable
 
 import numpy as np
@@ -63,10 +65,40 @@ def freeze_foundation(model: Any) -> None:
         parameter.grad = None
 
 
-def load_official_rnafm(model_location: Path) -> tuple[Any, Callable]:
+def assert_official_source_root(source_root: Path) -> Path:
+    source_root = Path(source_root).resolve()
+    if not (source_root / "fm" / "__init__.py").is_file():
+        raise FileNotFoundError(f"RNA-FM source package is absent: {source_root}")
+    head = subprocess.run(
+        ["git", "-C", str(source_root), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    if head != OFFICIAL_REPOSITORY_COMMIT:
+        raise RuntimeError(
+            f"RNA-FM source HEAD {head} does not match frozen commit "
+            f"{OFFICIAL_REPOSITORY_COMMIT}"
+        )
+    dirty = subprocess.run(
+        ["git", "-C", str(source_root), "status", "--porcelain"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    if dirty:
+        raise RuntimeError("RNA-FM source checkout has local modifications")
+    return source_root
+
+
+def load_official_rnafm(
+    model_location: Path, source_root: Path
+) -> tuple[Any, Callable]:
     model_location = Path(model_location).resolve()
     if not model_location.is_file():
         raise FileNotFoundError(f"official RNA-FM checkpoint is absent: {model_location}")
+    source_root = assert_official_source_root(source_root)
+    sys.path.insert(0, str(source_root))
     try:
         import fm
     except ImportError as exc:
@@ -74,6 +106,9 @@ def load_official_rnafm(model_location: Path) -> tuple[Any, Callable]:
             "official RNA-FM package is absent; install the pinned ml4bio/RNA-FM "
             "revision before cache generation"
         ) from exc
+    module_path = Path(fm.__file__).resolve()
+    if source_root not in module_path.parents:
+        raise RuntimeError(f"RNA-FM imported from non-frozen source: {module_path}")
     model, alphabet = fm.pretrained.rna_fm_t12(str(model_location))
     freeze_foundation(model)
     return model, alphabet.get_batch_converter()
@@ -136,6 +171,7 @@ def write_cache(
     cache_path: Path,
     manifest_path: Path,
     model_location: Path,
+    source_root: Path,
     foundation_parameter_count: int,
     foundation_trainable_parameter_count: int,
 ) -> dict[str, Any]:
@@ -174,6 +210,7 @@ def write_cache(
         "official_repository_commit": OFFICIAL_REPOSITORY_COMMIT,
         "official_checkpoint_source": OFFICIAL_CHECKPOINT_SOURCE,
         "checkpoint_path_used": str(Path(model_location).resolve()),
+        "package_source_root": str(Path(source_root).resolve()),
         "foundation_parameter_count": int(foundation_parameter_count),
         "foundation_trainable_parameter_count": int(
             foundation_trainable_parameter_count
@@ -202,6 +239,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--cache-path", type=Path, required=True)
     parser.add_argument("--manifest-path", type=Path, required=True)
     parser.add_argument("--model-location", type=Path, required=True)
+    parser.add_argument("--rnafm-source-root", type=Path, required=True)
     parser.add_argument("--physical-gpu", type=int, required=True)
     parser.add_argument("--batch-size", type=int, default=8)
     args = parser.parse_args(argv)
@@ -215,7 +253,9 @@ def main(argv: list[str] | None = None) -> int:
     if not torch.cuda.is_available():
         raise RuntimeError("authorized v4 GPU is unavailable")
     entries = load_outcome_blind_sequences(args.m2_csv)
-    model, converter = load_official_rnafm(args.model_location)
+    model, converter = load_official_rnafm(
+        args.model_location, args.rnafm_source_root
+    )
     foundation_parameter_count = sum(parameter.numel() for parameter in model.parameters())
     foundation_trainable_parameter_count = sum(
         parameter.numel() for parameter in model.parameters() if parameter.requires_grad
@@ -230,6 +270,7 @@ def main(argv: list[str] | None = None) -> int:
         cache_path=args.cache_path,
         manifest_path=args.manifest_path,
         model_location=args.model_location,
+        source_root=args.rnafm_source_root,
         foundation_parameter_count=foundation_parameter_count,
         foundation_trainable_parameter_count=foundation_trainable_parameter_count,
     )

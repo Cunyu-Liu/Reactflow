@@ -21,6 +21,7 @@ decisions:
     repository_commit: 348951516e0963d22bbb33b3c9fc18c89081d38e
     checkpoint_source: https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth
     checkpoint_loading: EXPLICIT_LOCAL_PATH_REQUIRED
+    package_loading: EXPLICIT_CLEAN_GIT_CHECKOUT_AT_REPOSITORY_COMMIT_REQUIRED
     rationale: >-
       RNA-FM provides nucleotide representations without OpenKnot outcome labels and
       is small enough to cache deterministically; exposure is disclosed rather than

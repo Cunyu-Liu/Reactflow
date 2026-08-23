@@ -37,6 +37,7 @@ foundation:
     loader: fm.pretrained.rna_fm_t12
     checkpoint_source: https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth
     checkpoint_loading: EXPLICIT_LOCAL_PATH_REQUIRED
+    package_loading: EXPLICIT_CLEAN_GIT_CHECKOUT_AT_REPOSITORY_COMMIT_REQUIRED
     checkpoint_family: OFFICIAL_RNA_FM_T12
     layers: 12
     hidden: 640

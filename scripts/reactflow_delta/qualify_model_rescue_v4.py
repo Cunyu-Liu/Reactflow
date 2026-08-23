@@ -42,6 +42,7 @@ def qualify_foundation_cache(cache_path: Path, manifest_path: Path) -> dict[str,
         "official_checkpoint_source_exact": manifest.get("official_checkpoint_source")
         == "https://huggingface.co/cuhkaih/rnafm/resolve/main/RNA-FM_pretrained.pth",
         "explicit_checkpoint_path_recorded": bool(manifest.get("checkpoint_path_used")),
+        "explicit_package_source_recorded": bool(manifest.get("package_source_root")),
         "foundation_parameter_count_plausible": int(
             manifest.get("foundation_parameter_count", 0)
         )
