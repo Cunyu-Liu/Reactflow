@@ -148,6 +148,19 @@ def test_v9_smoke_controller_is_prediction_only() -> None:
     assert "score_model_rescue" not in text
 
 
+def test_v9_screen_controller_uses_all_folds_and_never_scores() -> None:
+    root = Path(__file__).resolve().parents[2]
+    controller = root / "scripts/reactflow_delta/run_model_rescue_v9_screen_controller.sh"
+    subprocess.run(["bash", "-n", str(controller)], check=True)
+    text = controller.read_text(encoding="utf-8")
+    assert "--phase V9M2" in text
+    assert "--epochs 40" in text
+    assert "merge_model_rescue_v9" in text
+    assert "score_model_rescue" not in text
+    for fold in range(20):
+        assert str(fold) in text
+
+
 def test_v9m2_merge_requires_all_twenty_prediction_only_folds(tmp_path: Path) -> None:
     for fold in range(20):
         _write_smoke_fold(tmp_path, fold)
