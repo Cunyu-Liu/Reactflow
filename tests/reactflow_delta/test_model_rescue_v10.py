@@ -219,3 +219,15 @@ def test_v10_smoke_controller_is_prediction_only() -> None:
     assert "--epochs 3" in text
     assert "qualify_model_rescue_v10_smoke" in text
     assert "score_model_rescue_v10" not in text
+
+
+def test_v10_screen_controller_is_complete_universe_before_score() -> None:
+    root = Path(__file__).resolve().parents[2]
+    controller = root / "scripts/reactflow_delta/run_model_rescue_v10_screen_controller.sh"
+    subprocess.run(["bash", "-n", str(controller)], check=True)
+    text = controller.read_text(encoding="utf-8")
+    assert "--phase V10M2" in text
+    assert "--epochs 40" in text
+    assert "fold<20" in text
+    assert "merge_model_rescue_v10" in text
+    assert "score_model_rescue_v10" not in text
