@@ -41,6 +41,7 @@ Files to add:
 - `scripts/reactflow_delta/merge_model_rescue_v7_probe.py`
 - `scripts/reactflow_delta/score_model_rescue_v7_probe.py`
 - `scripts/reactflow_delta/qualify_model_rescue_v7_probe.py`
+- `scripts/reactflow_delta/run_model_rescue_v7_probe_controller.sh`
 - `tests/reactflow_delta/test_model_rescue_v7_probe.py`
 
 Required behavior:
@@ -78,6 +79,11 @@ Frozen implementation interface, confirmed without opening any score artifact:
   qualified target mask and score may not.
 
 V7M2 acceptance: exact `V7M2_RINALMO_DEPENDENCY_SIGNAL_ELIGIBLE`. Anything else closes v7.
+
+The persistent controller splits the fixed fold universe into four disjoint CPU
+shards, resumes only missing fold-result filenames, and performs only the
+complete unscored merge. It contains no scorer or qualifier call; score authority
+must be opened by a separate focused commit after the 20-fold merge passes.
 
 ## V7M3–V7M4 — Neural operator and seed-0 screen
 
