@@ -233,6 +233,7 @@ def test_v10_smoke_controller_is_prediction_only() -> None:
     text = controller.read_text(encoding="utf-8")
     assert "--phase V10M1" in text
     assert "--epochs 3" in text
+    assert 'v10_fold_result_fold${fold}_seed0.json' in text
     assert "qualify_model_rescue_v10_smoke" in text
     assert "score_model_rescue_v10" not in text
 

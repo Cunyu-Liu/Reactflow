@@ -22,6 +22,9 @@ cd "${repo}"
 run_fold() {
   local fold=$1
   local gpu=$2
+  if [[ -f "${out}/v10_fold_result_fold${fold}_seed0.json" ]]; then
+    return 0
+  fi
   CUDA_VISIBLE_DEVICES="${gpu}" "${python_bin}" -m \
     scripts.reactflow_delta.run_model_rescue_v10 \
       --repo-root "${repo}" \
