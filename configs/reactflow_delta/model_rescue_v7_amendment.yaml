@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v7_amendment.v1
 contract_id: reactflow_delta_model_rescue_v7_20260824
-contract_status: V7M2_COMPLETE_CORRECTED_SCORE_ONCE_AUTHORIZED
-contract_revision: V7M2_COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORITY
+contract_status: TERMINAL_V7M2_MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED
+contract_revision: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE_TERMINAL_HANDOFF
 created_at: '2026-08-24T16:20:00+08:00'
 
 parent:
@@ -271,11 +271,11 @@ resource_policy:
 phase_graph:
   - {id: V7M0, status: PASS, next_on_pass: V7M1}
   - {id: V7M1, status: PASS, next_on_pass: V7M2, next_on_fail: V7M6_FAIL}
-  - {id: V7M2, status: AUTHORIZED_COMPLETE_SCORE_ONCE, next_on_pass: V7M3, next_on_fail: V7M6_FAIL}
+  - {id: V7M2, status: FAIL_NOT_ELIGIBLE, next_on_pass: V7M3, next_on_fail: V7M6_FAIL}
   - {id: V7M3, status: NOT_AUTHORIZED, next_on_pass: V7M4, next_on_fail: V7M6_FAIL}
   - {id: V7M4, status: NOT_AUTHORIZED, next_on_pass: V7M5, next_on_fail: V7M6_FAIL}
   - {id: V7M5, status: NOT_AUTHORIZED, next_on_pass: V7M6_PASS, next_on_fail: V7M6_FAIL}
-  - {id: V7M6, status: NOT_RUN, handoff_phase: M6}
+  - {id: V7M6, status: TERMINAL_FAIL, handoff_phase: M6}
 
 claim_policy:
   foundation_cache_pass_is_scientific_pass: false

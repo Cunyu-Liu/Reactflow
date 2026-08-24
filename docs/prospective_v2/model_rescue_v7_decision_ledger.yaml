@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v7_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v7_20260824
 created_at: '2026-08-24T16:20:00+08:00'
-current_status: V7M2_COMPLETE_CORRECTED_SCORE_ONCE_AUTHORIZED
+current_status: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE_MODEL_RESCUE_V7_FAIL
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -228,7 +228,7 @@ evidence_state:
     cell_balanced_weight_test: PASS
     focused_tests: 26_PASS_LOCAL_AND_REMOTE
   v7m2_eligibility:
-    status: V7M2_COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
+    status: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
     session: reactflow_v7_v7m2_corrected_probe_20260824
     started_at: "2026-08-24T21:53:30+08:00"
     output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v7/v7m2_corrected_probe
@@ -242,14 +242,42 @@ evidence_state:
     model_selection_performed: false
     legacy_target_dependent_prediction_reused: false
     complete_before_score: true
-    held_score_read_allowed: true
+    held_score_read_allowed: false
     partial_fold_score_read_allowed: false
     external_outcome_accessed: false
     partial_metrics_read: false
+    score_status: V7M2_COMPLETE_CORRECTED_SCORE_PASS
+    qualification_schema: reactflow_delta.model_rescue_v7_probe_qualification.v1
+    signed_delta:
+      baseline_mean: 0.19115973001699202
+      candidate_mean: 0.19108739654094528
+      mean_gain: 0.00007233347604671259
+      relative_gain: 0.00037839285523307096
+      ci95: [-0.0000792579289386696, 0.0002239248810320948]
+      positive_puzzles: 14
+    absolute_delta:
+      baseline_mean: 0.15302427333591662
+      candidate_mean: 0.15299355230308906
+      mean_gain: 0.0000307210328275756
+      relative_gain: 0.0002007592139329245
+      ci95: [-0.00009896232649418849, 0.0001604043921493397]
+      positive_puzzles: 12
+    gate_checks:
+      complete_twenty_fold_universe: true
+      registered_prediction_coverage_100_percent: true
+      failure_rate_zero: true
+      unexpected_keys_zero: true
+      absolute_delta_relative_gain_guardrail: true
+      signed_delta_positive_puzzles_at_least_fourteen: true
+      signed_delta_relative_gain_at_least_one_percent: false
+      signed_delta_ci_lower_above_zero: false
+    decision: >-
+      DO_NOT_OPEN_V7M3_THE_FIXED_RINALMO_DEPENDENCY6_INCREMENT_IS_STATISTICALLY
+      AND_PRACTICALLY_NEGLIGIBLE_OVER_THE_CORRECTED_FEATURE41_COMPARATOR
   v7m4_screen: NOT_RUN
   v7m5_confirmation: NOT_RUN
 
-next_allowed_action: RUN_COMPLETE_V7M2_SCORE_AND_PREFROZEN_QUALIFIER_ONCE
+next_allowed_action: RETURN_MAIN_CONTRACT_M6_AND_PRESERVE_V7_NEGATIVE_RESULT
 
 engineering_incidents:
   - id: V7E001

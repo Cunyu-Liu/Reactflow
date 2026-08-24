@@ -11,13 +11,13 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v7m2_authorizes_only_one_complete_corrected_score() -> None:
+def test_v7m2_failure_closes_model_rescue_v7_authority() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v7 = _yaml("configs/reactflow_delta/model_rescue_v7_amendment.yaml")
 
-    assert active["authority"]["current_phase"] == "V7M2"
-    assert active["runnable_phases"] == ["V7M2"]
-    assert active["authorization"]["implementation_allowed"] is True
+    assert active["authority"]["current_phase"] == "M6"
+    assert active["runnable_phases"] == ["M6"]
+    assert active["authorization"]["implementation_allowed"] is False
     assert (
         active["authorization"]["outcome_blind_foundation_preparation_allowed"]
         is False
@@ -28,18 +28,19 @@ def test_v7m2_authorizes_only_one_complete_corrected_score() -> None:
     assert active["training_allowed"] is False
     assert active["candidate_model_training_allowed"] is False
     assert active["outcome_blind_cache_allowed"] is False
-    assert active["held_score_read_allowed"] is True
+    assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert v7["contract_status"] == (
-        "V7M2_COMPLETE_CORRECTED_SCORE_ONCE_AUTHORIZED"
+        "TERMINAL_V7M2_MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED"
     )
 
     phase_status = {row["id"]: row["status"] for row in v7["phase_graph"]}
     assert phase_status["V7M0"] == "PASS"
     assert phase_status["V7M1"] == "PASS"
-    assert phase_status["V7M2"] == "AUTHORIZED_COMPLETE_SCORE_ONCE"
+    assert phase_status["V7M2"] == "FAIL_NOT_ELIGIBLE"
     assert phase_status["V7M3"] == "NOT_AUTHORIZED"
+    assert phase_status["V7M6"] == "TERMINAL_FAIL"
 
 
 def test_v7_dependency_definition_is_one_fixed_published_intervention() -> None:
