@@ -17,7 +17,7 @@ authority:
   decision_ledger_path: docs/prospective_v2/model_rescue_v6_decision_ledger.yaml
   design_path: docs/plans/2026-08-24-model-rescue-v6-design.md
   implementation_plan_path: docs/plans/2026-08-24-model-rescue-v6.md
-  binding_status: V6M1_IMPLEMENTATION_AND_BASIS_CORRECTION_FOCUSED_COMMITS_COMPLETE
+  binding_status: V6M1_RUNNING_V6M2_PIPELINE_IMPLEMENTED_BUT_NOT_AUTHORIZED
 
 parent_state:
   remote_parent_head: eb9fbdc33a03aeb12decc0d68575c18549395e71
@@ -61,7 +61,7 @@ resource_policy:
 gate_state:
   V6M0: CONTRACT_AND_AUTHORITY_PASS
   V6M1: OUTCOME_BLIND_CONSTRAINED_CACHE_RUNNING_BASIS_CORRECTED
-  V6M2: NOT_AUTHORIZED
+  V6M2: IMPLEMENTED_NOT_AUTHORIZED_PENDING_V6M1_EXACT_PASS
   V6M3: NOT_AUTHORIZED
   V6M4: NOT_AUTHORIZED
   V6M5: NOT_AUTHORIZED
