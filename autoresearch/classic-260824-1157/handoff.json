@@ -1,8 +1,8 @@
 {
   "schema_version": "autoresearch.handoff.v1",
   "current_incumbent": "corrected_b1",
-  "next_hypothesis": "TO_BE_FROZEN_UNDER_A_NEW_SEPARATE_AMENDMENT",
-  "next_stage": "POST_V5_REFLECTION_AND_V6_HYPOTHESIS_SELECTION",
-  "outcome": "discarded_continue_loop",
-  "qualification": "MODEL_RESCUE_V5_FAIL"
+  "next_hypothesis": "WT_2A3_CONSTRAINED_EXACT_DIFFERENTIAL_ENSEMBLE",
+  "next_stage": "V6M1_COMPLETE_OUTCOME_BLIND_CACHE_AND_QUALIFICATION",
+  "outcome": "running_no_scientific_result_yet",
+  "qualification": "V6M1_ENGINEERING_SMOKE_PASS_FULL_CACHE_RUNNING"
 }
