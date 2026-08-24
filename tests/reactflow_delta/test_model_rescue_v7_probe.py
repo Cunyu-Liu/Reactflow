@@ -30,6 +30,7 @@ from scripts.reactflow_delta.run_model_rescue_v7_probe import (
 from scripts.reactflow_delta.score_model_rescue_v7_probe import (
     SCHEMA as SCORE_SCHEMA,
     assert_score_authority,
+    score_complete_merged,
 )
 
 
@@ -394,3 +395,27 @@ def test_v7m2_prediction_and_complete_score_authorities_are_mutually_exclusive(
     _write_v7m2_authority(tmp_path, held_score=True, external_outcome=True)
     with pytest.raises(RuntimeError, match="external outcomes locked"):
         assert_score_authority(tmp_path)
+
+
+def test_v7m2_scorer_rejects_contaminated_merge_before_target_join(
+    tmp_path: Path,
+) -> None:
+    merged = {
+        "schema_version": "reactflow_delta.model_rescue_v7_probe_merged.v1",
+        "merge_integrity": {
+            "complete_fold_universe": True,
+            "unique_folds": True,
+            "referenced_artifacts_exist": True,
+            "prediction_schema_valid": True,
+            "prediction_only_fields": True,
+            "target_identity_exact": True,
+            "corrected_feature41_replay_all_folds": True,
+            "held_scores_absent": True,
+            "partial_score_inspected": False,
+            "model_selection_performed": False,
+            "legacy_target_dependent_prediction_reused": False,
+            "external_outcome_accessed": True,
+        },
+    }
+    with pytest.raises(ValueError, match="complete corrected-identity merge"):
+        score_complete_merged(merged, tmp_path / "must_not_be_opened.csv")

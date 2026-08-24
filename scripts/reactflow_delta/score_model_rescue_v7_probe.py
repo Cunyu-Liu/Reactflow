@@ -130,12 +130,25 @@ def score_complete_merged(merged: dict[str, Any], m2_csv: Path) -> dict[str, Any
     if merged.get("schema_version") != MERGED_SCHEMA:
         raise ValueError("V7M2 scorer requires the complete merged schema")
     integrity = merged.get("merge_integrity", {})
-    required = (
+    required_true = (
         "complete_fold_universe",
+        "unique_folds",
+        "referenced_artifacts_exist",
+        "prediction_schema_valid",
+        "prediction_only_fields",
         "target_identity_exact",
         "corrected_feature41_replay_all_folds",
+        "held_scores_absent",
     )
-    if any(integrity.get(name) is not True for name in required):
+    required_false = (
+        "partial_score_inspected",
+        "model_selection_performed",
+        "legacy_target_dependent_prediction_reused",
+        "external_outcome_accessed",
+    )
+    if any(integrity.get(name) is not True for name in required_true) or any(
+        integrity.get(name) is not False for name in required_false
+    ):
         raise ValueError("V7M2 scorer requires complete corrected-identity merge")
     univ = M2Universe(m2_csv)
     ledger = univ.build()
