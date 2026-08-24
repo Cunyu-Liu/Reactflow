@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v6_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v6_20260824
 created_at: '2026-08-24T12:55:00+08:00'
-current_status: V6M2_PREDICTION_ONLY_AUTHORIZED_AFTER_V6M1_EXACT_PASS
+current_status: V6M2_SCORE_ONCE_AUTHORIZED_AFTER_COMPLETE_UNSCORED_MERGE
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -115,7 +115,7 @@ evidence_state:
     target_columns_read: false
     external_outcome_accessed: false
   v6m2_eligibility:
-    status: PREDICTION_ONLY_TWENTY_FOLD_AUTHORIZED_HELD_SCORE_CLOSED
+    status: COMPLETE_UNSCORED_MERGE_PASS_SINGLE_HELD_SCORE_ACCESS
     implementation:
       - scripts/reactflow_delta/model_rescue_v6_probe.py
       - scripts/reactflow_delta/run_model_rescue_v6_probe.py
@@ -131,11 +131,21 @@ evidence_state:
       valid_prediction_schema_and_outer_fold: 20/20
       prediction_values_inspected: false
       score_fields_inspected: false
-    target_join_authorized: false
-    real_openknot_probe_started: false
+    target_join_authorized: true
+    real_openknot_probe_started: true
+    complete_prediction_only_folds: 20/20
+    complete_prediction_artifacts: 20/20
+    complete_model_artifacts: 20/20
+    runner_nonmetric_error_matches: 0
+    unscored_merge:
+      artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m2_probe_predictions/v6m2_merged_unscored.json
+      status: V6M2_COMPLETE_UNSCORED_MERGE_PASS
+      held_score_computed: false
+      partial_score_inspected: false
+      external_outcome_accessed: false
     v6_score_accessed: false
     external_outcome_accessed: false
   v6m4_screen: NOT_RUN
   v6m5_confirmation: NOT_RUN
 
-next_allowed_action: RUN_ALL_V6M2_PREDICTION_ONLY_FOLDS_THEN_MERGE_WITHOUT_SCORE
+next_allowed_action: SCORE_COMPLETE_V6M2_MERGE_ONCE_THEN_RUN_FROZEN_QUALIFIER
