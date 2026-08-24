@@ -1,8 +1,8 @@
 schema_version: reactflow_delta.model_rescue_v10_amendment.v1
 contract_id: reactflow_delta_model_rescue_v10_20260825
-contract_status: V10M0_IMPLEMENTATION_PASS_V10M1_SMOKE_AUTHORIZED
+contract_status: V10M1_ENGINEERING_SMOKE_PASS_V10M2_SCREEN_AUTHORIZED
 created_at: '2026-08-25T01:30:00+08:00'
-updated_at: '2026-08-25T02:05:00+08:00'
+updated_at: '2026-08-25T02:25:00+08:00'
 
 parent:
   v9_terminal_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
@@ -108,7 +108,10 @@ v10m1_smoke:
   seed: 0
   epochs: 3
   scoring_allowed: false
-  evidence_status: ENGINEERING_SMOKE_ONLY
+  evidence_status: V10M1_ENGINEERING_SMOKE_PASS
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m1_real_smoke/v10m1_smoke_qualification.json
+  scientific_scores_read: false
+  external_outcome_accessed: false
 
 v10m2_screen:
   prerequisite: V10M1_ENGINEERING_SMOKE_PASS
@@ -151,8 +154,8 @@ formal_confirmation:
 
 phase_graph:
   - {id: V10M0, status: PASS, next_on_pass: V10M1}
-  - {id: V10M1, status: AUTHORIZED, next_on_pass: V10M2, next_on_fail: V10M6_FAIL}
-  - {id: V10M2, status: NOT_AUTHORIZED, next_on_pass: V10M3, next_on_fail: V10M6_FAIL}
+  - {id: V10M1, status: PASS, next_on_pass: V10M2, next_on_fail: V10M6_FAIL}
+  - {id: V10M2, status: AUTHORIZED, next_on_pass: V10M3, next_on_fail: V10M6_FAIL}
   - {id: V10M3, status: NOT_AUTHORIZED, next_on_pass: V10M4, next_on_fail: V10M6_FAIL}
   - {id: V10M4, status: NOT_AUTHORIZED, next_on_pass: V10M5, next_on_fail: V10M6_FAIL}
   - {id: V10M5, status: NOT_RUN, next_on_pass: V10M6_PASS, next_on_fail: V10M6_FAIL}

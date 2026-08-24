@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v10 Amendment
 
-**状态：V10M0 实现与 28 项聚焦测试 PASS；V10M1 folds0/1、seed0、3 epochs prediction-only smoke 已授权；科学评分仍关闭。**
+**状态：V10M1 folds0/1、seed0、3 epochs prediction-only engineering smoke PASS；V10M2 固定 seed0、20-fold、40 epochs score-blind screen 已授权；完整 20 folds 前科学评分关闭。**
 
 ## 1. 合同地位
 
@@ -62,3 +62,17 @@ point 的 symmetric null 至少 1%，CI lower 大于零且至少 14/20 puzzles �
 V10 内部 PASS 最多建立 development-consumed LOPO 上的性能与 residual-asymmetry
 增量证据。External replication、SOTA、mechanism、practical utility 和 publication
 readiness 均需要后续独立证据，不能由内部显著性自动生成。
+
+## 6. V10M1 工程记录与 V10M2 authority
+
+首次 smoke 完成 fold0 后，fold1 在 held prediction 的 median invariant 检查处
+中断。根因是 float32 下 inverse-normal CDF 与 normal CDF 在 allocation 边界的
+数值往返误差，不是科学 Gate 或训练分数失败。四个 matched heads 的分布构造
+统一提升为 float64；网络、输入、参数量、目标、epoch、候选和 Gate 均未改变。
+fold0 被原样保留，只补跑 fold1。预冻结 smoke qualifier 随后机械给出
+`V10M1_ENGINEERING_SMOKE_PASS`，且未读取任何科学分数或 external outcome。
+
+因此唯一开放阶段为 V10M2。必须使用固定 controller 完成 seed0 的 20 个 folds；
+完整 prediction-only universe 出现前不得运行 scorer、读取 partial metric 或修改
+任何候选。V10M3 仍未授权，只有 20/20 完整后的一次预冻结 scorer 与 qualifier
+可以裁决是否开放后续 formal confirmation。
