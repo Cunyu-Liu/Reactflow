@@ -9,7 +9,10 @@ import pytest
 from scripts.reactflow_delta.merge_model_rescue_v5_probe import merge_folds
 from scripts.reactflow_delta.qualify_model_rescue_v5_probe import qualify
 from scripts.reactflow_delta.run_model_rescue_v5_probe import PREDICTION_SCHEMA
+from scripts.reactflow_delta.run_model_rescue_v5_probe import predict_registered_held
 from scripts.reactflow_delta.score_model_rescue_v5_probe import _puzzle_macro
+from scripts.reactflow_delta.model_rescue_v5_probe import BASELINE_FEATURE_NAMES
+from scripts.reactflow_delta.model_rescue_v5_schema import FEATURE_NAMES
 
 
 def _key(method: str, design_pos: int, mutation: str, position: int) -> str:
@@ -30,6 +33,56 @@ def test_puzzle_macro_balances_positions_then_mutants_then_methods() -> None:
     # Direct position pooling would be 0.75, so this fixture detects the exact
     # missing-position imbalance that the frozen hierarchy must neutralize.
     assert np.mean(list(losses.values())) == pytest.approx(0.75)
+
+
+def test_held_prediction_is_full_output_and_never_calls_target_accessor() -> None:
+    class Record:
+        puzzle = "P1"
+        method = "M"
+        construct_id = "P1_M"
+        design_pos = 1
+        full_pos = 1
+        ref = "C"
+        alt = "U"
+
+    class Construct:
+        sequence = "ACG"
+        wt_reactivity = np.asarray([0.1, 0.2, 0.3])
+        wt_error = np.asarray([0.1, 0.1, 0.1])
+        wt_observed = np.asarray([True, False, True])
+        region_map = np.asarray(["design_region"] * 3)
+
+    class Universe:
+        def get_construct(self, _construct_id):
+            return Construct()
+
+        def mutant_full_profile(self, *_args, **_kwargs):
+            raise AssertionError("held target accessor entered prediction path")
+
+    class Cache:
+        def get(self, _record):
+            return np.zeros((3, len(FEATURE_NAMES)), dtype=np.float32)
+
+    def zero_model(width: int) -> dict:
+        return {
+            "mean_x": np.zeros(width),
+            "scale_x": np.ones(width),
+            "mean_y": np.zeros(2),
+            "coefficient": np.zeros((width, 2)),
+            "alpha": 1.0,
+        }
+
+    result = predict_registered_held(
+        Universe(),
+        [Record()],
+        Cache(),
+        zero_model(len(BASELINE_FEATURE_NAMES)),
+        zero_model(len(BASELINE_FEATURE_NAMES) + len(FEATURE_NAMES)),
+        outer_fold=0,
+    )
+    assert len(result["keys"]) == len(Construct.sequence)
+    assert set(result["registered_status"]) == {"covered"}
+    assert {"target", "target_error", "target_mask", "score"}.isdisjoint(result)
 
 
 def _write_prediction(path: Path, fold: int, *, include_target: bool = False) -> None:
