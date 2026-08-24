@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.target_identity_corrected_baseline_ledger.v1
 ledger_id: reactflow_delta_tic2a_corrected_baselines_20260824
 created_at: '2026-08-24T19:30:00+08:00'
-current_status: TIC2A_COMPLETE_UNSCORED_MERGE_PASS_HELD_SCORE_AUTHORIZED
+current_status: TIC2A_CORRECTED_BASELINE_REBUILD_PASS
 target_identity:
   registered_mutants: 13976
   canonical_profiles: 13976
@@ -26,7 +26,36 @@ outcome_blind_cache_alignment:
 execution:
   folds_required: 20
   folds_complete: 20
-  target_join_allowed: true
+  target_join_allowed: false
   partial_score_read_allowed: false
   external_outcome_accessed: false
-next_allowed_action: RUN_FROZEN_SCORER_AND_QUALIFIER_ONCE
+qualification:
+  status: TIC2A_CORRECTED_BASELINE_REBUILD_PASS
+  score_artifact: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_scores.json
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_qualification.json
+  prediction_integrity: true
+  target_identity_exact: true
+  legacy_prediction_reused: false
+  model_selection_performed: false
+  direct18_to_v6_feature41:
+    signed_delta_mae:
+      baseline_mean: 0.1936412734374483
+      candidate_mean: 0.19115973001699202
+      mean_gain: 0.0024815434204562533
+      relative_gain: 0.012815157514742657
+      ci95: [0.0020203298729180594, 0.002942756967994447]
+      positive_puzzles: 20
+    absolute_delta_mae:
+      baseline_mean: 0.15498236460640374
+      candidate_mean: 0.15302427333591662
+      mean_gain: 0.0019580912704871105
+      relative_gain: 0.012634284393969065
+      ci95: [0.0012951715713819293, 0.002621010969592292]
+      positive_puzzles: 19
+  v5_feature30_to_v6_feature41:
+    signed_delta_relative_gain: 0.0021294007565113363
+    absolute_delta_relative_gain: 0.002059952655026686
+  evidence_status: CORRECTED_DEVELOPMENT_CONSUMED_COMPARATOR_REBUILD
+  sota: NOT_ESTABLISHED
+  publication_ready: false
+next_allowed_action: WAIT_FOR_V7M1_DEPENDENCY_CACHE_THEN_RUN_CORRECTED_V7M2

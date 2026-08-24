@@ -2,12 +2,12 @@ schema_version: reactflow_delta.active_contract.target_identity_corrected_baseli
 manifest_id: reactflow_delta_tic2a_corrected_baseline_authority_20260824
 project_task_id: reactflow_delta_target_identity_corrected_baselines
 created_at: '2026-08-24T16:20:00+08:00'
-updated_at: '2026-08-24T19:50:00+08:00'
+updated_at: '2026-08-24T20:00:00+08:00'
 
 authority:
   pointer_role: TIC2A_WORKTREE_SINGLE_ACTIVE_AUTHORITY
   current_phase: TIC2A
-  current_authority_state: TIC2A_COMPLETE_UNSCORED_MERGE_SCORE_AUTHORIZED
+  current_authority_state: TIC2A_CORRECTED_BASELINE_REBUILD_PASS
   current_runnable_phase: TIC2A
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-target-identity-baselines-20260824
@@ -15,7 +15,7 @@ authority:
   human_contract_path: docs/prospective_v2/target_identity_corrected_baseline_rebuild_20260824.md
   machine_contract_path: configs/reactflow_delta/target_identity_corrected_baseline_rebuild.yaml
   decision_ledger_path: docs/prospective_v2/target_identity_corrected_baseline_ledger.yaml
-  binding_status: TIC2A_COMPLETE_UNSCORED_MERGE_PASS_HELD_SCORE_AUTHORIZED
+  binding_status: TIC2A_CORRECTED_BASELINE_REBUILD_PASS_FROZEN
   target_profile_identity_correction: configs/reactflow_delta/target_profile_identity_correction_amendment.yaml
   target_profile_identity_ledger: docs/prospective_v2/target_profile_identity_correction_ledger.yaml
 
@@ -49,7 +49,7 @@ runnable_phases: [TIC2A]
 training_allowed: false
 candidate_model_training_allowed: false
 outcome_blind_cache_allowed: false
-held_score_read_allowed: true
+held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -69,7 +69,7 @@ resource_policy:
 
 gate_state:
   TIC1: ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
-  TIC2A: COMPLETE_UNSCORED_MERGE_PASS_HELD_SCORE_AUTHORIZED
+  TIC2A: CORRECTED_BASELINE_REBUILD_PASS
   V7M1: RUNNING_IN_SEPARATE_WORKTREE
   V7M2: NOT_AUTHORIZED
   V7M3: NOT_AUTHORIZED
@@ -81,4 +81,4 @@ gate_state:
   TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
   LEGACY_TARGET_DEPENDENT_SCIENTIFIC_EVIDENCE: INVALIDATED
 
-next_allowed_action: RUN_TIC2A_FROZEN_SCORER_AND_QUALIFIER_ONCE
+next_allowed_action: WAIT_FOR_V7M1_DEPENDENCY_CACHE_THEN_RUN_CORRECTED_V7M2

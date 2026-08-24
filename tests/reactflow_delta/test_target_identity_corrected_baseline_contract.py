@@ -32,17 +32,17 @@ def test_corrected_baseline_contract_is_fixed_and_score_closed() -> None:
     assert contract["authorization"]["new_external_outcome_access_allowed"] is False
 
 
-def test_corrected_baseline_complete_merge_opens_only_held_scoring() -> None:
+def test_corrected_baseline_final_authority_closes_scoring_after_qualification() -> None:
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
     assert active["authority"]["current_phase"] == "TIC2A"
     assert active["authority"]["current_authority_state"] == (
-        "TIC2A_COMPLETE_UNSCORED_MERGE_SCORE_AUTHORIZED"
+        "TIC2A_CORRECTED_BASELINE_REBUILD_PASS"
     )
     assert active["training_allowed"] is False
     assert active["outcome_blind_cache_allowed"] is False
-    assert active["held_score_read_allowed"] is True
+    assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
 
@@ -50,5 +50,10 @@ def test_corrected_baseline_complete_merge_opens_only_held_scoring() -> None:
         (ROOT / "docs/prospective_v2/target_identity_corrected_baseline_ledger.yaml").read_text()
     )
     assert ledger["execution"]["folds_complete"] == 20
-    assert ledger["execution"]["target_join_allowed"] is True
+    assert ledger["execution"]["target_join_allowed"] is False
     assert ledger["execution"]["partial_score_read_allowed"] is False
+    qualification = ledger["qualification"]
+    assert qualification["status"] == "TIC2A_CORRECTED_BASELINE_REBUILD_PASS"
+    assert qualification["direct18_to_v6_feature41"]["signed_delta_mae"]["positive_puzzles"] == 20
+    assert qualification["direct18_to_v6_feature41"]["absolute_delta_mae"]["positive_puzzles"] == 19
+    assert qualification["sota"] == "NOT_ESTABLISHED"
