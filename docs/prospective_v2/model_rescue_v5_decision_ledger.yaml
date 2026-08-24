@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v5_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v5_20260824
 created_at: '2026-08-24T11:57:54+08:00'
-current_status: V5M1_OUTCOME_BLIND_ENSEMBLE_CACHE_IMPLEMENTATION_ONLY
+current_status: V5M2_FIXED_WEIGHTED_RIDGE_ELIGIBILITY_PREDICTION_ONLY
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -45,9 +45,20 @@ evidence_state:
   old_wt_only_structure_probe:
     status: STRUCT_DELTA_EXCLUDED_M2
     limitation: USED_WT_MFE_GRAPH_DISTANCE_AND_WT_BPP_ONLY_NOT_EXACT_MUTANT_MINUS_WT_CHANGE
-  exact_ensemble_delta_cache: NOT_RUN
+  exact_ensemble_delta_cache:
+    status: V5M1_OUTCOME_BLIND_ENSEMBLE_CACHE_PASS
+    cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
+    manifest: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache_manifest.json
+    qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache_qualification.json
+    constructs: 160
+    registered_mutants: 13976
+    receivers_per_mutant: 177
+    feature_width: 12
+    viennarna_version: 2.7.2
+    outcome_columns_read: false
+    external_outcome_accessed: false
   eligibility_probe: NOT_RUN
   candidate_screen: NOT_RUN
   formal_confirmation: NOT_RUN
 
-next_allowed_action: IMPLEMENT_AND_TEST_OUTCOME_BLIND_EXACT_ENSEMBLE_CACHE
+next_allowed_action: IMPLEMENT_AND_RUN_COMPLETE_V5M2_PREDICTION_ONLY_FOLDS

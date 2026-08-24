@@ -20,10 +20,10 @@ def test_v5_starts_fail_closed_and_preserves_every_prior_authority() -> None:
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
     v1 = _yaml("configs/reactflow_delta/model_rescue_contract_v1.yaml")
 
-    assert active["authority"]["current_phase"] == "V5M1"
-    assert active["runnable_phases"] == ["V5M1"]
-    assert active["training_allowed"] is False
-    assert active["outcome_blind_cache_allowed"] is True
+    assert active["authority"]["current_phase"] == "V5M2"
+    assert active["runnable_phases"] == ["V5M2"]
+    assert active["training_allowed"] == "FIXED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY"
+    assert active["outcome_blind_cache_allowed"] is False
     assert active["held_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert v5["parent"]["disposition"] == (

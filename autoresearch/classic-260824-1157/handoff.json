@@ -2,7 +2,7 @@
   "schema_version": "autoresearch.handoff.v1",
   "current_incumbent": "corrected_b1",
   "next_hypothesis": "exact_mutant_minus_wt_boltzmann_ensemble_delta",
-  "next_stage": "V5M1_OUTCOME_BLIND_CACHE",
+  "next_stage": "V5M2_FIXED_WEIGHTED_RIDGE_ELIGIBILITY",
   "outcome": "progressed",
-  "qualification": "NOT_YET_RUN"
+  "qualification": "V5M1_OUTCOME_BLIND_ENSEMBLE_CACHE_PASS"
 }
