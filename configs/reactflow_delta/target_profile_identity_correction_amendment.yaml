@@ -1,0 +1,75 @@
+schema_version: reactflow_delta.target_profile_identity_correction.v1
+contract_id: reactflow_delta_target_profile_identity_correction_20260824
+status: IDENTITY_FIX_VERIFIED_CORRECTED_SCIENTIFIC_REBUILD_NOT_YET_AUTHORIZED
+created_at: '2026-08-24T19:22:00+08:00'
+
+scope:
+  dataset: OPENKNOT_M2_V4_5_2
+  affected_accessor: scripts/reactflow_delta/m2_universe_v1.py
+  affected_function: M2Universe.mutant_full_profile
+  root_cause: RAW_ROW_PREFIX_INDEX_WITH_MUTATION_ONLY_CROSS_CONSTRUCT_FALLBACK
+  correction_identity: [puzzle, method, design_pos, canonical_ref, canonical_alt]
+
+confirmed_impact:
+  registered_mutants: 13976
+  affected_mutants: 3494
+  total_puzzle_method_cells: 160
+  affected_puzzle_method_cells: 40
+  affected_methods:
+    Starting sequence: 1747
+    gRNAde-no3d: 1305
+    gRNAde: 442
+  old_fallback_wrong_construct: 3494
+  corrected_real_data_missing: 0
+  corrected_real_data_wrong_target: 0
+  corrected_real_data_wrong_error: 0
+
+history_policy:
+  preserve_all_artifacts: true
+  overwrite_old_artifacts: false
+  change_old_terminal_strings: false
+  old_training_or_score_qualification: SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY
+  v3_current_status: R3C3_INTERRUPTED_INVALIDATED_TARGET_IDENTITY_RECOVERABLE
+  v3_completed_fold_artifacts_preserved: 10
+  v3_old_checkpoint_reuse_allowed: false
+  v3_resume_missing_folds_allowed: false
+
+unaffected_outcome_blind_artifact_families:
+  - SPLIT_V4
+  - REGISTERED_SEQUENCE_AND_MUTATION_METADATA
+  - V4_RNAFM_CACHE
+  - V5_UNCONSTRAINED_THERMODYNAMIC_CACHE
+  - V6_WT_2A3_CONSTRAINED_THERMODYNAMIC_CACHE
+  - V7_RINALMO_DEPENDENCY_CACHE
+
+corrected_path:
+  tic1:
+    status: PASS
+    requirements:
+      - NO_MUTATION_ONLY_SUFFIX_FALLBACK
+      - DUPLICATE_CANONICAL_KEY_FAILS
+      - ALL_13976_TARGET_AND_ERROR_ROWS_EXACT
+  v7m1:
+    status: IN_PROGRESS
+    outcome_blind_only: true
+  tic2_v7m2:
+    status: NOT_AUTHORIZED
+    baseline_algorithms: [DIRECT18, V5_FEATURE30, V6_FEATURE41]
+    candidate: V6_FEATURE41_PLUS_V7_DEPENDENCY6
+    old_v6_prediction_replay_allowed: false
+    refit_from_fold_zero: true
+    original_gate_unchanged: true
+  tic3_v7m3:
+    status: NOT_AUTHORIZED
+    corrected_b1_full_rebuild_required: true
+    old_v3_expert_reuse_allowed: false
+
+authorization:
+  accessor_fix_and_tests_allowed: true
+  real_data_identity_audit_allowed: true
+  v7m1_outcome_blind_cache_allowed: true
+  corrected_training_allowed: false
+  held_score_read_allowed: false
+  partial_score_read_allowed: false
+  new_external_outcome_access_allowed: false
+

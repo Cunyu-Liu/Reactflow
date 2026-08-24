@@ -2,7 +2,7 @@ schema_version: reactflow_delta.active_contract.v7
 manifest_id: reactflow_delta_model_rescue_v7_authority_20260824
 project_task_id: reactflow_delta_model_rescue_v7
 created_at: '2026-08-24T16:20:00+08:00'
-updated_at: '2026-08-24T17:00:00+08:00'
+updated_at: '2026-08-24T19:22:00+08:00'
 
 authority:
   pointer_role: V7_WORKTREE_SINGLE_ACTIVE_AUTHORITY
@@ -18,13 +18,15 @@ authority:
   design_path: docs/plans/2026-08-24-model-rescue-v7-design.md
   implementation_plan_path: docs/plans/2026-08-24-model-rescue-v7.md
   binding_status: V7M0_FOCUSED_COMMIT_PASS_V7M1_CACHE_AUTHORIZED_PRE_FORWARD_FP32_DISTANCE_AND_SEED_POLICY_FROZEN
+  target_profile_identity_correction: configs/reactflow_delta/target_profile_identity_correction_amendment.yaml
+  target_profile_identity_ledger: docs/prospective_v2/target_profile_identity_correction_ledger.yaml
 
 parent_state:
   local_parent_head: 75e0ea0
   remote_parent_head: 08af937
   model_rescue_v1_status: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
   model_rescue_v2_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY_IMMUTABLE
-  model_rescue_v3_status: R3C3_RUNNING_SEPARATELY_UNCHANGED
+  model_rescue_v3_status: R3C3_INTERRUPTED_INVALIDATED_TARGET_IDENTITY_RECOVERABLE
   model_rescue_v4_status: MODEL_RESCUE_V4_FAIL_IMMUTABLE
   model_rescue_v5_status: MODEL_RESCUE_V5_FAIL_IMMUTABLE
   model_rescue_v6_status: MODEL_RESCUE_V6_FAIL_IMMUTABLE
@@ -34,6 +36,8 @@ authorization:
   owner_instruction_date: '2026-08-24'
   amendment_scope: RINALMO_GIGA_EXACT_SOURCE_TO_RECEIVER_DEPENDENCY_ONLY
   implementation_allowed: true
+  target_profile_identity_fix_allowed: true
+  corrected_baseline_rebuild_allowed: false
   outcome_blind_foundation_preparation_allowed: true
   outcome_blind_cache_preparation_allowed: true
   internal_development_probe_allowed: false
@@ -53,6 +57,10 @@ new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
 new_split_allowed: false
 unrelated_job_interference_allowed: false
+legacy_target_dependent_prediction_reuse_allowed: false
+legacy_target_dependent_score_reuse_allowed: false
+v3_resume_missing_folds_allowed: false
+v3_corrected_full_rebuild_required: true
 
 resource_policy:
   physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -71,5 +79,7 @@ gate_state:
   V7M6: NOT_RUN
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
+  TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
+  LEGACY_TARGET_DEPENDENT_SCIENTIFIC_EVIDENCE: INVALIDATED
 
 next_allowed_action: IMPLEMENT_AND_QUALIFY_V7M1_OUTCOME_BLIND_DEPENDENCY_CACHE
