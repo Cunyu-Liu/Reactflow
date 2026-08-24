@@ -62,6 +62,11 @@ def test_design_and_full_coordinates_are_explicit_and_correct(tmp_path: Path) ->
     assert record.region == "design_region"
     assert record.wt_reactivity == pytest.approx(0.06)
     assert record.target_reactivity == pytest.approx(1.06)
+    assert ledger["n_canonical_mutant_full_profiles"] == 1
+    assert (
+        ledger["canonical_mutant_full_profile_identity"]
+        == "EXACT_PUZZLE_METHOD_MUTATION"
+    )
     assert ledger["coordinate_frame"]["formula_matches_raw_diff"] == 1
     assert ledger["coordinate_frame"]["mutA_equals_design_pos_plus_one"] == 1
 
@@ -83,3 +88,79 @@ def test_coordinate_validation_rejects_wrong_full_sequence_offset(
     )
     with pytest.raises(ValueError, match="coordinate validation failed"):
         universe.build()
+
+
+def test_full_profile_lookup_uses_puzzle_method_identity_not_raw_id_prefix(
+    tmp_path: Path,
+) -> None:
+    sequence = "AAAACCCCGGGG"
+    mutant = sequence[:5] + "G" + sequence[6:]
+    common = {
+        "experiment_type": "2A3_MaP",
+        "dataset_name": "construct-identity-fixture",
+        "puzzle": "P01",
+        "sub_start": 5,
+        "sub_end": 8,
+        "design_length": 4,
+        "design_sequence": sequence[4:8],
+        "target_structure": "",
+        "M2_structure": "",
+    }
+    rows = [
+        {
+            **common,
+            "method": "Eterna",
+            "id": "P01_Eterna_wt",
+            "sequence": sequence,
+            "mutA": 0,
+            "profile_offset": 0.0,
+        },
+        {
+            **common,
+            "method": "Eterna",
+            "id": "P01_Eterna_mm_1_C_G",
+            "sequence": mutant,
+            "mutA": 2,
+            "profile_offset": 1.0,
+        },
+        {
+            **common,
+            "method": "Starting sequence",
+            "id": "P01_WT_wt",
+            "sequence": sequence,
+            "mutA": 0,
+            "profile_offset": 10.0,
+        },
+        {
+            **common,
+            "method": "Starting sequence",
+            "id": "P01_WT_mm_1_C_G",
+            "sequence": mutant,
+            "mutA": 2,
+            "profile_offset": 11.0,
+        },
+    ]
+    for row in rows:
+        offset = row.pop("profile_offset")
+        for position in range(1, len(sequence) + 1):
+            row[f"reactivity_{position:04d}"] = offset + position / 100.0
+            row[f"reactivity_error_{position:04d}"] = 0.1
+    csv = tmp_path / "construct-identity.csv"
+    pd.DataFrame(rows).to_csv(csv, index=False)
+
+    universe = M2Universe(csv)
+    universe.build()
+    records = {record.method: record for record in universe.get_records()}
+
+    eterna = records["Eterna"]
+    starting = records["Starting sequence"]
+    eterna_target, _ = universe.mutant_full_profile(
+        eterna.wt_id, eterna.design_pos, eterna.ref, eterna.alt
+    )
+    starting_target, _ = universe.mutant_full_profile(
+        starting.wt_id, starting.design_pos, starting.ref, starting.alt
+    )
+
+    assert eterna_target is not None and starting_target is not None
+    assert eterna_target[eterna.full_pos] == pytest.approx(1.06)
+    assert starting_target[starting.full_pos] == pytest.approx(11.06)
