@@ -11,7 +11,10 @@ from typing import Any
 import torch
 
 from scripts.reactflow_delta.model_rescue_v9 import FOLD_SCHEMA
-from scripts.reactflow_delta.qualify_model_rescue_v9_smoke import _prediction_checks
+from scripts.reactflow_delta.qualify_model_rescue_v9_smoke import (
+    _prediction_checks,
+    recorded_invariants_pass,
+)
 
 
 SCHEMA = "reactflow_delta.model_rescue_v9_merged.v1"
@@ -41,7 +44,7 @@ def merge_folds(input_dir: Path) -> dict[str, Any]:
         ) != 40:
             raise ValueError(f"V9M2 fold {fold} violates seed or epoch freeze")
         invariants = row.get("invariants", {})
-        if not invariants or not all(value is True for value in invariants.values()):
+        if not recorded_invariants_pass(invariants):
             raise ValueError(f"V9M2 fold {fold} lacks all scientific invariants")
         prediction = Path(row["prediction_artifact"])
         checks = _prediction_checks(
