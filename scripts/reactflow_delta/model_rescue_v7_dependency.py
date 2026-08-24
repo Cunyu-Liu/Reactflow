@@ -19,6 +19,21 @@ from scripts.reactflow_delta.model_rescue_v7_schema import (
 )
 
 
+def freeze_fp32_model_for_autocast(
+    model: torch.nn.Module, device: torch.device
+) -> torch.nn.Module:
+    """Keep official floating parameters in FP32 and freeze them before inference."""
+
+    model = model.to(device=device)
+    model.eval()
+    for parameter in model.parameters():
+        if parameter.is_floating_point() and parameter.dtype != torch.float32:
+            raise RuntimeError("v7 RiNALMo floating parameters must remain FP32")
+        parameter.requires_grad_(False)
+        parameter.grad = None
+    return model
+
+
 def normalize_rna_sequence(sequence: str) -> str:
     value = str(sequence).upper().replace("T", "U")
     if not value or set(value) - set(RNA_BASES):
@@ -128,13 +143,15 @@ class RiNALMoGigaLogitInferer:
         model = RiNALMo(config)
         state = torch.load(weights_path, map_location="cpu")
         model.load_state_dict(state)
-        model.eval()
-
         self.device = torch.device(device)
         if self.device.type != "cuda":
             raise ValueError("formal V7M1 RiNALMo inference requires a CUDA device")
         self.dtype = torch.bfloat16
-        self.model = model.to(device=self.device, dtype=self.dtype)
+        # Preserve the official FP32 checkpoint parameters and use autocast only
+        # for the forward pass.  Permanently quantizing all weights to BF16 can
+        # erase the small WT-to-mutant logit differences that define the v7
+        # dependency signal, while the A100 memory budget does not require it.
+        self.model = freeze_fp32_model_for_autocast(model, self.device)
         self.alphabet = alphabet
         # Alphabet.encode maps U to the T token, so the fourth conceptual RNA
         # probability is read from the official T vocabulary entry.
