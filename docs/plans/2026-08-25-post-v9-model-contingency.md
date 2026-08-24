@@ -199,6 +199,14 @@ input gradients were finite. The symmetric initialization recovered
 `a=b=0.5` to at most `1.11e-16`. This establishes numerical feasibility of the
 parameterization, not predictive benefit.
 
+`NESTED_NULL_CHECK` (2026-08-25, tensor-only, no project outcomes): across
+8,192 random point means, mixture weights, scales, and synthetic targets,
+setting both component CDF allocations to 0.5 produced component locations
+exactly equal to the V9 locations. Maximum differences in locations,
+closed-form Gaussian-mixture CRPS, and distribution-derived expected absolute
+delta were all exactly `0.0` in float64. The asymmetric candidate therefore
+contains V9 as a true nested null rather than merely a similar comparator.
+
 `INPUT_INITIALIZATION_CHECK` (2026-08-25, frozen fold0 inputs only, no target or
 score): on 73,632 registered rows, the seed0 V9 head had zero mixture-weight
 saturation below 0.01 or above 0.99 with either raw or standardized feature41.
