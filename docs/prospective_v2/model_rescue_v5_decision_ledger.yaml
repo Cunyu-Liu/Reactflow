@@ -34,6 +34,14 @@ decisions:
     decision: KEEP_FIVE_PERCENT_TOP_JOURNAL_DUAL_METRIC_GATE
     rationale: >-
       Repeated sub-percent development changes are not a publishable method result.
+  - id: V5D005
+    status: FROZEN_IMPLEMENTED
+    decision: SCORE_POSITION_THEN_MUTANT_THEN_METHOD_CELL_THEN_PUZZLE
+    rationale: >-
+      Direct position pooling gives mutants with more qualified receivers greater
+      weight and is not the contract estimand. Mutant identity includes construct,
+      design position and ref>alt so equal allele changes at different sites remain
+      distinct.
 
 evidence_state:
   v4_complete_result:
@@ -57,8 +65,25 @@ evidence_state:
     viennarna_version: 2.7.2
     outcome_columns_read: false
     external_outcome_accessed: false
-  eligibility_probe: NOT_RUN
+    biological_key_join_coverage: 13976/13976
+  eligibility_probe:
+    status: V5M2_COMPLETE_PREDICTION_UNIVERSE_RUNNING
+    implementation_remote_commit: d21e2d6
+    focused_remote_tests: 22_PASS
+    engineering_smoke:
+      status: V5M2_ENGINEERING_SMOKE_PASS
+      fold: 0
+      registered_prediction_rows: 73632
+      held_score_computed: false
+      partial_score_inspected: false
+      external_outcome_accessed: false
+    artifact_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m2_structure_probe_complete
+    sessions:
+      - reactflow_v5_v5m2_probe_0
+      - reactflow_v5_v5m2_probe_1
+    complete_fold_artifacts_required_before_score: 20
+    current_score_access: CLOSED
   candidate_screen: NOT_RUN
   formal_confirmation: NOT_RUN
 
-next_allowed_action: IMPLEMENT_AND_RUN_COMPLETE_V5M2_PREDICTION_ONLY_FOLDS
+next_allowed_action: COMPLETE_V5M2_PREDICTION_ONLY_FOLDS_WITHOUT_PARTIAL_SCORE_ACCESS
