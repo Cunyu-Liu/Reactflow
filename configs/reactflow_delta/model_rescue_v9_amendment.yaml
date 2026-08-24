@@ -1,0 +1,122 @@
+schema_version: reactflow_delta.model_rescue_v9_amendment.v1
+contract_id: reactflow_delta_model_rescue_v9_20260824
+contract_status: V9M0_IMPLEMENTATION_AUTHORIZED
+created_at: '2026-08-24T23:40:00+08:00'
+
+parent:
+  v8_terminal_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
+  v8_terminal_head_local: 06f0a90
+  v8_signed_delta_relative_gain_vs_feature41: 0.08363163114343936
+  v8_signed_delta_positive_puzzles_vs_feature41: 20
+  v8_absolute_delta_relative_gain_vs_feature41: -0.017662362830501394
+  v8_gate_changed: false
+  v8m3_opened: false
+
+confirmed_failure_mechanism:
+  true_method_balanced_absolute_delta_mean: 0.1833171467539873
+  meanaligned_method_balanced_absolute_mean: 0.042840858502292196
+  meanaligned_absolute_bias: -0.1404762882516951
+  underprediction_puzzles: 20
+  interpretation: L1_CONDITIONAL_MEDIAN_SHRINKS_POINT_MAGNITUDE_TOWARD_ZERO
+
+scientific_hypothesis:
+  statement: >-
+    A STRICTLY ZERO_MEAN_RESIDUAL DISTRIBUTION CAN PRESERVE THE V8 SIGNED
+    POINT MEAN EXACTLY WHILE ITS EXPECTED_ABSOLUTE_DELTA RECOVERS THE MISSING
+    MAGNITUDE AND ITS CRPS IMPROVES OVER AN EQUI-CALIBRATED FEATURE41 BASELINE
+  signed_point_mean: FROZEN_V8_MEANALIGNED_MU
+  distribution: DELTA_EQUALS_MU_PLUS_ZERO_MEAN_EPSILON
+  magnitude_prediction: CONDITIONAL_EXPECTATION_OF_ABSOLUTE_DELTA
+  falsifier: ABSOLUTE_OR_CRPS_TOP_JOURNAL_GATE_FAILS
+
+data_and_split:
+  dataset: REAL_OPENKNOT_M2_V4_5_2_DEVELOPMENT_CONSUMED
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  target_profile_identity: EXACT_PUZZLE_METHOD_MUTATION
+  external_outcome_allowed: false
+  v8_valid_checkpoint_reuse_allowed: true
+  legacy_pre_target_identity_checkpoint_reuse_allowed: false
+
+models:
+  baseline:
+    id: TIC2A_FEATURE41_EQUI_CALIBRATED_ZERO_MEAN_MIXTURE
+    signed_mean: CORRECTED_OUTER_TRAIN_FEATURE41_WEIGHTED_RIDGE
+    residual_head_input: FEATURE41_PLUS_SIGNED_MEAN_PLUS_ABSOLUTE_MEAN
+  candidate:
+    id: V8_MEANALIGNED_EQUI_CALIBRATED_ZERO_MEAN_MIXTURE
+    signed_mean: FROZEN_V8_TARGET_CORRECTED_MEANALIGNED
+    residual_head_input: FEATURE41_PLUS_SIGNED_MEAN_PLUS_ABSOLUTE_MEAN
+  identical_residual_family:
+    architecture: LINEAR_RELU_LINEAR
+    hidden: 64
+    components: 2
+    locations: BOTH_EXACTLY_EQUAL_TO_FROZEN_SIGNED_MEAN
+    narrow_scale: SCALE_FLOOR_PLUS_SOFTPLUS
+    wide_scale: NARROW_PLUS_SOFTPLUS_GAP
+    mixture_weight: SIGMOID
+    objective: EXACT_METHOD_BALANCED_GAUSSIAN_MIXTURE_CRPS
+    epochs: 40
+    optimizer: Adam
+    learning_rate: 0.001
+    weight_decay: 0.0
+    gradient_clip: 5.0
+    early_stopping: false
+    architecture_or_loss_search_allowed: false
+
+v9m1_smoke:
+  folds: [0, 1]
+  seed: 0
+  calibration_epochs: 3
+  scoring_allowed: false
+  evidence_status: ENGINEERING_SMOKE_ONLY
+  required_invariants:
+    - BOTH_COMPONENT_LOCATIONS_EQUAL_FROZEN_MEAN
+    - CANDIDATE_MEAN_REPLAYS_V8_AT_1E_7
+    - TARGET_FIELDS_ABSENT_FROM_PREDICTIONS
+    - FEATURE41_AND_CANDIDATE_USE_IDENTICAL_RESIDUAL_HEAD_CLASS_AND_BUDGET
+    - COMPLETE_REGISTERED_HELD_OUTPUT
+
+v9m2_screen:
+  prerequisite: V9M1_ENGINEERING_SMOKE_PASS
+  folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  seed: 0
+  calibration_epochs: 40
+  complete_before_score: true
+  partial_score_allowed: false
+  top_journal_gate:
+    signed_delta_relative_gain_vs_feature41_min: 0.05
+    signed_delta_ci_lower_gt: 0.0
+    signed_delta_positive_puzzles_min: 16
+    absolute_delta_relative_gain_vs_feature41_min: 0.01
+    absolute_delta_ci_lower_gt: 0.0
+    absolute_delta_positive_puzzles_min: 14
+    crps_relative_gain_vs_equicalibrated_feature41_min: 0.05
+    crps_ci_lower_gt: 0.0
+    crps_positive_puzzles_min: 16
+    leave_one_puzzle_out_all_metrics_positive: true
+    max_single_puzzle_effect_fraction: 0.20
+    coverage_68_95_error_not_worse_than_baseline_by_more_than: 0.02
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+
+formal_confirmation:
+  prerequisite: V9M2_TOP_JOURNAL_SCREEN_PASS
+  seeds: [0, 1, 2, 3, 4]
+  folds: 20
+  selection_allowed: false
+  external_replication: REQUIRES_SEPARATE_SEALED_AMENDMENT
+
+phase_graph:
+  - {id: V9M0, status: AUTHORIZED, next_on_pass: V9M1}
+  - {id: V9M1, status: NOT_AUTHORIZED, next_on_pass: V9M2, next_on_fail: V9M6_FAIL}
+  - {id: V9M2, status: NOT_AUTHORIZED, next_on_pass: V9M3, next_on_fail: V9M6_FAIL}
+  - {id: V9M3, status: NOT_AUTHORIZED, next_on_pass: V9M4, next_on_fail: V9M6_FAIL}
+  - {id: V9M4, status: NOT_AUTHORIZED, next_on_pass: V9M5, next_on_fail: V9M6_FAIL}
+  - {id: V9M5, status: NOT_RUN, next_on_pass: V9M6_PASS, next_on_fail: V9M6_FAIL}
+  - {id: V9M6, status: NOT_RUN, handoff_phase: M6}
+
+claim_policy:
+  development_consumed: true
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
