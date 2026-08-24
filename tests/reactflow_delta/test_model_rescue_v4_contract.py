@@ -21,8 +21,9 @@ def test_v4_authority_is_isolated_fail_closed_and_preserves_prior_results() -> N
 
     assert active["authority"]["current_phase"] == "V4M3"
     assert active["runnable_phases"] == ["V4M3"]
-    assert active["training_allowed"] is True
-    assert active["candidate_model_training_allowed"] is True
+    assert active["training_allowed"] is False
+    assert active["candidate_model_training_allowed"] is False
+    assert active["held_score_read_allowed"] is True
     assert active["new_external_outcome_access_allowed"] is False
     assert active["resource_partition"]["v4_allowed_physical_gpus"] == list(range(8))
     assert active["resource_partition"]["v3_preferred_physical_gpus"] == [0, 1, 2, 3, 4, 5]

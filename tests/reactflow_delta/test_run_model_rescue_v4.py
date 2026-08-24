@@ -14,6 +14,7 @@ from scripts.reactflow_delta.model_rescue_v4 import (
     V4ModelConfig,
 )
 from scripts.reactflow_delta import run_model_rescue_v4 as R
+from scripts.reactflow_delta import score_model_rescue_v4 as S
 
 
 def test_cache_row_id_canonicalizes_raw_t_and_u_alleles() -> None:
@@ -179,9 +180,11 @@ def test_prediction_schema_is_target_free_and_zero_mean_centered(tmp_path) -> No
     assert np.array_equal(arrays["locations"][:, 1], arrays["point_mean"])
 
 
-def test_v4m3_active_contract_opens_only_single_seed_screen() -> None:
+def test_v4m3_complete_merge_closes_training_and_opens_complete_score() -> None:
     root = Path(__file__).resolve().parents[2]
-    R.assert_run_authority(root, "V4M3")
+    with pytest.raises(RuntimeError, match="training authority is absent"):
+        R.assert_run_authority(root, "V4M3")
+    S.assert_score_authority(root, "V4M3")
     with pytest.raises(RuntimeError, match="closed outside active V4M2"):
         R.assert_run_authority(root, "V4M2")
     with pytest.raises(RuntimeError, match="closed outside active V4M4"):
