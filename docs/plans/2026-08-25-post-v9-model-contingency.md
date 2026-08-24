@@ -192,6 +192,34 @@ result would mean that residual asymmetry is not the missing capability and
 should close residual-only rescue rather than trigger an unbounded family
 search.
 
+### Identification ladder, not candidate search
+
+If the post-Gate asymmetry criterion is met, the successor amendment must run
+all three frozen levels; none may be selected or dropped after outcomes:
+
+1. `V9-SmallSymmetric`: the completed V9 model, raw 41+2 inputs, hidden 64,
+   both locations equal to the frozen point.
+2. `V10-CapacitySymmetricNull`: outer-train-standardized 41+2 inputs plus the
+   201 detached, actually trained V8 direct features, hidden 256, but both
+   locations still equal to the frozen point.
+3. `V10-MedianAsymmetric`: exactly the same inputs, hidden width, scales,
+   component count, optimizer, epochs, folds, and seeds as level 2; only the
+   median-constrained component-location allocation is enabled.
+
+Required attribution:
+
+- level 2 versus level 1 identifies the incremental value of conditioning and
+  residual capacity;
+- level 3 versus level 2 identifies the incremental value of asymmetric
+  locations;
+- level 3 versus the corrected, equi-calibrated feature41 comparator is the
+  overall task-level comparison;
+- a gain only from level 2 supports a representation/capacity claim, not an
+  asymmetry claim;
+- a gain only from level 3 over level 2 supports the median-preserving
+  asymmetry claim;
+- no post-outcome choice between levels 2 and 3 is allowed.
+
 `FEASIBILITY_CHECK` (2026-08-25, tensor-only, no project outcomes): 4,096
 random float64 parameter vectors with `w` bounded to `[0.1,0.9]` produced a
 maximum median-CDF constraint error of `1.11e-16`; all forward values and all
