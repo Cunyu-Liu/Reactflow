@@ -13,7 +13,7 @@ def _yaml(path: str) -> dict:
 def test_v8_terminal_preserves_gate_failure_under_v9_scoring() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v8_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V9M3"
+    assert active["authority"]["current_phase"] == "V9M6"
     assert active["parent_state"]["model_rescue_v8_status"] == (
         "TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH"
     )

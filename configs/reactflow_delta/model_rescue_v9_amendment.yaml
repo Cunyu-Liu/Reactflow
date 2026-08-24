@@ -1,8 +1,8 @@
 schema_version: reactflow_delta.model_rescue_v9_amendment.v1
 contract_id: reactflow_delta_model_rescue_v9_20260824
-contract_status: V9M2_COMPLETE_UNSCORED_MERGE_PASS_V9M3_SCORING_AUTHORIZED
+contract_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
 created_at: '2026-08-24T23:40:00+08:00'
-updated_at: '2026-08-25T01:01:00+08:00'
+updated_at: '2026-08-25T01:08:00+08:00'
 
 parent:
   v8_terminal_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -107,15 +107,42 @@ formal_confirmation:
   folds: 20
   selection_allowed: false
   external_replication: REQUIRES_SEPARATE_SEALED_AMENDMENT
+  authorized: false
+
+v9m3_terminal_result:
+  status: V9M3_TOP_JOURNAL_SCREEN_FAIL
+  failed_gate: CRPS_RELATIVE_GAIN_GE_5PCT
+  signed_delta:
+    baseline_mae: 0.19115973001564485
+    candidate_mae: 0.17517272998673153
+    relative_gain: 0.08363163113698135
+    ci95_gain: [0.012862310365787447, 0.019111689692039257]
+    positive_puzzles: 20
+  distribution_absolute_delta:
+    baseline_mae: 0.15302427333591662
+    candidate_mae: 0.13801581391275136
+    relative_gain: 0.0980789458821277
+    ci95_gain: [0.01214822855659295, 0.017868690289737615]
+    positive_puzzles: 20
+  crps:
+    baseline: 0.13926276069499338
+    candidate: 0.13337694899480804
+    relative_gain: 0.042264074550957244
+    ci95_gain: [0.003916452722562464, 0.007855170677808174]
+    positive_puzzles: 19
+  coverage68: {baseline: 0.728196854541806, candidate: 0.6892846712940724}
+  coverage95: {baseline: 0.9540829964037203, candidate: 0.9484540749617573}
+  all_other_prefrozen_gates_passed: true
+  v9m4_authorized: false
 
 phase_graph:
   - {id: V9M0, status: PASS, next_on_pass: V9M1}
   - {id: V9M1, status: PASS, next_on_pass: V9M2, next_on_fail: V9M6_FAIL}
   - {id: V9M2, status: PASS, next_on_pass: V9M3, next_on_fail: V9M6_FAIL}
-  - {id: V9M3, status: AUTHORIZED, next_on_pass: V9M4, next_on_fail: V9M6_FAIL}
-  - {id: V9M4, status: NOT_AUTHORIZED, next_on_pass: V9M5, next_on_fail: V9M6_FAIL}
+  - {id: V9M3, status: FAIL, next_on_pass: V9M4, next_on_fail: V9M6_FAIL}
+  - {id: V9M4, status: PERMANENTLY_NOT_AUTHORIZED, next_on_pass: V9M5, next_on_fail: V9M6_FAIL}
   - {id: V9M5, status: NOT_RUN, next_on_pass: V9M6_PASS, next_on_fail: V9M6_FAIL}
-  - {id: V9M6, status: NOT_RUN, handoff_phase: M6}
+  - {id: V9M6, status: TERMINAL_CRPS_TOP_JOURNAL_MARGIN_FAIL, handoff_phase: M6}
 
 claim_policy:
   development_consumed: true
