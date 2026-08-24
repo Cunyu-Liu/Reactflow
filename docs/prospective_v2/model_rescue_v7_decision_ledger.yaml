@@ -118,6 +118,17 @@ evidence_state:
     unique_dependency_edges: 13976
     dependency_edge_reuse_multiplicity: {1: 13976}
     cross_method_exact_sequence_reuse: false
+    cache_controller_batch_size: 4
+    real_smoke_universe:
+      constructs: 2
+      registered_mutants: 104
+      unique_inference_sequences: 106
+      forward_batches: 27
+    full_cache_universe:
+      constructs: 160
+      registered_mutants: 13976
+      unique_inference_sequences: 14136
+      forward_batches: 3534
     corrected_operational_interpretation: >-
       Methods correspond to distinct designed constructs, not repeated
       measurements of one shared WT sequence. Exact-sequence deduplication is
