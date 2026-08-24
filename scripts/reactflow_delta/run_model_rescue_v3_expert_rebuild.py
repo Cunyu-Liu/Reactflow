@@ -52,13 +52,14 @@ def _save_expert_prediction(
     *,
     fold: int,
     seed: int,
+    prediction_schema: str = PREDICTION_SCHEMA,
 ) -> None:
     keys = np.asarray(prediction["keys"], dtype=object)
     if len(keys) != len(set(keys.tolist())):
         raise RuntimeError("corrected expert prediction contains duplicate keys")
     np.savez_compressed(
         path,
-        schema_version=np.asarray(PREDICTION_SCHEMA),
+        schema_version=np.asarray(prediction_schema),
         keys=keys,
         b1_delta_mean=np.asarray(prediction["b1_delta_mean"], dtype=np.float64),
         meanaligned_delta_mean=np.asarray(
@@ -80,6 +81,9 @@ def run_expert_fold(
     learning_rate: float,
     weight_decay: float,
     seed: int,
+    artifact_prefix: str = "v3_corrected",
+    result_schema: str = SCHEMA,
+    prediction_schema: str = PREDICTION_SCHEMA,
 ) -> dict[str, Any]:
     train_puzzles = set(fold.train_puzzles)
     train_records = [record for record in records if record.puzzle in train_puzzles]
@@ -122,8 +126,8 @@ def run_expert_fold(
         raise RuntimeError("corrected expert training produced a non-finite loss")
 
     fold_id = int(fold.outer_fold)
-    b1_checkpoint = out_dir / f"v3_corrected_b1_fold{fold_id}_seed{seed}.pt"
-    mean_checkpoint = out_dir / f"v3_corrected_mean_fold{fold_id}_seed{seed}.pt"
+    b1_checkpoint = out_dir / f"{artifact_prefix}_b1_fold{fold_id}_seed{seed}.pt"
+    mean_checkpoint = out_dir / f"{artifact_prefix}_mean_fold{fold_id}_seed{seed}.pt"
     torch.save(b1_model.state_dict(), b1_checkpoint)
     torch.save(mean_model.state_dict(), mean_checkpoint)
 
@@ -136,13 +140,17 @@ def run_expert_fold(
         device,
     )
     prediction_path = out_dir / (
-        f"v3_corrected_expert_predictions_fold{fold_id}_seed{seed}.npz"
+        f"{artifact_prefix}_expert_predictions_fold{fold_id}_seed{seed}.npz"
     )
     _save_expert_prediction(
-        prediction_path, prediction, fold=fold_id, seed=seed
+        prediction_path,
+        prediction,
+        fold=fold_id,
+        seed=seed,
+        prediction_schema=prediction_schema,
     )
     return {
-        "schema_version": SCHEMA,
+        "schema_version": result_schema,
         "evidence_status": "DEVELOPMENT_CONSUMED_EXPERT_REBUILD_ONLY",
         "outer_fold": fold_id,
         "held_puzzle": fold.held_puzzle,

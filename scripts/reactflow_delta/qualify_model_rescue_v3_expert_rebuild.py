@@ -25,11 +25,15 @@ QUALIFICATION_SCHEMA = (
 
 
 def check_fold_result(
-    row: dict[str, Any], expected_keys: set[str]
+    row: dict[str, Any],
+    expected_keys: set[str],
+    *,
+    result_schema: str = SCHEMA,
+    prediction_schema: str = PREDICTION_SCHEMA,
 ) -> dict[str, bool]:
     prediction_path = Path(row["expert_prediction_artifact"])
     checks = {
-        "result_schema": row.get("schema_version") == SCHEMA,
+        "result_schema": row.get("schema_version") == result_schema,
         "seed_zero": int(row.get("seed", -1)) == 0,
         "epochs_forty": int(row.get("epochs", -1)) == 40,
         "held_score_not_computed": row.get("held_score_computed") is False,
@@ -64,7 +68,7 @@ def check_fold_result(
         checks.update(
             {
                 "prediction_schema": str(stored["schema_version"])
-                == PREDICTION_SCHEMA,
+                == prediction_schema,
                 "prediction_only_fields": set(stored.files) == required,
                 "prediction_keys_unique": len(keys) == len(set(keys)),
                 "prediction_key_universe_exact": set(keys) == expected_keys,

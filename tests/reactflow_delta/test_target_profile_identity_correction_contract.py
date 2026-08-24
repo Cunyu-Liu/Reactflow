@@ -26,17 +26,21 @@ def test_target_profile_identity_correction_contract_is_fail_closed() -> None:
     assert contract["authorization"]["new_external_outcome_access_allowed"] is False
 
 
-def test_active_v7_authority_registers_identity_invalidation() -> None:
+def test_active_v8_authority_preserves_identity_invalidation() -> None:
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
-    assert active["authority"]["current_phase"] == "M6"
-    assert active["training_allowed"] is False
+    assert active["authority"]["current_phase"] == "V8M1"
+    assert active["training_allowed"] == (
+        "TARGET_IDENTITY_CORRECTED_B1_AND_MEANALIGNED_FRESH_REBUILD_ONLY"
+    )
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["legacy_target_dependent_prediction_reuse_allowed"] is False
     assert active["legacy_target_dependent_score_reuse_allowed"] is False
-    assert active["v3_resume_missing_folds_allowed"] is False
-    assert active["v3_corrected_full_rebuild_required"] is True
+    assert active["legacy_v3_expert_reuse_allowed"] is False
+    assert active["overwrite_existing_v8_fold_allowed"] is False
     assert active["gate_state"]["TARGET_PROFILE_IDENTITY"].endswith("PASS")
-    assert active["gate_state"]["LEGACY_TARGET_DEPENDENT_SCIENTIFIC_EVIDENCE"] == "INVALIDATED"
+    assert active["gate_state"]["LEGACY_V3_CORRECTED_EXPERTS"] == (
+        "INVALIDATED_TARGET_IDENTITY"
+    )

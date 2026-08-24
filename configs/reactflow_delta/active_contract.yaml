@@ -1,56 +1,49 @@
-schema_version: reactflow_delta.active_contract.v7
-manifest_id: reactflow_delta_model_rescue_v7_authority_20260824
-project_task_id: reactflow_delta_model_rescue_v7
-created_at: '2026-08-24T16:20:00+08:00'
-updated_at: '2026-08-24T22:15:00+08:00'
+schema_version: reactflow_delta.active_contract.v8
+manifest_id: reactflow_delta_model_rescue_v8_authority_20260824
+project_task_id: reactflow_delta_model_rescue_v8
+created_at: '2026-08-24T22:25:00+08:00'
+updated_at: '2026-08-24T22:25:00+08:00'
 
 authority:
-  pointer_role: V7_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: M6
-  current_authority_state: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE_MODEL_RESCUE_V7_FAIL
-  current_runnable_phase: M6
+  pointer_role: V8_WORKTREE_SINGLE_ACTIVE_AUTHORITY
+  current_phase: V8M1
+  current_authority_state: TARGET_IDENTITY_CORRECTED_EXPERT_REBUILD_ONLY
+  current_runnable_phase: V8M1
   conflict_policy: FAIL_CLOSED
-  branch: codex/reactflow-delta-model-rescue-v7-20260824
-  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v7_20260824
-  human_contract_path: docs/prospective_v2/model_rescue_v7_amendment_20260824.md
-  machine_contract_path: configs/reactflow_delta/model_rescue_v7_amendment.yaml
-  decision_ledger_path: docs/prospective_v2/model_rescue_v7_decision_ledger.yaml
-  design_path: docs/plans/2026-08-24-model-rescue-v7-design.md
-  implementation_plan_path: docs/plans/2026-08-24-model-rescue-v7.md
-  binding_status: TERMINAL_V7M2_MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED
-  target_profile_identity_correction: configs/reactflow_delta/target_profile_identity_correction_amendment.yaml
-  target_profile_identity_ledger: docs/prospective_v2/target_profile_identity_correction_ledger.yaml
+  branch: codex/reactflow-delta-model-rescue-v8-20260824
+  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v8_20260824
+  human_contract_path: docs/prospective_v2/model_rescue_v8_amendment_20260824.md
+  machine_contract_path: configs/reactflow_delta/model_rescue_v8_amendment.yaml
+  decision_ledger_path: docs/prospective_v2/model_rescue_v8_decision_ledger.yaml
+  implementation_plan_path: docs/plans/2026-08-24-model-rescue-v8.md
+  binding_status: V8M0_IMPLEMENTATION_AND_FOCUSED_TESTS_PASS_V8M1_AUTHORIZED
 
 parent_state:
-  local_parent_head: 75e0ea0
-  remote_parent_head: 08af937
-  model_rescue_v1_status: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
-  model_rescue_v2_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY_IMMUTABLE
-  model_rescue_v3_status: R3C3_INTERRUPTED_INVALIDATED_TARGET_IDENTITY_RECOVERABLE
-  model_rescue_v4_status: MODEL_RESCUE_V4_FAIL_IMMUTABLE
-  model_rescue_v5_status: MODEL_RESCUE_V5_FAIL_IMMUTABLE
-  model_rescue_v6_status: MODEL_RESCUE_V6_FAIL_IMMUTABLE
+  model_rescue_v1_status: TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED
+  model_rescue_v2_status: TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY
+  model_rescue_v4_status: TERMINAL_V4M3_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED
+  model_rescue_v5_status: TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED
+  model_rescue_v6_status: TERMINAL_V6M2_MODEL_RESCUE_V6_FAIL_BENCHMARK_ROUTE_LOCKED
+  model_rescue_v7_status: TERMINAL_V7M2_MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED
+  model_rescue_v3_artifacts: SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY
+  target_profile_identity: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
 
 authorization:
   owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION
   owner_instruction_date: '2026-08-24'
-  amendment_scope: RINALMO_GIGA_EXACT_SOURCE_TO_RECEIVER_DEPENDENCY_ONLY
-  implementation_allowed: false
-  target_profile_identity_fix_allowed: true
-  corrected_baseline_rebuild_allowed: false
-  outcome_blind_foundation_preparation_allowed: false
-  outcome_blind_cache_preparation_allowed: false
+  amendment_scope: TARGET_IDENTITY_CORRECTED_MEAN_FIRST_END_TO_END_RESCUE
+  implementation_allowed: true
+  fresh_corrected_expert_training_allowed: true
   internal_development_probe_allowed: false
-  candidate_training_allowed: false
+  large_residual_model_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
   public_release_allowed: false
 
-allowed_phases: [V7M0, V7M1, V7M2, V7M3, V7M4, V7M5, V7M6, M6]
-runnable_phases: [M6]
-training_allowed: false
-candidate_model_training_allowed: false
-outcome_blind_cache_allowed: false
+allowed_phases: [V8M0, V8M1, V8M2, V8M3, V8M4, V8M5, V8M6, M6]
+runnable_phases: [V8M1]
+training_allowed: TARGET_IDENTITY_CORRECTED_B1_AND_MEANALIGNED_FRESH_REBUILD_ONLY
+candidate_model_training_allowed: TARGET_IDENTITY_CORRECTED_B1_AND_MEANALIGNED_FRESH_REBUILD_ONLY
 held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
@@ -59,27 +52,27 @@ new_split_allowed: false
 unrelated_job_interference_allowed: false
 legacy_target_dependent_prediction_reuse_allowed: false
 legacy_target_dependent_score_reuse_allowed: false
-v3_resume_missing_folds_allowed: false
-v3_corrected_full_rebuild_required: true
+legacy_v3_expert_reuse_allowed: false
+overwrite_existing_v8_fold_allowed: false
 
 resource_policy:
   physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
-  cpu_parallel_cache_allowed: true
   co_location_when_memory_sufficient: true
   preemption_or_termination_allowed: false
-  v3_process_interference_allowed: false
+  persistent_sessions_required: true
+  low_frequency_monitor_seconds: 900
 
 gate_state:
-  V7M0: CONTRACT_AND_AUTHORITY_PASS
-  V7M1: OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_PASS
-  V7M2: RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
-  V7M3: NOT_AUTHORIZED
-  V7M4: NOT_AUTHORIZED
-  V7M5: NOT_AUTHORIZED
-  V7M6: MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED
+  V8M0: CONTRACT_AND_AUTHORITY_PASS
+  V8M1: TARGET_IDENTITY_CORRECTED_EXPERT_REBUILD_AUTHORIZED
+  V8M2: NOT_AUTHORIZED
+  V8M3: NOT_AUTHORIZED
+  V8M4: NOT_AUTHORIZED
+  V8M5: NOT_AUTHORIZED
+  V8M6: NOT_RUN
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
   TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
-  LEGACY_TARGET_DEPENDENT_SCIENTIFIC_EVIDENCE: INVALIDATED
+  LEGACY_V3_CORRECTED_EXPERTS: INVALIDATED_TARGET_IDENTITY
 
-next_allowed_action: RETURN_MAIN_CONTRACT_M6_AND_PRESERVE_V7_NEGATIVE_RESULT
+next_allowed_action: RUN_V8M1_FRESH_CORRECTED_EXPERT_REBUILD_FOLDS_ZERO_THROUGH_NINETEEN

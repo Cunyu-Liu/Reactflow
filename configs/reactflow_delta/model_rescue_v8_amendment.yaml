@@ -1,0 +1,138 @@
+schema_version: reactflow_delta.model_rescue_v8_amendment.v1
+contract_id: reactflow_delta_model_rescue_v8_20260824
+contract_status: V8M1_TARGET_IDENTITY_CORRECTED_EXPERT_REBUILD_AUTHORIZED
+created_at: '2026-08-24T22:25:00+08:00'
+
+parent:
+  v1_terminal_status: TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED
+  v2_terminal_status: TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY
+  v4_terminal_status: TERMINAL_V4M3_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED
+  v5_terminal_status: TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED
+  v6_terminal_status: TERMINAL_V6M2_MODEL_RESCUE_V6_FAIL_BENCHMARK_ROUTE_LOCKED
+  v7_terminal_status: TERMINAL_V7M2_MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED
+  v7_result: RINALMO_DEPENDENCY6_SIGNED_DELTA_RELATIVE_GAIN_0_000378_CI_CROSSES_ZERO
+  v3_artifact_status: SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY
+  v3_preserved_invalidated_folds: [0, 3, 5, 6, 9, 11, 12, 15, 17, 18]
+  v3_invalidation_reason: >-
+    ARTIFACTS_USED_THE_COORDINATE_CORRECTION_BUT_PREDATE_THE_EXACT
+    PUZZLE_METHOD_MUTATION_TARGET_IDENTITY_FIX_AND_RETAINED_GLOBAL_SUFFIX_FALLBACK
+  v3_checkpoint_or_prediction_reuse_allowed: false
+
+scientific_scope:
+  question: >-
+    CAN_MEAN_FIRST_END_TO_END_NEURAL_LEARNING_ON_EXACT_PUZZLE_METHOD_MUTATION
+    TARGETS_BEAT_THE_STRONGEST_CORRECTED_FEATURE41_COMPARATOR_ON_UNSEEN_PUZZLES
+  dataset: REAL_OPENKNOT_M2_V4_5_2_DEVELOPMENT_CONSUMED
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  target_profile_identity: EXACT_PUZZLE_METHOD_MUTATION
+  primary_point_metric: METHOD_BALANCED_FULL_CONSTRUCT_SIGNED_DELTA_MAE
+  secondary_point_metric: METHOD_BALANCED_FULL_CONSTRUCT_ABSOLUTE_DELTA_MAE
+  external_outcome_allowed: false
+  legacy_target_dependent_artifact_reuse_allowed: false
+
+v8m1_expert_rebuild:
+  output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
+  folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  seed: 0
+  epochs: 40
+  optimizer: Adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  early_stopping: false
+  fresh_initialization_every_fold: true
+  models:
+    b1:
+      class: AlignedDeltaModel
+      k_rank: 0
+      sparse: false
+      d: 96
+      heads: 4
+      hidden: 64
+      objective: ALIGNED_GAUSSIAN_NLL
+    meanaligned:
+      class: MeanAlignedModel
+      d: 96
+      heads: 4
+      hidden: 64
+      objective: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
+  artifact_policy:
+    prediction_only: true
+    full_registered_construct_positions: true
+    target_or_score_fields_allowed: false
+    old_v3_checkpoint_reuse_allowed: false
+    old_v3_prediction_reuse_allowed: false
+    overwrite_existing_v8_fold_allowed: false
+
+v8m2_mean_screen:
+  prerequisite: EXACT_V8M1_CORRECTED_EXPERT_REBUILD_PASS
+  complete_before_score: true
+  comparators:
+    - TIC2A_CORRECTED_FEATURE41_WEIGHTED_RIDGE
+    - V8_CORRECTED_B1_D96
+  candidate: V8_CORRECTED_MEANALIGNED_D96
+  gate:
+    signed_delta_relative_gain_vs_feature41_min: 0.01
+    signed_delta_relative_gain_vs_b1_min: 0.01
+    paired_ci_lower_vs_feature41_gt: 0.0
+    paired_ci_lower_vs_b1_gt: 0.0
+    positive_puzzles_vs_feature41_min: 14
+    absolute_delta_relative_gain_vs_feature41_min: -0.005
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+  model_or_threshold_selection_allowed: false
+
+v8m3_large_residual_model:
+  prerequisite: EXACT_V8M2_MEAN_SIGNAL_ELIGIBLE
+  candidate: FEATURE41_RESIDUAL_MEANALIGNED_LARGE
+  fixed_architecture:
+    feature41_outer_train_base: true
+    final_mean: FEATURE41_BASE_PLUS_NEURAL_RESIDUAL
+    d: 192
+    heads: 8
+    attention_blocks: 4
+    hidden: 128
+    objective: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
+    epochs: 40
+    learning_rate: 0.001
+    weight_decay: 0.0
+    gradient_clip: 5.0
+  capacity_or_architecture_search_allowed: false
+  calibration:
+    mean_frozen_before_calibration: true
+    residual_expectation_exact_zero: true
+    family: TWO_COMPONENT_CONDITIONAL_GAUSSIAN_SCALE_MIXTURE
+    objective: METHOD_BALANCED_CLOSED_FORM_CRPS
+    calibration_gradient_to_mean_allowed: false
+  top_journal_screen_gate:
+    signed_delta_relative_gain_vs_feature41_min: 0.05
+    crps_relative_gain_vs_feature41_min: 0.05
+    paired_ci_lower_both_gt: 0.0
+    positive_puzzles_both_min: 16
+    leave_one_puzzle_out_direction_positive: true
+    max_single_puzzle_effect_fraction: 0.20
+    coverage_100_percent: true
+    failure_rate_zero: true
+
+formal_confirmation:
+  prerequisite: EXACT_V8M3_TOP_JOURNAL_SCREEN_PASS
+  seeds: [0, 1, 2, 3, 4]
+  folds: 20
+  model_selection_allowed: false
+  seed_selection_allowed: false
+  external_replication: REQUIRES_SEPARATE_SEALED_AMENDMENT
+
+phase_graph:
+  - {id: V8M0, status: PASS, next_on_pass: V8M1}
+  - {id: V8M1, status: AUTHORIZED, next_on_pass: V8M2, next_on_fail: V8M6_FAIL}
+  - {id: V8M2, status: NOT_AUTHORIZED, next_on_pass: V8M3, next_on_fail: V8M6_FAIL}
+  - {id: V8M3, status: NOT_AUTHORIZED, next_on_pass: V8M4, next_on_fail: V8M6_FAIL}
+  - {id: V8M4, status: NOT_AUTHORIZED, next_on_pass: V8M5, next_on_fail: V8M6_FAIL}
+  - {id: V8M5, status: NOT_AUTHORIZED, next_on_pass: V8M6_PASS, next_on_fail: V8M6_FAIL}
+  - {id: V8M6, status: NOT_RUN, handoff_phase: M6}
+
+claim_policy:
+  development_consumed: true
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
