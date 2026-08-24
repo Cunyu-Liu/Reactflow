@@ -26,11 +26,11 @@ def test_target_profile_identity_correction_contract_is_fail_closed() -> None:
     assert contract["authorization"]["new_external_outcome_access_allowed"] is False
 
 
-def test_active_v8_authority_preserves_identity_invalidation() -> None:
+def test_active_v9_authority_preserves_identity_invalidation() -> None:
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
-    assert active["authority"]["current_phase"] == "V8M6"
+    assert active["authority"]["current_phase"] == "V9M0"
     assert active["training_allowed"] is False
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
