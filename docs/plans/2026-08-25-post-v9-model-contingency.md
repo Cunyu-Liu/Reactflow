@@ -120,6 +120,21 @@ feature41 separately:
 - the relationship between predicted `E|Delta|`, observed `|Delta|`, and CRPS
   without changing any threshold.
 
+For a qualified position `i` in mutant `u`, method `m`, and puzzle `p`, the
+within-puzzle diagnostic weight is
+
+```text
+w_i|p = 1 / (number_of_methods_in_p
+             * valid_mutants_in_(p,m)
+             * qualified_positions_in_u).
+```
+
+Normalize these weights within each puzzle, compute the mean, weighted median,
+and weighted quantiles separately for every puzzle, and then take the simple
+mean of the 20 puzzle statistics. The 95% CI and direction count use exactly
+those 20 puzzle-level statistics. Position rows, mutants, seeds, and mixture
+components never increase the independent sample size.
+
 Decision rule:
 
 - open the median-constrained asymmetric-location amendment only if the global
