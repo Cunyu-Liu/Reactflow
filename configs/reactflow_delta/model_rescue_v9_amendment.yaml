@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v9_amendment.v1
 contract_id: reactflow_delta_model_rescue_v9_20260824
-contract_status: V9M0_IMPLEMENTATION_AUTHORIZED
+contract_status: V9M1_TWO_FOLD_ENGINEERING_SMOKE_AUTHORIZED
 created_at: '2026-08-24T23:40:00+08:00'
 
 parent:
@@ -107,8 +107,8 @@ formal_confirmation:
   external_replication: REQUIRES_SEPARATE_SEALED_AMENDMENT
 
 phase_graph:
-  - {id: V9M0, status: AUTHORIZED, next_on_pass: V9M1}
-  - {id: V9M1, status: NOT_AUTHORIZED, next_on_pass: V9M2, next_on_fail: V9M6_FAIL}
+  - {id: V9M0, status: PASS, next_on_pass: V9M1}
+  - {id: V9M1, status: AUTHORIZED, next_on_pass: V9M2, next_on_fail: V9M6_FAIL}
   - {id: V9M2, status: NOT_AUTHORIZED, next_on_pass: V9M3, next_on_fail: V9M6_FAIL}
   - {id: V9M3, status: NOT_AUTHORIZED, next_on_pass: V9M4, next_on_fail: V9M6_FAIL}
   - {id: V9M4, status: NOT_AUTHORIZED, next_on_pass: V9M5, next_on_fail: V9M6_FAIL}

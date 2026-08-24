@@ -30,8 +30,8 @@ def test_active_v9_authority_preserves_identity_invalidation() -> None:
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
-    assert active["authority"]["current_phase"] == "V9M0"
-    assert active["training_allowed"] is False
+    assert active["authority"]["current_phase"] == "V9M1"
+    assert active["training_allowed"] == "V9_ZERO_MEAN_RESIDUAL_SMOKE_ONLY"
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["legacy_target_dependent_prediction_reuse_allowed"] is False
