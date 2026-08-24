@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v5
 manifest_id: reactflow_delta_model_rescue_v5_authority_20260824
 project_task_id: reactflow_delta_model_rescue_v5
 created_at: '2026-08-24T11:57:54+08:00'
-updated_at: '2026-08-24T12:38:49+08:00'
+updated_at: '2026-08-24T12:43:00+08:00'
 
 authority:
   pointer_role: V5_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: V5M2
-  current_authority_state: V5M2_COMPLETE_HELD_SCORE_AND_QUALIFICATION_ONLY
-  current_runnable_phase: V5M2
+  current_phase: M6
+  current_authority_state: TERMINAL_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED
+  current_runnable_phase: M6
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v5-20260824
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v5_20260824
@@ -16,7 +16,7 @@ authority:
   machine_contract_path: configs/reactflow_delta/model_rescue_v5_amendment.yaml
   decision_ledger_path: docs/prospective_v2/model_rescue_v5_decision_ledger.yaml
   implementation_plan_path: docs/plans/2026-08-24-model-rescue-v5.md
-  binding_status: V5M2_COMPLETE_UNSCORED_MERGE_PASS
+  binding_status: V5M2_MODEL_RESCUE_V5_FAIL
   precedence:
     - THIS_V5_WORKTREE_ACTIVE_CONTRACT
     - MODEL_RESCUE_V5_MACHINE_AMENDMENT
@@ -40,18 +40,18 @@ authorization:
   amendment_scope: EXACT_MUTANT_MINUS_WT_BOLTZMANN_ENSEMBLE_DELTA_ONLY
   implementation_allowed: true
   outcome_blind_cache_preparation_allowed: false
-  internal_development_probe_allowed: true
+  internal_development_probe_allowed: false
   candidate_training_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
   public_release_allowed: false
 
 allowed_phases: [V5M0, V5M1, V5M2, V5M3, V5M4, V5M5, V5M6, M6]
-runnable_phases: [V5M2]
+runnable_phases: [M6]
 training_allowed: false
 candidate_model_training_allowed: false
 outcome_blind_cache_allowed: false
-held_score_read_allowed: true
+held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -68,12 +68,12 @@ resource_policy:
 gate_state:
   V5M0: CONTRACT_AND_PHYSICS_HYPOTHESIS_FROZEN
   V5M1: OUTCOME_BLIND_ENSEMBLE_CACHE_PASS
-  V5M2: COMPLETE_PREDICTION_ONLY_MERGE_PASS_SCORE_AND_QUALIFIER_AUTHORIZED
-  V5M3: NOT_AUTHORIZED
+  V5M2: MODEL_RESCUE_V5_FAIL_SIGNED_DELTA_EFFECT_BELOW_ONE_PERCENT
+  V5M3: PERMANENTLY_NOT_AUTHORIZED_BY_V5
   V5M4: NOT_AUTHORIZED
   V5M5: NOT_AUTHORIZED
-  V5M6: NOT_RUN
+  V5M6: FAIL_HANDOFF_TO_M6_COMPLETE
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
 
-next_allowed_action: RUN_COMPLETE_V5M2_SCORE_AND_PREFROZEN_QUALIFIER_ONCE
+next_allowed_action: BENCHMARK_ROUTE_OR_NEW_SEPARATE_AMENDMENT_ONLY

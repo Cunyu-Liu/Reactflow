@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v5_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v5_20260824
 created_at: '2026-08-24T11:57:54+08:00'
-current_status: V5M2_COMPLETE_HELD_SCORE_AND_QUALIFICATION_ONLY
+current_status: TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -67,7 +67,7 @@ evidence_state:
     external_outcome_accessed: false
     biological_key_join_coverage: 13976/13976
   eligibility_probe:
-    status: V5M2_COMPLETE_UNSCORED_MERGE_PASS
+    status: MODEL_RESCUE_V5_FAIL
     implementation_remote_commit: d21e2d6
     focused_remote_tests: 22_PASS
     engineering_smoke:
@@ -84,8 +84,37 @@ evidence_state:
     complete_fold_artifacts_required_before_score: 20
     complete_fold_artifacts_realized: 20
     prediction_only_merge: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m2_structure_probe_complete/v5m2_complete_prediction_only_merged.json
-    current_score_access: ONE_TIME_COMPLETE_UNIVERSE_ALLOWED
+    complete_score: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m2_structure_probe_complete/v5m2_complete_score.json
+    qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m2_structure_probe_complete/v5m2_complete_qualification.json
+    signed_delta:
+      baseline_mean: 0.2673903517836907
+      candidate_mean: 0.2656951975321747
+      mean_gain: 0.0016951542515160096
+      relative_gain: 0.006339623850329982
+      ci95: [0.0013958100100162432, 0.001994498493015776]
+      positive_puzzles: 20
+    absolute_delta:
+      baseline_mean: 0.22729037309700145
+      candidate_mean: 0.22604789903065242
+      mean_gain: 0.0012424740663490434
+      relative_gain: 0.00546646146697462
+      ci95: [0.0005735812440805495, 0.0019113668886175373]
+      positive_puzzles: 19
+    gates:
+      signed_delta_relative_gain: false
+      signed_delta_ci_lower: true
+      signed_delta_positive_puzzles: true
+      absolute_delta_guardrail: true
+      prediction_integrity: true
+    v5m3_authorized: false
+    current_score_access: CLOSED_AFTER_SINGLE_COMPLETE_QUALIFICATION
   candidate_screen: NOT_RUN
   formal_confirmation: NOT_RUN
 
-next_allowed_action: RUN_COMPLETE_V5M2_SCORE_AND_PREFROZEN_QUALIFIER_ONCE
+terminal_interpretation: >-
+  Exact mutant-minus-WT ensemble features contain a small, highly consistent
+  cross-puzzle linear signal, but the signed-delta relative gain of 0.634% is
+  below the frozen 1% eligibility threshold. V5M3 neural training is therefore
+  prohibited and the v5 method hypothesis is discarded without lowering the Gate.
+
+next_allowed_action: BENCHMARK_ROUTE_OR_NEW_SEPARATE_AMENDMENT_ONLY

@@ -12,7 +12,7 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v5_complete_score_authority_preserves_every_prior_authority() -> None:
+def test_v5_terminal_failure_preserves_every_prior_authority() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v5 = _yaml("configs/reactflow_delta/model_rescue_v5_amendment.yaml")
     v4 = _yaml("configs/reactflow_delta/model_rescue_v4_amendment.yaml")
@@ -20,14 +20,18 @@ def test_v5_complete_score_authority_preserves_every_prior_authority() -> None:
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
     v1 = _yaml("configs/reactflow_delta/model_rescue_contract_v1.yaml")
 
-    assert active["authority"]["current_phase"] == "V5M2"
-    assert active["runnable_phases"] == ["V5M2"]
+    assert active["authority"]["current_phase"] == "M6"
+    assert active["runnable_phases"] == ["M6"]
     assert active["training_allowed"] is False
     assert active["outcome_blind_cache_allowed"] is False
-    assert active["held_score_read_allowed"] is True
+    assert active["held_score_read_allowed"] is False
+    assert active["candidate_model_training_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert v5["parent"]["disposition"] == (
         "PRESERVE_ALL_PRIOR_RESULTS_AUTHORITIES_AND_RUNNING_V3_UNCHANGED"
+    )
+    assert v5["contract_status"] == (
+        "TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED"
     )
     assert v4["contract_status"] == (
         "TERMINAL_V4M3_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED"

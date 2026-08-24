@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v5_amendment.v1
 contract_id: reactflow_delta_model_rescue_v5_20260824
-contract_status: V5M2_COMPLETE_HELD_SCORE_AND_QUALIFICATION_ONLY
+contract_status: TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED
 created_at: '2026-08-24T11:57:54+08:00'
 
 parent:
@@ -147,11 +147,11 @@ formal_confirmation:
 phase_graph:
   - {id: V5M0, status: PASS, next_on_pass: V5M1}
   - {id: V5M1, status: PASS, next_on_pass: V5M2, next_on_fail: V5M6_FAIL}
-  - {id: V5M2, status: COMPLETE_PREDICTION_ONLY_SCORE_AUTHORIZED, next_on_pass: V5M3, next_on_fail: V5M6_FAIL}
-  - {id: V5M3, status: NOT_AUTHORIZED, next_on_pass: V5M4, next_on_fail: V5M6_FAIL}
+  - {id: V5M2, status: MODEL_RESCUE_V5_FAIL, next_on_pass: V5M3, next_on_fail: V5M6_FAIL}
+  - {id: V5M3, status: PERMANENTLY_NOT_AUTHORIZED_BY_V5, next_on_pass: V5M4, next_on_fail: V5M6_FAIL}
   - {id: V5M4, status: NOT_AUTHORIZED, next_on_pass: V5M5, next_on_fail: V5M6_FAIL}
   - {id: V5M5, status: NOT_AUTHORIZED, next_on_pass: V5M6_PASS, next_on_fail: V5M6_FAIL}
-  - {id: V5M6, status: NOT_RUN, handoff_phase: M6}
+  - {id: V5M6, status: FAIL_HANDOFF_COMPLETE, handoff_phase: M6}
 
 claim_policy:
   engineering_pass_is_scientific_pass: false

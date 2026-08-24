@@ -1,2 +1,3 @@
 iteration	hypothesis	stage	primary_before	primary_after	primary_relative_gain	secondary_relative_gain	status	commit	notes
 0	v4_dual_tower_rnafm	V4M3	0.2401037068	0.2395592742	0.0022674893	-0.0018181879	discarded	820f34f	MODEL_RESCUE_V4_FAIL; complete 20-fold evidence
+1	exact_mutant_minus_wt_boltzmann_ensemble_delta	V5M2	0.2673903518	0.2656951975	0.0063396239	NA	discarded	babbd91	MODEL_RESCUE_V5_FAIL; 20/20 signed-delta effects positive but frozen 1% eligibility threshold not met
