@@ -35,7 +35,7 @@ run_fold() {
 
 run_fold 0 6 &
 pid0=$!
-run_fold 1 7 &
+run_fold 1 0 &
 pid1=$!
 wait "${pid0}"
 wait "${pid1}"
