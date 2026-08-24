@@ -172,7 +172,10 @@ evidence_state:
     candidate_addition: RINALMO_DEPENDENCY6_ONLY
     legacy_prediction_reuse: false
     complete_before_score: true
-    focused_tests: 23_PASS_LOCAL_AND_REMOTE
+    persistent_controller: COMPLETE_PREDICTION_AND_UNSCORED_MERGE_ONLY
+    held_target_invariance_test: PASS
+    cell_balanced_weight_test: PASS
+    focused_tests: 26_PASS_LOCAL_AND_REMOTE
   v7m2_eligibility: NOT_RUN
   v7m4_screen: NOT_RUN
   v7m5_confirmation: NOT_RUN
