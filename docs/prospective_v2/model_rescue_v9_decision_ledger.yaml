@@ -66,6 +66,19 @@ v9m2:
     target_values_read_for_audit: false
     partial_model_scores_read: false
 v9m3: NOT_AUTHORIZED
-v9m4: NOT_AUTHORIZED
+v9m4:
+  status: NOT_AUTHORIZED
+  pre_gate_implementation_audit:
+    audited_at: '2026-08-25T00:37:00+08:00'
+    current_runner_seed_universe: [0]
+    current_merge_seed_universe: [0]
+    five_seed_runner_implemented: false
+    five_seed_assembler_implemented: false
+    required_formal_seed_universe: [0, 1, 2, 3, 4]
+    frozen_v8_point_checkpoint_reused_across_formal_seeds: true
+    residual_head_retrained_independently_per_formal_seed: true
+    v8_point_retraining_allowed: false
+    implementation_before_v9m3_pass_allowed: false
+    authority_opened: false
 
 next_allowed_action: RUN_V9M2_COMPLETE_PREDICTION_ONLY_SCREEN_WITHOUT_PARTIAL_SCORE
