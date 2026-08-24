@@ -196,8 +196,10 @@ def test_v7_runtime_recovery_builds_a_clean_frozen_environment() -> None:
     assert "cuda-nvcc=11.8" in text
     assert "cuda-cudart-dev=11.8" in text
     assert "cuda-libraries-dev=11.8" in text
+    assert "cuda-cccl=11.8" in text
     assert 'RUNTIME/include/cuda_runtime.h' in text
     assert 'RUNTIME/include/cusparse.h' in text
+    assert 'RUNTIME/include/thrust/complex.h' in text
     assert "numpy=1.24.4" in text
     assert "pandas=2.0.3" in text
     assert "h5py=3.9.0" in text
