@@ -122,6 +122,13 @@ result would mean that residual asymmetry is not the missing capability and
 should close residual-only rescue rather than trigger an unbounded family
 search.
 
+`FEASIBILITY_CHECK` (2026-08-25, tensor-only, no project outcomes): 4,096
+random float64 parameter vectors with `w` bounded to `[0.1,0.9]` produced a
+maximum median-CDF constraint error of `1.11e-16`; all forward values and all
+input gradients were finite. The symmetric initialization recovered
+`a=b=0.5` to at most `1.11e-16`. This establishes numerical feasibility of the
+parameterization, not predictive benefit.
+
 ## Evidence status and missing perspectives
 
 - The located evidence is internal development evidence; it is not external
