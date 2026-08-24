@@ -167,6 +167,21 @@ def test_v7m1_controller_waits_for_frozen_setup_and_never_scores() -> None:
     assert "run_model_rescue_v7_probe" not in text
 
 
+def test_v7m2_controller_runs_only_complete_prediction_and_merge_universe() -> None:
+    controller = ROOT / "scripts/reactflow_delta/run_model_rescue_v7_probe_controller.sh"
+    subprocess.run(["bash", "-n", str(controller)], check=True)
+    text = controller.read_text(encoding="utf-8")
+
+    assert "V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_PASS" in text
+    assert "tic2a_corrected_baselines" in text
+    assert "run_model_rescue_v7_probe" in text
+    assert "merge_model_rescue_v7_probe" in text
+    assert "v7m2_complete_merged_unscored.json" in text
+    assert "v7m2_complete_unscored_merge_pass" in text
+    assert "score_model_rescue_v7_probe" not in text
+    assert "qualify_model_rescue_v7_probe" not in text
+
+
 def test_v7_runtime_recovery_builds_a_clean_frozen_environment() -> None:
     recovery = ROOT / "scripts/reactflow_delta/recover_model_rescue_v7_runtime.sh"
     subprocess.run(["bash", "-n", str(recovery)], check=True)
