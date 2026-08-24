@@ -15,22 +15,9 @@ def test_v7m2_failure_closes_model_rescue_v7_authority() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v7 = _yaml("configs/reactflow_delta/model_rescue_v7_amendment.yaml")
 
-    assert active["authority"]["current_phase"] == "M6"
-    assert active["runnable_phases"] == ["M6"]
-    assert active["authorization"]["implementation_allowed"] is False
-    assert (
-        active["authorization"]["outcome_blind_foundation_preparation_allowed"]
-        is False
+    assert active["parent_state"]["model_rescue_v7_status"] == (
+        "TERMINAL_V7M2_MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED"
     )
-    assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is False
-    assert active["authorization"]["internal_development_probe_allowed"] is False
-    assert active["authorization"]["candidate_training_allowed"] is False
-    assert active["training_allowed"] is False
-    assert active["candidate_model_training_allowed"] is False
-    assert active["outcome_blind_cache_allowed"] is False
-    assert active["held_score_read_allowed"] is False
-    assert active["partial_fold_score_read_allowed"] is False
-    assert active["new_external_outcome_access_allowed"] is False
     assert v7["contract_status"] == (
         "TERMINAL_V7M2_MODEL_RESCUE_V7_FAIL_BENCHMARK_ROUTE_LOCKED"
     )

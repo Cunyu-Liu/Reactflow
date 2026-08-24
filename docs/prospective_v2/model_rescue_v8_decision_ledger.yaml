@@ -1,0 +1,39 @@
+schema_version: reactflow_delta.model_rescue_v8_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v8_20260824
+created_at: '2026-08-24T22:25:00+08:00'
+current_status: V8M1_TARGET_IDENTITY_CORRECTED_EXPERT_REBUILD_AUTHORIZED
+
+immutable_history:
+  model_rescue_v7: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
+  legacy_v3_coordinate_corrected_experts: SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY
+  preserved_legacy_v3_folds: [0, 3, 5, 6, 9, 11, 12, 15, 17, 18]
+  legacy_v3_reuse_allowed: false
+
+confirmed_evidence:
+  target_profile_identity:
+    canonical_profiles: 13976
+    wrong_target: 0
+    wrong_error: 0
+    status: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
+  corrected_feature41:
+    signed_delta_mae: 0.19115973001699202
+    absolute_delta_mae: 0.15302427333591662
+    signed_delta_relative_gain_vs_direct18: 0.012815157514742657
+  v7_dependency6:
+    signed_delta_relative_gain_vs_feature41: 0.00037839285523307096
+    signed_delta_ci95: [-0.0000792579289386696, 0.0002239248810320948]
+    status: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
+
+v8m1:
+  status: IMPLEMENTED_FOCUSED_TESTED_AUTHORIZED_NOT_RUN
+  target_profile_identity: EXACT_PUZZLE_METHOD_MUTATION
+  fresh_twenty_fold_rebuild_required: true
+  legacy_v3_checkpoint_or_prediction_reuse: false
+  held_score_read_allowed: false
+  external_outcome_accessed: false
+v8m2: NOT_AUTHORIZED
+v8m3: NOT_AUTHORIZED
+v8m4: NOT_AUTHORIZED
+v8m5: NOT_AUTHORIZED
+
+next_allowed_action: RUN_V8M1_FRESH_CORRECTED_EXPERT_REBUILD_FOLDS_ZERO_THROUGH_NINETEEN

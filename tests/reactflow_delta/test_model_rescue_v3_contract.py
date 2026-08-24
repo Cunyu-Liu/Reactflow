@@ -21,21 +21,10 @@ def test_coordinate_correction_authority_is_fail_closed_and_preserves_parents() 
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
     v1 = _yaml("configs/reactflow_delta/model_rescue_contract_v1.yaml")
 
-    assert active["authority"]["machine_contract_path"] == (
-        "configs/reactflow_delta/model_rescue_v3_coordinate_correction_amendment.yaml"
+    assert active["parent_state"]["model_rescue_v3_artifacts"] == (
+        "SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY"
     )
-    assert active["authority"]["current_phase"] == "R3C3"
-    assert active["authority"]["binding_status"] == (
-        "R3M3_INVALID_BEFORE_FIRST_FOLD_COORDINATE_FRAME"
-    )
-    assert active["runnable_phases"] == ["R3C3"]
-    assert active["training_allowed"] == (
-        "CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY"
-    )
-    assert active["candidate_model_training_allowed"] == (
-        "CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY"
-    )
-    assert active["new_external_outcome_access_allowed"] is False
+    assert active["legacy_v3_expert_reuse_allowed"] is False
     assert correction["authorization"]["current_phase"] == "R3C3"
     assert correction["authorization"]["training_allowed"] == (
         "CORRECTED_B1_AND_MEANALIGNED_REBUILD_ONLY"
