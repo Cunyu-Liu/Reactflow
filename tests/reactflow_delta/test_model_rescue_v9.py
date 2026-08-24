@@ -35,6 +35,15 @@ def test_v9_distribution_preserves_signed_mean_and_has_positive_magnitude() -> N
     assert torch.all(magnitude >= mean.abs())
 
 
+def test_v9_zero_mean_check_is_stable_for_large_float32_means() -> None:
+    model = EquiCalibratedZeroMeanMixture()
+    mean = torch.tensor([1.0e8, -1.0e8], dtype=torch.float32)
+    weights, locations, _scales = model(mean, torch.zeros(2, 41))
+    assert_zero_mean_distribution(mean, weights, locations)
+    assert torch.equal(locations[:, 0], mean)
+    assert torch.equal(locations[:, 1], mean)
+
+
 def test_v9_mutant_balanced_crps_matches_explicit_mutant_average() -> None:
     target = torch.tensor([0.1, -0.2, 0.4])
     locations = torch.tensor([[0.0, 0.0], [0.0, 0.0], [0.2, 0.2]])

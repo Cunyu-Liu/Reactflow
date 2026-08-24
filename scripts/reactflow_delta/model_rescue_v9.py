@@ -108,6 +108,10 @@ def assert_zero_mean_distribution(
         locations[..., 1], signed_mean, atol=atol, rtol=0.0
     ):
         raise RuntimeError("V9 residual distribution changed a component location")
-    distribution_mean = (weights * locations).sum(-1)
-    if not torch.allclose(distribution_mean, signed_mean, atol=atol, rtol=0.0):
+    residual_mean = (
+        weights * (locations - signed_mean.detach().unsqueeze(-1))
+    ).sum(-1)
+    if not torch.allclose(
+        residual_mean, torch.zeros_like(signed_mean), atol=atol, rtol=0.0
+    ):
         raise RuntimeError("V9 residual distribution changed the signed point mean")
