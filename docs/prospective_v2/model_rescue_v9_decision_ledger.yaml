@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v9_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v9_20260824
 created_at: '2026-08-24T23:40:00+08:00'
-current_status: V9M2_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
+current_status: V9M2_COMPLETE_UNSCORED_MERGE_PASS_V9M3_SCORING_AUTHORIZED
 
 immutable_parent:
   v8_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -32,7 +32,7 @@ v9m1:
   qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m1_real_smoke/v9m1_smoke_qualification.json
   scores_read: false
 v9m2:
-  status: TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
+  status: V9M2_COMPLETE_UNSCORED_MERGE_PASS
   folds: 20
   seed: 0
   epochs: 40
@@ -65,7 +65,31 @@ v9m2:
     conclusion: V5_V6_CACHE_COORDINATES_EXACTLY_MATCH_CURRENT_CANONICAL_UNIVERSE
     target_values_read_for_audit: false
     partial_model_scores_read: false
-v9m3: NOT_AUTHORIZED
+  complete_prediction_only_merge:
+    completed_at: '2026-08-25T00:57:39+08:00'
+    artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0/v9m2_complete_unscored_merge.json
+    marker: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0/v9m2_complete_prediction_only_merge_pass
+    fold_universe: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    complete_fold_universe: true
+    unique_folds: true
+    prediction_only_schema: true
+    target_identity_exact: true
+    v8_mean_replay_all_folds: true
+    tic2a_feature41_replay_all_folds: true
+    identical_residual_family_all_folds: true
+    zero_mean_residual_all_folds: true
+    partial_scores_inspected: false
+    external_outcome_accessed: false
+    persistent_runner_nonmetric_error: false
+v9m3:
+  status: COMPLETE_HELD_SCORE_AND_PREFROZEN_QUALIFICATION_AUTHORIZED
+  training_allowed: false
+  held_score_read_allowed: true
+  partial_fold_score_read_allowed: false
+  external_outcome_accessed: false
+  score_invocations_allowed: 1
+  qualifier_invocations_allowed: 1
+  v9m4_authority_opened: false
 v9m4:
   status: NOT_AUTHORIZED
   pre_gate_implementation_audit:
@@ -81,4 +105,4 @@ v9m4:
     implementation_before_v9m3_pass_allowed: false
     authority_opened: false
 
-next_allowed_action: RUN_V9M2_COMPLETE_PREDICTION_ONLY_SCREEN_WITHOUT_PARTIAL_SCORE
+next_allowed_action: SCORE_COMPLETE_V9M2_MERGE_ONCE_THEN_RUN_PREFROZEN_V9M3_QUALIFIER_ONCE

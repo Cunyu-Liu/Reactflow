@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v9
 manifest_id: reactflow_delta_model_rescue_v9_authority_20260824
 project_task_id: reactflow_delta_model_rescue_v9
 created_at: '2026-08-24T22:25:00+08:00'
-updated_at: '2026-08-25T00:20:00+08:00'
+updated_at: '2026-08-25T01:01:00+08:00'
 
 authority:
   pointer_role: V9_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: V9M2
-  current_authority_state: TWENTY_FOLD_PREDICTION_ONLY_SCREEN
-  current_runnable_phase: V9M2
+  current_phase: V9M3
+  current_authority_state: COMPLETE_HELD_SCORE_AND_PREFROZEN_QUALIFICATION
+  current_runnable_phase: V9M3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v9-20260824
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v9_20260824
@@ -16,7 +16,7 @@ authority:
   machine_contract_path: configs/reactflow_delta/model_rescue_v9_amendment.yaml
   decision_ledger_path: docs/prospective_v2/model_rescue_v9_decision_ledger.yaml
   implementation_plan_path: docs/plans/2026-08-24-model-rescue-v9.md
-  binding_status: V9M1_ENGINEERING_SMOKE_PASS_V9M2_AUTHORIZED
+  binding_status: V9M2_COMPLETE_UNSCORED_MERGE_PASS_V9M3_AUTHORIZED
 
 parent_state:
   model_rescue_v1_status: TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED
@@ -42,10 +42,10 @@ authorization:
   public_release_allowed: false
 
 allowed_phases: [V9M0, V9M1, V9M2, V9M3, V9M4, V9M5, V9M6, M6]
-runnable_phases: [V9M2]
-training_allowed: V9_ZERO_MEAN_RESIDUAL_TWENTY_FOLD_SCREEN_ONLY
-candidate_model_training_allowed: V9_ZERO_MEAN_RESIDUAL_TWENTY_FOLD_SCREEN_ONLY
-held_score_read_allowed: false
+runnable_phases: [V9M3]
+training_allowed: false
+candidate_model_training_allowed: false
+held_score_read_allowed: true
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -66,8 +66,8 @@ resource_policy:
 gate_state:
   V9M0: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   V9M1: V9M1_ENGINEERING_SMOKE_PASS
-  V9M2: TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
-  V9M3: NOT_AUTHORIZED
+  V9M2: V9M2_COMPLETE_UNSCORED_MERGE_PASS
+  V9M3: COMPLETE_HELD_SCORE_AND_PREFROZEN_QUALIFICATION_AUTHORIZED
   V9M4: NOT_AUTHORIZED
   V9M5: NOT_AUTHORIZED
   V9M6: NOT_RUN
@@ -76,4 +76,4 @@ gate_state:
   TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
   LEGACY_V3_CORRECTED_EXPERTS: INVALIDATED_TARGET_IDENTITY
 
-next_allowed_action: RUN_V9M2_SEED_ZERO_TWENTY_FOLD_PREDICTION_ONLY_SCREEN
+next_allowed_action: SCORE_COMPLETE_V9M2_MERGE_ONCE_THEN_RUN_PREFROZEN_V9M3_QUALIFIER_ONCE

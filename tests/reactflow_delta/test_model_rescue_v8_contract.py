@@ -10,17 +10,15 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v8_terminal_preserves_gate_failure_under_v9_smoke() -> None:
+def test_v8_terminal_preserves_gate_failure_under_v9_scoring() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v8_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V9M2"
+    assert active["authority"]["current_phase"] == "V9M3"
     assert active["parent_state"]["model_rescue_v8_status"] == (
         "TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH"
     )
-    assert active["training_allowed"] == (
-        "V9_ZERO_MEAN_RESIDUAL_TWENTY_FOLD_SCREEN_ONLY"
-    )
-    assert active["held_score_read_allowed"] is False
+    assert active["training_allowed"] is False
+    assert active["held_score_read_allowed"] is True
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert active["legacy_target_dependent_prediction_reuse_allowed"] is False

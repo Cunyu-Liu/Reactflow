@@ -10,20 +10,19 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v9m2_authorizes_only_complete_score_blind_screen() -> None:
+def test_v9m3_authorizes_only_one_complete_score_and_qualification() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v9_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V9M2"
-    assert active["runnable_phases"] == ["V9M2"]
-    assert active["training_allowed"] == (
-        "V9_ZERO_MEAN_RESIDUAL_TWENTY_FOLD_SCREEN_ONLY"
-    )
-    assert active["held_score_read_allowed"] is False
+    assert active["authority"]["current_phase"] == "V9M3"
+    assert active["runnable_phases"] == ["V9M3"]
+    assert active["training_allowed"] is False
+    assert active["held_score_read_allowed"] is True
+    assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert contract["parent"]["v8_gate_changed"] is False
     assert contract["parent"]["v8m3_opened"] is False
     assert contract["contract_status"] == (
-        "V9M2_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED"
+        "V9M2_COMPLETE_UNSCORED_MERGE_PASS_V9M3_SCORING_AUTHORIZED"
     )
 
 
