@@ -63,6 +63,15 @@ def qualify_cache(
         for group in groups
         for mutant in group["mutants"]
     }
+    expected_inference_sequences = {
+        sequence
+        for row in expected_rows.values()
+        for sequence in (row["wt_sequence"], row["mutant_sequence"])
+    }
+    expected_dependency_edges = {
+        (row["wt_sequence"], row["mutant_sequence"], row["full_pos"])
+        for row in expected_rows.values()
+    }
     checks: dict[str, bool] = {
         "manifest_schema": manifest.get("schema_version") == CACHE_SCHEMA,
         "manifest_status": manifest.get("status")
@@ -78,6 +87,24 @@ def qualify_cache(
         == expected_constructs,
         "manifest_mutant_count": manifest.get("n_registered_mutants")
         == expected_mutants,
+        "manifest_unique_wt_sequence_count": manifest.get("n_unique_wt_sequences")
+        == len({row["wt_sequence"] for row in expected_rows.values()}),
+        "manifest_unique_mutant_sequence_count": manifest.get(
+            "n_unique_mutant_sequences"
+        )
+        == len({row["mutant_sequence"] for row in expected_rows.values()}),
+        "manifest_unique_inference_sequence_count": manifest.get(
+            "n_unique_inference_sequences"
+        )
+        == len(expected_inference_sequences),
+        "manifest_unique_dependency_edge_count": manifest.get(
+            "n_unique_dependency_edges"
+        )
+        == len(expected_dependency_edges),
+        "manifest_dependency_edge_reuse_count": manifest.get(
+            "n_dependency_edge_reuse_rows"
+        )
+        == expected_mutants - len(expected_dependency_edges),
         "manifest_sequence_length": manifest.get("sequence_length")
         == expected_length,
         "manifest_feature_width": manifest.get("feature_width")
@@ -131,7 +158,7 @@ def qualify_cache(
         self_zero = True
         max_absolute_identity = True
         any_off_diagonal_signal = False
-        method_reuse_identical = True
+        exact_sequence_reuse_identical = True
         first_by_dependency: dict[tuple[str, str, int], np.ndarray] = {}
         for index, row_id in enumerate(row_ids):
             expected = expected_rows.get(row_id)
@@ -176,7 +203,7 @@ def qualify_cache(
             )
             reference = first_by_dependency.setdefault(dependency_key, block)
             if not np.array_equal(reference, block):
-                method_reuse_identical = False
+                exact_sequence_reuse_identical = False
 
         checks.update(
             {
@@ -186,7 +213,9 @@ def qualify_cache(
                 "self_dependency_exact_zero": self_zero,
                 "max_absolute_channel_identity": max_absolute_identity,
                 "off_diagonal_signal_nonzero": any_off_diagonal_signal,
-                "duplicated_method_dependency_identical": method_reuse_identical,
+                "duplicated_exact_sequence_dependency_identical": (
+                    exact_sequence_reuse_identical
+                ),
                 "unique_dependency_count_matches_manifest": len(first_by_dependency)
                 == manifest.get("n_unique_dependency_edges"),
             }
