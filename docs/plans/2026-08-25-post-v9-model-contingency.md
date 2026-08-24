@@ -67,47 +67,60 @@ rule, not execution authority.
 
 ## Highest-information successor if required
 
-Candidate name: `MedianAligned-AsymmetricQuantiles`.
+Candidate name: `MedianAligned-AsymmetricGaussianMixture`.
 
 `IDEA`: reinterpret the frozen V8 output as the conditional median
-`m_0.5(x)`. Predict a monotone residual quantile function with its 0.5 quantile
-fixed exactly at zero:
+`m_0.5(x)`. Retain the existing two-Gaussian mixture and exact closed-form
+mixture CRPS, but allow the component locations to differ while constraining
+the mixture CDF at the frozen point to equal 0.5 exactly:
 
 ```text
-Delta = m_0.5(x) + q_epsilon(tau | x),  q_epsilon(0.5 | x) = 0.
+Delta = m_0.5(x) + epsilon,
+P(epsilon <= 0 | x) = 0.5.
 ```
+
+For mixture weight `w`, component scales `s1,s2`, and component CDF values at
+zero `a,b`, enforce
+
+```text
+w*a + (1-w)*b = 0.5.
+```
+
+Use a bounded `w`, map one network output into the analytically valid interval
+for `a`, set `b=(0.5-w*a)/(1-w)`, and obtain residual locations through
+`l1=-s1*Phi_inverse(a)` and `l2=-s2*Phi_inverse(b)`. Initializing `a=b=0.5`
+recovers the exact V9 nested null with both residual locations equal to zero.
 
 Minimum implementation:
 
-- reuse the frozen, target-corrected V8 encoder and point checkpoint;
-- input outer-train-standardized feature41 plus detached V8 source and receiver
-  representations;
-- one fixed two-layer residual head, width 256, no backbone expansion;
-- fixed quantile grid, with monotonicity enforced by positive increments and
-  the central quantile exactly zero;
-- train by the method-balanced discrete approximation to integrated pinball
-  loss, which estimates CRPS without moving the point median;
-- derive the absolute-delta prediction from the same quantile distribution,
-  not from a separately selected postprocessor;
-- compare against the same residual family and training budget centered on the
-  corrected feature41 point predictor;
-- one seed, 20-fold, complete-universe-before-score screen; no partial metric
-  inspection and no hyperparameter search.
+- reuse the frozen, target-corrected V8 encoder and L1 point checkpoint;
+- input outer-train-standardized feature41 plus detached V8 direct features;
+- use one fixed two-layer residual head, width 256;
+- retain two Gaussian components, exact Gaussian-mixture CRPS, and the existing
+  expected-absolute-delta calculation;
+- keep the signed point prediction equal to the frozen V8 conditional median;
+- train a same-input symmetric-location nested null and the
+  median-constrained asymmetric candidate with identical budget;
+- train the corrected feature41 comparator with the same residual family and
+  input permissions;
+- run one seed, 20-fold, complete-universe-before-score; do not inspect partial
+  metrics or search mixture count, width, loss, epoch, or location constraint.
 
 `PREDICTION`: allowing residual asymmetry should improve CRPS and
 distribution-derived absolute magnitude relative to V9 while preserving the
 already observed V8 signed-MAE gain exactly.
 
 `ADVERSARIAL_ALTERNATIVE`: apparent gains could come from adding detached V8
-representations or standardization rather than the median constraint. If this
-candidate is ever authorized, a same-input symmetric quantile null is required
-to identify the effect of asymmetry.
+representations or outer-train standardization rather than the median
+constraint. The same-input symmetric-location nested null is therefore
+required to identify the incremental value of asymmetric locations.
 
-`RISK`: a finite quantile grid only approximates CRPS and tail mass; crossings,
-tail extrapolation, and calibration coverage must be tested before real-data
-execution. A null result would mean that the bottleneck is not distributional
-shape alone and should close residual-only rescue rather than trigger an
-unbounded family search.
+`RISK`: inverse-normal parameterization can produce unstable gradients if CDF
+probabilities approach zero or one; the valid CDF interval and a fixed
+numerical interior bound must be specified before outcome access. A null
+result would mean that residual asymmetry is not the missing capability and
+should close residual-only rescue rather than trigger an unbounded family
+search.
 
 ## Evidence status and missing perspectives
 
