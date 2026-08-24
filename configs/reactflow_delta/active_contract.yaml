@@ -1,80 +1,79 @@
-schema_version: reactflow_delta.active_contract.v4
-manifest_id: reactflow_delta_model_rescue_v4_authority_20260823
-project_task_id: reactflow_delta_model_rescue_v4
-created_at: '2026-08-23T11:20:00+08:00'
-updated_at: '2026-08-24T11:37:00+08:00'
+schema_version: reactflow_delta.active_contract.v5
+manifest_id: reactflow_delta_model_rescue_v5_authority_20260824
+project_task_id: reactflow_delta_model_rescue_v5
+created_at: '2026-08-24T11:57:54+08:00'
+updated_at: '2026-08-24T11:57:54+08:00'
 
 authority:
-  pointer_role: V4_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: M6
-  current_authority_state: TERMINAL_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED
-  current_runnable_phase: M6
+  pointer_role: V5_WORKTREE_SINGLE_ACTIVE_AUTHORITY
+  current_phase: V5M0
+  current_authority_state: CONTRACT_AND_PHYSICS_HYPOTHESIS_FREEZE_ONLY
+  current_runnable_phase: V5M0
   conflict_policy: FAIL_CLOSED
-  branch: codex/reactflow-delta-model-rescue-v4-20260823
-  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v4_20260823
-  human_contract_path: docs/prospective_v2/model_rescue_v4_amendment_20260823.md
-  machine_contract_path: configs/reactflow_delta/model_rescue_v4_amendment.yaml
-  decision_ledger_path: docs/prospective_v2/model_rescue_v4_decision_ledger.yaml
-  implementation_plan_path: docs/plans/2026-08-23-model-rescue-v4.md
-  binding_status: MODEL_RESCUE_V4_FAIL
+  branch: codex/reactflow-delta-model-rescue-v5-20260824
+  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v5_20260824
+  human_contract_path: docs/prospective_v2/model_rescue_v5_amendment_20260824.md
+  machine_contract_path: configs/reactflow_delta/model_rescue_v5_amendment.yaml
+  decision_ledger_path: docs/prospective_v2/model_rescue_v5_decision_ledger.yaml
+  implementation_plan_path: docs/plans/2026-08-24-model-rescue-v5.md
+  binding_status: V5M0_CONTRACT_NOT_YET_COMMITTED
   precedence:
-    - THIS_V4_WORKTREE_ACTIVE_CONTRACT
-    - MODEL_RESCUE_V4_MACHINE_AMENDMENT
-    - MODEL_RESCUE_V4_HUMAN_AMENDMENT
-    - MODEL_RESCUE_V3_COORDINATE_CORRECTION_TERMS_IMMUTABLE
-    - MODEL_RESCUE_V2_TERMINAL_AMENDMENT_IMMUTABLE
-    - MODEL_RESCUE_V1_TERMINAL_CONTRACT_IMMUTABLE
+    - THIS_V5_WORKTREE_ACTIVE_CONTRACT
+    - MODEL_RESCUE_V5_MACHINE_AMENDMENT
+    - MODEL_RESCUE_V5_HUMAN_AMENDMENT
+    - MODEL_RESCUE_V4_TERMINAL_RESULT_IMMUTABLE
+    - MODEL_RESCUE_V3_RUNNING_AUTHORITY_ISOLATED
+    - MODEL_RESCUE_V2_TERMINAL_RESULT_IMMUTABLE
+    - MODEL_RESCUE_V1_TERMINAL_RESULT_IMMUTABLE
 
 parent_state:
-  parent_head: a560a179d620f5be083c8fce617e3cc0a7016908
+  parent_head: 820f34fc693f933dba7db816ba5f62f101cf6986
   model_rescue_v1_status: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
   model_rescue_v2_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY_IMMUTABLE
-  model_rescue_v3_worktree: /home/cunyuliu/reactflow_delta_worktrees/prospective_v2_20260813
-  model_rescue_v3_phase_at_fork: R3C3
-  model_rescue_v3_disposition: PRESERVE_RUNNING_DIAGNOSTIC_BASELINE_UNCHANGED
+  model_rescue_v3_status: R3C3_RUNNING_SEPARATELY_UNCHANGED
+  model_rescue_v4_status: MODEL_RESCUE_V4_FAIL_IMMUTABLE
+  model_rescue_v4_route: BENCHMARK_ROUTE_LOCKED_IN_V4_WORKTREE
 
 authorization:
-  owner_instruction: TREAT_AS_OWN_RESEARCH_TOPIC_AND_EXECUTE_WITHOUT_PARAMETER_BY_PARAMETER_APPROVAL
-  owner_instruction_date: '2026-08-23'
-  amendment_scope: MUTATION_CONDITIONED_DUAL_TOWER_RNAFM_ONLY
-  development_data_status: DEVELOPMENT_CONSUMED
+  owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION
+  owner_instruction_date: '2026-08-24'
+  amendment_scope: EXACT_MUTANT_MINUS_WT_BOLTZMANN_ENSEMBLE_DELTA_ONLY
   implementation_allowed: true
-  outcome_blind_foundation_cache_preparation_allowed: true
-  real_data_engineering_smoke_allowed: true
-  scientific_screen_allowed: false
+  outcome_blind_cache_preparation_allowed: false
+  internal_development_probe_allowed: false
+  candidate_training_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
   public_release_allowed: false
 
-resource_partition:
-  v3_preferred_physical_gpus: [0, 1, 2, 3, 4, 5]
-  v4_allowed_physical_gpus: [0, 1, 2, 3, 4, 5, 6, 7]
-  co_location_when_memory_sufficient: true
-  use_only_when_idle: false
-  unrelated_job_interference_allowed: false
-  preemption_or_termination_allowed: false
-
-allowed_phases: [V4M0, V4M1, V4M2, V4M3, V4M4, V4M5, V4M6, M6]
-runnable_phases: [M6]
+allowed_phases: [V5M0, V5M1, V5M2, V5M3, V5M4, V5M5, V5M6, M6]
+runnable_phases: [V5M0]
 training_allowed: false
 candidate_model_training_allowed: false
 outcome_blind_cache_allowed: false
+held_score_read_allowed: false
+partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
 new_split_allowed: false
-held_score_read_allowed: false
-partial_fold_score_read_allowed: false
+unrelated_job_interference_allowed: false
+
+resource_policy:
+  physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
+  cpu_parallel_cache_allowed: true
+  co_location_when_memory_sufficient: true
+  preemption_or_termination_allowed: false
+  v3_process_interference_allowed: false
 
 gate_state:
-  V4M0: CONTRACT_AND_DESIGN_FROZEN
-  V4M1: IMPLEMENTATION_AND_FOUNDATION_CACHE_PASS
-  V4M2: REAL_DATA_ENGINEERING_SMOKE_PASS
-  V4M3: MODEL_RESCUE_V4_FAIL
-  V4M4: NOT_RUN_PREREQUISITE_FAILED
-  V4M5: NOT_RUN
-  V4M6: FAIL_HANDOFF_COMPLETE
-  M6: BENCHMARK_ROUTE_LOCKED
-  TOP_JOURNAL_DEVELOPMENT_GATE: FAIL
+  V5M0: CONTRACT_FREEZE_IN_PROGRESS
+  V5M1: NOT_AUTHORIZED
+  V5M2: NOT_AUTHORIZED
+  V5M3: NOT_AUTHORIZED
+  V5M4: NOT_AUTHORIZED
+  V5M5: NOT_AUTHORIZED
+  V5M6: NOT_RUN
+  TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
 
-next_allowed_action: MAIN_CONTRACT_M6_BENCHMARK_ROUTE_ONLY
+next_allowed_action: COMMIT_V5_CONTRACT_AND_RUN_CONTRACT_TESTS

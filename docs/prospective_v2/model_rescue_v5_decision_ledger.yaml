@@ -1,0 +1,53 @@
+schema_version: reactflow_delta.model_rescue_v5_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v5_20260824
+created_at: '2026-08-24T11:57:54+08:00'
+current_status: V5M0_CONTRACT_AND_PHYSICS_HYPOTHESIS_FREEZE
+
+immutable_history:
+  model_rescue_v1: M2_NO_RESCUE_CANDIDATE
+  model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
+  model_rescue_v3: R3C3_RUNNING_SEPARATELY_UNCHANGED
+  model_rescue_v4: MODEL_RESCUE_V4_FAIL
+
+decisions:
+  - id: V5D001
+    status: FROZEN
+    decision: TEST_EXACT_MUTANT_MINUS_WT_BOLTZMANN_ENSEMBLE_CHANGE
+    rationale: >-
+      V4 used a learned WT pair field and paired RNA-FM representations but did
+      not explicitly calculate the structural ensemble perturbation caused by
+      the exact mutation.
+  - id: V5D002
+    status: FROZEN
+    decision: REQUIRE_LINEAR_SIGNAL_ELIGIBILITY_BEFORE_ANY_NEURAL_RESIDUAL_SCREEN
+    rationale: >-
+      The physical feature must demonstrate cross-puzzle incremental signal in
+      a fixed low-capacity learner before it can justify another GPU model.
+  - id: V5D003
+    status: FROZEN
+    decision: PRESERVE_CORRECTED_B1_AND_ADD_ONLY_A_ZERO_INITIALIZED_RESIDUAL_BRANCH
+    rationale: >-
+      Corrected B1 remains the strongest qualified mean baseline; v5 must add a
+      capability rather than replace it with another high-capacity encoder.
+  - id: V5D004
+    status: FROZEN
+    decision: KEEP_FIVE_PERCENT_TOP_JOURNAL_DUAL_METRIC_GATE
+    rationale: >-
+      Repeated sub-percent development changes are not a publishable method result.
+
+evidence_state:
+  v4_complete_result:
+    status: MODEL_RESCUE_V4_FAIL
+    primary_vs_corrected_b1_crps_relative_gain: -0.001818187917267443
+    primary_vs_corrected_b1_signed_delta_mae_relative_gain: 0.0022674893385431967
+    primary_vs_corrected_b1_crps_ci95: [-0.0062146894424298426, 0.005520786755248082]
+    primary_vs_corrected_b1_signed_delta_mae_ci95: [-0.007419661290932675, 0.008508526481734308]
+  old_wt_only_structure_probe:
+    status: STRUCT_DELTA_EXCLUDED_M2
+    limitation: USED_WT_MFE_GRAPH_DISTANCE_AND_WT_BPP_ONLY_NOT_EXACT_MUTANT_MINUS_WT_CHANGE
+  exact_ensemble_delta_cache: NOT_RUN
+  eligibility_probe: NOT_RUN
+  candidate_screen: NOT_RUN
+  formal_confirmation: NOT_RUN
+
+next_allowed_action: COMMIT_V5_CONTRACT_AND_RUN_CONTRACT_TESTS
