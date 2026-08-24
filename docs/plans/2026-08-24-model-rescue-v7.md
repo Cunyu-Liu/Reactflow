@@ -49,6 +49,28 @@ Required behavior:
 - shard merge rejects duplicate or missing folds;
 - only 20/20 folds authorize one complete target join and frozen qualifier.
 
+Frozen implementation interface, confirmed without opening any score artifact:
+
+- import `CANDIDATE_PROBE_FEATURE_NAMES`, `ConstrainedFeatureCache`,
+  `accumulate_train_stats` and the full-construct prediction ordering from the
+  existing v6 probe instead of independently rebuilding the 41-feature
+  baseline;
+- treat the v6 `candidate_signed_delta/candidate_absolute_delta` arrays as the
+  replay reference and preserve their `biological_scoring_key` order exactly;
+- index dependency6 by the same
+  `(puzzle, method, design_pos, ref, alt)` biological key used by the qualified
+  V5/V6 caches; use the v7 `full_pos` only to verify the corrected construct
+  coordinate and source-zero invariant;
+- retain the frozen `RIDGE_ALPHA=1.0`, train-only weighted standardization,
+  signed/absolute two-output target and
+  puzzle→method→mutant→qualified-position training weights;
+- construct the 47-feature candidate by appending dependency6 to the replayed
+  baseline41. No interaction expansion, feature selection, alpha search or
+  replacement of existing columns is allowed;
+- create held predictions for every registered construct position before any
+  target join. V7 cache values may enter prediction; held target, target error,
+  qualified target mask and score may not.
+
 V7M2 acceptance: exact `V7M2_RINALMO_DEPENDENCY_SIGNAL_ELIGIBLE`. Anything else closes v7.
 
 ## V7M3–V7M4 — Neural operator and seed-0 screen
