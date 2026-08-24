@@ -98,6 +98,9 @@ evidence_state:
     incremental_standardized_rank: 11
     exact_duplicate_column_pairs: []
     exact_identity: DELTA_UNPAIRED_PLUS_DELTA_UPSTREAM_PLUS_DELTA_DOWNSTREAM_EQUALS_ZERO
+    float32_identity_max_abs_residual: 5.9604644775390625e-08
+    qualifier_identity_atol: 2.0e-07
+    smoke_violations_at_qualifier_tolerance: 0
     target_columns_read: false
     external_outcome_accessed: false
   v6m2_eligibility: NOT_RUN
