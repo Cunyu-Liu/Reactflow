@@ -24,6 +24,7 @@ from scripts.reactflow_delta.run_model_rescue_v7_probe import (
     FOLD_SCHEMA,
     PREDICTION_SCHEMA,
     assert_corrected_baseline_replay,
+    predict_registered_held,
 )
 from scripts.reactflow_delta.score_model_rescue_v7_probe import SCHEMA as SCORE_SCHEMA
 
@@ -153,6 +154,53 @@ def test_v7_candidate_stats_preserve_cell_weight_and_exclude_missing_target() ->
     assert duplicated.sum_weight == pytest.approx(2.0)
     assert duplicated_counts["n_train_cells"] == 2
     assert duplicated_counts["n_train_valid_mutants"] == 4
+
+
+def _constant_model(width: int, signed: float, absolute: float) -> dict:
+    return {
+        "mean_x": np.zeros(width, dtype=np.float64),
+        "scale_x": np.ones(width, dtype=np.float64),
+        "mean_y": np.asarray([signed, absolute], dtype=np.float64),
+        "coefficient": np.zeros((width, 2), dtype=np.float64),
+        "alpha": 1.0,
+    }
+
+
+class _PredictionUniverse:
+    def __init__(self) -> None:
+        self.construct = SimpleNamespace(
+            sequence="AUG",
+            wt_observed=np.asarray([True, True, True]),
+            wt_reactivity=np.asarray([0.1, 0.2, 0.3]),
+            wt_error=np.asarray([0.1, 0.1, 0.1]),
+            region_map=np.asarray(["design_region", "other", "other"]),
+        )
+
+    def get_construct(self, _construct_id: str) -> SimpleNamespace:
+        return self.construct
+
+    def mutant_full_profile(self, *_args: object) -> tuple[np.ndarray, np.ndarray]:
+        raise AssertionError("held target access entered the V7M2 prediction path")
+
+
+def test_v7_registered_prediction_path_is_held_target_invariant() -> None:
+    univ = _PredictionUniverse()
+    record = _record("cell_a", "held")
+    prediction = predict_registered_held(
+        univ,
+        [record],
+        _ArrayCache(12),
+        _ArrayCache(11),
+        _ArrayCache(6),
+        _constant_model(41, signed=0.1, absolute=0.2),
+        _constant_model(47, signed=0.3, absolute=0.4),
+        outer_fold=0,
+    )
+    assert len(prediction["keys"]) == 3
+    assert np.array_equal(prediction["baseline_signed_delta"], np.full(3, 0.1))
+    assert np.array_equal(prediction["baseline_absolute_delta"], np.full(3, 0.2))
+    assert np.array_equal(prediction["candidate_signed_delta"], np.full(3, 0.3))
+    assert np.array_equal(prediction["candidate_absolute_delta"], np.full(3, 0.4))
 
 
 def test_corrected_feature41_replay_requires_exact_key_order_and_predictions(
