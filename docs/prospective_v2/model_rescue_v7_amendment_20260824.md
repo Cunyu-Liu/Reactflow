@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v7 Amendment
 
-**状态：V7M1 全量 outcome-blind cache PASS；V7M2 固定 corrected prediction-only probe 已授权**
+**状态：V7M2 完整 20-fold unscored merge PASS；一次性 complete-score authority 已授权**
 **日期：2026-08-24**  
 **范围：RiNALMo-Giga exact source-to-receiver nucleotide dependency only**
 

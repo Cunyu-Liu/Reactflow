@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v7_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v7_20260824
 created_at: '2026-08-24T16:20:00+08:00'
-current_status: V7M2_FIXED_CORRECTED_RINALMO_DEPENDENCY_ELIGIBILITY_PREDICTION_AUTHORIZED
+current_status: V7M2_COMPLETE_CORRECTED_SCORE_ONCE_AUTHORIZED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -228,20 +228,28 @@ evidence_state:
     cell_balanced_weight_test: PASS
     focused_tests: 26_PASS_LOCAL_AND_REMOTE
   v7m2_eligibility:
-    status: V7M2_PREDICTION_ONLY_RUNNING
+    status: V7M2_COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
     session: reactflow_v7_v7m2_corrected_probe_20260824
     started_at: "2026-08-24T21:53:30+08:00"
     output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v7/v7m2_corrected_probe
     expected_outer_folds: 20
+    completed_outer_folds: 20
+    complete_unscored_merge_status: V7M2_COMPLETE_UNSCORED_MERGE_PASS
+    corrected_feature41_replay_all_folds: true
+    target_identity_exact: true
+    prediction_only_fields: true
+    held_scores_absent_before_transition: true
+    model_selection_performed: false
+    legacy_target_dependent_prediction_reused: false
     complete_before_score: true
-    held_score_read_allowed: false
+    held_score_read_allowed: true
     partial_fold_score_read_allowed: false
     external_outcome_accessed: false
     partial_metrics_read: false
   v7m4_screen: NOT_RUN
   v7m5_confirmation: NOT_RUN
 
-next_allowed_action: RUN_COMPLETE_V7M2_PREDICTION_ONLY_FOLDS_AND_UNSCORED_MERGE
+next_allowed_action: RUN_COMPLETE_V7M2_SCORE_AND_PREFROZEN_QUALIFIER_ONCE
 
 engineering_incidents:
   - id: V7E001
