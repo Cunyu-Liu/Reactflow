@@ -76,7 +76,7 @@ class EnsembleFeatureCache:
             if canonical in self.index:
                 raise ValueError(f"duplicate canonical cache row {canonical}")
             self.index[canonical] = index
-        self.features = self.handle["features"]
+        self.features = np.asarray(self.handle["features"][:], dtype=np.float32)
 
     def close(self) -> None:
         self.handle.close()
