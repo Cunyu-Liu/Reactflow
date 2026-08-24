@@ -56,6 +56,9 @@ def test_v7_dependency_definition_is_one_fixed_published_intervention() -> None:
     assert model["runtime_cuda"] == "11.8"
     assert model["runtime_flash_attention"] == "2.3.2"
     assert model["attention_backend"] == "OFFICIAL_FLASH_ATTENTION"
+    assert model["parameter_dtype"] == "FLOAT32_OFFICIAL_CHECKPOINT"
+    assert model["forward_autocast_dtype"] == "BFLOAT16"
+    assert model["output_logit_and_log_odds_dtype"] == "FLOAT32"
     assert dependency["sequence_input"] == (
         "FULL_UNMASKED_WT_AND_EXACT_REGISTERED_MUTANT_SEQUENCE"
     )
