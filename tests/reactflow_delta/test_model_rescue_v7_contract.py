@@ -163,3 +163,19 @@ def test_v7m1_controller_waits_for_frozen_setup_and_never_scores() -> None:
     assert "qualify_model_rescue_v7_dependency_cache.py" in text
     assert "score_model_rescue" not in text
     assert "run_model_rescue_v7_probe" not in text
+
+
+def test_v7_runtime_recovery_uses_official_build_tool_versions() -> None:
+    recovery = ROOT / "scripts/reactflow_delta/recover_model_rescue_v7_runtime.sh"
+    subprocess.run(["bash", "-n", str(recovery)], check=True)
+    text = recovery.read_text(encoding="utf-8")
+
+    assert "pip==23.3" in text
+    assert "setuptools==68.2.2" in text
+    assert "wheel==0.41.2" in text
+    assert "ninja==1.11.1.1" in text
+    assert "flash-attn==2.3.2" in text
+    assert "--no-build-isolation" in text
+    assert "TORCH_CUDA_ARCH_LIST=8.0" in text
+    assert "runtime_setup_complete" in text
+    assert "score_model_rescue" not in text
