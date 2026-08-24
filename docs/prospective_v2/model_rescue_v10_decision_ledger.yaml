@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v10_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v10_20260825
 created_at: '2026-08-25T01:30:00+08:00'
-current_status: V10M0_IMPLEMENTATION_PASS_V10M1_SMOKE_AUTHORIZED
+current_status: V10M1_ENGINEERING_SMOKE_PASS_V10M2_SCREEN_AUTHORIZED
 
 immutable_parent:
   v9_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
@@ -33,16 +33,31 @@ v10m0:
   held_score_read_allowed: false
   external_outcome_accessed: false
 v10m1:
-  status: REAL_DATA_ENGINEERING_SMOKE_AUTHORIZED
+  status: V10M1_ENGINEERING_SMOKE_PASS
   folds: [0, 1]
   seed: 0
   epochs: 3
   scoring_allowed: false
   output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m1_real_smoke
-v10m2: NOT_AUTHORIZED
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m1_real_smoke/v10m1_smoke_qualification.json
+  first_run_fold0_preserved: true
+  first_run_fold1_interruption: FLOAT32_NORMAL_CDF_INVERSE_ROUND_TRIP_MEDIAN_INVARIANT
+  recovery_change: FLOAT64_DISTRIBUTION_CONSTRUCTION_ALL_FOUR_HEADS
+  scientific_protocol_changed: false
+  missing_fold_only_recovery: true
+  scientific_scores_read: false
+  external_outcome_accessed: false
+v10m2:
+  status: FIXED_SEED0_TWENTY_FOLD_SCREEN_AUTHORIZED
+  folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  seed: 0
+  epochs: 40
+  partial_scoring_allowed: false
+  complete_universe_before_score: true
+  controller: scripts/reactflow_delta/run_model_rescue_v10_screen_controller.sh
 v10m3: NOT_AUTHORIZED
 v10m4: NOT_AUTHORIZED
 v10m5: NOT_RUN
 v10m6: NOT_RUN
 
-next_allowed_action: RUN_V10M1_FOLDS0_1_SEED0_THREE_EPOCH_PREDICTION_ONLY_SMOKE
+next_allowed_action: RUN_V10M2_SEED0_TWENTY_FOLD_FORTY_EPOCH_COMPLETE_BEFORE_SCORE_SCREEN
