@@ -56,6 +56,13 @@ def test_v6_has_one_fixed_constraint_protocol_and_incremental_gate() -> None:
     assert len(engine["constrained_features"]) == 12
     assert probe["baseline_features"] == "DIRECT_18_PLUS_V5_UNCONSTRAINED_12"
     assert probe["gate"]["signed_delta_relative_mae_gain_min"] == 0.01
+    invariants = probe["implementation_invariants"]
+    assert invariants["baseline_replay"] == (
+        "V6_BASELINE_MUST_MATCH_V5_CANDIDATE_PREDICTIONS"
+    )
+    assert invariants["merge_before_target_join"] is True
+    assert invariants["model_or_feature_selection_allowed"] is False
+    assert invariants["alpha_search_allowed"] is False
 
 
 def test_v6_neural_controls_are_not_a_search_and_gate_remains_top_journal() -> None:
