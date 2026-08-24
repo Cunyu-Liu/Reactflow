@@ -10,31 +10,32 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v6m2_authorizes_only_complete_score_and_preserves_prior_results() -> None:
+def test_v6m2_terminal_fail_closes_training_and_preserves_prior_results() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v6 = _yaml("configs/reactflow_delta/model_rescue_v6_amendment.yaml")
     v5 = _yaml("configs/reactflow_delta/model_rescue_v5_amendment.yaml")
     v4 = _yaml("configs/reactflow_delta/model_rescue_v4_amendment.yaml")
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
 
-    assert active["authority"]["current_phase"] == "V6M2"
-    assert active["runnable_phases"] == ["V6M2"]
-    assert active["authorization"]["implementation_allowed"] is True
-    assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is True
-    assert active["authorization"]["internal_development_probe_allowed"] is True
+    assert active["authority"]["current_phase"] == "M6"
+    assert active["runnable_phases"] == ["M6"]
+    assert active["authorization"]["implementation_allowed"] is False
+    assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is False
+    assert active["authorization"]["internal_development_probe_allowed"] is False
     assert active["training_allowed"] is False
     assert active["candidate_model_training_allowed"] is False
     assert active["outcome_blind_cache_allowed"] is False
-    assert active["held_score_read_allowed"] is True
+    assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert v6["contract_status"] == (
-        "V6M2_SCORE_ONCE_AUTHORIZED_AFTER_COMPLETE_UNSCORED_MERGE"
+        "TERMINAL_V6M2_MODEL_RESCUE_V6_FAIL_BENCHMARK_ROUTE_LOCKED"
     )
     phase_status = {row["id"]: row["status"] for row in v6["phase_graph"]}
     assert phase_status["V6M1"] == "PASS"
-    assert phase_status["V6M2"] == "SCORE_ONCE_AUTHORIZED"
+    assert phase_status["V6M2"] == "FAIL_SIGNED_DELTA_RELATIVE_GATE"
     assert phase_status["V6M3"] == "NOT_AUTHORIZED"
+    assert phase_status["V6M6"] == "FAIL_HANDOFF_COMPLETE"
     assert v6["parent"]["v5_terminal_status"] == "MODEL_RESCUE_V5_FAIL"
     assert v5["contract_status"] == (
         "TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED"

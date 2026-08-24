@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v6_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v6_20260824
 created_at: '2026-08-24T12:55:00+08:00'
-current_status: V6M2_SCORE_ONCE_AUTHORIZED_AFTER_COMPLETE_UNSCORED_MERGE
+current_status: TERMINAL_V6M2_MODEL_RESCUE_V6_FAIL_BENCHMARK_ROUTE_LOCKED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -115,7 +115,7 @@ evidence_state:
     target_columns_read: false
     external_outcome_accessed: false
   v6m2_eligibility:
-    status: COMPLETE_UNSCORED_MERGE_PASS_SINGLE_HELD_SCORE_ACCESS
+    status: MODEL_RESCUE_V6_FAIL
     implementation:
       - scripts/reactflow_delta/model_rescue_v6_probe.py
       - scripts/reactflow_delta/run_model_rescue_v6_probe.py
@@ -131,7 +131,7 @@ evidence_state:
       valid_prediction_schema_and_outer_fold: 20/20
       prediction_values_inspected: false
       score_fields_inspected: false
-    target_join_authorized: true
+    target_join_authorized: false
     real_openknot_probe_started: true
     complete_prediction_only_folds: 20/20
     complete_prediction_artifacts: 20/20
@@ -140,12 +140,33 @@ evidence_state:
     unscored_merge:
       artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m2_probe_predictions/v6m2_merged_unscored.json
       status: V6M2_COMPLETE_UNSCORED_MERGE_PASS
-      held_score_computed: false
+      held_score_computed: true
       partial_score_inspected: false
       external_outcome_accessed: false
-    v6_score_accessed: false
+    complete_score:
+      artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m2_probe_predictions/v6m2_complete_score.json
+      status: V6M2_COMPLETE_SCORE_PASS
+      target_join_after_complete_merge: true
+    qualification:
+      artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m2_probe_predictions/v6m2_qualification.json
+      overall_status: MODEL_RESCUE_V6_FAIL
+      v6m3_authorized: false
+      signed_delta_baseline_mean: 0.26569519753217474
+      signed_delta_candidate_mean: 0.26538683147852865
+      signed_delta_mean_gain: 0.00030836605364606835
+      signed_delta_relative_gain: 0.0011606007805569248
+      signed_delta_ci95: [0.00010571960237784966, 0.0005110125049142871]
+      signed_delta_positive_puzzles: 16
+      signed_delta_relative_gain_gate: false
+      signed_delta_ci_lower_gate: true
+      signed_delta_positive_puzzles_gate: true
+      absolute_delta_relative_gain: 0.0009248235117158895
+      absolute_delta_guardrail_gate: true
+      prediction_integrity_gate: true
+      v5_baseline_replay_gate: true
+    v6_score_accessed: true
     external_outcome_accessed: false
   v6m4_screen: NOT_RUN
   v6m5_confirmation: NOT_RUN
 
-next_allowed_action: SCORE_COMPLETE_V6M2_MERGE_ONCE_THEN_RUN_FROZEN_QUALIFIER
+next_allowed_action: RETURN_TO_MAIN_CONTRACT_M6_BENCHMARK_ROUTE
