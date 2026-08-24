@@ -16,6 +16,9 @@ FEATURE_NAMES = (
 
 RNA_BASES = ("A", "C", "G", "U")
 RNA_BASE_TO_INDEX = {base: index for index, base in enumerate(RNA_BASES)}
+RINALMO_VOCAB_BASE_TOKENS = ("A", "C", "G", "T")
+RINALMO_ACGU_TOKEN_INDICES = (5, 6, 7, 8)
+RINALMO_SEQUENCE_TOKEN_OFFSET = 1
 LOG_ODDS_EPSILON = 1.0e-10
 
 RINALMO_MODEL_NAME = "giga-v1"

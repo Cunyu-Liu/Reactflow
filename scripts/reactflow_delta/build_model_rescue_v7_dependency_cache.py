@@ -31,9 +31,12 @@ from scripts.reactflow_delta.model_rescue_v7_schema import (
     CACHE_SCHEMA,
     DEPENDENCY_CODE_COMMIT,
     FEATURE_NAMES,
+    RINALMO_ACGU_TOKEN_INDICES,
     RINALMO_CODE_COMMIT,
     RINALMO_MODEL_NAME,
     RINALMO_PARAMETER_COUNT,
+    RINALMO_SEQUENCE_TOKEN_OFFSET,
+    RINALMO_VOCAB_BASE_TOKENS,
 )
 
 
@@ -302,6 +305,20 @@ def build_cache(
         ),
         "output_logit_and_log_odds_dtype": getattr(
             inferer, "output_logit_and_log_odds_dtype", "UNKNOWN"
+        ),
+        "conceptual_rna_bases": ["A", "C", "G", "U"],
+        "official_vocab_base_tokens": list(
+            getattr(inferer, "acgu_tokens", RINALMO_VOCAB_BASE_TOKENS)
+        ),
+        "official_vocab_base_indices": list(
+            getattr(inferer, "acgu_indices", RINALMO_ACGU_TOKEN_INDICES)
+        ),
+        "sequence_token_offset": int(
+            getattr(
+                inferer,
+                "sequence_token_offset",
+                RINALMO_SEQUENCE_TOKEN_OFFSET,
+            )
         ),
         "full_unmasked_wt_and_exact_mutant": True,
         "self_dependency_zero": True,
