@@ -37,6 +37,7 @@ if [[ ! -x "$PYTHON" ]]; then
     'pytorch-cuda=11.8' \
     'cuda-nvcc=11.8' \
     'cuda-cudart-dev=11.8' \
+    'cuda-libraries-dev=11.8' \
     'numpy=1.24.4' \
     'pandas=2.0.3' \
     'h5py=3.9.0' \
@@ -53,6 +54,11 @@ if [[ ! -f "$RUNTIME/include/cuda_runtime.h" ]]; then
   "$CONDA" install -y -p "$RUNTIME" --override-channels \
     -c nvidia -c conda-forge \
     'cuda-cudart-dev=11.8'
+fi
+if [[ ! -f "$RUNTIME/include/cusparse.h" ]]; then
+  "$CONDA" install -y -p "$RUNTIME" --override-channels \
+    -c nvidia -c conda-forge \
+    'cuda-libraries-dev=11.8'
 fi
 "$PYTHON" -m pip install \
   packaging==23.2 \
