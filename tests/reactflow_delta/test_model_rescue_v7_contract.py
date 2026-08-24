@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 
 import yaml
 
@@ -121,3 +122,21 @@ def test_v7_preserves_all_prior_terminal_states_and_running_v3() -> None:
     assert v2["contract_status"] == (
         "TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY"
     )
+
+
+def test_v7m1_controller_waits_for_frozen_setup_and_never_scores() -> None:
+    controller = ROOT / "scripts/reactflow_delta/run_model_rescue_v7_cache_controller.sh"
+    subprocess.run(["bash", "-n", str(controller)], check=True)
+    text = controller.read_text(encoding="utf-8")
+
+    assert "EXPECTED_WEIGHT_BYTES=2603787622" in text
+    assert "POLL_SECONDS=900" in text
+    assert "runtime_setup_complete" in text
+    assert "weight_download_complete" in text
+    assert "--max-constructs 2" in text
+    assert "--expected-constructs 160" in text
+    assert "--expected-mutants 13976" in text
+    assert "build_model_rescue_v7_dependency_cache.py" in text
+    assert "qualify_model_rescue_v7_dependency_cache.py" in text
+    assert "score_model_rescue" not in text
+    assert "run_model_rescue_v7_probe" not in text
