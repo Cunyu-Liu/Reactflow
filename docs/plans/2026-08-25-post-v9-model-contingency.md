@@ -146,6 +146,16 @@ input gradients were finite. The symmetric initialization recovered
 `a=b=0.5` to at most `1.11e-16`. This establishes numerical feasibility of the
 parameterization, not predictive benefit.
 
+`INPUT_INITIALIZATION_CHECK` (2026-08-25, frozen fold0 inputs only, no target or
+score): on 73,632 registered rows, the seed0 V9 head had zero mixture-weight
+saturation below 0.01 or above 0.99 with either raw or standardized feature41.
+For raw inputs, narrow-scale median/p99 were 0.118/0.210 and wide-scale
+median/p99 were 0.354/0.462; baseline and MeanAligned point inputs were nearly
+identical in these diagnostics. Thus raw feature scaling does not
+catastrophically break initialization. Outer-train standardization remains a
+reasonable successor optimization, but it is not a sufficient explanation of
+V9 performance and must not be presented as one.
+
 ## Evidence status and missing perspectives
 
 - The located evidence is internal development evidence; it is not external
