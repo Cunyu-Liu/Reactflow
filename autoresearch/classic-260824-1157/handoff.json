@@ -1,8 +1,8 @@
 {
   "schema_version": "autoresearch.handoff.v1",
   "current_incumbent": "corrected_b1",
-  "next_hypothesis": "exact_mutant_minus_wt_boltzmann_ensemble_delta",
-  "next_stage": "V5M2_FIXED_WEIGHTED_RIDGE_ELIGIBILITY",
-  "outcome": "progressed",
-  "qualification": "V5M1_OUTCOME_BLIND_ENSEMBLE_CACHE_PASS"
+  "next_hypothesis": "TO_BE_FROZEN_UNDER_A_NEW_SEPARATE_AMENDMENT",
+  "next_stage": "POST_V5_REFLECTION_AND_V6_HYPOTHESIS_SELECTION",
+  "outcome": "discarded_continue_loop",
+  "qualification": "MODEL_RESCUE_V5_FAIL"
 }
