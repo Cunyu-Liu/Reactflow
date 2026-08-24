@@ -154,6 +154,7 @@ def test_v7m1_controller_waits_for_frozen_setup_and_never_scores() -> None:
 
     assert "EXPECTED_WEIGHT_BYTES=2603787622" in text
     assert "POLL_SECONDS=900" in text
+    assert 'runtime_v7_clean/bin/python' in text
     assert "runtime_setup_complete" in text
     assert "weight_download_complete" in text
     assert "--max-constructs 2" in text
@@ -165,7 +166,7 @@ def test_v7m1_controller_waits_for_frozen_setup_and_never_scores() -> None:
     assert "run_model_rescue_v7_probe" not in text
 
 
-def test_v7_runtime_recovery_uses_official_build_tool_versions() -> None:
+def test_v7_runtime_recovery_builds_a_clean_frozen_environment() -> None:
     recovery = ROOT / "scripts/reactflow_delta/recover_model_rescue_v7_runtime.sh"
     subprocess.run(["bash", "-n", str(recovery)], check=True)
     text = recovery.read_text(encoding="utf-8")
@@ -173,10 +174,21 @@ def test_v7_runtime_recovery_uses_official_build_tool_versions() -> None:
     assert "pip=23.3" in text
     assert "setuptools=68.2.2" in text
     assert "wheel=0.41.2" in text
+    assert "runtime_v7_clean" in text
+    assert "pytorch=2.1.0=py3.11_cuda11.8_cudnn8.7.0_0" in text
+    assert "pytorch-cuda=11.8" in text
+    assert "cuda-nvcc=11.8" in text
+    assert "numpy=1.24.4" in text
+    assert "pandas=2.0.3" in text
+    assert "h5py=3.9.0" in text
+    assert "pyyaml=6.0.1" in text
+    assert "packaging==23.2" in text
     assert "ninja==1.11.1.1" in text
+    assert "einops==0.6.1" in text
+    assert "ml-collections==0.1.1" in text
+    assert "gdown==5.1.0" in text
     assert "flash-attn==2.3.2" in text
     assert "--no-build-isolation" in text
-    assert "--force-reinstall" in text
     assert "CONDA_PKGS_DIRS" in text
     assert "TORCH_CUDA_ARCH_LIST=8.0" in text
     assert "runtime_setup_complete" in text

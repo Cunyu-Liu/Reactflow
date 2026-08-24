@@ -3,7 +3,7 @@ set -euo pipefail
 
 BASE=/mnt/cunyuliu/reactflow_delta_model_rescue_v7
 REPO=/home/cunyuliu/reactflow_delta_worktrees/model_rescue_v7_20260824
-PYTHON="$BASE/runtime/bin/python"
+PYTHON="$BASE/runtime_v7_clean/bin/python"
 OFFICIAL="$BASE/official/RiNALMo"
 WEIGHTS="$BASE/weights/rinalmo_giga_pretrained.pt"
 M2=/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
