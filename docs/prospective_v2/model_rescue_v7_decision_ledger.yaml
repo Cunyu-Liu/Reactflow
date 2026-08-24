@@ -99,6 +99,25 @@ evidence_state:
     foundation_inference_run: false
     v7_target_or_score_accessed: false
     external_outcome_accessed: false
+  v7m1_outcome_blind_preflight:
+    status: PASS
+    source_columns: [id, sequence, puzzle, method, sub_start, mutA]
+    constructs: 160
+    registered_mutants: 13976
+    sequence_lengths: [177]
+    puzzles: 20
+    methods_per_puzzle: 8
+    global_method_labels: 9
+    global_label_note: >-
+      gRNAde occurs in five puzzles and gRNAde-no3d in fifteen; every puzzle
+      still has exactly eight method cells, so the frozen within-puzzle
+      method-balanced estimand is unchanged.
+    mutant_outcome_columns_read: false
+    external_outcome_accessed: false
+    cache_builder_runtime_dependencies: RINALMO_ONLY_NO_VIENNARNA_IMPORT
+    local_focused_commit: fd9637b
+    remote_focused_commit: f2e5683
+    focused_tests: 8_PASS_REMOTE
   v7m1_cache: NOT_RUN
   v7m2_eligibility: NOT_RUN
   v7m4_screen: NOT_RUN
