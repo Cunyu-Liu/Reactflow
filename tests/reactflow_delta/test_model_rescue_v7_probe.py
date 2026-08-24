@@ -23,10 +23,14 @@ from scripts.reactflow_delta.run_model_rescue_v7_probe import (
     CORRECTED_REFERENCE_SCHEMA,
     FOLD_SCHEMA,
     PREDICTION_SCHEMA,
+    assert_probe_authority,
     assert_corrected_baseline_replay,
     predict_registered_held,
 )
-from scripts.reactflow_delta.score_model_rescue_v7_probe import SCHEMA as SCORE_SCHEMA
+from scripts.reactflow_delta.score_model_rescue_v7_probe import (
+    SCHEMA as SCORE_SCHEMA,
+    assert_score_authority,
+)
 
 
 def _dependency_cache(path: Path, *, full_pos: int = 1) -> None:
@@ -338,3 +342,47 @@ def test_v7_probe_constants_match_the_machine_contract() -> None:
     assert ABSOLUTE_RELATIVE_GAIN_MIN == gate[
         "absolute_delta_relative_mae_guardrail_min"
     ]
+
+
+def _write_v7m2_authority(
+    root: Path,
+    *,
+    held_score: bool,
+    partial_score: bool = False,
+    external_outcome: bool = False,
+) -> None:
+    path = root / "configs/reactflow_delta/active_contract.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "authority": {"current_phase": "V7M2"},
+                "training_allowed": "FIXED_CORRECTED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY",
+                "held_score_read_allowed": held_score,
+                "partial_fold_score_read_allowed": partial_score,
+                "new_external_outcome_access_allowed": external_outcome,
+            }
+        )
+    )
+
+
+def test_v7m2_prediction_and_complete_score_authorities_are_mutually_exclusive(
+    tmp_path: Path,
+) -> None:
+    _write_v7m2_authority(tmp_path, held_score=False)
+    assert_probe_authority(tmp_path)
+    with pytest.raises(RuntimeError, match="score access is closed"):
+        assert_score_authority(tmp_path)
+
+    _write_v7m2_authority(tmp_path, held_score=True)
+    assert_score_authority(tmp_path)
+    with pytest.raises(RuntimeError, match="held scores closed"):
+        assert_probe_authority(tmp_path)
+
+    _write_v7m2_authority(tmp_path, held_score=True, partial_score=True)
+    with pytest.raises(RuntimeError, match="partial V7M2 scores"):
+        assert_score_authority(tmp_path)
+
+    _write_v7m2_authority(tmp_path, held_score=True, external_outcome=True)
+    with pytest.raises(RuntimeError, match="external outcomes locked"):
+        assert_score_authority(tmp_path)
