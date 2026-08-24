@@ -6,12 +6,13 @@ current_status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_AUTHORIZED
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
   model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
-  model_rescue_v3: R3C3_RUNNING_SEPARATELY_UNCHANGED
+  model_rescue_v3: R3C3_INTERRUPTED_INVALIDATED_TARGET_IDENTITY_RECOVERABLE
   model_rescue_v4: MODEL_RESCUE_V4_FAIL
   model_rescue_v5: MODEL_RESCUE_V5_FAIL
   model_rescue_v6: MODEL_RESCUE_V6_FAIL
 
 completed_evidence:
+  legacy_v4_v5_v6_qualification: SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY
   v4:
     primary: PAIRED_RNAFM_DUAL_TOWER
     signed_delta_relative_gain: 0.0022674893385431967
@@ -28,6 +29,16 @@ completed_evidence:
     signed_delta_positive_puzzles: 16
     signed_delta_ci95: [0.00010571960237784966, 0.0005110125049142871]
     interpretation: STABLE_BUT_SMALL_ADDITIONAL_EXPERIMENT_CONDITIONING_SIGNAL
+  corrected_tic2a:
+    status: TIC2A_CORRECTED_BASELINE_REBUILD_PASS
+    target_identity: EXACT_PUZZLE_METHOD_MUTATION
+    legacy_prediction_reused: false
+    model_selection_performed: false
+    direct18_to_v6_feature41_signed_delta_relative_gain: 0.012815157514742657
+    direct18_to_v6_feature41_signed_delta_positive_puzzles: 20
+    direct18_to_v6_feature41_absolute_delta_relative_gain: 0.012634284393969065
+    direct18_to_v6_feature41_absolute_delta_positive_puzzles: 19
+    qualification_artifact: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_qualification.json
 
 idea_register:
   selected:
@@ -61,7 +72,7 @@ decisions:
     decision: FIX_SIX_DEPENDENCY_FEATURES_WITH_NO_LAYER_OR_SUMMARY_SEARCH
   - id: V7D004
     status: FROZEN_BEFORE_ANY_V7_SCORE
-    decision: V7_BASELINE_REPLAYS_V6_CANDIDATE_AT_ATOL_1E_MINUS_12
+    decision: V7_BASELINE_REPLAYS_TIC2A_CORRECTED_V6_FEATURE41_AT_ATOL_1E_MINUS_12
   - id: V7D005
     status: FROZEN_BEFORE_ANY_V7_SCORE
     decision: REQUIRE_ONE_PERCENT_INCREMENTAL_SIGNED_DELTA_GAIN_FOR_NEURAL_ELIGIBILITY
@@ -155,6 +166,13 @@ evidence_state:
     remote_focused_commit: f2e5683
     focused_tests: 8_PASS_REMOTE
   v7m1_cache: NOT_RUN
+  v7m2_implementation:
+    status: IMPLEMENTED_AND_FOCUSED_TESTED_NOT_AUTHORIZED
+    baseline: TIC2A_CORRECTED_V6_FEATURE41
+    candidate_addition: RINALMO_DEPENDENCY6_ONLY
+    legacy_prediction_reuse: false
+    complete_before_score: true
+    focused_tests: 23_PASS_LOCAL_AND_REMOTE
   v7m2_eligibility: NOT_RUN
   v7m4_screen: NOT_RUN
   v7m5_confirmation: NOT_RUN
@@ -178,3 +196,15 @@ engineering_incidents:
     scientific_effect: NONE_NO_FOUNDATION_FORWARD_AND_NO_CACHE_ARTIFACT_CREATED
     recovery: >-
       CONDA_FORCE_REINSTALL_OFFICIAL_PINNED_BUILD_TOOLS_BEFORE_PIP_FLASH_ATTN_BUILD
+  - id: V7E003
+    status: RECOVERABLE_RUNTIME_SETUP_INTERRUPTION
+    stage: V7M1_PRE_FOUNDATION_FORWARD
+    cause: CUDA_11_8_RUNTIME_CREATED_WITH_NVCC_BUT_WITHOUT_CUDA_CUDART_DEVELOPMENT_HEADERS
+    scientific_effect: NONE_NO_FOUNDATION_FORWARD_AND_NO_CACHE_ARTIFACT_CREATED
+    recovery: INSTALL_PINNED_CUDA_CUDART_DEV_11_8_IN_THE_EXISTING_FROZEN_RUNTIME
+  - id: V7E004
+    status: RECOVERABLE_RUNTIME_SETUP_INTERRUPTION
+    stage: V7M1_PRE_FOUNDATION_FORWARD
+    cause: CUDA_11_8_RUNTIME_MISSING_CUSPARSE_AND_REMAINING_LIBRARY_DEVELOPMENT_HEADERS
+    scientific_effect: NONE_NO_FOUNDATION_FORWARD_AND_NO_CACHE_ARTIFACT_CREATED
+    recovery: INSTALL_PINNED_CUDA_LIBRARIES_DEV_11_8_IN_THE_EXISTING_FROZEN_RUNTIME

@@ -85,9 +85,10 @@ def test_v7_requires_incremental_probe_and_top_journal_model_gate() -> None:
     )
     assert probe["candidate_features"] == "BASELINE_PLUS_V7_RINALMO_DEPENDENCY_6"
     assert probe["implementation_invariants"]["baseline_replay"] == (
-        "V7_BASELINE_MUST_MATCH_V6_CANDIDATE_PREDICTIONS"
+        "V7_BASELINE_MUST_MATCH_TIC2A_CORRECTED_V6_FEATURE41_PREDICTIONS"
     )
     assert probe["implementation_invariants"]["baseline_replay_atol"] == 1e-12
+    assert probe["implementation_invariants"]["legacy_v6_prediction_reuse_allowed"] is False
     assert probe["gate"]["signed_delta_relative_mae_gain_min"] == 0.01
     assert candidate["prerequisite"] == (
         "EXACT_V7M2_RINALMO_DEPENDENCY_SIGNAL_ELIGIBLE"

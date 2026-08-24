@@ -45,8 +45,8 @@ Files to add:
 
 Required behavior:
 
-- reuse V5 and V6 caches and V6 fold prediction/model artifacts;
-- baseline41 must replay V6 candidate at `atol=1e-12`;
+- reuse the requalified outcome-blind V5/V6 caches and rebuild all target-dependent fits;
+- baseline41 must replay the corrected TIC2A feature41 prediction at `atol=1e-12`;
 - candidate adds dependency6 only;
 - exact puzzle/method/mutant/position weights;
 - prediction artifacts contain keys and predictions but no target or score;
@@ -59,8 +59,10 @@ Frozen implementation interface, confirmed without opening any score artifact:
   `accumulate_train_stats` and the full-construct prediction ordering from the
   existing v6 probe instead of independently rebuilding the 41-feature
   baseline;
-- treat the v6 `candidate_signed_delta/candidate_absolute_delta` arrays as the
-  replay reference and preserve their `biological_scoring_key` order exactly;
+- treat the corrected TIC2A
+  `v6_feature41_signed_delta/v6_feature41_absolute_delta` arrays as the replay
+  reference and preserve their `biological_scoring_key` order exactly; legacy
+  pre-correction V6 predictions are prohibited;
 - index dependency6 by the same
   `(puzzle, method, design_pos, ref, alt)` biological key used by the qualified
   V5/V6 caches; use the v7 `full_pos` only to verify the corrected construct

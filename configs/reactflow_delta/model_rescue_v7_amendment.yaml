@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v7_amendment.v1
 contract_id: reactflow_delta_model_rescue_v7_20260824
 contract_status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_AUTHORIZED
-contract_revision: V7_RINALMO_DEPENDENCY_PRE_FORWARD_FP32_DISTANCE_AND_SEED_POLICY_FROZEN
+contract_revision: V7_TARGET_IDENTITY_CORRECTED_COMPARATOR_IMPLEMENTATION_FROZEN
 created_at: '2026-08-24T16:20:00+08:00'
 
 parent:
@@ -26,6 +26,7 @@ scientific_scope:
   primary_candidate: b1_rinalmo_dependency_operator
 
 evidence_basis:
+  legacy_v4_v5_v6_status: SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY
   v4_observation: >-
     A 35M-45M dual tower using paired RNA-FM representations was statistically
     equivalent to corrected B1. More foundation parameters and embedding
@@ -42,6 +43,16 @@ evidence_basis:
     Existing models encode sequence context or thermodynamic ensemble changes,
     but do not expose a pretrained directed intervention map from the actual
     mutation source to every receiver nucleotide.
+  corrected_comparator_rebuild:
+    status: TIC2A_CORRECTED_BASELINE_REBUILD_PASS
+    target_identity: EXACT_PUZZLE_METHOD_MUTATION
+    legacy_prediction_reused: false
+    model_selection_performed: false
+    direct18_to_v6_feature41_signed_delta_relative_gain: 0.012815157514742657
+    direct18_to_v6_feature41_signed_delta_positive_puzzles: 20
+    direct18_to_v6_feature41_absolute_delta_relative_gain: 0.012634284393969065
+    direct18_to_v6_feature41_absolute_delta_positive_puzzles: 19
+    qualification_artifact: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_qualification.json
 
 hypothesis:
   statement: >-
@@ -146,8 +157,10 @@ eligibility_probe:
   complete_before_score_access: true
   implementation_invariants:
     folds: SPLIT_V4_OUTER_FOLDS_0_THROUGH_19
-    baseline_replay: V7_BASELINE_MUST_MATCH_V6_CANDIDATE_PREDICTIONS
+    baseline_replay: V7_BASELINE_MUST_MATCH_TIC2A_CORRECTED_V6_FEATURE41_PREDICTIONS
     baseline_replay_atol: 1.0e-12
+    corrected_baseline_reference_directory: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines
+    legacy_v6_prediction_reuse_allowed: false
     prediction_artifact: REGISTERED_FULL_CONSTRUCT_KEYS_WITHOUT_TARGET_OR_SCORE
     merge_before_target_join: true
     score_hierarchy: POSITION_THEN_MUTANT_THEN_METHOD_THEN_PUZZLE

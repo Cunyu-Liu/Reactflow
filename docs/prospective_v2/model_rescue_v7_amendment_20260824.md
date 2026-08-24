@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v7 Amendment
 
-**状态：V7M0 合同与 authority 冻结中**  
+**状态：V7M1 outcome-blind cache 执行中；V7M2 已实现但未授权**
 **日期：2026-08-24**  
 **范围：RiNALMo-Giga exact source-to-receiver nucleotide dependency only**
 
@@ -11,19 +11,31 @@
 - v4：`MODEL_RESCUE_V4_FAIL`；
 - v5：`MODEL_RESCUE_V5_FAIL`；
 - v6：`MODEL_RESCUE_V6_FAIL`；
-- v3：继续在独立 worktree 和 authority 下运行，v7 不覆盖、不终止、不读取其未完成分数。
+- v3：在目标身份错误被确认后登记为
+  `R3C3_INTERRUPTED_INVALIDATED_TARGET_IDENTITY_RECOVERABLE`；旧 checkpoint
+  和旧 target-dependent artifact 不得复用。
 
 v7 的任务不是再增加一组 embedding 或 ViennaRNA descriptor，而是检验一个不同的信息源：预训练 RNA masked language model 在真实 SNV 干预前后产生的、从 mutation source 到每个 receiver 的有向 nucleotide log-odds 变化。
 
 ## 2. 为什么继续做、为什么不是重复实验
 
-已完成证据形成一条清楚的排除链：
+目标身份审计随后确认：旧 accessor 对 3,494/13,976 个 mutant 使用了另一
+construct 的 outcome。所以下列 v4/v5/v6 数字只作为历史实验记录保留，科学
+资格统一为 `SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY`，不得再作为 v7 的
+性能证据或 comparator：
 
 1. v4 的 paired RNA-FM dual tower 使用约 35M–45M trainable 参数，但相对 corrected B1 的 signed-delta 改善仅 0.227%，CRPS 还略有下降。更大容量和 foundation embedding 本身不足。
 2. v5 的 exact-mutant minus WT thermodynamic ensemble features 在 20/20 puzzles 上方向为正，但 signed-delta 改善只有 0.634%。传统 nearest-neighbor ensemble 确有信号，但不够强。
 3. v6 在 v5 上加入同一 WT 2A3 constraint field，16/20 puzzles 为正且 CI 下界大于零，但增量仅 0.116%。继续扩展同类热力学特征不值得。
 
-因此 v7 不搜索 backbone、layer、模型大小或 feature subset。它使用 [Nature Genetics 的 nucleotide dependency 定义](https://www.nature.com/articles/s41588-025-02347-3) 和 [官方实现](https://github.com/gagneurlab/dependencies_DNALM)，但把 query 固定为项目中实际注册的 SNV，把 target 固定为 full construct 的每个 receiver。Foundation 采用 [RiNALMo 官方实现](https://github.com/lbcb-sci/RiNALMo) 的 `giga-v1`；其论文发表于 Nature Communications，模型约 650M 参数并在约 36M 条 ncRNA 序列上预训练。
+修正后，TIC2A 从零重建 direct18、feature30 和 feature41。唯一合法的
+feature41 comparator 相对 direct18 在 signed-delta MAE 上改善 1.2815%
+（20/20 puzzles 正向），在 absolute-delta MAE 上改善 1.2634%（19/20 正向）；
+它不复用任何旧预测，也没有模型选择。v7 因此继续检验 source→receiver
+dependency 是否能在这个修正 comparator 上再提供至少 1% 的增量，而不是
+依赖旧排除链。
+
+v7 不搜索 backbone、layer、模型大小或 feature subset。它使用 [Nature Genetics 的 nucleotide dependency 定义](https://www.nature.com/articles/s41588-025-02347-3) 和 [官方实现](https://github.com/gagneurlab/dependencies_DNALM)，但把 query 固定为项目中实际注册的 SNV，把 target 固定为 full construct 的每个 receiver。Foundation 采用 [RiNALMo 官方实现](https://github.com/lbcb-sci/RiNALMo) 的 `giga-v1`；其论文发表于 Nature Communications，模型约 650M 参数并在约 36M 条 ncRNA 序列上预训练。
 
 这个设计与 v4 的本质差异是：v4 给小样本监督网络两个上下文 embedding，让它自行学习突变干预关系；v7 直接从冻结的 MLM logits 计算干预后的 target nucleotide odds 变化，使 source→receiver relation 在训练前已经显式存在。
 
@@ -102,7 +114,8 @@ Baseline：`direct18 + v5 unconstrained12 + v6 constrained11`。
 Candidate：baseline 加 `v7 dependency6`。  
 Learner：train-only weighted standardized ridge，`alpha=1.0`。  
 权重：puzzle→method→mutant→qualified position 等权。  
-Baseline 必须逐 key 重放 v6 candidate，`atol=1e-12`。
+Baseline 必须逐 key 重放 TIC2A 修正后的 `v6_feature41`，`atol=1e-12`；
+旧 V6 prediction 明确禁止复用。
 
 所有 20 folds 先输出 prediction-only artifact。完整 universe 前禁止读取 prediction value、loss、MAE、CRPS 或 Gate 方向。20/20 后先 merge，再用一次 focused authority join target、score、qualify。
 
