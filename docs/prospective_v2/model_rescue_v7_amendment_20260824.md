@@ -126,6 +126,9 @@ Gate：
 - mutation ref/alt one-hot 8；
 - fixed signed-distance encoding 32。
 
+其中 signed distance 固定为 `receiver_index - source_index`，32 维编码不含可训练参数。对 `k=0,...,15`，按固定顺序拼接
+`sin(distance / 10000^(2k/32))` 与 `cos(distance / 10000^(2k/32))`。不得改用归一化距离、learned embedding、另一组频率或依据 V7M2/V7M4 结果选择编码。
+
 Dependency 先投影到 128 维，context 投影到 256 维；融合后使用约 0.75M trainable parameters 的四层 residual MLP，最后一层零初始化。Mean 用精确 method-balanced signed-delta L1 训练 80 epochs；mean 冻结后用 zero-mean two-Gaussian CRPS 校准 40 epochs。
 
 Equal-capacity controls：
@@ -147,6 +150,8 @@ Top-journal development Gate 同时要求：
 ### V7M5：五 seed formal confirmation
 
 固定 seeds 0–4、20 folds、无 family/layer/epoch/seed selection。唯一五-seed mixture 必须重新通过 V7M4 全部 Gate。内部通过也只标记 `HIGH_EFFECT_POST_HOC_DEVELOPMENT_PASS`。
+
+Corrected B1 checkpoint 也按 fold×seed 唯一冻结：每个 seed 都以相同的 `AlignedDeltaModel(K_rank=0, sparse=False, d=96, heads=4, hidden=64)` 从头在 outer-train 拟合 40 epochs，使用冻结的 B1 Gaussian NLL、Adam、learning rate `1e-3`、weight decay `0`、Huber weight `0`。Seed 0 对匹配 fold 必须复用 exact R3C3-qualified checkpoint；seeds 1–4 按相同算法和对应 seed 重新拟合。一个 fold×seed 内的 corrected-B1 checkpoint 必须由 baseline、primary、zero-dependency control 与 receiver-shift control 共同复用，不允许 checkpoint、seed 或失败 run 选择。
 
 ### V7M6：冻结和 M6 handoff
 

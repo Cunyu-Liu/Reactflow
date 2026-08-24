@@ -82,6 +82,8 @@ V7M2 acceptance: exact `V7M2_RINALMO_DEPENDENCY_SIGNAL_ELIGIBLE`. Anything else 
 Implement only after V7M2 exact PASS:
 
 - frozen corrected B1 adapter from exact R3C3-qualified artifacts;
+- exact non-learned 32-channel Transformer sinusoidal encoding of raw
+  `receiver_index - source_index` as frozen in the machine contract;
 - fixed dependency projection and residual MLP from the contract;
 - equal-capacity zero and cyclic-shift controls;
 - method-balanced L1 mean training and complete mean freeze;
@@ -93,6 +95,9 @@ V7M4 acceptance requires the full five-percent dual-metric and attribution Gate.
 ## V7M5 — Five-seed confirmation
 
 - fixed seeds 0–4 and folds 0–19;
+- one outer-train-only corrected-B1 fit per fold×seed; seed 0 reuses the exact
+  matching R3C3-qualified checkpoint and seeds 1–4 use the identical frozen B1
+  fitting algorithm; baseline, primary and both controls share it;
 - no model, epoch, seed, calibration or checkpoint selection;
 - unique five-seed mixture only;
 - complete-before-score and full V7M4 Gate replay.
