@@ -227,7 +227,17 @@ evidence_state:
     held_target_invariance_test: PASS
     cell_balanced_weight_test: PASS
     focused_tests: 26_PASS_LOCAL_AND_REMOTE
-  v7m2_eligibility: NOT_RUN
+  v7m2_eligibility:
+    status: V7M2_PREDICTION_ONLY_RUNNING
+    session: reactflow_v7_v7m2_corrected_probe_20260824
+    started_at: "2026-08-24T21:53:30+08:00"
+    output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v7/v7m2_corrected_probe
+    expected_outer_folds: 20
+    complete_before_score: true
+    held_score_read_allowed: false
+    partial_fold_score_read_allowed: false
+    external_outcome_accessed: false
+    partial_metrics_read: false
   v7m4_screen: NOT_RUN
   v7m5_confirmation: NOT_RUN
 
