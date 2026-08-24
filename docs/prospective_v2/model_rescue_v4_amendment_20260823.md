@@ -2,7 +2,7 @@
 
 **合同日期：** 2026-08-23
 
-**当前阶段：** `V4M3_SINGLE_SEED_TWENTY_FOLD_PREDICTION_ONLY`
+**当前阶段：** `TERMINAL_V4M3_MODEL_RESCUE_V4_FAIL → M6_BENCHMARK_ROUTE_LOCKED`
 
 **父 HEAD：** `a560a179d620f5be083c8fce617e3cc0a7016908`
 
@@ -14,7 +14,7 @@
 
 v4 唯一允许检验的研究假设是：在严格正确的 full-sequence mutation coordinate 下，显式建模 WT 一维响应状态、RNA 二维 pair state 和 exact mutation-conditioned receiver state，并加入冻结的 paired RNA-FM sequence representation，能否产生超过容量、foundation 与 calibration 所能解释的 signed-delta mean 增量。
 
-V4M1 已由完整 outcome-blind RNA-FM cache 机械裁决为 PASS；V4M2 folds 0/1、seed 0、mean/calibration 各 3 epochs 的 prediction-only smoke 也已由预冻结 qualifier 裁决为 `V4M2_REAL_DATA_ENGINEERING_SMOKE_PASS`。当前授权固定 seed 0、20 folds、80+40 epochs 和全部五个冻结 model families 的 prediction-only V4M3；20 folds 完整前不得合并、评分或读取部分指标方向。
+V4M1 已由完整 outcome-blind RNA-FM cache 机械裁决为 PASS；V4M2 folds 0/1、seed 0、mean/calibration 各 3 epochs 的 prediction-only smoke 也已由预冻结 qualifier 裁决为 `V4M2_REAL_DATA_ENGINEERING_SMOKE_PASS`。V4M3 随后完成固定 seed 0、20 folds、80+40 epochs 和全部五个冻结 model families；仅在完整 universe 合并通过后评分。预冻结 qualifier 的终局为 `MODEL_RESCUE_V4_FAIL`，因此 V4M4 未开放，v4 已关闭并交还 M6 benchmark route。
 
 ## 2. 唯一候选和对照
 
@@ -65,3 +65,9 @@ V4M3 PASS 才能开放 V4M4。V4M4 固定 seeds 0–4、20 folds、所有五个 
 ## 8. 失败与终止
 
 工程不变量、参数匹配、foundation freeze、target invariance 或完整输出任一失败，禁止真实 screen。V4M3 任一主 Gate 或归因 Gate 失败，v4 立即关闭并返回 benchmark route；不得增加第二个 v4 主候选。V4M4 失败则保留完整 negative result，不得通过更换 seed、foundation、参数规模或 Gate 恢复。只有内部正式 Gate 通过才允许起草新的 external amendment。
+
+## 9. 2026-08-24 终局登记
+
+20/20 seed-0 folds 的完整 prediction-only universe 先通过 `V4M3_COMPLETE_UNSCORED_MERGE_PASS`，随后才进行 target join、完整评分和预冻结 qualification。主候选相对 corrected B1 的 CRPS mean gain 为 `-0.00034695`（relative gain `-0.1818%`；10/20 puzzles 正向；95% CI `[-0.00621469, 0.00552079]`），signed-delta MAE mean gain 为 `+0.00054443`（relative gain `+0.2267%`；12/20 puzzles 正向；95% CI `[-0.00741966, 0.00850853]`）。两项均远低于预冻结 5% 门槛，CI lower 也未大于 0。
+
+Prediction integrity 通过，但 capacity-matched-null attribution 未通过；95% coverage absolute error 相对 B1 恶化 `3.318` 个百分点，超过允许的 1 个百分点；仓库中也没有合格的 task-matched published comparator artifact。因此预冻结 qualifier 的 exact status 是 `MODEL_RESCUE_V4_FAIL`，`v4m4_authorized=false`。V4M4、V4M5 均不得运行，模型训练与 held-score access 已关闭。该结果只可作为 development-consumed negative/ablation evidence，不能支持 SOTA、external replication、mechanism 或 publication-ready claim。

@@ -81,3 +81,9 @@
 - 将个体 P5 或 P5b verdict 回溯改写为 individually PASS；
 - 淡化或省略 Set-B 字面负对照不独立满足的事实；
 - push/PR/public release/submission 无 explicit owner instruction。
+
+## 5. 2026-08-24 Model Rescue v4 补充资格
+
+Model Rescue v4 在 development-consumed 20-puzzle seed-0 LOPO 上完成全部五个冻结 families 后，由预冻结 qualifier 裁决为 `MODEL_RESCUE_V4_FAIL`。主候选相对 corrected B1 的 CRPS relative gain 为 `-0.1818%`，signed-delta MAE relative gain 为 `+0.2267%`；两个 CI 均跨 0，且未达到 5% 双指标门槛。Prediction integrity 通过，但 architecture attribution、coverage calibration 和 task-matched published comparator Gates 均失败。V4M4 未运行且不得补跑。
+
+该补充结果不回写旧 P0–P6 artifact，也不把旧 claim 自动改判；它只限定后续 M6 稿件：不得把 v4 dual-tower RNA-FM 写成优于 corrected B1 的方法贡献、SOTA、external replication 或 publication-ready evidence。完整终局见 `model_rescue_v4_handoff_20260824.yaml`。

@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v4_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v4_20260823
 created_at: '2026-08-23T11:20:00+08:00'
-current_status: V4M3_COMPLETE_MERGE_SCORE_QUALIFICATION_ONLY
+current_status: TERMINAL_V4M3_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -50,6 +50,17 @@ decisions:
       Owner explicitly expanded v4 from idle GPU6/7 to GPU0-5 and any card with
       available memory. Existing processes remain protected from signals,
       termination, preemption, or mutation.
+  - id: V4D008
+    status: TERMINAL
+    decision: CLOSE_V4_AFTER_PREFROZEN_V4M3_GATE_FAILURE_AND_RETURN_TO_M6_BENCHMARK_ROUTE
+    decided_at: '2026-08-24T11:37:00+08:00'
+    rationale: >-
+      The complete 20-fold seed-0 universe was scored only after the merge passed.
+      The pre-frozen qualifier returned MODEL_RESCUE_V4_FAIL: the primary did not
+      improve corrected B1 on CRPS, improved signed-delta MAE by only 0.2267%,
+      failed the capacity-null attribution CI, worsened 95% coverage error beyond
+      tolerance, and had no qualified task-matched published comparator. V4M4 is
+      therefore prohibited rather than used as a second opportunity to search.
 
 evidence_state:
   contract_and_design: FROZEN
@@ -109,7 +120,7 @@ evidence_state:
       recovery_commit: e2d70c3
       full_join_audit: 13976_OF_13976_MUTANTS_AND_WT_ROWS_RESOLVED
   seed0_screen:
-    status: COMPLETE_UNSCORED_MERGE_PASS_SCORE_ACCESS_OPEN
+    status: MODEL_RESCUE_V4_FAIL
     seed: 0
     mean_epochs: 80
     calibration_epochs: 40
@@ -136,13 +147,40 @@ evidence_state:
           - {physical_gpu: 5, folds: [16, 17], session: reactflow_v4_v4m3_recovery_gpu5_wait_20260823}
           - {physical_gpu: 0, folds: [18, 19], session: reactflow_v4_v4m3_recovery_gpu0_wait_20260823}
         recovery_policy: WAIT_FOR_ORIGINAL_GPU5_AND_GPU0_PARTITIONS_THEN_RUN_MISSING_FOLDS
-    held_scores_computed: false
+    held_scores_computed: true
     partial_score_accessed: false
     complete_fold_artifacts: 20
     merged_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v4/v4m3_seed0/v4m3_merged_complete_unscored.json
     merge_integrity_pass: true
-  formal_confirmation: NOT_AUTHORIZED
+    complete_score_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v4/v4m3_seed0/v4m3_complete_scores.json
+    qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v4/v4m3_seed0/v4m3_qualification.json
+    overall_status: MODEL_RESCUE_V4_FAIL
+    v4m4_authorized: false
+    gates:
+      prediction_integrity: true
+      dual_metric_top_journal_development: false
+      architecture_attribution: false
+      coverage_calibration: false
+      task_matched_published_comparator: false
+    versus_corrected_b1:
+      crps_mean_gain: -0.00034695134359088027
+      crps_relative_gain: -0.001818187917267443
+      crps_ci95: [-0.0062146894424298426, 0.005520786755248082]
+      crps_positive_puzzles: 10
+      signed_delta_mae_mean_gain: 0.0005444325954008164
+      signed_delta_mae_relative_gain: 0.0022674893385431967
+      signed_delta_mae_ci95: [-0.007419661290932675, 0.008508526481734308]
+      signed_delta_mae_positive_puzzles: 12
+    coverage:
+      coverage68_error_worsening: -0.04097176047045237
+      coverage95_error_worsening: 0.03318056582548501
+      maximum_allowed_worsening: 0.01
+    attribution:
+      versus_capacity_null_crps_ci95: [-0.0001942062888197118, 0.011380834036900314]
+      versus_capacity_null_signed_delta_mae_ci95: [-0.00039200121024602144, 0.014537433080451466]
+      versus_rnafm_only_both_metrics_ci_lower_gt_zero: true
+  formal_confirmation: NOT_RUN_PREREQUISITE_FAILED
   external_confirmation: NOT_AUTHORIZED
-  current_scientific_qualification: NOT_ESTABLISHED
+  current_scientific_qualification: MODEL_RESCUE_V4_FAIL
 
-next_allowed_action: SCORE_COMPLETE_V4M3_MERGE_THEN_RUN_PREFROZEN_QUALIFIER
+next_allowed_action: MAIN_CONTRACT_M6_BENCHMARK_ROUTE_ONLY

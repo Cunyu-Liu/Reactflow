@@ -19,11 +19,14 @@ def test_v4_authority_is_isolated_fail_closed_and_preserves_prior_results() -> N
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
     v1 = _yaml("configs/reactflow_delta/model_rescue_contract_v1.yaml")
 
-    assert active["authority"]["current_phase"] == "V4M3"
-    assert active["runnable_phases"] == ["V4M3"]
+    assert active["authority"]["current_phase"] == "M6"
+    assert active["authority"]["current_authority_state"] == (
+        "TERMINAL_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED"
+    )
+    assert active["runnable_phases"] == ["M6"]
     assert active["training_allowed"] is False
     assert active["candidate_model_training_allowed"] is False
-    assert active["held_score_read_allowed"] is True
+    assert active["held_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert active["resource_partition"]["v4_allowed_physical_gpus"] == list(range(8))
     assert active["resource_partition"]["v3_preferred_physical_gpus"] == [0, 1, 2, 3, 4, 5]
@@ -33,6 +36,10 @@ def test_v4_authority_is_isolated_fail_closed_and_preserves_prior_results() -> N
     assert v3["parent"]["disposition"] == "PRESERVE_METHOD_AND_GATES_INVALIDATE_COORDINATE_FRAME"
     assert v2["contract_status"] == "TERMINAL_R2M3_MEAN_GATE_FAIL_CALIBRATION_BASELINE_ONLY"
     assert v1["contract_status"] == "TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED"
+    assert v4["contract_status"] == (
+        "TERMINAL_V4M3_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED"
+    )
+    assert v4["claim_policy"]["final_route"] == "BENCHMARK_ROUTE_LOCKED"
 
 
 def test_v4_has_one_primary_model_fixed_foundation_and_no_search_surface() -> None:
