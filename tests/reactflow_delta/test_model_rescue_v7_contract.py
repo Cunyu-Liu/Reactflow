@@ -170,12 +170,14 @@ def test_v7_runtime_recovery_uses_official_build_tool_versions() -> None:
     subprocess.run(["bash", "-n", str(recovery)], check=True)
     text = recovery.read_text(encoding="utf-8")
 
-    assert "pip==23.3" in text
-    assert "setuptools==68.2.2" in text
-    assert "wheel==0.41.2" in text
+    assert "pip=23.3" in text
+    assert "setuptools=68.2.2" in text
+    assert "wheel=0.41.2" in text
     assert "ninja==1.11.1.1" in text
     assert "flash-attn==2.3.2" in text
     assert "--no-build-isolation" in text
+    assert "--force-reinstall" in text
+    assert "CONDA_PKGS_DIRS" in text
     assert "TORCH_CUDA_ARCH_LIST=8.0" in text
     assert "runtime_setup_complete" in text
     assert "score_model_rescue" not in text
