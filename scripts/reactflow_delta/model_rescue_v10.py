@@ -101,14 +101,20 @@ class CapacitySymmetricResidual(nn.Module):
     def forward(
         self, point: torch.Tensor, standardized_input: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        raw = self.raw(standardized_input)
+        # Keep the learned network in float32, but construct the reported
+        # distribution in float64.  The asymmetric head uses inverse-normal
+        # CDFs to impose an exact median; float32 inverse/forward CDF
+        # round-trips can miss the frozen 3e-6 invariant near the allocation
+        # boundary even when the algebraic constraint is satisfied.
+        raw = self.raw(standardized_input).to(torch.float64)
+        point = point.detach().to(torch.float64)
         narrow_weight = WEIGHT_FLOOR + (1.0 - 2.0 * WEIGHT_FLOOR) * torch.sigmoid(
             raw[..., 0]
         )
         narrow_scale = SCALE_FLOOR + torch.nn.functional.softplus(raw[..., 1])
         wide_scale = narrow_scale + torch.nn.functional.softplus(raw[..., 2])
         weights = torch.stack([narrow_weight, 1.0 - narrow_weight], dim=-1)
-        locations = torch.stack([point.detach(), point.detach()], dim=-1)
+        locations = torch.stack([point, point], dim=-1)
         scales = torch.stack([narrow_scale, wide_scale], dim=-1)
         return weights, locations, scales
 
@@ -164,7 +170,8 @@ class MedianAsymmetricResidual(nn.Module):
     def forward(
         self, point: torch.Tensor, standardized_input: torch.Tensor
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        raw = self.raw(standardized_input)
+        raw = self.raw(standardized_input).to(torch.float64)
+        point = point.detach().to(torch.float64)
         narrow_weight = WEIGHT_FLOOR + (1.0 - 2.0 * WEIGHT_FLOOR) * torch.sigmoid(
             raw[..., 0]
         )
@@ -176,8 +183,8 @@ class MedianAsymmetricResidual(nn.Module):
         weights = torch.stack([narrow_weight, 1.0 - narrow_weight], dim=-1)
         locations = torch.stack(
             [
-                point.detach() + narrow_residual_location,
-                point.detach() + wide_residual_location,
+                point + narrow_residual_location,
+                point + wide_residual_location,
             ],
             dim=-1,
         )

@@ -69,6 +69,22 @@ def test_v10_asymmetric_cdf_constraint_and_gradients_are_finite() -> None:
     assert float(model.output_layer.bias.grad[3].abs()) > 0.0
 
 
+def test_v10_asymmetric_cdf_constraint_survives_boundary_allocations() -> None:
+    torch.manual_seed(23)
+    model = MedianAsymmetricResidual()
+    inputs = torch.randn(2048, INPUT_WIDTH)
+    point = torch.randn(2048)
+    with torch.no_grad():
+        model.output_layer.weight[3].normal_(mean=0.0, std=4.0)
+        model.output_layer.bias[3] = 8.0
+    weights, locations, scales = model(point, inputs)
+    cdf = mixture_cdf_at_point(point, weights, locations, scales)
+    assert weights.dtype == torch.float64
+    assert locations.dtype == torch.float64
+    assert scales.dtype == torch.float64
+    assert torch.allclose(cdf, torch.full_like(cdf, 0.5), atol=3e-6, rtol=0.0)
+
+
 def test_v10_train_only_standardization_and_input_width() -> None:
     feature41 = np.arange(5 * 41, dtype=np.float64).reshape(5, 41)
     point = np.linspace(-1.0, 1.0, 5)
