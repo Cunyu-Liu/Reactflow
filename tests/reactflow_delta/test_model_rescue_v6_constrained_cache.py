@@ -21,6 +21,9 @@ from scripts.reactflow_delta.model_rescue_v6_schema import (
     FEATURE_NAMES,
     METADATA_COLUMNS,
     MISSING_REACTIVITY,
+    PROBE_FEATURE_INDICES,
+    PROBE_FEATURE_NAMES,
+    REDUNDANT_PROBE_FEATURE,
 )
 from scripts.reactflow_delta.qualify_model_rescue_v6_constrained_cache import (
     qualify_cache,
@@ -113,6 +116,28 @@ def test_observed_constraint_changes_ensemble_without_changing_shape() -> None:
     unconstrained = fold_ensemble(sequence)
     assert constrained[0].shape == unconstrained[0].shape == (9, 9)
     assert not np.array_equal(constrained[0], unconstrained[0])
+
+
+def test_probe_basis_removes_the_exact_pairing_mass_dependency() -> None:
+    from scripts.reactflow_delta.build_model_rescue_v5_ensemble_cache import (
+        ensemble_delta_features,
+    )
+
+    sequence = "GGGAAACCC"
+    profile = np.asarray([0.1, 0.0, 0.3, np.nan, 0.5, 0.6, 0.2, 0.1, 0.4])
+    wt = fold_constrained_ensemble(sequence, profile)
+    mutant = fold_constrained_ensemble("GGGGAACCC", profile)
+    features = ensemble_delta_features(*wt, *mutant, full_pos=3)
+    np.testing.assert_allclose(
+        features[:, 0] + features[:, 7] + features[:, 8],
+        0.0,
+        atol=2e-7,
+        rtol=0.0,
+    )
+    assert REDUNDANT_PROBE_FEATURE == "constrained_delta_downstream_pairing_mass"
+    assert len(FEATURE_NAMES) == 12
+    assert len(PROBE_FEATURE_NAMES) == len(PROBE_FEATURE_INDICES) == 11
+    assert REDUNDANT_PROBE_FEATURE not in PROBE_FEATURE_NAMES
 
 
 def test_cache_is_invariant_to_mutant_outcome_values(tmp_path) -> None:

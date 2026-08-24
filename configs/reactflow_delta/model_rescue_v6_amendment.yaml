@@ -1,6 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v6_amendment.v1
 contract_id: reactflow_delta_model_rescue_v6_20260824
 contract_status: V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_AUTHORIZED
+contract_revision: V6_BASIS_CORRECTION_PRE_OUTCOME_ACCESS
 created_at: '2026-08-24T12:55:00+08:00'
 
 parent:
@@ -71,12 +72,16 @@ eligibility_probe:
   learner: TRAIN_ONLY_WEIGHTED_STANDARDIZED_RIDGE_ALPHA_ONE
   weighting: EQUAL_PUZZLE_METHOD_THEN_EQUAL_MUTANT_THEN_EQUAL_QUALIFIED_POSITION
   baseline_features: DIRECT_18_PLUS_V5_UNCONSTRAINED_12
-  candidate_features: BASELINE_PLUS_V6_CONSTRAINED_12
+  candidate_features: BASELINE_PLUS_V6_CONSTRAINED_INDEPENDENT_11
   complete_before_score_access: true
   implementation_invariants:
     folds: SPLIT_V4_OUTER_FOLDS_0_THROUGH_19
     baseline_replay: V6_BASELINE_MUST_MATCH_V5_CANDIDATE_PREDICTIONS
     prediction_artifact: REGISTERED_FULL_CONSTRUCT_KEYS_WITHOUT_TARGET_OR_SCORE
+    cache_feature_width: 12
+    constrained_probe_feature_width: 11
+    excluded_exact_redundancy: CONSTRAINED_DELTA_DOWNSTREAM_PAIRING_MASS
+    exact_identity: DELTA_UNPAIRED_PLUS_DELTA_UPSTREAM_PLUS_DELTA_DOWNSTREAM_EQUALS_ZERO
     merge_before_target_join: true
     score_hierarchy: POSITION_THEN_MUTANT_THEN_METHOD_THEN_PUZZLE
     model_or_feature_selection_allowed: false
@@ -98,7 +103,12 @@ candidate_model:
   controls:
     - b1_zero_structure_residual
     - b1_unconstrained_ensemble_residual
-  equal_structure_input_width: 24
+  equal_structure_input_width: 22
+  independent_structure_basis:
+    unconstrained_width: 11
+    constrained_width: 11
+    excluded_from_each_block: DELTA_DOWNSTREAM_PAIRING_MASS
+    information_loss: NONE_EXACTLY_RECONSTRUCTIBLE
   residual_fusion: TRAIN_ONLY_NORMALIZED_DUAL_PROJECTION_HIDDEN_64_GELU_ZERO_INITIALIZED_OUTPUT
   residual_loss: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
   residual_epochs: 40
