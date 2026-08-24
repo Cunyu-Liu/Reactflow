@@ -113,6 +113,13 @@ evidence_state:
       - scripts/reactflow_delta/qualify_model_rescue_v6_probe.py
     prediction_only_before_complete_merge: true
     v5_baseline_replay_required_per_fold: true
+    v5_reference_predictions:
+      directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m2_structure_probe_complete
+      filename_pattern: v5_probe_predictions_fold{0..19}.npz
+      files_present: 20/20
+      valid_prediction_schema_and_outer_fold: 20/20
+      prediction_values_inspected: false
+      score_fields_inspected: false
     target_join_authorized: false
     real_openknot_probe_started: false
     v6_score_accessed: false
