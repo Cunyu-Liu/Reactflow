@@ -16,3 +16,10 @@ L1 point show puzzle-replicated mean/median separation or quantile asymmetry?
 If yes, test a median-preserving asymmetric residual family against a
 parameter-matched symmetric null. If no, test only the representation/capacity
 symmetric null and do not claim an asymmetry mechanism.
+
+Observed result: both pre-registered criteria passed. The method-balanced
+mean-minus-median gap was +0.03452 (95% CI +0.02615 to +0.04289; 20/20 puzzles
+same direction). Normalized q10/q50/q90 asymmetry was +0.23049 (95% CI +0.18823
+to +0.27274; 20/20 same direction). The next iteration is therefore eligible
+to test median-preserving asymmetric locations, but only against the frozen
+parameter-matched symmetric null.

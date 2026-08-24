@@ -33,3 +33,5 @@ TIC2A ridge ledger 为 float64，而统一残差 head 使用 float32；真实 sm
 ## 6. 终局结果
 
 完整 20-fold、seed0 qualifier 显示 signed-delta MAE 改善 8.36%（20/20 puzzles）、distribution-derived absolute-delta MAE 改善 9.81%（20/20）、CRPS 改善 4.23%（19/20），三项 puzzle-level CI lower 均大于零，LOO、influence、coverage 与 calibration guardrail 均通过。由于 CRPS 的预冻结门槛是至少 5%，V9 整体必须判 FAIL，不能用接近门槛或其他指标强势通过来改写结论。
+
+终局之后按 outcome access 前冻结的权重运行了独立 residual diagnostic。MeanAligned residual 的 mean-minus-median gap 为 `+0.03452`，95% CI `[+0.02615,+0.04289]`，20/20 puzzles 同方向；normalized q10/q50/q90 asymmetry 为 `+0.23049`，95% CI `[+0.18823,+0.27274]`，20/20 同方向。两项均满足预登记的 V10 准入规则。这是另立 median-preserving asymmetric amendment 的依据，不改变 V9 FAIL，也不恢复 V9M4。
