@@ -29,6 +29,17 @@ The six-dimensional basis contains the signed four-base response, the response f
 
 The V7M2 baseline exactly replays V6 candidate predictions. The later primary shares corrected B1 and trainable capacity with two controls. Zero dependency tests capacity; half-length cyclic receiver shift retains the marginal dependency feature distribution while destroying coordinate alignment. A primary result is attributable only if it beats both controls on CRPS and signed-delta MAE with paired CI lower above zero.
 
+The 32-dimensional distance input is fixed before any V7 score: for raw integer
+`d = receiver_index - source_index` and `k = 0,...,15`, concatenate
+`sin(d / 10000^(2k/32))` and `cos(d / 10000^(2k/32))` in increasing `k` order.
+It has no learned parameters and no alternative normalization or frequency grid.
+
+For formal seeds, corrected B1 is a fold×seed object rather than a shared
+post-hoc checkpoint. Seed 0 reuses the matching exact R3C3-qualified artifact;
+seeds 1–4 refit the identical frozen B1 algorithm from scratch on outer-train.
+Within one fold×seed, baseline, primary and both attribution controls share that
+same B1 checkpoint.
+
 ## Main risks
 
 1. RiNALMo dependencies encode structural contacts but not 2A3 reactivity direction. V7M2 would fail quickly.

@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v7_amendment.v1
 contract_id: reactflow_delta_model_rescue_v7_20260824
 contract_status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_AUTHORIZED
-contract_revision: V7_RINALMO_DEPENDENCY_PRE_FOUNDATION_ACCESS
+contract_revision: V7_RINALMO_DEPENDENCY_PRE_SCORE_DISTANCE_AND_SEED_POLICY_FROZEN
 created_at: '2026-08-24T16:20:00+08:00'
 
 parent:
@@ -174,6 +174,14 @@ candidate_model:
       - RINALMO_DEPENDENCY_6
       - MUTATION_REF_ALT_ONE_HOT_8
       - FIXED_SIGNED_DISTANCE_ENCODING_32
+    signed_distance_encoding:
+      raw_distance: RECEIVER_INDEX_MINUS_SOURCE_INDEX
+      width: 32
+      definition: STANDARD_TRANSFORMER_SINUSOIDAL_NO_LEARNABLE_PARAMETERS
+      channels: >-
+        FOR_K_0_THROUGH_15_CONCAT_SIN_D_OVER_10000_POWER_2K_OVER_32_AND_COS_D_OVER_10000_POWER_2K_OVER_32
+      source_distance_zero_allowed: true
+      normalization_or_frequency_search_allowed: false
     dependency_projection: LINEAR_6_TO_128_LAYER_NORM_GELU
     context_projection: LINEAR_232_TO_256_LAYER_NORM_GELU
     residual_mlp: LINEAR_384_TO_512_GELU_LINEAR_512_TO_512_GELU_LINEAR_512_TO_256_GELU_LINEAR_256_TO_1
@@ -219,6 +227,19 @@ formal_confirmation:
   seeds: [0, 1, 2, 3, 4]
   outer_folds: 20
   selection_allowed: false
+  corrected_b1_checkpoint_policy:
+    per_outer_fold_and_seed: INDEPENDENT_FROM_SCRATCH_FIT_ON_OUTER_TRAIN_ONLY
+    architecture: ALIGNED_DELTA_MODEL_K_RANK_ZERO_SPARSE_FALSE_D96_HEADS4_HIDDEN64
+    objective: FROZEN_B1_GAUSSIAN_NLL
+    epochs: 40
+    optimizer: ADAM
+    learning_rate: 0.001
+    weight_decay: 0.0
+    huber_lambda: 0.0
+    sharing: SAME_FOLD_SEED_CHECKPOINT_SHARED_BY_BASELINE_PRIMARY_AND_BOTH_CONTROLS
+    seed_zero_reuse: EXACT_R3C3_QUALIFIED_CHECKPOINT_FOR_MATCHING_OUTER_FOLD
+    seeds_one_through_four: REFIT_WITH_IDENTICAL_ALGORITHM_AND_MATCHING_SEED
+    checkpoint_or_seed_selection_allowed: false
   gate: SAME_AS_DEVELOPMENT_GATE_ON_UNIQUE_FIVE_SEED_MIXTURES
   internal_pass_status: HIGH_EFFECT_POST_HOC_DEVELOPMENT_PASS
 

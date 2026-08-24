@@ -92,10 +92,28 @@ def test_v7_requires_incremental_probe_and_top_journal_model_gate() -> None:
         "EQUAL_CAPACITY_ZERO_DEPENDENCY_OPERATOR",
         "EQUAL_CAPACITY_HALF_LENGTH_CYCLIC_RECEIVER_SHIFTED_DEPENDENCY_OPERATOR",
     ]
+    distance = candidate["trainable_operator"]["signed_distance_encoding"]
+    assert distance["raw_distance"] == "RECEIVER_INDEX_MINUS_SOURCE_INDEX"
+    assert distance["width"] == 32
+    assert distance["definition"] == (
+        "STANDARD_TRANSFORMER_SINUSOIDAL_NO_LEARNABLE_PARAMETERS"
+    )
+    assert distance["normalization_or_frequency_search_allowed"] is False
     assert gate["versus_corrected_b1"]["crps_relative_gain_min"] == 0.05
     assert gate["versus_corrected_b1"]["signed_delta_mae_relative_gain_min"] == 0.05
     assert gate["attribution"]["primary_vs_each_control_crps_ci_lower_gt"] == 0.0
     assert v7["formal_confirmation"]["seeds"] == [0, 1, 2, 3, 4]
+    checkpoint = v7["formal_confirmation"]["corrected_b1_checkpoint_policy"]
+    assert checkpoint["epochs"] == 40
+    assert checkpoint["learning_rate"] == 0.001
+    assert checkpoint["weight_decay"] == 0.0
+    assert checkpoint["seed_zero_reuse"] == (
+        "EXACT_R3C3_QUALIFIED_CHECKPOINT_FOR_MATCHING_OUTER_FOLD"
+    )
+    assert checkpoint["sharing"] == (
+        "SAME_FOLD_SEED_CHECKPOINT_SHARED_BY_BASELINE_PRIMARY_AND_BOTH_CONTROLS"
+    )
+    assert checkpoint["checkpoint_or_seed_selection_allowed"] is False
     assert v7["claim_policy"]["publication_ready"] is False
 
 
