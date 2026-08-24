@@ -7,6 +7,7 @@ PYTHON="$RUNTIME/bin/python"
 OFFICIAL="$BASE/official/RiNALMo"
 SETUP="$BASE/setup"
 CONDA=/home/cunyuliu/miniconda3/bin/conda
+FLASH_WHEEL="$BASE/wheels/flash_attn-2.3.2-cp311-cp311-linux_x86_64.whl"
 
 export CUDA_HOME="$RUNTIME"
 export PATH="$RUNTIME/bin:$PATH"
@@ -46,6 +47,10 @@ if [[ ! -x "$PYTHON" || ! -x "$RUNTIME/bin/nvcc" ]]; then
   echo "v7 clean Conda runtime transaction is incomplete"
   exit 1
 fi
+if [[ ! -f "$FLASH_WHEEL" ]]; then
+  echo "v7 exact locally built FlashAttention wheel is absent"
+  exit 1
+fi
 
 "$PYTHON" -m pip install \
   packaging==23.2 \
@@ -53,7 +58,7 @@ fi
   einops==0.6.1 \
   ml-collections==0.1.1 \
   gdown==5.1.0
-"$PYTHON" -m pip install --no-build-isolation --no-deps flash-attn==2.3.2
+"$PYTHON" -m pip install --no-deps "$FLASH_WHEEL"
 "$PYTHON" -m pip install --no-build-isolation --no-deps -e "$OFFICIAL"
 
 "$PYTHON" - <<'PY'
