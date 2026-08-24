@@ -17,6 +17,13 @@ def test_corrected_baseline_contract_is_fixed_and_score_closed() -> None:
     ]
     assert contract["algorithm"]["ridge_alpha"] == 1.0
     assert contract["algorithm"]["v5_v6_shared_feature30_replay_atol"] == 1e-12
+    cache_identity = contract["input_artifacts"]["corrected_identity_qualification"]
+    assert cache_identity["v5_unique_keys"] == 13976
+    assert cache_identity["v5_missing_keys"] == 0
+    assert cache_identity["v5_full_pos_mismatches"] == 0
+    assert cache_identity["v6_unique_keys"] == 13976
+    assert cache_identity["v6_missing_keys"] == 0
+    assert cache_identity["v6_full_pos_mismatches"] == 0
     assert contract["execution"]["complete_before_score"] is True
     assert contract["authorization"]["held_score_read_allowed"] is False
     assert contract["authorization"]["partial_score_read_allowed"] is False

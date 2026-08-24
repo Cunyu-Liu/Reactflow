@@ -8,6 +8,21 @@ target_identity:
   missing: 0
   wrong_target: 0
   wrong_error: 0
+outcome_blind_cache_alignment:
+  v5:
+    rows: 13976
+    unique_biological_keys: 13976
+    missing_keys: 0
+    unexpected_keys: 0
+    full_pos_mismatches: 0
+    feature_shape: [13976, 177, 12]
+  v6:
+    rows: 13976
+    unique_biological_keys: 13976
+    missing_keys: 0
+    unexpected_keys: 0
+    full_pos_mismatches: 0
+    feature_shape: [13976, 177, 12]
 execution:
   folds_required: 20
   folds_complete: 0
@@ -15,4 +30,3 @@ execution:
   partial_score_read_allowed: false
   external_outcome_accessed: false
 next_allowed_action: IMPLEMENT_TEST_AND_RUN_PREDICTION_ONLY_FOLDS_0_THROUGH_19
-

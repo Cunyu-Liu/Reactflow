@@ -30,6 +30,17 @@ input_artifacts:
   legacy_predictions_allowed: false
   legacy_models_allowed: false
   legacy_scores_allowed: false
+  corrected_identity_qualification:
+    v5_rows: 13976
+    v5_unique_keys: 13976
+    v5_missing_keys: 0
+    v5_unexpected_keys: 0
+    v5_full_pos_mismatches: 0
+    v6_rows: 13976
+    v6_unique_keys: 13976
+    v6_missing_keys: 0
+    v6_unexpected_keys: 0
+    v6_full_pos_mismatches: 0
 
 algorithm:
   ridge_alpha: 1.0
@@ -69,4 +80,3 @@ authorization:
   candidate_model_training_allowed: false
   v7_dependency_allowed: false
   new_external_outcome_access_allowed: false
-
