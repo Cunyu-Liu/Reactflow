@@ -54,6 +54,7 @@ d_{s\to j,k}=\log_2\frac{p(k_j\mid x')}{1-p(k_j\mid x')}
 - 官方代码 commit：`2c2c5c14a5ae609d8c560a5d9ca32e51e0288955`；
 - 官方权重：`rinalmo_giga_pretrained.pt`，Zenodo record 15043668；
 - foundation 全程 `eval()`、`no_grad()`，不 fine-tune；
+- 正式 runtime 固定为官方 environment 的 Python 3.11、PyTorch 2.1.0、CUDA 11.8 和 FlashAttention 2.3.2；不使用兼容桩或修改官方 attention 实现；
 - 输入是完整、未遮罩 WT 与 exact mutant sequence；
 - A/C/G/U 概率由四个对应 MLM logits 的 softmax 得到；
 - 概率以 `1e-10` 稳定后计算 base-2 log odds；
