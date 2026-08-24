@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v5_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v5_20260824
 created_at: '2026-08-24T11:57:54+08:00'
-current_status: V5M0_CONTRACT_AND_PHYSICS_HYPOTHESIS_FREEZE
+current_status: V5M1_OUTCOME_BLIND_ENSEMBLE_CACHE_IMPLEMENTATION_ONLY
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -50,4 +50,4 @@ evidence_state:
   candidate_screen: NOT_RUN
   formal_confirmation: NOT_RUN
 
-next_allowed_action: COMMIT_V5_CONTRACT_AND_RUN_CONTRACT_TESTS
+next_allowed_action: IMPLEMENT_AND_TEST_OUTCOME_BLIND_EXACT_ENSEMBLE_CACHE
