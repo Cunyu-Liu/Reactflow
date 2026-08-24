@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v8
 manifest_id: reactflow_delta_model_rescue_v8_authority_20260824
 project_task_id: reactflow_delta_model_rescue_v8
 created_at: '2026-08-24T22:25:00+08:00'
-updated_at: '2026-08-24T23:27:00+08:00'
+updated_at: '2026-08-24T23:36:00+08:00'
 
 authority:
   pointer_role: V8_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: V8M2
-  current_authority_state: COMPLETE_MEAN_SCREEN_SCORE_ONCE
-  current_runnable_phase: V8M2
+  current_phase: V8M6
+  current_authority_state: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
+  current_runnable_phase: M6
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v8-20260824
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v8_20260824
@@ -16,7 +16,7 @@ authority:
   machine_contract_path: configs/reactflow_delta/model_rescue_v8_amendment.yaml
   decision_ledger_path: docs/prospective_v2/model_rescue_v8_decision_ledger.yaml
   implementation_plan_path: docs/plans/2026-08-24-model-rescue-v8.md
-  binding_status: V8M1_EXACT_PASS_V8M2_COMPLETE_SCORE_ONCE_AUTHORIZED
+  binding_status: V8_TERMINAL_NO_V8M3_SEPARATE_V9_AMENDMENT_REQUIRED
 
 parent_state:
   model_rescue_v1_status: TERMINAL_M2_NO_RESCUE_CANDIDATE_BENCHMARK_ROUTE_LOCKED
@@ -34,17 +34,17 @@ authorization:
   amendment_scope: TARGET_IDENTITY_CORRECTED_MEAN_FIRST_END_TO_END_RESCUE
   implementation_allowed: true
   fresh_corrected_expert_training_allowed: false
-  internal_development_probe_allowed: true
+  internal_development_probe_allowed: false
   large_residual_model_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
   public_release_allowed: false
 
 allowed_phases: [V8M0, V8M1, V8M2, V8M3, V8M4, V8M5, V8M6, M6]
-runnable_phases: [V8M2]
+runnable_phases: [M6]
 training_allowed: false
 candidate_model_training_allowed: false
-held_score_read_allowed: true
+held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -65,14 +65,14 @@ resource_policy:
 gate_state:
   V8M0: CONTRACT_AND_AUTHORITY_PASS
   V8M1: V8M1_CORRECTED_EXPERT_REBUILD_PASS
-  V8M2: COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED
-  V8M3: NOT_AUTHORIZED
+  V8M2: V8M2_MEAN_SIGNAL_NOT_ELIGIBLE_ABSOLUTE_GUARDRAIL_FAIL
+  V8M3: PERMANENTLY_NOT_AUTHORIZED
   V8M4: NOT_AUTHORIZED
   V8M5: NOT_AUTHORIZED
-  V8M6: NOT_RUN
+  V8M6: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
   TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
   LEGACY_V3_CORRECTED_EXPERTS: INVALIDATED_TARGET_IDENTITY
 
-next_allowed_action: RUN_ONE_COMPLETE_V8M2_MERGE_SCORE_AND_PREFROZEN_QUALIFIER
+next_allowed_action: PRESERVE_V8_AND_OPEN_SEPARATE_V9_ZERO_MEAN_RESIDUAL_MAGNITUDE_AMENDMENT

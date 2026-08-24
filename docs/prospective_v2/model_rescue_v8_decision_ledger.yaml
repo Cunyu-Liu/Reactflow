@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v8_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v8_20260824
 created_at: '2026-08-24T22:25:00+08:00'
-current_status: V8M2_COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED
+current_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
 
 immutable_history:
   model_rescue_v7: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
@@ -45,14 +45,36 @@ v8m1:
   held_score_read_allowed: false
   external_outcome_accessed: false
 v8m2:
-  status: COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED
+  status: V8M2_MEAN_SIGNAL_NOT_ELIGIBLE
   complete_before_score: true
   training_allowed: false
   held_score_read_allowed: true
   partial_fold_score_read_allowed: false
   external_outcome_accessed: false
-v8m3: NOT_AUTHORIZED
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0/v8m2_mean_screen_qualification.json
+  signed_delta_vs_feature41:
+    relative_gain: 0.08363163114343936
+    ci95: [0.0128623103680507, 0.019111689692470357]
+    positive_puzzles: 20
+  signed_delta_vs_b1:
+    relative_gain: 0.0388883459639052
+    ci95: [0.003802045316611861, 0.010373576628161546]
+    positive_puzzles: 18
+  absolute_delta_vs_feature41:
+    relative_gain: -0.017662362830501394
+    ci95: [-0.00874468805501229, 0.003339147579946732]
+    positive_puzzles: 8
+  failed_gate: ABSOLUTE_RELATIVE_GAIN_VS_FEATURE41_GE_MINUS_0_5PCT
+  post_gate_magnitude_diagnostic:
+    artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0/v8m2_post_gate_magnitude_bias_diagnostic.json
+    true_absolute_delta_mean: 0.1833171467539873
+    meanaligned_absolute_mean: 0.042840858502292196
+    meanaligned_absolute_bias: -0.1404762882516951
+    underprediction_puzzles: 20
+  v8_gate_changed: false
+  v8m3_authorized: false
+v8m3: PERMANENTLY_NOT_AUTHORIZED
 v8m4: NOT_AUTHORIZED
 v8m5: NOT_AUTHORIZED
 
-next_allowed_action: RUN_V8M2_COMPLETE_UNSCORED_MERGE_THEN_SINGLE_SCORE_THEN_PREFROZEN_QUALIFIER
+next_allowed_action: OPEN_SEPARATE_V9_ZERO_MEAN_RESIDUAL_MAGNITUDE_AMENDMENT_WITHOUT_CHANGING_V8
