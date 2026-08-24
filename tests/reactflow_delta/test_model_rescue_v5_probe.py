@@ -1,17 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+from pathlib import Path
 
+import h5py
 import numpy as np
 
 from scripts.reactflow_delta.model_rescue_v5_probe import (
     BASELINE_FEATURE_NAMES,
+    EnsembleFeatureCache,
     WeightedRidgeStats,
     baseline_features,
     cell_position_weights,
     fit_weighted_standardized_ridge,
     predict_weighted_ridge,
 )
+from scripts.reactflow_delta.model_rescue_v5_schema import CACHE_SCHEMA, FEATURE_NAMES
 
 
 @dataclass
@@ -19,6 +24,9 @@ class _Record:
     full_pos: int = 2
     ref: str = "G"
     alt: str = "A"
+    puzzle: str = "P02"
+    method: str = "Starting sequence"
+    design_pos: int = 0
 
 
 @dataclass
@@ -73,3 +81,37 @@ def test_zero_variance_feature_is_finite() -> None:
     stats.add_rows(x, y, np.ones(10))
     model = fit_weighted_standardized_ridge(stats)
     assert np.isfinite(predict_weighted_ridge(model, x)).all()
+
+
+def test_cache_lookup_uses_biological_fields_not_incompatible_id_prefix(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "cache.h5"
+    string_dtype = h5py.string_dtype(encoding="utf-8")
+    expected = np.arange(5 * len(FEATURE_NAMES), dtype=np.float32).reshape(
+        1, 5, len(FEATURE_NAMES)
+    )
+    with h5py.File(path, "w") as handle:
+        handle.attrs["schema_version"] = CACHE_SCHEMA
+        handle.attrs["feature_names"] = json.dumps(FEATURE_NAMES)
+        handle.create_dataset(
+            "row_id",
+            data=np.asarray(["raw_prefix_mm_0_U_A"], dtype=object),
+            dtype=string_dtype,
+        )
+        for name, value in (
+            ("puzzle", "P02"),
+            ("method", "Starting sequence"),
+            ("ref", "U"),
+            ("alt", "A"),
+        ):
+            handle.create_dataset(
+                name, data=np.asarray([value], dtype=object), dtype=string_dtype
+            )
+        handle.create_dataset("design_pos", data=np.asarray([0], dtype=np.int64))
+        handle.create_dataset("features", data=expected)
+    cache = EnsembleFeatureCache(path)
+    try:
+        assert np.array_equal(cache.get(_Record(ref="U")), expected[0])
+    finally:
+        cache.close()

@@ -7,7 +7,6 @@ from dataclasses import dataclass
 import json
 import math
 from pathlib import Path
-import re
 from typing import Any, Iterable
 
 import h5py
@@ -40,22 +39,19 @@ BASELINE_FEATURE_NAMES = (
     "wt_error_precision",
     "wt_observed",
 )
-MUTANT_SUFFIX = re.compile(r"_mm_(\d+)_([ACGTU])_([ACGTU])$")
-
-
-def canonical_mutant_id(row_id: str) -> str:
-    match = MUTANT_SUFFIX.search(str(row_id))
-    if match is None:
-        raise ValueError(f"invalid mutant id {row_id}")
-    position, ref, alt = match.groups()
-    prefix = row_id[: match.start()]
-    return f"{prefix}_mm_{position}_{ref.replace('T', 'U')}_{alt.replace('T', 'U')}"
-
-
-def record_mutant_id(record: Any) -> str:
-    prefix = record.wt_id[:-3] if str(record.wt_id).endswith("_wt") else str(record.wt_id)
-    return canonical_mutant_id(
-        f"{prefix}_mm_{int(record.design_pos)}_{record.ref}_{record.alt}"
+def _cache_key(
+    puzzle: Any,
+    method: Any,
+    design_pos: Any,
+    ref: Any,
+    alt: Any,
+) -> tuple[str, str, int, str, str]:
+    return (
+        str(puzzle),
+        str(method),
+        int(design_pos),
+        str(ref).replace("T", "U"),
+        str(alt).replace("T", "U"),
     )
 
 
@@ -68,26 +64,46 @@ class EnsembleFeatureCache:
         names = tuple(json.loads(self.handle.attrs["feature_names"]))
         if names != FEATURE_NAMES:
             raise ValueError("v5 cache feature universe differs from the frozen contract")
-        raw_ids = self.handle["row_id"][:]
-        ids = [value.decode() if isinstance(value, bytes) else str(value) for value in raw_ids]
-        self.index: dict[str, int] = {}
-        for index, row_id in enumerate(ids):
-            canonical = canonical_mutant_id(row_id)
-            if canonical in self.index:
-                raise ValueError(f"duplicate canonical cache row {canonical}")
-            self.index[canonical] = index
+        def strings(name: str) -> list[str]:
+            return [
+                value.decode() if isinstance(value, bytes) else str(value)
+                for value in self.handle[name][:]
+            ]
+
+        puzzles = strings("puzzle")
+        methods = strings("method")
+        refs = strings("ref")
+        alts = strings("alt")
+        positions = self.handle["design_pos"][:]
+        lengths = {len(puzzles), len(methods), len(refs), len(alts), len(positions)}
+        if len(lengths) != 1:
+            raise ValueError("v5 cache metadata columns have inconsistent lengths")
+        self.index: dict[tuple[str, str, int, str, str], int] = {}
+        for index, values in enumerate(zip(puzzles, methods, positions, refs, alts)):
+            key = _cache_key(*values)
+            if key in self.index:
+                raise ValueError(f"duplicate biological cache row {key}")
+            self.index[key] = index
         self.features = np.asarray(self.handle["features"][:], dtype=np.float32)
+        if len(self.features) != len(self.index):
+            raise ValueError("v5 cache feature and metadata row counts differ")
 
     def close(self) -> None:
         self.handle.close()
 
     def get(self, record: Any) -> np.ndarray:
-        row_id = record_mutant_id(record)
-        if row_id not in self.index:
-            raise KeyError(f"v5 cache is missing {row_id}")
-        value = np.asarray(self.features[self.index[row_id]], dtype=np.float32)
+        key = _cache_key(
+            record.puzzle,
+            record.method,
+            record.design_pos,
+            record.ref,
+            record.alt,
+        )
+        if key not in self.index:
+            raise KeyError(f"v5 cache is missing biological mutant key {key}")
+        value = np.asarray(self.features[self.index[key]], dtype=np.float32)
         if value.ndim != 2 or value.shape[1] != len(FEATURE_NAMES):
-            raise RuntimeError(f"invalid cached feature shape for {row_id}")
+            raise RuntimeError(f"invalid cached feature shape for {key}")
         return value
 
 
