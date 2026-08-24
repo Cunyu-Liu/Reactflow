@@ -119,4 +119,23 @@ v9m4:
     implementation_before_v9m3_pass_allowed: false
     authority_opened: false
 
-next_allowed_action: RUN_FROZEN_POST_GATE_RESIDUAL_DIAGNOSTICS_THEN_DECIDE_NARROW_NEW_AMENDMENT_OR_CLOSE_RESIDUAL_RESCUE
+post_gate_residual_diagnostic:
+  status: V9_POST_GATE_RESIDUAL_DIAGNOSTIC_COMPLETE
+  artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0/v9_post_gate_residual_diagnostic.json
+  evidence_status: POST_HOC_DIAGNOSTIC_NOT_V9_GATE_EVIDENCE
+  independent_unit: HELD_PUZZLE
+  n_independent_units: 20
+  within_puzzle_estimand: EQUAL_METHOD_THEN_MUTANT_THEN_QUALIFIED_POSITION
+  meanaligned_residual_mean: 0.0360460700494599
+  meanaligned_residual_mean_ci95: [0.028007764078534544, 0.04408437602038526]
+  meanaligned_mean_minus_median: 0.03451693472986933
+  meanaligned_mean_minus_median_ci95: [0.02614645338870382, 0.04288741607103484]
+  meanaligned_mean_minus_median_direction_puzzles: 20
+  meanaligned_normalized_quantile_asymmetry: 0.23048569348928732
+  meanaligned_normalized_quantile_asymmetry_ci95: [0.1882338402467704, 0.2727375467318043]
+  meanaligned_quantile_asymmetry_direction_puzzles: 20
+  asymmetric_amendment_pre_registered_criterion_met: true
+  v9_verdict_changed: false
+  v9m4_authorized: false
+
+next_allowed_action: CREATE_INDEPENDENT_V10_MEDIAN_PRESERVING_ASYMMETRIC_RESIDUAL_AMENDMENT_WITH_PARAMETER_MATCHED_SYMMETRIC_NULL

@@ -1,0 +1,2 @@
+iteration	candidate	mean_median_gap	gap_ci_low	gap_ci_high	gap_direction_puzzles	quantile_asymmetry	asym_ci_low	asym_ci_high	asym_direction_puzzles	verdict
+0	V9 frozen residual diagnostic	0.0345169347	0.0261464534	0.0428874161	20	0.2304856935	0.1882338402	0.2727375467	20	ASYMMETRIC_AMENDMENT_ELIGIBLE
