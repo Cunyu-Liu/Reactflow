@@ -39,6 +39,18 @@ v9m2:
   held_score_read_allowed: false
   partial_fold_score_read_allowed: false
   output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0
+  score_blind_training_hierarchy_audit:
+    audited_at: '2026-08-25T00:33:00+08:00'
+    registered_mutant_records: 13976
+    puzzles: 20
+    puzzle_method_cells: 160
+    unique_constructs: 160
+    constructs_per_puzzle_method: 1
+    methods_per_puzzle: 8
+    outer_train_cells_per_fold: 152
+    conclusion: EXACT_ONE_CONSTRUCT_PER_PUZZLE_METHOD_CELL
+    target_values_read_for_audit: false
+    partial_model_scores_read: false
 v9m3: NOT_AUTHORIZED
 v9m4: NOT_AUTHORIZED
 
