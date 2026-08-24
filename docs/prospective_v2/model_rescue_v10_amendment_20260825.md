@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v10 Amendment
 
-**状态：V10M0 合同与实现阶段；训练、held score 和 external outcome 全部关闭。**
+**状态：V10M0 实现与 28 项聚焦测试 PASS；V10M1 folds0/1、seed0、3 epochs prediction-only smoke 已授权；科学评分仍关闭。**
 
 ## 1. 合同地位
 

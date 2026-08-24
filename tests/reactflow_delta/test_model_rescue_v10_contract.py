@@ -10,17 +10,20 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v10m0_is_implementation_only_and_preserves_v9_terminal() -> None:
+def test_v10m1_authorizes_only_real_data_prediction_smoke() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v10_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V10M0"
-    assert active["runnable_phases"] == ["V10M0"]
-    assert active["training_allowed"] is False
+    assert active["authority"]["current_phase"] == "V10M1"
+    assert active["runnable_phases"] == ["V10M1"]
+    assert active["training_allowed"] == "V10_REAL_DATA_ENGINEERING_SMOKE_ONLY"
     assert active["held_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert contract["parent"]["v9_gate_changed"] is False
     assert contract["parent"]["v9m4_opened"] is False
     assert contract["formal_confirmation"]["authorized"] is False
+    assert contract["contract_status"] == (
+        "V10M0_IMPLEMENTATION_PASS_V10M1_SMOKE_AUTHORIZED"
+    )
 
 
 def test_v10_freezes_identification_ladder_and_top_journal_gate() -> None:

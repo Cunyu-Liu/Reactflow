@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v10
 manifest_id: reactflow_delta_model_rescue_v10_authority_20260825
 project_task_id: reactflow_delta_model_rescue_v10
 created_at: '2026-08-25T01:30:00+08:00'
-updated_at: '2026-08-25T01:30:00+08:00'
+updated_at: '2026-08-25T02:05:00+08:00'
 
 authority:
   pointer_role: V10_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: V10M0
-  current_authority_state: CONTRACT_AND_IMPLEMENTATION_ONLY
-  current_runnable_phase: V10M0
+  current_phase: V10M1
+  current_authority_state: REAL_DATA_ENGINEERING_SMOKE_ONLY
+  current_runnable_phase: V10M1
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v10-20260825
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v10_20260825
@@ -16,7 +16,7 @@ authority:
   machine_contract_path: configs/reactflow_delta/model_rescue_v10_amendment.yaml
   decision_ledger_path: docs/prospective_v2/model_rescue_v10_decision_ledger.yaml
   implementation_plan_path: docs/plans/2026-08-25-model-rescue-v10-implementation.md
-  binding_status: V10_CONTRACT_FROZEN_IMPLEMENTATION_ONLY
+  binding_status: V10M0_IMPLEMENTATION_AND_FOCUSED_TESTS_PASS_V10M1_AUTHORIZED
 
 parent_state:
   model_rescue_v8_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -38,9 +38,9 @@ authorization:
   public_release_allowed: false
 
 allowed_phases: [V10M0, V10M1, V10M2, V10M3, V10M4, V10M5, V10M6, M6]
-runnable_phases: [V10M0]
-training_allowed: false
-candidate_model_training_allowed: false
+runnable_phases: [V10M1]
+training_allowed: V10_REAL_DATA_ENGINEERING_SMOKE_ONLY
+candidate_model_training_allowed: V10_REAL_DATA_ENGINEERING_SMOKE_ONLY
 held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
@@ -63,8 +63,8 @@ resource_policy:
   low_frequency_monitor_seconds: 900
 
 gate_state:
-  V10M0: CONTRACT_FROZEN_IMPLEMENTATION_PENDING
-  V10M1: NOT_AUTHORIZED
+  V10M0: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
+  V10M1: REAL_DATA_ENGINEERING_SMOKE_AUTHORIZED
   V10M2: NOT_AUTHORIZED
   V10M3: NOT_AUTHORIZED
   V10M4: NOT_AUTHORIZED
@@ -75,4 +75,4 @@ gate_state:
   TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
   LEGACY_V3_CORRECTED_EXPERTS: INVALIDATED_TARGET_IDENTITY
 
-next_allowed_action: IMPLEMENT_V10_FIXED_HEADS_RUN_FOCUSED_TESTS_AND_FREEZE_IMPLEMENTATION_COMMIT
+next_allowed_action: RUN_V10M1_FOLDS0_1_SEED0_THREE_EPOCH_PREDICTION_ONLY_SMOKE

@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v10_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v10_20260825
 created_at: '2026-08-25T01:30:00+08:00'
-current_status: V10M0_CONTRACT_FROZEN_IMPLEMENTATION_ONLY
+current_status: V10M0_IMPLEMENTATION_PASS_V10M1_SMOKE_AUTHORIZED
 
 immutable_parent:
   v9_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
@@ -20,15 +20,29 @@ eligibility:
   quantile_direction_puzzles: 20
 
 v10m0:
-  status: CONTRACT_FROZEN_IMPLEMENTATION_PENDING
+  status: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
+  focused_tests_passed_local: 28
+  focused_tests_passed_remote: 28
+  symmetric_parameters: 63491
+  asymmetric_parameters: 63748
+  nested_null_exact_test: PASS
+  median_cdf_constraint_test: PASS
+  allocation_gradient_nonzero_test: PASS
+  train_only_standardization_test: PASS
   training_allowed: false
   held_score_read_allowed: false
   external_outcome_accessed: false
-v10m1: NOT_AUTHORIZED
+v10m1:
+  status: REAL_DATA_ENGINEERING_SMOKE_AUTHORIZED
+  folds: [0, 1]
+  seed: 0
+  epochs: 3
+  scoring_allowed: false
+  output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m1_real_smoke
 v10m2: NOT_AUTHORIZED
 v10m3: NOT_AUTHORIZED
 v10m4: NOT_AUTHORIZED
 v10m5: NOT_RUN
 v10m6: NOT_RUN
 
-next_allowed_action: IMPLEMENT_V10_FIXED_HEADS_RUN_FOCUSED_TESTS_AND_FREEZE_IMPLEMENTATION_COMMIT
+next_allowed_action: RUN_V10M1_FOLDS0_1_SEED0_THREE_EPOCH_PREDICTION_ONLY_SMOKE
