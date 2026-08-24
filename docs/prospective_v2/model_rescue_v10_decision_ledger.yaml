@@ -1,0 +1,34 @@
+schema_version: reactflow_delta.model_rescue_v10_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v10_20260825
+created_at: '2026-08-25T01:30:00+08:00'
+current_status: V10M0_CONTRACT_FROZEN_IMPLEMENTATION_ONLY
+
+immutable_parent:
+  v9_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
+  v9_gate_changed: false
+  v9m4_opened: false
+  v9_qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0/v9m3_qualification.json
+
+eligibility:
+  status: ASYMMETRIC_AMENDMENT_PRE_REGISTERED_CRITERION_MET
+  artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0/v9_post_gate_residual_diagnostic.json
+  mean_minus_median: 0.03451693472986933
+  mean_minus_median_ci95: [0.02614645338870382, 0.04288741607103484]
+  direction_puzzles: 20
+  normalized_quantile_asymmetry: 0.23048569348928732
+  normalized_quantile_asymmetry_ci95: [0.1882338402467704, 0.2727375467318043]
+  quantile_direction_puzzles: 20
+
+v10m0:
+  status: CONTRACT_FROZEN_IMPLEMENTATION_PENDING
+  training_allowed: false
+  held_score_read_allowed: false
+  external_outcome_accessed: false
+v10m1: NOT_AUTHORIZED
+v10m2: NOT_AUTHORIZED
+v10m3: NOT_AUTHORIZED
+v10m4: NOT_AUTHORIZED
+v10m5: NOT_RUN
+v10m6: NOT_RUN
+
+next_allowed_action: IMPLEMENT_V10_FIXED_HEADS_RUN_FOCUSED_TESTS_AND_FREEZE_IMPLEMENTATION_COMMIT
