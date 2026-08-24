@@ -39,8 +39,8 @@ authorization:
 
 allowed_phases: [V10M0, V10M1, V10M2, V10M3, V10M4, V10M5, V10M6, M6]
 runnable_phases: [V10M2]
-training_allowed: V10_FIXED_SEED0_TWENTY_FOLD_SCREEN_ONLY
-candidate_model_training_allowed: V10_FIXED_SEED0_TWENTY_FOLD_SCREEN_ONLY
+training_allowed: V10_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+candidate_model_training_allowed: V10_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
 held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
