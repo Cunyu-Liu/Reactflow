@@ -12,16 +12,18 @@ from scripts.reactflow_delta.run_model_rescue_v5_probe import PREDICTION_SCHEMA
 from scripts.reactflow_delta.score_model_rescue_v5_probe import _puzzle_macro
 
 
-def _key(method: str, mutation: str, position: int) -> str:
-    return f"openknot_m2|P1|{method}|P1_{method}|0|{mutation}|{position}"
+def _key(method: str, design_pos: int, mutation: str, position: int) -> str:
+    return (
+        f"openknot_m2|P1|{method}|P1_{method}|{design_pos}|{mutation}|{position}"
+    )
 
 
 def test_puzzle_macro_balances_positions_then_mutants_then_methods() -> None:
     losses = {
-        _key("A", "A>G", 0): 0.0,
-        _key("A", "A>G", 1): 0.0,
-        _key("A", "C>U", 0): 2.0,
-        _key("B", "G>A", 0): 1.0,
+        _key("A", 3, "A>G", 0): 0.0,
+        _key("A", 3, "A>G", 1): 0.0,
+        _key("A", 7, "A>G", 0): 2.0,
+        _key("B", 2, "G>A", 0): 1.0,
     }
     # A: mean(mutant means [0, 2]) = 1; B: 1; puzzle = 1.
     assert _puzzle_macro(losses) == pytest.approx(1.0)

@@ -83,7 +83,10 @@ def _puzzle_macro(losses: dict[str, float]) -> float:
         parts = E._bio_key_parts(key)
         puzzle = parts["puzzle"]
         method = parts["method"]
-        mutation = parts["mutation"]
+        raw = key.split("|")
+        if len(raw) < 7:
+            raise ValueError(f"invalid V5M2 biological scoring key {key}")
+        mutation = f"{raw[3]}|{raw[4]}|{raw[5]}"
         puzzles.add(puzzle)
         mutant_losses.setdefault((puzzle, method, mutation), []).append(float(loss))
     if len(puzzles) != 1 or not mutant_losses:
