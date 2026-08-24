@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v6
 manifest_id: reactflow_delta_model_rescue_v6_authority_20260824
 project_task_id: reactflow_delta_model_rescue_v6
 created_at: '2026-08-24T12:55:00+08:00'
-updated_at: '2026-08-24T13:40:00+08:00'
+updated_at: '2026-08-24T14:17:26+08:00'
 
 authority:
   pointer_role: V6_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: V6M1
-  current_authority_state: OUTCOME_BLIND_CACHE_RUNNING_PREOUTCOME_BASIS_CORRECTED
-  current_runnable_phase: V6M1
+  current_phase: V6M2
+  current_authority_state: COMPLETE_TWENTY_FOLD_PREDICTION_ONLY_BEFORE_ANY_SCORE
+  current_runnable_phase: V6M2
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v6-20260824
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v6_20260824
@@ -17,7 +17,7 @@ authority:
   decision_ledger_path: docs/prospective_v2/model_rescue_v6_decision_ledger.yaml
   design_path: docs/plans/2026-08-24-model-rescue-v6-design.md
   implementation_plan_path: docs/plans/2026-08-24-model-rescue-v6.md
-  binding_status: V6M1_RUNNING_V6M2_PIPELINE_IMPLEMENTED_BUT_NOT_AUTHORIZED
+  binding_status: V6M1_EXACT_PASS_V6M2_PREDICTION_ONLY_AUTHORIZED
 
 parent_state:
   remote_parent_head: eb9fbdc33a03aeb12decc0d68575c18549395e71
@@ -33,17 +33,17 @@ authorization:
   amendment_scope: WT_2A3_CONSTRAINED_EXACT_DIFFERENTIAL_ENSEMBLE_ONLY
   implementation_allowed: true
   outcome_blind_cache_preparation_allowed: true
-  internal_development_probe_allowed: false
+  internal_development_probe_allowed: true
   candidate_training_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
   public_release_allowed: false
 
 allowed_phases: [V6M0, V6M1, V6M2, V6M3, V6M4, V6M5, V6M6, M6]
-runnable_phases: [V6M1]
-training_allowed: false
+runnable_phases: [V6M2]
+training_allowed: FIXED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY
 candidate_model_training_allowed: false
-outcome_blind_cache_allowed: true
+outcome_blind_cache_allowed: false
 held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
@@ -60,8 +60,8 @@ resource_policy:
 
 gate_state:
   V6M0: CONTRACT_AND_AUTHORITY_PASS
-  V6M1: OUTCOME_BLIND_CONSTRAINED_CACHE_RUNNING_BASIS_CORRECTED
-  V6M2: IMPLEMENTED_NOT_AUTHORIZED_PENDING_V6M1_EXACT_PASS
+  V6M1: OUTCOME_BLIND_CONSTRAINED_CACHE_EXACT_PASS
+  V6M2: PREDICTION_ONLY_TWENTY_FOLD_AUTHORIZED_HELD_SCORE_CLOSED
   V6M3: NOT_AUTHORIZED
   V6M4: NOT_AUTHORIZED
   V6M5: NOT_AUTHORIZED
@@ -69,4 +69,4 @@ gate_state:
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
 
-next_allowed_action: IMPLEMENT_AND_QUALIFY_V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_ONLY
+next_allowed_action: RUN_ALL_V6M2_PREDICTION_ONLY_FOLDS_THEN_MERGE_WITHOUT_SCORE

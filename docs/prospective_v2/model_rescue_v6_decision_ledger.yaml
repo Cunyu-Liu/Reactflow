@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v6_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v6_20260824
 created_at: '2026-08-24T12:55:00+08:00'
-current_status: V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_AUTHORIZED
+current_status: V6M2_PREDICTION_ONLY_AUTHORIZED_AFTER_V6M1_EXACT_PASS
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -74,12 +74,23 @@ evidence_state:
     one_based_dummy_required: true
     all_minus_999_equals_unconstrained_pf: ENGINEERING_CONFIRMED
   v6m1_cache:
-    status: ENGINEERING_SMOKE_PASS_FULL_CACHE_NOT_RUN
+    status: V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_PASS
     implementation:
       - scripts/reactflow_delta/model_rescue_v6_schema.py
       - scripts/reactflow_delta/build_model_rescue_v6_constrained_cache.py
       - scripts/reactflow_delta/qualify_model_rescue_v6_constrained_cache.py
     focused_remote_tests: 14_PASS
+    full_real_data_cache:
+      directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full
+      cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+      manifest: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache_manifest.json
+      qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/v6m1_qualification.json
+      status: V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_PASS
+      completed_at: '2026-08-24T13:20:34+08:00'
+      qualified_at: '2026-08-24T14:17:26+08:00'
+      nonmetric_error_matches: 0
+      mutant_outcome_columns_used: false
+      external_outcome_accessed: false
     real_data_smoke:
       status: V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_PASS
       directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_real_smoke
@@ -104,7 +115,7 @@ evidence_state:
     target_columns_read: false
     external_outcome_accessed: false
   v6m2_eligibility:
-    status: IMPLEMENTATION_COMPLETE_REAL_RUN_NOT_AUTHORIZED
+    status: PREDICTION_ONLY_TWENTY_FOLD_AUTHORIZED_HELD_SCORE_CLOSED
     implementation:
       - scripts/reactflow_delta/model_rescue_v6_probe.py
       - scripts/reactflow_delta/run_model_rescue_v6_probe.py
@@ -127,4 +138,4 @@ evidence_state:
   v6m4_screen: NOT_RUN
   v6m5_confirmation: NOT_RUN
 
-next_allowed_action: IMPLEMENT_AND_QUALIFY_V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_ONLY
+next_allowed_action: RUN_ALL_V6M2_PREDICTION_ONLY_FOLDS_THEN_MERGE_WITHOUT_SCORE
