@@ -10,26 +10,24 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v8m1_authorizes_only_fresh_corrected_expert_rebuild() -> None:
+def test_v8m2_authorizes_only_one_complete_mean_screen() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v8_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V8M1"
-    assert active["runnable_phases"] == ["V8M1"]
-    assert active["training_allowed"] == (
-        "TARGET_IDENTITY_CORRECTED_B1_AND_MEANALIGNED_FRESH_REBUILD_ONLY"
-    )
-    assert active["held_score_read_allowed"] is False
+    assert active["authority"]["current_phase"] == "V8M2"
+    assert active["runnable_phases"] == ["V8M2"]
+    assert active["training_allowed"] is False
+    assert active["held_score_read_allowed"] is True
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert active["legacy_target_dependent_prediction_reuse_allowed"] is False
     assert active["legacy_v3_expert_reuse_allowed"] is False
     assert contract["contract_status"] == (
-        "V8M1_TARGET_IDENTITY_CORRECTED_EXPERT_REBUILD_AUTHORIZED"
+        "V8M2_COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED"
     )
     assert contract["parent"]["v3_checkpoint_or_prediction_reuse_allowed"] is False
     status = {row["id"]: row["status"] for row in contract["phase_graph"]}
-    assert status["V8M1"] == "AUTHORIZED"
-    assert status["V8M2"] == "NOT_AUTHORIZED"
+    assert status["V8M1"] == "PASS"
+    assert status["V8M2"] == "AUTHORIZED"
     assert status["V8M3"] == "NOT_AUTHORIZED"
 
 
