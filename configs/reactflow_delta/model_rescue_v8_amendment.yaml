@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v8_amendment.v1
 contract_id: reactflow_delta_model_rescue_v8_20260824
-contract_status: V8M1_TARGET_IDENTITY_CORRECTED_EXPERT_REBUILD_AUTHORIZED
+contract_status: V8M2_COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED
 created_at: '2026-08-24T22:25:00+08:00'
 
 parent:
@@ -31,6 +31,8 @@ scientific_scope:
   legacy_target_dependent_artifact_reuse_allowed: false
 
 v8m1_expert_rebuild:
+  terminal_status: V8M1_CORRECTED_EXPERT_REBUILD_PASS
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0/v8m1_corrected_expert_qualification.json
   output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
   folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   seed: 0
@@ -124,8 +126,8 @@ formal_confirmation:
 
 phase_graph:
   - {id: V8M0, status: PASS, next_on_pass: V8M1}
-  - {id: V8M1, status: AUTHORIZED, next_on_pass: V8M2, next_on_fail: V8M6_FAIL}
-  - {id: V8M2, status: NOT_AUTHORIZED, next_on_pass: V8M3, next_on_fail: V8M6_FAIL}
+  - {id: V8M1, status: PASS, next_on_pass: V8M2, next_on_fail: V8M6_FAIL}
+  - {id: V8M2, status: AUTHORIZED, next_on_pass: V8M3, next_on_fail: V8M6_FAIL}
   - {id: V8M3, status: NOT_AUTHORIZED, next_on_pass: V8M4, next_on_fail: V8M6_FAIL}
   - {id: V8M4, status: NOT_AUTHORIZED, next_on_pass: V8M5, next_on_fail: V8M6_FAIL}
   - {id: V8M5, status: NOT_AUTHORIZED, next_on_pass: V8M6_PASS, next_on_fail: V8M6_FAIL}

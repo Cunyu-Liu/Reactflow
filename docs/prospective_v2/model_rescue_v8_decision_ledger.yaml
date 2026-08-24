@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v8_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v8_20260824
 created_at: '2026-08-24T22:25:00+08:00'
-current_status: V8M1_TARGET_IDENTITY_CORRECTED_EXPERT_REBUILD_AUTHORIZED
+current_status: V8M2_COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED
 
 immutable_history:
   model_rescue_v7: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
@@ -25,7 +25,7 @@ confirmed_evidence:
     status: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
 
 v8m1:
-  status: FRESH_CORRECTED_EXPERT_REBUILD_RUNNING
+  status: V8M1_CORRECTED_EXPERT_REBUILD_PASS
   session: reactflow_v8_v8m1_corrected_experts_20260824
   started_at: '2026-08-24T22:30:51+08:00'
   output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
@@ -36,14 +36,23 @@ v8m1:
     7: [3, 7, 11, 15, 19]
   expected_outer_folds: 20
   completed_outer_folds_at_launch: 0
+  completed_outer_folds: 20
+  completed_at: '2026-08-24T23:26:00+08:00'
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0/v8m1_corrected_expert_qualification.json
   target_profile_identity: EXACT_PUZZLE_METHOD_MUTATION
   fresh_twenty_fold_rebuild_required: true
   legacy_v3_checkpoint_or_prediction_reuse: false
   held_score_read_allowed: false
   external_outcome_accessed: false
-v8m2: NOT_AUTHORIZED
+v8m2:
+  status: COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED
+  complete_before_score: true
+  training_allowed: false
+  held_score_read_allowed: true
+  partial_fold_score_read_allowed: false
+  external_outcome_accessed: false
 v8m3: NOT_AUTHORIZED
 v8m4: NOT_AUTHORIZED
 v8m5: NOT_AUTHORIZED
 
-next_allowed_action: MONITOR_V8M1_AT_900_SECOND_INTERVAL_AND_QUALIFY_ONLY_AFTER_TWENTY_FOLDS
+next_allowed_action: RUN_V8M2_COMPLETE_UNSCORED_MERGE_THEN_SINGLE_SCORE_THEN_PREFROZEN_QUALIFIER

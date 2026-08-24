@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v8 Amendment
 
-**状态：V8M1 target-identity-corrected B1/MeanAligned 全 20-fold 新鲜重建已授权**
+**状态：V8M1 exact PASS；V8M2 一次性完整 mean-signal screen 已授权**
 
 ## 1. 为什么另立 v8
 
@@ -21,6 +21,8 @@ V8 不修改 v3/v7 结论。它只回答一个尚未被正确实验回答的问�
 ## 3. V8M2：一次性 mean signal screen
 
 完整 expert rebuild PASS 后，统一比较 corrected feature41、corrected B1 和 corrected MeanAligned。MeanAligned 必须同时相对 feature41 和 B1 获得至少 1% signed-delta MAE 改善，两个 paired CI lower 都大于 0，且相对 feature41 至少 14/20 puzzles 正向，才能开放更大模型。
+
+2026-08-24 23:26（Asia/Shanghai），V8M1 qualifier 在不读取任何 held score 的情况下确认 20/20 folds、exact target identity、fresh checkpoints、完整 registered key universe 和 prediction-only schema 全部通过，精确状态为 `V8M1_CORRECTED_EXPERT_REBUILD_PASS`。因此只开放一次完整 V8M2 target join；训练保持关闭，partial-fold score 继续禁止。
 
 ## 4. V8M3：固定大容量 residual model
 
