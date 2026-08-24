@@ -34,6 +34,9 @@ def test_v9_freezes_equicalibration_and_top_journal_gate() -> None:
     assert family["components"] == 2
     assert family["locations"] == "BOTH_EXACTLY_EQUAL_TO_FROZEN_SIGNED_MEAN"
     assert family["architecture_or_loss_search_allowed"] is False
+    assert "FEATURE41_MEAN_REPLAYS_TIC2A_AT_1E_7" in contract["v9m1_smoke"][
+        "required_invariants"
+    ]
     gate = contract["v9m2_screen"]["top_journal_gate"]
     assert gate["signed_delta_relative_gain_vs_feature41_min"] == 0.05
     assert gate["absolute_delta_relative_gain_vs_feature41_min"] == 0.01
