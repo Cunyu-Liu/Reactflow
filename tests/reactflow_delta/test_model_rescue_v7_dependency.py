@@ -8,6 +8,7 @@ import pytest
 import torch
 
 from scripts.reactflow_delta.model_rescue_v7_dependency import (
+    RINALMO_FORWARD_DTYPE,
     dependency_features_from_acgu_logits,
     exact_mutant_sequence,
     freeze_fp32_model_for_autocast,
@@ -17,6 +18,7 @@ from scripts.reactflow_delta.model_rescue_v7_schema import FEATURE_NAMES
 
 
 def test_foundation_parameters_remain_fp32_and_frozen_during_autocast() -> None:
+    assert RINALMO_FORWARD_DTYPE == torch.float16
     model = torch.nn.Sequential(torch.nn.Linear(4, 8), torch.nn.LayerNorm(8))
     placed = freeze_fp32_model_for_autocast(model, torch.device("cpu"))
     assert placed.training is False

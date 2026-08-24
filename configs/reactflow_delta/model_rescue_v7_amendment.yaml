@@ -86,7 +86,7 @@ literature_and_implementation:
     runtime_flash_attention: '2.3.2'
     attention_backend: OFFICIAL_FLASH_ATTENTION
     parameter_dtype: FLOAT32_OFFICIAL_CHECKPOINT
-    forward_autocast_dtype: BFLOAT16
+    forward_autocast_dtype: FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT
     output_logit_and_log_odds_dtype: FLOAT32
     pretraining_exact_sequence_exposure: UNKNOWN_NOT_ASSERTED
 
@@ -122,7 +122,7 @@ foundation_cache:
     - OFFICIAL_RINALMO_GIGA_V1_CODE_AND_WEIGHT
     - OFFICIAL_PYTHON_3_11_TORCH_2_1_CUDA_11_8_FLASH_ATTN_2_3_2_RUNTIME
     - EVAL_MODE_AND_NO_GRADIENT
-    - BFLOAT16_OR_FLOAT16_FORWARD_WITH_FLOAT32_LOG_ODDS
+    - FLOAT16_FORWARD_WITH_FLOAT32_LOGITS_AND_LOG_ODDS
     - UNIQUE_WT_AND_EXACT_MUTANT_SEQUENCE_DEDUPLICATION
     - REGISTERED_MUTATIONS_ONLY
     - FULL_RECEIVER_POSITION_OUTPUT
