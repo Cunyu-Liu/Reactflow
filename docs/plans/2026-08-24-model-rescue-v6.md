@@ -28,7 +28,10 @@ focused V6M2 commit. The implementation consists only of:
 The v5 direct feature universe remains exactly 18 columns. The qualified v5
 unconstrained ensemble universe remains exactly 12 columns. The V6 baseline is
 their concatenation, with 30 columns. The V6 candidate adds the qualified v6
-constrained ensemble universe, with 42 columns. Both models use the same
+constrained 11-dimensional independent basis, with 41 columns in total. The
+12-channel cache is unchanged; downstream pairing mass is excluded from the
+learning basis because it equals `-delta_unpaired-delta_upstream_pairing_mass`
+for every receiver. Both models use the same
 train-only weighted standardization and ridge `alpha=1`. The centered ridge
 retains its train-only target mean; no intercept convention,
 alpha, feature, target, fold or post-processing choice is searched. The two
@@ -89,6 +92,8 @@ unexpected rows, and cover the frozen held-puzzle universe.
 
 - constrained and unconstrained caches expose the same biological mutant
   universe and receiver length;
+- the 12-channel caches satisfy the frozen unpaired/upstream/downstream identity
+  and the probe exposes exactly the 11 nonredundant constrained channels;
 - cache lookup is independent of raw row ordering and uses puzzle, method,
   design position, ref and alt;
 - V6 baseline replays frozen V5 candidate predictions;

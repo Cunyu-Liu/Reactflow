@@ -20,6 +20,15 @@ FEATURE_NAMES = (
     "constrained_source_unpaired_probability_change",
 )
 
+# The cache preserves all interpretable channels, but the learning basis removes
+# one exact algebraic duplicate:
+# delta_unpaired + delta_upstream_pairing_mass + delta_downstream_pairing_mass = 0.
+REDUNDANT_PROBE_FEATURE = "constrained_delta_downstream_pairing_mass"
+PROBE_FEATURE_NAMES = tuple(
+    name for name in FEATURE_NAMES if name != REDUNDANT_PROBE_FEATURE
+)
+PROBE_FEATURE_INDICES = tuple(FEATURE_NAMES.index(name) for name in PROBE_FEATURE_NAMES)
+
 DEIGAN_SLOPE = 1.8
 DEIGAN_INTERCEPT = -0.6
 MISSING_REACTIVITY = -999.0

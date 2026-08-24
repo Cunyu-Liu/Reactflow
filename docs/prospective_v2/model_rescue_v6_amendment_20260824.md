@@ -2,7 +2,7 @@
 
 **合同日期：** 2026-08-24
 
-**当前阶段：** `V6M0_CONTRACT_FROZEN_FAIL_CLOSED`
+**当前阶段：** `V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_RUNNING`
 
 **远端父 HEAD：** `eb9fbdc33a03aeb12decc0d68575c18549395e71`
 
@@ -22,19 +22,27 @@ v6 的唯一新增能力是用合法的 WT 2A3 input 约束 WT 与 exact-mutant 
 - 不删除 mutant edit-site constraint；
 - 不读取或使用 mutant reactivity、mutant error、target mask、score 或 external outcome；
 - P20 Eterna 全缺失 WT profile 必须严格退化为 unconstrained partition ensemble；
-- 不搜索 normalization、m、b、temperature、constraint method、feature subset 或 structure engine。
+- 不搜索 normalization、m、b、temperature、constraint method、feature subset 或 structure engine；cache 保留全部 12 个解释性通道。
+
+在任何 v6 target 或 score access 之前的 outcome-blind basis audit 证明三个通道满足恒等式
+
+\[
+\Delta p_{\mathrm{unpaired}}+\Delta m_{\mathrm{upstream}}+\Delta m_{\mathrm{downstream}}=0.
+\]
+
+因此学习输入固定排除可由前两者精确重构的 downstream mass。该修正不搜索 outcome、不删除信息，也不要求重建 12-channel cache。
 
 ## 3. V6M2 eligibility
 
-baseline 为 v5 的 18 个直接 covariates 加 12 个 unconstrained ensemble-delta features；candidate 只增加 12 个 constrained ensemble-delta features。learner 固定为 train-only weighted standardized ridge alpha 1。
+baseline 为 v5 的 18 个直接 covariates 加原有 12 个 unconstrained ensemble-delta features，以保证逐 key 重放 v5 candidate；candidate 只增加 11 维满秩 constrained basis。learner 固定为 train-only weighted standardized ridge alpha 1。
 
 只有以下条件全部成立才开放 neural implementation：signed-delta relative MAE gain ≥1%、paired CI lower >0、至少 14/20 puzzles 正向、absolute-delta relative MAE 不恶化超过 0.5%、coverage 100%、failure 0、unexpected keys 0。完整 20 folds 前禁止 target join 和任何 partial score。
 
 ## 4. 唯一 neural primary 与 mandatory controls
 
-primary 为 `b1_2a3_constrained_ensemble_residual`。corrected B1 按相同协议从头训练后冻结；residual 使用 detached B1 source/receiver features、12 unconstrained features 和 12 constrained features。head 固定为 train-only normalization 后的双投影 hidden-64 fusion、GELU、zero-initialized scalar output。
+primary 为 `b1_2a3_constrained_ensemble_residual`。corrected B1 按相同协议从头训练后冻结；residual 使用 detached B1 source/receiver features、11 维 unconstrained 独立基和 11 维 constrained 独立基。head 固定为 train-only normalization 后的双投影 hidden-64 fusion、GELU、zero-initialized scalar output。
 
-两个 control 不是候选搜索：`b1_zero_structure_residual` 使用 24 个零 structure channels；`b1_unconstrained_ensemble_residual` 使用 12 个 unconstrained channels加 12 个零 channels。三者输入宽度、参数量、训练预算、mean loss 和 calibration family 完全相同。
+两个 control 不是候选搜索：`b1_zero_structure_residual` 使用 22 个零 structure channels；`b1_unconstrained_ensemble_residual` 使用 11 个 unconstrained channels 加 11 个零 channels。三者输入宽度、参数量、训练预算、mean loss 和 calibration family 完全相同。
 
 ## 5. 顶刊级 Gate
 

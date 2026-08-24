@@ -26,7 +26,10 @@ from scripts.reactflow_delta.model_rescue_v6_schema import (
     DEIGAN_SLOPE,
     FEATURE_NAMES,
     METADATA_COLUMNS,
+    PROBE_FEATURE_INDICES,
+    PROBE_FEATURE_NAMES,
     QUALIFICATION_SCHEMA,
+    REDUNDANT_PROBE_FEATURE,
 )
 from scripts.reactflow_delta.model_rescue_v5_schema import CACHE_SCHEMA as V5_CACHE_SCHEMA
 
@@ -203,6 +206,7 @@ def qualify_cache(
         checks["constraint_identity"] = all_missing_identity_ok
         finite = True
         nonnegative_magnitudes = True
+        pairing_mass_identity = True
         for start in range(0, features.shape[0], 128):
             block = np.asarray(features[start : start + 128])
             if not np.isfinite(block).all():
@@ -211,8 +215,23 @@ def qualify_cache(
             if np.any(block[..., 5] < 0) or np.any(block[..., 6] < 0):
                 nonnegative_magnitudes = False
                 break
+            if not np.allclose(
+                block[..., 0] + block[..., 7] + block[..., 8],
+                0.0,
+                atol=2e-7,
+                rtol=0.0,
+            ):
+                pairing_mass_identity = False
+                break
         checks["features_finite"] = finite
         checks["change_magnitudes_nonnegative"] = nonnegative_magnitudes
+        checks["pairing_mass_exact_dependency"] = pairing_mass_identity
+        checks["probe_basis_width"] = (
+            len(PROBE_FEATURE_NAMES) == len(PROBE_FEATURE_INDICES) == 11
+        )
+        checks["redundant_probe_feature_excluded"] = (
+            REDUNDANT_PROBE_FEATURE not in PROBE_FEATURE_NAMES
+        )
 
     comparison = _compare_with_unconstrained(cache_path, unconstrained_cache_path)
     for name in (

@@ -55,6 +55,9 @@ def test_v6_has_one_fixed_constraint_protocol_and_incremental_gate() -> None:
     assert engine["searches_allowed"] == []
     assert len(engine["constrained_features"]) == 12
     assert probe["baseline_features"] == "DIRECT_18_PLUS_V5_UNCONSTRAINED_12"
+    assert probe["candidate_features"] == (
+        "BASELINE_PLUS_V6_CONSTRAINED_INDEPENDENT_11"
+    )
     assert probe["gate"]["signed_delta_relative_mae_gain_min"] == 0.01
     invariants = probe["implementation_invariants"]
     assert invariants["baseline_replay"] == (
@@ -63,6 +66,8 @@ def test_v6_has_one_fixed_constraint_protocol_and_incremental_gate() -> None:
     assert invariants["merge_before_target_join"] is True
     assert invariants["model_or_feature_selection_allowed"] is False
     assert invariants["alpha_search_allowed"] is False
+    assert invariants["cache_feature_width"] == 12
+    assert invariants["constrained_probe_feature_width"] == 11
 
 
 def test_v6_neural_controls_are_not_a_search_and_gate_remains_top_journal() -> None:
@@ -71,7 +76,9 @@ def test_v6_neural_controls_are_not_a_search_and_gate_remains_top_journal() -> N
     gate = v6["development_gate"]
 
     assert candidate["selection_allowed"] is False
-    assert candidate["equal_structure_input_width"] == 24
+    assert candidate["equal_structure_input_width"] == 22
+    assert candidate["independent_structure_basis"]["unconstrained_width"] == 11
+    assert candidate["independent_structure_basis"]["constrained_width"] == 11
     assert candidate["controls"] == [
         "b1_zero_structure_residual",
         "b1_unconstrained_ensemble_residual",

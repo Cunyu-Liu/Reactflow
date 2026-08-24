@@ -48,6 +48,15 @@ decisions:
     rationale: >-
       V6 claims only the incremental value of WT-2A3 constraints. Any baseline
       drift would confound that attribution and invalidate the eligibility probe.
+  - id: V6D006
+    status: FROZEN_BEFORE_ANY_V6_TARGET_OR_SCORE_ACCESS
+    decision: REMOVE_EXACT_DOWNSTREAM_MASS_DUPLICATE_FROM_LEARNING_BASIS
+    rationale: >-
+      Feature definitions imply delta_unpaired plus delta_upstream_mass plus
+      delta_downstream_mass equals zero for every receiver. Keeping all three
+      changes ridge regularization without adding information. The cache remains
+      12-wide for auditability; V6M2 adds 11 independent constrained channels and
+      any neural structure branch uses 11 independent channels per block.
 
 evidence_state:
   v5_complete_result:
@@ -80,6 +89,17 @@ evidence_state:
       mutant_reactivity_rows_read: 0
       held_score_computed: false
       external_outcome_accessed: false
+  v6m1_feature_basis_audit:
+    status: EXACT_ONE_DIMENSION_LINEAR_DEPENDENCY_CONFIRMED_AND_CORRECTED
+    artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_real_smoke/feature_nondegeneracy_smoke.json
+    rows: 18408
+    cache_feature_width: 12
+    standardized_rank: 11
+    incremental_standardized_rank: 11
+    exact_duplicate_column_pairs: []
+    exact_identity: DELTA_UNPAIRED_PLUS_DELTA_UPSTREAM_PLUS_DELTA_DOWNSTREAM_EQUALS_ZERO
+    target_columns_read: false
+    external_outcome_accessed: false
   v6m2_eligibility: NOT_RUN
   v6m4_screen: NOT_RUN
   v6m5_confirmation: NOT_RUN
