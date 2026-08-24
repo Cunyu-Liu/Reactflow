@@ -13,9 +13,9 @@ def _yaml(path: str) -> dict:
 def test_v10_parent_preserves_v9_terminal_and_formal_closure() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v9_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V10M0"
-    assert active["runnable_phases"] == ["V10M0"]
-    assert active["training_allowed"] is False
+    assert active["authority"]["current_phase"] == "V10M1"
+    assert active["runnable_phases"] == ["V10M1"]
+    assert active["training_allowed"] == "V10_REAL_DATA_ENGINEERING_SMOKE_ONLY"
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
