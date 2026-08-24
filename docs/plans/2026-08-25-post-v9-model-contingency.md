@@ -43,6 +43,13 @@ and receive the mechanical V9M3 verdict.
   automatically permitted input. It must not be added unless complete-result
   method-stratified calibration shows a reproducible residual dependency, and
   any use must be disclosed as a dataset-specific generalization limitation.
+- `MATHEMATICAL_PROPERTY`: because both V9 Gaussian components share exactly
+  the same location, every conditional distribution is symmetric with
+  mean=median=mode at the frozen V8 point and zero third central moment. The
+  family can represent heteroscedasticity and excess kurtosis, but not skew,
+  a mean/median offset, or an off-center response mode. Its only mechanism for
+  increasing `E|Delta|` is variance/tail inflation, which creates a direct
+  CRPS-versus-magnitude trade-off when the residual distribution is asymmetric.
 
 ## Primary unresolved mechanism
 
