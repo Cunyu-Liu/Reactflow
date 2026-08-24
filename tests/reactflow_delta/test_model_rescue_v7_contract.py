@@ -188,6 +188,10 @@ def test_v7_runtime_recovery_builds_a_clean_frozen_environment() -> None:
     assert "ml-collections==0.1.1" in text
     assert "gdown==5.1.0" in text
     assert "flash_attn-2.3.2-cp311-cp311-linux_x86_64.whl" in text
+    assert "FLASH_ATTENTION_FORCE_BUILD=TRUE" in text
+    assert "pip wheel" in text
+    assert '--wheel-dir "$BASE/wheels"' in text
+    assert "--no-build-isolation" in text
     assert 'pip install --no-deps "$FLASH_WHEEL"' in text
     assert "CONDA_PKGS_DIRS" in text
     assert 'PIP_CACHE_DIR="$BASE/pip_cache"' in text

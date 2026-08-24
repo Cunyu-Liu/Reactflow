@@ -13,6 +13,7 @@ export CUDA_HOME="$RUNTIME"
 export PATH="$RUNTIME/bin:$PATH"
 export MAX_JOBS=8
 export TORCH_CUDA_ARCH_LIST=8.0
+export FLASH_ATTENTION_FORCE_BUILD=TRUE
 export CONDA_PKGS_DIRS="$BASE/conda_pkgs"
 export PIP_CACHE_DIR="$BASE/pip_cache"
 export TMPDIR="$BASE/tmp"
@@ -47,17 +48,23 @@ if [[ ! -x "$PYTHON" || ! -x "$RUNTIME/bin/nvcc" ]]; then
   echo "v7 clean Conda runtime transaction is incomplete"
   exit 1
 fi
-if [[ ! -f "$FLASH_WHEEL" ]]; then
-  echo "v7 exact locally built FlashAttention wheel is absent"
-  exit 1
-fi
-
 "$PYTHON" -m pip install \
   packaging==23.2 \
   ninja==1.11.1.1 \
   einops==0.6.1 \
   ml-collections==0.1.1 \
   gdown==5.1.0
+if [[ ! -f "$FLASH_WHEEL" ]]; then
+  "$PYTHON" -m pip wheel \
+    --no-build-isolation \
+    --no-deps \
+    --wheel-dir "$BASE/wheels" \
+    flash-attn==2.3.2
+fi
+if [[ ! -f "$FLASH_WHEEL" ]]; then
+  echo "v7 forced local FlashAttention build did not produce the exact wheel"
+  exit 1
+fi
 "$PYTHON" -m pip install --no-deps "$FLASH_WHEEL"
 "$PYTHON" -m pip install --no-build-isolation --no-deps -e "$OFFICIAL"
 
