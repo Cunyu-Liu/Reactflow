@@ -10,30 +10,32 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v7m0_freezes_contract_before_foundation_access() -> None:
+def test_v7m1_authorizes_only_outcome_blind_foundation_cache() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v7 = _yaml("configs/reactflow_delta/model_rescue_v7_amendment.yaml")
 
-    assert active["authority"]["current_phase"] == "V7M0"
-    assert active["runnable_phases"] == ["V7M0"]
+    assert active["authority"]["current_phase"] == "V7M1"
+    assert active["runnable_phases"] == ["V7M1"]
     assert active["authorization"]["implementation_allowed"] is True
     assert (
         active["authorization"]["outcome_blind_foundation_preparation_allowed"]
-        is False
+        is True
     )
-    assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is False
+    assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is True
     assert active["authorization"]["internal_development_probe_allowed"] is False
     assert active["training_allowed"] is False
     assert active["candidate_model_training_allowed"] is False
-    assert active["outcome_blind_cache_allowed"] is False
+    assert active["outcome_blind_cache_allowed"] is True
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
-    assert v7["contract_status"] == "V7M0_CONTRACT_AND_AUTHORITY_FREEZE"
+    assert v7["contract_status"] == (
+        "V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_AUTHORIZED"
+    )
 
     phase_status = {row["id"]: row["status"] for row in v7["phase_graph"]}
-    assert phase_status["V7M0"] == "IN_PROGRESS"
-    assert phase_status["V7M1"] == "NOT_AUTHORIZED"
+    assert phase_status["V7M0"] == "PASS"
+    assert phase_status["V7M1"] == "AUTHORIZED"
     assert phase_status["V7M2"] == "NOT_AUTHORIZED"
     assert phase_status["V7M3"] == "NOT_AUTHORIZED"
 
