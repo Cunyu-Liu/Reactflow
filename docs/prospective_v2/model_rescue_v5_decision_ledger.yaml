@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v5_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v5_20260824
 created_at: '2026-08-24T11:57:54+08:00'
-current_status: V5M2_FIXED_WEIGHTED_RIDGE_ELIGIBILITY_PREDICTION_ONLY
+current_status: V5M2_COMPLETE_HELD_SCORE_AND_QUALIFICATION_ONLY
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -67,7 +67,7 @@ evidence_state:
     external_outcome_accessed: false
     biological_key_join_coverage: 13976/13976
   eligibility_probe:
-    status: V5M2_COMPLETE_PREDICTION_UNIVERSE_RUNNING
+    status: V5M2_COMPLETE_UNSCORED_MERGE_PASS
     implementation_remote_commit: d21e2d6
     focused_remote_tests: 22_PASS
     engineering_smoke:
@@ -82,8 +82,10 @@ evidence_state:
       - reactflow_v5_v5m2_probe_0
       - reactflow_v5_v5m2_probe_1
     complete_fold_artifacts_required_before_score: 20
-    current_score_access: CLOSED
+    complete_fold_artifacts_realized: 20
+    prediction_only_merge: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m2_structure_probe_complete/v5m2_complete_prediction_only_merged.json
+    current_score_access: ONE_TIME_COMPLETE_UNIVERSE_ALLOWED
   candidate_screen: NOT_RUN
   formal_confirmation: NOT_RUN
 
-next_allowed_action: COMPLETE_V5M2_PREDICTION_ONLY_FOLDS_WITHOUT_PARTIAL_SCORE_ACCESS
+next_allowed_action: RUN_COMPLETE_V5M2_SCORE_AND_PREFROZEN_QUALIFIER_ONCE
