@@ -56,10 +56,16 @@ def qualify(scores: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("V7M2 qualifier requires one complete score artifact")
     if scores.get("target_profile_identity") != "EXACT_PUZZLE_METHOD_MUTATION":
         raise ValueError("V7M2 qualifier requires corrected target identity")
+    if scores.get("target_join_after_complete_merge") is not True:
+        raise ValueError("V7M2 qualifier requires target join after complete merge")
     if scores.get("partial_fold_scores_inspected") is not False:
         raise ValueError("V7M2 qualifier rejects partial score inspection")
     if scores.get("model_selection_performed") is not False:
         raise ValueError("V7M2 qualifier rejects model selection")
+    if scores.get("legacy_target_dependent_prediction_reused") is not False:
+        raise ValueError("V7M2 qualifier rejects legacy target-dependent predictions")
+    if scores.get("external_outcome_accessed") is not False:
+        raise ValueError("V7M2 qualifier rejects external outcome access")
     if len(rows) != 20:
         raise ValueError("V7M2 qualifier requires exactly 20 folds")
     rows = sorted(rows, key=lambda row: int(row["outer_fold"]))

@@ -313,8 +313,11 @@ def _complete_scores(*, signed_gain: float, absolute_gain: float) -> dict:
         "schema_version": SCORE_SCHEMA,
         "status": "V7M2_COMPLETE_CORRECTED_SCORE_PASS",
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
+        "target_join_after_complete_merge": True,
         "partial_fold_scores_inspected": False,
         "model_selection_performed": False,
+        "legacy_target_dependent_prediction_reused": False,
+        "external_outcome_accessed": False,
         "scores": rows,
     }
 
@@ -329,6 +332,11 @@ def test_v7_probe_qualifier_applies_frozen_eligibility_gate() -> None:
     failed = qualify(_complete_scores(signed_gain=0.009, absolute_gain=0.0))
     assert failed["status"] == "V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE"
     assert failed["checks"]["signed_delta_relative_gain_at_least_one_percent"] is False
+
+    contaminated = _complete_scores(signed_gain=0.02, absolute_gain=0.0)
+    contaminated["external_outcome_accessed"] = True
+    with pytest.raises(ValueError, match="external outcome access"):
+        qualify(contaminated)
 
 
 def test_v7_probe_constants_match_the_machine_contract() -> None:
