@@ -51,6 +51,10 @@ def test_v7_dependency_definition_is_one_fixed_published_intervention() -> None:
     assert model["model_name"] == "giga-v1"
     assert model["parameters"] == 650000000
     assert model["weights_trainable"] is False
+    assert model["runtime_pytorch"] == "2.1.0"
+    assert model["runtime_cuda"] == "11.8"
+    assert model["runtime_flash_attention"] == "2.3.2"
+    assert model["attention_backend"] == "OFFICIAL_FLASH_ATTENTION"
     assert dependency["sequence_input"] == (
         "FULL_UNMASKED_WT_AND_EXACT_REGISTERED_MUTANT_SEQUENCE"
     )
