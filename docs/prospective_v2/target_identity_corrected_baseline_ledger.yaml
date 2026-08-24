@@ -1,0 +1,18 @@
+schema_version: reactflow_delta.target_identity_corrected_baseline_ledger.v1
+ledger_id: reactflow_delta_tic2a_corrected_baselines_20260824
+created_at: '2026-08-24T19:30:00+08:00'
+current_status: TIC2A_FIXED_CORRECTED_BASELINE_PREDICTIONS_AUTHORIZED
+target_identity:
+  registered_mutants: 13976
+  canonical_profiles: 13976
+  missing: 0
+  wrong_target: 0
+  wrong_error: 0
+execution:
+  folds_required: 20
+  folds_complete: 0
+  target_join_allowed: false
+  partial_score_read_allowed: false
+  external_outcome_accessed: false
+next_allowed_action: IMPLEMENT_TEST_AND_RUN_PREDICTION_ONLY_FOLDS_0_THROUGH_19
+
