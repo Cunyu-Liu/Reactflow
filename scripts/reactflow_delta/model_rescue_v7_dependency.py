@@ -113,6 +113,29 @@ def dependency_features_from_acgu_logits(
     return result
 
 
+def extract_acgu_sequence_logits(
+    logits: torch.Tensor,
+    sequences: Sequence[str],
+    acgu_indices: Sequence[int],
+) -> list[np.ndarray]:
+    """Remove CLS/EOS and select the conceptual A/C/G/U vocabulary logits."""
+
+    if logits.ndim != 3 or logits.shape[0] != len(sequences):
+        raise ValueError("RiNALMo logits must have one batch row per sequence")
+    if len(acgu_indices) != 4 or len(set(map(int, acgu_indices))) != 4:
+        raise ValueError("RiNALMo A/C/G/U vocabulary indices must be distinct")
+    output = []
+    for row, raw_sequence in zip(logits, sequences):
+        sequence = normalize_rna_sequence(raw_sequence)
+        if row.shape[0] < len(sequence) + 2:
+            raise ValueError("RiNALMo token axis is shorter than CLS+sequence+EOS")
+        value = row[1 : 1 + len(sequence), list(acgu_indices)].float().cpu().numpy()
+        if value.shape != (len(sequence), 4):
+            raise RuntimeError("RiNALMo sequence-logit extraction changed shape")
+        output.append(np.asarray(value, dtype=np.float32))
+    return output
+
+
 class RiNALMoGigaLogitInferer:
     """Thin adapter around the frozen official RiNALMo-Giga implementation."""
 
@@ -186,7 +209,7 @@ class RiNALMoGigaLogitInferer:
                 device_type="cuda", dtype=self.dtype
             ):
                 logits = self.model(tokens)["logits"]
-            acgu = logits[:, 1:-1, list(self.acgu_indices)].float().cpu().numpy()
+            acgu = extract_acgu_sequence_logits(logits, batch, self.acgu_indices)
             for sequence, values in zip(batch, acgu):
                 if values.shape != (len(sequence), 4):
                     raise RuntimeError("RiNALMo output length disagrees with the input")
