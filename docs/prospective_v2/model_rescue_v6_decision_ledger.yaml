@@ -42,6 +42,12 @@ decisions:
     status: FROZEN
     decision: IDENTICAL_CAPACITY_ZERO_AND_UNCONSTRAINED_NEURAL_CONTROLS
     rationale: ATTRIBUTE_ANY_LATER_GAIN_TO_CONSTRAINED_INFORMATION
+  - id: V6D005
+    status: FROZEN_BEFORE_V6M1_COMPLETE_AND_BEFORE_ANY_V6_SCORE
+    decision: V6M2_BASELINE_MUST_REPLAY_V5_DIRECT_PLUS_UNCONSTRAINED_CANDIDATE
+    rationale: >-
+      V6 claims only the incremental value of WT-2A3 constraints. Any baseline
+      drift would confound that attribution and invalidate the eligibility probe.
 
 evidence_state:
   v5_complete_result:

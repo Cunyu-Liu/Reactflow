@@ -73,6 +73,14 @@ eligibility_probe:
   baseline_features: DIRECT_18_PLUS_V5_UNCONSTRAINED_12
   candidate_features: BASELINE_PLUS_V6_CONSTRAINED_12
   complete_before_score_access: true
+  implementation_invariants:
+    folds: SPLIT_V4_OUTER_FOLDS_0_THROUGH_19
+    baseline_replay: V6_BASELINE_MUST_MATCH_V5_CANDIDATE_PREDICTIONS
+    prediction_artifact: REGISTERED_FULL_CONSTRUCT_KEYS_WITHOUT_TARGET_OR_SCORE
+    merge_before_target_join: true
+    score_hierarchy: POSITION_THEN_MUTANT_THEN_METHOD_THEN_PUZZLE
+    model_or_feature_selection_allowed: false
+    alpha_search_allowed: false
   gate:
     signed_delta_relative_mae_gain_min: 0.01
     signed_delta_paired_ci_lower_gt: 0.0
