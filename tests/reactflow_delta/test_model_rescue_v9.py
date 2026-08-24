@@ -19,7 +19,10 @@ from scripts.reactflow_delta.model_rescue_v9 import (
 from scripts.reactflow_delta.merge_model_rescue_v9 import merge_folds
 from scripts.reactflow_delta.qualify_model_rescue_v9 import qualify as qualify_screen
 from scripts.reactflow_delta.qualify_model_rescue_v9_smoke import qualify
-from scripts.reactflow_delta.score_model_rescue_v9 import SCHEMA as SCORE_SCHEMA
+from scripts.reactflow_delta.score_model_rescue_v9 import (
+    SCHEMA as SCORE_SCHEMA,
+    merged_integrity_pass,
+)
 from scripts.reactflow_delta.model_rescue_v6_probe import CANDIDATE_PROBE_FEATURE_NAMES
 
 
@@ -180,6 +183,25 @@ def test_v9m2_merge_requires_all_twenty_prediction_only_folds(tmp_path: Path) ->
         assert "incomplete" in str(exc)
     else:
         raise AssertionError("V9 merge accepted an incomplete fold universe")
+
+
+def test_v9_complete_scorer_accepts_safe_false_merge_invariants(
+    tmp_path: Path,
+) -> None:
+    for fold in range(20):
+        _write_smoke_fold(tmp_path, fold)
+        path = tmp_path / f"v9_fold_result_fold{fold}_seed0.json"
+        row = json.loads(path.read_text())
+        row["phase"] = "V9M2"
+        row["evidence_status"] = "DEVELOPMENT_CONSUMED_PREDICTION_ONLY_SCREEN"
+        row["calibration_epochs"] = 40
+        path.write_text(json.dumps(row) + "\n")
+    integrity = merge_folds(tmp_path)["merge_integrity"]
+    assert integrity["partial_scores_inspected"] is False
+    assert integrity["external_outcome_accessed"] is False
+    assert merged_integrity_pass(integrity) is True
+    integrity["partial_scores_inspected"] = True
+    assert merged_integrity_pass(integrity) is False
 
 
 def _complete_score_fixture(candidate_absolute: float = 0.14) -> dict:
