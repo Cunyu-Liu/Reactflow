@@ -12,26 +12,29 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v5_terminal_failure_preserves_every_prior_authority() -> None:
-    active = _yaml("configs/reactflow_delta/active_contract.yaml")
+def test_v5_terminal_failure_is_immutable_and_preserves_prior_results() -> None:
     v5 = _yaml("configs/reactflow_delta/model_rescue_v5_amendment.yaml")
+    ledger = _yaml("docs/prospective_v2/model_rescue_v5_decision_ledger.yaml")
     v4 = _yaml("configs/reactflow_delta/model_rescue_v4_amendment.yaml")
     v3 = _yaml("configs/reactflow_delta/model_rescue_v3_coordinate_correction_amendment.yaml")
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
     v1 = _yaml("configs/reactflow_delta/model_rescue_contract_v1.yaml")
 
-    assert active["authority"]["current_phase"] == "M6"
-    assert active["runnable_phases"] == ["M6"]
-    assert active["training_allowed"] is False
-    assert active["outcome_blind_cache_allowed"] is False
-    assert active["held_score_read_allowed"] is False
-    assert active["candidate_model_training_allowed"] is False
-    assert active["new_external_outcome_access_allowed"] is False
     assert v5["parent"]["disposition"] == (
         "PRESERVE_ALL_PRIOR_RESULTS_AUTHORITIES_AND_RUNNING_V3_UNCHANGED"
     )
     assert v5["contract_status"] == (
         "TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED"
+    )
+    assert ledger["current_status"] == (
+        "TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED"
+    )
+    assert ledger["evidence_state"]["eligibility_probe"]["status"] == (
+        "MODEL_RESCUE_V5_FAIL"
+    )
+    assert ledger["evidence_state"]["eligibility_probe"]["v5m3_authorized"] is False
+    assert ledger["next_allowed_action"] == (
+        "BENCHMARK_ROUTE_OR_NEW_SEPARATE_AMENDMENT_ONLY"
     )
     assert v4["contract_status"] == (
         "TERMINAL_V4M3_MODEL_RESCUE_V4_FAIL_BENCHMARK_ROUTE_LOCKED"

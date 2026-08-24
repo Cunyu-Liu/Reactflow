@@ -1,0 +1,66 @@
+schema_version: reactflow_delta.model_rescue_v6_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v6_20260824
+created_at: '2026-08-24T12:55:00+08:00'
+current_status: V6M0_CONTRACT_FROZEN_FAIL_CLOSED
+
+immutable_history:
+  model_rescue_v1: M2_NO_RESCUE_CANDIDATE
+  model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
+  model_rescue_v3: R3C3_RUNNING_SEPARATELY_UNCHANGED
+  model_rescue_v4: MODEL_RESCUE_V4_FAIL
+  model_rescue_v5: MODEL_RESCUE_V5_FAIL
+
+idea_register:
+  selected:
+    id: V6I001
+    idea: WT_2A3_CONSTRAINED_EXACT_DIFFERENTIAL_ENSEMBLE
+    stage: POST_LITERATURE_DECISION
+    status: SELECTED_FOR_ONE_FALSIFIABLE_AMENDMENT
+  deferred:
+    id: V6I002
+    idea: FULL_RESPONSE_LATENT_MANIFOLD
+    reason: OVERLAPS_PRIOR_LOW_RANK_ROUTE_AND_LACKS_CHEAP_ELIGIBILITY_TEST
+  rejected:
+    id: V6I003
+    idea: HURDLE_DIRECTION_MAGNITUDE_MODEL
+    reason: SPARSEDELTA_AND_MEANALIGNED_NEGATIVE_EVIDENCE_ALREADY_TESTS_THIS_MECHANISM
+
+decisions:
+  - id: V6D001
+    status: FROZEN
+    decision: SAME_WT_2A3_CONSTRAINT_FIELD_FOR_WT_AND_EVERY_EXACT_MUTANT
+    rationale: ISOLATE_SEQUENCE_MUTATION_AND_AVOID_CONSTRAINT_REMOVAL_CONFOUNDING
+  - id: V6D002
+    status: FROZEN
+    decision: VIENNARNA_DEFAULT_DEIGAN_M_1_8_B_MINUS_0_6_PF_ONLY
+    rationale: NO_DEVELOPMENT_OUTCOME_PARAMETER_SEARCH
+  - id: V6D003
+    status: FROZEN
+    decision: REQUIRE_INCREMENTAL_SIGNAL_BEYOND_V5_UNCONSTRAINED_FEATURES
+    rationale: V6_MUST_ADD_EXPERIMENT_CONDITIONING_NOT_RECYCLE_V5_SIGNAL
+  - id: V6D004
+    status: FROZEN
+    decision: IDENTICAL_CAPACITY_ZERO_AND_UNCONSTRAINED_NEURAL_CONTROLS
+    rationale: ATTRIBUTE_ANY_LATER_GAIN_TO_CONSTRAINED_INFORMATION
+
+evidence_state:
+  v5_complete_result:
+    status: MODEL_RESCUE_V5_FAIL
+    signed_delta_relative_gain: 0.006339623850329982
+    signed_delta_positive_puzzles: 20
+    signed_delta_ci95: [0.0013958100100162432, 0.001994498493015776]
+  openknot_wt_reactivity:
+    assay: 2A3_MAP_SHAPE
+    normalization: DATASET_90TH_PERCENTILE_EQUALS_ONE
+    finite_negative_values: EXPERIMENTAL_ERROR_ALLOWED_BY_SOURCE
+    all_missing_cells: [P20_Eterna]
+  viennarna_feasibility:
+    version: 2.7.2
+    one_based_dummy_required: true
+    all_minus_999_equals_unconstrained_pf: ENGINEERING_CONFIRMED
+  v6m1_cache: NOT_RUN
+  v6m2_eligibility: NOT_RUN
+  v6m4_screen: NOT_RUN
+  v6m5_confirmation: NOT_RUN
+
+next_allowed_action: VALIDATE_AND_COMMIT_V6M0_CONTRACT_ONLY
