@@ -12,6 +12,8 @@ import yaml
 from scripts.reactflow_delta.merge_model_rescue_v6_probe import merge_folds
 from scripts.reactflow_delta.model_rescue_v5_probe import (
     BASELINE_FEATURE_NAMES as DIRECT_FEATURE_NAMES,
+    fit_weighted_standardized_ridge,
+    predict_weighted_ridge,
 )
 from scripts.reactflow_delta.model_rescue_v5_schema import (
     CACHE_SCHEMA as V5_CACHE_SCHEMA,
@@ -21,6 +23,7 @@ from scripts.reactflow_delta.model_rescue_v6_probe import (
     BASELINE_PROBE_FEATURE_NAMES,
     CANDIDATE_PROBE_FEATURE_NAMES,
     ConstrainedFeatureCache,
+    accumulate_train_stats,
     validate_cache_alignment,
 )
 from scripts.reactflow_delta.model_rescue_v6_schema import (
@@ -55,6 +58,7 @@ class _Record:
     full_pos: int = 1
     ref: str = "C"
     alt: str = "U"
+    wt_id: str = "P1_M_wt"
 
 
 def _write_cache(
@@ -229,6 +233,57 @@ def test_held_prediction_is_full_output_and_never_calls_target_accessor() -> Non
         "mae",
         "crps",
     }.isdisjoint(result)
+
+
+def test_train_statistics_keep_equal_cell_mass_and_frozen_feature_widths() -> None:
+    class Construct:
+        sequence = "ACG"
+        wt_reactivity = np.asarray([0.1, 0.2, 0.3])
+        wt_error = np.asarray([0.1, 0.1, 0.1])
+        wt_observed = np.asarray([True, True, True])
+        region_map = np.asarray(["design_region"] * 3)
+
+    records = [
+        _Record(design_pos=1, full_pos=1, ref="C", alt="U"),
+        _Record(design_pos=2, full_pos=2, ref="G", alt="A"),
+    ]
+
+    class Universe:
+        def get_construct(self, _construct_id):
+            return Construct()
+
+        def mutant_full_profile(self, _wt_id, design_pos, _ref, _alt):
+            shift = 0.1 if design_pos == 1 else -0.2
+            return Construct.wt_reactivity + shift, np.full(3, 0.1)
+
+    class Unconstrained:
+        def get(self, record):
+            return np.full((3, 12), float(record.design_pos), dtype=np.float32)
+
+    class Constrained:
+        def get(self, record):
+            return np.full((3, 11), float(record.design_pos) / 10.0, dtype=np.float32)
+
+    baseline, candidate, counts = accumulate_train_stats(
+        Universe(), records, Unconstrained(), Constrained()
+    )
+    assert baseline.sum_weight == pytest.approx(1.0)
+    assert candidate.sum_weight == pytest.approx(1.0)
+    assert len(baseline.sum_x) == 30
+    assert len(candidate.sum_x) == 41
+    assert counts == {
+        "n_train_cells": 1,
+        "n_train_valid_mutants": 2,
+        "n_train_qualified_positions": 6,
+    }
+    baseline_model = fit_weighted_standardized_ridge(baseline)
+    candidate_model = fit_weighted_standardized_ridge(candidate)
+    assert np.isfinite(
+        predict_weighted_ridge(baseline_model, np.zeros((1, 30)))
+    ).all()
+    assert np.isfinite(
+        predict_weighted_ridge(candidate_model, np.zeros((1, 41)))
+    ).all()
 
 
 def test_v6_baseline_must_replay_v5_candidate(tmp_path: Path) -> None:
