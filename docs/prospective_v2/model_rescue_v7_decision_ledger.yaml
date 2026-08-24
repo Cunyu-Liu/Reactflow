@@ -165,6 +165,19 @@ evidence_state:
     local_focused_commit: fd9637b
     remote_focused_commit: f2e5683
     focused_tests: 8_PASS_REMOTE
+  v7m1_runtime:
+    status: V7M1_OFFICIAL_RINALMO_RUNTIME_PASS
+    recovery_session: reactflow_v7_v7m1_runtime_recovery12_20260824
+    completion_time: "2026-08-24T21:09:19+08:00"
+    official_code_head: 2c2c5c14a5ae609d8c560a5d9ca32e51e0288955
+    pytorch: "2.1.0"
+    pytorch_cuda: "11.8"
+    cuda_available: true
+    flash_attention: "2.3.2"
+    official_weight_bytes: 2603787622
+    foundation_forward_completed: false
+    cache_artifact_created: false
+    scientific_effect: NONE_RUNTIME_ENGINEERING_ONLY
   v7m1_cache: NOT_RUN
   v7m2_implementation:
     status: IMPLEMENTED_AND_FOCUSED_TESTED_NOT_AUTHORIZED
@@ -217,3 +230,11 @@ engineering_incidents:
     cause: CUDA_11_8_RUNTIME_MISSING_THRUST_HEADERS_FROM_CUDA_CCCL
     scientific_effect: NONE_NO_FOUNDATION_FORWARD_AND_NO_CACHE_ARTIFACT_CREATED
     recovery: INSTALL_PINNED_CUDA_CCCL_11_8_IN_THE_EXISTING_FROZEN_RUNTIME
+  - id: V7E006
+    status: RECOVERY12_RUNTIME_SETUP_PASS
+    stage: V7M1_PRE_FOUNDATION_FORWARD
+    resolution: >-
+      THE_FROZEN_PYTORCH_2_1_CUDA_11_8_FLASH_ATTENTION_2_3_2_RUNTIME_IMPORTED
+      SUCCESSFULLY_WITH_THE_EXACT_OFFICIAL_RINALMO_CODE_AND_WEIGHT_ARTIFACT
+    scientific_effect: NONE_RUNTIME_ENGINEERING_ONLY
+    next_action: WAIT_FOR_THE_EXISTING_PERSISTENT_V7M1_CACHE_CONTROLLER
