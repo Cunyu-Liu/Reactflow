@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v6_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v6_20260824
 created_at: '2026-08-24T12:55:00+08:00'
-current_status: V6M0_CONTRACT_FROZEN_FAIL_CLOSED
+current_status: V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_AUTHORIZED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -58,9 +58,9 @@ evidence_state:
     version: 2.7.2
     one_based_dummy_required: true
     all_minus_999_equals_unconstrained_pf: ENGINEERING_CONFIRMED
-  v6m1_cache: NOT_RUN
+  v6m1_cache: AUTHORIZED_NOT_RUN
   v6m2_eligibility: NOT_RUN
   v6m4_screen: NOT_RUN
   v6m5_confirmation: NOT_RUN
 
-next_allowed_action: VALIDATE_AND_COMMIT_V6M0_CONTRACT_ONLY
+next_allowed_action: IMPLEMENT_AND_QUALIFY_V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_ONLY

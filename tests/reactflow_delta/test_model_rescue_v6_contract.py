@@ -10,19 +10,24 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v6_starts_fail_closed_and_preserves_all_prior_results() -> None:
+def test_v6m1_authorizes_only_outcome_blind_cache_and_preserves_prior_results() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v6 = _yaml("configs/reactflow_delta/model_rescue_v6_amendment.yaml")
     v5 = _yaml("configs/reactflow_delta/model_rescue_v5_amendment.yaml")
     v4 = _yaml("configs/reactflow_delta/model_rescue_v4_amendment.yaml")
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
 
-    assert active["authority"]["current_phase"] == "V6M0"
-    assert active["runnable_phases"] == []
+    assert active["authority"]["current_phase"] == "V6M1"
+    assert active["runnable_phases"] == ["V6M1"]
+    assert active["authorization"]["implementation_allowed"] is True
+    assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is True
     assert active["training_allowed"] is False
-    assert active["outcome_blind_cache_allowed"] is False
+    assert active["candidate_model_training_allowed"] is False
+    assert active["outcome_blind_cache_allowed"] is True
     assert active["held_score_read_allowed"] is False
+    assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
+    assert v6["contract_status"] == "V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_AUTHORIZED"
     assert v6["parent"]["v5_terminal_status"] == "MODEL_RESCUE_V5_FAIL"
     assert v5["contract_status"] == (
         "TERMINAL_V5M2_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED"
