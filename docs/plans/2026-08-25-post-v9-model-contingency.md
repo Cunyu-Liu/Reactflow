@@ -24,8 +24,11 @@ and receive the mechanical V9M3 verdict.
   corrected ridge artifact already contains outer-train-only `mean_x` and
   `scale_x`, but V9 does not apply them to the residual-head input. Most
   channels are bounded near one, while global energy channels range to about
-  12, so this is a conditioning limitation rather than proof of catastrophic
-  saturation.
+  12. Across the 20 corrected outer-train ridge artifacts, feature scales range
+  from 0.04650 to 3.76185, an 80.90-fold ratio. This is a measured conditioning
+  limitation rather than proof of catastrophic saturation; any successor must
+  use the existing fold-specific outer-train `mean_x/scale_x` and apply the
+  same transformation to baseline and candidate.
 - `CONFIRMED_FACT`: one V9 residual head has only 3,011 trainable parameters
   (`43 -> 64 -> 3`). The proposed same-backbone median-constrained head would
   use the 41 standardized features, two point features, and 201 detached V8
