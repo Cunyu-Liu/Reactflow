@@ -13,6 +13,10 @@ export PATH="$RUNTIME/bin:$PATH"
 export MAX_JOBS=8
 export TORCH_CUDA_ARCH_LIST=8.0
 export CONDA_PKGS_DIRS="$BASE/conda_pkgs"
+export PIP_CACHE_DIR="$BASE/pip_cache"
+export TMPDIR="$BASE/tmp"
+
+mkdir -p "$PIP_CACHE_DIR" "$TMPDIR"
 
 if [[ ! -x "$CONDA" ]]; then
   echo "v7 recovery requires the server Conda executable"

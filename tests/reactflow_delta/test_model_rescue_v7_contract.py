@@ -190,6 +190,8 @@ def test_v7_runtime_recovery_builds_a_clean_frozen_environment() -> None:
     assert "flash-attn==2.3.2" in text
     assert "--no-build-isolation" in text
     assert "CONDA_PKGS_DIRS" in text
+    assert 'PIP_CACHE_DIR="$BASE/pip_cache"' in text
+    assert 'TMPDIR="$BASE/tmp"' in text
     assert "TORCH_CUDA_ARCH_LIST=8.0" in text
     assert "runtime_setup_complete" in text
     assert "score_model_rescue" not in text
