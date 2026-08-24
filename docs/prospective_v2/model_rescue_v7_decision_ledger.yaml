@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v7_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v7_20260824
 created_at: '2026-08-24T16:20:00+08:00'
-current_status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_AUTHORIZED
+current_status: V7M2_FIXED_CORRECTED_RINALMO_DEPENDENCY_ELIGIBILITY_PREDICTION_AUTHORIZED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -195,9 +195,30 @@ evidence_state:
     external_outcome_accessed: false
     scientific_effect: NONE_ENGINEERING_SMOKE_ONLY
     next_action: COMPLETE_AND_QUALIFY_FULL_OUTCOME_BLIND_CACHE
-  v7m1_cache: NOT_RUN
+  v7m1_cache:
+    status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_PASS
+    artifact_status: OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_COMPLETE
+    model_name: giga-v1
+    model_code_head: 2c2c5c14a5ae609d8c560a5d9ca32e51e0288955
+    dependency_code_head: d70b8816988eb83602f408d02fd63f1be82601e2
+    constructs: 160
+    registered_mutants: 13976
+    unique_dependency_edges: 13976
+    unique_inference_sequences: 14136
+    feature_width: 6
+    full_unmasked_wt_and_exact_mutant: true
+    registered_mutations_only: true
+    self_dependency_exact_zero: true
+    coordinate_identity_pass: true
+    sequence_identity_pass: true
+    exact_registered_row_universe_pass: true
+    feature_shape_dtype_and_finite_pass: true
+    forbidden_target_side_datasets_absent: true
+    mutant_reactivity_rows_read: 0
+    target_error_or_mask_read: false
+    external_outcome_accessed: false
   v7m2_implementation:
-    status: IMPLEMENTED_AND_FOCUSED_TESTED_NOT_AUTHORIZED
+    status: IMPLEMENTED_AND_FOCUSED_TESTED_PREDICTION_ONLY_AUTHORIZED
     baseline: TIC2A_CORRECTED_V6_FEATURE41
     candidate_addition: RINALMO_DEPENDENCY6_ONLY
     legacy_prediction_reuse: false
@@ -210,7 +231,7 @@ evidence_state:
   v7m4_screen: NOT_RUN
   v7m5_confirmation: NOT_RUN
 
-next_allowed_action: IMPLEMENT_AND_QUALIFY_V7M1_OUTCOME_BLIND_DEPENDENCY_CACHE
+next_allowed_action: RUN_COMPLETE_V7M2_PREDICTION_ONLY_FOLDS_AND_UNSCORED_MERGE
 
 engineering_incidents:
   - id: V7E001
