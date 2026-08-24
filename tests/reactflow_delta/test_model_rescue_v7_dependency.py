@@ -11,6 +11,7 @@ from scripts.reactflow_delta.model_rescue_v7_dependency import (
     RINALMO_FORWARD_DTYPE,
     dependency_features_from_acgu_logits,
     exact_mutant_sequence,
+    extract_acgu_sequence_logits,
     freeze_fp32_model_for_autocast,
     normalize_rna_sequence,
 )
@@ -77,6 +78,25 @@ def test_dependency_transform_rejects_length_or_nonfinite_drift() -> None:
         dependency_features_from_acgu_logits(
             bad, np.zeros((3, 4)), "ACG", source_pos=0
         )
+
+
+def test_rinalmo_logit_extraction_excludes_cls_eos_without_position_shift() -> None:
+    logits = torch.full((1, 5, 10), -999.0, dtype=torch.float32)
+    acgu_indices = (5, 6, 7, 8)
+    logits[0, 0, list(acgu_indices)] = 100.0
+    logits[0, 1, list(acgu_indices)] = torch.tensor([1.0, 2.0, 3.0, 4.0])
+    logits[0, 2, list(acgu_indices)] = torch.tensor([5.0, 6.0, 7.0, 8.0])
+    logits[0, 3, list(acgu_indices)] = torch.tensor([9.0, 10.0, 11.0, 12.0])
+    logits[0, 4, list(acgu_indices)] = 200.0
+
+    extracted = extract_acgu_sequence_logits(logits, ["ACU"], acgu_indices)
+    np.testing.assert_array_equal(
+        extracted[0],
+        np.asarray(
+            [[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0], [9.0, 10.0, 11.0, 12.0]],
+            dtype=np.float32,
+        ),
+    )
 
 
 def _frame(mutant_outcome: float) -> pd.DataFrame:
