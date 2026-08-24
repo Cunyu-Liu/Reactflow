@@ -1,0 +1,252 @@
+schema_version: reactflow_delta.model_rescue_v7_amendment.v1
+contract_id: reactflow_delta_model_rescue_v7_20260824
+contract_status: V7M0_CONTRACT_AND_AUTHORITY_FREEZE
+contract_revision: V7_RINALMO_DEPENDENCY_PRE_FOUNDATION_ACCESS
+created_at: '2026-08-24T16:20:00+08:00'
+
+parent:
+  local_fork_head: 75e0ea0
+  remote_fork_head: 08af937
+  v1_terminal_status: M2_NO_RESCUE_CANDIDATE
+  v2_terminal_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
+  v3_status_at_fork: R3C3_CORRECTED_EXPERT_REBUILD_IN_PROGRESS
+  v4_terminal_status: MODEL_RESCUE_V4_FAIL
+  v5_terminal_status: MODEL_RESCUE_V5_FAIL
+  v6_terminal_status: MODEL_RESCUE_V6_FAIL
+  disposition: PRESERVE_ALL_PRIOR_RESULTS_AND_RUNNING_V3_UNCHANGED
+
+scientific_scope:
+  task: ENDPOINT_V7_ALL_MUTANT_FULL_CONSTRUCT_SIGNED_DELTA_DISTRIBUTION
+  data: REAL_OPENKNOT_M2_V4_5_2
+  data_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  development_status: DEVELOPMENT_CONSUMED
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  evaluator: EVALUATOR_V2_METHOD_BALANCED_TARGET_INVARIANT
+  primary_metrics: [FULL_CONSTRUCT_CRPS, SIGNED_DELTA_MAE]
+  primary_candidate: b1_rinalmo_dependency_operator
+
+evidence_basis:
+  v4_observation: >-
+    A 35M-45M dual tower using paired RNA-FM representations was statistically
+    equivalent to corrected B1. More foundation parameters and embedding
+    differencing alone did not expose a usable mutation-response signal.
+  v5_observation: >-
+    Exact-mutant minus WT unconstrained thermodynamic ensemble features improved
+    signed-delta MAE by 0.633962%, with 20/20 positive puzzles, below the frozen
+    one-percent eligibility threshold.
+  v6_observation: >-
+    Adding WT-2A3-constrained ensemble features beyond V5 improved signed-delta
+    MAE by only 0.116060%, with 16/20 positive puzzles and CI above zero, again
+    below the one-percent threshold.
+  resulting_gap: >-
+    Existing models encode sequence context or thermodynamic ensemble changes,
+    but do not expose a pretrained directed intervention map from the actual
+    mutation source to every receiver nucleotide.
+
+hypothesis:
+  statement: >-
+    Exact unmasked RiNALMo-Giga log-odds changes induced by the registered SNV
+    provide a directed source-to-receiver dependency signal that improves
+    cross-puzzle signed-delta prediction beyond direct, unconstrained ensemble,
+    and WT-2A3-constrained ensemble features.
+  why_not_v4: >-
+    V4 supplied contextual embeddings to a small supervised tower and required
+    nineteen training puzzles to learn the intervention relation. V7 computes
+    the intervention relation directly from the pretrained MLM output logits.
+  prediction: >-
+    A fixed weighted ridge using dependency features will improve signed-delta
+    MAE by at least one percent beyond the exact V6 candidate replay.
+  falsifier: >-
+    The complete twenty-fold probe fails any eligibility Gate, or the later
+    dependency operator fails the five-percent dual-metric development Gate and
+    equal-capacity attribution controls.
+
+literature_and_implementation:
+  dependency_method:
+    article: Nucleotide dependency analysis of genomic language models detects functional elements
+    journal: Nature Genetics
+    doi: 10.1038/s41588-025-02347-3
+    publication_date: '2025-10-10'
+    official_code: https://github.com/gagneurlab/dependencies_DNALM
+    official_code_commit_reviewed: d70b8816988eb83602f408d02fd63f1be82601e2
+  foundation_model:
+    article: RiNALMo general-purpose RNA language models can generalize well on structure prediction tasks
+    journal: Nature Communications
+    doi: 10.1038/s41467-025-60872-5
+    official_code: https://github.com/lbcb-sci/RiNALMo
+    official_code_commit: 2c2c5c14a5ae609d8c560a5d9ca32e51e0288955
+    model_name: giga-v1
+    parameters: 650000000
+    pretraining_sequences: 36000000
+    official_weight_url: https://zenodo.org/records/15043668/files/rinalmo_giga_pretrained.pt
+    weights_trainable: false
+    pretraining_exact_sequence_exposure: UNKNOWN_NOT_ASSERTED
+
+dependency_definition:
+  sequence_input: FULL_UNMASKED_WT_AND_EXACT_REGISTERED_MUTANT_SEQUENCE
+  alphabet: [A, C, G, U]
+  logits_source: RINALMO_GIGA_MLM_HEAD
+  acgu_probability: SOFTMAX_OVER_ACGU_LOGITS
+  epsilon: 1.0e-10
+  for_each_target_base: >-
+    log2(p_mut/(1-p_mut))-log2(p_wt/(1-p_wt))
+  self_dependency: ZERO_AT_RECEIVER_EQUAL_TO_MUTATION_SOURCE
+  fixed_feature_basis:
+    - SIGNED_LOG_ODDS_SHIFT_A
+    - SIGNED_LOG_ODDS_SHIFT_C
+    - SIGNED_LOG_ODDS_SHIFT_G
+    - SIGNED_LOG_ODDS_SHIFT_U
+    - SIGNED_LOG_ODDS_SHIFT_FOR_WT_RECEIVER_BASE
+    - MAX_ABSOLUTE_LOG_ODDS_SHIFT
+  cache_key: WT_SEQUENCE_MUTATION_SOURCE_REF_ALT_RECEIVER
+  method_independent_cache_reuse: true
+  mutant_outcome_columns_allowed: false
+  target_error_or_mask_allowed: false
+  external_outcome_allowed: false
+  feature_or_layer_search_allowed: false
+  model_size_search_allowed: false
+
+foundation_cache:
+  phase: V7M1
+  output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v7/v7m1_rinalmo_dependency_cache
+  implementation_requirements:
+    - OFFICIAL_RINALMO_GIGA_V1_CODE_AND_WEIGHT
+    - EVAL_MODE_AND_NO_GRADIENT
+    - BFLOAT16_OR_FLOAT16_FORWARD_WITH_FLOAT32_LOG_ODDS
+    - UNIQUE_WT_AND_EXACT_MUTANT_SEQUENCE_DEDUPLICATION
+    - REGISTERED_MUTATIONS_ONLY
+    - FULL_RECEIVER_POSITION_OUTPUT
+    - NO_MUTANT_REACTIVITY_READ
+    - NO_EXTERNAL_OUTCOME_READ
+  qualifier:
+    finite_features: true
+    six_features_exact: true
+    self_dependency_zero: true
+    duplicated_method_keys_identical: true
+    reference_and_exact_mutant_only: true
+    full_registered_key_coverage: true
+
+eligibility_probe:
+  phase: V7M2
+  learner: TRAIN_ONLY_WEIGHTED_STANDARDIZED_RIDGE_ALPHA_ONE
+  weighting: EQUAL_PUZZLE_METHOD_THEN_EQUAL_MUTANT_THEN_EQUAL_QUALIFIED_POSITION
+  baseline_features: DIRECT_18_PLUS_V5_UNCONSTRAINED_12_PLUS_V6_CONSTRAINED_11
+  candidate_features: BASELINE_PLUS_V7_RINALMO_DEPENDENCY_6
+  targets: [SIGNED_DELTA, ABSOLUTE_DELTA]
+  complete_before_score_access: true
+  implementation_invariants:
+    folds: SPLIT_V4_OUTER_FOLDS_0_THROUGH_19
+    baseline_replay: V7_BASELINE_MUST_MATCH_V6_CANDIDATE_PREDICTIONS
+    baseline_replay_atol: 1.0e-12
+    prediction_artifact: REGISTERED_FULL_CONSTRUCT_KEYS_WITHOUT_TARGET_OR_SCORE
+    merge_before_target_join: true
+    score_hierarchy: POSITION_THEN_MUTANT_THEN_METHOD_THEN_PUZZLE
+    model_or_feature_selection_allowed: false
+    alpha_search_allowed: false
+  gate:
+    signed_delta_relative_mae_gain_min: 0.01
+    signed_delta_paired_ci_lower_gt: 0.0
+    signed_delta_positive_puzzles_min: 14
+    absolute_delta_relative_mae_guardrail_min: -0.005
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_keys: 0
+
+candidate_model:
+  phase: V7M3_AND_V7M4
+  prerequisite: EXACT_V7M2_RINALMO_DEPENDENCY_SIGNAL_ELIGIBLE
+  base: corrected_b1
+  base_source: V3_CORRECTED_EXPERT_ARTIFACTS_AFTER_EXACT_R3C3_PASS
+  base_parameters_frozen: true
+  primary: b1_rinalmo_dependency_operator
+  frozen_foundation_parameters: 650000000
+  trainable_operator:
+    inputs:
+      - DETACHED_B1_SOURCE_HIDDEN_96
+      - DETACHED_B1_RECEIVER_HIDDEN_96
+      - RINALMO_DEPENDENCY_6
+      - MUTATION_REF_ALT_ONE_HOT_8
+      - FIXED_SIGNED_DISTANCE_ENCODING_32
+    dependency_projection: LINEAR_6_TO_128_LAYER_NORM_GELU
+    context_projection: LINEAR_232_TO_256_LAYER_NORM_GELU
+    residual_mlp: LINEAR_384_TO_512_GELU_LINEAR_512_TO_512_GELU_LINEAR_512_TO_256_GELU_LINEAR_256_TO_1
+    output_initialization: FINAL_LINEAR_ZERO
+    estimated_trainable_parameters: APPROXIMATELY_750000
+    loss: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
+    epochs: 80
+    optimizer: ADAM
+    learning_rate: 0.001
+    weight_decay: 0.001
+    gradient_clip: 5.0
+  calibration: FROZEN_MEAN_ZERO_MEAN_TWO_GAUSSIAN_CRPS
+  calibration_epochs: 40
+  controls:
+    - EQUAL_CAPACITY_ZERO_DEPENDENCY_OPERATOR
+    - EQUAL_CAPACITY_HALF_LENGTH_CYCLIC_RECEIVER_SHIFTED_DEPENDENCY_OPERATOR
+  selection_allowed: false
+
+development_gate:
+  phase: V7M4
+  seed: 0
+  outer_folds: 20
+  complete_before_score_access: true
+  versus_corrected_b1:
+    crps_relative_gain_min: 0.05
+    signed_delta_mae_relative_gain_min: 0.05
+    crps_paired_ci_lower_gt: 0.0
+    signed_delta_mae_paired_ci_lower_gt: 0.0
+    crps_positive_puzzles_min: 16
+    signed_delta_mae_positive_puzzles_min: 16
+    leave_one_puzzle_effect_positive: true
+    max_single_puzzle_effect_fraction: 0.20
+  attribution:
+    primary_vs_each_control_crps_ci_lower_gt: 0.0
+    primary_vs_each_control_signed_delta_mae_ci_lower_gt: 0.0
+  prediction_coverage: 1.0
+  failure_rate: 0.0
+  unexpected_keys: 0
+  max_coverage_error_worsening_pp: 1.0
+
+formal_confirmation:
+  phase: V7M5
+  seeds: [0, 1, 2, 3, 4]
+  outer_folds: 20
+  selection_allowed: false
+  gate: SAME_AS_DEVELOPMENT_GATE_ON_UNIQUE_FIVE_SEED_MIXTURES
+  internal_pass_status: HIGH_EFFECT_POST_HOC_DEVELOPMENT_PASS
+
+resource_policy:
+  physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
+  use_only_sufficient_free_memory: true
+  co_location_allowed_when_memory_sufficient: true
+  preemption_or_signals_to_other_jobs: false
+  v3_process_interference_allowed: false
+  oom_recovery: MOVE_TO_ANOTHER_ALLOWED_GPU_OR_REDUCE_CACHE_BATCH_ONLY
+  scientific_protocol_change_on_oom: false
+
+phase_graph:
+  - {id: V7M0, status: IN_PROGRESS, next_on_pass: V7M1}
+  - {id: V7M1, status: NOT_AUTHORIZED, next_on_pass: V7M2, next_on_fail: V7M6_FAIL}
+  - {id: V7M2, status: NOT_AUTHORIZED, next_on_pass: V7M3, next_on_fail: V7M6_FAIL}
+  - {id: V7M3, status: NOT_AUTHORIZED, next_on_pass: V7M4, next_on_fail: V7M6_FAIL}
+  - {id: V7M4, status: NOT_AUTHORIZED, next_on_pass: V7M5, next_on_fail: V7M6_FAIL}
+  - {id: V7M5, status: NOT_AUTHORIZED, next_on_pass: V7M6_PASS, next_on_fail: V7M6_FAIL}
+  - {id: V7M6, status: NOT_RUN, handoff_phase: M6}
+
+claim_policy:
+  foundation_cache_pass_is_scientific_pass: false
+  eligibility_probe_is_model_pass: false
+  internal_pass: HIGH_EFFECT_POST_HOC_DEVELOPMENT_PASS
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  mechanism: NOT_ESTABLISHED
+  practical_utility: NOT_ESTABLISHED
+  publication_ready: false
+
+stop_policy:
+  v7m1_fail: STOP_V7_AND_RETURN_M6
+  v7m2_fail: STOP_V7_AND_RETURN_M6_WITH_DEPENDENCY_NEGATIVE_RESULT
+  v7m4_fail: STOP_V7_AND_RETURN_M6_WITHOUT_PARAMETER_OR_FEATURE_SEARCH
+  v7m5_fail: STOP_V7_AND_RETURN_M6_WITH_DEVELOPMENT_ABLATION_ONLY
+  gate_lowering_allowed: false
+  third_candidate_after_failure_allowed: false

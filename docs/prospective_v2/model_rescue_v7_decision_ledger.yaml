@@ -1,0 +1,104 @@
+schema_version: reactflow_delta.model_rescue_v7_decision_ledger.v1
+ledger_id: reactflow_delta_model_rescue_v7_20260824
+created_at: '2026-08-24T16:20:00+08:00'
+current_status: V7M0_CONTRACT_AND_AUTHORITY_FREEZE
+
+immutable_history:
+  model_rescue_v1: M2_NO_RESCUE_CANDIDATE
+  model_rescue_v2: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY
+  model_rescue_v3: R3C3_RUNNING_SEPARATELY_UNCHANGED
+  model_rescue_v4: MODEL_RESCUE_V4_FAIL
+  model_rescue_v5: MODEL_RESCUE_V5_FAIL
+  model_rescue_v6: MODEL_RESCUE_V6_FAIL
+
+completed_evidence:
+  v4:
+    primary: PAIRED_RNAFM_DUAL_TOWER
+    signed_delta_relative_gain: 0.0022674893385431967
+    crps_relative_gain: -0.001818187917267443
+    interpretation: FOUNDATION_EMBEDDING_AND_CAPACITY_NOT_SUFFICIENT
+  v5:
+    primary: EXACT_UNCONSTRAINED_THERMODYNAMIC_ENSEMBLE_DELTA
+    signed_delta_relative_gain: 0.006339623850329982
+    signed_delta_positive_puzzles: 20
+    interpretation: STABLE_BUT_SUBTHRESHOLD_SEQUENCE_ONLY_STRUCTURE_SIGNAL
+  v6:
+    primary: WT_2A3_CONSTRAINED_THERMODYNAMIC_ENSEMBLE_DELTA_INCREMENT
+    signed_delta_relative_gain: 0.0011606007805569248
+    signed_delta_positive_puzzles: 16
+    signed_delta_ci95: [0.00010571960237784966, 0.0005110125049142871]
+    interpretation: STABLE_BUT_SMALL_ADDITIONAL_EXPERIMENT_CONDITIONING_SIGNAL
+
+idea_register:
+  selected:
+    id: V7I001
+    idea: RINALMO_GIGA_EXACT_SOURCE_TO_RECEIVER_LOG_ODDS_DEPENDENCY
+    status: SELECTED_FOR_ONE_FALSIFIABLE_AMENDMENT
+    reason: >-
+      It is an intervention-derived directed edge representation, not another
+      embedding concatenation or thermodynamic feature expansion.
+  rejected:
+    - id: V7I002
+      idea: LARGER_RNA_FOUNDATION_EMBEDDING_DUAL_TOWER
+      reason: V4_ALREADY_FALSIFIED_EMBEDDING_AND_CAPACITY_AS_SUFFICIENT_EXPLANATION
+    - id: V7I003
+      idea: MORE_VIENNARNA_FEATURES_OR_CONSTRAINT_SEARCH
+      reason: V5_AND_V6_SHOWED_STABLE_BUT_TOO_SMALL_THERMODYNAMIC_INCREMENT
+    - id: V7I004
+      idea: JOINT_SEARCH_OVER_RINALMO_LAYER_MODEL_SIZE_AND_FEATURE_SUMMARY
+      reason: WOULD_CONFOUND_INFORMATION_SOURCE_WITH_POST_HOC_SELECTION
+
+decisions:
+  - id: V7D001
+    status: FROZEN_BEFORE_FOUNDATION_WEIGHT_ACCESS
+    decision: USE_ONLY_OFFICIAL_RINALMO_GIGA_V1_PRETRAINED_MLM
+  - id: V7D002
+    status: FROZEN_BEFORE_FOUNDATION_INFERENCE
+    decision: USE_EXACT_UNMASKED_WT_VERSUS_REGISTERED_MUTANT_LOG_ODDS
+    rationale: MATCH_PUBLISHED_NUCLEOTIDE_DEPENDENCY_INTERVENTION
+  - id: V7D003
+    status: FROZEN_BEFORE_ANY_V7_SCORE
+    decision: FIX_SIX_DEPENDENCY_FEATURES_WITH_NO_LAYER_OR_SUMMARY_SEARCH
+  - id: V7D004
+    status: FROZEN_BEFORE_ANY_V7_SCORE
+    decision: V7_BASELINE_REPLAYS_V6_CANDIDATE_AT_ATOL_1E_MINUS_12
+  - id: V7D005
+    status: FROZEN_BEFORE_ANY_V7_SCORE
+    decision: REQUIRE_ONE_PERCENT_INCREMENTAL_SIGNED_DELTA_GAIN_FOR_NEURAL_ELIGIBILITY
+  - id: V7D006
+    status: FROZEN_BEFORE_ANY_V7_TRAINING
+    decision: REQUIRE_FIVE_PERCENT_DUAL_METRIC_GAIN_AND_CONTROL_ATTRIBUTION_FOR_DEVELOPMENT_PASS
+
+literature_evidence:
+  nucleotide_dependencies:
+    doi: 10.1038/s41588-025-02347-3
+    journal: Nature Genetics
+    confirmed_fact: >-
+      Unmasked nucleotide substitutions change target nucleotide log-odds; the
+      resulting dependencies recover RNA secondary and tertiary contacts and
+      outperform reconstruction-only variant scores in reported benchmarks.
+    official_code: https://github.com/gagneurlab/dependencies_DNALM
+    code_commit_reviewed: d70b8816988eb83602f408d02fd63f1be82601e2
+  rinalmo:
+    doi: 10.1038/s41467-025-60872-5
+    journal: Nature Communications
+    confirmed_fact: >-
+      RiNALMo-Giga has approximately 650M parameters, was pretrained on 36M
+      non-coding RNA sequences, and provides per-position MLM logits.
+    official_code: https://github.com/lbcb-sci/RiNALMo
+    code_commit: 2c2c5c14a5ae609d8c560a5d9ca32e51e0288955
+    official_weight: https://zenodo.org/records/15043668/files/rinalmo_giga_pretrained.pt
+
+evidence_state:
+  v7m0_contract:
+    status: IN_PROGRESS
+    foundation_weight_downloaded: false
+    foundation_inference_run: false
+    v7_target_or_score_accessed: false
+    external_outcome_accessed: false
+  v7m1_cache: NOT_RUN
+  v7m2_eligibility: NOT_RUN
+  v7m4_screen: NOT_RUN
+  v7m5_confirmation: NOT_RUN
+
+next_allowed_action: VALIDATE_AND_COMMIT_V7M0_CONTRACT_ONLY

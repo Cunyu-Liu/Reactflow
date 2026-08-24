@@ -10,18 +10,18 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v6m2_terminal_fail_closes_training_and_preserves_prior_results() -> None:
+def test_v6m2_terminal_fail_is_preserved_by_later_active_amendment() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v6 = _yaml("configs/reactflow_delta/model_rescue_v6_amendment.yaml")
     v5 = _yaml("configs/reactflow_delta/model_rescue_v5_amendment.yaml")
     v4 = _yaml("configs/reactflow_delta/model_rescue_v4_amendment.yaml")
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
 
-    assert active["authority"]["current_phase"] == "M6"
-    assert active["runnable_phases"] == ["M6"]
-    assert active["authorization"]["implementation_allowed"] is False
-    assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is False
-    assert active["authorization"]["internal_development_probe_allowed"] is False
+    assert active["authority"]["current_phase"] == "V7M0"
+    assert active["runnable_phases"] == ["V7M0"]
+    assert active["parent_state"]["model_rescue_v6_status"] == (
+        "MODEL_RESCUE_V6_FAIL_IMMUTABLE"
+    )
     assert active["training_allowed"] is False
     assert active["candidate_model_training_allowed"] is False
     assert active["outcome_blind_cache_allowed"] is False
