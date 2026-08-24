@@ -18,6 +18,9 @@ from scripts.reactflow_delta.model_rescue_v10 import (
     parameter_count,
 )
 from scripts.reactflow_delta.qualify_model_rescue_v10 import qualify
+from scripts.reactflow_delta.qualify_model_rescue_v10_smoke import (
+    checkpoint_standardizer_pass,
+)
 from scripts.reactflow_delta.score_model_rescue_v10 import (
     SCHEMA as SCORE_SCHEMA,
     merged_integrity_pass,
@@ -96,6 +99,17 @@ def test_v10_train_only_standardization_and_input_width() -> None:
     assert np.allclose(train.mean(axis=0)[np.std(values[:3], axis=0) > 0], 0.0)
     held = standardizer.transform_numpy(values[3:])
     assert held.shape == (2, INPUT_WIDTH)
+
+
+def test_v10_smoke_standardizer_check_returns_json_boolean() -> None:
+    passed = checkpoint_standardizer_pass(
+        {
+            "standardizer_mean": np.zeros(244),
+            "standardizer_scale": np.ones(244),
+        }
+    )
+    assert passed is True
+    __import__("json").dumps({"passed": passed})
 
 
 def _write_fold(directory, fold: int) -> None:

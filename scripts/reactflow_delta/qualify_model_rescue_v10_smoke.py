@@ -27,6 +27,15 @@ HEAD_NAMES = (
 )
 
 
+def checkpoint_standardizer_pass(state: dict[str, Any]) -> bool:
+    return bool(
+        np.asarray(state["standardizer_mean"]).shape == (244,)
+        and np.asarray(state["standardizer_scale"]).shape == (244,)
+        and np.isfinite(state["standardizer_mean"]).all()
+        and (np.asarray(state["standardizer_scale"]) > 0.0).all()
+    )
+
+
 def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
     required_true = (
         "target_profile_identity_exact",
@@ -149,11 +158,8 @@ def qualify(input_dir: Path) -> dict[str, Any]:
             )
             if checks[f"fold{fold}_{name}_checkpoint"]:
                 state = torch.load(checkpoint_path, map_location="cpu")
-                checks[f"fold{fold}_{name}_standardizer"] = (
-                    np.asarray(state["standardizer_mean"]).shape == (244,)
-                    and np.asarray(state["standardizer_scale"]).shape == (244,)
-                    and np.isfinite(state["standardizer_mean"]).all()
-                    and (np.asarray(state["standardizer_scale"]) > 0.0).all()
+                checks[f"fold{fold}_{name}_standardizer"] = checkpoint_standardizer_pass(
+                    state
                 )
     passed = len(rows) == 2 and all(checks.values())
     return {
