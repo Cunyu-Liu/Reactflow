@@ -11,7 +11,7 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v7m2_authorizes_only_fixed_corrected_prediction_probe() -> None:
+def test_v7m2_authorizes_only_one_complete_corrected_score() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     v7 = _yaml("configs/reactflow_delta/model_rescue_v7_amendment.yaml")
 
@@ -23,28 +23,22 @@ def test_v7m2_authorizes_only_fixed_corrected_prediction_probe() -> None:
         is False
     )
     assert active["authorization"]["outcome_blind_cache_preparation_allowed"] is False
-    assert active["authorization"]["internal_development_probe_allowed"] is True
-    assert active["authorization"]["candidate_training_allowed"] == (
-        "FIXED_CORRECTED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY"
-    )
-    assert active["training_allowed"] == (
-        "FIXED_CORRECTED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY"
-    )
-    assert active["candidate_model_training_allowed"] == (
-        "FIXED_CORRECTED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY"
-    )
+    assert active["authorization"]["internal_development_probe_allowed"] is False
+    assert active["authorization"]["candidate_training_allowed"] is False
+    assert active["training_allowed"] is False
+    assert active["candidate_model_training_allowed"] is False
     assert active["outcome_blind_cache_allowed"] is False
-    assert active["held_score_read_allowed"] is False
+    assert active["held_score_read_allowed"] is True
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert v7["contract_status"] == (
-        "V7M2_FIXED_CORRECTED_RINALMO_DEPENDENCY_ELIGIBILITY_PREDICTION_AUTHORIZED"
+        "V7M2_COMPLETE_CORRECTED_SCORE_ONCE_AUTHORIZED"
     )
 
     phase_status = {row["id"]: row["status"] for row in v7["phase_graph"]}
     assert phase_status["V7M0"] == "PASS"
     assert phase_status["V7M1"] == "PASS"
-    assert phase_status["V7M2"] == "AUTHORIZED_PREDICTION_ONLY"
+    assert phase_status["V7M2"] == "AUTHORIZED_COMPLETE_SCORE_ONCE"
     assert phase_status["V7M3"] == "NOT_AUTHORIZED"
 
 
