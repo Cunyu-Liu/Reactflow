@@ -49,6 +49,7 @@ def test_seed_assembler_rejects_key_universe_mismatch(tmp_path) -> None:
         S.combine_seed_predictions([first, second], "model")
 
 
-def test_v4m3_complete_merge_authority_opens_complete_target_join() -> None:
+def test_terminal_v4m3_authority_closes_target_join_after_qualification() -> None:
     root = Path(__file__).resolve().parents[2]
-    S.assert_score_authority(root, "V4M3")
+    with pytest.raises(RuntimeError, match="closed outside active V4M3"):
+        S.assert_score_authority(root, "V4M3")
