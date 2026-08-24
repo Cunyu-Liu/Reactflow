@@ -28,6 +28,27 @@ TIC2A_PREDICTION_SCHEMA = (
 )
 
 
+def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
+    """Validate complete-merge invariants using their recorded semantics."""
+    required_true = (
+        "complete_fold_universe",
+        "unique_folds",
+        "prediction_only_schema",
+        "target_identity_exact",
+        "v8_mean_replay_all_folds",
+        "tic2a_feature41_replay_all_folds",
+        "identical_residual_family_all_folds",
+        "zero_mean_residual_all_folds",
+    )
+    required_false = (
+        "partial_scores_inspected",
+        "external_outcome_accessed",
+    )
+    return all(integrity.get(name) is True for name in required_true) and all(
+        integrity.get(name) is False for name in required_false
+    )
+
+
 def assert_score_authority(repo_root: Path) -> None:
     active = yaml.safe_load(
         (repo_root / "configs/reactflow_delta/active_contract.yaml").read_text(
@@ -204,7 +225,7 @@ def score_complete(
         "V9M2_COMPLETE_UNSCORED_MERGE_PASS"
     ):
         raise ValueError("V9 scorer requires one complete V9M2 merge")
-    if not all(merged.get("merge_integrity", {}).values()):
+    if not merged_integrity_pass(merged.get("merge_integrity", {})):
         raise ValueError("V9 merged integrity is not fully qualified")
     if tic2a_merged.get("schema_version") != TIC2A_MERGED_SCHEMA or tic2a_merged.get(
         "status"
