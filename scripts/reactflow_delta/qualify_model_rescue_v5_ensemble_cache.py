@@ -6,18 +6,24 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
 import h5py
 import numpy as np
 import pandas as pd
 
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 from scripts.reactflow_delta.build_model_rescue_v5_ensemble_cache import (
-    FEATURE_NAMES,
-    SCHEMA,
-    SOURCE_COLUMNS,
     assert_cache_authority,
     build_construct_groups,
+)
+from scripts.reactflow_delta.model_rescue_v5_schema import (
+    CACHE_SCHEMA as SCHEMA,
+    FEATURE_NAMES,
+    SOURCE_COLUMNS,
 )
 
 
