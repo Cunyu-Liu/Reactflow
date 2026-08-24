@@ -24,9 +24,12 @@ from scripts.reactflow_delta.model_rescue_v7_schema import (
     FEATURE_NAMES,
     FORBIDDEN_CACHE_DATASETS,
     QUALIFICATION_SCHEMA,
+    RINALMO_ACGU_TOKEN_INDICES,
     RINALMO_CODE_COMMIT,
     RINALMO_MODEL_NAME,
     RINALMO_PARAMETER_COUNT,
+    RINALMO_SEQUENCE_TOKEN_OFFSET,
+    RINALMO_VOCAB_BASE_TOKENS,
 )
 
 
@@ -89,6 +92,18 @@ def qualify_cache(
         == "FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT",
         "manifest_output_dtype": manifest.get("output_logit_and_log_odds_dtype")
         == "FLOAT32",
+        "manifest_conceptual_rna_bases": manifest.get("conceptual_rna_bases")
+        == ["A", "C", "G", "U"],
+        "manifest_official_vocab_tokens": manifest.get(
+            "official_vocab_base_tokens"
+        )
+        == list(RINALMO_VOCAB_BASE_TOKENS),
+        "manifest_official_vocab_indices": manifest.get(
+            "official_vocab_base_indices"
+        )
+        == list(RINALMO_ACGU_TOKEN_INDICES),
+        "manifest_sequence_token_offset": manifest.get("sequence_token_offset")
+        == RINALMO_SEQUENCE_TOKEN_OFFSET,
         "manifest_construct_count": manifest.get("n_constructs")
         == expected_constructs,
         "manifest_mutant_count": manifest.get("n_registered_mutants")

@@ -15,7 +15,12 @@ from scripts.reactflow_delta.model_rescue_v7_dependency import (
     freeze_fp32_model_for_autocast,
     normalize_rna_sequence,
 )
-from scripts.reactflow_delta.model_rescue_v7_schema import FEATURE_NAMES
+from scripts.reactflow_delta.model_rescue_v7_schema import (
+    FEATURE_NAMES,
+    RINALMO_ACGU_TOKEN_INDICES,
+    RINALMO_SEQUENCE_TOKEN_OFFSET,
+    RINALMO_VOCAB_BASE_TOKENS,
+)
 
 
 def test_foundation_parameters_remain_fp32_and_frozen_during_autocast() -> None:
@@ -132,6 +137,9 @@ class _FakeInferer:
     parameter_dtype = "FLOAT32_OFFICIAL_CHECKPOINT"
     forward_autocast_dtype = "FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT"
     output_logit_and_log_odds_dtype = "FLOAT32"
+    acgu_tokens = RINALMO_VOCAB_BASE_TOKENS
+    acgu_indices = RINALMO_ACGU_TOKEN_INDICES
+    sequence_token_offset = RINALMO_SEQUENCE_TOKEN_OFFSET
 
     def __call__(self, sequences: list[str], *, batch_size: int) -> dict[str, np.ndarray]:
         assert batch_size > 0
@@ -186,6 +194,10 @@ def test_small_cache_is_outcome_invariant_and_reuses_exact_sequence_duplicates(
             "FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT"
         )
         assert manifest["output_logit_and_log_odds_dtype"] == "FLOAT32"
+        assert manifest["conceptual_rna_bases"] == ["A", "C", "G", "U"]
+        assert manifest["official_vocab_base_tokens"] == ["A", "C", "G", "T"]
+        assert manifest["official_vocab_base_indices"] == [5, 6, 7, 8]
+        assert manifest["sequence_token_offset"] == 1
         qualification = qualify_cache(
             cache_path,
             manifest_path,

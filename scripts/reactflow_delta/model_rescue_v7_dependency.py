@@ -13,7 +13,10 @@ import torch
 from scripts.reactflow_delta.model_rescue_v7_schema import (
     FEATURE_NAMES,
     LOG_ODDS_EPSILON,
+    RINALMO_ACGU_TOKEN_INDICES,
     RINALMO_CONFIG_NAME,
+    RINALMO_SEQUENCE_TOKEN_OFFSET,
+    RINALMO_VOCAB_BASE_TOKENS,
     RNA_BASES,
     RNA_BASE_TO_INDEX,
 )
@@ -129,7 +132,8 @@ def extract_acgu_sequence_logits(
         sequence = normalize_rna_sequence(raw_sequence)
         if row.shape[0] < len(sequence) + 2:
             raise ValueError("RiNALMo token axis is shorter than CLS+sequence+EOS")
-        value = row[1 : 1 + len(sequence), list(acgu_indices)].float().cpu().numpy()
+        start = RINALMO_SEQUENCE_TOKEN_OFFSET
+        value = row[start : start + len(sequence), list(acgu_indices)].float().cpu().numpy()
         if value.shape != (len(sequence), 4):
             raise RuntimeError("RiNALMo sequence-logit extraction changed shape")
         output.append(np.asarray(value, dtype=np.float32))
@@ -184,11 +188,15 @@ class RiNALMoGigaLogitInferer:
         self.alphabet = alphabet
         # Alphabet.encode maps U to the T token, so the fourth conceptual RNA
         # probability is read from the official T vocabulary entry.
+        self.acgu_tokens = RINALMO_VOCAB_BASE_TOKENS
         self.acgu_indices = tuple(
-            alphabet.get_idx(token) for token in ("A", "C", "G", "T")
+            alphabet.get_idx(token) for token in self.acgu_tokens
         )
-        if len(set(self.acgu_indices)) != 4:
-            raise RuntimeError("RiNALMo alphabet does not expose four distinct RNA bases")
+        if self.acgu_indices != RINALMO_ACGU_TOKEN_INDICES:
+            raise RuntimeError(
+                "RiNALMo A/C/G/T vocabulary indices differ from the frozen commit"
+            )
+        self.sequence_token_offset = RINALMO_SEQUENCE_TOKEN_OFFSET
         self.attention_backend = attention_backend
 
     def __call__(
