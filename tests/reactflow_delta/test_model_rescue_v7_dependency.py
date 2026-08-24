@@ -109,6 +109,10 @@ def _frame(mutant_outcome: float) -> pd.DataFrame:
 
 
 class _FakeInferer:
+    parameter_dtype = "FLOAT32_OFFICIAL_CHECKPOINT"
+    forward_autocast_dtype = "FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT"
+    output_logit_and_log_odds_dtype = "FLOAT32"
+
     def __call__(self, sequences: list[str], *, batch_size: int) -> dict[str, np.ndarray]:
         assert batch_size > 0
         mapping = {base: index for index, base in enumerate("ACGU")}
@@ -157,6 +161,11 @@ def test_small_cache_is_outcome_invariant_and_reuses_exact_sequence_duplicates(
         assert manifest["n_unique_wt_sequences"] == 1
         assert manifest["n_unique_mutant_sequences"] == 1
         assert manifest["n_unique_inference_sequences"] == 2
+        assert manifest["parameter_dtype"] == "FLOAT32_OFFICIAL_CHECKPOINT"
+        assert manifest["forward_autocast_dtype"] == (
+            "FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT"
+        )
+        assert manifest["output_logit_and_log_odds_dtype"] == "FLOAT32"
         qualification = qualify_cache(
             cache_path,
             manifest_path,

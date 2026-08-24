@@ -296,6 +296,13 @@ def build_cache(
         "model_code_root": str(model_code_root) if model_code_root else "TEST_INFERER",
         "weights_path": str(weights_path) if weights_path else "TEST_INFERER",
         "attention_backend": attention_backend,
+        "parameter_dtype": getattr(inferer, "parameter_dtype", "UNKNOWN"),
+        "forward_autocast_dtype": getattr(
+            inferer, "forward_autocast_dtype", "UNKNOWN"
+        ),
+        "output_logit_and_log_odds_dtype": getattr(
+            inferer, "output_logit_and_log_odds_dtype", "UNKNOWN"
+        ),
         "full_unmasked_wt_and_exact_mutant": True,
         "self_dependency_zero": True,
         "unique_sequence_deduplication": "EXACT_SEQUENCE_IDENTITY_ONLY",
