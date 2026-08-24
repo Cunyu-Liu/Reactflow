@@ -83,6 +83,12 @@ def qualify_cache(
         == RINALMO_CODE_COMMIT,
         "manifest_feature_names": tuple(manifest.get("feature_names", []))
         == FEATURE_NAMES,
+        "manifest_parameter_dtype": manifest.get("parameter_dtype")
+        == "FLOAT32_OFFICIAL_CHECKPOINT",
+        "manifest_forward_autocast_dtype": manifest.get("forward_autocast_dtype")
+        == "FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT",
+        "manifest_output_dtype": manifest.get("output_logit_and_log_odds_dtype")
+        == "FLOAT32",
         "manifest_construct_count": manifest.get("n_constructs")
         == expected_constructs,
         "manifest_mutant_count": manifest.get("n_registered_mutants")

@@ -155,6 +155,9 @@ class RiNALMoGigaLogitInferer:
         # erase the small WT-to-mutant logit differences that define the v7
         # dependency signal, while the A100 memory budget does not require it.
         self.model = freeze_fp32_model_for_autocast(model, self.device)
+        self.parameter_dtype = "FLOAT32_OFFICIAL_CHECKPOINT"
+        self.forward_autocast_dtype = "FLOAT16_OFFICIAL_CUDA_AUTOCAST_DEFAULT"
+        self.output_logit_and_log_odds_dtype = "FLOAT32"
         self.alphabet = alphabet
         # Alphabet.encode maps U to the T token, so the fourth conceptual RNA
         # probability is read from the official T vocabulary entry.
