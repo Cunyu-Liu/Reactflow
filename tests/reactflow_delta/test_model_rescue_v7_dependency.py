@@ -113,7 +113,7 @@ class _FakeInferer:
         return output
 
 
-def test_small_cache_is_outcome_invariant_and_reuses_method_duplicates(
+def test_small_cache_is_outcome_invariant_and_reuses_exact_sequence_duplicates(
     tmp_path: Path,
 ) -> None:
     h5py = pytest.importorskip("h5py")
@@ -141,6 +141,10 @@ def test_small_cache_is_outcome_invariant_and_reuses_method_duplicates(
         )
         assert manifest["mutant_reactivity_rows_read"] == 0
         assert manifest["n_unique_dependency_edges"] == 1
+        assert manifest["n_dependency_edge_reuse_rows"] == 1
+        assert manifest["n_unique_wt_sequences"] == 1
+        assert manifest["n_unique_mutant_sequences"] == 1
+        assert manifest["n_unique_inference_sequences"] == 2
         qualification = qualify_cache(
             cache_path,
             manifest_path,

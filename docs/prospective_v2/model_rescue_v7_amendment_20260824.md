@@ -60,7 +60,9 @@ d_{s\to j,k}=\log_2\frac{p(k_j\mid x')}{1-p(k_j\mid x')}
 - 概率以 `1e-10` 稳定后计算 base-2 log odds；
 - receiver 等于 mutation source 时 dependency 六维全部置零，以排除 trivial self-reconstruction；
 - 不读取 mutant reactivity、target error、qualified target mask 或任何 external outcome；
-- 同一 biological WT/mutation across methods 复用完全相同的 cache 行。
+- 只对完全相同的 WT sequence、exact mutant sequence 和 mutation source
+  复用 cache；真实 M2 的 160 个 method-specific constructs 具有 160 个不同
+  WT sequences，因此不存在原先假设的跨 method 复用。
 
 固定六维 basis：
 
@@ -89,7 +91,8 @@ V7M0 exact PASS 后才允许：
 - 下载官方 Giga 权重；
 - 枚举真实 M2 中的唯一 WT 与注册 exact mutant sequence；
 - 生成完整六维 source→receiver cache；
-- 机械检查 finite、shape、self-zero、method reuse 和 registered coverage。
+- 机械检查 finite、shape、self-zero、exact-sequence duplicate identity 和
+  registered coverage。
 
 V7M1 只产生 `ENGINEERING_OUTCOME_BLIND_CACHE_PASS/FAIL`，不读取任何 score。
 

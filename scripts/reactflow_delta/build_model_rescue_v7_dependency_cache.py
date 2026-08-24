@@ -280,7 +280,12 @@ def build_cache(
         "feature_names": list(FEATURE_NAMES),
         "n_constructs": len(groups),
         "n_registered_mutants": len(rows),
+        "n_unique_wt_sequences": len({row["wt_sequence"] for row in rows}),
+        "n_unique_mutant_sequences": len(
+            {row["mutant_sequence"] for row in rows}
+        ),
         "n_unique_dependency_edges": len(feature_cache),
+        "n_dependency_edge_reuse_rows": len(rows) - len(feature_cache),
         "n_unique_inference_sequences": len(sequence_universe),
         "sequence_length": length,
         "feature_width": len(FEATURE_NAMES),
@@ -293,7 +298,7 @@ def build_cache(
         "attention_backend": attention_backend,
         "full_unmasked_wt_and_exact_mutant": True,
         "self_dependency_zero": True,
-        "unique_sequence_deduplication": True,
+        "unique_sequence_deduplication": "EXACT_SEQUENCE_IDENTITY_ONLY",
         "registered_mutations_only": True,
         "mutant_reactivity_rows_read": 0,
         "target_error_or_mask_read": False,

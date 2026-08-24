@@ -112,6 +112,16 @@ evidence_state:
       gRNAde occurs in five puzzles and gRNAde-no3d in fifteen; every puzzle
       still has exactly eight method cells, so the frozen within-puzzle
       method-balanced estimand is unchanged.
+    unique_wt_sequences: 160
+    unique_mutant_sequences: 13976
+    unique_inference_sequences: 14136
+    unique_dependency_edges: 13976
+    dependency_edge_reuse_multiplicity: {1: 13976}
+    cross_method_exact_sequence_reuse: false
+    corrected_operational_interpretation: >-
+      Methods correspond to distinct designed constructs, not repeated
+      measurements of one shared WT sequence. Exact-sequence deduplication is
+      still correct but does not reduce the real full-cache inference universe.
     mutant_outcome_columns_read: false
     external_outcome_accessed: false
     cache_builder_runtime_dependencies: RINALMO_ONLY_NO_VIENNARNA_IMPORT

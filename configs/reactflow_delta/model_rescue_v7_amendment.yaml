@@ -103,8 +103,9 @@ dependency_definition:
     - SIGNED_LOG_ODDS_SHIFT_U
     - SIGNED_LOG_ODDS_SHIFT_FOR_WT_RECEIVER_BASE
     - MAX_ABSOLUTE_LOG_ODDS_SHIFT
-  cache_key: WT_SEQUENCE_MUTATION_SOURCE_REF_ALT_RECEIVER
-  method_independent_cache_reuse: true
+  cache_key: EXACT_WT_SEQUENCE_EXACT_MUTANT_SEQUENCE_SOURCE_RECEIVER
+  exact_sequence_cache_reuse_if_present: true
+  real_m2_cross_method_sequence_reuse: false
   mutant_outcome_columns_allowed: false
   target_error_or_mask_allowed: false
   external_outcome_allowed: false
@@ -128,7 +129,7 @@ foundation_cache:
     finite_features: true
     six_features_exact: true
     self_dependency_zero: true
-    duplicated_method_keys_identical: true
+    duplicated_exact_sequence_keys_identical: true
     reference_and_exact_mutant_only: true
     full_registered_key_coverage: true
 

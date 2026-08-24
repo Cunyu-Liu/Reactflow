@@ -22,7 +22,11 @@ Implementation order:
 2. Implement registered WT/mutation sequence enumeration without mutant outcome fields.
 3. Build the official Python 3.11 / PyTorch 2.1.0 / CUDA 11.8 / FlashAttention 2.3.2 runtime without altering the official attention code.
 4. Implement official RiNALMo adapter fixed to `giga-v1` and A/C/G/U token indices obtained from the official alphabet.
-5. Deduplicate WT and exact mutant sequences, run batched no-grad inference, and store dependency6 keyed by biological construct/mutation/receiver.
+5. Deduplicate only exact WT and exact mutant sequence identities, run batched
+   no-grad inference, and store dependency6 keyed by biological
+   construct/mutation/receiver. The real full universe is 160 distinct WT plus
+   13,976 distinct mutants (14,136 inference sequences); do not assume
+   cross-method sequence reuse.
 6. Qualify finite values, exact six-width, self-zero, method identity and full registered coverage.
 7. Run a two-puzzle prediction-free engineering smoke, then the complete outcome-blind cache in a persistent session.
 

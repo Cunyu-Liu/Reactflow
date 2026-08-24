@@ -34,7 +34,11 @@ The V7M2 baseline exactly replays V6 candidate predictions. The later primary sh
 1. RiNALMo dependencies encode structural contacts but not 2A3 reactivity direction. V7M2 would fail quickly.
 2. Exact OpenKnot sequences may have appeared in pretraining. Exposure remains unknown and blocks external/SOTA claims even after an internal pass.
 3. Unmasked MLM outputs can be overconfident. Float32 log-odds and fixed epsilon address numerical stability; they do not justify changing the scientific definition.
-4. The 650M model may be costly, but unique biological sequences are deduplicated across eight methods. OOM changes only batch size or GPU placement.
+4. The real M2 universe contains 160 distinct WT sequences and 13,976 distinct
+   registered mutant sequences, so the full cache requires 14,136 RiNALMo
+   sequence inferences and 13,976 unique dependency edges. Exact-sequence
+   deduplication remains implemented but gives no cross-method reuse on this
+   dataset. OOM changes only batch size or GPU placement.
 
 ## Success decision
 
