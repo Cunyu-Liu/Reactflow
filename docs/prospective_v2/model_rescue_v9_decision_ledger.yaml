@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v9_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v9_20260824
 created_at: '2026-08-24T23:40:00+08:00'
-current_status: V9M1_TWO_FOLD_ENGINEERING_SMOKE_AUTHORIZED
+current_status: V9M2_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
 
 immutable_parent:
   v8_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -24,13 +24,22 @@ v9m0:
   real_receiver_length: 177
   target_profile_identity: EXACT_PUZZLE_METHOD_MUTATION
 v9m1:
-  status: TWO_FOLD_ENGINEERING_SMOKE_AUTHORIZED
+  status: V9M1_ENGINEERING_SMOKE_PASS
   folds: [0, 1]
   seed: 0
   epochs: 3
   held_score_read_allowed: false
-v9m2: NOT_AUTHORIZED
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m1_real_smoke/v9m1_smoke_qualification.json
+  scores_read: false
+v9m2:
+  status: TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
+  folds: 20
+  seed: 0
+  epochs: 40
+  held_score_read_allowed: false
+  partial_fold_score_read_allowed: false
+  output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0
 v9m3: NOT_AUTHORIZED
 v9m4: NOT_AUTHORIZED
 
-next_allowed_action: RUN_V9M1_PREDICTION_ONLY_SMOKE_ON_FOLDS_ZERO_ONE
+next_allowed_action: RUN_V9M2_COMPLETE_PREDICTION_ONLY_SCREEN_WITHOUT_PARTIAL_SCORE

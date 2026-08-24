@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v9 Amendment
 
-**状态：V9M0 implementation/tests PASS；V9M1 两折工程 smoke 已授权，科学评分仍关闭**
+**状态：V9M1 engineering smoke PASS；V9M2 seed0 20-fold prediction-only screen 已授权，科学评分仍关闭**
 
 ## 1. 与 V8 的关系
 

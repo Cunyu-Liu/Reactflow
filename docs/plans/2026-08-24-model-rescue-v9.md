@@ -5,6 +5,6 @@
 3. **Complete:** Reuse only corrected V8 fold checkpoints and corrected TIC2A feature41 models/caches.
 4. **Complete:** Emit prediction-only distributions with exact mean replay and `E|Delta|`.
 5. **Complete:** Add complete-universe merge, score-once target join and mechanical top-journal qualifier.
-6. **Authorized:** Run focused synthetic invariants, then a two-fold real-data engineering smoke without score.
-7. Only exact smoke PASS opens the fixed 20-fold screen; only the complete screen can be scored.
+6. **Complete:** Focused synthetic invariants and two-fold real-data engineering smoke passed without score.
+7. **Authorized:** Run the fixed 20-fold screen; only the complete prediction-only merge can be scored.
 8. Only a full three-metric top-journal PASS opens five-seed confirmation.
