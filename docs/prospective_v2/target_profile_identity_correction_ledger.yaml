@@ -1,0 +1,46 @@
+schema_version: reactflow_delta.target_profile_identity_correction_ledger.v1
+ledger_id: reactflow_delta_target_profile_identity_correction_20260824
+created_at: '2026-08-24T19:22:00+08:00'
+current_status: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS_V7M1_CONTINUES
+
+discovery:
+  trigger: POST_HOC_V5_V6_SLICE_ANALYSIS_OF_COMPLETE_TERMINAL_ARTIFACTS
+  failing_symbol: M2Universe.mutant_full_profile
+  old_index: RAW_ROW_ID_PREFIX
+  old_lookup: PUZZLE_METHOD_CONSTRUCT_ID
+  old_fallback: FIRST_GLOBAL_MUTATION_SUFFIX_MATCH
+  confirmed_cross_construct_matches: 3494
+
+evidence:
+  affected_mutants: 3494/13976
+  affected_cells: 40/160
+  affected_methods:
+    Starting sequence: 1747
+    gRNAde-no3d: 1305
+    gRNAde: 442
+  corrected_unit_and_pipeline_tests: 51_PASS_LOCAL_AND_REMOTE
+  corrected_real_data:
+    registered_mutants: 13976
+    canonical_profiles: 13976
+    identity: EXACT_PUZZLE_METHOD_MUTATION
+    missing: 0
+    wrong_target: 0
+    wrong_error: 0
+
+actions:
+  - PRESERVED_ALL_EXISTING_ARTIFACTS
+  - INTERRUPTED_V3_INVALID_REMAINING_TRAINING_WITH_10_OF_20_ARTIFACTS_PRESERVED
+  - REMOVED_MUTATION_ONLY_SUFFIX_FALLBACK
+  - INDEXED_FULL_PROFILES_BY_CANONICAL_PUZZLE_METHOD_MUTATION
+  - ADDED_DUPLICATE_AND_COMPLETE_IDENTITY_CHECKS
+  - KEPT_V7M1_OUTCOME_BLIND_CACHE_AUTHORIZED
+  - KEPT_ALL_CORRECTED_TRAINING_AND_HELD_SCORE_CLOSED
+
+scientific_consequence:
+  legacy_performance_effects: SCIENTIFICALLY_INVALIDATED_TARGET_IDENTITY
+  legacy_model_comparisons: NOT_REUSABLE
+  legacy_feature_caches: REUSABLE_ONLY_AFTER_SCHEMA_AND_KEY_REQUALIFICATION
+  v7_dependency_cache: UNAFFECTED_OUTCOME_BLIND_BUT_NOT_YET_COMPLETE
+
+next_allowed_action: COMPLETE_AND_QUALIFY_V7M1_THEN_FREEZE_CORRECTED_V7M2_RUNNER
+
