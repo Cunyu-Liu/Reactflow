@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 from typing import Any
@@ -18,15 +19,13 @@ import yaml
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.reactflow_delta.build_model_rescue_v5_ensemble_cache import (
-    build_construct_groups,
-)
 from scripts.reactflow_delta.model_rescue_v5_schema import SOURCE_COLUMNS
 from scripts.reactflow_delta.model_rescue_v7_dependency import (
     RiNALMoGigaLogitInferer,
     batched_infer,
     dependency_features_from_acgu_logits,
     exact_mutant_sequence,
+    normalize_rna_sequence,
 )
 from scripts.reactflow_delta.model_rescue_v7_schema import (
     CACHE_SCHEMA,
@@ -35,6 +34,11 @@ from scripts.reactflow_delta.model_rescue_v7_schema import (
     RINALMO_CODE_COMMIT,
     RINALMO_MODEL_NAME,
     RINALMO_PARAMETER_COUNT,
+)
+
+
+MUTANT_ID = re.compile(
+    r"^(?P<prefix>.+)_mm_(?P<design_pos>\d+)_(?P<ref>[ACGTU])_(?P<alt>[ACGTU])$"
 )
 
 
@@ -61,12 +65,82 @@ def assert_cache_authority(repo_root: Path) -> None:
         raise RuntimeError("v7 cache construction requires external outcomes locked")
 
 
+def build_registered_construct_groups(frame: pd.DataFrame) -> list[dict[str, Any]]:
+    """Build exact-SNV groups from metadata columns without importing outcomes."""
+
+    if tuple(frame.columns) != SOURCE_COLUMNS:
+        raise ValueError(f"v7 cache requires exactly the columns {SOURCE_COLUMNS}")
+    if frame["id"].duplicated().any():
+        raise ValueError("v7 cache input contains duplicate row ids")
+    rows = {str(row.id): row for row in frame.itertuples(index=False)}
+    groups: dict[str, dict[str, Any]] = {}
+    for row in frame.itertuples(index=False):
+        row_id = str(row.id)
+        if row_id.endswith("_wt"):
+            continue
+        match = MUTANT_ID.fullmatch(row_id)
+        if match is None:
+            raise ValueError(f"invalid registered mutant id {row_id}")
+        parsed = match.groupdict()
+        prefix = str(parsed["prefix"])
+        wt_id = f"{prefix}_wt"
+        if wt_id not in rows:
+            raise ValueError(f"mutant {row_id} has no matching WT row")
+        wt_row = rows[wt_id]
+        wt_sequence = normalize_rna_sequence(wt_row.sequence)
+        mutant_sequence = normalize_rna_sequence(row.sequence)
+        design_pos = int(parsed["design_pos"])
+        ref = normalize_rna_sequence(parsed["ref"])
+        alt = normalize_rna_sequence(parsed["alt"])
+        if int(row.mutA) != design_pos + 1:
+            raise ValueError(f"mutA and row id disagree for {row_id}")
+        if int(row.sub_start) != int(wt_row.sub_start):
+            raise ValueError(f"WT and mutant sub_start disagree for {row_id}")
+        full_pos = int(row.sub_start) - 1 + design_pos
+        reconstructed = exact_mutant_sequence(wt_sequence, full_pos, ref, alt)
+        if reconstructed != mutant_sequence:
+            raise ValueError(f"{row_id} is not the registered exact one-base mutant")
+        if str(row.puzzle) != str(wt_row.puzzle) or str(row.method) != str(
+            wt_row.method
+        ):
+            raise ValueError(f"WT and mutant identity disagree for {row_id}")
+        group = groups.setdefault(
+            prefix,
+            {
+                "construct_id": prefix,
+                "wt_id": wt_id,
+                "wt_sequence": wt_sequence,
+                "puzzle": str(row.puzzle),
+                "method": str(row.method),
+                "mutants": [],
+            },
+        )
+        if group["wt_sequence"] != wt_sequence:
+            raise ValueError(f"construct {prefix} has inconsistent WT sequences")
+        group["mutants"].append(
+            {
+                "row_id": row_id,
+                "sequence": mutant_sequence,
+                "design_pos": design_pos,
+                "full_pos": full_pos,
+                "ref": ref,
+                "alt": alt,
+            }
+        )
+    output = []
+    for prefix in sorted(groups):
+        group = groups[prefix]
+        group["mutants"].sort(key=lambda mutant: mutant["row_id"])
+        output.append(group)
+    return output
+
+
 def load_outcome_blind_groups(
     m2_csv: Path, *, max_constructs: int | None
 ) -> list[dict[str, Any]]:
     frame = pd.read_csv(m2_csv, usecols=list(SOURCE_COLUMNS))
     frame = frame.loc[:, list(SOURCE_COLUMNS)]
-    groups = build_construct_groups(frame)
+    groups = build_registered_construct_groups(frame)
     if max_constructs is not None:
         groups = groups[:max_constructs]
     if not groups:
