@@ -103,7 +103,20 @@ evidence_state:
     smoke_violations_at_qualifier_tolerance: 0
     target_columns_read: false
     external_outcome_accessed: false
-  v6m2_eligibility: NOT_RUN
+  v6m2_eligibility:
+    status: IMPLEMENTATION_COMPLETE_REAL_RUN_NOT_AUTHORIZED
+    implementation:
+      - scripts/reactflow_delta/model_rescue_v6_probe.py
+      - scripts/reactflow_delta/run_model_rescue_v6_probe.py
+      - scripts/reactflow_delta/merge_model_rescue_v6_probe.py
+      - scripts/reactflow_delta/score_model_rescue_v6_probe.py
+      - scripts/reactflow_delta/qualify_model_rescue_v6_probe.py
+    prediction_only_before_complete_merge: true
+    v5_baseline_replay_required_per_fold: true
+    target_join_authorized: false
+    real_openknot_probe_started: false
+    v6_score_accessed: false
+    external_outcome_accessed: false
   v6m4_screen: NOT_RUN
   v6m5_confirmation: NOT_RUN
 
