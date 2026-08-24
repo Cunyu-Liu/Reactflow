@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v8 Amendment
 
-**状态：V8M1 exact PASS；V8M2 一次性完整 mean-signal screen 已授权**
+**终局：V8M2 absolute guardrail FAIL；signed mean breakthrough 保留；V8M3 永久不开放**
 
 ## 1. 为什么另立 v8
 
@@ -23,6 +23,10 @@ V8 不修改 v3/v7 结论。它只回答一个尚未被正确实验回答的问�
 完整 expert rebuild PASS 后，统一比较 corrected feature41、corrected B1 和 corrected MeanAligned。MeanAligned 必须同时相对 feature41 和 B1 获得至少 1% signed-delta MAE 改善，两个 paired CI lower 都大于 0，且相对 feature41 至少 14/20 puzzles 正向，才能开放更大模型。
 
 2026-08-24 23:26（Asia/Shanghai），V8M1 qualifier 在不读取任何 held score 的情况下确认 20/20 folds、exact target identity、fresh checkpoints、完整 registered key universe 和 prediction-only schema 全部通过，精确状态为 `V8M1_CORRECTED_EXPERT_REBUILD_PASS`。因此只开放一次完整 V8M2 target join；训练保持关闭，partial-fold score 继续禁止。
+
+一次性完整评分显示，MeanAligned 相对 corrected feature41 的 signed-delta MAE 改善 8.36%，绝对 gain 的 95% CI 为 [0.01286, 0.01911]，20/20 puzzles 正向；相对 corrected B1 改善 3.89%，18/20 正向。该结果证明 mean-first 目标修复了 signed mean。与此同时，absolute-delta MAE 相对 feature41 恶化 1.77%，超过预冻结的 -0.5% guardrail，因此精确资格仍为 `V8M2_MEAN_SIGNAL_NOT_ELIGIBLE`，不得开放 V8M3。
+
+Gate 后只读诊断进一步显示：MeanAligned 的 method-balanced `|mu|` 均值为 0.04284，而真实 `|Delta|` 均值为 0.18332，20/20 puzzles 均表现为幅度低估；feature41 的幅度均值为 0.18283。该诊断不改变 V8 FAIL，只为独立 V9 的零均值残差分布假设提供依据。
 
 ## 4. V8M3：固定大容量 residual model
 

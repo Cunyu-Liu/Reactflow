@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v8_amendment.v1
 contract_id: reactflow_delta_model_rescue_v8_20260824
-contract_status: V8M2_COMPLETE_MEAN_SCREEN_SCORE_ONCE_AUTHORIZED
+contract_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
 created_at: '2026-08-24T22:25:00+08:00'
 
 parent:
@@ -83,6 +83,18 @@ v8m2_mean_screen:
     registered_prediction_coverage: 1.0
     failure_rate: 0.0
   model_or_threshold_selection_allowed: false
+  terminal_result:
+    status: V8M2_MEAN_SIGNAL_NOT_ELIGIBLE
+    qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0/v8m2_mean_screen_qualification.json
+    signed_delta_relative_gain_vs_feature41: 0.08363163114343936
+    signed_delta_ci95: [0.0128623103680507, 0.019111689692470357]
+    signed_delta_positive_puzzles_vs_feature41: 20
+    signed_delta_relative_gain_vs_b1: 0.0388883459639052
+    signed_delta_positive_puzzles_vs_b1: 18
+    absolute_delta_relative_gain_vs_feature41: -0.017662362830501394
+    failed_gate: ABSOLUTE_RELATIVE_GAIN_VS_FEATURE41_GE_MINUS_0_5PCT
+    v8m3_authorized: false
+    post_gate_magnitude_diagnostic: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0/v8m2_post_gate_magnitude_bias_diagnostic.json
 
 v8m3_large_residual_model:
   prerequisite: EXACT_V8M2_MEAN_SIGNAL_ELIGIBLE
@@ -127,11 +139,11 @@ formal_confirmation:
 phase_graph:
   - {id: V8M0, status: PASS, next_on_pass: V8M1}
   - {id: V8M1, status: PASS, next_on_pass: V8M2, next_on_fail: V8M6_FAIL}
-  - {id: V8M2, status: AUTHORIZED, next_on_pass: V8M3, next_on_fail: V8M6_FAIL}
-  - {id: V8M3, status: NOT_AUTHORIZED, next_on_pass: V8M4, next_on_fail: V8M6_FAIL}
+  - {id: V8M2, status: FAIL, next_on_pass: V8M3, next_on_fail: V8M6_FAIL}
+  - {id: V8M3, status: PERMANENTLY_NOT_AUTHORIZED, next_on_pass: V8M4, next_on_fail: V8M6_FAIL}
   - {id: V8M4, status: NOT_AUTHORIZED, next_on_pass: V8M5, next_on_fail: V8M6_FAIL}
   - {id: V8M5, status: NOT_AUTHORIZED, next_on_pass: V8M6_PASS, next_on_fail: V8M6_FAIL}
-  - {id: V8M6, status: NOT_RUN, handoff_phase: M6}
+  - {id: V8M6, status: TERMINAL, handoff_phase: M6}
 
 claim_policy:
   development_consumed: true
