@@ -32,6 +32,14 @@ and receive the mechanical V9M3 verdict.
   direct features (`244 -> 256 -> 4`), for 63,748 trainable parameters. This is
   a 21.17-fold residual-capacity increase while keeping the V8 encoder frozen;
   parameter count alone is not evidence that it will improve generalization.
+- `CONFIRMED_FACT`: the frozen MeanAligned model has 109,581 parameters, so the
+  V9 residual head is only 2.75% of the point-model size. None of the 41 V9
+  calibration features explicitly encodes the eight method identities. WT
+  reactivity/error can already carry method-specific measurement information;
+  therefore a method embedding is a post-Gate diagnostic hypothesis, not an
+  automatically permitted input. It must not be added unless complete-result
+  method-stratified calibration shows a reproducible residual dependency, and
+  any use must be disclosed as a dataset-specific generalization limitation.
 
 ## Primary unresolved mechanism
 
