@@ -30,8 +30,10 @@ def test_active_v7_authority_registers_identity_invalidation() -> None:
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
-    assert active["authority"]["current_phase"] == "V7M1"
-    assert active["training_allowed"] is False
+    assert active["authority"]["current_phase"] == "V7M2"
+    assert active["training_allowed"] == (
+        "FIXED_CORRECTED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY"
+    )
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["legacy_target_dependent_prediction_reuse_allowed"] is False
