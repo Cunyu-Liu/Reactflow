@@ -7,6 +7,11 @@ import subprocess
 import numpy as np
 import torch
 
+from scripts.reactflow_delta.diagnose_model_rescue_v9_residuals import (
+    hierarchical_weights,
+    residual_statistics,
+    weighted_quantile,
+)
 from scripts.reactflow_delta.model_rescue_v2 import gaussian_mixture_crps_torch
 from scripts.reactflow_delta.model_rescue_v9 import (
     FOLD_SCHEMA,
@@ -202,6 +207,30 @@ def test_v9_complete_scorer_accepts_safe_false_merge_invariants(
     assert merged_integrity_pass(integrity) is True
     integrity["partial_scores_inspected"] = True
     assert merged_integrity_pass(integrity) is False
+
+
+def test_post_v9_diagnostic_weights_balance_method_mutant_and_position() -> None:
+    methods = np.asarray(["a", "a", "a", "b", "b"], dtype=object)
+    mutants = np.asarray(["a1", "a1", "a2", "b1", "b1"], dtype=object)
+    weights = hierarchical_weights(methods, mutants)
+    assert np.isclose(weights[methods == "a"].sum(), 0.5)
+    assert np.isclose(weights[methods == "b"].sum(), 0.5)
+    assert np.isclose(weights[mutants == "a1"].sum(), 0.25)
+    assert np.isclose(weights[mutants == "a2"].sum(), 0.25)
+    assert np.isclose(weights[mutants == "b1"].sum(), 0.5)
+
+
+def test_post_v9_weighted_quantiles_and_asymmetry_are_deterministic() -> None:
+    values = np.asarray([-2.0, 0.0, 1.0, 4.0])
+    weights = np.asarray([0.1, 0.4, 0.3, 0.2])
+    assert weighted_quantile(values, weights, 0.1) == -2.0
+    assert weighted_quantile(values, weights, 0.5) == 0.0
+    assert weighted_quantile(values, weights, 0.9) == 4.0
+    result = residual_statistics(values, weights)
+    assert result["q10"] == -2.0
+    assert result["q50"] == 0.0
+    assert result["q90"] == 4.0
+    assert np.isclose(result["normalized_quantile_asymmetry"], 1.0 / 3.0)
 
 
 def _complete_score_fixture(candidate_absolute: float = 0.14) -> dict:
