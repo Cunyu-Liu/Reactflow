@@ -7,6 +7,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 import pytest
+import yaml
 
 from scripts.reactflow_delta.merge_model_rescue_v6_probe import merge_folds
 from scripts.reactflow_delta.model_rescue_v5_probe import (
@@ -35,10 +36,14 @@ from scripts.reactflow_delta.run_model_rescue_v5_probe import (
 from scripts.reactflow_delta.run_model_rescue_v6_probe import (
     FOLD_SCHEMA,
     PREDICTION_SCHEMA,
+    assert_probe_authority,
     assert_v5_baseline_replay,
     predict_registered_held,
 )
-from scripts.reactflow_delta.score_model_rescue_v6_probe import _puzzle_macro
+from scripts.reactflow_delta.score_model_rescue_v6_probe import (
+    _puzzle_macro,
+    assert_score_authority,
+)
 
 
 @dataclass
@@ -132,6 +137,42 @@ def test_cache_alignment_requires_identical_biological_universe(tmp_path: Path) 
     finally:
         unconstrained.close()
         constrained.close()
+
+
+def _write_authority(repo_root: Path, *, phase: str, held_score: bool) -> None:
+    path = repo_root / "configs" / "reactflow_delta" / "active_contract.yaml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        yaml.safe_dump(
+            {
+                "authority": {"current_phase": phase},
+                "training_allowed": "FIXED_WEIGHTED_RIDGE_ELIGIBILITY_ONLY",
+                "held_score_read_allowed": held_score,
+                "partial_fold_score_read_allowed": False,
+                "new_external_outcome_access_allowed": False,
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_authority_blocks_probe_and_score_until_their_exact_substates(
+    tmp_path: Path,
+) -> None:
+    _write_authority(tmp_path, phase="V6M1", held_score=False)
+    with pytest.raises(RuntimeError, match="closed outside active V6M2"):
+        assert_probe_authority(tmp_path)
+
+    _write_authority(tmp_path, phase="V6M2", held_score=False)
+    assert_probe_authority(tmp_path)
+    with pytest.raises(RuntimeError, match="score access has not been opened"):
+        assert_score_authority(tmp_path)
+
+    _write_authority(tmp_path, phase="V6M2", held_score=True)
+    with pytest.raises(RuntimeError, match="requires held scores closed"):
+        assert_probe_authority(tmp_path)
+    assert_score_authority(tmp_path)
 
 
 def test_held_prediction_is_full_output_and_never_calls_target_accessor() -> None:
