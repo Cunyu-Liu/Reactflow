@@ -13,6 +13,7 @@ from scripts.reactflow_delta.merge_model_rescue_v8_mean_screen import (
     QUALIFICATION_SCHEMA,
     merge_folds,
 )
+from scripts.reactflow_delta.diagnose_model_rescue_v8_magnitude import summarize
 from scripts.reactflow_delta.qualify_model_rescue_v8_mean_screen import qualify
 from scripts.reactflow_delta.run_model_rescue_v8_expert_rebuild import (
     PREDICTION_SCHEMA,
@@ -199,3 +200,21 @@ def test_v8m2_controller_merges_before_single_complete_score() -> None:
     assert "tic2a_corrected_merged_unscored.json" in text
     assert "v8m2_complete_mean_screen_scores.json" in text
     assert "fold_result" not in text
+
+
+def test_v8_post_gate_magnitude_summary_preserves_bias_direction() -> None:
+    rows = []
+    for fold in range(20):
+        rows.append(
+            {
+                "target_absolute_delta": 0.20,
+                "meanaligned_predicted_absolute": 0.16,
+                "feature41_predicted_absolute": 0.19,
+                "meanaligned_absolute_bias": -0.04,
+                "feature41_absolute_bias": -0.01,
+            }
+        )
+    result = summarize(rows)
+    assert result["meanaligned_absolute_bias"] == pytest.approx(-0.04)
+    assert result["feature41_absolute_bias"] == pytest.approx(-0.01)
+    assert result["meanaligned_underprediction_puzzles"] == 20
