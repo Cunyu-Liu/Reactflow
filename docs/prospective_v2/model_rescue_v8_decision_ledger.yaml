@@ -25,7 +25,17 @@ confirmed_evidence:
     status: V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE
 
 v8m1:
-  status: IMPLEMENTED_FOCUSED_TESTED_AUTHORIZED_NOT_RUN
+  status: FRESH_CORRECTED_EXPERT_REBUILD_RUNNING
+  session: reactflow_v8_v8m1_corrected_experts_20260824
+  started_at: '2026-08-24T22:30:51+08:00'
+  output_directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
+  physical_gpu_shards:
+    6: [0, 4, 8, 12, 16]
+    3: [1, 5, 9, 13, 17]
+    0: [2, 6, 10, 14, 18]
+    7: [3, 7, 11, 15, 19]
+  expected_outer_folds: 20
+  completed_outer_folds_at_launch: 0
   target_profile_identity: EXACT_PUZZLE_METHOD_MUTATION
   fresh_twenty_fold_rebuild_required: true
   legacy_v3_checkpoint_or_prediction_reuse: false
@@ -36,4 +46,4 @@ v8m3: NOT_AUTHORIZED
 v8m4: NOT_AUTHORIZED
 v8m5: NOT_AUTHORIZED
 
-next_allowed_action: RUN_V8M1_FRESH_CORRECTED_EXPERT_REBUILD_FOLDS_ZERO_THROUGH_NINETEEN
+next_allowed_action: MONITOR_V8M1_AT_900_SECOND_INTERVAL_AND_QUALIFY_ONLY_AFTER_TWENTY_FOLDS
