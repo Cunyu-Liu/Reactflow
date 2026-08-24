@@ -17,6 +17,25 @@ from scripts.reactflow_delta.model_rescue_v9 import FOLD_SCHEMA, PREDICTION_SCHE
 SCHEMA = "reactflow_delta.model_rescue_v9_smoke_qualification.v1"
 
 
+def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
+    required_true = (
+        "target_profile_identity_exact",
+        "v8_mean_replay_at_1e_7",
+        "tic2a_feature41_replay_at_1e_7",
+        "identical_residual_head_class_and_budget",
+        "both_component_locations_equal_frozen_mean",
+    )
+    required_false = (
+        "residual_changed_signed_point_mean",
+        "held_score_computed",
+        "prediction_contains_target_fields",
+        "external_outcome_accessed",
+    )
+    return all(invariants.get(name) is True for name in required_true) and all(
+        invariants.get(name) is False for name in required_false
+    )
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -117,9 +136,7 @@ def qualify(input_dir: Path) -> dict[str, Any]:
             and int(row.get("calibration_epochs", -1)) == 3,
         }
         invariants = row.get("invariants", {})
-        checks["all_recorded_invariants"] = bool(invariants) and all(
-            value is True for value in invariants.values()
-        )
+        checks["all_recorded_invariants"] = recorded_invariants_pass(invariants)
         checkpoints = [
             Path(row.get("baseline_calibration_checkpoint", "")),
             Path(row.get("candidate_calibration_checkpoint", "")),

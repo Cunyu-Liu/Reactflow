@@ -111,7 +111,17 @@ def _write_smoke_fold(directory: Path, fold: int) -> None:
         "candidate_calibration_checkpoint": str(candidate),
         "prediction_artifact": str(prediction),
         "n_registered_prediction_rows": 2,
-        "invariants": {"one": True, "two": True},
+        "invariants": {
+            "target_profile_identity_exact": True,
+            "v8_mean_replay_at_1e_7": True,
+            "tic2a_feature41_replay_at_1e_7": True,
+            "identical_residual_head_class_and_budget": True,
+            "both_component_locations_equal_frozen_mean": True,
+            "residual_changed_signed_point_mean": False,
+            "held_score_computed": False,
+            "prediction_contains_target_fields": False,
+            "external_outcome_accessed": False,
+        },
     }
     (directory / f"v9_fold_result_fold{fold}_seed0.json").write_text(
         json.dumps(row) + "\n", encoding="utf-8"
