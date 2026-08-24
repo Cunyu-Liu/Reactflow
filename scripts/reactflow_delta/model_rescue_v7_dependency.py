@@ -18,6 +18,8 @@ from scripts.reactflow_delta.model_rescue_v7_schema import (
     RNA_BASE_TO_INDEX,
 )
 
+RINALMO_FORWARD_DTYPE = torch.float16
+
 
 def freeze_fp32_model_for_autocast(
     model: torch.nn.Module, device: torch.device
@@ -146,8 +148,9 @@ class RiNALMoGigaLogitInferer:
         self.device = torch.device(device)
         if self.device.type != "cuda":
             raise ValueError("formal V7M1 RiNALMo inference requires a CUDA device")
-        self.dtype = torch.bfloat16
-        # Preserve the official FP32 checkpoint parameters and use autocast only
+        self.dtype = RINALMO_FORWARD_DTYPE
+        # Preserve the official FP32 checkpoint parameters and use FP16
+        # autocast only
         # for the forward pass.  Permanently quantizing all weights to BF16 can
         # erase the small WT-to-mutant logit differences that define the v7
         # dependency signal, while the A100 memory budget does not require it.
