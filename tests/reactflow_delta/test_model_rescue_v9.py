@@ -20,6 +20,7 @@ from scripts.reactflow_delta.merge_model_rescue_v9 import merge_folds
 from scripts.reactflow_delta.qualify_model_rescue_v9 import qualify as qualify_screen
 from scripts.reactflow_delta.qualify_model_rescue_v9_smoke import qualify
 from scripts.reactflow_delta.score_model_rescue_v9 import SCHEMA as SCORE_SCHEMA
+from scripts.reactflow_delta.model_rescue_v6_probe import CANDIDATE_PROBE_FEATURE_NAMES
 
 
 def test_v9_distribution_preserves_signed_mean_and_has_positive_magnitude() -> None:
@@ -194,3 +195,12 @@ def test_v9_top_journal_qualifier_requires_signed_absolute_and_crps() -> None:
     assert failed["status"] == "V9M3_TOP_JOURNAL_SCREEN_FAIL"
     assert failed["gates"]["absolute_relative_gain_ge_1pct"] is False
     assert failed["v9m4_authorized"] is False
+
+
+def test_v9_feature41_contract_binds_exact_feature_order() -> None:
+    assert len(CANDIDATE_PROBE_FEATURE_NAMES) == 41
+    assert CANDIDATE_PROBE_FEATURE_NAMES[:3] == (
+        "signed_sequence_distance",
+        "absolute_sequence_distance",
+        "log_absolute_sequence_distance",
+    )

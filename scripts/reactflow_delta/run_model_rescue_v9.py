@@ -21,6 +21,7 @@ from scripts.reactflow_delta.model_rescue_v5_probe import (
     predict_weighted_ridge,
 )
 from scripts.reactflow_delta.model_rescue_v6_probe import (
+    CANDIDATE_PROBE_FEATURE_NAMES,
     ConstrainedFeatureCache,
     prediction_features,
     validate_cache_alignment,
@@ -108,9 +109,9 @@ def _fold_inputs(
         raise ValueError("V9 requires complete TIC2A folds 0 through 19")
     tic2a_row = rows[fold_id]
     model_artifact = _read_json(Path(tic2a_row["model_artifact"]))
-    feature_names = model_artifact.get("feature41_feature_names", [])
-    if len(feature_names) != 41:
-        raise ValueError(f"fold {fold_id} feature41 basis width changed")
+    feature_names = tuple(model_artifact.get("feature41_feature_names", []))
+    if feature_names != CANDIDATE_PROBE_FEATURE_NAMES:
+        raise ValueError(f"fold {fold_id} feature41 basis identity changed")
     return v8_row, tic2a_row, _ridge_model(model_artifact["v6_feature41"])
 
 
@@ -266,6 +267,39 @@ def _load_reference_prediction(
         return {key: float(value) for key, value in zip(keys, values)}
 
 
+def _feature41_replay_max_difference(
+    univ: M2Universe,
+    held_records: list[Any],
+    feature41_model: dict[str, np.ndarray | float],
+    unconstrained: EnsembleFeatureCache,
+    constrained: ConstrainedFeatureCache,
+    reference_path: Path,
+    fold_id: int,
+) -> float:
+    reference = _load_reference_prediction(
+        reference_path,
+        TIC2A_PREDICTION_SCHEMA,
+        "v6_feature41_signed_delta",
+        fold_id,
+    )
+    predicted: dict[str, float] = {}
+    for record in held_records:
+        construct = univ.get_construct(record.construct_id)
+        receiver = np.arange(len(construct.sequence), dtype=np.int64)
+        _feature30, feature41 = prediction_features(
+            construct, record, receiver, unconstrained, constrained
+        )
+        values = predict_weighted_ridge(feature41_model, feature41)[:, 0]
+        for position, value in zip(receiver, values):
+            key = _bio_key(univ, record, int(position))
+            if key in predicted:
+                raise RuntimeError("V9 feature41 replay produced a duplicate key")
+            predicted[key] = float(value)
+    if set(predicted) != set(reference):
+        raise RuntimeError("V9 feature41 replay key universe differs from TIC2A")
+    return float(max(abs(predicted[key] - reference[key]) for key in reference))
+
+
 def _held_prediction(
     univ: M2Universe,
     held_records: list[Any],
@@ -375,7 +409,10 @@ def _held_prediction(
     if not np.allclose(candidate_mean_array, v8_mean, atol=1e-7, rtol=0.0):
         raise RuntimeError("V9 candidate signed mean does not replay V8")
     if not np.allclose(baseline_mean_array, tic_mean, atol=1e-10, rtol=0.0):
-        raise RuntimeError("V9 feature41 signed mean does not replay TIC2A")
+        maximum = float(np.max(np.abs(baseline_mean_array - tic_mean)))
+        raise RuntimeError(
+            f"V9 feature41 signed mean does not replay TIC2A: max={maximum:.17g}"
+        )
     return {
         "schema_version": np.asarray(PREDICTION_SCHEMA),
         "keys": key_array,
@@ -431,6 +468,20 @@ def run_fold(
             {record.construct_id for record in train_records + held_records}
         )
     }
+    feature41_replay_max = _feature41_replay_max_difference(
+        univ,
+        held_records,
+        feature41_model,
+        unconstrained,
+        constrained,
+        Path(tic2a_row["prediction_artifact"]),
+        fold_id,
+    )
+    if feature41_replay_max > 1e-10:
+        raise RuntimeError(
+            "V9 feature41 pre-training replay exceeds 1e-10: "
+            f"max={feature41_replay_max:.17g}"
+        )
     cells = _calibration_cells(
         univ,
         train_records,
@@ -493,6 +544,7 @@ def run_fold(
         "candidate_calibration_history": candidate_history,
         "n_train_cells": len(cells),
         "n_registered_prediction_rows": len(prediction["keys"]),
+        "feature41_replay_max_abs_difference": feature41_replay_max,
         "invariants": {
             "target_profile_identity_exact": True,
             "v8_mean_replay_at_1e_7": True,
