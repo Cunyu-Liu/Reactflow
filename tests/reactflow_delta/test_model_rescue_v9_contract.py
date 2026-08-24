@@ -10,11 +10,11 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v9m3_authorizes_only_one_complete_score_and_qualification() -> None:
+def test_v9_terminal_closes_training_and_formal_confirmation() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v9_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V9M3"
-    assert active["runnable_phases"] == ["V9M3"]
+    assert active["authority"]["current_phase"] == "V9M6"
+    assert active["runnable_phases"] == ["M6"]
     assert active["training_allowed"] is False
     assert active["held_score_read_allowed"] is True
     assert active["partial_fold_score_read_allowed"] is False
@@ -22,8 +22,11 @@ def test_v9m3_authorizes_only_one_complete_score_and_qualification() -> None:
     assert contract["parent"]["v8_gate_changed"] is False
     assert contract["parent"]["v8m3_opened"] is False
     assert contract["contract_status"] == (
-        "V9M2_COMPLETE_UNSCORED_MERGE_PASS_V9M3_SCORING_AUTHORIZED"
+        "TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION"
     )
+    assert contract["formal_confirmation"]["authorized"] is False
+    assert contract["v9m3_terminal_result"]["v9m4_authorized"] is False
+    assert contract["v9m3_terminal_result"]["all_other_prefrozen_gates_passed"] is True
 
 
 def test_v9_freezes_equicalibration_and_top_journal_gate() -> None:

@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v9 Amendment
 
-**状态：V9M2 complete prediction-only merge PASS；V9M3 唯一一次完整评分与预冻结 qualifier 已授权；训练和部分评分关闭**
+**状态：V9M3 顶刊 screen 终局 FAIL；唯一失败项为 CRPS 相对改善 4.23% 未达到预冻结 5% 门槛；V9M4 永久不开放**
 
 ## 1. 与 V8 的关系
 
@@ -29,3 +29,7 @@ TIC2A ridge ledger 为 float64，而统一残差 head 使用 float32；真实 sm
 ## 5. 边界
 
 不访问 external outcome；不复用 target-identity 修复前 artifact；不改变 V8 Gate；不搜索 residual family、hidden size、component 数、epoch、loss weight 或阈值；未通过完整 Gate 时不得开启正式多 seed 或声称 SOTA。
+
+## 6. 终局结果
+
+完整 20-fold、seed0 qualifier 显示 signed-delta MAE 改善 8.36%（20/20 puzzles）、distribution-derived absolute-delta MAE 改善 9.81%（20/20）、CRPS 改善 4.23%（19/20），三项 puzzle-level CI lower 均大于零，LOO、influence、coverage 与 calibration guardrail 均通过。由于 CRPS 的预冻结门槛是至少 5%，V9 整体必须判 FAIL，不能用接近门槛或其他指标强势通过来改写结论。
