@@ -206,6 +206,12 @@ all three frozen levels; none may be selected or dropped after outcomes:
    component count, optimizer, epochs, folds, and seeds as level 2; only the
    median-constrained component-location allocation is enabled.
 
+With input width 244 and hidden width 256, level 2 has 63,491 trainable
+parameters (`244 -> 256 -> 3`) and level 3 has 63,748 (`244 -> 256 -> 4`). The
+257-parameter difference is 0.405% and is exactly the one additional CDF
+allocation output plus its incoming weights; no other capacity difference is
+permitted.
+
 Required attribution:
 
 - level 2 versus level 1 identifies the incremental value of conditioning and
