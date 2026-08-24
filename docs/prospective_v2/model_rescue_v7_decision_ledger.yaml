@@ -178,6 +178,23 @@ evidence_state:
     foundation_forward_completed: false
     cache_artifact_created: false
     scientific_effect: NONE_RUNTIME_ENGINEERING_ONLY
+  v7m1_real_smoke:
+    status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_PASS
+    universe: FIXED_TWO_CONSTRUCT_REAL_OPENKNOT_SMOKE
+    artifact_scope: ENGINEERING_SMOKE_ONLY
+    cache_schema_pass: true
+    coordinate_identity_pass: true
+    sequence_identity_pass: true
+    full_unmasked_exact_intervention_pass: true
+    self_dependency_exact_zero_pass: true
+    off_diagonal_signal_nonzero_pass: true
+    feature_shape_dtype_and_finite_pass: true
+    exact_registered_row_universe_pass: true
+    forbidden_target_side_datasets_absent: true
+    mutant_outcome_columns_used: false
+    external_outcome_accessed: false
+    scientific_effect: NONE_ENGINEERING_SMOKE_ONLY
+    next_action: COMPLETE_AND_QUALIFY_FULL_OUTCOME_BLIND_CACHE
   v7m1_cache: NOT_RUN
   v7m2_implementation:
     status: IMPLEMENTED_AND_FOCUSED_TESTED_NOT_AUTHORIZED
