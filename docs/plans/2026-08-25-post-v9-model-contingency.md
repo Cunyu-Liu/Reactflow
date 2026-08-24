@@ -26,6 +26,12 @@ and receive the mechanical V9M3 verdict.
   channels are bounded near one, while global energy channels range to about
   12, so this is a conditioning limitation rather than proof of catastrophic
   saturation.
+- `CONFIRMED_FACT`: one V9 residual head has only 3,011 trainable parameters
+  (`43 -> 64 -> 3`). The proposed same-backbone median-constrained head would
+  use the 41 standardized features, two point features, and 201 detached V8
+  direct features (`244 -> 256 -> 4`), for 63,748 trainable parameters. This is
+  a 21.17-fold residual-capacity increase while keeping the V8 encoder frozen;
+  parameter count alone is not evidence that it will improve generalization.
 
 ## Primary unresolved mechanism
 
