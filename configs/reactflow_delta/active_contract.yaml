@@ -1,44 +1,37 @@
-schema_version: reactflow_delta.active_contract.v5
-manifest_id: reactflow_delta_model_rescue_v5_authority_20260824
-project_task_id: reactflow_delta_model_rescue_v5
-created_at: '2026-08-24T11:57:54+08:00'
-updated_at: '2026-08-24T12:43:00+08:00'
+schema_version: reactflow_delta.active_contract.v6
+manifest_id: reactflow_delta_model_rescue_v6_authority_20260824
+project_task_id: reactflow_delta_model_rescue_v6
+created_at: '2026-08-24T12:55:00+08:00'
+updated_at: '2026-08-24T12:55:00+08:00'
 
 authority:
-  pointer_role: V5_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: M6
-  current_authority_state: TERMINAL_MODEL_RESCUE_V5_FAIL_BENCHMARK_ROUTE_LOCKED
-  current_runnable_phase: M6
+  pointer_role: V6_WORKTREE_SINGLE_ACTIVE_AUTHORITY
+  current_phase: V6M0
+  current_authority_state: CONTRACT_FROZEN_FAIL_CLOSED
+  current_runnable_phase: NONE
   conflict_policy: FAIL_CLOSED
-  branch: codex/reactflow-delta-model-rescue-v5-20260824
-  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v5_20260824
-  human_contract_path: docs/prospective_v2/model_rescue_v5_amendment_20260824.md
-  machine_contract_path: configs/reactflow_delta/model_rescue_v5_amendment.yaml
-  decision_ledger_path: docs/prospective_v2/model_rescue_v5_decision_ledger.yaml
-  implementation_plan_path: docs/plans/2026-08-24-model-rescue-v5.md
-  binding_status: V5M2_MODEL_RESCUE_V5_FAIL
-  precedence:
-    - THIS_V5_WORKTREE_ACTIVE_CONTRACT
-    - MODEL_RESCUE_V5_MACHINE_AMENDMENT
-    - MODEL_RESCUE_V5_HUMAN_AMENDMENT
-    - MODEL_RESCUE_V4_TERMINAL_RESULT_IMMUTABLE
-    - MODEL_RESCUE_V3_RUNNING_AUTHORITY_ISOLATED
-    - MODEL_RESCUE_V2_TERMINAL_RESULT_IMMUTABLE
-    - MODEL_RESCUE_V1_TERMINAL_RESULT_IMMUTABLE
+  branch: codex/reactflow-delta-model-rescue-v6-20260824
+  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v6_20260824
+  human_contract_path: docs/prospective_v2/model_rescue_v6_amendment_20260824.md
+  machine_contract_path: configs/reactflow_delta/model_rescue_v6_amendment.yaml
+  decision_ledger_path: docs/prospective_v2/model_rescue_v6_decision_ledger.yaml
+  design_path: docs/plans/2026-08-24-model-rescue-v6-design.md
+  implementation_plan_path: docs/plans/2026-08-24-model-rescue-v6.md
+  binding_status: V6M0_UNCOMMITTED_FAIL_CLOSED
 
 parent_state:
-  parent_head: 820f34fc693f933dba7db816ba5f62f101cf6986
+  remote_parent_head: eb9fbdc33a03aeb12decc0d68575c18549395e71
   model_rescue_v1_status: M2_NO_RESCUE_CANDIDATE_IMMUTABLE
   model_rescue_v2_status: MODEL_RESCUE_V2_FAIL_CALIBRATION_BASELINE_ONLY_IMMUTABLE
   model_rescue_v3_status: R3C3_RUNNING_SEPARATELY_UNCHANGED
   model_rescue_v4_status: MODEL_RESCUE_V4_FAIL_IMMUTABLE
-  model_rescue_v4_route: BENCHMARK_ROUTE_LOCKED_IN_V4_WORKTREE
+  model_rescue_v5_status: MODEL_RESCUE_V5_FAIL_IMMUTABLE
 
 authorization:
   owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION
   owner_instruction_date: '2026-08-24'
-  amendment_scope: EXACT_MUTANT_MINUS_WT_BOLTZMANN_ENSEMBLE_DELTA_ONLY
-  implementation_allowed: true
+  amendment_scope: WT_2A3_CONSTRAINED_EXACT_DIFFERENTIAL_ENSEMBLE_ONLY
+  implementation_allowed: false
   outcome_blind_cache_preparation_allowed: false
   internal_development_probe_allowed: false
   candidate_training_allowed: false
@@ -46,8 +39,8 @@ authorization:
   new_external_outcome_access_allowed: false
   public_release_allowed: false
 
-allowed_phases: [V5M0, V5M1, V5M2, V5M3, V5M4, V5M5, V5M6, M6]
-runnable_phases: [M6]
+allowed_phases: [V6M0, V6M1, V6M2, V6M3, V6M4, V6M5, V6M6, M6]
+runnable_phases: []
 training_allowed: false
 candidate_model_training_allowed: false
 outcome_blind_cache_allowed: false
@@ -66,14 +59,14 @@ resource_policy:
   v3_process_interference_allowed: false
 
 gate_state:
-  V5M0: CONTRACT_AND_PHYSICS_HYPOTHESIS_FROZEN
-  V5M1: OUTCOME_BLIND_ENSEMBLE_CACHE_PASS
-  V5M2: MODEL_RESCUE_V5_FAIL_SIGNED_DELTA_EFFECT_BELOW_ONE_PERCENT
-  V5M3: PERMANENTLY_NOT_AUTHORIZED_BY_V5
-  V5M4: NOT_AUTHORIZED
-  V5M5: NOT_AUTHORIZED
-  V5M6: FAIL_HANDOFF_TO_M6_COMPLETE
+  V6M0: CONTRACT_FROZEN_UNCOMMITTED
+  V6M1: NOT_AUTHORIZED
+  V6M2: NOT_AUTHORIZED
+  V6M3: NOT_AUTHORIZED
+  V6M4: NOT_AUTHORIZED
+  V6M5: NOT_AUTHORIZED
+  V6M6: NOT_RUN
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_ESTABLISHED
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
 
-next_allowed_action: BENCHMARK_ROUTE_OR_NEW_SEPARATE_AMENDMENT_ONLY
+next_allowed_action: VALIDATE_AND_COMMIT_V6M0_CONTRACT_ONLY
