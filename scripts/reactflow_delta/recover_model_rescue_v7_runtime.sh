@@ -31,7 +31,7 @@ fi
   'pip=23.3' \
   'setuptools=68.2.2' \
   'wheel=0.41.2'
-"$PYTHON" -m pip install ninja==1.11.1.1
+"$PYTHON" -m pip install packaging==23.2 ninja==1.11.1.1
 "$PYTHON" -m pip install --no-build-isolation flash-attn==2.3.2
 "$PYTHON" -m pip install --no-build-isolation --no-deps -e "$OFFICIAL"
 
