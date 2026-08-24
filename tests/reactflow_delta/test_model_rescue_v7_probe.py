@@ -1,0 +1,206 @@
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+import h5py
+import numpy as np
+import pytest
+import yaml
+
+from scripts.reactflow_delta.merge_model_rescue_v7_probe import merge_folds
+from scripts.reactflow_delta.model_rescue_v7_probe import DependencyFeatureCache
+from scripts.reactflow_delta.model_rescue_v7_schema import CACHE_SCHEMA, FEATURE_NAMES
+from scripts.reactflow_delta.qualify_model_rescue_v7_probe import (
+    ABSOLUTE_RELATIVE_GAIN_MIN,
+    SIGNED_POSITIVE_PUZZLES_MIN,
+    SIGNED_RELATIVE_GAIN_MIN,
+    qualify,
+)
+from scripts.reactflow_delta.run_model_rescue_v7_probe import (
+    CORRECTED_REFERENCE_SCHEMA,
+    FOLD_SCHEMA,
+    PREDICTION_SCHEMA,
+    assert_corrected_baseline_replay,
+)
+from scripts.reactflow_delta.score_model_rescue_v7_probe import SCHEMA as SCORE_SCHEMA
+
+
+def _dependency_cache(path: Path, *, full_pos: int = 1) -> None:
+    string = h5py.string_dtype(encoding="utf-8")
+    features = np.ones((1, 3, len(FEATURE_NAMES)), dtype=np.float32)
+    features[0, full_pos] = 0.0
+    with h5py.File(path, "w") as handle:
+        handle.attrs["schema_version"] = CACHE_SCHEMA
+        handle.attrs["feature_names"] = json.dumps(FEATURE_NAMES)
+        for name, value in (
+            ("puzzle", "P01"),
+            ("method", "Starting sequence"),
+            ("ref", "T"),
+            ("alt", "A"),
+        ):
+            handle.create_dataset(name, data=np.asarray([value], dtype=object), dtype=string)
+        handle.create_dataset("design_pos", data=np.asarray([0], dtype=np.int16))
+        handle.create_dataset("full_pos", data=np.asarray([full_pos], dtype=np.int16))
+        handle.create_dataset("features", data=features)
+
+
+def test_dependency_cache_uses_canonical_biological_key_and_source_coordinate(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "dependency.h5"
+    _dependency_cache(path)
+    cache = DependencyFeatureCache(path)
+    try:
+        record = SimpleNamespace(
+            puzzle="P01",
+            method="Starting sequence",
+            design_pos=0,
+            ref="U",
+            alt="A",
+            full_pos=1,
+        )
+        value = cache.get(record)
+        assert value.shape == (3, 6)
+        assert np.array_equal(value[1], np.zeros(6, dtype=np.float32))
+        record.full_pos = 2
+        with pytest.raises(ValueError, match="source coordinate differs"):
+            cache.get(record)
+    finally:
+        cache.close()
+
+
+def test_corrected_feature41_replay_requires_exact_key_order_and_predictions(
+    tmp_path: Path,
+) -> None:
+    reference = tmp_path / "reference.npz"
+    keys = np.asarray(["P01|method|mutant|0", "P01|method|mutant|1"], dtype=object)
+    np.savez_compressed(
+        reference,
+        schema_version=np.asarray(CORRECTED_REFERENCE_SCHEMA),
+        keys=keys,
+        v6_feature41_signed_delta=np.asarray([0.1, -0.2]),
+        v6_feature41_absolute_delta=np.asarray([0.1, 0.2]),
+    )
+    prediction = {
+        "keys": keys.copy(),
+        "baseline_signed_delta": np.asarray([0.1, -0.2]),
+        "baseline_absolute_delta": np.asarray([0.1, 0.2]),
+    }
+    assert_corrected_baseline_replay(prediction, reference)
+    prediction["baseline_signed_delta"][1] += 1e-8
+    with pytest.raises(ValueError, match="corrected baseline replay failed"):
+        assert_corrected_baseline_replay(prediction, reference)
+
+
+def _write_fold(root: Path, fold: int, *, include_target: bool = False) -> None:
+    prediction_path = root / f"v7_probe_predictions_fold{fold}.npz"
+    model_path = root / f"v7_probe_models_fold{fold}.json"
+    reference_path = root / f"tic2a_corrected_predictions_fold{fold}.npz"
+    key = np.asarray([f"P{fold + 1:02d}|method|mutant|0"], dtype=object)
+    values = {
+        "schema_version": np.asarray(PREDICTION_SCHEMA),
+        "keys": key,
+        "biological_scoring_key": key.copy(),
+        "outer_fold": np.asarray([fold], dtype=np.int64),
+        "registered_status": np.asarray(["covered"], dtype=object),
+        "baseline_signed_delta": np.asarray([0.0]),
+        "baseline_absolute_delta": np.asarray([0.0]),
+        "candidate_signed_delta": np.asarray([0.0]),
+        "candidate_absolute_delta": np.asarray([0.0]),
+    }
+    if include_target:
+        values["target"] = np.asarray([0.0])
+    np.savez_compressed(prediction_path, **values)
+    model_path.write_text("{}\n")
+    reference_path.write_text("reference\n")
+    row = {
+        "schema_version": FOLD_SCHEMA,
+        "phase": "V7M2",
+        "outer_fold": fold,
+        "held_puzzle": f"P{fold + 1:02d}",
+        "prediction_artifact": str(prediction_path),
+        "model_artifact": str(model_path),
+        "corrected_baseline_reference": str(reference_path),
+        "n_registered_prediction_rows": 1,
+        "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
+        "corrected_feature41_replay_pass": True,
+        "held_target_used_for_prediction": False,
+        "held_score_computed": False,
+        "partial_score_inspected": False,
+        "model_selection_performed": False,
+        "legacy_target_dependent_prediction_reused": False,
+        "external_outcome_accessed": False,
+    }
+    (root / f"v7_probe_fold_result_fold{fold}.json").write_text(
+        json.dumps(row) + "\n"
+    )
+
+
+def test_v7_probe_merge_requires_complete_prediction_only_universe(tmp_path: Path) -> None:
+    for fold in range(20):
+        _write_fold(tmp_path, fold)
+    merged = merge_folds(tmp_path)
+    assert merged["status"] == "V7M2_COMPLETE_UNSCORED_MERGE_PASS"
+    assert merged["merge_integrity"]["corrected_feature41_replay_all_folds"] is True
+
+    (tmp_path / "v7_probe_fold_result_fold19.json").unlink()
+    with pytest.raises(ValueError, match="fold universe incomplete"):
+        merge_folds(tmp_path)
+
+
+def test_v7_probe_merge_rejects_target_side_prediction_fields(tmp_path: Path) -> None:
+    for fold in range(20):
+        _write_fold(tmp_path, fold, include_target=fold == 0)
+    with pytest.raises(ValueError, match="target-side fields"):
+        merge_folds(tmp_path)
+
+
+def _complete_scores(*, signed_gain: float, absolute_gain: float) -> dict:
+    rows = []
+    for fold in range(20):
+        rows.append(
+            {
+                "outer_fold": fold,
+                "held_puzzle": f"P{fold + 1:02d}",
+                "baseline_signed_delta_mae": 1.0,
+                "candidate_signed_delta_mae": 1.0 - signed_gain,
+                "baseline_absolute_delta_mae": 1.0,
+                "candidate_absolute_delta_mae": 1.0 - absolute_gain,
+                "registered_prediction_coverage": 1.0,
+                "failure_rate": 0.0,
+                "n_unexpected_prediction_keys": 0,
+            }
+        )
+    return {
+        "schema_version": SCORE_SCHEMA,
+        "status": "V7M2_COMPLETE_CORRECTED_SCORE_PASS",
+        "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
+        "partial_fold_scores_inspected": False,
+        "model_selection_performed": False,
+        "scores": rows,
+    }
+
+
+def test_v7_probe_qualifier_applies_frozen_eligibility_gate() -> None:
+    passed = qualify(_complete_scores(signed_gain=0.02, absolute_gain=-0.004))
+    assert passed["status"] == "V7M2_RINALMO_DEPENDENCY_SIGNAL_ELIGIBLE"
+    assert all(passed["checks"].values())
+    assert passed["candidate_model_trained"] is False
+    assert passed["sota"] == "NOT_ESTABLISHED"
+
+    failed = qualify(_complete_scores(signed_gain=0.009, absolute_gain=0.0))
+    assert failed["status"] == "V7M2_RINALMO_DEPENDENCY_SIGNAL_NOT_ELIGIBLE"
+    assert failed["checks"]["signed_delta_relative_gain_at_least_one_percent"] is False
+
+
+def test_v7_probe_constants_match_the_machine_contract() -> None:
+    root = Path(__file__).resolve().parents[2]
+    contract = yaml.safe_load(
+        (root / "configs/reactflow_delta/model_rescue_v7_amendment.yaml").read_text()
+    )
+    gate = contract["eligibility_probe"]["gate"]
+    assert SIGNED_RELATIVE_GAIN_MIN == gate["signed_delta_relative_mae_gain_min"]
+    assert SIGNED_POSITIVE_PUZZLES_MIN == gate["signed_delta_positive_puzzles_min"]
+    assert ABSOLUTE_RELATIVE_GAIN_MIN == gate[
+        "absolute_delta_relative_mae_guardrail_min"
+    ]
