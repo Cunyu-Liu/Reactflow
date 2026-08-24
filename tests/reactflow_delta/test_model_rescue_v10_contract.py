@@ -2,6 +2,8 @@ from pathlib import Path
 
 import yaml
 
+from scripts.reactflow_delta.run_model_rescue_v10 import assert_run_authority
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -15,7 +17,9 @@ def test_v10m1_pass_authorizes_only_fixed_complete_universe_screen() -> None:
     contract = _yaml("configs/reactflow_delta/model_rescue_v10_amendment.yaml")
     assert active["authority"]["current_phase"] == "V10M2"
     assert active["runnable_phases"] == ["V10M2"]
-    assert active["training_allowed"] == "V10_FIXED_SEED0_TWENTY_FOLD_SCREEN_ONLY"
+    assert active["training_allowed"] == (
+        "V10_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY"
+    )
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
@@ -27,6 +31,7 @@ def test_v10m1_pass_authorizes_only_fixed_complete_universe_screen() -> None:
     )
     assert contract["v10m1_smoke"]["scientific_scores_read"] is False
     assert contract["v10m2_screen"]["complete_before_score"] is True
+    assert_run_authority(ROOT, "V10M2")
 
 
 def test_v10_freezes_identification_ladder_and_top_journal_gate() -> None:
