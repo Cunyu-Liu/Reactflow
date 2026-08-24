@@ -58,7 +58,22 @@ evidence_state:
     version: 2.7.2
     one_based_dummy_required: true
     all_minus_999_equals_unconstrained_pf: ENGINEERING_CONFIRMED
-  v6m1_cache: AUTHORIZED_NOT_RUN
+  v6m1_cache:
+    status: ENGINEERING_SMOKE_PASS_FULL_CACHE_NOT_RUN
+    implementation:
+      - scripts/reactflow_delta/model_rescue_v6_schema.py
+      - scripts/reactflow_delta/build_model_rescue_v6_constrained_cache.py
+      - scripts/reactflow_delta/qualify_model_rescue_v6_constrained_cache.py
+    focused_remote_tests: 14_PASS
+    real_data_smoke:
+      status: V6M1_OUTCOME_BLIND_CONSTRAINED_CACHE_PASS
+      directory: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_real_smoke
+      constructs: 2
+      registered_mutants: 104
+      sequence_length: 177
+      mutant_reactivity_rows_read: 0
+      held_score_computed: false
+      external_outcome_accessed: false
   v6m2_eligibility: NOT_RUN
   v6m4_screen: NOT_RUN
   v6m5_confirmation: NOT_RUN
