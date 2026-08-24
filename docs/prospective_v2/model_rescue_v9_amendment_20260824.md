@@ -12,6 +12,8 @@ V9 不重训或改变该 signed mean。它只检验一个新的、由完整 V8 �
 
 corrected feature41 与 V8 MeanAligned 都使用同一残差 head：输入为相同的 outcome-blind feature41 特征，加各自冻结的 signed mean 与其绝对值；结构、初始化规则、epoch、优化器、method-balanced CRPS 和零均值约束完全相同。两个 Gaussian component 的 location 都必须逐 key 等于各自 frozen mean，因此 calibration 不可能移动 signed point prediction。
 
+TIC2A ridge ledger 为 float64，而统一残差 head 使用 float32；真实 smoke 预检确认两者最大重放差异小于 `3e-8`。因此 baseline 与 candidate 的 frozen mean replay 均使用预先固定的逐 key `atol=1e-7, rtol=0`，该容差只处理 dtype 转换，不允许重新拟合或移动 mean。
+
 ## 3. 阶段
 
 - V9M0：实现合同、模型、prediction schema、merge/scorer/qualifier 和测试；训练关闭。

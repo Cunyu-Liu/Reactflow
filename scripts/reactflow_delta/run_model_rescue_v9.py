@@ -408,7 +408,7 @@ def _held_prediction(
     tic_mean = np.asarray([tic_reference[key] for key in keys])
     if not np.allclose(candidate_mean_array, v8_mean, atol=1e-7, rtol=0.0):
         raise RuntimeError("V9 candidate signed mean does not replay V8")
-    if not np.allclose(baseline_mean_array, tic_mean, atol=1e-10, rtol=0.0):
+    if not np.allclose(baseline_mean_array, tic_mean, atol=1e-7, rtol=0.0):
         maximum = float(np.max(np.abs(baseline_mean_array - tic_mean)))
         raise RuntimeError(
             f"V9 feature41 signed mean does not replay TIC2A: max={maximum:.17g}"
@@ -477,9 +477,9 @@ def run_fold(
         Path(tic2a_row["prediction_artifact"]),
         fold_id,
     )
-    if feature41_replay_max > 1e-10:
+    if feature41_replay_max > 1e-7:
         raise RuntimeError(
-            "V9 feature41 pre-training replay exceeds 1e-10: "
+            "V9 feature41 pre-training replay exceeds 1e-7: "
             f"max={feature41_replay_max:.17g}"
         )
     cells = _calibration_cells(
@@ -548,7 +548,7 @@ def run_fold(
         "invariants": {
             "target_profile_identity_exact": True,
             "v8_mean_replay_at_1e_7": True,
-            "tic2a_feature41_replay_at_1e_10": True,
+            "tic2a_feature41_replay_at_1e_7": True,
             "identical_residual_head_class_and_budget": True,
             "both_component_locations_equal_frozen_mean": True,
             "residual_changed_signed_point_mean": False,
