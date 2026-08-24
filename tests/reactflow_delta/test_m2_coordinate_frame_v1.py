@@ -164,3 +164,49 @@ def test_full_profile_lookup_uses_puzzle_method_identity_not_raw_id_prefix(
     assert eterna_target is not None and starting_target is not None
     assert eterna_target[eterna.full_pos] == pytest.approx(1.06)
     assert starting_target[starting.full_pos] == pytest.approx(11.06)
+
+
+def test_full_profile_identity_canonicalizes_raw_t_reference_to_u(
+    tmp_path: Path,
+) -> None:
+    sequence = "AAAATCCCGGGG"
+    mutant = sequence[:4] + "A" + sequence[5:]
+    common = {
+        "experiment_type": "2A3_MaP",
+        "dataset_name": "tu-identity-fixture",
+        "puzzle": "P01",
+        "method": "Eterna",
+        "sub_start": 5,
+        "sub_end": 8,
+        "design_length": 4,
+        "design_sequence": sequence[4:8],
+        "target_structure": "",
+        "M2_structure": "",
+    }
+    rows = [
+        {**common, "id": "P01_Eterna_wt", "sequence": sequence, "mutA": 0},
+        {
+            **common,
+            "id": "P01_Eterna_mm_0_T_A",
+            "sequence": mutant,
+            "mutA": 1,
+        },
+    ]
+    for row_index, row in enumerate(rows):
+        for position in range(1, len(sequence) + 1):
+            row[f"reactivity_{position:04d}"] = row_index + position / 100.0
+            row[f"reactivity_error_{position:04d}"] = 0.1
+    csv = tmp_path / "tu-identity.csv"
+    pd.DataFrame(rows).to_csv(csv, index=False)
+
+    universe = M2Universe(csv)
+    universe.build()
+    record = universe.get_records()[0]
+    target, _ = universe.mutant_full_profile(
+        record.wt_id, record.design_pos, record.ref, record.alt
+    )
+
+    assert record.ref == "U"
+    assert record.alt == "A"
+    assert target is not None
+    assert target[record.full_pos] == pytest.approx(1.05)
