@@ -89,6 +89,43 @@ rule, not execution authority.
    frozen V8 source/receiver representations added to the residual input. Do
    not first search mixture counts, hidden sizes, backbones, or loss weights.
 
+## Post-Gate diagnostic package (frozen before V9 score access)
+
+These diagnostics run only after the complete V9M3 qualifier has written its
+immutable PASS/FAIL verdict. They cannot alter that verdict or rescue a failed
+Gate.
+
+Use the exact held residual `r=Delta-m_0.5(x)` and the frozen estimand weights:
+equal puzzles, equal methods within puzzle, equal mutants within method, and
+equal qualified positions within mutant. Report, for V8 and corrected
+feature41 separately:
+
+- weighted residual mean, median, and mean-minus-median gap;
+- weighted q10/q50/q90 and normalized quantile asymmetry
+  `(q90 + q10 - 2*q50) / (q90 - q10)`;
+- the same quantities per held puzzle, with the count of puzzles sharing the
+  global asymmetry direction;
+- method-stratified and design/other-region summaries, still puzzle-balanced;
+- V9 narrow/wide scales and mixture weights by method, region, and absolute
+  sequence-distance band;
+- the relationship between predicted `E|Delta|`, observed `|Delta|`, and CRPS
+  without changing any threshold.
+
+Decision rule:
+
+- open the median-constrained asymmetric-location amendment only if the global
+  mean-minus-median gap has a puzzle-level 95% CI excluding zero and at least
+  14/20 puzzles share its direction, or the normalized q10/q50/q90 asymmetry
+  has the same two properties;
+- if asymmetry is not established but V9 absolute/CRPS fails, test the
+  same-location distribution with standardized inputs and detached V8 direct
+  representations first; do not claim an asymmetry mechanism;
+- a method embedding is eligible only if a named method effect is directionally
+  stable under leave-one-puzzle-out removal. It must be a common input to
+  baseline and candidate and retain a no-method ablation;
+- if neither asymmetry nor stable conditional dependence is found, close the
+  residual-only rescue family rather than adding more components.
+
 ## Highest-information successor if required
 
 Candidate name: `MedianAligned-AsymmetricGaussianMixture`.
