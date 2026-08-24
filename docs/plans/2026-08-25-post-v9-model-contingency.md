@@ -43,6 +43,15 @@ and receive the mechanical V9M3 verdict.
   automatically permitted input. It must not be added unless complete-result
   method-stratified calibration shows a reproducible residual dependency, and
   any use must be disclosed as a dataset-specific generalization limitation.
+- `CONFIRMED_FACT`: fold0 checkpoint-to-seed0-initialization comparison shows
+  all 28 encoder tensors, `wt_obs_proj`, `ctx_norm`, and all four `bdirect`
+  tensors changed during V8 L1 training. Every tensor in `src`, `recv`, `gmod`,
+  and `scale_head` remained bit-identical to initialization because
+  `forward_mean` never uses those branches. Of 109,581 stored parameters,
+  93,193 belong to the trained path and 16,388 to unused branches. A successor
+  may reuse detached normalized encoder source/receiver states, distance, and
+  mutation one-hot from `forward_mean_and_features`; it must not use the
+  randomly initialized `src/recv/gmod/scale_head` outputs as learned features.
 - `MATHEMATICAL_PROPERTY`: because both V9 Gaussian components share exactly
   the same location, every conditional distribution is symmetric with
   mean=median=mode at the frozen V8 point and zero third central moment. The
