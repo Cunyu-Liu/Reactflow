@@ -51,6 +51,20 @@ v9m2:
     conclusion: EXACT_ONE_CONSTRUCT_PER_PUZZLE_METHOD_CELL
     target_values_read_for_audit: false
     partial_model_scores_read: false
+  score_blind_cache_coordinate_audit:
+    audited_at: '2026-08-25T00:35:00+08:00'
+    canonical_mutant_keys: 13976
+    v5_unconstrained_cache_keys: 13976
+    v5_missing_keys: 0
+    v5_unexpected_keys: 0
+    v5_full_pos_mismatches: 0
+    v6_constrained_cache_keys: 13976
+    v6_missing_keys: 0
+    v6_unexpected_keys: 0
+    v6_full_pos_mismatches: 0
+    conclusion: V5_V6_CACHE_COORDINATES_EXACTLY_MATCH_CURRENT_CANONICAL_UNIVERSE
+    target_values_read_for_audit: false
+    partial_model_scores_read: false
 v9m3: NOT_AUTHORIZED
 v9m4: NOT_AUTHORIZED
 
