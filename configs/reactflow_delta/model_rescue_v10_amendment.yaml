@@ -1,0 +1,165 @@
+schema_version: reactflow_delta.model_rescue_v10_amendment.v1
+contract_id: reactflow_delta_model_rescue_v10_20260825
+contract_status: V10M0_CONTRACT_FROZEN_IMPLEMENTATION_ONLY
+created_at: '2026-08-25T01:30:00+08:00'
+
+parent:
+  v9_terminal_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
+  v9_gate_changed: false
+  v9m4_opened: false
+  v9_signed_delta_relative_gain: 0.08363163113698135
+  v9_absolute_delta_relative_gain: 0.0980789458821277
+  v9_crps_relative_gain: 0.042264074550957244
+
+eligibility_evidence:
+  artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v9/v9m2_screen_seed0/v9_post_gate_residual_diagnostic.json
+  independent_unit: HELD_PUZZLE
+  n_independent_units: 20
+  estimand: EQUAL_METHOD_THEN_MUTANT_THEN_QUALIFIED_POSITION
+  mean_minus_median: 0.03451693472986933
+  mean_minus_median_ci95: [0.02614645338870382, 0.04288741607103484]
+  mean_minus_median_direction_puzzles: 20
+  normalized_quantile_asymmetry: 0.23048569348928732
+  normalized_quantile_asymmetry_ci95: [0.1882338402467704, 0.2727375467318043]
+  normalized_quantile_asymmetry_direction_puzzles: 20
+  pre_registered_asymmetry_criterion_met: true
+
+scientific_hypothesis:
+  statement: >-
+    THE FROZEN V8 L1 POINT IS A USEFUL CONDITIONAL MEDIAN, AND THE POSITIVE
+    HELD RESIDUAL SKEW REQUIRES A MEDIAN-PRESERVING ASYMMETRIC DISTRIBUTION;
+    ASYMMETRIC LOCATIONS SHOULD IMPROVE CRPS BEYOND A PARAMETER-MATCHED
+    CAPACITY-SYMMETRIC NULL WITHOUT MOVING THE SIGNED POINT PREDICTION
+  point_functional: FROZEN_V8_CONDITIONAL_MEDIAN
+  exact_constraint: MIXTURE_CDF_AT_POINT_EQUALS_0_5
+  falsifier: ASYMMETRIC_VS_MATCHED_SYMMETRIC_CRPS_GATE_FAILS
+
+data_and_split:
+  dataset: REAL_OPENKNOT_M2_V4_5_2_DEVELOPMENT_CONSUMED
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  target_profile_identity: EXACT_PUZZLE_METHOD_MUTATION
+  external_outcome_allowed: false
+  v8_corrected_checkpoint_reuse_allowed: true
+  legacy_pre_target_identity_artifact_reuse_allowed: false
+
+input:
+  width: 244
+  feature41: 41
+  point_and_absolute_point: 2
+  frozen_trained_v8_direct_features: 201
+  direct_feature_definition: SOURCE_HIDDEN96_RECEIVER_HIDDEN96_SIGNED_DISTANCE1_MUTATION_ONEHOT8
+  unused_random_v8_branches_allowed: false
+  normalization: OUTER_TRAIN_ONLY_MEAN_AND_SCALE_ALL_244_CHANNELS
+  normalization_scale_floor: 1.0e-6
+
+residual_family:
+  components: 2
+  hidden: 256
+  architecture: LINEAR_RELU_LINEAR
+  mixture_weight_interval: [0.1, 0.9]
+  scale_parameterization: NARROW_FLOOR_SOFTPLUS_AND_POSITIVE_WIDE_GAP
+  scale_floor: 1.0e-4
+  cdf_interior_epsilon: 1.0e-4
+  objective: EXACT_METHOD_BALANCED_GAUSSIAN_MIXTURE_CRPS
+  optimizer: Adam
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  epochs: 40
+  early_stopping: false
+
+models:
+  historical_small_symmetric:
+    id: V9_SMALL_SYMMETRIC
+    input_width: 43
+    hidden: 64
+    parameters: 3011
+    retraining_in_screen: false
+  feature41_capacity_symmetric:
+    point: CORRECTED_OUTER_TRAIN_FEATURE41_WEIGHTED_RIDGE
+    outputs: 3
+    parameters: 63491
+    locations: BOTH_EQUAL_FROZEN_POINT
+  feature41_median_asymmetric:
+    point: CORRECTED_OUTER_TRAIN_FEATURE41_WEIGHTED_RIDGE
+    outputs: 4
+    parameters: 63748
+    locations: MEDIAN_CONSTRAINED_ASYMMETRIC
+  meanaligned_capacity_symmetric:
+    point: FROZEN_V8_TARGET_CORRECTED_MEANALIGNED
+    outputs: 3
+    parameters: 63491
+    locations: BOTH_EQUAL_FROZEN_POINT
+  meanaligned_median_asymmetric:
+    point: FROZEN_V8_TARGET_CORRECTED_MEANALIGNED
+    outputs: 4
+    parameters: 63748
+    locations: MEDIAN_CONSTRAINED_ASYMMETRIC
+    final_candidate: true
+  shared_constraints:
+    common_first_layer_initialization: true
+    common_scale_and_weight_output_initialization: true
+    allocation_output_initialized_to_symmetric_null: true
+    model_or_family_selection_allowed: false
+
+v10m1_smoke:
+  folds: [0, 1]
+  seed: 0
+  epochs: 3
+  scoring_allowed: false
+  evidence_status: ENGINEERING_SMOKE_ONLY
+
+v10m2_screen:
+  prerequisite: V10M1_ENGINEERING_SMOKE_PASS
+  folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  seed: 0
+  epochs: 40
+  complete_before_score: true
+  partial_score_allowed: false
+  top_journal_gate:
+    signed_delta_relative_gain_vs_feature41_min: 0.05
+    signed_delta_ci_lower_gt: 0.0
+    signed_delta_positive_puzzles_min: 16
+    absolute_delta_relative_gain_vs_independent_feature41_head_min: 0.05
+    absolute_delta_ci_lower_gt: 0.0
+    absolute_delta_positive_puzzles_min: 16
+    crps_relative_gain_vs_feature41_asymmetric_min: 0.05
+    crps_ci_lower_gt: 0.0
+    crps_positive_puzzles_min: 16
+    crps_relative_gain_vs_historical_v9_min: 0.01
+    crps_vs_historical_v9_ci_lower_gt: 0.0
+    crps_relative_gain_asymmetric_vs_symmetric_min: 0.01
+    crps_asymmetric_vs_symmetric_ci_lower_gt: 0.0
+    crps_asymmetric_vs_symmetric_positive_puzzles_min: 14
+    leave_one_puzzle_out_all_headline_metrics_positive: true
+    max_single_puzzle_effect_fraction: 0.20
+    coverage_68_95_error_not_worse_than_fair_baseline_by_more_than: 0.02
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+    frozen_point_replay_atol: 1.0e-7
+
+formal_confirmation:
+  prerequisite: V10M3_TOP_JOURNAL_SCREEN_PASS
+  seeds: [0, 1, 2, 3, 4]
+  folds: 20
+  residual_heads_retrained_per_seed: true
+  v8_point_retrained: false
+  selection_allowed: false
+  external_replication: REQUIRES_SEPARATE_SEALED_AMENDMENT
+  authorized: false
+
+phase_graph:
+  - {id: V10M0, status: AUTHORIZED, next_on_pass: V10M1}
+  - {id: V10M1, status: NOT_AUTHORIZED, next_on_pass: V10M2, next_on_fail: V10M6_FAIL}
+  - {id: V10M2, status: NOT_AUTHORIZED, next_on_pass: V10M3, next_on_fail: V10M6_FAIL}
+  - {id: V10M3, status: NOT_AUTHORIZED, next_on_pass: V10M4, next_on_fail: V10M6_FAIL}
+  - {id: V10M4, status: NOT_AUTHORIZED, next_on_pass: V10M5, next_on_fail: V10M6_FAIL}
+  - {id: V10M5, status: NOT_RUN, next_on_pass: V10M6_PASS, next_on_fail: V10M6_FAIL}
+  - {id: V10M6, status: NOT_RUN, handoff_phase: M6}
+
+claim_policy:
+  development_consumed: true
+  asymmetry_claim_requires_asymmetric_vs_symmetric_gate: true
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
