@@ -73,14 +73,30 @@ class M2Universe:
         self._index_full_profiles()
 
     def _index_full_profiles(self) -> None:
-        """Index full-construct mutant reactivity/error profiles by row id (canonical)."""
+        """Index profiles by the canonical puzzle-method construct identity.
+
+        Raw OpenKnot row-id prefixes are not the biological construct keys for
+        every method (for example ``P01_WT`` is labelled ``Starting sequence``
+        and ``P01_gRNAde2`` is labelled ``gRNAde-no3d``).  Indexing by the raw
+        prefix and later falling back to a mutation-only suffix can therefore
+        select a profile from a different construct.  The canonical key used by
+        every accessor is puzzle + method + mutation identity, so construct it
+        directly from the parsed metadata here.
+        """
         react = self._reactivity_cols(self.df)
         err = self._error_cols(self.df)
         for r in self.df.itertuples():
-            rid = str(r.id)
-            # canonical T->U on the allele part if present
-            rid = rid.replace("_T>", "_U>").replace("_A_T", "_A_U").replace("_C_T", "_C_U") \
-                     .replace("_G_T", "_G_U").replace("_U_T", "_U_U")
+            if bool(r.is_wt):
+                rid = f"{r.construct_id}_wt"
+            else:
+                if pd.isna(r.mut_pos) or pd.isna(r.mut_ref) or pd.isna(r.mut_alt):
+                    raise ValueError(f"cannot index non-canonical mutant row {r.id}")
+                rid = (
+                    f"{r.construct_id}_mm_{int(r.mut_pos)}_"
+                    f"{r.mut_ref}_{r.mut_alt}"
+                )
+            if rid in self._full_profiles:
+                raise ValueError(f"duplicate canonical full-profile key {rid}")
             arr = np.asarray([getattr(r, c) for c in react], dtype=float)
             earr = np.asarray([getattr(r, c) for c in err], dtype=float)
             self._full_profiles[rid] = arr
@@ -90,16 +106,9 @@ class M2Universe:
         self, wt_id: str, design_pos: int, ref: str, alt: str
     ) -> tuple[np.ndarray, np.ndarray]:
         """Return (full reactivity, full error) for a mutant row by constructing its canonical id."""
+        ref_c = ref.replace("T", "U")
         alt_c = alt.replace("T", "U")
-        rid = f"{wt_id.replace('_wt', '')}_mm_{design_pos}_{ref}_{alt_c}"
-        if rid not in self._full_profiles:
-            # fallback: search by prefix (id may use original allele casing)
-            cands = [
-                k
-                for k in self._full_profiles
-                if k.endswith(f"_mm_{design_pos}_{ref}_{alt_c}")
-            ]
-            rid = cands[0] if cands else rid
+        rid = f"{wt_id.replace('_wt', '')}_mm_{design_pos}_{ref_c}_{alt_c}"
         return self._full_profiles.get(rid), self._full_errors.get(rid)
 
     # -- raw parsing (outcome-blind) --------------------------------------
@@ -252,6 +261,19 @@ class M2Universe:
                 f"{coordinate_failures}"
             )
 
+        canonical_profile_keys = {
+            f"{record.wt_id.replace('_wt', '')}_mm_{record.design_pos}_"
+            f"{record.ref}_{record.alt}"
+            for record in records
+        }
+        missing_profile_keys = canonical_profile_keys - set(self._full_profiles)
+        if missing_profile_keys:
+            example = sorted(missing_profile_keys)[0]
+            raise ValueError(
+                "canonical mutant full-profile identity is incomplete: "
+                f"missing={len(missing_profile_keys)} example={example}"
+            )
+
         # attrition ledger
         cells = mm.groupby(["puzzle", "method"]).size()
         per_puzzle = cells.groupby(level=0).size()
@@ -264,6 +286,8 @@ class M2Universe:
             "n_constructs": len(constructs),
             "n_wt_rows": int(len(wt_rows)),
             "n_registered_snv_mutants": len(records),
+            "n_canonical_mutant_full_profiles": len(canonical_profile_keys),
+            "canonical_mutant_full_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
             "n_methods_total_distinct": int(mm["method"].nunique()),
             "seq_len": seq_len,
             "coordinate_frame": {
