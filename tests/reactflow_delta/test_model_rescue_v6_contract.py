@@ -17,14 +17,14 @@ def test_v6m2_terminal_fail_is_preserved_by_later_active_amendment() -> None:
     v4 = _yaml("configs/reactflow_delta/model_rescue_v4_amendment.yaml")
     v2 = _yaml("configs/reactflow_delta/model_rescue_v2_amendment.yaml")
 
-    assert active["authority"]["current_phase"] == "V7M0"
-    assert active["runnable_phases"] == ["V7M0"]
+    assert active["authority"]["current_phase"] == "V7M1"
+    assert active["runnable_phases"] == ["V7M1"]
     assert active["parent_state"]["model_rescue_v6_status"] == (
         "MODEL_RESCUE_V6_FAIL_IMMUTABLE"
     )
     assert active["training_allowed"] is False
     assert active["candidate_model_training_allowed"] is False
-    assert active["outcome_blind_cache_allowed"] is False
+    assert active["outcome_blind_cache_allowed"] is True
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False

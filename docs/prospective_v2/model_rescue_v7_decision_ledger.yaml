@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v7_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v7_20260824
 created_at: '2026-08-24T16:20:00+08:00'
-current_status: V7M0_CONTRACT_AND_AUTHORITY_FREEZE
+current_status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_AUTHORIZED
 
 immutable_history:
   model_rescue_v1: M2_NO_RESCUE_CANDIDATE
@@ -91,7 +91,10 @@ literature_evidence:
 
 evidence_state:
   v7m0_contract:
-    status: IN_PROGRESS
+    status: PASS
+    local_focused_commit: a92facf
+    remote_focused_commit: bd86f44
+    focused_tests: 7_PASS
     foundation_weight_downloaded: false
     foundation_inference_run: false
     v7_target_or_score_accessed: false
@@ -101,4 +104,4 @@ evidence_state:
   v7m4_screen: NOT_RUN
   v7m5_confirmation: NOT_RUN
 
-next_allowed_action: VALIDATE_AND_COMMIT_V7M0_CONTRACT_ONLY
+next_allowed_action: IMPLEMENT_AND_QUALIFY_V7M1_OUTCOME_BLIND_DEPENDENCY_CACHE

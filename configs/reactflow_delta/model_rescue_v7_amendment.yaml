@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v7_amendment.v1
 contract_id: reactflow_delta_model_rescue_v7_20260824
-contract_status: V7M0_CONTRACT_AND_AUTHORITY_FREEZE
+contract_status: V7M1_OUTCOME_BLIND_RINALMO_DEPENDENCY_CACHE_AUTHORIZED
 contract_revision: V7_RINALMO_DEPENDENCY_PRE_FOUNDATION_ACCESS
 created_at: '2026-08-24T16:20:00+08:00'
 
@@ -225,8 +225,8 @@ resource_policy:
   scientific_protocol_change_on_oom: false
 
 phase_graph:
-  - {id: V7M0, status: IN_PROGRESS, next_on_pass: V7M1}
-  - {id: V7M1, status: NOT_AUTHORIZED, next_on_pass: V7M2, next_on_fail: V7M6_FAIL}
+  - {id: V7M0, status: PASS, next_on_pass: V7M1}
+  - {id: V7M1, status: AUTHORIZED, next_on_pass: V7M2, next_on_fail: V7M6_FAIL}
   - {id: V7M2, status: NOT_AUTHORIZED, next_on_pass: V7M3, next_on_fail: V7M6_FAIL}
   - {id: V7M3, status: NOT_AUTHORIZED, next_on_pass: V7M4, next_on_fail: V7M6_FAIL}
   - {id: V7M4, status: NOT_AUTHORIZED, next_on_pass: V7M5, next_on_fail: V7M6_FAIL}
