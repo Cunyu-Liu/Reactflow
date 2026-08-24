@@ -8,7 +8,10 @@ import pytest
 import yaml
 
 from scripts.reactflow_delta.merge_model_rescue_v7_probe import merge_folds
-from scripts.reactflow_delta.model_rescue_v7_probe import DependencyFeatureCache
+from scripts.reactflow_delta.model_rescue_v7_probe import (
+    DependencyFeatureCache,
+    accumulate_candidate_train_stats,
+)
 from scripts.reactflow_delta.model_rescue_v7_schema import CACHE_SCHEMA, FEATURE_NAMES
 from scripts.reactflow_delta.qualify_model_rescue_v7_probe import (
     ABSOLUTE_RELATIVE_GAIN_MIN,
@@ -67,6 +70,89 @@ def test_dependency_cache_uses_canonical_biological_key_and_source_coordinate(
             cache.get(record)
     finally:
         cache.close()
+
+
+class _ArrayCache:
+    def __init__(self, width: int) -> None:
+        self.width = width
+
+    def get(self, _record: SimpleNamespace) -> np.ndarray:
+        return np.zeros((3, self.width), dtype=np.float32)
+
+
+class _TrainingUniverse:
+    def __init__(self, targets: dict[str, np.ndarray | None]) -> None:
+        self.targets = targets
+        self.constructs = {
+            "cell_a": SimpleNamespace(
+                sequence="AUG",
+                wt_observed=np.asarray([True, True, True]),
+                wt_reactivity=np.asarray([0.1, 0.2, 0.3]),
+                wt_error=np.asarray([0.1, 0.1, 0.1]),
+                region_map=np.asarray(["design_region", "other", "other"]),
+            ),
+            "cell_b": SimpleNamespace(
+                sequence="AUG",
+                wt_observed=np.asarray([True, True, True]),
+                wt_reactivity=np.asarray([0.1, 0.2, 0.3]),
+                wt_error=np.asarray([0.1, 0.1, 0.1]),
+                region_map=np.asarray(["design_region", "other", "other"]),
+            ),
+        }
+
+    def get_construct(self, construct_id: str) -> SimpleNamespace:
+        return self.constructs[construct_id]
+
+    def mutant_full_profile(
+        self, wt_id: str, _design_pos: int, _ref: str, _alt: str
+    ) -> tuple[np.ndarray | None, None]:
+        return self.targets[wt_id], None
+
+
+def _record(cell: str, wt_id: str, *, design_pos: int = 0) -> SimpleNamespace:
+    return SimpleNamespace(
+        construct_id=cell,
+        wt_id=wt_id,
+        puzzle="P01",
+        method=cell,
+        design_pos=design_pos,
+        full_pos=design_pos,
+        ref="A",
+        alt="U",
+    )
+
+
+def test_v7_candidate_stats_preserve_cell_weight_and_exclude_missing_target() -> None:
+    targets = {
+        "a1": np.asarray([0.2, 0.3, 0.4]),
+        "a2": np.asarray([0.3, 0.4, 0.5]),
+        "a3": np.asarray([0.2, 0.3, 0.4]),
+        "b1": np.asarray([0.15, 0.25, 0.35]),
+        "missing": None,
+    }
+    univ = _TrainingUniverse(targets)
+    unconstrained = _ArrayCache(12)
+    constrained = _ArrayCache(11)
+    dependency = _ArrayCache(6)
+
+    records = [_record("cell_a", "a1"), _record("cell_a", "a2"), _record("cell_b", "b1")]
+    stats, counts = accumulate_candidate_train_stats(
+        univ, records, unconstrained, constrained, dependency
+    )
+    assert stats.sum_weight == pytest.approx(2.0)
+    assert counts["n_train_cells"] == 2
+    assert counts["n_train_valid_mutants"] == 3
+
+    duplicated, duplicated_counts = accumulate_candidate_train_stats(
+        univ,
+        records + [_record("cell_a", "a3"), _record("cell_b", "missing")],
+        unconstrained,
+        constrained,
+        dependency,
+    )
+    assert duplicated.sum_weight == pytest.approx(2.0)
+    assert duplicated_counts["n_train_cells"] == 2
+    assert duplicated_counts["n_train_valid_mutants"] == 4
 
 
 def test_corrected_feature41_replay_requires_exact_key_order_and_predictions(
