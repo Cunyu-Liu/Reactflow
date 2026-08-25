@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
 current_status: V12M3_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY
-updated_at: '2026-08-25T20:24:00+08:00'
+updated_at: '2026-08-25T20:29:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -128,3 +128,23 @@ events:
     partial_score_inspected: false
     external_outcome_accessed: false
     next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN_WITHOUT_PARTIAL_SCORE_ACCESS
+
+  - id: POST_V12_MODEL_CONTINGENCY_PREFROZEN_BEFORE_SCORE_ACCESS
+    observed_at: '2026-08-25T20:29:00+08:00'
+    status: DIAGNOSTIC_ROUTING_ONLY_NO_NEW_MODEL_AUTHORIZED
+    plan: docs/plans/2026-08-25-post-v12-model-contingency.md
+    plan_commit_local: 022df595
+    plan_commit_remote: a6edc2baa761ba6ade2c87ac3c965552a7e5bb97
+    diagnostic_axes:
+      - LEARNED_GATE_GEOMETRY
+      - HELD_PUZZLE_SHRINKAGE_CEILINGS
+      - TRANSFER_VERSUS_GATE_FAMILY_FAILURE
+      - POINT_VERSUS_DISTRIBUTION_BOTTLENECK
+    partial_score_required: false
+    complete_score_required_for_outcome_diagnostics: true
+    new_model_authorized: false
+    v12_gate_or_threshold_change_allowed: false
+    scientific_score_computed: false
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN
