@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
-current_status: V12M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
-updated_at: '2026-08-25T20:00:00+08:00'
+current_status: V12M3_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY
+updated_at: '2026-08-25T20:17:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -38,8 +38,8 @@ frozen_decisions:
 phase_state:
   V12M0: PASS
   V12M1: PASS
-  V12M2: AUTHORIZED_ENGINEERING_SMOKE_ONLY
-  V12M3: NOT_AUTHORIZED
+  V12M2: PASS
+  V12M3: AUTHORIZED_SCORE_BLIND_SCREEN_ONLY
   V12M4: NOT_AUTHORIZED
   V12M5: NOT_RUN
 
@@ -91,3 +91,22 @@ events:
     partial_score_read_allowed: false
     external_outcome_accessed: false
     next_action: RUN_FOLDS0_1_SEED0_THREE_EPOCH_ENGINEERING_SMOKE_WITHOUT_SCIENTIFIC_SCORING
+
+  - id: V12M2_ENGINEERING_SMOKE_PASS
+    observed_at: '2026-08-25T20:17:00+08:00'
+    status: V12M3_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY
+    implementation_commit_local: 5f4fca68ffe79563f30a3ead3a8e85741de76ae7
+    implementation_commit_remote: 58bb3a287dc532a4f0fc0aa8dcd1d4658d30d179
+    smoke_qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m2_real_smoke/v12m2_smoke_qualification.json
+    smoke_merge: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m2_real_smoke/v12m2_complete_unscored_smoke_merge.json
+    smoke_status: V12M2_ENGINEERING_SMOKE_PASS
+    smoke_merge_status: V12M2_COMPLETE_UNSCORED_SMOKE_MERGE_PASS
+    completed_folds: [0, 1]
+    seed: 0
+    scientific_score_computed: false
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    focused_tests_passed: 13
+    candidate_training_allowed: V12_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY
+    held_score_read_allowed: false
+    next_action: RUN_SEED0_FOLDS0_19_COMPLETE_PREDICTION_ONLY_UNIVERSE

@@ -38,20 +38,20 @@ from scripts.reactflow_delta.validate_model_rescue_v12_contract import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_v12_contract_preserves_v11_and_opens_only_engineering_smoke() -> None:
+def test_v12_contract_preserves_v11_and_opens_only_score_blind_screen() -> None:
     result = validate_contract(ROOT)
     assert result["status"] == "V12_CONTRACT_VALIDATION_PASS"
-    assert result["phase"] == "V12M2"
-    assert result["training_allowed"] == "V12_REAL_DATA_ENGINEERING_SMOKE_ONLY"
+    assert result["phase"] == "V12M3"
+    assert result["training_allowed"] == "V12_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY"
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
-    assert active["gate_state"]["V12M2"] == "AUTHORIZED_ENGINEERING_SMOKE_ONLY"
-    assert active["gate_state"]["V12M3"] == "NOT_AUTHORIZED"
+    assert active["gate_state"]["V12M2"] == "ENGINEERING_SMOKE_PASS"
+    assert active["gate_state"]["V12M3"] == "AUTHORIZED_SCORE_BLIND_SCREEN_ONLY"
     assert active["gate_state"]["V12M4"] == "NOT_AUTHORIZED"
-    assert_run_authority(ROOT, "V12M2")
+    assert_run_authority(ROOT, "V12M3")
     with pytest.raises(RuntimeError, match="sole active authority"):
-        assert_run_authority(ROOT, "V12M3")
+        assert_run_authority(ROOT, "V12M4")
 
 
 def test_gate_has_four_parameters_and_is_monotone_in_both_inputs() -> None:
@@ -252,8 +252,8 @@ def test_v12_qualifier_requires_every_frozen_top_journal_gate() -> None:
     assert failed["v12m4_authorized"] is False
 
 
-def test_scientific_scorer_remains_closed_during_smoke() -> None:
-    with pytest.raises(RuntimeError, match="closed outside"):
+def test_scientific_scorer_remains_closed_during_score_blind_training() -> None:
+    with pytest.raises(RuntimeError, match="training must be closed"):
         assert_score_authority(ROOT)
 
 
