@@ -125,6 +125,15 @@ implementation_evidence:
   post_v11_new_model_authorized: false
   seed0_feature41_comparator_source: AUTHORITATIVE_TERMINAL_V10_SAME_FOLD_SEED_40EPOCH
   seed0_feature41_comparator_retraining_required: false
+  seed0_feature41_real_artifact_loader_replay:
+    status: PASS
+    checked_fold: 0
+    checkpoint_state_exact: true
+    standardizer_exact: true
+    history_epochs: 40
+    prediction_rows: 73632
+    distribution_arrays_exact: true
+    scientific_score_read: false
   training_opened: V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
 
 phase_state:
