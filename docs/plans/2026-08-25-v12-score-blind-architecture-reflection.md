@@ -211,4 +211,3 @@ full-construct 2A3 mutation response.
    the existing top-journal thresholds; parameter growth is allowed only when
    it adds an identified capability and is accompanied by a parameter-matched
    null.
-
