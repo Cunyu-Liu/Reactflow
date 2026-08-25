@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
 current_status: V12M3_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY
-updated_at: '2026-08-25T20:17:00+08:00'
+updated_at: '2026-08-25T20:24:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -110,3 +110,21 @@ events:
     candidate_training_allowed: V12_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY
     held_score_read_allowed: false
     next_action: RUN_SEED0_FOLDS0_19_COMPLETE_PREDICTION_ONLY_UNIVERSE
+
+  - id: V12M4_FORMAL_TOOLING_PREFROZEN_DURING_SCORE_BLIND_SCREEN
+    observed_at: '2026-08-25T20:24:00+08:00'
+    status: TOOLING_ONLY_V12M4_NOT_AUTHORIZED
+    tooling_commit_local: 763920a1
+    tooling_commit_remote: 84e941b35f514f688f8e83aefdbc7fe639b0a179
+    five_seed_equal_mixture_assembler_implemented: true
+    complete_formal_scorer_implemented: true
+    mechanical_formal_qualifier_implemented: true
+    missing_fold_or_seed_deletion_allowed: false
+    best_seed_selection_allowed: false
+    individual_seed_direction_gate_minimum: 4
+    focused_tests_passed: 16
+    v12m4_authorized: false
+    scientific_score_computed: false
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN_WITHOUT_PARTIAL_SCORE_ACCESS
