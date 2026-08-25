@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M3_ALL_OLD_WORKERS_RECOVERED_THREE_NEW_CODE_PARTITIONS_RUNNING
-updated_at: '2026-08-25T15:41:00+08:00'
+current_status: V11M3_THREE_NEW_CODE_PARTITIONS_RUNNING
+updated_at: '2026-08-25T15:57:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -290,3 +290,17 @@ recovery_events:
     artifact_contents_read: false
     held_score_read_allowed: false
     model_loss_epoch_gate_changed: false
+
+  - id: V11M3_ALL_NEW_CODE_PARTITIONS_FIRST_FOLD_COMPLETE
+    observed_at: '2026-08-25T15:57:00+08:00'
+    status: V11M3_PARTIAL_RECOVERY_RUNNING_NO_SCORE
+    scientific_score_read: false
+    external_outcome_accessed: false
+    gpu0_first_completed_fold: 1
+    gpu6_first_completed_fold: 2
+    gpu7_first_completed_fold: 3
+    complete_fold_result_filenames_at_observation: 8
+    completed_folds_at_observation: [0, 1, 2, 3, 4, 8, 12, 16]
+    artifact_contents_read: false
+    merge_or_qualification_run: false
+    held_score_read_allowed: false
