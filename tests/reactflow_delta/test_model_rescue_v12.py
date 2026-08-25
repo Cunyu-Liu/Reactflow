@@ -29,6 +29,13 @@ from scripts.reactflow_delta.merge_model_rescue_v12 import merge_folds
 from scripts.reactflow_delta.qualify_model_rescue_v12 import qualify
 from scripts.reactflow_delta.score_model_rescue_v12 import assert_score_authority
 from scripts.reactflow_delta.score_model_rescue_v6_probe import _puzzle_macro
+from scripts.reactflow_delta.assemble_model_rescue_v12_formal import assemble_fold
+from scripts.reactflow_delta.qualify_model_rescue_v12_formal import (
+    qualify as qualify_formal,
+)
+from scripts.reactflow_delta.score_model_rescue_v12_formal import (
+    assert_score_authority as assert_formal_score_authority,
+)
 from scripts.reactflow_delta.validate_model_rescue_v12_contract import (
     assert_run_authority,
     validate_contract,
@@ -279,3 +286,85 @@ def test_v12_parent_loader_requires_exact_seed0_biological_keys(tmp_path: Path) 
     )
     with pytest.raises(ValueError, match="biological scoring keys"):
         _load_parent_prediction(path, 0)
+
+
+def _write_formal_source(path: Path, seed: int) -> None:
+    keys = np.asarray(["k0", "k1"], dtype=object)
+    one_component_weights = np.asarray([[1.0], [1.0]])
+    two_component_weights = np.asarray([[0.25, 0.75], [0.25, 0.75]])
+    deterministic = {
+        "feature41_weights": one_component_weights,
+        "feature41_locations": np.asarray([[0.0], [0.0]]),
+        "feature41_scales": np.asarray([[0.1], [0.1]]),
+        "feature41_expected_absolute_delta": np.asarray([0.1, 0.1]),
+        "parent_weights": two_component_weights,
+        "parent_locations": np.asarray([[0.0, 0.1], [0.0, 0.1]]),
+        "parent_scales": np.asarray([[0.1, 0.2], [0.1, 0.2]]),
+        "parent_expected_absolute_delta": np.asarray([0.2, 0.2]),
+        "historical_v10_weights": two_component_weights,
+        "historical_v10_locations": np.asarray([[0.0, 0.1], [0.0, 0.1]]),
+        "historical_v10_scales": np.asarray([[0.1, 0.2], [0.1, 0.2]]),
+        "historical_v10_expected_absolute_delta": np.asarray([0.2, 0.2]),
+    }
+    np.savez_compressed(
+        path,
+        schema_version=np.asarray("reactflow_delta.model_rescue_v12_prediction.v1"),
+        keys=keys,
+        biological_scoring_key=keys.copy(),
+        outer_fold=np.full(2, 0),
+        seed=np.full(2, seed),
+        feature41_point=np.asarray([0.0, 0.0]),
+        v11_parent_point=np.asarray([1.0, 1.0]),
+        candidate_point=np.full(2, float(seed)),
+        candidate_weights=two_component_weights,
+        candidate_locations=np.full((2, 2), float(seed)),
+        candidate_scales=np.asarray([[0.1, 0.2], [0.1, 0.2]]),
+        candidate_expected_absolute_delta=np.full(2, float(seed)),
+        **deterministic,
+    )
+
+
+def test_formal_assembler_uses_all_five_seeds_with_equal_mass(tmp_path: Path) -> None:
+    rows = []
+    for seed in range(5):
+        path = tmp_path / f"seed{seed}.npz"
+        _write_formal_source(path, seed)
+        rows.append({"seed": seed, "prediction_artifact": str(path)})
+    result = assemble_fold(rows, fold=0, out_dir=tmp_path)
+    with np.load(result["prediction_artifact"], allow_pickle=True) as prediction:
+        assert prediction["candidate_weights"].shape == (2, 10)
+        assert np.allclose(prediction["candidate_weights"].sum(axis=1), 1.0)
+        for seed in range(5):
+            assert np.allclose(
+                prediction["candidate_weights"][:, 2 * seed : 2 * seed + 2].sum(axis=1),
+                0.2,
+            )
+        assert np.allclose(prediction["candidate_point"], 2.0)
+
+
+def test_formal_qualifier_repeats_screen_gates_and_requires_four_positive_seeds() -> None:
+    screen = {
+        "schema_version": "reactflow_delta.model_rescue_v12_qualification.v1",
+        "status": "V12M3_TOP_JOURNAL_SCREEN_PASS",
+        "gate_passed": True,
+    }
+    rows = _passing_v12_score()["scores"]
+    scores = {
+        "schema_version": "reactflow_delta.model_rescue_v12_formal_score.v1",
+        "status": "V12M4_COMPLETE_FORMAL_SCORE_PASS",
+        "mixture_scores": rows,
+        "individual_seed_scores": {str(seed): rows for seed in range(5)},
+        "equal_seed_mixture": True,
+        "partial_fold_scores_inspected": False,
+        "external_outcome_accessed": False,
+        "model_or_threshold_selection_performed": False,
+    }
+    result = qualify_formal(scores, screen)
+    assert result["status"] == "V12M4_TOP_JOURNAL_FORMAL_PASS"
+    assert all(result["gates"].values())
+    assert set(result["positive_seed_counts"].values()) == {5}
+
+
+def test_formal_scorer_remains_closed_before_exact_screen_pass() -> None:
+    with pytest.raises(RuntimeError, match="closed outside V12M4"):
+        assert_formal_score_authority(ROOT)
