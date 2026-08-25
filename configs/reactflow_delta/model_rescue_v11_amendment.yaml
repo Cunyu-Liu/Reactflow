@@ -156,12 +156,16 @@ residual_calibration:
   architecture_or_family_change_allowed: false
 
 comparators:
-  primary: V11_FRESH_FEATURE41_ASYMMETRIC_SAME_FOLD_SEED_FAMILY
+  primary: >-
+    SEED0_AUTHORITATIVE_TERMINAL_V10_FEATURE41_ASYMMETRIC_SAME_FOLD_SEED;
+    SEEDS1_4_FRESH_SAME_FAMILY_IF_FORMAL_OPENS
   current_best_point: V8_CORRECTED_MEANALIGNED_D96
   current_best_distribution: TERMINAL_V10_MEANALIGNED_ASYMMETRIC_SEED0
   attribution: V11_UNANCHORED_CONTEXT_NULL
   corrected_absolute_reference: TIC2A_CORRECTED_FEATURE41_ABSOLUTE_DELTA
   v11_scientific_40epoch_feature41_replay_must_match_v10_seed0_atol: 1.0e-7
+  seed0_feature41_retraining_required: false
+  seed0_feature41_authoritative_checkpoint_and_prediction_reuse: true
 
 prediction_artifact:
   schema: reactflow_delta.model_rescue_v11_prediction.v1

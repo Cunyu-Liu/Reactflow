@@ -442,6 +442,38 @@ def _new_residual_heads(seed: int, device: str) -> dict[str, MedianAsymmetricRes
     }
 
 
+def _load_authoritative_v10_feature41(
+    v10_row: dict[str, Any], device: str
+) -> tuple[MedianAsymmetricResidual, TrainOnlyStandardizer, list[float]]:
+    checkpoint = torch.load(
+        Path(v10_row["checkpoints"]["feature41_asymmetric"]),
+        map_location=device,
+    )
+    head = MedianAsymmetricResidual().to(device)
+    head.load_state_dict(checkpoint["state_dict"])
+    head.eval()
+    standardizer = TrainOnlyStandardizer(
+        mean=np.asarray(checkpoint["standardizer_mean"], dtype=np.float64),
+        scale=np.asarray(checkpoint["standardizer_scale"], dtype=np.float64),
+    )
+    history = [
+        float(value)
+        for value in v10_row["training_histories"]["feature41_asymmetric"]
+    ]
+    if len(history) != 40 or not np.isfinite(history).all():
+        raise ValueError("authoritative V10 feature41 history is not forty epochs")
+    return head, standardizer, history
+
+
+def _apply_authoritative_feature41_distribution(
+    output: dict[str, np.ndarray], historical: dict[str, Any]
+) -> None:
+    for suffix in ("weights", "locations", "scales", "expected_absolute_delta"):
+        output[f"feature41_{suffix}"] = np.asarray(
+            historical[f"feature41_{suffix}"], dtype=np.float64
+        ).copy()
+
+
 def _load_historical_v10(path: Path, fold_id: int) -> dict[str, Any]:
     with np.load(path, allow_pickle=True) as handle:
         if str(handle["schema_version"].item()) != V10_PREDICTION_SCHEMA:
@@ -454,6 +486,9 @@ def _load_historical_v10(path: Path, fold_id: int) -> dict[str, Any]:
             "feature41_weights": np.asarray(handle["feature41_asymmetric_weights"]),
             "feature41_locations": np.asarray(handle["feature41_asymmetric_locations"]),
             "feature41_scales": np.asarray(handle["feature41_asymmetric_scales"]),
+            "feature41_expected_absolute_delta": np.asarray(
+                handle["feature41_asymmetric_expected_absolute_delta"]
+            ),
             "v10_weights": np.asarray(handle["meanaligned_asymmetric_weights"]),
             "v10_locations": np.asarray(handle["meanaligned_asymmetric_locations"]),
             "v10_scales": np.asarray(handle["meanaligned_asymmetric_scales"]),
@@ -664,10 +699,22 @@ def _held_prediction(
     if require_v10_feature41_replay:
         if seed != 0:
             raise RuntimeError("V11 V10 feature41 replay is defined only for seed0")
-        for suffix in ("weights", "locations", "scales"):
+        authoritative = {
+            f"feature41_{suffix}": historical[f"feature41_{suffix}"][
+                historical_rows
+            ]
+            for suffix in (
+                "weights",
+                "locations",
+                "scales",
+                "expected_absolute_delta",
+            )
+        }
+        _apply_authoritative_feature41_distribution(output, authoritative)
+        for suffix in ("weights", "locations", "scales", "expected_absolute_delta"):
             current = output[f"feature41_{suffix}"]
-            expected = historical[f"feature41_{suffix}"][historical_rows]
-            if not np.allclose(current, expected, atol=1e-7, rtol=0.0):
+            expected = authoritative[f"feature41_{suffix}"]
+            if not np.array_equal(current, expected):
                 raise RuntimeError(
                     f"V11 feature41 asymmetric replay differs for {suffix}"
                 )
@@ -781,15 +828,31 @@ def run_fold(
         standardizers[name], calibration_inputs[name] = _prepare_calibration_inputs(
             calibration_cells, name
         )
-        histories[name] = fit_v10_residual_head(
-            heads[name],
-            calibration_cells,
-            calibration_inputs[name],
-            f"{name}_point",
-            device,
-            calibration_epochs,
-            seed,
-        )
+        if name == "feature41" and phase != "V11M2" and seed == 0:
+            authoritative_head, authoritative_standardizer, history = (
+                _load_authoritative_v10_feature41(v10_row, device)
+            )
+            if not np.array_equal(
+                standardizers[name].mean, authoritative_standardizer.mean
+            ) or not np.array_equal(
+                standardizers[name].scale, authoritative_standardizer.scale
+            ):
+                raise RuntimeError(
+                    "V11 feature41 standardizer does not replay authoritative V10"
+                )
+            heads[name] = authoritative_head
+            standardizers[name] = authoritative_standardizer
+            histories[name] = history
+        else:
+            histories[name] = fit_v10_residual_head(
+                heads[name],
+                calibration_cells,
+                calibration_inputs[name],
+                f"{name}_point",
+                device,
+                calibration_epochs,
+                seed,
+            )
     _assert_unchanged(anchored_snapshot, anchored, "anchored point")
     _assert_unchanged(unanchored_snapshot, unanchored, "unanchored point")
     if any(parameter.grad is not None for parameter in anchored.parameters()):
@@ -878,6 +941,7 @@ def run_fold(
             "v10_residual_family_reused": True,
             "feature41_replay_at_1e_7": True,
             "feature41_asymmetric_screen_replay_or_not_applicable": True,
+            "feature41_asymmetric_seed0_uses_authoritative_v10_or_not_applicable": True,
             "median_constraint_all_held_rows": True,
             "held_score_computed": False,
             "prediction_contains_target_fields": False,

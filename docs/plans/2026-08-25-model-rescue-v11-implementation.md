@@ -40,6 +40,8 @@ Run folds 0/1, seed 0, 3 point epochs and 3 calibration epochs in a persistent s
 
 Run folds 0–19 with non-overlapping fold ownership on any safe GPU0–7. Controllers skip complete artifacts and refuse overwrite. Before 20/20, monitoring is limited to session existence, log mtime/size, artifact filename count, GPU health, and non-metric errors. After 20/20, merge prediction-only files, run the frozen scorer once, then the frozen qualifier once.
 
+The seed-0 feature41-asymmetric comparator is the authoritative terminal V10 same-fold, same-seed, 40-epoch checkpoint and prediction-only distribution. It is loaded and replayed exactly rather than retrained and expected to reproduce a non-deterministic GPU optimization path bitwise. This affects only the comparator; the V11 anchored candidate and exact unanchored null remain freshly trained under V11.
+
 ## V11M4 — five-seed formal confirmation
 
 Only exact `V11M3_TOP_JOURNAL_SCREEN_PASS` can open V11M4. Run seeds0–4 on the same 20 folds for candidate, null, and feature41 residual comparators. Assemble equal-seed mixtures and apply all frozen screen gates plus the 4/5 seed direction requirement.

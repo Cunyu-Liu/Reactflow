@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
-updated_at: '2026-08-25T13:48:16+08:00'
+current_status: V11M3_PARTIAL_WORKER_INTERRUPTED_RECOVERABLE_REPLAY_FIX_IN_PROGRESS
+updated_at: '2026-08-25T14:20:23+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -123,6 +123,8 @@ implementation_evidence:
   post_v11_diagnostic_implementation: scripts/reactflow_delta/diagnose_model_rescue_v11.py
   post_v11_diagnostic_focused_tests: 7_PASS_LOCAL_20260825
   post_v11_new_model_authorized: false
+  seed0_feature41_comparator_source: AUTHORITATIVE_TERMINAL_V10_SAME_FOLD_SEED_40EPOCH
+  seed0_feature41_comparator_retraining_required: false
   training_opened: V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
 
 phase_state:
@@ -169,4 +171,25 @@ recovery_events:
     qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m2_real_smoke/v11m2_smoke_qualification.json
     qualification_replay_status: V11M2_ENGINEERING_SMOKE_PASS
     decision: OPEN_V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN
+    model_loss_epoch_gate_changed: false
+
+  - id: V11M3_RECOVERY_1
+    status: V11M3_INTERRUPTED_RECOVERABLE_COMPARATOR_REPLAY
+    scientific_score_read: false
+    external_outcome_accessed: false
+    completed_fold_results_at_detection: 0
+    affected_worker_folds: [0, 4, 8, 12, 16]
+    unaffected_workers_still_running: true
+    cause: >-
+      THE IMPLEMENTATION RETRAINED THE SEED0 FEATURE41 RESIDUAL HEAD AND EXPECTED
+      A SEPARATE GPU OPTIMIZATION TO REPRODUCE TERMINAL V10 DISTRIBUTION WEIGHTS
+      BITWISE. TRAIN_ONLY STANDARDIZER STATISTICS WERE EXACTLY IDENTICAL, BUT
+      RETRAINED HEAD PARAMETERS WERE NOT; EXACT COMPARATOR REPLAY THEREFORE
+      FAILED CLOSED BEFORE ANY FOLD RESULT OR SCORE.
+    correction: >-
+      LOAD THE AUTHORITATIVE TERMINAL V10 SAME_FOLD SEED0 FORTY_EPOCH FEATURE41
+      CHECKPOINT AND PREDICTION_ONLY DISTRIBUTION. KEEP V11 ANCHORED CANDIDATE,
+      MATCHED NULL, LOSSES, EPOCHS, SEED, GATES, AND TARGET ACCESS UNCHANGED.
+    replay_tolerance_lowered: false
+    candidate_or_null_changed: false
     model_loss_epoch_gate_changed: false
