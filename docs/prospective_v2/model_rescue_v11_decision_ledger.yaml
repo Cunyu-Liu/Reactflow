@@ -207,3 +207,24 @@ recovery_events:
     recovery_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v11_v11m3_replay_recovery_gpu0.log
     recovery_folds: [0, 4, 8, 12, 16]
     recovery_gpu: 0
+
+  - id: V11M3_RECOVERY_1_ORIGINAL_WORKER3_INTERRUPTION
+    observed_at: '2026-08-25T14:38:00+08:00'
+    status: V11M3_INTERRUPTED_RECOVERABLE_COMPARATOR_REPLAY
+    scientific_score_read: false
+    external_outcome_accessed: false
+    original_worker_assignment: [3, 7, 11, 15, 19]
+    completed_fold_results_from_original_worker: 0
+    incomplete_fold: 3
+    cause_matches_recovery_1: true
+    error: V11_FEATURE41_ASYMMETRIC_REPLAY_DIFFERS_FOR_WEIGHTS
+    complete_prediction_or_result_created: false
+    invalid_partial_checkpoints_moved_not_deleted: true
+    invalid_partial_checkpoint_archive: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/invalid_retrained_comparator_replay_20260825_1420
+    recovery_disposition: >-
+      DO NOT INTERRUPT THE TWO REMAINING ORIGINAL WORKERS OR THE ACTIVE NEW_CODE
+      RECOVERY. AFTER THEY EXIT, ARCHIVE ONLY THEIR INCOMPLETE OLD_REPLAY
+      CHECKPOINTS AND RECOVER ONLY FOLDS THAT LACK COMPLETE QUALIFIED RESULTS.
+    completed_new_code_fold_results_at_observation: 1
+    completed_new_code_folds_at_observation: [0]
+    model_loss_epoch_gate_changed: false
