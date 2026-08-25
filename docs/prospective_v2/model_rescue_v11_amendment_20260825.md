@@ -55,7 +55,7 @@ Null 仍在 head input 中看到完全相同的 feature41 scalar；唯一差异�
 
 Point 训练后冻结。Candidate、null 和 feature41 comparator 分别拟合同一个 V10 `MedianAsymmetricResidual` family：input width 244，包含 feature41 basis-41、对应 point、abs(point) 和冻结的 V8 direct features-201；hidden=256，两个 Gaussian components，location allocation 257 outputs，mixture CDF 在 point 处严格等于 0.5。使用 method-balanced closed-form Gaussian-mixture CRPS、Adam 1e-3、40 epochs。Calibration gradient 不得进入 point 模型。
 
-Seed-0、40-epoch 的科学 comparator 必须在 1e-7 内 replay V10 feature41-asymmetric；否则不允许科学评分。3-epoch smoke 只验证同一 residual family 与初始化，不得拿它与 V10 的 40-epoch输出做数值 replay。
+Seed-0、40-epoch 的科学 comparator 必须在 1e-7 内 replay V10 feature41-asymmetric；否则不允许科学评分。这里的权威 comparator 是同 fold、同 seed、同 40-epoch protocol 已冻结的 terminal V10 feature41 checkpoint 与 prediction-only distribution，不要求在另一次 GPU 优化中重新训练后获得 bitwise-identical 参数。V11 candidate 和 matched null 仍按冻结协议独立训练，不复用 V10 candidate。若 V11M4 开放，seeds 1–4 的 feature41 comparator 按同一 family 新训练。3-epoch smoke 只验证同一 residual family 与初始化，不得拿它与 V10 的 40-epoch输出做数值 replay。
 
 ## 7. V11M2 real-data smoke
 

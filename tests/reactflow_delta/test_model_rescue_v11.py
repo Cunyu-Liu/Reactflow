@@ -37,6 +37,7 @@ from scripts.reactflow_delta.qualify_model_rescue_v11_formal import (
     qualify as qualify_formal,
 )
 from scripts.reactflow_delta.run_model_rescue_v11 import (
+    _apply_authoritative_feature41_distribution,
     assert_run_authority,
     fit_point_model,
 )
@@ -83,6 +84,10 @@ def test_v11_contract_opens_only_seed0_screen_after_smoke_and_keeps_parent_termi
         "TERMINAL_TOP_JOURNAL_TASK_CRPS_MARGIN_FAIL"
     )
     assert contract["parent"]["v10_formal_opened"] is False
+    assert contract["comparators"][
+        "seed0_feature41_authoritative_checkpoint_and_prediction_reuse"
+    ] is True
+    assert contract["comparators"]["seed0_feature41_retraining_required"] is False
     gates = contract["v11m3_screen"]["gates"]
     assert gates["signed_delta_relative_gain_vs_feature41_min"] == 0.10
     assert gates["task_crps_relative_gain_vs_feature41_asymmetric_min"] == 0.05
@@ -134,6 +139,25 @@ def test_zero_initialized_residual_makes_skip_the_only_initial_output_difference
     assert torch.equal(primary_hidden, null_hidden)
     assert torch.allclose(anchored, feature41, atol=0.0, rtol=0.0)
     assert torch.count_nonzero(unanchored) == 0
+
+
+def test_seed0_feature41_distribution_replays_authoritative_v10_exactly() -> None:
+    output = {
+        f"feature41_{suffix}": np.zeros((2, 2), dtype=np.float64)
+        for suffix in ("weights", "locations", "scales", "expected_absolute_delta")
+    }
+    historical = {
+        "feature41_weights": np.asarray([[0.25, 0.75], [0.4, 0.6]]),
+        "feature41_locations": np.asarray([[-0.1, 0.2], [-0.2, 0.1]]),
+        "feature41_scales": np.asarray([[0.1, 0.3], [0.2, 0.4]]),
+        "feature41_expected_absolute_delta": np.asarray([0.2, 0.3]),
+    }
+    _apply_authoritative_feature41_distribution(output, historical)
+    for suffix in ("weights", "locations", "scales", "expected_absolute_delta"):
+        assert np.array_equal(
+            output[f"feature41_{suffix}"], historical[f"feature41_{suffix}"]
+        )
+        assert output[f"feature41_{suffix}"] is not historical[f"feature41_{suffix}"]
 
 
 def test_point_prediction_does_not_accept_target_error_or_target_mask() -> None:

@@ -2,12 +2,12 @@ schema_version: reactflow_delta.active_contract.v11
 manifest_id: reactflow_delta_model_rescue_v11_authority_20260825
 project_task_id: reactflow_delta_model_rescue_v11
 created_at: '2026-08-25T01:30:00+08:00'
-updated_at: '2026-08-25T13:48:16+08:00'
+updated_at: '2026-08-25T14:20:23+08:00'
 
 authority:
   pointer_role: V11_WORKTREE_SINGLE_ACTIVE_AUTHORITY
   current_phase: V11M3
-  current_authority_state: V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
+  current_authority_state: V11M3_PARTIAL_WORKER_INTERRUPTED_RECOVERABLE_REPLAY_FIX_IN_PROGRESS
   current_runnable_phase: V11M3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v11-20260825
@@ -16,7 +16,7 @@ authority:
   machine_contract_path: configs/reactflow_delta/model_rescue_v11_amendment.yaml
   decision_ledger_path: docs/prospective_v2/model_rescue_v11_decision_ledger.yaml
   implementation_plan_path: docs/plans/2026-08-25-model-rescue-v11-implementation.md
-  binding_status: V11M2_ENGINEERING_SMOKE_PASS_V11M3_AUTHORIZED_NO_SCORE
+  binding_status: V11M3_RECOVERABLE_COMPARATOR_REPLAY_INTERRUPTION_NO_SCORE
 
 parent_state:
   model_rescue_v8_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -70,7 +70,7 @@ gate_state:
   V11M0: CONTRACT_FROZEN_PASS
   V11M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   V11M2: V11M2_ENGINEERING_SMOKE_PASS
-  V11M3: AUTHORIZED_PREDICTION_ONLY_SEED0_TWENTY_FOLD_SCREEN
+  V11M3: PARTIAL_WORKER_INTERRUPTED_RECOVERABLE_OTHER_WORKERS_RUNNING
   V11M4: NOT_AUTHORIZED
   V11M5: NOT_RUN
   TOP_JOURNAL_DEVELOPMENT_GATE: NOT_RUN
@@ -78,4 +78,4 @@ gate_state:
   TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
   LEGACY_V3_CORRECTED_EXPERTS: INVALIDATED_TARGET_IDENTITY
 
-next_allowed_action: LAUNCH_PERSISTENT_V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN
+next_allowed_action: FIX_AUTHORITATIVE_V10_SEED0_COMPARATOR_REPLAY_THEN_RECOVER_MISSING_FOLDS_ONLY
