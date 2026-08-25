@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from pathlib import Path
+import pytest
 import subprocess
 import torch
 
@@ -24,6 +25,7 @@ from scripts.reactflow_delta.qualify_model_rescue_v10_smoke import (
 from scripts.reactflow_delta.run_model_rescue_v10 import frozen_point_from_reference
 from scripts.reactflow_delta.score_model_rescue_v10 import (
     SCHEMA as SCORE_SCHEMA,
+    assert_score_authority,
     merged_integrity_pass,
 )
 
@@ -246,6 +248,32 @@ def test_v10_qualifier_requires_overall_and_asymmetry_increment() -> None:
     assert failed["status"] == "V10M3_TOP_JOURNAL_SCREEN_FAIL"
     assert failed["gates"]["asymmetric_vs_symmetric_relative_gain_ge_1pct"] is False
     assert failed["v10m4_authorized"] is False
+
+
+def test_v10_qualifier_does_not_round_task_crps_up_to_five_percent() -> None:
+    scores = _complete_score_fixture()
+    for row in scores["scores"]:
+        row["feature41_asymmetric_crps"] = 0.1364
+    result = qualify(scores)
+    assert result["comparisons"]["task_crps"]["relative_gain"] < 0.05
+    assert result["gates"]["task_crps_relative_gain_ge_5pct"] is False
+    assert result["gate_passed"] is False
+
+
+def test_v10_qualifier_enforces_independent_absolute_delta_margin() -> None:
+    scores = _complete_score_fixture()
+    for row in scores["scores"]:
+        row["feature41_absolute_delta_mae"] = 0.14
+    result = qualify(scores)
+    assert result["comparisons"]["absolute_delta"]["relative_gain"] < 0.05
+    assert result["gates"]["absolute_relative_gain_ge_5pct"] is False
+    assert result["gate_passed"] is False
+
+
+def test_v10_complete_scorer_remains_closed_during_v10m2() -> None:
+    root = Path(__file__).resolve().parents[2]
+    with pytest.raises(RuntimeError, match="outside V10M3"):
+        assert_score_authority(root)
 
 
 def test_v10_smoke_controller_is_prediction_only() -> None:
