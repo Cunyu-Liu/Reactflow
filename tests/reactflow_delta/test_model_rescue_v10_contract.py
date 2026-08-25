@@ -31,6 +31,15 @@ def test_v10m1_pass_authorizes_only_fixed_complete_universe_screen() -> None:
     )
     assert contract["v10m1_smoke"]["scientific_scores_read"] is False
     assert contract["v10m2_screen"]["complete_before_score"] is True
+    assert contract["input"]["meanaligned_held_point_authority"] == (
+        "AUTHORITATIVE_V8_PREDICTION_ARTIFACT_BY_BIOLOGICAL_KEY"
+    )
+    assert contract["input"]["current_and_future_held_point_materialization"] == (
+        "DIRECT_KEYED_READ_FROM_AUTHORITY"
+    )
+    assert contract["input"]["preserved_pre_fix_fold_materialization"] == (
+        "SAME_CHECKPOINT_RECOMPUTATION_WITHIN_FROZEN_1E_7_ONLY"
+    )
     assert_run_authority(ROOT, "V10M2")
 
 

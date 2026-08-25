@@ -85,3 +85,9 @@ float32 的少数 ULP 漂移；未发现 key 或模型语义变化。V10 不放�
 按 biological key 原值读取。Outer-train point 仍由同一 checkpoint 计算，held
 direct features 仍来自其实际训练路径。该修复不改变模型、训练、候选或 Gate；
 只补跑缺失的 folds 2/3/9/10/16/17，14个已完成 artifacts 保持不变。
+
+为避免把工程实现写成与现有证据不一致，需区分“point authority”和
+“materialization”。权威值始终是 corrected V8 prediction artifact。修复前已经
+完成的14个 folds由同一checkpoint重新计算，而且逐 fold 已通过原冻结的
+`atol=1e-7` replay，因此继续有效；当前及未来 runner 则直接按key读取权威值，
+不再依赖硬件重算。该区分没有放宽1e-7，也没有给失败 folds提供额外自由度。
