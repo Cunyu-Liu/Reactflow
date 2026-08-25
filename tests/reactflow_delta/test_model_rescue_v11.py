@@ -29,6 +29,9 @@ from scripts.reactflow_delta.model_rescue_v11 import (
     method_cell_balanced_l1,
     trainable_parameter_count,
 )
+from scripts.reactflow_delta.merge_model_rescue_v11 import (
+    authoritative_comparator_invariant_pass,
+)
 from scripts.reactflow_delta.qualify_model_rescue_v11 import (
     SCHEMA as SCREEN_QUALIFICATION_SCHEMA,
 )
@@ -158,6 +161,17 @@ def test_seed0_feature41_distribution_replays_authoritative_v10_exactly() -> Non
             output[f"feature41_{suffix}"], historical[f"feature41_{suffix}"]
         )
         assert output[f"feature41_{suffix}"] is not historical[f"feature41_{suffix}"]
+
+
+def test_scientific_merge_rejects_old_retrained_comparator_artifacts() -> None:
+    old = {"feature41_asymmetric_screen_replay_or_not_applicable": True}
+    current = {
+        "feature41_asymmetric_seed0_uses_authoritative_v10_or_not_applicable": True
+    }
+    assert authoritative_comparator_invariant_pass("V11M2", old) is True
+    assert authoritative_comparator_invariant_pass("V11M3", old) is False
+    assert authoritative_comparator_invariant_pass("V11M3", current) is True
+    assert authoritative_comparator_invariant_pass("V11M4", current) is True
 
 
 def test_point_prediction_does_not_accept_target_error_or_target_mask() -> None:
