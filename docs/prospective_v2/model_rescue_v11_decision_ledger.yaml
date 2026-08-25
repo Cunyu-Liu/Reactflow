@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M2_INTERRUPTED_RECOVERABLE_ENGINEERING_FIX_ONLY
-updated_at: '2026-08-25T15:50:00+08:00'
+current_status: V11M2_RECOVERY_IN_PROGRESS_ENGINEERING_SMOKE_ONLY
+updated_at: '2026-08-25T16:05:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -113,7 +113,7 @@ implementation_evidence:
 phase_state:
   V11M0: PASS
   V11M1: PASS
-  V11M2: INTERRUPTED_RECOVERABLE_ENGINEERING_FIX_ONLY
+  V11M2: RECOVERY_IN_PROGRESS_ENGINEERING_SMOKE_ONLY
   V11M3: NOT_AUTHORIZED
   V11M4: NOT_AUTHORIZED
   V11M5: NOT_RUN
@@ -141,3 +141,6 @@ recovery_events:
       RECORD THE FROZEN POINT PARAMETER COUNT BEFORE REQUIRES_GRAD IS DISABLED
       FOR CALIBRATION; THIS CHANGES ONLY RESULT METADATA.
     model_loss_epoch_gate_changed: false
+    invalid_partial_artifact_archive: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m2_real_smoke/invalid_run_replay_epoch_mismatch_20260825_1337
+    recovery_session: reactflow_v11_v11m2_smoke_recovery_20260825
+    recovery_controller_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v11_v11m2_smoke_recovery_controller.log
