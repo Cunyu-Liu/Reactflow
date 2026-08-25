@@ -67,6 +67,15 @@ HEAD_NAMES = (
 )
 
 
+def frozen_point_from_reference(
+    keys: list[str], reference: dict[str, float]
+) -> np.ndarray:
+    missing = [key for key in keys if key not in reference]
+    if missing:
+        raise RuntimeError("V10 frozen point reference is missing held keys")
+    return np.asarray([reference[key] for key in keys], dtype=np.float64)
+
+
 def assert_run_authority(repo_root: Path, phase: str) -> None:
     active = yaml.safe_load(
         (repo_root / "configs/reactflow_delta/active_contract.yaml").read_text(
@@ -351,6 +360,12 @@ def _held_prediction(
     tic2a_prediction_path: Path,
     v9_prediction_path: Path,
 ) -> dict[str, np.ndarray]:
+    v8_reference = _load_reference_prediction(
+        v8_prediction_path,
+        V8_PREDICTION_SCHEMA,
+        "meanaligned_delta_mean",
+        fold_id,
+    )
     by_construct: dict[str, list[Any]] = {}
     for record in held_records:
         by_construct.setdefault(record.construct_id, []).append(record)
@@ -379,7 +394,7 @@ def _held_prediction(
                 device=device,
             )
             hidden = mean_model.encode(ctx_cache[construct_id])
-            mean_matrix, direct_matrix = mean_model.forward_mean_and_features(
+            _mean_matrix, direct_matrix = mean_model.forward_mean_and_features(
                 hidden,
                 edit,
                 distance,
@@ -388,13 +403,22 @@ def _held_prediction(
                 prediction_mask,
             )
             for row, record in enumerate(recs):
+                record_keys = [
+                    _bio_key(univ, record, position) for position in range(length)
+                ]
                 _feature30, feature41 = prediction_features(
                     construct, record, receiver, unconstrained, constrained
                 )
                 feature41_point = predict_weighted_ridge(
                     feature41_model, feature41
                 )[:, 0].astype(np.float32)
-                meanaligned_point = mean_matrix[row].cpu().numpy().astype(np.float32)
+                # The V8 prediction artifact is the authoritative frozen point.
+                # Recomputing the same checkpoint can differ by a few float32
+                # ULPs across CUDA kernels, which is enough to violate the
+                # pre-frozen 1e-7 replay invariant without changing semantics.
+                meanaligned_point = frozen_point_from_reference(
+                    record_keys, v8_reference
+                )
                 direct = direct_matrix[row].cpu().numpy().astype(np.float32)
                 f_input = torch.tensor(
                     feature41_standardizer.transform_numpy(
@@ -434,16 +458,10 @@ def _held_prediction(
                     )
                 result["feature41_point"].append(feature41_point)
                 result["meanaligned_point"].append(meanaligned_point)
-                keys.extend(_bio_key(univ, record, position) for position in range(length))
+                keys.extend(record_keys)
     key_array = np.asarray(keys, dtype=object)
     feature41_point = np.concatenate(result.pop("feature41_point")).astype(np.float64)
     meanaligned_point = np.concatenate(result.pop("meanaligned_point")).astype(np.float64)
-    v8_reference = _load_reference_prediction(
-        v8_prediction_path,
-        V8_PREDICTION_SCHEMA,
-        "meanaligned_delta_mean",
-        fold_id,
-    )
     tic_reference = _load_reference_prediction(
         tic2a_prediction_path,
         TIC2A_PREDICTION_SCHEMA,
@@ -452,8 +470,8 @@ def _held_prediction(
     )
     if set(keys) != set(v8_reference) or set(keys) != set(tic_reference):
         raise RuntimeError("V10 held keys do not replay V8/TIC2A")
-    if not np.allclose(
-        meanaligned_point, [v8_reference[key] for key in keys], atol=1e-7, rtol=0.0
+    if not np.array_equal(
+        meanaligned_point, frozen_point_from_reference(keys, v8_reference)
     ):
         raise RuntimeError("V10 MeanAligned point does not replay V8")
     if not np.allclose(

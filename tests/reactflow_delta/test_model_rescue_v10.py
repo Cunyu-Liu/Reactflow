@@ -21,6 +21,7 @@ from scripts.reactflow_delta.qualify_model_rescue_v10 import qualify
 from scripts.reactflow_delta.qualify_model_rescue_v10_smoke import (
     checkpoint_standardizer_pass,
 )
+from scripts.reactflow_delta.run_model_rescue_v10 import frozen_point_from_reference
 from scripts.reactflow_delta.score_model_rescue_v10 import (
     SCHEMA as SCORE_SCHEMA,
     merged_integrity_pass,
@@ -110,6 +111,13 @@ def test_v10_smoke_standardizer_check_returns_json_boolean() -> None:
     )
     assert passed is True
     __import__("json").dumps({"passed": passed})
+
+
+def test_v10_held_point_uses_authoritative_v8_reference_exactly() -> None:
+    reference = {"k0": np.float32(0.12345679), "k1": np.float32(-0.25)}
+    point = frozen_point_from_reference(["k1", "k0"], reference)
+    assert point.dtype == np.float64
+    assert np.array_equal(point, np.asarray([-0.25, reference["k0"]]))
 
 
 def _write_fold(directory, fold: int) -> None:
