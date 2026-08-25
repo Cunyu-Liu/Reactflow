@@ -25,6 +25,7 @@ from scripts.reactflow_delta.qualify_model_rescue_v12_smoke import qualify as qu
 from scripts.reactflow_delta.merge_model_rescue_v12 import merge_folds
 from scripts.reactflow_delta.qualify_model_rescue_v12 import qualify
 from scripts.reactflow_delta.score_model_rescue_v12 import assert_score_authority
+from scripts.reactflow_delta.score_model_rescue_v6_probe import _puzzle_macro
 from scripts.reactflow_delta.validate_model_rescue_v12_contract import (
     assert_run_authority,
     validate_contract,
@@ -251,3 +252,12 @@ def test_v12_qualifier_requires_every_frozen_top_journal_gate() -> None:
 def test_scientific_scorer_remains_closed_during_smoke() -> None:
     with pytest.raises(RuntimeError, match="closed outside"):
         assert_score_authority(ROOT)
+
+
+def test_v12_scoring_estimand_balances_methods_before_puzzle_mean() -> None:
+    losses = {
+        "openknot_m2|P1|A|C1|1|A>G|0": 0.0,
+        "openknot_m2|P1|A|C1|2|C>U|0": 0.0,
+        "openknot_m2|P1|B|C1|3|G>A|0": 2.0,
+    }
+    assert _puzzle_macro(losses) == 1.0
