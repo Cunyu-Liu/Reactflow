@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
-current_status: V12M1_IMPLEMENTATION_ONLY_NO_TRAINING
-updated_at: '2026-08-25T19:45:00+08:00'
+current_status: V12M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
+updated_at: '2026-08-25T20:00:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -37,8 +37,8 @@ frozen_decisions:
 
 phase_state:
   V12M0: PASS
-  V12M1: IMPLEMENTATION_IN_PROGRESS
-  V12M2: NOT_AUTHORIZED
+  V12M1: PASS
+  V12M2: AUTHORIZED_ENGINEERING_SMOKE_ONLY
   V12M3: NOT_AUTHORIZED
   V12M4: NOT_AUTHORIZED
   V12M5: NOT_RUN
@@ -74,3 +74,20 @@ events:
     partial_score_read_allowed: false
     external_outcome_accessed: false
     next_action: IMPLEMENT_GATE_RUNNER_MERGER_SCORER_QUALIFIER_AND_FOCUSED_TESTS
+
+  - id: V12M1_IMPLEMENTATION_AND_INVARIANTS_PASS
+    observed_at: '2026-08-25T20:00:00+08:00'
+    status: V12M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
+    implementation_commit_local: 8f6a0d7a
+    implementation_commit_remote: 25f7e111a159885f8787bf38259fcb7cb62779d8
+    focused_tests_passed: 8
+    contract_validator_passed: true
+    inner_crossfit_complete_test_passed: true
+    parent_null_replay_test_passed: true
+    median_invariance_test_passed: true
+    target_bearing_prediction_rejection_test_passed: true
+    candidate_training_allowed: V12_REAL_DATA_ENGINEERING_SMOKE_ONLY
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: RUN_FOLDS0_1_SEED0_THREE_EPOCH_ENGINEERING_SMOKE_WITHOUT_SCIENTIFIC_SCORING
