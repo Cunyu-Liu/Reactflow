@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v10 Amendment
 
-**状态：V10M1 folds0/1、seed0、3 epochs prediction-only engineering smoke PASS；V10M2 固定 seed0、20-fold、40 epochs score-blind screen 已授权；完整 20 folds 前科学评分关闭。**
+**状态：V10M2 固定 seed0、20-fold、40 epochs prediction-only universe 已20/20完整并通过 merge integrity；训练关闭，V10M3 唯一一次完整评分与预冻结 qualifier 已授权。**
 
 ## 1. 合同地位
 
@@ -108,3 +108,15 @@ MeanAligned-asymmetric 相对 MeanAligned-symmetric 增量为正。100个fold-se
 必须完整后才能评分，所有5个seed均须报告。Formal PASS仍只获得
 `POST_HOC_DEVELOPMENT_FORMAL_PASS`；external、SOTA与publication readiness不会
 由此自动建立。
+
+## 8. V10M2 完整性与 V10M3 authority
+
+V10M2 已形成 folds0–19 的20/20完整 prediction-only artifacts。冻结 controller
+生成 `v10m2_complete_unscored_merge.json`；schema、fold universe、key identity、
+V8/feature41/V9 replay、matched families、median constraint与train-only
+standardization均通过，且 merge 不包含科学 score。V10M2 training authority关闭。
+
+V10M3 只授权一次完整 target join、scorer和预冻结 qualifier。Partial score保持
+禁止；不得在 scorer 与 qualifier 之间修改文件、阈值、模型或 comparator。Exact
+`V10M3_TOP_JOURNAL_SCREEN_PASS` 才能另行提交 authority 开放 V10M4；任何FAIL
+均保持 V10M4关闭，并按预冻结 post-V10 contingency裁决下一方向。
