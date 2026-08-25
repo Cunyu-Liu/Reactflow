@@ -226,6 +226,51 @@ def test_point_training_path_has_finite_gradients_and_complete_history() -> None
     assert torch.isfinite(torch.tensor(history)).all()
 
 
+def test_zero_initialized_head_allows_backbone_updates_after_first_cell() -> None:
+    primary, _null = make_exact_matched_pair(seed=41, device="cpu")
+    before = {
+        name: parameter.detach().clone()
+        for name, parameter in primary.named_parameters()
+    }
+    length = 5
+    edit = torch.tensor([1, 3])
+    distance = torch.arange(length)[None, :] - edit[:, None]
+    cells = []
+    contexts = {}
+    for construct_id, shift in (("a", 0.0), ("b", 0.15)):
+        cells.append(
+            {
+                "construct_id": construct_id,
+                "edit": edit,
+                "distance": distance.float(),
+                "refs": ["A", "C"],
+                "alts": ["G", "U"],
+                "target": torch.tensor(
+                    [
+                        [0.3 + shift, 0.1, -0.2, 0.2, 0.0],
+                        [0.0, 0.2, 0.3 + shift, -0.1, 0.25],
+                    ]
+                ),
+                "prediction_mask": torch.ones(2, length, dtype=torch.bool),
+                "qualified_mask": torch.ones(2, length, dtype=torch.bool),
+                "wt": torch.zeros(length),
+                "feature41_point": torch.zeros(2, length),
+            }
+        )
+        contexts[construct_id] = _context(length)
+    fit_point_model(primary, cells, contexts, epochs=1, seed=41)
+    changed = {
+        name: not torch.equal(before[name], parameter.detach())
+        for name, parameter in primary.named_parameters()
+    }
+    assert any(
+        value
+        for name, value in changed.items()
+        if name.startswith(("input_projection", "blocks", "output_norm"))
+    )
+    assert all(changed.values())
+
+
 def test_unobserved_positions_and_same_base_mutations_are_zeroed() -> None:
     model = V11PointModel(feature41_skip_multiplier=1.0).eval()
     length = 5
