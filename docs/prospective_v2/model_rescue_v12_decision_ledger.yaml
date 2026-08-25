@@ -167,3 +167,20 @@ events:
     partial_score_inspected: false
     external_outcome_accessed: false
     next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN
+
+  - id: POST_V12_DIAGNOSTIC_CONTRASTS_COMPLETED_BEFORE_SCORE_ACCESS
+    observed_at: '2026-08-25T22:55:00+08:00'
+    status: DIAGNOSTIC_TOOLING_COMPLETE_NO_OUTCOME_ACCESS_NO_NEW_MODEL_AUTHORIZED
+    tooling_commit_local: b9258c6
+    tooling_commit_remote: da5d9bdafe1371dbb77385272417ef5cfe95facd
+    across_fold_gate_dispersion_implemented: true
+    oracle_gain_vs_feature41_v11_and_v12_implemented: true
+    learned_gate_vs_2d_oracle_correlation_implemented: true
+    fixed_regime_residual_association_implemented: true
+    focused_tests_passed: 20
+    training_or_model_change_performed: false
+    new_model_authorized: false
+    scientific_score_computed: false
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN
