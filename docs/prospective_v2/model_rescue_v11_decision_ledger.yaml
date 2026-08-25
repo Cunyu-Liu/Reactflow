@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M3_TOP_JOURNAL_SCREEN_FAIL_POSTREGISTERED_DIAGNOSTICS_ONLY
-updated_at: '2026-08-25T19:08:00+08:00'
+current_status: TERMINAL_V11M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
+updated_at: '2026-08-25T19:35:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -142,7 +142,7 @@ phase_state:
   V11M2: PASS
   V11M3: V11M3_TOP_JOURNAL_SCREEN_FAIL
   V11M4: NOT_AUTHORIZED
-  V11M5: NOT_RUN
+  V11M5: PASS
 
 outcome_access:
   new_external_outcome_accessed: false
@@ -393,3 +393,80 @@ recovery_events:
     model_or_threshold_selection_performed: false
     new_model_authorized: false
     next_action: RUN_POSTREGISTERED_DIAGNOSTICS_ONCE
+
+  - id: V11M3_POSTREGISTERED_DIAGNOSTICS_COMPLETE
+    observed_at: '2026-08-25T19:35:00+08:00'
+    status: POST_V11_DIAGNOSTICS_COMPLETE
+    diagnostic_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/v11m3_postscreen_diagnostics.json
+    diagnostic_session: reactflow_v11_postscreen_diagnostics_20260825
+    complete_fold_universe: 20
+    independent_unit: HELD_PUZZLE_N20
+    partial_score_read: false
+    external_outcome_accessed: false
+    model_or_threshold_selection_performed: false
+    convergence:
+      schedule_visibly_unfinished: false
+      anchored_folds_ge_1pct: 2
+      anchored_median_last_window_relative_decrease: 0.0022249298954503545
+      convergence_only_route_supported: false
+    outer_train_to_held_generalization:
+      descriptive_only: true
+      folds_with_gap_ge_5_percentage_points: 3
+      median_train_minus_held_gain: 0.004372508207320568
+      residual_shrinkage_route_supported_by_global_overfit: false
+    formal_task_matched_anchor_attribution:
+      signed_relative_gain_vs_unanchored: 0.0004999200892941171
+      signed_ci95: [-0.002178360966548239, 0.002350837869202216]
+      signed_positive_puzzles: 13
+      task_crps_relative_gain_vs_unanchored: -0.0023470166739153198
+      task_crps_ci95: [-0.0010990033068657133, 0.0005098840478436799]
+      task_crps_positive_puzzles: 8
+      anchor_attribution_pass: false
+    auxiliary_d1_limitation:
+      artifact_flag_anchor_specific_residual_signal: true
+      scientific_qualification: AUXILIARY_NOT_TASK_MATCHED_NOT_ANCHOR_ATTRIBUTION
+      reason: >-
+        The unanchored null was trained to predict full signed delta, but D1
+        subtracts feature41 from its target and evaluates the null output as a
+        residual. This changes the estimand for the null. The frozen full-task
+        matched-null Gate remains authoritative and failed.
+    residual_distribution:
+      stable_tail_or_asymmetry_signal: true
+      coverage90_minus_nominal_mean: -0.01864619949138842
+      coverage90_ci95: [-0.029966187825616077, -0.007326211157160766]
+      coverage90_negative_puzzles: 16
+      coverage95_minus_nominal_mean: -0.026248358934660022
+      coverage95_ci95: [-0.034945086483668085, -0.01755163138565196]
+      coverage95_negative_puzzles: 18
+      lower_minus_upper_tail_miss90_mean: -0.015623908727585173
+      lower_minus_upper_tail_miss90_ci95: [-0.026634235493279087, -0.00461358196189126]
+      lower_minus_upper_tail_negative_puzzles: 15
+      distribution_only_route_eligible: false
+      reason: >-
+        Point, matched-null, V10 CRPS, and V10 distribution-absolute Gates also
+        failed; task CRPS was not the sole failed headline Gate.
+    outcome_blind_regime_localization:
+      edit_site_signed_relative_gain: -0.014280295916130406
+      distance_1_5_signed_relative_gain: 0.01817974523328181
+      distance_6_20_signed_relative_gain: 0.10965789727567198
+      distance_gt20_signed_relative_gain: 0.11371982614352912
+      feature41_abs_lt_0_05_signed_relative_gain: -0.0027300702561358593
+      feature41_abs_0_05_0_10_signed_relative_gain: 0.1403186450130699
+      feature41_abs_0_10_0_20_signed_relative_gain: 0.08510011911354047
+      feature41_abs_ge_0_20_signed_relative_gain: 0.118515923470963
+      interpretation: >-
+        The learned residual is harmful at the edit site and unhelpful for
+        near-zero feature41 effects, but is consistently useful at distances
+        of at least six nucleotides and for non-negligible feature41 effects.
+    decision:
+      v11m4_authorized: false
+      v11_training_closed: true
+      v11_held_score_closed_after_diagnostics: true
+      v11_terminal_verdict_changed: false
+      selected_bottleneck_for_separate_amendment: OUTCOME_BLIND_REGIME_DEPENDENT_RESIDUAL_OVER_CORRECTION
+      separate_amendment_contract_drafting_allowed: true
+      separate_amendment_training_allowed_before_focused_contract_commit: false
+      proposed_single_capability: CONTINUOUS_MONOTONE_DISTANCE_AND_FEATURE_MAGNITUDE_RESIDUAL_SHRINKAGE
+      proposed_task_matched_null: FROZEN_V11_ANCHORED_POINT_WITH_GATE_FIXED_TO_ONE
+      new_model_authorized_under_v11: false
+      next_action: CREATE_SEPARATE_V12_AMENDMENT_AND_KEEP_V11_IMMUTABLE
