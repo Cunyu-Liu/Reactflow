@@ -284,6 +284,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
     assert_score_authority(args.repo_root.resolve())
+    if args.out_json.exists():
+        raise FileExistsError(f"V12 refuses to overwrite its one complete score: {args.out_json}")
     result = score_complete(
         json.loads(args.merged_json.read_text()),
         json.loads(args.tic2a_merged_json.read_text()),
