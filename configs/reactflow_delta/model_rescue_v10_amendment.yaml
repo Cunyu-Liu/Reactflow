@@ -53,8 +53,10 @@ input:
   normalization: OUTER_TRAIN_ONLY_MEAN_AND_SCALE_ALL_244_CHANNELS
   normalization_scale_floor: 1.0e-6
   meanaligned_train_point_source: SAME_V8_CHECKPOINT_RECOMPUTED_ON_OUTER_TRAIN
-  meanaligned_held_point_source: AUTHORITATIVE_V8_PREDICTION_ARTIFACT_BY_BIOLOGICAL_KEY
-  meanaligned_held_point_recomputation_allowed: false
+  meanaligned_held_point_authority: AUTHORITATIVE_V8_PREDICTION_ARTIFACT_BY_BIOLOGICAL_KEY
+  current_and_future_held_point_materialization: DIRECT_KEYED_READ_FROM_AUTHORITY
+  preserved_pre_fix_fold_materialization: SAME_CHECKPOINT_RECOMPUTATION_WITHIN_FROZEN_1E_7_ONLY
+  preserved_pre_fix_folds: [0, 1, 4, 5, 6, 7, 8, 11, 12, 13, 14, 15, 18, 19]
   held_direct_features_source: SAME_V8_CHECKPOINT_TRAINED_DIRECT_PATH
 
 residual_family:

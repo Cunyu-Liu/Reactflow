@@ -64,6 +64,9 @@ v10m2:
   diagnosed_rows_total: 103368
   root_cause: CUDA_FLOAT32_CHECKPOINT_RECOMPUTATION_ULP_DRIFT
   resolution: READ_AUTHORITATIVE_FROZEN_V8_HELD_POINT_BY_BIOLOGICAL_KEY
+  frozen_point_authority: CORRECTED_V8_PREDICTION_ARTIFACT
+  preserved_completed_fold_materialization: SAME_CHECKPOINT_RECOMPUTATION_PASSED_FROZEN_1E_7
+  recovery_fold_materialization: DIRECT_KEYED_READ_FROM_FROZEN_POINT_AUTHORITY
   training_point_changed: false
   held_direct_features_changed: false
   model_or_gate_changed: false
