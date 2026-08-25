@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
-current_status: V12M3_COMPLETE_UNSCORED_MERGE_PASS_COMPLETE_SCORE_AUTHORIZED_ONCE
-updated_at: '2026-08-26T03:52:00+08:00'
+current_status: TERMINAL_V12M3_TOP_JOURNAL_SCREEN_FAIL_POSTSCREEN_DIAGNOSTICS_ONLY
+updated_at: '2026-08-26T03:55:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -39,13 +39,13 @@ phase_state:
   V12M0: PASS
   V12M1: PASS
   V12M2: PASS
-  V12M3: COMPLETE_UNSCORED_MERGE_PASS_SCORE_AUTHORIZED_ONCE
-  V12M4: NOT_AUTHORIZED
+  V12M3: TOP_JOURNAL_SCREEN_FAIL
+  V12M4: PERMANENTLY_NOT_AUTHORIZED
   V12M5: NOT_RUN
 
 outcome_access:
   v12_partial_score_accessed: false
-  v12_complete_score_accessed: false
+  v12_complete_score_accessed: true
   new_external_outcome_accessed: false
 
 events:
@@ -225,3 +225,30 @@ events:
     training_allowed: false
     held_score_read_allowed_after_commit: V12_COMPLETE_MERGE_SCORE_ONCE_ONLY
     next_action: RUN_V12M3_SCORER_ONCE_THEN_QUALIFIER_ONCE
+
+  - id: V12M3_COMPLETE_SCORE_AND_QUALIFICATION
+    observed_at: '2026-08-26T03:55:00+08:00'
+    status: V12M3_TOP_JOURNAL_SCREEN_FAIL
+    score_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m3_screen_seed0/v12m3_complete_score.json
+    qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m3_screen_seed0/v12m3_qualification.json
+    scorer_runs: 1
+    qualifier_runs: 1
+    signed_delta_relative_gain_vs_feature41: 0.10081552922033378
+    signed_delta_relative_gain_vs_parent_v11: 0.0030760867330776064
+    point_absolute_relative_gain_vs_feature41: 0.04307921215737242
+    point_absolute_relative_gain_vs_parent_v11: -0.002726127394551431
+    task_crps_relative_gain_vs_feature41: 0.03741344014449823
+    task_crps_relative_gain_vs_parent_v11: 0.0008289578718574153
+    task_crps_relative_gain_vs_terminal_v10: 0.0047946398156857575
+    distribution_absolute_relative_gain_vs_feature41: 0.1262947913908966
+    distribution_absolute_relative_gain_vs_terminal_v10: -0.019446261879693574
+    prediction_integrity_pass: true
+    coverage_guardrail_pass: true
+    v12m4_authorized: false
+    model_or_threshold_selection_performed: false
+    complete_score_accessed: true
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    training_allowed: false
+    held_score_read_allowed_after_commit: V12_COMPLETE_SCORE_POSTSCREEN_DIAGNOSTICS_ONLY
+    next_action: RUN_PREFROZEN_POST_V12_DIAGNOSTICS_ONCE_NO_TRAINING
