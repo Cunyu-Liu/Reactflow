@@ -52,18 +52,23 @@ from scripts.reactflow_delta.validate_model_rescue_v12_contract import (
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def test_v12_contract_preserves_v11_and_opens_only_score_blind_screen() -> None:
+def test_v12_contract_preserves_v11_and_freezes_terminal_benchmark_handoff() -> None:
     result = validate_contract(ROOT)
     assert result["status"] == "V12_CONTRACT_VALIDATION_PASS"
-    assert result["phase"] == "V12M3"
-    assert result["training_allowed"] == "V12_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY"
+    assert result["phase"] == "M6"
+    assert result["training_allowed"] is False
+    assert result["held_score_read_allowed"] is False
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
     assert active["gate_state"]["V12M2"] == "ENGINEERING_SMOKE_PASS"
-    assert active["gate_state"]["V12M3"] == "AUTHORIZED_SCORE_BLIND_SCREEN_ONLY"
-    assert active["gate_state"]["V12M4"] == "NOT_AUTHORIZED"
-    assert_run_authority(ROOT, "V12M3")
+    assert active["gate_state"]["V12M3"] == "TOP_JOURNAL_SCREEN_FAIL"
+    assert active["gate_state"]["V12M4"] == "PERMANENTLY_NOT_AUTHORIZED"
+    assert active["authority"]["current_authority_state"] == (
+        "TERMINAL_V12M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE"
+    )
+    with pytest.raises(RuntimeError, match="sole active authority"):
+        assert_run_authority(ROOT, "V12M3")
     with pytest.raises(RuntimeError, match="sole active authority"):
         assert_run_authority(ROOT, "V12M4")
 
@@ -266,8 +271,8 @@ def test_v12_qualifier_requires_every_frozen_top_journal_gate() -> None:
     assert failed["v12m4_authorized"] is False
 
 
-def test_scientific_scorer_remains_closed_during_score_blind_training() -> None:
-    with pytest.raises(RuntimeError, match="training must be closed"):
+def test_scientific_scorer_is_closed_after_terminal_handoff() -> None:
+    with pytest.raises(RuntimeError, match="closed outside the complete V12M3 authority"):
         assert_score_authority(ROOT)
 
 
@@ -377,8 +382,8 @@ def test_formal_scorer_remains_closed_before_exact_screen_pass() -> None:
         assert_formal_score_authority(ROOT)
 
 
-def test_post_v12_diagnostics_remain_closed_during_score_blind_training() -> None:
-    with pytest.raises(RuntimeError, match="require training closed"):
+def test_post_v12_diagnostics_are_closed_after_terminal_handoff() -> None:
+    with pytest.raises(RuntimeError, match="closed outside V12M3"):
         assert_diagnostic_authority(ROOT)
 
 
