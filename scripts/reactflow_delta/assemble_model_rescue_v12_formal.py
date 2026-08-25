@@ -137,8 +137,6 @@ def assemble_fold(
                 source[0][f"{prefix}_{suffix}"], dtype=np.float64
             )
     path = out_dir / f"v12_formal_predictions_fold{fold}_seeds0_4.npz"
-    if path.exists():
-        raise FileExistsError(f"V12 formal assembler refuses to overwrite {path}")
     np.savez_compressed(path, **output)
     return {
         "outer_fold": fold,
