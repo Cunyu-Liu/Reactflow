@@ -1,7 +1,9 @@
 # Post-V10 model contingency — pre-score decision register
 
-**Status:** `PRE_SCORE_CONTINGENCY_ONLY`  
-**Frozen before:** any V10M3 score or Gate direction is read  
+**Status:** `PRE_SCORE_CONTINGENCY_ONLY`
+
+**Frozen before:** any V10M3 score or Gate direction is read
+
 **Authority effect:** none; this document does not authorize V10M3, V10M4,
 V11 training, external outcome access, or candidate selection.
 
