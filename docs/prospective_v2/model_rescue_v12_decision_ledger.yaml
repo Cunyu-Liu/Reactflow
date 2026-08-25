@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
-current_status: V12M3_TWENTY_FOLD_SCORE_BLIND_SCREEN_ONLY
-updated_at: '2026-08-25T20:29:00+08:00'
+current_status: V12M3_COMPLETE_UNSCORED_MERGE_PASS_COMPLETE_SCORE_AUTHORIZED_ONCE
+updated_at: '2026-08-26T03:52:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -39,7 +39,7 @@ phase_state:
   V12M0: PASS
   V12M1: PASS
   V12M2: PASS
-  V12M3: AUTHORIZED_SCORE_BLIND_SCREEN_ONLY
+  V12M3: COMPLETE_UNSCORED_MERGE_PASS_SCORE_AUTHORIZED_ONCE
   V12M4: NOT_AUTHORIZED
   V12M5: NOT_RUN
 
@@ -203,3 +203,25 @@ events:
     partial_score_inspected: false
     external_outcome_accessed: false
     next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN
+
+  - id: V12M3_COMPLETE_UNSCORED_MERGE
+    observed_at: '2026-08-26T03:52:00+08:00'
+    status: V12M3_COMPLETE_UNSCORED_MERGE_PASS
+    merge_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m3_screen_seed0/v12m3_complete_unscored_merge.json
+    complete_fold_seed_universe: true
+    fold_count: 20
+    seeds: [0]
+    prediction_only_schema: true
+    target_identity_exact: true
+    inner_crossfit_complete_all_runs: true
+    outer_held_target_excluded_from_gate_fit_all_runs: true
+    four_parameter_monotone_gate_all_runs: true
+    exact_v11_parent_replay_all_runs: true
+    v10_median_residual_family_all_runs: true
+    median_constraint_all_runs: true
+    scientific_score_computed: false
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    training_allowed: false
+    held_score_read_allowed_after_commit: V12_COMPLETE_MERGE_SCORE_ONCE_ONLY
+    next_action: RUN_V12M3_SCORER_ONCE_THEN_QUALIFIER_ONCE
