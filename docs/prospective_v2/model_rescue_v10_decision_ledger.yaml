@@ -19,6 +19,14 @@ eligibility:
   normalized_quantile_asymmetry_ci95: [0.1882338402467704, 0.2727375467318043]
   quantile_direction_puzzles: 20
 
+pre_score_contingency:
+  status: PRE_SCORE_CONTINGENCY_ONLY_NO_AUTHORITY_EFFECT
+  plan: docs/plans/2026-08-25-post-v10-model-contingency.md
+  v10_gate_changed: false
+  v11_training_authorized: false
+  partial_scientific_scores_read: false
+  external_outcome_accessed: false
+
 v10m0:
   status: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   focused_tests_passed_local: 28
