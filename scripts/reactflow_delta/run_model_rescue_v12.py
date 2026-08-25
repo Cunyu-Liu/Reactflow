@@ -109,10 +109,16 @@ def _load_parent_prediction(path: Path, fold_id: int) -> dict[str, np.ndarray]:
             raise ValueError("V12 parent prediction is not V11 schema")
         if set(map(int, handle["outer_fold"])) != {fold_id}:
             raise ValueError("V12 parent prediction fold mismatch")
+        if set(map(int, handle["seed"])) != {0}:
+            raise ValueError("V12 screen requires the authoritative V11 seed0 parent")
         result = {name: np.asarray(handle[name]) for name in handle.files}
     keys = list(map(str, result["keys"]))
     if len(keys) != len(set(keys)):
         raise ValueError("V12 parent prediction contains duplicate keys")
+    if not np.array_equal(result["keys"], result["biological_scoring_key"]):
+        raise ValueError("V12 parent biological scoring keys differ")
+    if not np.all(np.asarray(result["registered_status"]) == "covered"):
+        raise ValueError("V12 parent prediction is not fully registered")
     return result
 
 
@@ -654,6 +660,13 @@ def run_fold(
     parent_prediction = _load_parent_prediction(
         Path(parent_row["prediction_artifact"]), fold_id
     )
+    expected_held_keys = {
+        _bio_key(univ, record, position)
+        for record in held_records
+        for position in range(len(univ.get_construct(record.construct_id).sequence))
+    }
+    if set(map(str, parent_prediction["keys"])) != expected_held_keys:
+        raise RuntimeError("V12 parent does not cover the exact held registered universe")
     parent_model = _load_outer_parent_model(
         Path(parent_row["point_checkpoints"]["anchored"]), device
     )
