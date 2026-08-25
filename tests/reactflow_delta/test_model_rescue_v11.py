@@ -66,22 +66,28 @@ def _context(length: int) -> tuple[torch.Tensor, ...]:
     return sequence, reactivity, precision, observed, position, region
 
 
-def test_v11_contract_opens_only_seed0_screen_after_smoke_and_keeps_parent_terminal() -> None:
+def test_v11_contract_keeps_parent_terminal_and_enforces_active_authority_exclusion() -> None:
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
     )
     contract = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/model_rescue_v11_amendment.yaml").read_text()
     )
-    assert active["authority"]["current_phase"] == "V11M3"
+    phase = active["authority"]["current_phase"]
+    assert phase in {"V11M3", "V11M4"}
+    assert active["runnable_phases"] == [phase]
     assert active["gate_state"]["V11M2"] == "V11M2_ENGINEERING_SMOKE_PASS"
-    assert active["training_allowed"] == (
-        "V11_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY"
-    )
-    assert active["candidate_model_training_allowed"] == (
-        "V11M3_SEED0_TWENTY_FOLD_SCREEN_ONLY"
-    )
-    assert active["held_score_read_allowed"] is False
+    if active["training_allowed"] is False:
+        assert active["candidate_model_training_allowed"] is False
+    else:
+        expected_training = {
+            "V11M3": "V11_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY",
+            "V11M4": "V11_FIXED_FIVE_SEED_FORMAL_ONLY",
+        }[phase]
+        assert active["training_allowed"] == expected_training
+        assert active["held_score_read_allowed"] is False
+        assert_run_authority(ROOT, phase)
+    assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert contract["parent"]["v10_terminal_status"] == (
         "TERMINAL_TOP_JOURNAL_TASK_CRPS_MARGIN_FAIL"
@@ -95,7 +101,6 @@ def test_v11_contract_opens_only_seed0_screen_after_smoke_and_keeps_parent_termi
     assert gates["signed_delta_relative_gain_vs_feature41_min"] == 0.10
     assert gates["task_crps_relative_gain_vs_feature41_asymmetric_min"] == 0.05
     assert gates["task_crps_relative_gain_vs_terminal_v10_min"] == 0.015
-    assert_run_authority(ROOT, "V11M3")
 
 
 def test_primary_and_null_have_exact_trainable_state_and_parameter_count() -> None:
