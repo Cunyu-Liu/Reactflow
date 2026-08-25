@@ -12,15 +12,25 @@ from typing import Any
 import numpy as np
 from scipy.special import ndtr
 from scipy.stats import t as student_t
+import torch
 import yaml
 
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.merge_model_rescue_v11 import SCHEMA as MERGED_SCHEMA
+from scripts.reactflow_delta.model_rescue_v1 import aligned_wt_ctx_tensors
 from scripts.reactflow_delta.model_rescue_v1 import weighted_gaussian_mixture_crps
+from scripts.reactflow_delta.model_rescue_v5_probe import EnsembleFeatureCache
+from scripts.reactflow_delta.model_rescue_v6_probe import (
+    ConstrainedFeatureCache,
+    validate_cache_alignment,
+)
+from scripts.reactflow_delta.model_rescue_v11 import V11PointModel, freeze_point_model
 from scripts.reactflow_delta.qualify_model_rescue_v11 import (
     SCHEMA as QUALIFICATION_SCHEMA,
 )
 from scripts.reactflow_delta.run_p2_v3 import _bio_key
+from scripts.reactflow_delta.run_model_rescue_v9 import _read_json, _ridge_model
+from scripts.reactflow_delta.run_model_rescue_v11 import _feature41_matrix
 from scripts.reactflow_delta.score_model_rescue_v11 import (
     SCHEMA as SCORE_SCHEMA,
     _load_prediction,
@@ -445,11 +455,190 @@ def summarize_distribution(folds: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def puzzle_macro_from_mutant_losses(
+    losses: dict[str, dict[str, list[float]]],
+) -> dict[str, float]:
+    """Aggregate puzzle→method→mutant losses without treating overlap as N."""
+
+    output = {}
+    for puzzle, methods in losses.items():
+        if not methods or any(not values for values in methods.values()):
+            raise ValueError("outer-train puzzle metrics contain an empty method")
+        output[puzzle] = float(
+            np.mean([float(np.mean(values)) for values in methods.values()])
+        )
+    return output
+
+
+def _load_point_model(path: Path, skip: float, device: str) -> V11PointModel:
+    model = V11PointModel(feature41_skip_multiplier=skip).to(device)
+    model.load_state_dict(torch.load(path, map_location=device))
+    freeze_point_model(model)
+    model.eval()
+    return model
+
+
+def outer_train_point_diagnostic(
+    *,
+    univ: M2Universe,
+    records: list[Any],
+    fold: Any,
+    merged_row: dict[str, Any],
+    score_row: dict[str, Any],
+    unconstrained: EnsembleFeatureCache,
+    constrained: ConstrainedFeatureCache,
+    device: str,
+) -> dict[str, Any]:
+    """Describe final-checkpoint train skill; overlapping train sets add no N."""
+
+    feature41_model = _ridge_model(
+        _read_json(Path(merged_row["feature41_model_artifact"]))["v6_feature41"]
+    )
+    anchored = _load_point_model(
+        Path(merged_row["point_checkpoints"]["anchored"]), 1.0, device
+    )
+    unanchored = _load_point_model(
+        Path(merged_row["point_checkpoints"]["unanchored"]), 0.0, device
+    )
+    train_puzzles = set(fold.train_puzzles)
+    train_records = [record for record in records if record.puzzle in train_puzzles]
+    by_construct: dict[str, list[Any]] = {}
+    for record in train_records:
+        by_construct.setdefault(record.construct_id, []).append(record)
+    metric_losses: dict[str, dict[str, dict[str, list[float]]]] = {
+        name: {} for name in ("feature41", "anchored", "unanchored")
+    }
+    with torch.no_grad():
+        for construct_id, construct_records in sorted(by_construct.items()):
+            construct = univ.get_construct(construct_id)
+            length = len(construct.sequence)
+            prediction_mask = torch.tensor(
+                np.tile(
+                    construct.wt_observed.astype(bool),
+                    (len(construct_records), 1),
+                ),
+                device=device,
+            )
+            edit = torch.tensor(
+                [record.full_pos for record in construct_records], device=device
+            )
+            distance = (
+                torch.arange(length, device=device)[None, :] - edit[:, None]
+            ).float()
+            _basis, feature41 = _feature41_matrix(
+                construct,
+                construct_records,
+                feature41_model,
+                unconstrained,
+                constrained,
+            )
+            feature41_tensor = torch.tensor(feature41, device=device)
+            context = aligned_wt_ctx_tensors(univ, construct_id, device)
+            anchored_point = anchored.forward_point(
+                anchored.encode(context),
+                edit,
+                distance,
+                [record.ref for record in construct_records],
+                [record.alt for record in construct_records],
+                prediction_mask,
+                feature41_tensor,
+            ).cpu().numpy()
+            unanchored_point = unanchored.forward_point(
+                unanchored.encode(context),
+                edit,
+                distance,
+                [record.ref for record in construct_records],
+                [record.alt for record in construct_records],
+                prediction_mask,
+                feature41_tensor,
+            ).cpu().numpy()
+            predictions = {
+                "feature41": feature41,
+                "anchored": anchored_point,
+                "unanchored": unanchored_point,
+            }
+            for mutant, record in enumerate(construct_records):
+                target, _error = univ.mutant_full_profile(
+                    record.wt_id, record.design_pos, record.ref, record.alt
+                )
+                if target is None:
+                    continue
+                qualified = construct.wt_observed & np.isfinite(target)
+                receiver = np.flatnonzero(qualified)
+                if not len(receiver):
+                    continue
+                target_delta = (
+                    target[receiver] - construct.wt_reactivity[receiver]
+                )
+                for name, values in predictions.items():
+                    mutant_loss = float(
+                        np.mean(np.abs(target_delta - values[mutant, receiver]))
+                    )
+                    metric_losses[name].setdefault(record.puzzle, {}).setdefault(
+                        record.method, []
+                    ).append(mutant_loss)
+    puzzle_metrics = {
+        name: puzzle_macro_from_mutant_losses(values)
+        for name, values in metric_losses.items()
+    }
+    if any(set(values) != train_puzzles for values in puzzle_metrics.values()):
+        raise RuntimeError("outer-train diagnostic did not cover all train puzzles")
+    means = {
+        name: float(np.mean(list(values.values())))
+        for name, values in puzzle_metrics.items()
+    }
+    train_gain = (means["feature41"] - means["anchored"]) / means["feature41"]
+    held_gain = (
+        float(score_row["feature41_signed_delta_mae"])
+        - float(score_row["anchored_signed_delta_mae"])
+    ) / float(score_row["feature41_signed_delta_mae"])
+    null_train_gain = (
+        means["feature41"] - means["unanchored"]
+    ) / means["feature41"]
+    null_held_gain = (
+        float(score_row["feature41_signed_delta_mae"])
+        - float(score_row["unanchored_signed_delta_mae"])
+    ) / float(score_row["feature41_signed_delta_mae"])
+    return {
+        "outer_fold": int(fold.outer_fold),
+        "n_overlapping_train_puzzles": len(train_puzzles),
+        "train_feature41_signed_delta_mae": means["feature41"],
+        "train_anchored_signed_delta_mae": means["anchored"],
+        "train_unanchored_signed_delta_mae": means["unanchored"],
+        "train_anchored_relative_gain_vs_feature41": train_gain,
+        "held_anchored_relative_gain_vs_feature41": held_gain,
+        "anchored_train_minus_held_gain": train_gain - held_gain,
+        "train_unanchored_relative_gain_vs_feature41": null_train_gain,
+        "held_unanchored_relative_gain_vs_feature41": null_held_gain,
+        "unanchored_train_minus_held_gain": null_train_gain - null_held_gain,
+        "train_puzzle_metrics": puzzle_metrics,
+        "independent_effect_interval_allowed": False,
+    }
+
+
+def summarize_train_held_gap(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    rows = sorted(rows, key=lambda row: int(row["outer_fold"]))
+    if len(rows) != 20 or [int(row["outer_fold"]) for row in rows] != list(range(20)):
+        raise ValueError("train-held diagnostic requires outer folds0-19")
+    gaps = np.asarray([row["anchored_train_minus_held_gain"] for row in rows])
+    return {
+        "descriptive_only_due_to_overlapping_outer_train_sets": True,
+        "median_train_minus_held_gain": float(np.median(gaps)),
+        "folds_with_gap_ge_5_percentage_points": int((gaps >= 0.05).sum()),
+        "large_train_to_held_gap": int((gaps >= 0.05).sum()) >= 14,
+        "per_fold": rows,
+        "independent_effect_interval_computed": False,
+    }
+
+
 def diagnose_complete(
     merged: dict[str, Any],
     scores: dict[str, Any],
     qualification: dict[str, Any],
     m2_csv: Path,
+    unconstrained: EnsembleFeatureCache,
+    constrained: ConstrainedFeatureCache,
+    device: str,
 ) -> dict[str, Any]:
     if merged.get("schema_version") != MERGED_SCHEMA or merged.get("status") != (
         "V11M3_COMPLETE_UNSCORED_MERGE_PASS"
@@ -527,6 +716,21 @@ def diagnose_complete(
     )
     convergence = convergence_diagnostic(list(merged_rows.values()))
     distribution = summarize_distribution(folds)
+    train_held = summarize_train_held_gap(
+        [
+            outer_train_point_diagnostic(
+                univ=univ,
+                records=records,
+                fold=fold_map[fold_id],
+                merged_row=merged_rows[fold_id],
+                score_row=score_rows[fold_id],
+                unconstrained=unconstrained,
+                constrained=constrained,
+                device=device,
+            )
+            for fold_id in range(20)
+        ]
+    )
     return {
         "schema_version": SCHEMA,
         "phase": "POST_V11M3_DIAGNOSTIC_ONLY",
@@ -545,6 +749,7 @@ def diagnose_complete(
             ),
         },
         "convergence": convergence,
+        "outer_train_to_held_generalization": train_held,
         "regime_summary": summarize_regimes(folds),
         "distribution_summary": distribution,
         "decision_support": {
@@ -553,6 +758,9 @@ def diagnose_complete(
             "anchor_specific_residual_signal": anchor_signal,
             "convergence_only_route_supported": convergence[
                 "schedule_visibly_unfinished"
+            ],
+            "residual_shrinkage_route_supported_by_overfit": train_held[
+                "large_train_to_held_gap"
             ],
             "distribution_only_route_has_stable_diagnostic": distribution[
                 "anchored_stable_asymmetry_or_tail_signal"
@@ -572,15 +780,29 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--score-json", type=Path, required=True)
     parser.add_argument("--qualification-json", type=Path, required=True)
     parser.add_argument("--m2-csv", type=Path, required=True)
+    parser.add_argument("--unconstrained-cache", type=Path, required=True)
+    parser.add_argument("--constrained-cache", type=Path, required=True)
+    parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
     assert_diagnostic_authority(args.repo_root.resolve())
-    result = diagnose_complete(
-        json.loads(args.merged_json.read_text(encoding="utf-8")),
-        json.loads(args.score_json.read_text(encoding="utf-8")),
-        json.loads(args.qualification_json.read_text(encoding="utf-8")),
-        args.m2_csv,
-    )
+    device = args.device if torch.cuda.is_available() else "cpu"
+    unconstrained = EnsembleFeatureCache(args.unconstrained_cache)
+    constrained = ConstrainedFeatureCache(args.constrained_cache)
+    validate_cache_alignment(unconstrained, constrained)
+    try:
+        result = diagnose_complete(
+            json.loads(args.merged_json.read_text(encoding="utf-8")),
+            json.loads(args.score_json.read_text(encoding="utf-8")),
+            json.loads(args.qualification_json.read_text(encoding="utf-8")),
+            args.m2_csv,
+            unconstrained,
+            constrained,
+            device,
+        )
+    finally:
+        unconstrained.close()
+        constrained.close()
     args.out_json.parent.mkdir(parents=True, exist_ok=True)
     args.out_json.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"

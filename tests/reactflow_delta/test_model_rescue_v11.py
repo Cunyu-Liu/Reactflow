@@ -14,6 +14,8 @@ from scripts.reactflow_delta.diagnose_model_rescue_v11 import (
     directional_summary,
     distribution_diagnostic,
     method_balanced_weights,
+    puzzle_macro_from_mutant_losses,
+    summarize_train_held_gap,
 )
 from scripts.reactflow_delta.model_rescue_v11 import (
     ATTENTION_HEADS,
@@ -411,3 +413,24 @@ def test_post_v11_distribution_diagnostic_uses_fixed_point_allocation() -> None:
     assert "coverage68" in result["anchored"]
     assert "lower_tail_miss90" in result["anchored"]
     assert "median_allocation_absolute_error_association" in result["anchored"]
+
+
+def test_post_v11_outer_train_aggregation_does_not_pool_mutants_or_methods() -> None:
+    result = puzzle_macro_from_mutant_losses(
+        {"P01": {"M1": [1.0, 3.0], "M2": [5.0]}}
+    )
+    assert result == {"P01": 3.5}
+
+
+def test_post_v11_train_held_gap_is_descriptive_and_requires_fourteen_folds() -> None:
+    rows = [
+        {
+            "outer_fold": fold,
+            "anchored_train_minus_held_gain": 0.06 if fold < 14 else 0.0,
+        }
+        for fold in range(20)
+    ]
+    result = summarize_train_held_gap(rows)
+    assert result["folds_with_gap_ge_5_percentage_points"] == 14
+    assert result["large_train_to_held_gap"] is True
+    assert result["independent_effect_interval_computed"] is False

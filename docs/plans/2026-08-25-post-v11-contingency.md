@@ -46,7 +46,7 @@ u_p=\frac{\operatorname{mean}(L_{31:35})-\operatorname{mean}(L_{36:40})}
 
 `DECISION_RULE`: call the schedule visibly unfinished only if `u_p >= 1%` in at least 14/20 folds and the median `u_p >= 1%`. A negative final slope alone is insufficient. If this condition is absent, more epochs are not a supported rescue explanation.
 
-After complete held scoring, final checkpoints may be evaluated on their own outer-training puzzles with the same estimator. Because the 20 outer-training sets overlap, this train result is descriptive and receives no independent-puzzle CI. A train-to-held relative-gain drop of at least five percentage points in at least 14/20 outer folds is treated as cross-puzzle overfit, not lack of parameter count.
+After complete held scoring, `diagnose_model_rescue_v11.py` evaluates each final checkpoint on its own 19 outer-training puzzles using the same outcome-blind feature caches and method-balanced estimator. Because the 20 outer-training sets overlap, this train result is descriptive and receives no independent-puzzle CI. A train-to-held relative-gain drop of at least five percentage points in at least 14/20 outer folds is treated as cross-puzzle overfit, not lack of parameter count.
 
 ### D3 — Outcome-blind regime localization
 
