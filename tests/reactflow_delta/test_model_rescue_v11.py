@@ -74,9 +74,16 @@ def test_v11_contract_keeps_parent_terminal_and_enforces_active_authority_exclus
         (ROOT / "configs/reactflow_delta/model_rescue_v11_amendment.yaml").read_text()
     )
     phase = active["authority"]["current_phase"]
-    assert phase in {"V11M3", "V11M4"}
+    assert phase in {"V11M3", "V11M4", "M6"}
     assert active["runnable_phases"] == [phase]
     assert active["gate_state"]["V11M2"] == "V11M2_ENGINEERING_SMOKE_PASS"
+    if phase == "M6":
+        assert active["authority"]["current_authority_state"] == (
+            "TERMINAL_V11M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE"
+        )
+        assert active["gate_state"]["V11M3"] == "V11M3_TOP_JOURNAL_SCREEN_FAIL"
+        assert active["gate_state"]["V11M4"] == "NOT_AUTHORIZED"
+        assert active["held_score_read_allowed"] is False
     if active["training_allowed"] is False:
         assert active["candidate_model_training_allowed"] is False
     else:
