@@ -16,8 +16,12 @@ def _yaml(path: str) -> dict:
 def test_v10_terminal_fail_closes_training_scoring_and_formal() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v10_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V10M6"
-    assert active["runnable_phases"] == []
+    assert active["schema_version"] == "reactflow_delta.active_contract.v11"
+    assert active["parent_state"]["model_rescue_v10_status"] == (
+        "TERMINAL_TOP_JOURNAL_TASK_CRPS_MARGIN_FAIL"
+    )
+    assert active["parent_state"]["model_rescue_v10_formal_opened"] is False
+    assert active["v10_terminal_verdict_change_allowed"] is False
     assert active["training_allowed"] is False
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
