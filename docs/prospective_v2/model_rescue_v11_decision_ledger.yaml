@@ -96,6 +96,13 @@ decisions:
     label: DECISION
     decision: NO_V11_TRAINING_BEFORE_IMPLEMENTATION_AND_ENGINEERING_INVARIANTS_PASS
 
+implementation_evidence:
+  point_primary_trainable_parameters: 1966433
+  point_null_trainable_parameters: 1966433
+  exact_parameter_and_initial_state_match: true
+  focused_model_tests: 8_PASS_LOCAL_20260825
+  training_opened: false
+
 phase_state:
   V11M0: PASS
   V11M1: IN_PROGRESS

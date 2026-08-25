@@ -78,6 +78,7 @@ point_models:
     same_training_cells_and_order: true
     same_optimizer_and_epochs: true
     only_allowed_difference: FIXED_NONTRAINABLE_FEATURE41_SKIP_MULTIPLIER
+    exact_trainable_parameters_each: 1966433
   inputs:
     wt_sequence_one_hot: 4
     wt_reactivity_construct_standardized: 1
