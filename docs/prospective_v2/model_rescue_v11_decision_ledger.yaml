@@ -120,6 +120,8 @@ implementation_evidence:
     automatic_scoring_by_prediction_controller: false
   post_v11_contingency_frozen_before_v11m3_score: true
   post_v11_contingency_path: docs/plans/2026-08-25-post-v11-contingency.md
+  post_v11_diagnostic_implementation: scripts/reactflow_delta/diagnose_model_rescue_v11.py
+  post_v11_diagnostic_focused_tests: 5_PASS_LOCAL_20260825
   post_v11_new_model_authorized: false
   training_opened: V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
 

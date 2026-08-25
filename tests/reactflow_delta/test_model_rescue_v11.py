@@ -3,10 +3,18 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+import pytest
 import torch
 import yaml
 
 from scripts.reactflow_delta.assemble_model_rescue_v11_formal import assemble_fold
+from scripts.reactflow_delta.diagnose_model_rescue_v11 import (
+    assert_diagnostic_authority,
+    convergence_diagnostic,
+    directional_summary,
+    distribution_diagnostic,
+    method_balanced_weights,
+)
 from scripts.reactflow_delta.model_rescue_v11 import (
     ATTENTION_HEADS,
     CONTEXT_BLOCKS,
@@ -328,3 +336,78 @@ def test_formal_qualifier_repeats_gates_and_requires_seed_stability() -> None:
     assert failed["status"] == "V11M4_TOP_JOURNAL_FORMAL_FAIL"
     assert failed["gate_passed"] is False
     assert failed["gates"]["task_crps_gain_vs_feature41_ge_5pct"] is False
+
+
+def test_post_v11_diagnostic_weights_methods_then_mutants_then_positions() -> None:
+    methods = np.asarray(["A", "A", "A", "A", "B", "B"], dtype=object)
+    mutants = np.asarray(["A1", "A2", "A2", "A2", "B1", "B1"], dtype=object)
+    weights = method_balanced_weights(methods, mutants)
+    assert np.isclose(weights[methods == "A"].sum(), 0.5)
+    assert np.isclose(weights[methods == "B"].sum(), 0.5)
+    assert np.isclose(weights[mutants == "A1"].sum(), 0.25)
+    assert np.isclose(weights[mutants == "A2"].sum(), 0.25)
+    assert np.allclose(weights[mutants == "A2"], 1.0 / 12.0)
+
+
+def test_post_v11_diagnostics_are_closed_while_screen_training_runs() -> None:
+    with pytest.raises(RuntimeError, match="training closed"):
+        assert_diagnostic_authority(ROOT)
+
+
+def test_post_v11_convergence_rule_requires_one_percent_in_fourteen_folds() -> None:
+    folds = []
+    for fold in range(20):
+        anchored = [1.2] * 30 + [1.0] * 5 + ([0.98] * 5 if fold < 14 else [1.0] * 5)
+        folds.append(
+            {
+                "outer_fold": fold,
+                "training_histories": {
+                    "anchored_point": anchored,
+                    "unanchored_point": [1.0] * 40,
+                },
+            }
+        )
+    diagnostic = convergence_diagnostic(folds)
+    assert diagnostic["anchored_folds_ge_1pct"] == 14
+    assert diagnostic["schedule_visibly_unfinished"] is True
+
+    folds[13]["training_histories"]["anchored_point"] = [1.0] * 40
+    diagnostic = convergence_diagnostic(folds)
+    assert diagnostic["anchored_folds_ge_1pct"] == 13
+    assert diagnostic["schedule_visibly_unfinished"] is False
+
+
+def test_post_v11_direction_requires_all_twenty_independent_puzzles() -> None:
+    complete = directional_summary([0.1] * 20)
+    assert complete["confirmatory"] is True
+    assert complete["stable_nonzero_direction"] is True
+    incomplete = directional_summary([0.1] * 19)
+    assert incomplete == {
+        "n_puzzles": 19,
+        "confirmatory": False,
+        "reason": "REQUIRES_ALL_TWENTY_PUZZLES",
+    }
+
+
+def test_post_v11_distribution_diagnostic_uses_fixed_point_allocation() -> None:
+    observations: dict[str, np.ndarray] = {
+        "method": np.asarray(["A", "A", "B", "B"], dtype=object),
+        "mutant": np.asarray(["A1", "A1", "B1", "B1"], dtype=object),
+        "target": np.asarray([-0.2, -0.05, 0.1, 0.3]),
+    }
+    locations = np.asarray(
+        [[-0.1, 0.1], [-0.2, 0.1], [-0.1, 0.2], [-0.3, 0.1]]
+    )
+    scales = np.asarray(
+        [[0.1, 0.2], [0.2, 0.3], [0.15, 0.25], [0.3, 0.4]]
+    )
+    for name in ("feature41", "anchored", "unanchored"):
+        observations[f"{name}_point"] = np.zeros(4)
+        observations[f"{name}_weights"] = np.full((4, 2), 0.5)
+        observations[f"{name}_locations"] = locations
+        observations[f"{name}_scales"] = scales
+    result = distribution_diagnostic(observations)
+    assert set(result) == {"feature41", "anchored", "unanchored"}
+    assert "coverage68" in result["anchored"]
+    assert "lower_tail_miss90" in result["anchored"]
+    assert "median_allocation_absolute_error_association" in result["anchored"]

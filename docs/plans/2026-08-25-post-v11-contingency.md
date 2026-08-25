@@ -12,6 +12,8 @@ This document does not authorize V12 or any additional model. It freezes the dia
 
 All diagnostics below may run only after the complete 20-fold V11M3 prediction universe has been merged and scored once under complete-score authority. They use the same method-balanced position→mutant→cell→puzzle estimator. The 20 held puzzles remain the only independent units for held-effect intervals.
 
+The executable implementation is frozen in `scripts/reactflow_delta/diagnose_model_rescue_v11.py`. It requires the qualified complete merge, the one complete score artifact, and the mechanical V11M3 verdict. It cannot run while training or held-score access is closed, and it always records `new_model_authorized=false`.
+
 ## Predeclared diagnostic package
 
 ### D1 — Point residual learnability and anchor attribution
