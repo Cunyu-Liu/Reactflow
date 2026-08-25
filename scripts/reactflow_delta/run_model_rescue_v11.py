@@ -482,6 +482,7 @@ def _held_prediction(
     v8_prediction_path: Path,
     tic2a_prediction_path: Path,
     historical_v10_path: Path,
+    require_v10_feature41_replay: bool,
 ) -> dict[str, np.ndarray]:
     v8_reference = _load_reference_prediction(
         v8_prediction_path,
@@ -660,7 +661,9 @@ def _held_prediction(
     for name, values in distributions.items():
         output[name] = np.concatenate(values).astype(np.float64)
 
-    if seed == 0:
+    if require_v10_feature41_replay:
+        if seed != 0:
+            raise RuntimeError("V11 V10 feature41 replay is defined only for seed0")
         for suffix in ("weights", "locations", "scales"):
             current = output[f"feature41_{suffix}"]
             expected = historical[f"feature41_{suffix}"][historical_rows]
@@ -727,7 +730,11 @@ def run_fold(
         device,
     )
     anchored, unanchored = make_exact_matched_pair(seed=seed, device=device)
-    if trainable_parameter_count(anchored) != EXPECTED_POINT_PARAMETERS:
+    point_parameter_counts = {
+        PRIMARY_CANDIDATE: trainable_parameter_count(anchored),
+        MATCHED_NULL: trainable_parameter_count(unanchored),
+    }
+    if set(point_parameter_counts.values()) != {EXPECTED_POINT_PARAMETERS}:
         raise RuntimeError("V11 point parameter count differs from frozen contract")
     assert_exact_trainable_match(anchored, unanchored)
     anchored_history = fit_point_model(
@@ -822,6 +829,7 @@ def run_fold(
         v8_prediction_path=Path(v8_row["expert_prediction_artifact"]),
         tic2a_prediction_path=Path(tic_row["prediction_artifact"]),
         historical_v10_path=Path(v10_row["prediction_artifact"]),
+        require_v10_feature41_replay=(phase != "V11M2" and seed == 0),
     )
     prediction_path = out_dir / f"v11_predictions_fold{fold_id}_seed{seed}.npz"
     np.savez_compressed(prediction_path, **prediction)
@@ -856,8 +864,7 @@ def run_fold(
         "n_registered_prediction_rows": int(len(prediction["keys"])),
         "feature41_replay_max_abs_difference": replay,
         "point_parameter_counts": {
-            PRIMARY_CANDIDATE: trainable_parameter_count(anchored),
-            MATCHED_NULL: trainable_parameter_count(unanchored),
+            **point_parameter_counts,
         },
         "residual_parameter_counts": {
             name: parameter_count(head) for name, head in heads.items()
@@ -870,7 +877,7 @@ def run_fold(
             "point_frozen_during_calibration": True,
             "v10_residual_family_reused": True,
             "feature41_replay_at_1e_7": True,
-            "feature41_asymmetric_seed0_replay_or_not_applicable": True,
+            "feature41_asymmetric_screen_replay_or_not_applicable": True,
             "median_constraint_all_held_rows": True,
             "held_score_computed": False,
             "prediction_contains_target_fields": False,

@@ -161,7 +161,7 @@ comparators:
   current_best_distribution: TERMINAL_V10_MEANALIGNED_ASYMMETRIC_SEED0
   attribution: V11_UNANCHORED_CONTEXT_NULL
   corrected_absolute_reference: TIC2A_CORRECTED_FEATURE41_ABSOLUTE_DELTA
-  v11_feature41_replay_must_match_v10_seed0_atol: 1.0e-7
+  v11_scientific_40epoch_feature41_replay_must_match_v10_seed0_atol: 1.0e-7
 
 prediction_artifact:
   schema: reactflow_delta.model_rescue_v11_prediction.v1
@@ -203,6 +203,7 @@ v11m2_smoke:
   invariants:
     - EXACT_PARAMETER_AND_INITIAL_STATE_MATCH
     - FEATURE41_SKIP_IS_ONLY_POINT_MODEL_DIFFERENCE
+    - V10_RESIDUAL_HEAD_FAMILY_AND_INITIALIZATION_MATCH
     - FINITE_LOSS_AND_GRADIENT
     - POINT_FROZEN_DURING_CALIBRATION
     - MIXTURE_MEDIAN_EQUALS_POINT
@@ -211,6 +212,7 @@ v11m2_smoke:
     - COVERAGE_ONE
     - FAILURE_ZERO
     - UNEXPECTED_KEYS_ZERO
+  forty_epoch_v10_feature41_output_replay_required: false
 
 v11m3_screen:
   seed: 0
