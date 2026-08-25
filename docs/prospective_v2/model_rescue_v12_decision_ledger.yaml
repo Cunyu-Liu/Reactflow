@@ -1,0 +1,63 @@
+schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
+contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
+current_status: V12M0_CONTRACT_FROZEN_NO_TRAINING
+updated_at: '2026-08-25T19:40:00+08:00'
+
+immutable_parent_verdicts:
+  v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
+  v9: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
+  v10: TERMINAL_V10M3_TOP_JOURNAL_SCREEN_FAIL_V10M4_PERMANENTLY_CLOSED
+  v11: TERMINAL_V11M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
+  v11m4_opened: false
+
+located_evidence:
+  v11_diagnostic_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/v11m3_postscreen_diagnostics.json
+  convergence_route_supported: false
+  global_overfit_route_supported: false
+  distribution_only_route_eligible: false
+  selected_bottleneck: OUTCOME_BLIND_REGIME_DEPENDENT_RESIDUAL_OVER_CORRECTION
+  edit_site_signed_relative_gain: -0.014280295916130406
+  distance_6_20_signed_relative_gain: 0.10965789727567198
+  distance_gt20_signed_relative_gain: 0.11371982614352912
+  feature41_abs_lt_0_05_signed_relative_gain: -0.0027300702561358593
+  feature41_abs_0_05_0_10_signed_relative_gain: 0.1403186450130699
+
+frozen_decisions:
+  candidate: v12_v11_monotone_regime_shrinkage
+  null: v12_gate_fixed_one_parent_null
+  gate_family: PRODUCT_OF_TWO_MONOTONE_LOGISTIC_FACTORS
+  gate_inputs: [ABS_SIGNED_DISTANCE, ABS_OUTER_TRAIN_FEATURE41_POINT]
+  gate_parameter_count: 4
+  inner_crossfit_folds: 4
+  point_family_change_allowed: false
+  residual_family_change_allowed: false
+  gate_or_threshold_search_allowed: false
+  method_id_allowed: false
+  external_outcome_allowed: false
+
+phase_state:
+  V12M0: CONTRACT_FROZEN_PENDING_FOCUSED_COMMIT
+  V12M1: NOT_AUTHORIZED
+  V12M2: NOT_AUTHORIZED
+  V12M3: NOT_AUTHORIZED
+  V12M4: NOT_AUTHORIZED
+  V12M5: NOT_RUN
+
+outcome_access:
+  v12_partial_score_accessed: false
+  v12_complete_score_accessed: false
+  new_external_outcome_accessed: false
+
+events:
+  - id: V12M0_CONTRACT_FREEZE
+    observed_at: '2026-08-25T19:40:00+08:00'
+    status: V12M0_CONTRACT_FROZEN_NO_TRAINING
+    parent_v11_immutable: true
+    human_contract_written: true
+    machine_contract_written: true
+    implementation_plan_written: true
+    candidate_training_allowed: false
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: COMMIT_CONTRACT_AND_OPEN_IMPLEMENTATION_ONLY

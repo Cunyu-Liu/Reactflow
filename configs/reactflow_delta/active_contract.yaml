@@ -1,47 +1,44 @@
-schema_version: reactflow_delta.active_contract.v11
-manifest_id: reactflow_delta_model_rescue_v11_authority_20260825
-project_task_id: reactflow_delta_model_rescue_v11
-created_at: '2026-08-25T01:30:00+08:00'
-updated_at: '2026-08-25T19:35:00+08:00'
+schema_version: reactflow_delta.active_contract.v12
+manifest_id: reactflow_delta_model_rescue_v12_authority_20260825
+project_task_id: reactflow_delta_model_rescue_v12
+created_at: '2026-08-25T19:40:00+08:00'
+updated_at: '2026-08-25T19:40:00+08:00'
 
 authority:
-  pointer_role: V11_WORKTREE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: M6
-  current_authority_state: TERMINAL_V11M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
-  current_runnable_phase: M6
+  pointer_role: V12_WORKTREE_SINGLE_ACTIVE_AUTHORITY
+  current_phase: V12M0
+  current_authority_state: V12M0_CONTRACT_FROZEN_IMPLEMENTATION_NOT_YET_AUTHORIZED
+  current_runnable_phase: V12M0
   conflict_policy: FAIL_CLOSED
-  branch: codex/reactflow-delta-model-rescue-v11-20260825
-  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v11_20260825
-  human_contract_path: docs/prospective_v2/model_rescue_v11_amendment_20260825.md
-  machine_contract_path: configs/reactflow_delta/model_rescue_v11_amendment.yaml
-  decision_ledger_path: docs/prospective_v2/model_rescue_v11_decision_ledger.yaml
-  implementation_plan_path: docs/plans/2026-08-25-model-rescue-v11-implementation.md
-  binding_status: TERMINAL_V11_FAIL_BENCHMARK_HANDOFF_SEPARATE_AMENDMENT_REQUIRED
+  branch: codex/reactflow-delta-model-rescue-v12-20260825
+  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v12_20260825
+  human_contract_path: docs/prospective_v2/model_rescue_v12_amendment_20260825.md
+  machine_contract_path: configs/reactflow_delta/model_rescue_v12_amendment.yaml
+  decision_ledger_path: docs/prospective_v2/model_rescue_v12_decision_ledger.yaml
+  implementation_plan_path: docs/plans/2026-08-25-model-rescue-v12-implementation.md
+  binding_status: CONTRACT_ONLY_FAIL_CLOSED
 
 parent_state:
-  model_rescue_v8_status: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
-  model_rescue_v9_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
-  model_rescue_v10_status: TERMINAL_TOP_JOURNAL_TASK_CRPS_MARGIN_FAIL
-  model_rescue_v10_screen_status: V10M3_TOP_JOURNAL_SCREEN_FAIL
-  model_rescue_v10_formal_opened: false
-  v9_signed_delta_relative_gain: 0.08363163113698135
-  v9_absolute_delta_relative_gain: 0.0980789458821277
-  v9_crps_relative_gain: 0.042264074550957244
-  v9m4_opened: false
+  model_rescue_v11_status: TERMINAL_V11M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
+  model_rescue_v11_formal_opened: false
+  parent_v11_local_head: 084545fabb85c370eee54ee3e86832afc05d8f47
+  parent_v11_remote_head: da97b19f51a2b5a24a88812ecaef054c6bd2532a
   target_profile_identity: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
+  v1_through_v11_verdict_change_allowed: false
 
 authorization:
-  owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION
+  owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION_WITH_AUTONOMOUS_SCIENTIFIC_JUDGMENT
   owner_instruction_date: '2026-08-25'
-  amendment_scope: FEATURE41_ANCHORED_CONTEXT_RESIDUAL_POINT_WITH_EXACT_UNANCHORED_NULL
+  amendment_scope: CONTINUOUS_MONOTONE_OUTCOME_BLIND_RESIDUAL_SHRINKAGE_ONLY
+  contract_drafting_allowed: true
   implementation_allowed: false
   internal_development_probe_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
   public_release_allowed: false
 
-allowed_phases: [V11M0, V11M1, V11M2, V11M3, V11M4, V11M5, M6]
-runnable_phases: [M6]
+allowed_phases: [V12M0, V12M1, V12M2, V12M3, V12M4, V12M5, M6]
+runnable_phases: [V12M0]
 training_allowed: false
 candidate_model_training_allowed: false
 held_score_read_allowed: false
@@ -50,14 +47,8 @@ new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
 new_split_allowed: false
 unrelated_job_interference_allowed: false
-legacy_target_dependent_prediction_reuse_allowed: false
-legacy_target_dependent_score_reuse_allowed: false
-legacy_v3_expert_reuse_allowed: false
-overwrite_existing_v8_fold_allowed: false
-v8_frozen_point_checkpoint_reuse_allowed: true
-v8_point_retraining_allowed: false
-v9_terminal_verdict_change_allowed: false
-v10_terminal_verdict_change_allowed: false
+v11_artifact_overwrite_allowed: false
+v11_terminal_verdict_change_allowed: false
 
 resource_policy:
   physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
@@ -67,15 +58,14 @@ resource_policy:
   low_frequency_monitor_seconds: 900
 
 gate_state:
-  V11M0: CONTRACT_FROZEN_PASS
-  V11M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
-  V11M2: V11M2_ENGINEERING_SMOKE_PASS
-  V11M3: V11M3_TOP_JOURNAL_SCREEN_FAIL
-  V11M4: NOT_AUTHORIZED
-  V11M5: V11_ARTIFACT_AND_DIAGNOSTIC_FREEZE_PASS
-  TOP_JOURNAL_DEVELOPMENT_GATE: FAIL
+  V12M0: CONTRACT_FROZEN_PENDING_FOCUSED_COMMIT
+  V12M1: NOT_AUTHORIZED
+  V12M2: NOT_AUTHORIZED
+  V12M3: NOT_AUTHORIZED
+  V12M4: NOT_AUTHORIZED
+  V12M5: NOT_RUN
+  TOP_JOURNAL_DEVELOPMENT_GATE: NOT_RUN
   TOP_JOURNAL_EXTERNAL_GATE: NOT_RUN
   TARGET_PROFILE_IDENTITY: TIC1_ACCESSOR_FIX_AND_REAL_DATA_IDENTITY_PASS
-  LEGACY_V3_CORRECTED_EXPERTS: INVALIDATED_TARGET_IDENTITY
 
-next_allowed_action: CREATE_SEPARATE_V12_MONOTONE_RESIDUAL_SHRINKAGE_AMENDMENT_CONTRACT_ONLY
+next_allowed_action: COMMIT_V12_CONTRACT_THEN_OPEN_IMPLEMENTATION_ONLY

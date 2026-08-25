@@ -1,0 +1,248 @@
+schema_version: reactflow_delta.model_rescue_v12_amendment.v1
+contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
+contract_status: V12M0_CONTRACT_FROZEN_NO_TRAINING
+created_at: '2026-08-25T19:40:00+08:00'
+
+parent:
+  v11_terminal_status: TERMINAL_V11M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
+  v11_screen_status: V11M3_TOP_JOURNAL_SCREEN_FAIL
+  v11_formal_opened: false
+  v11_verdict_change_allowed: false
+  v1_through_v10_verdict_change_allowed: false
+  parent_local_head: 084545fabb85c370eee54ee3e86832afc05d8f47
+  parent_remote_head: da97b19f51a2b5a24a88812ecaef054c6bd2532a
+  diagnostic_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/v11m3_postscreen_diagnostics.json
+
+scientific_scope:
+  question: >-
+    CAN A TRAIN_ONLY CONTINUOUS MONOTONE GATE SUPPRESS V11 RESIDUAL
+    OVER_CORRECTION IN OUTCOME_BLIND NEAR_EDIT AND NEAR_ZERO REGIMES WHILE
+    RETAINING ITS NONLOCAL GAINS, SO THAT ONE FIXED MODEL PASSES POINT,
+    PROBABILISTIC, AND MAGNITUDE TOP_JOURNAL GATES
+  task: ENDPOINT_V7_ALL_MUTANT_FULL_CONSTRUCT_SIGNED_DELTA_DISTRIBUTION
+  data: REAL_OPENKNOT_M2_V4_5_2_DEVELOPMENT_CONSUMED
+  data_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  inner_crossfit: FOUR_PUZZLE_GROUPED_FOLDS_WITH_EACH_OUTER_TRAIN_PUZZLE_HELD_ONCE
+  evaluator: EVALUATOR_V2_METHOD_BALANCED_TARGET_INVARIANT
+  target_identity: EXACT_PUZZLE_METHOD_MUTATION
+  external_outcome_allowed: false
+  partial_score_allowed: false
+  model_or_threshold_selection_allowed: false
+
+evidence_basis:
+  v11_global:
+    signed_relative_gain_vs_feature41: 0.0980410251841224
+    point_absolute_relative_gain_vs_feature41: 0.04568080785023808
+    task_crps_relative_gain_vs_feature41: 0.036614834427866554
+    task_crps_relative_gain_vs_v10: 0.003968972054456065
+    anchor_attribution_pass: false
+  convergence:
+    schedule_visibly_unfinished: false
+    folds_ge_1pct_last_window_decrease: 2
+    median_last_window_relative_decrease: 0.0022249298954503545
+  global_overfit:
+    supported: false
+    folds_train_held_gap_ge_5pp: 3
+    median_train_minus_held_gain: 0.004372508207320568
+  outcome_blind_localization:
+    edit_site_signed_relative_gain: -0.014280295916130406
+    distance_1_5_signed_relative_gain: 0.01817974523328181
+    distance_6_20_signed_relative_gain: 0.10965789727567198
+    distance_gt20_signed_relative_gain: 0.11371982614352912
+    feature41_abs_lt_0_05_signed_relative_gain: -0.0027300702561358593
+    feature41_abs_0_05_0_10_signed_relative_gain: 0.1403186450130699
+    feature41_abs_0_10_0_20_signed_relative_gain: 0.08510011911354047
+    feature41_abs_ge_0_20_signed_relative_gain: 0.118515923470963
+  identified_bottleneck: OUTCOME_BLIND_REGIME_DEPENDENT_RESIDUAL_OVER_CORRECTION
+
+hypothesis:
+  statement: >-
+    THE V11 RESIDUAL CONTAINS REAL NONLOCAL SIGNAL BUT SHOULD BE SHRUNK TOWARD
+    FEATURE41 WHEN EITHER ABSOLUTE EDIT DISTANCE OR FEATURE41 MAGNITUDE IS SMALL.
+    A LOW_CAPACITY MONOTONE PRODUCT GATE FIT ONLY ON LEGAL INNER_OOF PREDICTIONS
+    CAN REMOVE THIS ERROR WITHOUT CHANGING THE V11 BACKBONE OR POINT LOSS.
+  prediction: >-
+    THE GATED POINT WILL IMPROVE SIGNED AND POINT_ABSOLUTE ERROR VERSUS THE SAME
+    V11 POINT WITH GATE FIXED TO ONE; AFTER THE SAME FIXED_MEDIAN V10 RESIDUAL
+    FAMILY IT WILL ALSO EXCEED THE FIVE_PERCENT TASK_CRPS MARGIN.
+  falsifier: >-
+    ANY PREFROZEN POINT, CRPS, DISTRIBUTION_ABSOLUTE, MATCHED_PARENT, COVERAGE,
+    INTEGRITY, OR INNER_CROSSFIT GATE FAILS.
+
+candidate:
+  id: v12_v11_monotone_regime_shrinkage
+  frozen_parent_point: V11_FEATURE41_ANCHORED_CONTEXT_RESIDUAL
+  final_point: FEATURE41_PLUS_GATE_TIMES_V11_NEURAL_RESIDUAL
+  equation: MU_V12_EQUALS_F41_PLUS_G_TIMES_MU_V11_MINUS_F41
+  backbone_change_allowed: false
+  point_loss_change_allowed: false
+  parent_point_retraining_in_seed0_screen: false
+  authoritative_v11_seed0_checkpoint_and_prediction_reuse: true
+
+task_matched_null:
+  id: v12_gate_fixed_one_parent_null
+  equation: MU_NULL_EQUALS_F41_PLUS_ONE_TIMES_MU_V11_MINUS_F41
+  scientific_meaning: EXACT_AUTHORITATIVE_V11_ANCHORED_POINT_AND_DISTRIBUTION
+  additional_trainable_parameters: 0
+
+gate:
+  family: PRODUCT_OF_TWO_MONOTONE_LOGISTIC_FACTORS
+  equation: >-
+    G_EQUALS_SIGMOID(B_DISTANCE_PLUS_SOFTPLUS(W_DISTANCE)_TIMES_LOG1P_ABS_DISTANCE)
+    TIMES_SIGMOID(B_MAGNITUDE_PLUS_SOFTPLUS(W_MAGNITUDE)_TIMES_LOG1P_ABS_F41_OVER_0_05)
+  inputs: [ABSOLUTE_SIGNED_DISTANCE_FROM_EDIT, ABSOLUTE_OUTER_TRAIN_FEATURE41_POINT]
+  forbidden_inputs: [METHOD_ID, MUTANT_TARGET, TARGET_ERROR, TARGET_MASK, HELD_PUZZLE_ID, EXTERNAL_OUTCOME]
+  trainable_parameters: 4
+  range_open_interval: [0.0, 1.0]
+  monotone_non_decreasing_in_each_input: true
+  magnitude_normalization_constant: 0.05
+  hard_bin_or_threshold_allowed: false
+  gate_family_or_input_search_allowed: false
+  objective: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1_ON_INNER_OOF_PREDICTIONS
+  optimizer: ADAM
+  learning_rate: 0.01
+  steps: 500
+  weight_decay: 0.0
+  initialization: {b_distance: 0.0, raw_w_distance: 0.0, b_magnitude: 0.0, raw_w_magnitude: 0.0}
+
+inner_crossfit:
+  folds: 4
+  grouping: FROZEN_SPLIT_V4_INNER_GROUPS
+  point_architecture: EXACT_V11_ANCHORED_CONTEXT_RESIDUAL
+  point_epochs: 40
+  optimizer_and_loss: EXACT_V11
+  each_outer_train_puzzle_held_once: true
+  inner_held_outcome_enters_gate_objective_only_after_prediction: true
+  inner_held_outcome_enters_point_training: false
+  outer_held_outcome_enters_gate_fit: false
+  in_sample_outer_point_predictions_for_gate_fit_allowed: false
+  threshold_or_feature_selection_allowed: false
+
+residual_calibration:
+  implementation: EXACT_V10_MEDIAN_ASYMMETRIC_RESIDUAL
+  point_frozen_before_calibration: true
+  family_change_allowed: false
+  epochs: 40
+  optimizer: ADAM
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  exact_median_constraint: MIXTURE_CDF_AT_GATED_POINT_EQUALS_0_5
+  point_gradient_allowed: false
+
+prediction_artifact:
+  schema: reactflow_delta.model_rescue_v12_prediction.v1
+  prediction_only: true
+  full_registered_construct_positions: true
+  required_fields:
+    - biological_scoring_key
+    - outer_fold
+    - seed
+    - feature41_point
+    - v11_parent_point
+    - gate_distance_factor
+    - gate_magnitude_factor
+    - gate_value
+    - candidate_point
+    - candidate_weights
+    - candidate_locations
+    - candidate_scales
+    - parent_weights
+    - parent_locations
+    - parent_scales
+    - registered_status
+    - inner_crossfit_ledger_path
+  prohibited_fields: [target, target_error, target_mask, score, crps, signed_delta_mae]
+
+v12m2_smoke:
+  folds: [0, 1]
+  seed: 0
+  inner_point_epochs: 3
+  calibration_epochs: 3
+  gate_steps: 20
+  scientific_score_allowed: false
+  artifact_status: ENGINEERING_SMOKE_ONLY
+
+v12m3_screen:
+  seed: 0
+  folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  inner_point_epochs: 40
+  calibration_epochs: 40
+  gate_steps: 500
+  complete_before_score_access: true
+  score_once_after_complete_merge: true
+  gates:
+    signed_delta_relative_gain_vs_feature41_min: 0.10
+    signed_delta_relative_gain_vs_parent_v11_min: 0.01
+    signed_delta_ci_lower_each_gt: 0.0
+    signed_delta_positive_puzzles_vs_feature41_min: 16
+    signed_delta_positive_puzzles_vs_parent_v11_min: 14
+    point_absolute_delta_relative_gain_vs_feature41_min: 0.05
+    point_absolute_delta_relative_gain_vs_parent_v11_min: 0.01
+    point_absolute_delta_ci_lower_each_gt: 0.0
+    point_absolute_delta_positive_puzzles_vs_feature41_min: 16
+    point_absolute_delta_positive_puzzles_vs_parent_v11_min: 14
+    task_crps_relative_gain_vs_feature41_min: 0.05
+    task_crps_relative_gain_vs_parent_v11_min: 0.015
+    task_crps_relative_gain_vs_terminal_v10_min: 0.015
+    task_crps_ci_lower_each_gt: 0.0
+    task_crps_positive_puzzles_vs_feature41_min: 16
+    task_crps_positive_puzzles_vs_parent_v11_min: 14
+    task_crps_positive_puzzles_vs_v10_min: 14
+    distribution_absolute_delta_relative_gain_vs_feature41_min: 0.15
+    distribution_absolute_delta_relative_gain_vs_v10_min: 0.01
+    distribution_absolute_delta_ci_lower_each_gt: 0.0
+    distribution_absolute_delta_positive_puzzles_vs_feature41_min: 16
+    distribution_absolute_delta_positive_puzzles_vs_v10_min: 14
+    leave_one_puzzle_effect_positive_all_headline_metrics: true
+    max_single_puzzle_effect_fraction: 0.20
+    coverage_68_and_95_error_worsening_max_pp: 2.0
+    prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_keys: 0
+
+v12m4_formal:
+  prerequisite: EXACT_V12M3_TOP_JOURNAL_SCREEN_PASS
+  seeds: [0, 1, 2, 3, 4]
+  folds_per_seed: 20
+  inner_point_epochs: 40
+  calibration_epochs: 40
+  gate_steps: 500
+  selection_allowed: false
+  failed_seed_deletion_allowed: false
+  best_seed_reporting_allowed: false
+  repeat_all_screen_gates_on_equal_seed_mixture: true
+  additional_seed_stability:
+    signed_delta_positive_direction_seeds_min: 4
+    point_absolute_positive_direction_seeds_min: 4
+    task_crps_positive_direction_seeds_min: 4
+    distribution_absolute_positive_direction_seeds_min: 4
+
+phase_graph:
+  - {id: V12M0, status: CONTRACT_FROZEN, next_on_pass: V12M1}
+  - {id: V12M1, status: NOT_AUTHORIZED, next_on_pass: V12M2, next_on_fail: V12M5_FAIL}
+  - {id: V12M2, status: NOT_AUTHORIZED, next_on_pass: V12M3, next_on_fail: V12M5_FAIL}
+  - {id: V12M3, status: NOT_AUTHORIZED, next_on_pass: V12M4, next_on_fail: V12M5_FAIL}
+  - {id: V12M4, status: NOT_AUTHORIZED, next_on_pass: V12M5_PASS, next_on_fail: V12M5_FAIL}
+  - {id: V12M5, status: NOT_RUN, handoff_phase: M6}
+
+resource_policy:
+  physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
+  co_location_when_memory_sufficient: true
+  preemption_or_termination_allowed: false
+  persistent_sessions_required: true
+  low_frequency_monitor_seconds: 900
+  unlimited_compute_means_frozen_protocol_completion_only: true
+
+stop_and_claim_policy:
+  gate_lowering_allowed: false
+  partial_score_access_allowed: false
+  external_outcome_access_allowed: false
+  v12m3_fail: TERMINAL_V12_SCREEN_FAIL_NO_FORMAL_CONFIRMATION
+  v12m4_fail: TERMINAL_V12_FORMAL_FAIL
+  pass_qualification: POST_HOC_DEVELOPMENT_PASS_REQUIRES_SEALED_EXTERNAL_AMENDMENT
+  sota: NOT_ESTABLISHED
+  external_replication: NOT_ESTABLISHED
+  mechanism: NOT_ESTABLISHED
+  publication_ready: false
