@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
-current_status: TERMINAL_V12M3_TOP_JOURNAL_SCREEN_FAIL_POSTSCREEN_DIAGNOSTICS_ONLY
-updated_at: '2026-08-26T03:55:00+08:00'
+current_status: TERMINAL_V12M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE_SHRINKAGE_GATE_ROUTE_CLOSED
+updated_at: '2026-08-26T04:24:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -41,7 +41,7 @@ phase_state:
   V12M2: PASS
   V12M3: TOP_JOURNAL_SCREEN_FAIL
   V12M4: PERMANENTLY_NOT_AUTHORIZED
-  V12M5: NOT_RUN
+  V12M5: PASS
 
 outcome_access:
   v12_partial_score_accessed: false
@@ -252,3 +252,50 @@ events:
     training_allowed: false
     held_score_read_allowed_after_commit: V12_COMPLETE_SCORE_POSTSCREEN_DIAGNOSTICS_ONLY
     next_action: RUN_PREFROZEN_POST_V12_DIAGNOSTICS_ONCE_NO_TRAINING
+
+  - id: V12M3_POSTSCREEN_DIAGNOSTICS_COMPLETE_AND_ROUTE_FREEZE
+    observed_at: '2026-08-26T04:24:00+08:00'
+    status: POST_V12_DIAGNOSTICS_COMPLETE
+    diagnostic_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m3_screen_seed0/v12m3_postscreen_diagnostics.json
+    diagnostic_session: reactflow_v12_postscreen_diagnostics_20260826
+    independent_unit: HELD_PUZZLE_N20
+    complete_fold_universe: 20
+    oracle_is_in_sample_upper_bound_not_model_performance: true
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    model_or_threshold_selection_performed: false
+    routing_evidence:
+      coordinate_limited: false
+      transfer_limited: false
+      monotone_product_adequate: true
+      residual_signal_absent: false
+      point_gates_pass: false
+      stable_tail_asymmetry: true
+      distribution_only_supported: false
+      global_to_2d_signed_relative_headroom_mean: 0.008333290800183375
+      global_to_2d_signed_relative_headroom_ci95: [0.006219191834595681, 0.010447389765771068]
+      global_to_2d_signed_positive_puzzles: 20
+      global_to_2d_point_absolute_relative_headroom_mean: -0.0010211100603617117
+      v12_to_2d_signed_relative_headroom_mean: 0.007200108857377876
+      v12_to_2d_point_absolute_relative_headroom_mean: 0.003105476610054811
+      oracle_2d_signed_relative_gain_vs_feature41_mean: 0.11693161554158735
+      oracle_2d_point_absolute_relative_gain_vs_feature41_mean: 0.054320534992493716
+      candidate_tail_asymmetry90_mean: -0.01755061511244923
+      candidate_tail_asymmetry90_ci95: [-0.0273440204706629, -0.007757209754235559]
+      candidate_tail_asymmetry95_mean: -0.021258307378634565
+      candidate_tail_asymmetry95_ci95: [-0.027848188268819993, -0.014668426488449137]
+    decision:
+      route: TERMINATE_SHRINKAGE_GATE_CAPACITY_ROUTE
+      rationale: >-
+        The product gate is within the pre-frozen one-percent adequacy margin
+        of the held 4x4 in-sample oracle, while coordinate-limited and
+        transfer-limited criteria are false. Stable tail asymmetry cannot open
+        a residual-only route because the frozen point Gates failed.
+      v12_terminal_verdict_changed: false
+      v12m4_authorized: false
+      v13_authorized: false
+      new_model_authorized: false
+      held_score_read_allowed_after_commit: false
+      training_allowed_after_commit: false
+      handoff_phase: M6
+      next_action: RETURN_MAIN_CONTRACT_M6_BENCHMARK_MEASUREMENT_ROUTE
