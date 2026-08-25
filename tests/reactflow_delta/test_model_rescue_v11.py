@@ -439,9 +439,31 @@ def test_post_v11_diagnostic_weights_methods_then_mutants_then_positions() -> No
     assert np.allclose(weights[mutants == "A2"], 1.0 / 12.0)
 
 
-def test_post_v11_diagnostics_are_closed_while_screen_training_runs() -> None:
+def test_post_v11_diagnostics_require_training_closed_and_complete_score(
+    tmp_path: Path,
+) -> None:
+    active_path = tmp_path / "configs/reactflow_delta/active_contract.yaml"
+    active_path.parent.mkdir(parents=True)
+    active = {
+        "authority": {"current_phase": "V11M3"},
+        "runnable_phases": ["V11M3"],
+        "training_allowed": "V11_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY",
+        "held_score_read_allowed": False,
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+    }
+    active_path.write_text(yaml.safe_dump(active))
     with pytest.raises(RuntimeError, match="training closed"):
-        assert_diagnostic_authority(ROOT)
+        assert_diagnostic_authority(tmp_path)
+
+    active["training_allowed"] = False
+    active_path.write_text(yaml.safe_dump(active))
+    with pytest.raises(RuntimeError, match="complete-score authority"):
+        assert_diagnostic_authority(tmp_path)
+
+    active["held_score_read_allowed"] = True
+    active_path.write_text(yaml.safe_dump(active))
+    assert_diagnostic_authority(tmp_path)
 
 
 def test_post_v11_convergence_rule_requires_one_percent_in_fourteen_folds() -> None:
