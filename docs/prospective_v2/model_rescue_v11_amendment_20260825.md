@@ -79,7 +79,7 @@ Primary 必须全部满足：
 
 ## 9. V11M4 五 seed formal confirmation
 
-固定 seeds 0–4、20 folds、40+40 epochs，无 selection。Candidate、matched null 和 feature41-asymmetric 均在相同 fold×seed universe 中重建；最终是等 seed mixture，不删失败 seed、不报告 best seed。除重复 V11M3 全部 Gate 外，至少 4/5 seeds 的 signed 与 task CRPS 方向必须为正。Terminal V10 seed-0 只作为历史上下文，不冒充五-seed formal comparator。
+固定 seeds 0–4、20 folds、40+40 epochs，无 selection。Candidate、matched null 和 feature41-asymmetric 均在相同 fold×seed universe 中重建；最终是等 seed mixture，不删失败 seed、不报告 best seed。正式 mixture 重复 V11M3 中相对 feature41、V8、matched null 的 point、absolute、task-CRPS、CI、puzzle、LOO、influence、coverage 和完整性 Gate；至少 4/5 seeds 的 signed 与 task CRPS 方向必须为正。V11M3 相对 terminal V10 的 1.5% CRPS 及 absolute non-inferiority 必须已经通过，但 terminal V10 seed-0 在 formal 阶段只作为历史上下文，不冒充五-seed comparator，也不与五-seed mixture 生成新的显著性 Gate。
 
 ## 10. 证据资格和停止条件
 
