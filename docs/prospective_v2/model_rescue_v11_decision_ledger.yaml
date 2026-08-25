@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M3_TWENTY_OF_TWENTY_PREDICTION_ARTIFACTS_PRESENT_MERGE_ONLY
-updated_at: '2026-08-25T19:03:00+08:00'
+current_status: V11M3_COMPLETE_UNSCORED_MERGE_PASS_COMPLETE_SCORE_AUTHORIZED_ONCE
+updated_at: '2026-08-25T19:05:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -140,7 +140,7 @@ phase_state:
   V11M0: PASS
   V11M1: PASS
   V11M2: PASS
-  V11M3: TWENTY_OF_TWENTY_PREDICTION_ARTIFACTS_PRESENT_MERGE_ONLY_SCORE_CLOSED
+  V11M3: COMPLETE_UNSCORED_MERGE_PASS_SCORE_AUTHORIZED_ONCE
   V11M4: NOT_AUTHORIZED
   V11M5: NOT_RUN
 
@@ -351,3 +351,18 @@ recovery_events:
     training_allowed: false
     held_score_read_allowed: false
     next_action: RUN_PREDICTION_ONLY_MERGE_AND_PROVENANCE_GUARD
+
+  - id: V11M3_COMPLETE_UNSCORED_MERGE
+    observed_at: '2026-08-25T19:05:00+08:00'
+    status: V11M3_COMPLETE_UNSCORED_MERGE_PASS
+    merge_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/v11m3_complete_unscored_merge.json
+    complete_fold_seed_universe: true
+    fold_count: 20
+    authoritative_comparator_provenance_all_runs: true
+    merged_integrity_pass: true
+    scientific_score_read: false
+    partial_score_read: false
+    external_outcome_accessed: false
+    training_allowed: false
+    held_score_read_allowed_after_commit: true
+    next_action: RUN_SCORER_ONCE_THEN_QUALIFIER_ONCE
