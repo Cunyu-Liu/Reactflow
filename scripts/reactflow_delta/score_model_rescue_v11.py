@@ -58,6 +58,7 @@ def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
         "v10_residual_family_all_runs",
         "feature41_replay_all_runs",
         "feature41_asymmetric_seed0_replay_all_folds",
+        "authoritative_feature41_seed0_comparator_provenance_all_runs",
         "median_constraint_all_runs",
     )
     required_false = ("partial_scores_inspected", "external_outcome_accessed")

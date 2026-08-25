@@ -21,6 +21,19 @@ from scripts.reactflow_delta.run_model_rescue_v11 import (
 SCHEMA = "reactflow_delta.model_rescue_v11_merged.v1"
 
 
+def authoritative_comparator_invariant_pass(
+    phase: str, invariants: dict[str, Any]
+) -> bool:
+    if phase == "V11M2":
+        return True
+    return (
+        invariants.get(
+            "feature41_asymmetric_seed0_uses_authoritative_v10_or_not_applicable"
+        )
+        is True
+    )
+
+
 def _expected_universe(phase: str) -> tuple[list[int], list[int], int, int, str]:
     if phase == "V11M2":
         return [0, 1], [0], 3, 3, "V11M2_COMPLETE_UNSCORED_SMOKE_MERGE_PASS"
@@ -53,6 +66,12 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
             raise ValueError(f"V11 fold-seed {pair} violates epoch freeze")
         if not recorded_invariants_pass(row.get("invariants", {})):
             raise ValueError(f"V11 fold-seed {pair} lacks required invariants")
+        if not authoritative_comparator_invariant_pass(
+            phase, row.get("invariants", {})
+        ):
+            raise ValueError(
+                f"V11 fold-seed {pair} lacks authoritative comparator provenance"
+            )
         checks = prediction_checks(
             Path(row["prediction_artifact"]),
             fold=fold,
@@ -103,6 +122,7 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
             "v10_residual_family_all_runs": True,
             "feature41_replay_all_runs": True,
             "feature41_asymmetric_seed0_replay_all_folds": True,
+            "authoritative_feature41_seed0_comparator_provenance_all_runs": True,
             "median_constraint_all_runs": True,
             "partial_scores_inspected": False,
             "external_outcome_accessed": False,
