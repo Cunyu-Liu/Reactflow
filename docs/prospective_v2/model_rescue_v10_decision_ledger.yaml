@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v10_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v10_20260825
 created_at: '2026-08-25T01:30:00+08:00'
-current_status: V10M2_COMPLETE_UNSCORED_MERGE_PASS_V10M3_SCORE_AUTHORIZED
+current_status: TERMINAL_V10M3_TOP_JOURNAL_SCREEN_FAIL_V10M4_PERMANENTLY_CLOSED
 
 immutable_parent:
   v9_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
@@ -99,7 +99,7 @@ v10m2:
   merge_integrity_pass: true
   partial_scientific_scores_read: false
 v10m3:
-  status: ONE_COMPLETE_SCORE_AND_QUALIFICATION_AUTHORIZED
+  status: V10M3_TOP_JOURNAL_SCREEN_FAIL
   training_allowed: false
   held_score_read_allowed: true
   partial_score_allowed: false
@@ -109,8 +109,39 @@ v10m3:
   qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0/v10m3_qualification.json
   repeat_score_or_qualifier_allowed: false
   external_outcome_allowed: false
-v10m4: NOT_AUTHORIZED
+  gate_passed: false
+  failed_gate: task_crps_relative_gain_ge_5pct
+  signed_delta:
+    baseline_mean: 0.19115973001564485
+    candidate_mean: 0.17517272998673153
+    relative_gain: 0.08363163113698135
+    ci95: [0.012862310365787447, 0.019111689692039257]
+    positive_puzzles: 20
+  absolute_delta:
+    baseline_mean: 0.15302427333591662
+    candidate_mean: 0.1311477707620369
+    relative_gain: 0.1429609962979974
+    ci95: [0.01877042904835064, 0.0249825760994088]
+    positive_puzzles: 20
+  task_crps:
+    baseline_mean: 0.1305795589523953
+    candidate_mean: 0.1262996899616337
+    relative_gain: 0.03277594919984294
+    ci95: [0.00339533632756878, 0.0051644016539544296]
+    positive_puzzles: 20
+  asymmetric_vs_symmetric:
+    baseline_mean: 0.13256967665687686
+    candidate_mean: 0.1262996899616337
+    relative_gain: 0.0472957832692873
+    ci95: [0.004361050999539734, 0.008178922390946553]
+    positive_puzzles: 20
+  crps_vs_historical_v9_relative_gain: 0.0530620852142138
+  coverage68: 0.6718762779519163
+  coverage95: 0.9191409004399329
+  all_other_gates_passed: true
+  selected_pre_score_contingency_branch: BRANCH_5_POINT_REPRESENTATION
+v10m4: PERMANENTLY_NOT_AUTHORIZED
 v10m5: NOT_RUN
-v10m6: NOT_RUN
+v10m6: TERMINAL_FAIL_POINT_REPRESENTATION_BRANCH_SELECTED
 
-next_allowed_action: RUN_ONE_V10M3_COMPLETE_SCORER_THEN_PRE_FROZEN_QUALIFIER
+next_allowed_action: DRAFT_SEPARATE_V11_POINT_REPRESENTATION_AMENDMENT_WITH_FIXED_V10_RESIDUAL_FAMILY_NO_TRAINING
