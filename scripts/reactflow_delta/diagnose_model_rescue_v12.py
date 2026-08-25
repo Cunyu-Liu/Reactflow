@@ -146,6 +146,61 @@ def gate_geometry(
     }
 
 
+def _descriptive_summary(values: list[float]) -> dict[str, float | int]:
+    array = np.asarray(values, dtype=np.float64)
+    if len(array) != 20 or not np.isfinite(array).all():
+        raise ValueError("gate-geometry dispersion requires twenty finite folds")
+    return {
+        "n_puzzles": 20,
+        "mean": float(array.mean()),
+        "standard_deviation": float(array.std(ddof=1)),
+        "minimum": float(array.min()),
+        "median": float(np.median(array)),
+        "maximum": float(array.max()),
+    }
+
+
+def summarize_gate_geometries(folds: list[dict[str, Any]]) -> dict[str, Any]:
+    if len(folds) != 20:
+        raise ValueError("gate-geometry summary requires folds0-19")
+    parameter_names = tuple(sorted(folds[0]["gate_geometry"]["parameters"]))
+    distance = tuple(folds[0]["gate_geometry"]["surface"]["distance"])
+    magnitude = tuple(
+        folds[0]["gate_geometry"]["surface"]["absolute_feature41"]
+    )
+    surfaces = []
+    for row in folds:
+        geometry = row["gate_geometry"]
+        if tuple(sorted(geometry["parameters"])) != parameter_names:
+            raise ValueError("gate parameter universe differs across folds")
+        if tuple(geometry["surface"]["distance"]) != distance or tuple(
+            geometry["surface"]["absolute_feature41"]
+        ) != magnitude:
+            raise ValueError("gate diagnostic grid differs across folds")
+        surface = np.asarray(geometry["surface"]["gate"], dtype=np.float64)
+        if surface.shape != (len(distance), len(magnitude)):
+            raise ValueError("gate diagnostic surface has the wrong shape")
+        surfaces.append(surface)
+    stacked = np.stack(surfaces)
+    grid = {}
+    for distance_index, distance_value in enumerate(distance):
+        for magnitude_index, magnitude_value in enumerate(magnitude):
+            grid[f"distance={distance_value}|absolute_feature41={magnitude_value}"] = (
+                _descriptive_summary(
+                    stacked[:, distance_index, magnitude_index].tolist()
+                )
+            )
+    return {
+        "parameters": {
+            name: _descriptive_summary(
+                [float(row["gate_geometry"]["parameters"][name]) for row in folds]
+            )
+            for name in parameter_names
+        },
+        "surface_grid": grid,
+    }
+
+
 def _observations(
     univ: M2Universe,
     held_records: list[Any],
@@ -258,6 +313,7 @@ def _oracle(
 ) -> dict[str, Any]:
     prediction = np.asarray(observations["feature41_point"], dtype=np.float64).copy()
     residual = observations["parent_point"] - observations["feature41_point"]
+    gate_by_row = np.zeros(len(prediction), dtype=np.float64)
     gates = {}
     covered = np.zeros(len(prediction), dtype=bool)
     for label, selected in groups.items():
@@ -265,6 +321,7 @@ def _oracle(
         if selected.any():
             gate = _best_gate(observations, selected)
             prediction[selected] += gate * residual[selected]
+            gate_by_row[selected] = gate
             covered |= selected
             gates[label] = gate
         else:
@@ -280,6 +337,7 @@ def _oracle(
             np.sum(weights * np.abs(np.abs(target) - np.abs(prediction)))
         ),
         "prediction": prediction,
+        "gate_by_row": gate_by_row,
     }
 
 
@@ -318,6 +376,32 @@ def oracle_diagnostics(
             )
         ),
         "feature41_absolute_delta_mae": float(score_row["feature41_absolute_delta_mae"]),
+        "parent_point_absolute_delta_mae": float(
+            np.sum(
+                weights
+                * np.abs(np.abs(target) - np.abs(observations["parent_point"]))
+            )
+        ),
+    }
+    comparison_losses = {
+        "feature41": {
+            "signed_delta_mae": point_losses["feature41_signed_delta_mae"],
+            "point_absolute_delta_mae": point_losses[
+                "feature41_absolute_delta_mae"
+            ],
+        },
+        "parent_v11": {
+            "signed_delta_mae": point_losses["parent_signed_delta_mae"],
+            "point_absolute_delta_mae": point_losses[
+                "parent_point_absolute_delta_mae"
+            ],
+        },
+        "candidate_v12": {
+            "signed_delta_mae": point_losses["candidate_signed_delta_mae"],
+            "point_absolute_delta_mae": point_losses[
+                "candidate_point_absolute_delta_mae"
+            ],
+        },
     }
     for name, current in oracles.items():
         current["signed_relative_gain_vs_feature41"] = (
@@ -327,8 +411,73 @@ def oracle_diagnostics(
             point_losses["feature41_absolute_delta_mae"]
             - current["point_absolute_delta_mae"]
         ) / point_losses["feature41_absolute_delta_mae"]
+        current["gains"] = {}
+        for comparator, comparator_losses in comparison_losses.items():
+            current["gains"][comparator] = {}
+            for metric in ("signed_delta_mae", "point_absolute_delta_mae"):
+                absolute_gain = comparator_losses[metric] - current[metric]
+                current["gains"][comparator][f"{metric}_absolute_gain"] = float(
+                    absolute_gain
+                )
+                current["gains"][comparator][f"{metric}_relative_gain"] = float(
+                    absolute_gain / comparator_losses[metric]
+                )
+    oracle_gate_correlation = weighted_correlation(
+        observations["gate_value"],
+        oracles["distance_by_magnitude"]["gate_by_row"],
+        weights,
+    )
+    comparisons = {}
+    ordered_pairs = (
+        ("candidate_v12", None, "global", "candidate_minus_global"),
+        (None, "global", "distance", "global_minus_distance"),
+        (None, "global", "magnitude", "global_minus_magnitude"),
+        (None, "global", "distance_by_magnitude", "global_minus_2d"),
+    )
+    for left_point, left_oracle, right_oracle, label in ordered_pairs:
+        comparisons[label] = {}
+        for metric, baseline_key in (
+            ("signed_delta_mae", "feature41_signed_delta_mae"),
+            ("point_absolute_delta_mae", "feature41_absolute_delta_mae"),
+        ):
+            if left_point is not None:
+                left = comparison_losses[left_point][metric]
+            else:
+                left = oracles[str(left_oracle)][metric]
+            right = oracles[right_oracle][metric]
+            comparisons[label][f"{metric}_absolute_headroom"] = float(left - right)
+            comparisons[label][f"{metric}_relative_headroom"] = float(
+                (left - right) / point_losses[baseline_key]
+            )
+    residual_associations = {}
+    target_residual = target - observations["feature41_point"]
+    parent_residual = observations["parent_point"] - observations["feature41_point"]
+    for dimension, masks in _regime_masks(observations).items():
+        residual_associations[dimension] = {}
+        for label, selected in masks.items():
+            selected = np.asarray(selected, dtype=bool)
+            if selected.any():
+                selected_weights = method_balanced_weights(
+                    observations["method"], observations["mutant"], selected
+                )
+                residual_associations[dimension][label] = {
+                    "n_rows": int(selected.sum()),
+                    "weighted_residual_correlation": weighted_correlation(
+                        target_residual, parent_residual, selected_weights
+                    ),
+                }
+            else:
+                residual_associations[dimension][label] = {"available": False}
+    for current in oracles.values():
         current.pop("prediction")
-    return {"observed_point_losses": point_losses, "oracles": oracles}
+        current.pop("gate_by_row")
+    return {
+        "observed_point_losses": point_losses,
+        "oracles": oracles,
+        "comparisons": comparisons,
+        "v12_gate_to_2d_oracle_gate_weighted_correlation": oracle_gate_correlation,
+        "regime_residual_associations": residual_associations,
+    }
 
 
 def _distribution(
@@ -600,6 +749,7 @@ def diagnose(
         "status": "POST_V12_DIAGNOSTICS_COMPLETE",
         "evidence_status": "POST_HOC_DEVELOPMENT_DIAGNOSTIC_ONLY",
         "folds": fold_results,
+        "gate_geometry_across_folds": summarize_gate_geometries(fold_results),
         "route_summary": route,
         "independent_units": 20,
         "oracle_is_in_sample_upper_bound_not_model_performance": True,

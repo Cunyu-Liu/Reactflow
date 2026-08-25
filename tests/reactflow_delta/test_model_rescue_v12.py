@@ -39,7 +39,9 @@ from scripts.reactflow_delta.score_model_rescue_v12_formal import (
 from scripts.reactflow_delta.diagnose_model_rescue_v12 import (
     assert_diagnostic_authority,
     gate_geometry,
+    oracle_diagnostics,
     route_summary,
+    summarize_gate_geometries,
 )
 from scripts.reactflow_delta.validate_model_rescue_v12_contract import (
     assert_run_authority,
@@ -406,6 +408,40 @@ def test_post_v12_gate_geometry_replays_frozen_monotone_surface() -> None:
     assert np.all(surface[1:, :] >= surface[:-1, :])
     assert np.all(surface[:, 1:] >= surface[:, :-1])
     assert result["weighted_fractions"]["gate_lt_0.25"] == 0.5
+    summary = summarize_gate_geometries(
+        [{"gate_geometry": result} for _ in range(20)]
+    )
+    assert summary["parameters"]["b_distance"]["standard_deviation"] == 0.0
+    assert len(summary["surface_grid"]) == 36
+
+
+def test_post_v12_oracle_reports_all_prefrozen_d3_contrasts() -> None:
+    observations = {
+        "method": np.asarray(["A", "A", "A", "A", "B", "B", "B", "B"]),
+        "mutant": np.asarray(["m1", "m1", "m2", "m2", "m3", "m3", "m4", "m4"]),
+        "distance": np.asarray([0, 1, 6, 21, 0, 2, 8, 30], dtype=float),
+        "target": np.asarray([0.0, 0.1, 0.3, 0.5, 0.0, -0.1, -0.3, -0.5]),
+        "feature41_point": np.asarray(
+            [0.02, 0.02, 0.04, 0.06, -0.02, -0.02, -0.04, -0.06]
+        ),
+        "parent_point": np.asarray(
+            [0.04, 0.09, 0.25, 0.42, -0.04, -0.09, -0.25, -0.42]
+        ),
+        "candidate_point": np.asarray(
+            [0.03, 0.08, 0.22, 0.38, -0.03, -0.08, -0.22, -0.38]
+        ),
+        "gate_value": np.asarray([0.1, 0.3, 0.5, 0.8, 0.1, 0.3, 0.5, 0.8]),
+    }
+    result = oracle_diagnostics(
+        observations,
+        {"feature41_absolute_delta_mae": 0.235},
+    )
+    assert "parent_v11" in result["oracles"]["global"]["gains"]
+    assert "candidate_v12" in result["oracles"]["global"]["gains"]
+    assert "global_minus_2d" in result["comparisons"]
+    assert "distance" in result["regime_residual_associations"]
+    assert "magnitude" in result["regime_residual_associations"]
+    assert "v12_gate_to_2d_oracle_gate_weighted_correlation" in result
 
 
 def _post_v12_route_folds() -> list[dict[str, object]]:
