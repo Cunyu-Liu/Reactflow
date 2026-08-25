@@ -48,13 +48,27 @@ v10m1:
   scientific_scores_read: false
   external_outcome_accessed: false
 v10m2:
-  status: FIXED_SEED0_TWENTY_FOLD_SCREEN_AUTHORIZED
+  status: INTERRUPTED_RECOVERABLE_AUTHORITATIVE_POINT_REPLAY_ACTIVE
   folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   seed: 0
   epochs: 40
   partial_scoring_allowed: false
   complete_universe_before_score: true
   controller: scripts/reactflow_delta/run_model_rescue_v10_screen_controller.sh
+  complete_fold_artifacts_preserved: 14
+  missing_folds_recovery_only: [2, 3, 9, 10, 16, 17]
+  interruption: RECOMPUTED_HELD_V8_POINT_EXCEEDED_FROZEN_1E_7_REPLAY_TOLERANCE
+  diagnostic_scope: POINT_IDENTITY_ONLY_NO_TARGET_OR_SCIENTIFIC_SCORE
+  diagnosed_max_abs_difference: 2.384185791015625e-7
+  diagnosed_rows_over_1e_7: 608
+  diagnosed_rows_total: 103368
+  root_cause: CUDA_FLOAT32_CHECKPOINT_RECOMPUTATION_ULP_DRIFT
+  resolution: READ_AUTHORITATIVE_FROZEN_V8_HELD_POINT_BY_BIOLOGICAL_KEY
+  training_point_changed: false
+  held_direct_features_changed: false
+  model_or_gate_changed: false
+  scientific_scores_read: false
+  external_outcome_accessed: false
 v10m3: NOT_AUTHORIZED
 v10m4: NOT_AUTHORIZED
 v10m5: NOT_RUN

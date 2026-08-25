@@ -76,3 +76,12 @@ fold0 被原样保留，只补跑 fold1。预冻结 smoke qualifier 随后机械
 完整 prediction-only universe 出现前不得运行 scorer、读取 partial metric 或修改
 任何候选。V10M3 仍未授权，只有 20/20 完整后的一次预冻结 scorer 与 qualifier
 可以裁决是否开放后续 formal confirmation。
+
+V10M2 首次并行运行完成并保留 14/20 folds；其余6个folds在 held V8 point
+重放检查处停止。只读身份诊断显示，重新运行同一 checkpoint 的最大差异为
+`2.3841858e-7`，103,368 rows 中608 rows超过预冻结 `1e-7`，符合 CUDA
+float32 的少数 ULP 漂移；未发现 key 或模型语义变化。V10 不放宽 replay
+阈值，而是把已冻结的 V8 prediction artifact 定义为 held point 的权威来源，
+按 biological key 原值读取。Outer-train point 仍由同一 checkpoint 计算，held
+direct features 仍来自其实际训练路径。该修复不改变模型、训练、候选或 Gate；
+只补跑缺失的 folds 2/3/9/10/16/17，14个已完成 artifacts 保持不变。
