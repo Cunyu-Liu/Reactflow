@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v12_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v12_monotone_residual_shrinkage_20260825
-current_status: V12M0_CONTRACT_FROZEN_NO_TRAINING
-updated_at: '2026-08-25T19:40:00+08:00'
+current_status: V12M1_IMPLEMENTATION_ONLY_NO_TRAINING
+updated_at: '2026-08-25T19:45:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -36,8 +36,8 @@ frozen_decisions:
   external_outcome_allowed: false
 
 phase_state:
-  V12M0: CONTRACT_FROZEN_PENDING_FOCUSED_COMMIT
-  V12M1: NOT_AUTHORIZED
+  V12M0: PASS
+  V12M1: IMPLEMENTATION_IN_PROGRESS
   V12M2: NOT_AUTHORIZED
   V12M3: NOT_AUTHORIZED
   V12M4: NOT_AUTHORIZED
@@ -61,3 +61,16 @@ events:
     partial_score_read_allowed: false
     external_outcome_accessed: false
     next_action: COMMIT_CONTRACT_AND_OPEN_IMPLEMENTATION_ONLY
+
+  - id: V12M1_IMPLEMENTATION_AUTHORITY_OPEN
+    observed_at: '2026-08-25T19:45:00+08:00'
+    status: V12M1_IMPLEMENTATION_ONLY_NO_TRAINING
+    contract_focused_commit_local: 96b11ec7e5f2ebd7795833274cbfb84cca18944a
+    contract_focused_commit_remote: 968437ce675ccc947e67ccc99ea18fa9ceb6bd05
+    implementation_allowed: true
+    candidate_training_allowed: false
+    real_data_smoke_allowed: false
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: IMPLEMENT_GATE_RUNNER_MERGER_SCORER_QUALIFIER_AND_FOCUSED_TESTS
