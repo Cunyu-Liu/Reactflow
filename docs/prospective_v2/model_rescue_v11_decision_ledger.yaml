@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M1_IMPLEMENTATION_AND_FOCUSED_TESTS_PASS_V11M2_AUTHORIZED
-updated_at: '2026-08-25T15:25:00+08:00'
+current_status: V11M2_INTERRUPTED_RECOVERABLE_ENGINEERING_FIX_ONLY
+updated_at: '2026-08-25T15:50:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -113,7 +113,7 @@ implementation_evidence:
 phase_state:
   V11M0: PASS
   V11M1: PASS
-  V11M2: AUTHORIZED_ENGINEERING_SMOKE_ONLY
+  V11M2: INTERRUPTED_RECOVERABLE_ENGINEERING_FIX_ONLY
   V11M3: NOT_AUTHORIZED
   V11M4: NOT_AUTHORIZED
   V11M5: NOT_RUN
@@ -122,3 +122,22 @@ outcome_access:
   new_external_outcome_accessed: false
   v11_partial_score_accessed: false
   v11_complete_score_accessed: false
+
+recovery_events:
+  - id: V11M2_RECOVERY_1
+    status: V11M2_INTERRUPTED_RECOVERABLE
+    scientific_score_read: false
+    external_outcome_accessed: false
+    completed_fold_results: 0
+    cause: >-
+      THREE_EPOCH SMOKE FEATURE41 RESIDUAL OUTPUT WAS INCORRECTLY COMPARED TO THE
+      TERMINAL V10 FORTY_EPOCH OUTPUT; FOLD0 FAILED CLOSED AND THE CONTROLLER
+      INTERRUPTED FOLD1 BEFORE ANY COMPLETE RESULT ARTIFACT.
+    correction: >-
+      REQUIRE EXACT V10 OUTPUT REPLAY ONLY FOR SEED0 FORTY_EPOCH SCIENTIFIC
+      RUNS; SMOKE STILL REQUIRES THE IDENTICAL FAMILY, INITIALIZATION, MEDIAN,
+      FREEZE, TARGET_INVARIANCE, AND PREDICTION_ONLY CHECKS.
+    additional_metadata_fix: >-
+      RECORD THE FROZEN POINT PARAMETER COUNT BEFORE REQUIRES_GRAD IS DISABLED
+      FOR CALIBRATION; THIS CHANGES ONLY RESULT METADATA.
+    model_loss_epoch_gate_changed: false

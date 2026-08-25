@@ -32,7 +32,7 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
         "point_frozen_during_calibration",
         "v10_residual_family_reused",
         "feature41_replay_at_1e_7",
-        "feature41_asymmetric_seed0_replay_or_not_applicable",
+        "feature41_asymmetric_screen_replay_or_not_applicable",
         "median_constraint_all_held_rows",
     )
     required_false = (

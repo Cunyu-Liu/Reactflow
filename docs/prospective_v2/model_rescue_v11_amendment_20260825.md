@@ -55,11 +55,11 @@ Null 仍在 head input 中看到完全相同的 feature41 scalar；唯一差异�
 
 Point 训练后冻结。Candidate、null 和 feature41 comparator 分别拟合同一个 V10 `MedianAsymmetricResidual` family：input width 244，包含 feature41 basis-41、对应 point、abs(point) 和冻结的 V8 direct features-201；hidden=256，两个 Gaussian components，location allocation 257 outputs，mixture CDF 在 point 处严格等于 0.5。使用 method-balanced closed-form Gaussian-mixture CRPS、Adam 1e-3、40 epochs。Calibration gradient 不得进入 point 模型。
 
-Seed-0 feature41 comparator 必须在 1e-7 内 replay V10 feature41-asymmetric；否则不允许科学评分。
+Seed-0、40-epoch 的科学 comparator 必须在 1e-7 内 replay V10 feature41-asymmetric；否则不允许科学评分。3-epoch smoke 只验证同一 residual family 与初始化，不得拿它与 V10 的 40-epoch输出做数值 replay。
 
 ## 7. V11M2 real-data smoke
 
-只运行 folds 0/1、seed 0、3+3 epochs，artifact 为 prediction-only，禁止科学评分。必须机械验证：candidate/null 参数与初始 state 完全相同、skip 是唯一差异、有限 loss/gradient、point freeze、CDF(point)=0.5、target/error/mask invariance、full registered output、coverage 100%、failure 0、unexpected keys 0。
+只运行 folds 0/1、seed 0、3+3 epochs，artifact 为 prediction-only，禁止科学评分。必须机械验证：candidate/null 参数与初始 state 完全相同、skip 是唯一差异、V10 residual family 与初始化一致、有限 loss/gradient、point freeze、CDF(point)=0.5、target/error/mask invariance、full registered output、coverage 100%、failure 0、unexpected keys 0。Smoke 不要求 3-epoch residual 输出等于历史 V10 的 40-epoch输出。
 
 ## 8. V11M3 单 seed 顶刊 screen
 
