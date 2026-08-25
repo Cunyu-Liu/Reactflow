@@ -148,3 +148,22 @@ events:
     partial_score_inspected: false
     external_outcome_accessed: false
     next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN
+
+  - id: POST_V12_DIAGNOSTIC_TOOLING_PREFROZEN_DURING_SCORE_BLIND_SCREEN
+    observed_at: '2026-08-25T22:48:00+08:00'
+    status: DIAGNOSTIC_TOOLING_ONLY_NO_OUTCOME_ACCESS_NO_NEW_MODEL_AUTHORIZED
+    diagnostic_script: scripts/reactflow_delta/diagnose_model_rescue_v12.py
+    tooling_commit_local: ff7cdf5
+    tooling_commit_remote: c28af255eaa4004191b3fd56b87e055454de201b
+    complete_twenty_fold_fail_required: true
+    gate_geometry_replay_implemented: true
+    held_puzzle_fixed_grid_oracles_implemented: true
+    point_distribution_bottleneck_diagnostics_implemented: true
+    route_decision_mechanical: true
+    focused_tests_passed: 19
+    training_or_model_change_performed: false
+    new_model_authorized: false
+    scientific_score_computed: false
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    next_action: CONTINUE_V12M3_SCORE_BLIND_SCREEN
