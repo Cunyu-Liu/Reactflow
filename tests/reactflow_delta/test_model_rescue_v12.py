@@ -22,6 +22,9 @@ from scripts.reactflow_delta.model_rescue_v10 import (
 )
 from scripts.reactflow_delta.run_model_rescue_v12 import build_inner_crossfit_ledger
 from scripts.reactflow_delta.qualify_model_rescue_v12_smoke import qualify as qualify_smoke
+from scripts.reactflow_delta.merge_model_rescue_v12 import merge_folds
+from scripts.reactflow_delta.qualify_model_rescue_v12 import qualify
+from scripts.reactflow_delta.score_model_rescue_v12 import assert_score_authority
 from scripts.reactflow_delta.validate_model_rescue_v12_contract import (
     assert_run_authority,
     validate_contract,
@@ -191,3 +194,60 @@ def test_smoke_qualifier_rejects_target_bearing_predictions(tmp_path: Path) -> N
         )
     with pytest.raises(ValueError, match="targets or scores"):
         qualify_smoke(tmp_path)
+
+
+def test_complete_merger_rejects_an_incomplete_fold_universe(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="universe incomplete"):
+        merge_folds(tmp_path, "V12M3")
+
+
+def _passing_v12_score() -> dict[str, object]:
+    rows = []
+    for fold in range(20):
+        rows.append(
+            {
+                "outer_fold": fold,
+                "feature41_signed_delta_mae": 1.0,
+                "parent_v11_signed_delta_mae": 0.95,
+                "candidate_signed_delta_mae": 0.8,
+                "feature41_absolute_delta_mae": 1.0,
+                "parent_v11_point_absolute_delta_mae": 0.95,
+                "candidate_point_absolute_delta_mae": 0.8,
+                "candidate_distribution_absolute_delta_mae": 0.8,
+                "historical_v10_distribution_absolute_delta_mae": 0.95,
+                "feature41_crps": 1.0,
+                "parent_v11_crps": 0.95,
+                "candidate_crps": 0.8,
+                "historical_v10_crps": 0.96,
+                "feature41_coverage68": 0.68,
+                "candidate_coverage68": 0.68,
+                "feature41_coverage95": 0.95,
+                "candidate_coverage95": 0.95,
+                "registered_prediction_coverage": 1.0,
+                "failure_rate": 0.0,
+                "n_unexpected_prediction_keys": 0,
+            }
+        )
+    return {
+        "schema_version": "reactflow_delta.model_rescue_v12_score.v1",
+        "status": "V12M3_COMPLETE_SCORE_PASS",
+        "scores": rows,
+    }
+
+
+def test_v12_qualifier_requires_every_frozen_top_journal_gate() -> None:
+    scores = _passing_v12_score()
+    passed = qualify(scores)
+    assert passed["status"] == "V12M3_TOP_JOURNAL_SCREEN_PASS"
+    assert all(passed["gates"].values())
+    for row in scores["scores"]:
+        row["candidate_crps"] = 0.951
+    failed = qualify(scores)
+    assert failed["status"] == "V12M3_TOP_JOURNAL_SCREEN_FAIL"
+    assert failed["gates"]["task_crps_gain_vs_feature41_ge_5pct"] is False
+    assert failed["v12m4_authorized"] is False
+
+
+def test_scientific_scorer_remains_closed_during_smoke() -> None:
+    with pytest.raises(RuntimeError, match="closed outside"):
+        assert_score_authority(ROOT)
