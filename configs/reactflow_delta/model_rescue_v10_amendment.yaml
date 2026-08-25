@@ -155,6 +155,32 @@ formal_confirmation:
   residual_heads_retrained_per_seed: true
   v8_point_retrained: false
   selection_allowed: false
+  failed_seed_removal_allowed: false
+  seed_subset_selection_allowed: false
+  prediction_assembly:
+    point: AUTHORITATIVE_FROZEN_POINT_IDENTICAL_ACROSS_SEEDS
+    distribution: EQUAL_SEED_MIXTURE
+    seed_mass: 0.2
+    components_per_seed: 2
+    assembled_components_per_head: 10
+    internal_component_weights_preserved_within_each_seed: true
+    expected_absolute_delta: EXPECTATION_UNDER_ASSEMBLED_TEN_COMPONENT_MIXTURE
+  comparators:
+    task_crps: FIVE_SEED_FEATURE41_MEDIAN_ASYMMETRIC
+    asymmetry_increment: FIVE_SEED_MEANALIGNED_CAPACITY_SYMMETRIC
+    historical_increment: FROZEN_V9_SMALL_SYMMETRIC
+    absolute_delta: INDEPENDENT_TIC2A_FEATURE41_ABSOLUTE_HEAD
+  formal_gate:
+    repeat_all_v10m3_top_journal_gates_on_five_seed_mixture: true
+    task_crps_positive_individual_seeds_min: 4
+    asymmetric_increment_positive_individual_seeds_min: 4
+    all_five_seeds_reported: true
+    point_metrics_replayed_not_seed_selected: true
+    complete_fold_seed_runs_per_trained_head: 100
+    complete_before_score: true
+    partial_score_allowed: false
+  evidence_status_on_pass: POST_HOC_DEVELOPMENT_FORMAL_PASS
+  external_sota_or_publication_pass_generated: false
   external_replication: REQUIRES_SEPARATE_SEALED_AMENDMENT
   authorized: false
 

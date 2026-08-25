@@ -27,6 +27,20 @@ pre_score_contingency:
   partial_scientific_scores_read: false
   external_outcome_accessed: false
 
+pre_score_formal_freeze:
+  status: SPECIFICATION_FROZEN_NOT_AUTHORIZED
+  prerequisite: V10M3_TOP_JOURNAL_SCREEN_PASS
+  seeds: [0, 1, 2, 3, 4]
+  folds: 20
+  final_distribution: EQUAL_SEED_TEN_COMPONENT_MIXTURE
+  all_v10m3_gates_repeated: true
+  task_crps_positive_individual_seeds_min: 4
+  asymmetric_increment_positive_individual_seeds_min: 4
+  failed_seed_removal_allowed: false
+  partial_score_allowed: false
+  training_authorized: false
+  external_outcome_accessed: false
+
 v10m0:
   status: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   focused_tests_passed_local: 28
