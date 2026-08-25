@@ -44,6 +44,8 @@ Run folds 0–19 with non-overlapping fold ownership on any safe GPU0–7. Contr
 
 Only exact `V11M3_TOP_JOURNAL_SCREEN_PASS` can open V11M4. Run seeds0–4 on the same 20 folds for candidate, null, and feature41 residual comparators. Assemble equal-seed mixtures and apply all frozen screen gates plus the 4/5 seed direction requirement.
 
+The formal implementation is frozen before V11M3 score access. `run_model_rescue_v11_formal_controller.sh` may only produce the 100 fold×seed prediction artifacts, the complete unscored merge, and the equal-seed prediction-only assembly. `assemble_model_rescue_v11_formal.py` gives every seed one-fifth total mass and therefore creates ten Gaussian components per model. Scientific target access remains a separate authority transition: only then may `score_model_rescue_v11_formal.py` run once, followed by one mechanical call to `qualify_model_rescue_v11_formal.py`. The prediction controller never scores automatically.
+
 ## V11M5 — freeze and handoff
 
 Freeze code, contracts, prediction artifacts, score, qualifier, plots/tables, and claim map. Close all training. PASS remains post-hoc development until a separate sealed external amendment; FAIL returns to the benchmark manuscript with the negative result intact.

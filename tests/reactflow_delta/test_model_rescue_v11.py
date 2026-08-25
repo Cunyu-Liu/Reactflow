@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import torch
 import yaml
 
+from scripts.reactflow_delta.assemble_model_rescue_v11_formal import assemble_fold
 from scripts.reactflow_delta.model_rescue_v11 import (
     ATTENTION_HEADS,
     CONTEXT_BLOCKS,
@@ -17,12 +19,21 @@ from scripts.reactflow_delta.model_rescue_v11 import (
     method_cell_balanced_l1,
     trainable_parameter_count,
 )
+from scripts.reactflow_delta.qualify_model_rescue_v11 import (
+    SCHEMA as SCREEN_QUALIFICATION_SCHEMA,
+)
 from scripts.reactflow_delta.qualify_model_rescue_v11 import qualify
+from scripts.reactflow_delta.qualify_model_rescue_v11_formal import (
+    qualify as qualify_formal,
+)
 from scripts.reactflow_delta.run_model_rescue_v11 import (
     assert_run_authority,
     fit_point_model,
 )
 from scripts.reactflow_delta.score_model_rescue_v11 import SCHEMA as SCORE_SCHEMA
+from scripts.reactflow_delta.score_model_rescue_v11_formal import (
+    SCHEMA as FORMAL_SCORE_SCHEMA,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -233,5 +244,87 @@ def test_qualifier_requires_every_prefrozen_top_journal_gate() -> None:
     assert passed["gate_passed"] is True
     failed = qualify(_complete_score(anchored_crps=0.125))
     assert failed["status"] == "V11M3_TOP_JOURNAL_SCREEN_FAIL"
+    assert failed["gate_passed"] is False
+    assert failed["gates"]["task_crps_gain_vs_feature41_ge_5pct"] is False
+
+
+def _write_formal_source_prediction(path: Path, *, seed: int) -> None:
+    n_rows = 2
+    output: dict[str, np.ndarray] = {
+        "schema_version": np.asarray(
+            "reactflow_delta.model_rescue_v11_prediction.v1"
+        ),
+        "keys": np.asarray(["key0", "key1"], dtype=object),
+        "outer_fold": np.zeros(n_rows, dtype=np.int64),
+        "seed": np.full(n_rows, seed, dtype=np.int64),
+        "feature41_point": np.asarray([0.1, -0.1]),
+        "v8_point": np.asarray([0.2, -0.2]),
+        "anchored_point": np.full(n_rows, float(seed)),
+        "unanchored_point": np.full(n_rows, float(seed + 10)),
+    }
+    for name, offset in (("feature41", 0.0), ("anchored", 1.0), ("unanchored", 2.0)):
+        output[f"{name}_weights"] = np.tile([[0.25, 0.75]], (n_rows, 1))
+        output[f"{name}_locations"] = np.full(
+            (n_rows, 2), seed + offset, dtype=np.float64
+        )
+        output[f"{name}_scales"] = np.tile([[0.1, 0.3]], (n_rows, 1))
+        output[f"{name}_expected_absolute_delta"] = np.full(n_rows, 0.2)
+    output["historical_v10_weights"] = np.tile([[0.4, 0.6]], (n_rows, 1))
+    output["historical_v10_locations"] = np.zeros((n_rows, 2))
+    output["historical_v10_scales"] = np.tile([[0.1, 0.2]], (n_rows, 1))
+    output["historical_v10_expected_absolute_delta"] = np.full(n_rows, 0.1)
+    np.savez_compressed(path, **output)
+
+
+def test_formal_assembler_builds_equal_seed_ten_component_mixtures(
+    tmp_path: Path,
+) -> None:
+    rows = []
+    for seed in range(5):
+        path = tmp_path / f"seed{seed}.npz"
+        _write_formal_source_prediction(path, seed=seed)
+        rows.append({"seed": seed, "prediction_artifact": str(path)})
+    result = assemble_fold(rows, fold=0, out_dir=tmp_path)
+    with np.load(result["prediction_artifact"], allow_pickle=True) as handle:
+        assert handle["anchored_weights"].shape == (2, 10)
+        assert handle["anchored_locations"].shape == (2, 10)
+        assert handle["anchored_scales"].shape == (2, 10)
+        assert np.allclose(handle["anchored_weights"].sum(axis=1), 1.0)
+        assert np.allclose(handle["anchored_point"], 2.0)
+        assert np.allclose(handle["unanchored_point"], 12.0)
+        assert np.all(handle["seed"] == -1)
+
+
+def _formal_score(*, anchored_crps: float = 0.12) -> dict:
+    rows = _complete_score(anchored_crps=anchored_crps)["scores"]
+    return {
+        "schema_version": FORMAL_SCORE_SCHEMA,
+        "status": "V11M4_COMPLETE_FORMAL_SCORE_PASS",
+        "mixture_scores": rows,
+        "individual_seed_scores": {
+            str(seed): [dict(row) for row in rows] for seed in range(5)
+        },
+        "equal_seed_mixture": True,
+        "partial_fold_scores_inspected": False,
+        "external_outcome_accessed": False,
+        "model_or_threshold_selection_performed": False,
+    }
+
+
+def _screen_pass() -> dict:
+    return {
+        "schema_version": SCREEN_QUALIFICATION_SCHEMA,
+        "status": "V11M3_TOP_JOURNAL_SCREEN_PASS",
+        "gate_passed": True,
+    }
+
+
+def test_formal_qualifier_repeats_gates_and_requires_seed_stability() -> None:
+    passed = qualify_formal(_formal_score(), _screen_pass())
+    assert passed["status"] == "V11M4_TOP_JOURNAL_FORMAL_PASS"
+    assert passed["gate_passed"] is True
+
+    failed = qualify_formal(_formal_score(anchored_crps=0.125), _screen_pass())
+    assert failed["status"] == "V11M4_TOP_JOURNAL_FORMAL_FAIL"
     assert failed["gate_passed"] is False
     assert failed["gates"]["task_crps_gain_vs_feature41_ge_5pct"] is False
