@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M3_GPU0_ASSIGNED_FOLDS_COMPLETE_GPU6_GPU7_AND_ORIGINAL_WORKER1_RUNNING
-updated_at: '2026-08-25T15:08:00+08:00'
+current_status: V11M3_ALL_OLD_WORKERS_RECOVERED_THREE_NEW_CODE_PARTITIONS_RUNNING
+updated_at: '2026-08-25T15:41:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -266,3 +266,27 @@ recovery_events:
     merge_or_qualification_run: false
     total_complete_fold_result_filenames_at_observation: 5
     held_score_read_allowed: false
+
+  - id: V11M3_RECOVERY_3_ORIGINAL_WORKER1_INTERRUPTION
+    observed_at: '2026-08-25T15:40:00+08:00'
+    status: V11M3_INTERRUPTED_RECOVERABLE_COMPARATOR_REPLAY
+    scientific_score_read: false
+    external_outcome_accessed: false
+    original_worker_assignment: [1, 5, 9, 13, 17]
+    completed_fold_results_from_original_worker: 0
+    incomplete_fold: 1
+    cause_matches_recovery_1: true
+    error: V11_FEATURE41_ASYMMETRIC_REPLAY_DIFFERS_FOR_WEIGHTS
+    complete_prediction_or_result_created: false
+    invalid_partial_checkpoints_moved_not_deleted: true
+    invalid_partial_checkpoint_archive: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/invalid_retrained_comparator_replay_20260825_1420
+    recovery_session: reactflow_v11_v11m3_replay_recovery_gpu0_folds1_20260825
+    recovery_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v11_v11m3_replay_recovery_gpu0_folds1.log
+    recovery_folds: [1, 5, 9, 13, 17]
+    recovery_gpu: 0
+    recovery_session_started: true
+    complete_fold_result_filenames_at_observation: 6
+    completed_folds_at_observation: [0, 3, 4, 8, 12, 16]
+    artifact_contents_read: false
+    held_score_read_allowed: false
+    model_loss_epoch_gate_changed: false
