@@ -846,8 +846,12 @@ def main(argv: list[str] | None = None) -> int:
     folds = _parse_folds(args.folds)
     if args.phase == "V12M2" and not set(folds) <= {0, 1}:
         raise RuntimeError("V12M2 smoke is restricted to folds0/1")
+    if args.phase == "V12M2" and args.seed != 0:
+        raise RuntimeError("V12M2 smoke is restricted to seed0")
     if args.phase == "V12M3" and args.seed != 0:
         raise RuntimeError("V12M3 screen is restricted to seed0")
+    if args.phase == "V12M4" and args.seed not in range(5):
+        raise RuntimeError("V12M4 formal confirmation is restricted to seeds0-4")
     device = args.device if torch.cuda.is_available() else "cpu"
     args.out_dir.mkdir(parents=True, exist_ok=True)
     univ = M2Universe(args.m2_csv)

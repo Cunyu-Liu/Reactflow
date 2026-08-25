@@ -85,6 +85,15 @@ def _prediction_checks(path: Path, fold: int, seed: int, expected_rows: int) -> 
             rtol=0.0,
         ):
             raise ValueError(f"V12 mixture weights do not sum to one in {path}")
+        point_fields = ("feature41_point", "v11_parent_point", "candidate_point")
+        if any(np.asarray(handle[name]).shape != (len(keys),) for name in point_fields):
+            raise ValueError(f"V12 point vector shape changed in {path}")
+        mixture_shape = np.asarray(handle["candidate_weights"]).shape
+        if mixture_shape != (len(keys), 2) or any(
+            np.asarray(handle[name]).shape != mixture_shape
+            for name in ("candidate_locations", "candidate_scales")
+        ):
+            raise ValueError(f"V12 candidate mixture shape changed in {path}")
         candidate = np.asarray(handle["feature41_point"]) + gate * (
             np.asarray(handle["v11_parent_point"])
             - np.asarray(handle["feature41_point"])
