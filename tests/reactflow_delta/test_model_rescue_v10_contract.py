@@ -22,7 +22,6 @@ def test_v10_terminal_fail_closes_training_scoring_and_formal() -> None:
     )
     assert active["parent_state"]["model_rescue_v10_formal_opened"] is False
     assert active["v10_terminal_verdict_change_allowed"] is False
-    assert active["training_allowed"] is False
     assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False

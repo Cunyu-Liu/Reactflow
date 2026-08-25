@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v11_amendment.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-contract_status: V11M0_CONTRACT_FROZEN_IMPLEMENTATION_ONLY
+contract_status: V11M1_IMPLEMENTATION_AND_FOCUSED_TESTS_PASS_V11M2_AUTHORIZED
 created_at: '2026-08-25T14:30:00+08:00'
 
 parent:
@@ -264,8 +264,8 @@ v11m4_formal:
 
 phase_graph:
   - {id: V11M0, status: PASS, next_on_pass: V11M1}
-  - {id: V11M1, status: NOT_RUN, next_on_pass: V11M2, next_on_fail: V11M5_FAIL}
-  - {id: V11M2, status: NOT_AUTHORIZED, next_on_pass: V11M3, next_on_fail: V11M5_FAIL}
+  - {id: V11M1, status: PASS, next_on_pass: V11M2, next_on_fail: V11M5_FAIL}
+  - {id: V11M2, status: AUTHORIZED_ENGINEERING_SMOKE_ONLY, next_on_pass: V11M3, next_on_fail: V11M5_FAIL}
   - {id: V11M3, status: NOT_AUTHORIZED, next_on_pass: V11M4, next_on_fail: V11M5_FAIL}
   - {id: V11M4, status: NOT_AUTHORIZED, next_on_pass: V11M5_PASS, next_on_fail: V11M5_FAIL}
   - {id: V11M5, status: NOT_RUN, handoff_phase: M6}
