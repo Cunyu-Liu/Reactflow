@@ -20,7 +20,10 @@ from scripts.reactflow_delta.model_rescue_v10 import (
     MedianAsymmetricResidual,
     mixture_cdf_at_point,
 )
-from scripts.reactflow_delta.run_model_rescue_v12 import build_inner_crossfit_ledger
+from scripts.reactflow_delta.run_model_rescue_v12 import (
+    _load_parent_prediction,
+    build_inner_crossfit_ledger,
+)
 from scripts.reactflow_delta.qualify_model_rescue_v12_smoke import qualify as qualify_smoke
 from scripts.reactflow_delta.merge_model_rescue_v12 import merge_folds
 from scripts.reactflow_delta.qualify_model_rescue_v12 import qualify
@@ -261,3 +264,18 @@ def test_v12_scoring_estimand_balances_methods_before_puzzle_mean() -> None:
         "openknot_m2|P1|B|C1|3|G>A|0": 2.0,
     }
     assert _puzzle_macro(losses) == 1.0
+
+
+def test_v12_parent_loader_requires_exact_seed0_biological_keys(tmp_path: Path) -> None:
+    path = tmp_path / "parent.npz"
+    np.savez_compressed(
+        path,
+        schema_version=np.asarray("reactflow_delta.model_rescue_v11_prediction.v1"),
+        outer_fold=np.asarray([0]),
+        seed=np.asarray([0]),
+        keys=np.asarray(["expected"], dtype=object),
+        biological_scoring_key=np.asarray(["different"], dtype=object),
+        registered_status=np.asarray(["covered"], dtype=object),
+    )
+    with pytest.raises(ValueError, match="biological scoring keys"):
+        _load_parent_prediction(path, 0)
