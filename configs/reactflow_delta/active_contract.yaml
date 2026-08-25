@@ -2,7 +2,7 @@ schema_version: reactflow_delta.active_contract.v11
 manifest_id: reactflow_delta_model_rescue_v11_authority_20260825
 project_task_id: reactflow_delta_model_rescue_v11
 created_at: '2026-08-25T01:30:00+08:00'
-updated_at: '2026-08-25T14:55:00+08:00'
+updated_at: '2026-08-25T14:57:00+08:00'
 
 authority:
   pointer_role: V11_WORKTREE_SINGLE_ACTIVE_AUTHORITY

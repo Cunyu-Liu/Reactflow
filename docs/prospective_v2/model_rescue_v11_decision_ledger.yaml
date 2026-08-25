@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
 current_status: V11M3_MULTIPLE_OLD_WORKERS_INTERRUPTED_RECOVERABLE_REPLAY_RECOVERIES_RUNNING
-updated_at: '2026-08-25T14:55:00+08:00'
+updated_at: '2026-08-25T14:57:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -221,10 +221,12 @@ recovery_events:
     complete_prediction_or_result_created: false
     invalid_partial_checkpoints_moved_not_deleted: true
     invalid_partial_checkpoint_archive: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/invalid_retrained_comparator_replay_20260825_1420
-    recovery_disposition: >-
-      DO NOT INTERRUPT THE TWO REMAINING ORIGINAL WORKERS OR THE ACTIVE NEW_CODE
-      RECOVERY. AFTER THEY EXIT, ARCHIVE ONLY THEIR INCOMPLETE OLD_REPLAY
-      CHECKPOINTS AND RECOVER ONLY FOLDS THAT LACK COMPLETE QUALIFIED RESULTS.
+    recovery_session: reactflow_v11_v11m3_replay_recovery_gpu7_20260825
+    recovery_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v11_v11m3_replay_recovery_gpu7.log
+    recovery_folds: [3, 7, 11, 15, 19]
+    recovery_gpu: 7
+    recovery_session_started: true
+    recovery_disposition: RECOVER_ONLY_THE_FIVE_ORIGINAL_WORKER3_FOLDS_WITH_FIXED_CODE
     completed_new_code_fold_results_at_observation: 1
     completed_new_code_folds_at_observation: [0]
     model_loss_epoch_gate_changed: false
