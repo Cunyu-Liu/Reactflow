@@ -40,6 +40,14 @@ def test_v10m1_pass_authorizes_only_fixed_complete_universe_screen() -> None:
     assert contract["input"]["preserved_pre_fix_fold_materialization"] == (
         "SAME_CHECKPOINT_RECOMPUTATION_WITHIN_FROZEN_1E_7_ONLY"
     )
+    formal = contract["formal_confirmation"]
+    assert formal["authorized"] is False
+    assert formal["prediction_assembly"]["distribution"] == "EQUAL_SEED_MIXTURE"
+    assert formal["prediction_assembly"]["assembled_components_per_head"] == 10
+    assert formal["formal_gate"]["repeat_all_v10m3_top_journal_gates_on_five_seed_mixture"] is True
+    assert formal["formal_gate"]["task_crps_positive_individual_seeds_min"] == 4
+    assert formal["formal_gate"]["asymmetric_increment_positive_individual_seeds_min"] == 4
+    assert formal["failed_seed_removal_allowed"] is False
     assert_run_authority(ROOT, "V10M2")
 
 

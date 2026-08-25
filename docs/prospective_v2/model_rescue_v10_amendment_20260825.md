@@ -91,3 +91,20 @@ direct features 仍来自其实际训练路径。该修复不改变模型、训�
 完成的14个 folds由同一checkpoint重新计算，而且逐 fold 已通过原冻结的
 `atol=1e-7` replay，因此继续有效；当前及未来 runner 则直接按key读取权威值，
 不再依赖硬件重算。该区分没有放宽1e-7，也没有给失败 folds提供额外自由度。
+
+## 7. Formal confirmation 的预冻结定义
+
+V10M4 仍未授权；只有 exact `V10M3_TOP_JOURNAL_SCREEN_PASS` 才能通过新的
+focused authority commit 开放。若开放，必须运行 seeds0–4 × 20 folds；每个seed
+独立训练四个冻结 residual heads，不能删除失败seed或选择seed子集。每个head的
+正式预测是等seed混合：每个seed占总概率质量 `1/5`，seed内部保留其两个Gaussian
+components的学习权重，因此最终为10-component mixture。Point保持同一个权威V8
+或feature41 point，不因seed改变；distribution-derived absolute delta必须从最终
+10-component mixture重新计算。
+
+五seed mixture必须重新通过 V10M3 的全部顶刊 Gate。除此之外，至少4/5个单seed
+的 task CRPS 相对其 matched feature41-asymmetric 为正，且至少4/5个单seed的
+MeanAligned-asymmetric 相对 MeanAligned-symmetric 增量为正。100个fold-seed runs
+必须完整后才能评分，所有5个seed均须报告。Formal PASS仍只获得
+`POST_HOC_DEVELOPMENT_FORMAL_PASS`；external、SOTA与publication readiness不会
+由此自动建立。
