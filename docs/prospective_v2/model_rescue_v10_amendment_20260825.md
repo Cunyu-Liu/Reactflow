@@ -1,6 +1,6 @@
 # ReactFlow-Delta Model Rescue v10 Amendment
 
-**状态：V10M2 固定 seed0、20-fold、40 epochs prediction-only universe 已20/20完整并通过 merge integrity；训练关闭，V10M3 唯一一次完整评分与预冻结 qualifier 已授权。**
+**终局状态：`V10M3_TOP_JOURNAL_SCREEN_FAIL`；V10M4 永久不开放。除相对公平 feature41-asymmetric 的 task CRPS 5%实用门槛外，其余全部 Gate 通过。**
 
 ## 1. 合同地位
 
@@ -120,3 +120,21 @@ V10M3 只授权一次完整 target join、scorer和预冻结 qualifier。Partial
 禁止；不得在 scorer 与 qualifier 之间修改文件、阈值、模型或 comparator。Exact
 `V10M3_TOP_JOURNAL_SCREEN_PASS` 才能另行提交 authority 开放 V10M4；任何FAIL
 均保持 V10M4关闭，并按预冻结 post-V10 contingency裁决下一方向。
+
+## 9. V10M3 终局结果
+
+唯一冻结 scorer/qualifier 给出 `V10M3_TOP_JOURNAL_SCREEN_FAIL`。Signed-delta
+MAE相对feature41改善8.363%（20/20，CI lower >0）；distribution-derived
+absolute-delta MAE改善14.296%（20/20，CI lower >0）；MeanAligned-asymmetric
+相对matched MeanAligned-symmetric的CRPS改善4.730%（20/20，CI lower >0）；
+相对历史V9 CRPS改善5.306%。Coverage、LOO、influence、完整性和全部方向Gate通过。
+
+唯一失败项是相对公平、同容量、同输入、同非对称分布族的feature41-asymmetric：
+CRPS由0.13057956降至0.12629969，改善3.2776%，20/20 puzzles正向且95% CI为
+`[+0.00339534,+0.00516440]`，但低于冻结的5%实用门槛。该结果不能因统计显著
+或全puzzle同方向而升级为PASS。V10M4永久关闭。
+
+预冻结post-V10 decision tree的branch 5被机械触发：asymmetry增量、signed与
+absolute均通过，但fair task CRPS低于5%。因此残差偏斜能力成立，A2“冻结V8 point
+足以支撑顶刊margin”被否定。下一实验只能改变point representation，并固定V10
+residual family、evaluator、split和budget；不得继续增加calibration模块。

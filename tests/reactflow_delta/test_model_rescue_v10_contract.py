@@ -13,20 +13,20 @@ def _yaml(path: str) -> dict:
     return yaml.safe_load((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_v10m2_complete_merge_authorizes_only_one_complete_score() -> None:
+def test_v10_terminal_fail_closes_training_scoring_and_formal() -> None:
     active = _yaml("configs/reactflow_delta/active_contract.yaml")
     contract = _yaml("configs/reactflow_delta/model_rescue_v10_amendment.yaml")
-    assert active["authority"]["current_phase"] == "V10M3"
-    assert active["runnable_phases"] == ["V10M3"]
+    assert active["authority"]["current_phase"] == "V10M6"
+    assert active["runnable_phases"] == []
     assert active["training_allowed"] is False
-    assert active["held_score_read_allowed"] is True
+    assert active["held_score_read_allowed"] is False
     assert active["partial_fold_score_read_allowed"] is False
     assert active["new_external_outcome_access_allowed"] is False
     assert contract["parent"]["v9_gate_changed"] is False
     assert contract["parent"]["v9m4_opened"] is False
     assert contract["formal_confirmation"]["authorized"] is False
     assert contract["contract_status"] == (
-        "V10M2_COMPLETE_UNSCORED_MERGE_PASS_V10M3_SCORE_AUTHORIZED"
+        "TERMINAL_V10M3_TOP_JOURNAL_SCREEN_FAIL_V10M4_PERMANENTLY_CLOSED"
     )
     assert contract["v10m1_smoke"]["scientific_scores_read"] is False
     assert contract["v10m2_screen"]["complete_before_score"] is True
@@ -49,6 +49,10 @@ def test_v10m2_complete_merge_authorizes_only_one_complete_score() -> None:
     assert formal["failed_seed_removal_allowed"] is False
     with pytest.raises(RuntimeError, match="outside active V10M2"):
         assert_run_authority(ROOT, "V10M2")
+    assert contract["v10m3_result"]["failed_gate"] == (
+        "TASK_CRPS_RELATIVE_GAIN_GE_0_05"
+    )
+    assert contract["v10m3_result"]["v10m4_authorized"] is False
 
 
 def test_v10_freezes_identification_ladder_and_top_journal_gate() -> None:

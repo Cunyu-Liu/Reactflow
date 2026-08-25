@@ -1,8 +1,8 @@
 schema_version: reactflow_delta.model_rescue_v10_amendment.v1
 contract_id: reactflow_delta_model_rescue_v10_20260825
-contract_status: V10M2_COMPLETE_UNSCORED_MERGE_PASS_V10M3_SCORE_AUTHORIZED
+contract_status: TERMINAL_V10M3_TOP_JOURNAL_SCREEN_FAIL_V10M4_PERMANENTLY_CLOSED
 created_at: '2026-08-25T01:30:00+08:00'
-updated_at: '2026-08-25T13:00:00+08:00'
+updated_at: '2026-08-25T13:10:00+08:00'
 
 parent:
   v9_terminal_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
@@ -188,14 +188,37 @@ formal_confirmation:
   external_replication: REQUIRES_SEPARATE_SEALED_AMENDMENT
   authorized: false
 
+v10m3_result:
+  status: V10M3_TOP_JOURNAL_SCREEN_FAIL
+  score_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0/v10m3_complete_score.json
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0/v10m3_qualification.json
+  signed_delta_relative_gain: 0.08363163113698135
+  signed_delta_positive_puzzles: 20
+  signed_delta_ci95: [0.012862310365787447, 0.019111689692039257]
+  absolute_delta_relative_gain: 0.1429609962979974
+  absolute_delta_positive_puzzles: 20
+  absolute_delta_ci95: [0.01877042904835064, 0.0249825760994088]
+  task_crps_relative_gain: 0.03277594919984294
+  task_crps_positive_puzzles: 20
+  task_crps_ci95: [0.00339533632756878, 0.0051644016539544296]
+  asymmetric_vs_symmetric_relative_gain: 0.0472957832692873
+  asymmetric_vs_symmetric_positive_puzzles: 20
+  asymmetric_vs_symmetric_ci95: [0.004361050999539734, 0.008178922390946553]
+  crps_vs_historical_v9_relative_gain: 0.0530620852142138
+  coverage_guardrail_pass: true
+  failed_gate: TASK_CRPS_RELATIVE_GAIN_GE_0_05
+  all_other_gates_passed: true
+  v10m4_authorized: false
+  selected_pre_score_contingency_branch: BRANCH_5_POINT_REPRESENTATION
+
 phase_graph:
   - {id: V10M0, status: PASS, next_on_pass: V10M1}
   - {id: V10M1, status: PASS, next_on_pass: V10M2, next_on_fail: V10M6_FAIL}
   - {id: V10M2, status: PASS, next_on_pass: V10M3, next_on_fail: V10M6_FAIL}
-  - {id: V10M3, status: AUTHORIZED, next_on_pass: V10M4, next_on_fail: V10M6_FAIL}
-  - {id: V10M4, status: NOT_AUTHORIZED, next_on_pass: V10M5, next_on_fail: V10M6_FAIL}
+  - {id: V10M3, status: FAIL, next_on_pass: V10M4, next_on_fail: V10M6_FAIL}
+  - {id: V10M4, status: PERMANENTLY_NOT_AUTHORIZED, next_on_pass: V10M5, next_on_fail: V10M6_FAIL}
   - {id: V10M5, status: NOT_RUN, next_on_pass: V10M6_PASS, next_on_fail: V10M6_FAIL}
-  - {id: V10M6, status: NOT_RUN, handoff_phase: M6}
+  - {id: V10M6, status: TERMINAL_FAIL, handoff_phase: SEPARATE_V11_AMENDMENT_OR_M6}
 
 claim_policy:
   development_consumed: true
