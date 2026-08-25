@@ -110,6 +110,14 @@ implementation_evidence:
   controller_shell_parse: PASS
   v11m2_real_data_smoke_folds: [0, 1]
   v11m2_smoke_qualification: V11M2_ENGINEERING_SMOKE_PASS
+  formal_pipeline_frozen_before_v11m3_score: true
+  formal_pipeline:
+    assembler: scripts/reactflow_delta/assemble_model_rescue_v11_formal.py
+    scorer: scripts/reactflow_delta/score_model_rescue_v11_formal.py
+    qualifier: scripts/reactflow_delta/qualify_model_rescue_v11_formal.py
+    prediction_controller: scripts/reactflow_delta/run_model_rescue_v11_formal_controller.sh
+    equal_seed_components_per_model: 10
+    automatic_scoring_by_prediction_controller: false
   training_opened: V11M3_SEED0_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
 
 phase_state:
