@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M3_GPU6_FINAL_PARTITION_RUNNING_GPU0_GPU7_PARTITIONS_COMPLETE
-updated_at: '2026-08-25T18:02:00+08:00'
+current_status: V11M3_TWENTY_OF_TWENTY_PREDICTION_ARTIFACTS_PRESENT_MERGE_ONLY
+updated_at: '2026-08-25T19:03:00+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -140,7 +140,7 @@ phase_state:
   V11M0: PASS
   V11M1: PASS
   V11M2: PASS
-  V11M3: AUTHORIZED_PREDICTION_ONLY_SEED0_TWENTY_FOLD_SCREEN
+  V11M3: TWENTY_OF_TWENTY_PREDICTION_ARTIFACTS_PRESENT_MERGE_ONLY_SCORE_CLOSED
   V11M4: NOT_AUTHORIZED
   V11M5: NOT_RUN
 
@@ -334,3 +334,20 @@ recovery_events:
     total_complete_fold_result_filenames_at_observation: 18
     missing_folds_at_observation: [14, 18]
     held_score_read_allowed: false
+
+  - id: V11M3_RECOVERY_2_GPU6_ASSIGNED_FOLDS_COMPLETION
+    observed_at: '2026-08-25T19:03:00+08:00'
+    status: V11M3_TWENTY_OF_TWENTY_PREDICTION_ARTIFACTS_PRESENT_NO_SCORE
+    scientific_score_read: false
+    external_outcome_accessed: false
+    recovery_session: reactflow_v11_v11m3_replay_recovery_gpu6_20260825
+    recovery_folds: [2, 6, 10, 14, 18]
+    complete_fold_result_filenames_present: 5
+    completed_folds: [2, 6, 10, 14, 18]
+    all_twenty_fold_result_filenames_present: true
+    all_training_sessions_ended: true
+    artifact_contents_read: false
+    merge_or_qualification_run: false
+    training_allowed: false
+    held_score_read_allowed: false
+    next_action: RUN_PREDICTION_ONLY_MERGE_AND_PROVENANCE_GUARD
