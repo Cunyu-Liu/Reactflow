@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v10_decision_ledger.v1
 ledger_id: reactflow_delta_model_rescue_v10_20260825
 created_at: '2026-08-25T01:30:00+08:00'
-current_status: V10M1_ENGINEERING_SMOKE_PASS_V10M2_SCREEN_AUTHORIZED
+current_status: V10M2_COMPLETE_UNSCORED_MERGE_PASS_V10M3_SCORE_AUTHORIZED
 
 immutable_parent:
   v9_status: TERMINAL_V9M3_CRPS_TOP_JOURNAL_MARGIN_FAIL_NO_FORMAL_CONFIRMATION
@@ -70,7 +70,7 @@ v10m1:
   scientific_scores_read: false
   external_outcome_accessed: false
 v10m2:
-  status: INTERRUPTED_RECOVERABLE_AUTHORITATIVE_POINT_REPLAY_ACTIVE
+  status: V10M2_COMPLETE_UNSCORED_MERGE_PASS
   folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
   seed: 0
   epochs: 40
@@ -94,9 +94,23 @@ v10m2:
   model_or_gate_changed: false
   scientific_scores_read: false
   external_outcome_accessed: false
-v10m3: NOT_AUTHORIZED
+  complete_fold_artifacts: 20
+  complete_merge_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0/v10m2_complete_unscored_merge.json
+  merge_integrity_pass: true
+  partial_scientific_scores_read: false
+v10m3:
+  status: ONE_COMPLETE_SCORE_AND_QUALIFICATION_AUTHORIZED
+  training_allowed: false
+  held_score_read_allowed: true
+  partial_score_allowed: false
+  scorer: scripts/reactflow_delta/score_model_rescue_v10.py
+  qualifier: scripts/reactflow_delta/qualify_model_rescue_v10.py
+  score_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0/v10m3_complete_score.json
+  qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0/v10m3_qualification.json
+  repeat_score_or_qualifier_allowed: false
+  external_outcome_allowed: false
 v10m4: NOT_AUTHORIZED
 v10m5: NOT_RUN
 v10m6: NOT_RUN
 
-next_allowed_action: RUN_V10M2_SEED0_TWENTY_FOLD_FORTY_EPOCH_COMPLETE_BEFORE_SCORE_SCREEN
+next_allowed_action: RUN_ONE_V10M3_COMPLETE_SCORER_THEN_PRE_FROZEN_QUALIFIER

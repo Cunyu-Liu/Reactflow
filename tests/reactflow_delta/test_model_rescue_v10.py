@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 from pathlib import Path
-import pytest
 import subprocess
 import torch
 
@@ -270,10 +269,9 @@ def test_v10_qualifier_enforces_independent_absolute_delta_margin() -> None:
     assert result["gate_passed"] is False
 
 
-def test_v10_complete_scorer_remains_closed_during_v10m2() -> None:
+def test_v10_complete_scorer_is_exactly_open_during_v10m3() -> None:
     root = Path(__file__).resolve().parents[2]
-    with pytest.raises(RuntimeError, match="outside V10M3"):
-        assert_score_authority(root)
+    assert_score_authority(root)
 
 
 def test_v10_smoke_controller_is_prediction_only() -> None:
