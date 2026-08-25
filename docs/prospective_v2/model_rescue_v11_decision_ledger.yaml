@@ -1,7 +1,7 @@
 schema_version: reactflow_delta.model_rescue_v11_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v11_point_representation_20260825
-current_status: V11M3_PARTIAL_WORKER_INTERRUPTED_RECOVERABLE_REPLAY_FIX_IN_PROGRESS
-updated_at: '2026-08-25T14:20:23+08:00'
+current_status: V11M3_PARTIAL_WORKER_INTERRUPTED_RECOVERABLE_REPLAY_RECOVERY_STARTED
+updated_at: '2026-08-25T14:23:05+08:00'
 
 immutable_parent_verdicts:
   v8: TERMINAL_V8M2_ABSOLUTE_GUARDRAIL_FAIL_SIGNED_MEAN_BREAKTHROUGH
@@ -193,3 +193,8 @@ recovery_events:
     replay_tolerance_lowered: false
     candidate_or_null_changed: false
     model_loss_epoch_gate_changed: false
+    invalid_partial_checkpoint_archive: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0/invalid_retrained_comparator_replay_20260825_1420
+    recovery_session: reactflow_v11_v11m3_replay_recovery_gpu0_20260825
+    recovery_log: /mnt/cunyuliu/reactflow_delta_model_rescue_v11_v11m3_replay_recovery_gpu0.log
+    recovery_folds: [0, 4, 8, 12, 16]
+    recovery_gpu: 0
