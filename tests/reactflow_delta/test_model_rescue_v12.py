@@ -36,6 +36,11 @@ from scripts.reactflow_delta.qualify_model_rescue_v12_formal import (
 from scripts.reactflow_delta.score_model_rescue_v12_formal import (
     assert_score_authority as assert_formal_score_authority,
 )
+from scripts.reactflow_delta.diagnose_model_rescue_v12 import (
+    assert_diagnostic_authority,
+    gate_geometry,
+    route_summary,
+)
 from scripts.reactflow_delta.validate_model_rescue_v12_contract import (
     assert_run_authority,
     validate_contract,
@@ -368,3 +373,104 @@ def test_formal_qualifier_repeats_screen_gates_and_requires_four_positive_seeds(
 def test_formal_scorer_remains_closed_before_exact_screen_pass() -> None:
     with pytest.raises(RuntimeError, match="closed outside V12M4"):
         assert_formal_score_authority(ROOT)
+
+
+def test_post_v12_diagnostics_remain_closed_during_score_blind_training() -> None:
+    with pytest.raises(RuntimeError, match="require training closed"):
+        assert_diagnostic_authority(ROOT)
+
+
+def test_post_v12_gate_geometry_replays_frozen_monotone_surface() -> None:
+    keys = np.asarray(
+        [
+            "openknot_m2|P1|A|C1|1|A>G|0",
+            "openknot_m2|P1|B|C2|2|C>U|0",
+        ],
+        dtype=object,
+    )
+    result = gate_geometry(
+        {
+            "keys": keys,
+            "gate_value": np.asarray([0.2, 0.8]),
+            "gate_distance_factor": np.asarray([0.4, 0.9]),
+            "gate_magnitude_factor": np.asarray([0.5, 0.89]),
+        },
+        {
+            "b_distance": 0.0,
+            "raw_w_distance": 0.0,
+            "b_magnitude": 0.0,
+            "raw_w_magnitude": 0.0,
+        },
+    )
+    surface = np.asarray(result["surface"]["gate"])
+    assert np.all(surface[1:, :] >= surface[:-1, :])
+    assert np.all(surface[:, 1:] >= surface[:, :-1])
+    assert result["weighted_fractions"]["gate_lt_0.25"] == 0.5
+
+
+def _post_v12_route_folds() -> list[dict[str, object]]:
+    rows = []
+    for fold in range(20):
+        rows.append(
+            {
+                "oracle": {
+                    "observed_point_losses": {
+                        "feature41_signed_delta_mae": 1.0,
+                        "feature41_absolute_delta_mae": 1.0,
+                        "candidate_signed_delta_mae": 0.9,
+                        "candidate_point_absolute_delta_mae": 0.9,
+                    },
+                    "oracles": {
+                        "global": {
+                            "signed_delta_mae": 0.8,
+                            "point_absolute_delta_mae": 0.8,
+                        },
+                        "distance_by_magnitude": {
+                            "signed_delta_mae": 0.6,
+                            "point_absolute_delta_mae": 0.6,
+                            "signed_relative_gain_vs_feature41": 0.4,
+                            "point_absolute_relative_gain_vs_feature41": 0.4,
+                        },
+                    },
+                },
+                "distribution": {
+                    "global": {
+                        "candidate": {
+                            "lower_miss90": 0.1,
+                            "upper_miss90": 0.0,
+                            "lower_miss95": 0.1,
+                            "upper_miss95": 0.0,
+                        }
+                    }
+                },
+            }
+        )
+    return rows
+
+
+def test_post_v12_route_requires_diagnostic_supported_bottleneck() -> None:
+    point_gate_names = {
+        "signed_gain_vs_feature41_ge_10pct",
+        "signed_gain_vs_parent_v11_ge_1pct",
+        "signed_ci_lower_each_gt_zero",
+        "signed_positive_puzzles_vs_feature41_ge_16",
+        "signed_positive_puzzles_vs_parent_v11_ge_14",
+        "point_absolute_gain_vs_feature41_ge_5pct",
+        "point_absolute_gain_vs_parent_v11_ge_1pct",
+        "point_absolute_ci_lower_each_gt_zero",
+        "point_absolute_positive_puzzles_vs_feature41_ge_16",
+        "point_absolute_positive_puzzles_vs_parent_v11_ge_14",
+    }
+    coordinate = route_summary(
+        _post_v12_route_folds(), {"gates": {name: False for name in point_gate_names}}
+    )
+    assert coordinate["decisions"]["route"] == (
+        "LOW_CAPACITY_NON_PRODUCT_GATE_AMENDMENT_ELIGIBLE_NOT_AUTHORIZED"
+    )
+    distribution = route_summary(
+        _post_v12_route_folds(), {"gates": {name: True for name in point_gate_names}}
+    )
+    assert distribution["decisions"]["route"] == (
+        "RESIDUAL_DISTRIBUTION_ONLY_AMENDMENT_ELIGIBLE_NOT_AUTHORIZED"
+    )
+    assert distribution["decisions"]["new_model_authorized"] is False
