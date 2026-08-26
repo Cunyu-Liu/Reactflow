@@ -1,0 +1,74 @@
+schema_version: reactflow_delta.model_rescue_v13_decision_ledger.v1
+contract_id: reactflow_delta_model_rescue_v13_anchored_exact_mutant_contrast_20260826
+current_status: V13M0_CONTRACT_FROZEN_NO_IMPLEMENTATION_OR_TRAINING
+created_at: '2026-08-26T09:00:00+08:00'
+
+immutable_parent_verdicts:
+  v1_through_v10: TERMINAL_UNCHANGED
+  v11: TERMINAL_V11M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
+  v12: TERMINAL_V12M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
+  v12m4_opened: false
+
+evidence:
+  - id: V13E001
+    type: CONFIRMED_FACT
+    statement: V11 context states are WT-only and mutation identity enters after encoding.
+    source: scripts/reactflow_delta/model_rescue_v11.py::V11PointModel
+  - id: V13E002
+    type: CONFIRMED_FACT
+    statement: V4 mutation-conditioned high-capacity modeling without the feature41 anchor failed its complete seed-0 Gate.
+    source: docs/prospective_v2/model_rescue_v4_decision_ledger.yaml
+  - id: V13E003
+    type: CONFIRMED_FACT
+    statement: V12 diagnostics terminate further shrinkage-gate capacity and leave residual signal present.
+    source: docs/prospective_v2/model_rescue_v12_decision_ledger.yaml
+  - id: V13E004
+    type: REASONED_INFERENCE
+    statement: Anchored shared exact-mutant re-encoding is a distinct untested combination, not established performance.
+    source: docs/plans/2026-08-26-v13-architecture-decision.md
+
+decisions:
+  - id: V13D001
+    status: FROZEN
+    decision: TEST_ONLY_FEATURE41_ANCHORED_SHARED_EXACT_MUTANT_REENCODING
+  - id: V13D002
+    status: FROZEN
+    decision: USE_IDENTICAL_WT_REPLAY_SECOND_PASS_AS_NESTED_NULL
+  - id: V13D003
+    status: FROZEN
+    decision: KEEP_V11_ENCODER_SIZE_AND_V10_CALIBRATION_FAMILY
+  - id: V13D004
+    status: FROZEN
+    decision: USE_HIGH_CONJUNCTIVE_POINT_PROBABILITY_AND_ATTRIBUTION_GATES
+  - id: V13D005
+    status: FROZEN
+    decision: TERMINATE_EXACT_MUTANT_REENCODING_ON_ANY_SCREEN_OR_FORMAL_GATE_FAILURE
+
+phase_state:
+  V13M0: CONTRACT_FROZEN
+  V13M1: NOT_AUTHORIZED
+  V13M2: NOT_AUTHORIZED
+  V13M3: NOT_AUTHORIZED
+  V13M4: NOT_AUTHORIZED
+  V13M5: NOT_RUN
+
+outcome_access:
+  v13_partial_score_accessed: false
+  v13_complete_score_accessed: false
+  new_external_outcome_accessed: false
+
+events:
+  - id: V13M0_CONTRACT_AND_ARCHITECTURE_FREEZE
+    observed_at: '2026-08-26T09:00:00+08:00'
+    status: V13M0_CONTRACT_FROZEN_NO_IMPLEMENTATION_OR_TRAINING
+    architecture_decision: docs/plans/2026-08-26-v13-architecture-decision.md
+    human_contract: docs/prospective_v2/model_rescue_v13_amendment_20260826.md
+    machine_contract: configs/reactflow_delta/model_rescue_v13_amendment.yaml
+    implementation_plan: docs/plans/2026-08-26-model-rescue-v13.md
+    v12_verdict_changed: false
+    training_allowed: false
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: VALIDATE_AND_COMMIT_CONTRACT_THEN_OPEN_IMPLEMENTATION_ONLY
+

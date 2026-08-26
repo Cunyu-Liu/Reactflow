@@ -1,0 +1,167 @@
+schema_version: reactflow_delta.model_rescue_v13_amendment.v1
+contract_id: reactflow_delta_model_rescue_v13_anchored_exact_mutant_contrast_20260826
+contract_status: V13M0_CONTRACT_FROZEN_NO_IMPLEMENTATION_OR_TRAINING
+created_at: '2026-08-26T09:00:00+08:00'
+
+parent:
+  v12_status: TERMINAL_V12M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE
+  v12m4_opened: false
+  v12_verdict_change_allowed: false
+  shrinkage_gate_route: TERMINATED
+
+scope:
+  task: ENDPOINT_V7_ALL_MUTANT_FULL_CONSTRUCT_SIGNED_DELTA_DISTRIBUTION
+  data: REAL_OPENKNOT_M2_V4_5_2
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  evaluator: EVALUATOR_V2_METHOD_BALANCED_TARGET_INVARIANT
+  candidate: v13_feature41_anchored_exact_mutant_contrast
+  nested_null: v13_feature41_anchored_wt_replay_null
+  comparator_stack:
+    point_signed: [feature41, terminal_v12]
+    point_absolute: [feature41, terminal_v11]
+    task_crps: [fresh_fair_feature41_asymmetric, terminal_v12]
+    distribution_absolute: [feature41, terminal_v10]
+
+inputs:
+  allowed:
+    - WT_SEQUENCE
+    - EXACT_MUTANT_SEQUENCE
+    - WT_REACTIVITY
+    - WT_PRECISION
+    - WT_OBSERVED_MASK
+    - NORMALIZED_POSITION
+    - REGION
+    - CORRECTED_FULL_MUTATION_POSITION
+    - MUTATION_REF_ALT
+    - SIGNED_SOURCE_RECEIVER_DISTANCE
+    - OUTER_TRAIN_FEATURE41_POINT_AND_BASIS
+  prohibited:
+    - HELD_MUTANT_REACTIVITY
+    - HELD_MUTANT_ERROR
+    - HELD_QUALIFIED_TARGET_MASK
+    - HELD_SCORE
+    - METHOD_ID
+    - PUZZLE_ID
+    - DATASET_ID
+    - EXTERNAL_OUTCOME
+
+model:
+  shared_encoder:
+    width: 192
+    heads: 8
+    blocks: 4
+    ffn_width: 768
+    dropout: 0.1
+    relative_window: 256
+    shared_wt_mutant_weights: true
+  head:
+    inputs: [WT_SOURCE, WT_RECEIVER, DELTA_SOURCE, DELTA_RECEIVER, SIGNED_DISTANCE, REF_ALT, FEATURE41_POINT]
+    hidden_width: 256
+    hidden_layers: 2
+    output: FEATURE41_PLUS_RESIDUAL
+    output_layer_zero_initialized: true
+  exact_nested_contrast:
+    candidate_second_pass: EXACT_MUTANT_SEQUENCE
+    null_second_pass: WT_SEQUENCE_REPLAY
+    all_other_inputs_identical: true
+    parameter_names_count_and_initial_state_identical: true
+    compute_path_identical: true
+  search:
+    architecture: false
+    width: false
+    depth: false
+    loss: false
+    epoch: false
+    seed_subset: false
+    calibration_family: false
+
+training:
+  point:
+    loss: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
+    epochs: 40
+    optimizer: ADAM
+    learning_rate: 0.001
+    weight_decay: 0.0
+    gradient_clip: 5.0
+    early_stopping: false
+    warm_start: false
+    mutant_microbatch: 64
+  calibration:
+    family: V10_MEDIAN_CONSTRAINED_ASYMMETRIC_RESIDUAL
+    epochs: 40
+    optimizer: ADAM
+    learning_rate: 0.001
+    weight_decay: 0.0
+    point_gradient_allowed: false
+    median_equals_point_atol: 1.0e-7
+
+phases:
+  V13M0: CONTRACT_FROZEN
+  V13M1: NOT_AUTHORIZED
+  V13M2: NOT_AUTHORIZED
+  V13M3: NOT_AUTHORIZED
+  V13M4: NOT_AUTHORIZED
+  V13M5: NOT_RUN
+
+screen:
+  phase: V13M3
+  seed: 0
+  folds: 20
+  complete_before_score_access: true
+  signed_delta:
+    relative_gain_vs_feature41_min: 0.12
+    relative_gain_vs_terminal_v12_min: 0.02
+    relative_gain_vs_nested_null_min: 0.015
+    positive_puzzles: {feature41: 16, terminal_v12: 14, nested_null: 14}
+    paired_ci_lower_gt: 0.0
+  point_absolute:
+    relative_gain_vs_feature41_min: 0.07
+    relative_gain_vs_terminal_v11_min: 0.02
+    relative_gain_vs_nested_null_min: 0.01
+    positive_puzzles: {feature41: 16, terminal_v11: 14, nested_null: 14}
+    paired_ci_lower_gt: 0.0
+  task_crps:
+    relative_gain_vs_feature41_min: 0.05
+    relative_gain_vs_terminal_v12_min: 0.02
+    relative_gain_vs_nested_null_min: 0.015
+    positive_puzzles: {feature41: 16, terminal_v12: 14, nested_null: 14}
+    paired_ci_lower_gt: 0.0
+  distribution_absolute:
+    relative_gain_vs_feature41_min: 0.15
+    relative_gain_vs_terminal_v10_min: 0.02
+    relative_gain_vs_nested_null_min: 0.01
+    positive_puzzles: {feature41: 16, terminal_v10: 14, nested_null: 14}
+    paired_ci_lower_gt: 0.0
+  stability:
+    leave_one_puzzle_positive: true
+    max_single_puzzle_effect_fraction: 0.20
+    max_coverage_error_worsening_pp: 1.0
+    prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_keys: 0
+
+formal:
+  phase: V13M4
+  prerequisite: EXACT_V13M3_TOP_JOURNAL_SCREEN_PASS
+  seeds: [0, 1, 2, 3, 4]
+  folds: 20
+  selection_allowed: false
+  equal_seed_mixture: true
+  minimum_positive_individual_seeds_signed_and_crps: 4
+  gate: REPEAT_FEATURE41_AND_NESTED_NULL_SCREEN_GATES
+
+resource_policy:
+  physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
+  co_location_when_memory_sufficient: true
+  preemption_termination_or_signal_allowed: false
+  persistent_sessions_required: true
+  low_frequency_monitor_seconds: 900
+  oom_recovery: CHANGE_GPU_OR_LOWER_MICROBATCH_ONLY
+
+claim_policy:
+  internal_pass_ceiling: POST_HOC_DEVELOPMENT_PASS
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  mechanism: NOT_ESTABLISHED
+  publication_ready: false
+
