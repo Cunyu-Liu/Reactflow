@@ -59,6 +59,18 @@ outcome_access:
   new_external_outcome_accessed: false
 
 events:
+  - id: V13M2_PAIRED_DROPOUT_IMPLEMENTATION_CORRECTION
+    observed_at: '2026-08-26T11:05:00+08:00'
+    status: V13M2_ENGINEERING_SMOKE_RESTART_REQUIRED_NO_SCIENTIFIC_SCORE_READ
+    finding: WT_AND_SECOND_ENCODER_PASSES_USED_INDEPENDENT_DROPOUT_MASKS_IN_TRAIN_MODE
+    scientific_impact: COUNTERFACTUAL_HIDDEN_DIFFERENCE_CONTAINED_STOCHASTIC_MASK_NOISE
+    correction: REPLAY_IDENTICAL_DROPOUT_RANDOMNESS_ACROSS_PAIRED_ENCODER_PASSES
+    model_family_changed: false
+    parameter_count_changed: false
+    loss_epoch_seed_or_gate_changed: false
+    existing_smoke_scientific_score_read: false
+    action: PRESERVE_OLD_ENGINEERING_ARTIFACTS_AS_INVALIDATED_AND_RERUN_FOLDS0_1
+
   - id: V13M0_CONTRACT_AND_ARCHITECTURE_FREEZE
     observed_at: '2026-08-26T09:00:00+08:00'
     status: V13M0_CONTRACT_FROZEN_NO_IMPLEMENTATION_OR_TRAINING

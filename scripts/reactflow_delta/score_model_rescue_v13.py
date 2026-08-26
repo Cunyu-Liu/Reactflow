@@ -59,6 +59,7 @@ def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
         "second_pass_only_difference_all_runs",
         "exact_mutant_vs_wt_replay_all_runs",
         "null_hidden_delta_at_most_1e_7_all_runs",
+        "paired_encoder_dropout_mask_shared_all_runs",
         "point_frozen_during_calibration_all_runs",
         "v10_residual_family_all_runs",
         "feature41_replay_all_runs",

@@ -642,6 +642,7 @@ def run_fold(
             "candidate_exact_mutant_null_wt_replay": True,
             "null_hidden_delta_at_most_1e_7": True,
             "same_point_training_order_and_dropout_seed": True,
+            "paired_encoder_dropout_mask_shared": True,
             "point_frozen_during_calibration": True,
             "v10_residual_family_reused": True,
             "feature41_replay_at_1e_7": True,

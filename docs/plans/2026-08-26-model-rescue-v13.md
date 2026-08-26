@@ -23,12 +23,13 @@ Required tests before real data:
 3. WT replay produces zero hidden delta in evaluation mode;
 4. exact-mutant delta is generally nonzero and receiver-shaped;
 5. candidate/null difference is limited to second-pass sequence input;
-6. point target/error/mask invariance;
-7. method-balanced L1 and missing-target semantics;
-8. point freeze and median equality;
-9. prediction artifact contains no target-bearing fields;
-10. merger rejects missing/duplicate folds;
-11. qualifier fails every single pre-frozen Gate independently.
+6. WT and second-pass encoder rows replay an identical dropout mask, so stochastic mask noise cannot enter the counterfactual hidden difference;
+7. point target/error/mask invariance;
+8. method-balanced L1 and missing-target semantics;
+9. point freeze and median equality;
+10. prediction artifact contains no target-bearing fields;
+11. merger rejects missing/duplicate folds;
+12. qualifier fails every single pre-frozen Gate independently.
 
 ## V13M2 — real-data smoke
 
@@ -45,4 +46,3 @@ Open only on exact V13M3 PASS. Run seeds 0–4 and 20 folds without selection, m
 ## V13M5 — freeze/handoff
 
 Freeze code, contracts, checkpoints, prediction-only universe, complete score and qualification. Restore main M6 authority with either `POST_HOC_DEVELOPMENT_PASS` or terminal representation-route failure. External outcomes remain locked.
-

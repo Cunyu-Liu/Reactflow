@@ -200,7 +200,13 @@ class V13PointModel(nn.Module):
         *,
         microbatch: int = MUTANT_MICROBATCH,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        """Encode matched WT/second-pass rows in the same batched operations."""
+        """Encode WT/second-pass rows with shared dropout randomness.
+
+        The counterfactual representation must change because the sequence
+        changes, not because two otherwise matched rows received independent
+        dropout masks.  Replaying the RNG state makes the stochastic encoder a
+        paired transformation while preserving the post-call RNG progression.
+        """
 
         if microbatch <= 0:
             raise ValueError("V13 mutant microbatch must be positive")
@@ -216,12 +222,30 @@ class V13PointModel(nn.Module):
         for start in range(0, len(second_sequences), microbatch):
             second = second_sequences[start : start + microbatch]
             wt = wt_context[0].unsqueeze(0).expand(len(second), -1, -1)
-            paired = self.encode_sequence_batch(torch.cat([wt, second], dim=0), wt_context)
-            wt_encoded, second_encoded = paired.split(len(second), dim=0)
+            cpu_before = torch.get_rng_state()
+            cuda_before = (
+                torch.cuda.get_rng_state(wt.device)
+                if wt.device.type == "cuda"
+                else None
+            )
+            wt_encoded = self.encode_sequence_batch(wt, wt_context)
+            cpu_after = torch.get_rng_state()
+            cuda_after = (
+                torch.cuda.get_rng_state(wt.device)
+                if wt.device.type == "cuda"
+                else None
+            )
+            torch.set_rng_state(cpu_before)
+            if cuda_before is not None:
+                torch.cuda.set_rng_state(cuda_before, wt.device)
+            second_encoded = self.encode_sequence_batch(second, wt_context)
+            torch.set_rng_state(cpu_after)
+            if cuda_after is not None:
+                torch.cuda.set_rng_state(cuda_after, wt.device)
             if self.second_pass_mode == SECOND_PASS_WT_REPLAY:
                 # The nested null is defined by an exactly zero counterfactual
-                # representation.  The replay encoder is still executed for
-                # matched compute, but batch-kernel roundoff is not a feature.
+                # representation. The replay encoder is still executed for
+                # matched compute, but numerical roundoff is not a feature.
                 second_encoded = wt_encoded
             wt_rows.append(wt_encoded)
             second_rows.append(second_encoded)

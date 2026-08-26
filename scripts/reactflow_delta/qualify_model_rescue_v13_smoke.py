@@ -33,6 +33,7 @@ def qualify(merged: dict[str, Any]) -> dict[str, Any]:
         and integrity.get("exact_point_parameter_and_initial_state_match_all_runs") is True
         and integrity.get("second_pass_only_difference_all_runs") is True
         and integrity.get("null_hidden_delta_at_most_1e_7_all_runs") is True
+        and integrity.get("paired_encoder_dropout_mask_shared_all_runs") is True
         and integrity.get("point_frozen_during_calibration_all_runs") is True
         and integrity.get("median_constraint_all_runs") is True
         and integrity.get("partial_scores_inspected") is False

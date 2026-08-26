@@ -74,6 +74,10 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         "exact_trainable_parameters_each"
     ) != 2_064_737:
         raise RuntimeError("V13 exact point parameter count changed")
+    if contract["model"]["exact_nested_contrast"].get(
+        "paired_encoder_dropout_mask_shared"
+    ) is not True:
+        raise RuntimeError("V13 paired encoder dropout invariant is absent")
     return {
         "status": "V13_CONTRACT_VALIDATION_PASS",
         "phase": authority["current_phase"],

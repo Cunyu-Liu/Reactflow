@@ -64,6 +64,8 @@ Candidate and null differ only in the second sequence tensor:
 
 Both still receive the same legal mutation metadata, so the contrast isolates re-encoding rather than mutation identity.
 
+Within each paired encoder call, the WT and second pass replay the same dropout mask. This common-random-numbers constraint prevents stochastic mask differences from contaminating `H_mut-H_wt`; the effective hidden contrast therefore changes with the second-pass sequence rather than with independent dropout noise.
+
 The frozen trainable parameter count is 2,064,737 for each model.
 
 ### 3.3 Training

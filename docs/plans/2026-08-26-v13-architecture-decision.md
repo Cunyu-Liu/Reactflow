@@ -42,6 +42,8 @@ Ribonanza documents that M2 measurements are full reactivity profiles under sequ
 
 The candidate and null have identical architecture, parameters, initialization, optimizer, epochs, dropout stream, inputs outside the second sequence pass, calibration family, folds and seeds.
 
+The WT and second encoder pass also share the same dropout mask within each paired call. This makes the stochastic encoder comparison a common-random-numbers contrast rather than allowing independent dropout noise to masquerade as mutation-induced representation change.
+
 - Candidate second pass: exact-mutant sequence with the registered corrected ref→alt change.
 - Null second pass: WT sequence replayed in the same batch shape and through the same encoder.
 - Both models still receive ref/alt one-hot, signed distance and feature41 in the residual head.
@@ -68,4 +70,3 @@ If V13 fails, the project will have tested both an unanchored high-capacity muta
 - Implementation begins only after the human amendment, machine contract, ledger and active authority are frozen in an isolated worktree.
 - Scientific scoring is forbidden until the complete 20-fold prediction-only universe exists.
 - A near miss remains a FAIL.
-

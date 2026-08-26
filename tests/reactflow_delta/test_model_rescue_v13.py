@@ -198,6 +198,22 @@ def test_wt_replay_hidden_delta_is_zero_in_evaluation_mode() -> None:
     assert torch.allclose(replay, wt, atol=1e-7, rtol=0.0)
 
 
+def test_paired_encoder_dropout_cannot_create_a_counterfactual_difference() -> None:
+    candidate, _null = make_exact_matched_pair(seed=27, device="cpu")
+    candidate.train()
+    context = _context()
+    fixture = _mutation_fixture()
+    refs = fixture["refs"]
+    with torch.no_grad():
+        wt, identical = candidate.encode_paired_passes(
+            context,
+            fixture["edit"],
+            refs,
+            refs,
+        )
+    assert torch.equal(identical, wt)
+
+
 def test_exact_mutant_produces_receiver_shaped_counterfactual_signal() -> None:
     candidate, _null = make_exact_matched_pair(seed=29, device="cpu")
     candidate.eval()
@@ -401,6 +417,7 @@ def test_smoke_qualifier_cannot_create_scientific_pass() -> None:
             "exact_point_parameter_and_initial_state_match_all_runs": True,
             "second_pass_only_difference_all_runs": True,
             "null_hidden_delta_at_most_1e_7_all_runs": True,
+            "paired_encoder_dropout_mask_shared_all_runs": True,
             "point_frozen_during_calibration_all_runs": True,
             "median_constraint_all_runs": True,
             "partial_scores_inspected": False,
