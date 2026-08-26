@@ -15,6 +15,7 @@ from scipy.special import ndtr
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     BLOCK_DIAGONAL_NULL,
     FULL_CROSS_CONSTRUCT,
+    POSITION_ALIGNED_OPERATOR,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     FORBIDDEN_PREDICTION_FIELDS,
@@ -26,7 +27,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
 
 
-MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v3"
+MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v4"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
@@ -135,6 +136,8 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
         "candidate_full_cross_construct_attention",
         "null_block_diagonal_attention",
         "puzzle_balanced_training",
+        "position_aligned_cross_construct_attention",
+        "puzzle_coordinate_frames_validated",
         "frozen_v13_point_parent",
         "frozen_v14_context_encoder",
         "zero_initialized_parent_replay_at_1e_7",
@@ -202,6 +205,8 @@ def merge_complete_universe(
             "null_connectivity"
         ) != BLOCK_DIAGONAL_NULL:
             raise ValueError(f"puzzle-set fold {pair} changed connectivity")
+        if row.get("cross_construct_operator") != POSITION_ALIGNED_OPERATOR:
+            raise ValueError(f"puzzle-set fold {pair} changed aligned operator")
         if int(row.get("candidate_parameter_count", -1)) != int(
             expected_parameter_count
         ) or int(row.get("null_parameter_count", -1)) != int(
@@ -224,6 +229,8 @@ def merge_complete_universe(
             Path(value).is_file() for value in parents.values()
         ):
             raise FileNotFoundError(f"puzzle-set fold {pair} lacks frozen parents")
+        if int(row.get("n_validated_puzzle_coordinate_frames", 0)) <= 0:
+            raise ValueError(f"puzzle-set fold {pair} lacks coordinate validation")
         histories = row.get("training_histories", {})
         expected_history_lengths = {
             "candidate_point": expected_point_epochs,
@@ -300,6 +307,11 @@ def merge_complete_universe(
             "candidate_full_cross_construct_attention_all_runs": True,
             "null_block_diagonal_attention_all_runs": True,
             "puzzle_balanced_training_all_runs": True,
+            "position_aligned_cross_construct_attention_all_runs": True,
+            "puzzle_coordinate_frames_validated_all_runs": True,
+            "frozen_v13_point_parent_all_runs": True,
+            "frozen_v14_context_encoder_all_runs": True,
+            "zero_initialized_parent_replay_all_runs": True,
             "point_frozen_during_calibration_all_runs": True,
             "v10_residual_family_all_runs": True,
             "puzzle_balanced_residual_calibration_all_runs": True,

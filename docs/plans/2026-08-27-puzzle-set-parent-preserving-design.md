@@ -59,15 +59,18 @@ For outer fold \(f\):
    for every outer-train cell and every registered held-puzzle key.
 2. Load the encoder subset of `v14_candidate_point_fold{f}_seed0.pt` into both
    P1 arms. Freeze it and keep it in evaluation mode during point training.
-3. Encode all eight outcome-blind WT construct contexts. The registered
-   zero-outcome P20_Eterna construct remains a context token but contributes no
+3. Encode all eight outcome-blind WT construct contexts in their common
+   full-sequence coordinate frame. The registered zero-outcome P20_Eterna
+   construct remains present at all aligned positions but contributes no
    fabricated target.
-4. Candidate uses full permutation-equivariant construct attention. The matched
-   null uses block-diagonal self-only attention with identical inputs,
-   parameters, initialization, optimizer, order, and epochs.
+4. At every position, candidate uses full permutation-equivariant attention
+   across the eight constructs. The matched null uses block-diagonal self-only
+   attention with identical inputs, parameters, initialization, optimizer,
+   order, and epochs.
 5. A zero-initialized incremental head receives focal V14 source/receiver
    features, signed distance, mutation identity, feature41, the frozen V13
-   parent point, and the mixed construct token.
+   parent point, and the position-aligned mixed states at the mutation source
+   and receiver.
 6. The prediction is
 
    \[
@@ -114,6 +117,9 @@ post-hoc parent or seed selection.
    inventing supervision.
 8. The fold runner rejects mismatched parent fold/seed provenance and emits one
    complete target-free prediction universe.
+
+The final position-aware operator and its coordinate audit are specified in
+`docs/plans/2026-08-27-puzzle-set-position-alignment-design.md`.
 
 ## 6. Scientific interpretation
 

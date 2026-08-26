@@ -30,6 +30,7 @@ from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     BLOCK_DIAGONAL_NULL,
     FULL_CROSS_CONSTRUCT,
+    POSITION_ALIGNED_OPERATOR,
     V14_ENCODER_PREFIXES,
     fit_puzzle_set_point_model,
     make_exact_full_model_pair,
@@ -44,6 +45,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     PREDICTION_SCHEMA,
     assemble_puzzle_training_batches,
     predict_held_puzzle_distributions,
+    validate_puzzle_coordinate_frames,
 )
 from scripts.reactflow_delta.run_model_rescue_v11 import (
     _feature41_matrix,
@@ -51,7 +53,7 @@ from scripts.reactflow_delta.run_model_rescue_v11 import (
 )
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v3"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v4"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
 FROZEN_PARENT_SEED = 0
@@ -140,6 +142,9 @@ def prepare_real_fold(
     train_puzzles = set(fold.train_puzzles)
     train_records = [record for record in records if record.puzzle in train_puzzles]
     held_records = [record for record in records if record.puzzle == fold.held_puzzle]
+    coordinate_frames = validate_puzzle_coordinate_frames(
+        train_records + held_records, univ
+    )
     all_construct_ids = sorted(
         {record.construct_id for record in train_records + held_records}
     )
@@ -271,6 +276,7 @@ def prepare_real_fold(
             "v13_point": str(v13_parent_checkpoint),
             "v14_encoder": str(v14_parent_checkpoint),
         },
+        "coordinate_frames": coordinate_frames,
     }
 
 
@@ -445,6 +451,7 @@ def run_prepared_fold(
         "calibration_epochs": int(calibration_epochs),
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
         "null_connectivity": BLOCK_DIAGONAL_NULL,
+        "cross_construct_operator": POSITION_ALIGNED_OPERATOR,
         "candidate_parameter_count": point_parameter_counts["candidate"],
         "null_parameter_count": point_parameter_counts["null"],
         "candidate_trainable_parameter_count": point_trainable_counts["candidate"],
@@ -452,6 +459,9 @@ def run_prepared_fold(
         "frozen_parent_seed": FROZEN_PARENT_SEED,
         "frozen_parent_checkpoints": prepared["frozen_parent_checkpoints"],
         "initial_parent_replay_max_abs_difference": initial_replay,
+        "n_validated_puzzle_coordinate_frames": len(
+            prepared.get("coordinate_frames", {})
+        ),
         "training_histories": {
             "candidate_point": candidate_history,
             "null_point": null_history,
@@ -476,6 +486,8 @@ def run_prepared_fold(
             "candidate_full_cross_construct_attention": True,
             "null_block_diagonal_attention": True,
             "puzzle_balanced_training": True,
+            "position_aligned_cross_construct_attention": True,
+            "puzzle_coordinate_frames_validated": True,
             "frozen_v13_point_parent": True,
             "frozen_v14_context_encoder": True,
             "zero_initialized_parent_replay_at_1e_7": True,

@@ -38,7 +38,7 @@ def _set_inputs(*, requires_grad: bool = False):
     generator = torch.Generator().manual_seed(1401)
     hidden = [
         torch.randn(
-            5 + index,
+            7,
             CONTEXT_WIDTH,
             generator=generator,
             requires_grad=requires_grad,
@@ -112,8 +112,8 @@ def test_puzzle_set_handles_the_registered_zero_observed_construct() -> None:
     model = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).eval()
     hidden, observed = _set_inputs()
     observed[0] = torch.zeros_like(observed[0])
-    tokens = model.pool_construct_tokens(hidden, observed)
-    assert tokens.shape == (EXPECTED_CONSTRUCTS_PER_PUZZLE, CONTEXT_WIDTH)
+    tokens = model.align_construct_tokens(hidden, observed)
+    assert tokens.shape == (EXPECTED_CONSTRUCTS_PER_PUZZLE, 7, CONTEXT_WIDTH)
     assert torch.isfinite(tokens).all()
 
 
@@ -132,11 +132,24 @@ def test_full_context_is_permutation_equivariant() -> None:
         )
 
 
+def test_position_aligned_mixer_rejects_incompatible_coordinate_frames() -> None:
+    model = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT)
+    hidden, observed = _set_inputs()
+    hidden[-1] = hidden[-1][:-1]
+    observed[-1] = observed[-1][:-1]
+    try:
+        model.mix_construct_tokens(hidden, observed)
+    except ValueError as error:
+        assert "coordinate frame" in str(error)
+    else:
+        raise AssertionError("position-aware mixer accepted unequal construct lengths")
+
+
 def test_block_diagonal_null_disconnects_nonfocal_constructs() -> None:
     _candidate, null = make_exact_matched_pair(seed=5)
     null.eval()
     hidden, observed = _set_inputs(requires_grad=True)
-    focal = null.mix_construct_tokens(hidden, observed)[0].sum()
+    focal = null.mix_construct_tokens(hidden, observed)[0, 3].sum()
     gradient = torch.autograd.grad(focal, hidden[1], allow_unused=True)[0]
     assert gradient is not None
     assert torch.equal(gradient, torch.zeros_like(gradient))
@@ -146,10 +159,22 @@ def test_candidate_focal_context_uses_other_constructs() -> None:
     candidate, _null = make_exact_matched_pair(seed=5)
     candidate.eval()
     hidden, observed = _set_inputs(requires_grad=True)
-    focal = candidate.mix_construct_tokens(hidden, observed)[0].sum()
+    focal = candidate.mix_construct_tokens(hidden, observed)[0, 3].square().sum()
     gradient = torch.autograd.grad(focal, hidden[1], allow_unused=True)[0]
     assert gradient is not None
     assert float(gradient.abs().sum()) > 0.0
+
+
+def test_cross_construct_attention_is_position_aligned() -> None:
+    candidate, _null = make_exact_matched_pair(seed=6)
+    candidate.eval()
+    hidden, observed = _set_inputs(requires_grad=True)
+    focal = candidate.mix_construct_tokens(hidden, observed)[0, 3].square().sum()
+    gradient = torch.autograd.grad(focal, hidden[1], allow_unused=True)[0]
+    assert gradient is not None
+    assert float(gradient[3].abs().sum()) > 0.0
+    off_position = torch.cat([gradient[:3], gradient[4:]], dim=0)
+    assert torch.equal(off_position, torch.zeros_like(off_position))
 
 
 def test_zero_initialized_adapter_replays_parent_in_both_arms() -> None:
@@ -158,14 +183,15 @@ def test_zero_initialized_adapter_replays_parent_in_both_arms() -> None:
     null.eval()
     hidden, observed = _set_inputs()
     generator = torch.Generator().manual_seed(77)
-    base = torch.randn(3, 11, BASE_FEATURE_WIDTH, generator=generator)
-    parent = torch.randn(3, 11, generator=generator)
-    mask = torch.ones(3, 11, dtype=torch.bool)
+    base = torch.randn(3, 7, BASE_FEATURE_WIDTH, generator=generator)
+    parent = torch.randn(3, 7, generator=generator)
+    edit = torch.tensor([1, 3, 5])
+    mask = torch.ones(3, 7, dtype=torch.bool)
     candidate_point, candidate_residual, _ = candidate(
-        hidden, observed, 0, base, parent, mask
+        hidden, observed, 0, edit, base, parent, mask
     )
     null_point, null_residual, _ = null(
-        hidden, observed, 0, base, parent, mask
+        hidden, observed, 0, edit, base, parent, mask
     )
     assert torch.equal(candidate_residual, torch.zeros_like(candidate_residual))
     assert torch.equal(null_residual, torch.zeros_like(null_residual))
@@ -226,14 +252,14 @@ def test_full_point_model_replays_parent_and_handles_zero_observed_p20() -> None
     )
     assert torch.equal(point, parent)
     assert torch.equal(residual, torch.zeros_like(residual))
-    assert mixed.shape == (8, CONTEXT_WIDTH)
+    assert mixed.shape == (8, 9, CONTEXT_WIDTH)
     assert torch.isfinite(mixed).all()
 
 
 def test_full_point_model_is_equivariant_to_construct_order() -> None:
     candidate, _null = _full_pair(51)
     candidate.eval()
-    contexts = [_context(8 + (index % 2)) for index in range(8)]
+    contexts = [_context(8) for _index in range(8)]
     edit = torch.tensor([2])
     distance = torch.arange(8)[None, :] - edit[:, None]
     feature41 = torch.randn(1, 8, generator=torch.Generator().manual_seed(8))

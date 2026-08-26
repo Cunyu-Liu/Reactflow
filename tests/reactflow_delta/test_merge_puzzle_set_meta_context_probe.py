@@ -12,6 +12,7 @@ from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     BLOCK_DIAGONAL_NULL,
     FULL_CROSS_CONSTRUCT,
+    POSITION_ALIGNED_OPERATOR,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context_data import PREDICTION_SCHEMA
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
@@ -71,6 +72,7 @@ def _write_fold(
         "calibration_epochs": epochs,
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
         "null_connectivity": BLOCK_DIAGONAL_NULL,
+        "cross_construct_operator": POSITION_ALIGNED_OPERATOR,
         "candidate_parameter_count": 100,
         "null_parameter_count": 100,
         "candidate_trainable_parameter_count": 50,
@@ -81,6 +83,7 @@ def _write_fold(
             "null": 0.0,
         },
         "frozen_parent_checkpoints": frozen_parents,
+        "n_validated_puzzle_coordinate_frames": 20,
         "training_histories": {
             "candidate_point": [0.5] * epochs,
             "null_point": [0.6] * epochs,
@@ -98,6 +101,8 @@ def _write_fold(
             "candidate_full_cross_construct_attention": True,
             "null_block_diagonal_attention": True,
             "puzzle_balanced_training": True,
+            "position_aligned_cross_construct_attention": True,
+            "puzzle_coordinate_frames_validated": True,
             "frozen_v13_point_parent": True,
             "frozen_v14_context_encoder": True,
             "zero_initialized_parent_replay_at_1e_7": True,

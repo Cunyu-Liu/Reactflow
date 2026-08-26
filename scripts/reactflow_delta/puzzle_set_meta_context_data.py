@@ -47,6 +47,41 @@ def _construct_to_puzzle(records: Sequence[Any]) -> dict[str, str]:
     }
 
 
+def validate_puzzle_coordinate_frames(
+    records: Sequence[Any], univ: Any
+) -> dict[str, tuple[int, int, int]]:
+    """Confirm that aligned cross-construct positions have one real frame."""
+
+    construct_puzzle = _construct_to_puzzle(records)
+    by_puzzle: dict[str, list[str]] = defaultdict(list)
+    for construct_id, puzzle in construct_puzzle.items():
+        by_puzzle[puzzle].append(construct_id)
+    frames: dict[str, tuple[int, int, int]] = {}
+    for puzzle, construct_ids in sorted(by_puzzle.items()):
+        if len(construct_ids) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError(
+                f"puzzle {puzzle} has {len(construct_ids)} coordinate frames instead of eight"
+            )
+        observed = set()
+        for construct_id in construct_ids:
+            construct = univ.get_construct(construct_id)
+            observed.add(
+                (
+                    len(construct.sequence),
+                    int(construct.design_start),
+                    int(construct.design_end),
+                )
+            )
+        if len(observed) != 1:
+            raise ValueError(
+                f"puzzle {puzzle} constructs do not share length/design coordinates"
+            )
+        frames[puzzle] = next(iter(observed))
+    if not frames:
+        raise ValueError("puzzle-set coordinate audit found no puzzle frames")
+    return frames
+
+
 def assemble_puzzle_training_batches(
     records: Sequence[Any],
     cells: Sequence[dict[str, Any]],

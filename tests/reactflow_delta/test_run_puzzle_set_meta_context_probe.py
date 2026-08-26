@@ -122,6 +122,7 @@ def _prepared():
             },
             "v14_point_state": V14PointModel().state_dict(),
             "frozen_parent_checkpoints": {},
+            "coordinate_frames": {"P01": (4, 0, 4)},
         },
     )
 

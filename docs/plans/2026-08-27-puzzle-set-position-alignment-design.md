@@ -1,0 +1,131 @@
+# Position-aligned puzzle-set context design
+
+**Status:** `PRE_SCORE_IMPLEMENTATION_DESIGN_ONLY_NO_TRAINING_AUTHORITY`
+
+**Evidence boundary:** this design was completed while V14M3 remained
+score-blind. No V14 loss, partial fold score, per-puzzle effect, Gate direction,
+or external outcome was read.
+
+## 1. Why the global construct token is insufficient
+
+The first parent-preserving P1 implementation compressed every WT construct to
+one observed-position mean token. That token can represent a puzzle-wide regime,
+but the same vector is appended to every receiver position. It therefore cannot
+tell the incremental head what the other seven designs show at the mutation
+source coordinate or at a particular receiver coordinate. Because the endpoint
+is a full-construct profile, this is a direct representational bottleneck rather
+than a generic request for more capacity.
+
+## 2. Outcome-blind coordinate audit
+
+A metadata-only audit of the 160 registered WT rows in OpenKnot M2 v4.5.2 found:
+
+- every construct has full length 177;
+- every puzzle has exactly eight WT constructs;
+- within each puzzle all eight constructs have the same `sub_start` and
+  `sub_end` coordinates;
+- within each puzzle all eight rows carry one shared target structure;
+- the eight sequences are not near duplicates: mean pairwise full-sequence
+  Hamming distance ranges from approximately 81.7 to 91.0 positions across
+  puzzles.
+
+Thus full-sequence position is a registered shared coordinate frame inside a
+puzzle. At a fixed coordinate, the eight WT profiles provide different designed
+sequences and measurements for the same target-position role. This makes
+position-aligned cross-construct conditioning both legal and materially more
+informative than global mean pooling. No mutant outcome column was used for this
+audit.
+
+## 3. Alternatives
+
+### A. Retain one global token per construct
+
+Rejected. It is inexpensive and permutation equivariant, but it supplies no
+receiver-specific or source-specific cross-construct information. Increasing
+its width would not repair that missing indexing ability.
+
+### B. Position-aligned cross-construct attention
+
+Selected. For every full-sequence coordinate independently, the eight frozen
+V14 hidden states and their observed flags form an unordered set. Candidate
+attention can exchange information across all eight constructs at that
+coordinate. The matched null executes the same projection, attention, FFN, and
+normalization but masks every off-diagonal construct edge.
+
+The focal incremental head receives both the aligned mixed state at the mutation
+source and the aligned mixed state at each receiver. The frozen V14 local source
+and receiver states, signed distance, mutation identity, feature41, and frozen
+V13 parent point remain explicit inputs.
+
+### C. Target-structure graph alignment
+
+Rejected for this experiment. It would introduce a second new capability and a
+new metadata dependency after several structure/contact routes already produced
+negative or sub-threshold evidence. Full-position alignment directly tests the
+registered eight-design relationship with a cleaner null.
+
+## 4. Frozen architecture
+
+For hidden states \(H\in\mathbb R^{8\times177\times256}\), concatenate the WT
+observed indicator and project each aligned state:
+
+\[
+Z_{c,j}=W_p[H_{c,j};O_{c,j}].
+\]
+
+For each position \(j\), apply the same eight-token attention block:
+
+\[
+\widetilde Z_{:,j}=
+\operatorname{SetBlock}(Z_{:,j}).
+\]
+
+Candidate uses full eight-by-eight attention. Null uses an identity attention
+mask. No construct-order or method embedding is present. Position is the batch
+axis of the set block, so the cross-construct operator cannot mix position
+\(j\) with a different position \(k\); within-construct positional context has
+already been encoded by the frozen six-layer V14 encoder.
+
+For mutation source \(s\), receiver \(i\), and focal construct \(c\), the
+trainable increment uses
+
+\[
+g(x)=\operatorname{MLP}[
+f_{V14}(c,s,i),
+\widetilde Z_{c,s},
+\widetilde Z_{c,i},
+\widehat\Delta_{V13}(c,s,i)
+].
+\]
+
+Its final layer is zero initialized and the prediction remains
+
+\[
+\widehat\Delta=\widehat\Delta_{V13}+g(x).
+\]
+
+Each arm has 6,170,417 total parameters: 4,767,280 frozen V14 encoder
+parameters and 1,403,137 trainable position-aware mixer/head parameters. The
+V13 parent is evaluated outside the module and never optimized.
+
+## 5. Verification and failure meaning
+
+The implementation must establish:
+
+- all eight constructs have one exact length before mixing;
+- construct permutation changes only the corresponding construct axis;
+- candidate focal output depends on non-focal input at the same coordinate;
+- that dependency is exactly zero at all different coordinates;
+- null focal output has zero dependency on every non-focal construct;
+- candidate/null state, total parameters, trainable parameters, input universe,
+  optimizer, and random initialization match exactly;
+- both arms replay the frozen V13 parent within `1e-7` before training;
+- the frozen V14 encoder receives no gradient and remains bitwise unchanged;
+- P20_Eterna stays in all 177 aligned context positions with observed flag zero
+  and no fabricated supervised cell.
+
+This architecture is still implementation-only. If a future complete P1
+candidate does not beat its block-diagonal null under the predeclared
+attribution Gate, the result means that aligned cross-design WT context lacks
+usable incremental signal; the response is to terminate the family, not return
+to global pooling, widen the mixer, or add a structure graph.

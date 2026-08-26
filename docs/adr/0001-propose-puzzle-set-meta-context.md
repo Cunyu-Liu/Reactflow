@@ -51,36 +51,39 @@ frozen V13 outer-fold point ─────────────────�
 8 WT sequence/reactivity contexts                                 │
         │ frozen outer-fold V14 outcome-blind WT encoder           │
         ▼
-8 WT construct hidden sequences
-        │ observed-mean pooling; all-position fallback only for P20_Eterna
+8 × 177 WT construct hidden states
+        │ append observed flag; shared projection at each position
         ▼
-8 construct tokens + observed fractions
+177 aligned sets of eight construct states
         │
-        ├── candidate: full permutation-equivariant set attention
-        └── matched null: identical attention with block-diagonal mask
+        ├── candidate: full cross-construct attention at each position
+        └── matched null: identical self-only attention at each position
         │
         ▼
-focal mixed token + focal source/receiver/mutation/feature41/parent features
+mixed source + mixed receiver + focal/mutation/feature41/parent features
         │
         ▼
 zero-initialized incremental head → frozen V13 point + increment
 ```
 
-The block-diagonal null uses every trainable layer on the focal token but cannot
-receive information from non-focal constructs. This identifies the
+The block-diagonal null uses every trainable layer at every focal position but
+cannot receive information from non-focal constructs. Cross-construct attention
+is position aligned: full-sequence position is the attention batch axis, so it
+cannot mix different coordinates. This identifies the
 cross-construct capability rather than model size. Both arms replay the frozen
 V13 parent point exactly at initialization. V13 is fixed before V14 scoring
 because it has the strongest known combined point profile; using its prediction
 as an immutable parent does not reopen the terminated exact-mutant mechanism
 claim.
 
-The current implementation materializes `6,072,113` parameters in each arm:
-`4,767,280` frozen V14 encoder parameters and `1,304,833` trainable set-mixer
-and incremental-head parameters. The extra parent-point scalar is an explicit
-input to the incremental head. The V13 parent is evaluated outside the new
-module and is never optimized by P1. These are implementation observations,
-not an active contract; an eligible future amendment must freeze the final
-count before real-data training.
+The current implementation materializes `6,170,417` parameters in each arm:
+`4,767,280` frozen V14 encoder parameters and `1,403,137` trainable
+position-aware mixer and incremental-head parameters. The head receives the
+aligned mixed states at both source and receiver plus the explicit parent-point
+scalar. The V13 parent is evaluated outside the new module and is never
+optimized by P1. These are implementation observations, not an active contract;
+an eligible future amendment must freeze the final count before real-data
+training.
 
 The proposed training unit is one whole puzzle, not one pooled mutant table.
 Within a puzzle, loss is averaged position within mutant, then mutant within
@@ -93,8 +96,9 @@ fitting, so model connectivity—not cell order or dropout randomness—is the
 intended difference.
 
 The proposed held path first computes the same-fold V13 parent point, then
-assembles all eight WT contexts once, encodes and mixes them once per arm, and
-emits a prediction for every registered mutant and full construct position.
+assembles all eight WT contexts once, encodes them once, and mixes each aligned
+eight-construct position once per arm before emitting a prediction for every
+registered mutant and full construct position.
 The V14 encoder stays in evaluation mode throughout point fitting. After point
 fitting, both complete incremental models are frozen.
 Each arm then receives an exactly initialized copy of the V10
@@ -131,7 +135,7 @@ this stage.
 - Supplies an exact parameter-matched attribution null.
 - Directly targets unseen-puzzle transfer rather than adding focal capacity.
 - Preserves the strongest known point level and reduces the trainable problem
-  from 6.07M parameters to the 1.30M parameters that implement the new ability.
+  from 6.17M parameters to the 1.40M parameters that implement the new ability.
 - Cleanly supports a future full model without changing the frozen evaluator.
 
 ### Negative
@@ -190,6 +194,8 @@ branch.
   is invalid and no real-data probe may run.
 - If construct permutation changes the corresponding candidate output, method
   order has leaked into the model and the design is invalid.
+- If a mixed state at position `j` depends on a non-focal input at a different
+  position `k`, the registered coordinate alignment is not being implemented.
 - If zero-observed P20 cannot be represented without a fake target, exclude the
   adapter rather than inventing data.
 - If either arm fails to replay its same-fold V13 parent at `1e-7` before the
@@ -201,5 +207,6 @@ branch.
 ## References
 
 - `docs/plans/2026-08-27-post-v14-model-contingency.md`
+- `docs/plans/2026-08-27-puzzle-set-position-alignment-design.md`
 - `autoresearch/orchestrator-260827-v14-wt-profile/research.md`
 - `docs/prospective_v2/model_rescue_v13_decision_ledger.yaml`

@@ -63,9 +63,11 @@ These are `IDEA` records, not findings or authorized candidates.
 ### P1 — Puzzle-set meta-context operator
 
 - `IDEA`: encode the eight WT constructs belonging to one puzzle as a
-  permutation-equivariant set. A focal construct's feature41-anchored residual
-  may attend to outcome-blind summaries of the other seven constructs and to
-  their shared target-structure context.
+  permutation-equivariant set at every shared full-sequence coordinate. A
+  focal construct's parent-anchored increment may attend to outcome-blind V14
+  states from the other seven constructs at the mutation source and each
+  receiver coordinate. Metadata-only audit confirms all eight constructs in
+  every puzzle share length, design interval and target structure.
 - `NEW_CAPABILITY`: cross-construct conditioning inside an unseen puzzle. This
   differs from V11/V13/V14, which use only the focal construct, and from generic
   structure message passing, which propagates positions inside one construct.

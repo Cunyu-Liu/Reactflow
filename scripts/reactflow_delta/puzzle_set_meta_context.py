@@ -28,6 +28,7 @@ from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 FULL_CROSS_CONSTRUCT = "FULL_CROSS_CONSTRUCT"
 BLOCK_DIAGONAL_NULL = "BLOCK_DIAGONAL_NULL"
 CONNECTIVITY_MODES = {FULL_CROSS_CONSTRUCT, BLOCK_DIAGONAL_NULL}
+POSITION_ALIGNED_OPERATOR = "POSITION_ALIGNED_CROSS_CONSTRUCT_V1"
 
 EXPECTED_CONSTRUCTS_PER_PUZZLE = 8
 CONTEXT_WIDTH = 256
@@ -150,13 +151,14 @@ def assert_v14_encoder_replay(
 
 
 class PuzzleSetMetaContext(nn.Module):
-    """Feature41-anchored point adapter with puzzle-set WT context.
+    """Parent-anchored point adapter with aligned puzzle-set WT context.
 
     ``construct_hidden`` and ``construct_observed`` must be produced without
-    mutant outcomes.  Construct order has no positional encoding, so the set
-    mixer is permutation equivariant.  A real zero-observed construct is
-    represented by the mean of all of its sequence-derived hidden states plus
-    an explicit observed-fraction value of zero.
+    mutant outcomes. All eight constructs share the registered full-sequence
+    coordinate frame, so cross-construct attention is applied independently at
+    every aligned position. Construct order has no positional encoding and the
+    mixer remains permutation equivariant. A real zero-observed construct keeps
+    its sequence-derived hidden state plus an explicit observed value of zero.
     """
 
     def __init__(self, *, connectivity: str) -> None:
@@ -182,7 +184,7 @@ class PuzzleSetMetaContext(nn.Module):
         self.residual_dropout = nn.Dropout(DROPOUT)
         self.output_norm = nn.LayerNorm(CONTEXT_WIDTH)
         self.point_head = nn.Sequential(
-            nn.Linear(BASE_FEATURE_WIDTH + CONTEXT_WIDTH, POINT_HEAD_WIDTH),
+            nn.Linear(BASE_FEATURE_WIDTH + 2 * CONTEXT_WIDTH, POINT_HEAD_WIDTH),
             nn.GELU(),
             nn.LayerNorm(POINT_HEAD_WIDTH),
             nn.Dropout(DROPOUT),
@@ -205,7 +207,7 @@ class PuzzleSetMetaContext(nn.Module):
         if hidden.shape[0] == 0:
             raise ValueError("puzzle-set construct cannot be empty")
 
-    def pool_construct_tokens(
+    def align_construct_tokens(
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
@@ -214,28 +216,30 @@ class PuzzleSetMetaContext(nn.Module):
             construct_observed
         ) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
             raise ValueError("puzzle-set context requires exactly eight constructs")
-        pooled = []
+        lengths = {int(hidden.shape[0]) for hidden in construct_hidden}
+        if len(lengths) != 1:
+            raise ValueError("puzzle-set constructs do not share one coordinate frame")
+        aligned = []
         for hidden, observed in zip(construct_hidden, construct_observed):
             self._validate_construct(hidden, observed)
-            if bool(observed.any()):
-                summary = hidden[observed].mean(dim=0)
-            else:
-                # P20_Eterna is a registered, reachable zero-observed WT
-                # construct. Its sequence-derived hidden states remain legal
-                # outcome-blind inputs even though no reactivity target exists.
-                summary = hidden.mean(dim=0)
-            observed_fraction = observed.to(hidden.dtype).mean().reshape(1)
-            pooled.append(torch.cat([summary, observed_fraction], dim=0))
-        return self.construct_projection(torch.stack(pooled, dim=0))
+            aligned.append(
+                torch.cat(
+                    [hidden, observed.to(hidden.dtype)[:, None]], dim=-1
+                )
+            )
+        return self.construct_projection(torch.stack(aligned, dim=0))
 
     def mix_construct_tokens(
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
     ) -> torch.Tensor:
-        tokens = self.pool_construct_tokens(
+        # MultiheadAttention treats full-sequence position as the batch axis
+        # and the eight constructs as the unordered token axis. Information
+        # therefore crosses constructs only at the same registered coordinate.
+        tokens = self.align_construct_tokens(
             construct_hidden, construct_observed
-        ).unsqueeze(0)
+        ).permute(1, 0, 2)
         normalized = self.attention_norm(tokens)
         attention_mask = None
         if self.connectivity == BLOCK_DIAGONAL_NULL:
@@ -253,13 +257,14 @@ class PuzzleSetMetaContext(nn.Module):
         )
         tokens = tokens + self.residual_dropout(attended)
         tokens = tokens + self.residual_dropout(self.ffn(self.ffn_norm(tokens)))
-        return self.output_norm(tokens[0])
+        return self.output_norm(tokens).permute(1, 0, 2)
 
     def forward(
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
         focal_construct_index: int,
+        edit_index: torch.Tensor,
         base_point_features: torch.Tensor,
         parent_point: torch.Tensor,
         prediction_mask: torch.Tensor,
@@ -280,6 +285,7 @@ class PuzzleSetMetaContext(nn.Module):
         point, residual = self.point_from_mixed(
             mixed,
             focal_construct_index,
+            edit_index,
             base_point_features,
             parent_point,
             prediction_mask,
@@ -290,12 +296,15 @@ class PuzzleSetMetaContext(nn.Module):
         self,
         mixed: torch.Tensor,
         focal_construct_index: int,
+        edit_index: torch.Tensor,
         base_point_features: torch.Tensor,
         parent_point: torch.Tensor,
         prediction_mask: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        if mixed.shape != (EXPECTED_CONSTRUCTS_PER_PUZZLE, CONTEXT_WIDTH):
-            raise ValueError("mixed puzzle-set tokens have invalid shape")
+        if mixed.ndim != 3 or mixed.shape[0] != EXPECTED_CONSTRUCTS_PER_PUZZLE or (
+            mixed.shape[2] != CONTEXT_WIDTH
+        ):
+            raise ValueError("mixed aligned puzzle-set states have invalid shape")
         if not 0 <= int(focal_construct_index) < EXPECTED_CONSTRUCTS_PER_PUZZLE:
             raise ValueError("focal construct index is outside the puzzle set")
         if base_point_features.ndim != 3 or base_point_features.shape[-1] != (
@@ -305,19 +314,25 @@ class PuzzleSetMetaContext(nn.Module):
         expected = base_point_features.shape[:2]
         if parent_point.shape != expected or prediction_mask.shape != expected:
             raise ValueError("point anchor or prediction mask is misaligned")
+        invalid_edit = (edit_index < 0) | (edit_index >= mixed.shape[1])
+        if edit_index.shape != (expected[0],) or bool(invalid_edit.any()):
+            raise ValueError("puzzle-set edit index is misaligned")
+        if mixed.shape[1] != expected[1]:
+            raise ValueError("mixed puzzle-set length differs from focal construct")
         if prediction_mask.dtype != torch.bool:
             raise ValueError("prediction mask must be boolean")
         focal = mixed[int(focal_construct_index)]
-        expanded = focal.reshape(1, 1, -1).expand(*expected, -1)
+        source = focal[edit_index][:, None, :].expand(*expected, -1)
+        receiver = focal[None, :, :].expand(expected[0], -1, -1)
         residual = self.point_head(
-            torch.cat([base_point_features, expanded], dim=-1)
+            torch.cat([base_point_features, source, receiver], dim=-1)
         ).squeeze(-1)
         point = (parent_point + residual).masked_fill(~prediction_mask, 0.0)
         return point, residual
 
 
 class PuzzleSetMetaContextPointModel(nn.Module):
-    """Complete feature41-anchored point model for the proposed capability."""
+    """V13-parent-anchored point model for the proposed puzzle-set capability."""
 
     def __init__(self, *, connectivity: str) -> None:
         super().__init__()
@@ -442,6 +457,7 @@ class PuzzleSetMetaContextPointModel(nn.Module):
         point, residual = self.meta_context.point_from_mixed(
             mixed,
             focal_construct_index,
+            edit_index,
             base_features,
             parent_point,
             prediction_mask,

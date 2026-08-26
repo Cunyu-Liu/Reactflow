@@ -31,6 +31,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     assemble_puzzle_training_batches,
     predict_held_puzzle_distributions,
     predict_held_puzzle_points,
+    validate_puzzle_coordinate_frames,
 )
 
 
@@ -49,6 +50,8 @@ class _Record:
 class _Construct:
     sequence: str
     wt_observed: np.ndarray
+    design_start: int = 1
+    design_end: int = 3
 
 
 class _Universe:
@@ -121,6 +124,26 @@ def test_training_assembler_rejects_incomplete_puzzle_set() -> None:
         assert "constructs instead of eight" in str(error)
     else:
         raise AssertionError("assembler accepted an incomplete puzzle set")
+
+
+def test_coordinate_audit_accepts_shared_frame_and_rejects_shifted_design() -> None:
+    records = [
+        _Record("P01", f"method{index}", f"P01_method{index}", 1, 1)
+        for index in range(8)
+    ]
+    constructs = {
+        record.construct_id: _Construct("ACGU", np.ones(4, dtype=bool))
+        for record in records
+    }
+    frames = validate_puzzle_coordinate_frames(records, _Universe(constructs))
+    assert frames == {"P01": (4, 1, 3)}
+    constructs[records[-1].construct_id].design_start = 0
+    try:
+        validate_puzzle_coordinate_frames(records, _Universe(constructs))
+    except ValueError as error:
+        assert "share length/design coordinates" in str(error)
+    else:
+        raise AssertionError("coordinate audit accepted a shifted construct")
 
 
 def test_zero_outcome_construct_remains_context_without_fake_supervision() -> None:
