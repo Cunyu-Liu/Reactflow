@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-updated_at: '2026-08-27T04:05:00+08:00'
+updated_at: '2026-08-27T02:16:00+08:00'
 
 immutable_parent_verdicts:
   v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -61,8 +61,8 @@ frozen_counts:
 phase_state:
   V14M0: CONTRACT_FROZEN_PASS
   V14M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
-  V14M2: REAL_DATA_ENGINEERING_SMOKE_AUTHORIZED
-  V14M3: NOT_AUTHORIZED
+  V14M2: ENGINEERING_SMOKE_PASS
+  V14M3: TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
   V14M4: NOT_AUTHORIZED
   V14M5: NOT_RUN
 
@@ -119,5 +119,30 @@ events:
     folds: [0, 1]
     seed: 0
     epochs: [3, 3, 3]
+    score_accessed: false
+    external_outcome_accessed: false
+  - at: '2026-08-27T02:16:00+08:00'
+    phase: V14M2
+    event: ENGINEERING_SMOKE_EXACT_PASS
+    status: V14M2_ENGINEERING_SMOKE_PASS
+    evidence:
+      fold_artifacts:
+        - /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m2_real_smoke/v14_fold_result_fold0_seed0.json
+        - /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m2_real_smoke/v14_fold_result_fold1_seed0.json
+      complete_unscored_merge: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m2_real_smoke/v14m2_complete_unscored_merge.json
+      qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m2_real_smoke/v14m2_smoke_qualification.json
+      merge_status: V14M2_COMPLETE_UNSCORED_SMOKE_MERGE_PASS
+      prediction_only: true
+      scientific_score_computed: false
+      all_registered_engineering_invariants: true
+    score_accessed: false
+    external_outcome_accessed: false
+  - at: '2026-08-27T02:16:00+08:00'
+    phase: V14M3
+    event: TWENTY_FOLD_SEED_ZERO_PREDICTION_ONLY_SCREEN_AUTHORIZED
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seed: 0
+    epochs: [200, 40, 40]
+    complete_universe_required_before_score: true
     score_accessed: false
     external_outcome_accessed: false
