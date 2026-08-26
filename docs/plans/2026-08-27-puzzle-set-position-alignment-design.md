@@ -70,8 +70,11 @@ For hidden states \(H\in\mathbb R^{8\times177\times256}\), concatenate the WT
 observed indicator and project each aligned state:
 
 \[
-Z_{c,j}=W_p[H_{c,j};O_{c,j}].
+Z_{c,j}=W_p[H_{c,j};O_{c,j}]+W_qQ_{c,j},
 \]
+
+where `Q` is the four-dimensional aligned WT statistic. It is
+leave-one-construct for the candidate and focal-only for the matched null.
 
 For each position \(j\), apply the same eight-token attention block:
 
@@ -85,6 +88,17 @@ mask. No construct-order or method embedding is present. Position is the batch
 axis of the set block, so the cross-construct operator cannot mix position
 \(j\) with a different position \(k\); within-construct positional context has
 already been encoded by the frozen six-layer V14 encoder.
+
+The WT-only alignment audit justifies a low-dimensional explicit statistic at
+the same coordinate. For each focal construct, the candidate computes the
+leave-one-construct WT mean, population spread, observed support fraction and
+focal-minus-consensus deviation from the other seven constructs. The matched
+null supplies the same four-dimensional interface and the same projection
+parameters, but its statistics are restricted to the focal construct itself:
+focal WT value, zero spread, focal observed flag and zero deviation. Thus the
+null receives comparable nonzero inputs without any non-focal information.
+The projected statistics are added before the set block; they do not introduce
+method or puzzle identity and remain permutation equivariant.
 
 For mutation source \(s\), receiver \(i\), and focal construct \(c\), the
 trainable increment uses
@@ -104,8 +118,8 @@ Its final layer is zero initialized and the prediction remains
 \widehat\Delta=\widehat\Delta_{V13}+g(x).
 \]
 
-Each arm has 6,170,417 total parameters: 4,767,280 frozen V14 encoder
-parameters and 1,403,137 trainable position-aware mixer/head parameters. The
+Each arm has 6,171,697 total parameters: 4,767,280 frozen V14 encoder
+parameters and 1,404,417 trainable position-aware mixer/head parameters. The
 V13 parent is evaluated outside the module and never optimized.
 
 ## 5. Verification and failure meaning
@@ -119,6 +133,8 @@ The implementation must establish:
 - null focal output has zero dependency on every non-focal construct;
 - candidate/null state, total parameters, trainable parameters, input universe,
   optimizer, and random initialization match exactly;
+- candidate statistics exclude the focal construct, while null statistics are
+  self-only and non-focal counterfactuals leave them bitwise unchanged;
 - both arms replay the frozen V13 parent within `1e-7` before training;
 - after the zero-initialized output layer has received its first update, a
   second supervised backward pass gives finite nonzero gradients to the

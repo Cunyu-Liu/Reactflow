@@ -76,8 +76,16 @@ because it has the strongest known combined point profile; using its prediction
 as an immutable parent does not reopen the terminated exact-mutant mechanism
 claim.
 
-The current implementation materializes `6,170,417` parameters in each arm:
-`4,767,280` frozen V14 encoder parameters and `1,403,137` trainable
+The final pre-run representation also projects four missingness-aware aligned
+WT statistics. Candidate statistics are leave-one-construct mean, spread,
+support fraction and focal deviation across the other seven constructs. The
+matched null uses the identical projection and parameter count but supplies
+only focal value, zero spread, focal observed flag and zero deviation. This
+turns the positive WT-only alignment diagnostic into a sample-efficient input
+bias while preserving a strict no-cross-construct null.
+
+The current implementation materializes `6,171,697` parameters in each arm:
+`4,767,280` frozen V14 encoder parameters and `1,404,417` trainable
 position-aware mixer and incremental-head parameters. The head receives the
 aligned mixed states at both source and receiver plus the explicit parent-point
 scalar. The V13 parent is evaluated outside the new module and is never

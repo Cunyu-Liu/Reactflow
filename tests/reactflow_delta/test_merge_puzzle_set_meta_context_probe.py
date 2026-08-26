@@ -106,6 +106,8 @@ def _write_fold(
             "null_block_diagonal_attention": True,
             "puzzle_balanced_training": True,
             "position_aligned_cross_construct_attention": True,
+            "leave_one_construct_alignment_statistics": True,
+            "matched_null_self_only_alignment_statistics": True,
             "puzzle_coordinate_frames_validated": True,
             "frozen_v13_point_parent": True,
             "frozen_v14_context_encoder": True,

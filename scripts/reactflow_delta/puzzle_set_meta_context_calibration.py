@@ -98,12 +98,15 @@ def build_calibration_cells(
             if len(contexts) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
                 raise ValueError("puzzle-set calibration requires eight WT contexts")
             observed = [context[3].bool() for context in contexts]
+            reactivity = [context[1] for context in contexts]
             candidate_hidden = candidate.encode_puzzle_set(contexts)
             null_hidden = null.encode_puzzle_set(contexts)
             candidate_mixed = candidate.meta_context.mix_construct_tokens(
-                candidate_hidden, observed
+                candidate_hidden, observed, reactivity
             )
-            null_mixed = null.meta_context.mix_construct_tokens(null_hidden, observed)
+            null_mixed = null.meta_context.mix_construct_tokens(
+                null_hidden, observed, reactivity
+            )
             for source in cells:
                 focal = int(source["focal_construct_index"])
                 candidate_point, _ = candidate.forward_from_encoded(

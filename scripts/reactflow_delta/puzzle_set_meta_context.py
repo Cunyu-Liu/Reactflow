@@ -28,17 +28,18 @@ from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 FULL_CROSS_CONSTRUCT = "FULL_CROSS_CONSTRUCT"
 BLOCK_DIAGONAL_NULL = "BLOCK_DIAGONAL_NULL"
 CONNECTIVITY_MODES = {FULL_CROSS_CONSTRUCT, BLOCK_DIAGONAL_NULL}
-POSITION_ALIGNED_OPERATOR = "POSITION_ALIGNED_CROSS_CONSTRUCT_V1"
+POSITION_ALIGNED_OPERATOR = "POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V2"
 
 EXPECTED_CONSTRUCTS_PER_PUZZLE = 8
 CONTEXT_WIDTH = 256
 ATTENTION_HEADS = 8
 V14_LOCAL_FEATURE_WIDTH = 522
 BASE_FEATURE_WIDTH = V14_LOCAL_FEATURE_WIDTH + 1
+ALIGNMENT_STAT_WIDTH = 4
 POINT_HEAD_WIDTH = 384
 DROPOUT = 0.1
-EXPECTED_TOTAL_PARAMETERS = 6_170_417
-EXPECTED_TRAINABLE_PARAMETERS = 1_403_137
+EXPECTED_TOTAL_PARAMETERS = 6_171_697
+EXPECTED_TRAINABLE_PARAMETERS = 1_404_417
 
 
 class OutcomeBlindWTEncoder(nn.Module):
@@ -169,6 +170,9 @@ class PuzzleSetMetaContext(nn.Module):
             raise ValueError(f"unsupported puzzle-set connectivity: {connectivity}")
         self.connectivity = connectivity
         self.construct_projection = nn.Linear(CONTEXT_WIDTH + 1, CONTEXT_WIDTH)
+        self.alignment_projection = nn.Linear(
+            ALIGNMENT_STAT_WIDTH, CONTEXT_WIDTH
+        )
         self.attention_norm = nn.LayerNorm(CONTEXT_WIDTH)
         self.set_attention = nn.MultiheadAttention(
             CONTEXT_WIDTH,
@@ -213,34 +217,97 @@ class PuzzleSetMetaContext(nn.Module):
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
+        construct_reactivity: Sequence[torch.Tensor],
     ) -> torch.Tensor:
         if len(construct_hidden) != EXPECTED_CONSTRUCTS_PER_PUZZLE or len(
             construct_observed
+        ) != EXPECTED_CONSTRUCTS_PER_PUZZLE or len(
+            construct_reactivity
         ) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
             raise ValueError("puzzle-set context requires exactly eight constructs")
         lengths = {int(hidden.shape[0]) for hidden in construct_hidden}
         if len(lengths) != 1:
             raise ValueError("puzzle-set constructs do not share one coordinate frame")
         aligned = []
-        for hidden, observed in zip(construct_hidden, construct_observed):
+        for hidden, observed, reactivity in zip(
+            construct_hidden, construct_observed, construct_reactivity
+        ):
             self._validate_construct(hidden, observed)
+            if reactivity.shape != observed.shape:
+                raise ValueError("puzzle-set WT reactivity is misaligned")
             aligned.append(
                 torch.cat(
                     [hidden, observed.to(hidden.dtype)[:, None]], dim=-1
                 )
             )
-        return self.construct_projection(torch.stack(aligned, dim=0))
+        projected = self.construct_projection(torch.stack(aligned, dim=0))
+        statistics = self.construct_alignment_statistics(
+            construct_reactivity, construct_observed
+        )
+        return projected + self.alignment_projection(statistics)
+
+    def construct_alignment_statistics(
+        self,
+        construct_reactivity: Sequence[torch.Tensor],
+        construct_observed: Sequence[torch.Tensor],
+    ) -> torch.Tensor:
+        """Return mean, spread, support and focal deviation at each coordinate.
+
+        The candidate uses the other seven constructs. The matched null uses
+        the focal construct only, giving its alignment projection comparable
+        nonzero inputs without introducing any non-focal information.
+        """
+
+        if len(construct_reactivity) != EXPECTED_CONSTRUCTS_PER_PUZZLE or len(
+            construct_observed
+        ) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError("alignment statistics require exactly eight constructs")
+        values = torch.stack(list(construct_reactivity), dim=0)
+        observed = torch.stack(list(construct_observed), dim=0).bool()
+        if values.ndim != 2 or observed.shape != values.shape:
+            raise ValueError("alignment statistics have incompatible coordinates")
+        finite = torch.isfinite(values)
+        observed = observed & finite
+        safe = torch.where(observed, values, torch.zeros_like(values))
+        if self.connectivity == BLOCK_DIAGONAL_NULL:
+            mean = safe
+            spread = torch.zeros_like(values)
+            support = observed.to(values.dtype)
+            deviation = torch.zeros_like(values)
+        else:
+            counts = observed.sum(dim=0, keepdim=True) - observed.to(torch.int64)
+            sums = safe.sum(dim=0, keepdim=True) - safe
+            squared = safe.square().sum(dim=0, keepdim=True) - safe.square()
+            supported = counts > 0
+            denominator = counts.clamp_min(1).to(values.dtype)
+            mean = torch.where(supported, sums / denominator, torch.zeros_like(values))
+            variance = torch.where(
+                supported,
+                squared / denominator - mean.square(),
+                torch.zeros_like(values),
+            ).clamp_min(0.0)
+            spread = torch.sqrt(variance)
+            support = counts.to(values.dtype) / float(
+                EXPECTED_CONSTRUCTS_PER_PUZZLE - 1
+            )
+            deviation = torch.where(
+                observed & supported,
+                safe - mean,
+                torch.zeros_like(values),
+            )
+        return torch.stack([mean, spread, support, deviation], dim=-1)
 
     def mix_construct_tokens(
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
+        construct_reactivity: Sequence[torch.Tensor],
     ) -> torch.Tensor:
         # MultiheadAttention treats full-sequence position as the batch axis
         # and the eight constructs as the unordered token axis. Information
         # therefore crosses constructs only at the same registered coordinate.
         tokens = self.align_construct_tokens(
-            construct_hidden, construct_observed
+            construct_hidden, construct_observed, construct_reactivity
         ).permute(1, 0, 2)
         normalized = self.attention_norm(tokens)
         attention_mask = None
@@ -265,6 +332,7 @@ class PuzzleSetMetaContext(nn.Module):
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
+        construct_reactivity: Sequence[torch.Tensor],
         focal_construct_index: int,
         edit_index: torch.Tensor,
         base_point_features: torch.Tensor,
@@ -283,7 +351,9 @@ class PuzzleSetMetaContext(nn.Module):
         if prediction_mask.dtype != torch.bool:
             raise ValueError("prediction mask must be boolean")
 
-        mixed = self.mix_construct_tokens(construct_hidden, construct_observed)
+        mixed = self.mix_construct_tokens(
+            construct_hidden, construct_observed, construct_reactivity
+        )
         point, residual = self.point_from_mixed(
             mixed,
             focal_construct_index,
@@ -417,7 +487,10 @@ class PuzzleSetMetaContextPointModel(nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         hidden = self.encode_puzzle_set(contexts)
         observed = [context[3].bool() for context in contexts]
-        mixed = self.meta_context.mix_construct_tokens(hidden, observed)
+        reactivity = [context[1] for context in contexts]
+        mixed = self.meta_context.mix_construct_tokens(
+            hidden, observed, reactivity
+        )
         point, residual = self.forward_from_encoded(
             hidden,
             mixed,
@@ -578,7 +651,10 @@ def puzzle_balanced_point_loss(
 
     hidden = model.encode_puzzle_set(contexts)
     observed = [context[3].bool() for context in contexts]
-    mixed = model.meta_context.mix_construct_tokens(hidden, observed)
+    reactivity = [context[1] for context in contexts]
+    mixed = model.meta_context.mix_construct_tokens(
+        hidden, observed, reactivity
+    )
     cell_losses = []
     for cell in cells:
         qualified = cell["qualified_mask"]

@@ -27,7 +27,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
 
 
-MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v4"
+MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v5"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
@@ -137,6 +137,8 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
         "null_block_diagonal_attention",
         "puzzle_balanced_training",
         "position_aligned_cross_construct_attention",
+        "leave_one_construct_alignment_statistics",
+        "matched_null_self_only_alignment_statistics",
         "puzzle_coordinate_frames_validated",
         "frozen_v13_point_parent",
         "frozen_v14_context_encoder",
@@ -319,6 +321,8 @@ def merge_complete_universe(
             "null_block_diagonal_attention_all_runs": True,
             "puzzle_balanced_training_all_runs": True,
             "position_aligned_cross_construct_attention_all_runs": True,
+            "leave_one_construct_alignment_statistics_all_runs": True,
+            "matched_null_self_only_alignment_statistics_all_runs": True,
             "puzzle_coordinate_frames_validated_all_runs": True,
             "frozen_v13_point_parent_all_runs": True,
             "frozen_v14_context_encoder_all_runs": True,

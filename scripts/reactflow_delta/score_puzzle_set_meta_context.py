@@ -74,6 +74,8 @@ def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
         "null_block_diagonal_attention_all_runs",
         "puzzle_balanced_training_all_runs",
         "position_aligned_cross_construct_attention_all_runs",
+        "leave_one_construct_alignment_statistics_all_runs",
+        "matched_null_self_only_alignment_statistics_all_runs",
         "puzzle_coordinate_frames_validated_all_runs",
         "frozen_v13_point_parent_all_runs",
         "frozen_v14_context_encoder_all_runs",

@@ -11,6 +11,8 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
     BLOCK_DIAGONAL_NULL,
     CONTEXT_WIDTH,
     EXPECTED_CONSTRUCTS_PER_PUZZLE,
+    EXPECTED_TOTAL_PARAMETERS,
+    EXPECTED_TRAINABLE_PARAMETERS,
     FULL_CROSS_CONSTRUCT,
     PuzzleSetMetaContextPointModel,
     PuzzleSetMetaContext,
@@ -50,6 +52,13 @@ def _set_inputs(*, requires_grad: bool = False):
         torch.ones(len(value), dtype=torch.bool) for value in hidden
     ]
     return hidden, observed
+
+
+def _reactivity(hidden):
+    return [
+        torch.linspace(-1.0, 1.0, len(value)) + index / 10.0
+        for index, value in enumerate(hidden)
+    ]
 
 
 def _context(length: int, *, observed: bool = True):
@@ -113,19 +122,55 @@ def test_puzzle_set_handles_the_registered_zero_observed_construct() -> None:
     model = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).eval()
     hidden, observed = _set_inputs()
     observed[0] = torch.zeros_like(observed[0])
-    tokens = model.align_construct_tokens(hidden, observed)
+    tokens = model.align_construct_tokens(hidden, observed, _reactivity(hidden))
     assert tokens.shape == (EXPECTED_CONSTRUCTS_PER_PUZZLE, 7, CONTEXT_WIDTH)
     assert torch.isfinite(tokens).all()
+
+
+def test_alignment_statistics_are_leave_one_construct_and_missing_aware() -> None:
+    candidate, null = make_exact_matched_pair(seed=1402)
+    reactivity = [torch.full((4,), float(index)) for index in range(8)]
+    observed = [torch.ones(4, dtype=torch.bool) for _index in range(8)]
+    candidate_stats = candidate.construct_alignment_statistics(
+        reactivity, observed
+    )
+    null_stats = null.construct_alignment_statistics(reactivity, observed)
+    assert torch.allclose(
+        candidate_stats[0, :, 0], torch.full((4,), 4.0), atol=1e-7, rtol=0.0
+    )
+    assert torch.allclose(
+        candidate_stats[0, :, 1], torch.full((4,), 2.0), atol=1e-7, rtol=0.0
+    )
+    assert torch.equal(candidate_stats[0, :, 2], torch.ones(4))
+    assert torch.allclose(
+        candidate_stats[0, :, 3], torch.full((4,), -4.0), atol=1e-7, rtol=0.0
+    )
+    assert torch.equal(null_stats[:, :, 0], torch.stack(reactivity))
+    assert torch.equal(null_stats[:, :, 1], torch.zeros(8, 4))
+    assert torch.equal(null_stats[:, :, 2], torch.ones(8, 4))
+    assert torch.equal(null_stats[:, :, 3], torch.zeros(8, 4))
+
+    observed[0] = torch.zeros(4, dtype=torch.bool)
+    candidate_missing = candidate.construct_alignment_statistics(
+        reactivity, observed
+    )
+    null_missing = null.construct_alignment_statistics(reactivity, observed)
+    assert torch.equal(candidate_missing[0, :, 0], torch.full((4,), 4.0))
+    assert torch.equal(candidate_missing[0, :, 2], torch.ones(4))
+    assert torch.equal(candidate_missing[0, :, 3], torch.zeros(4))
+    assert torch.equal(null_missing[0], torch.zeros(4, 4))
 
 
 def test_full_context_is_permutation_equivariant() -> None:
     model = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).eval()
     hidden, observed = _set_inputs()
-    original = model.mix_construct_tokens(hidden, observed)
+    reactivity = _reactivity(hidden)
+    original = model.mix_construct_tokens(hidden, observed, reactivity)
     permutation = [3, 0, 7, 2, 6, 1, 5, 4]
     permuted = model.mix_construct_tokens(
         [hidden[index] for index in permutation],
         [observed[index] for index in permutation],
+        [reactivity[index] for index in permutation],
     )
     for new_index, old_index in enumerate(permutation):
         assert torch.allclose(
@@ -139,7 +184,7 @@ def test_position_aligned_mixer_rejects_incompatible_coordinate_frames() -> None
     hidden[-1] = hidden[-1][:-1]
     observed[-1] = observed[-1][:-1]
     try:
-        model.mix_construct_tokens(hidden, observed)
+        model.mix_construct_tokens(hidden, observed, _reactivity(hidden))
     except ValueError as error:
         assert "coordinate frame" in str(error)
     else:
@@ -150,7 +195,9 @@ def test_block_diagonal_null_disconnects_nonfocal_constructs() -> None:
     _candidate, null = make_exact_matched_pair(seed=5)
     null.eval()
     hidden, observed = _set_inputs(requires_grad=True)
-    focal = null.mix_construct_tokens(hidden, observed)[0, 3].sum()
+    focal = null.mix_construct_tokens(
+        hidden, observed, _reactivity(hidden)
+    )[0, 3].sum()
     gradient = torch.autograd.grad(focal, hidden[1], allow_unused=True)[0]
     assert gradient is not None
     assert torch.equal(gradient, torch.zeros_like(gradient))
@@ -160,7 +207,9 @@ def test_candidate_focal_context_uses_other_constructs() -> None:
     candidate, _null = make_exact_matched_pair(seed=5)
     candidate.eval()
     hidden, observed = _set_inputs(requires_grad=True)
-    focal = candidate.mix_construct_tokens(hidden, observed)[0, 3].square().sum()
+    focal = candidate.mix_construct_tokens(
+        hidden, observed, _reactivity(hidden)
+    )[0, 3].square().sum()
     gradient = torch.autograd.grad(focal, hidden[1], allow_unused=True)[0]
     assert gradient is not None
     assert float(gradient.abs().sum()) > 0.0
@@ -170,7 +219,9 @@ def test_cross_construct_attention_is_position_aligned() -> None:
     candidate, _null = make_exact_matched_pair(seed=6)
     candidate.eval()
     hidden, observed = _set_inputs(requires_grad=True)
-    focal = candidate.mix_construct_tokens(hidden, observed)[0, 3].square().sum()
+    focal = candidate.mix_construct_tokens(
+        hidden, observed, _reactivity(hidden)
+    )[0, 3].square().sum()
     gradient = torch.autograd.grad(focal, hidden[1], allow_unused=True)[0]
     assert gradient is not None
     assert float(gradient[3].abs().sum()) > 0.0
@@ -189,10 +240,10 @@ def test_zero_initialized_adapter_replays_parent_in_both_arms() -> None:
     edit = torch.tensor([1, 3, 5])
     mask = torch.ones(3, 7, dtype=torch.bool)
     candidate_point, candidate_residual, _ = candidate(
-        hidden, observed, 0, edit, base, parent, mask
+        hidden, observed, _reactivity(hidden), 0, edit, base, parent, mask
     )
     null_point, null_residual, _ = null(
-        hidden, observed, 0, edit, base, parent, mask
+        hidden, observed, _reactivity(hidden), 0, edit, base, parent, mask
     )
     assert torch.equal(candidate_residual, torch.zeros_like(candidate_residual))
     assert torch.equal(null_residual, torch.zeros_like(null_residual))
@@ -204,7 +255,12 @@ def test_full_point_models_are_exact_matches_and_target_free() -> None:
     candidate, null = _full_pair(31)
     assert candidate.connectivity == FULL_CROSS_CONSTRUCT
     assert null.connectivity == BLOCK_DIAGONAL_NULL
-    assert parameter_count(candidate) == parameter_count(null)
+    assert parameter_count(candidate) == parameter_count(null) == (
+        EXPECTED_TOTAL_PARAMETERS
+    )
+    assert parameter_count(candidate, trainable_only=True) == parameter_count(
+        null, trainable_only=True
+    ) == EXPECTED_TRAINABLE_PARAMETERS
     for left, right in zip(candidate.parameters(), null.parameters()):
         assert torch.equal(left, right)
     signature = inspect.signature(PuzzleSetMetaContextPointModel.forward)
@@ -382,6 +438,7 @@ def test_cross_construct_path_receives_gradient_after_zero_init_bootstrap() -> N
     parameters = dict(candidate.named_parameters())
     for name in (
         "meta_context.construct_projection.weight",
+        "meta_context.alignment_projection.weight",
         "meta_context.set_attention.in_proj_weight",
         "meta_context.point_head.0.weight",
     ):

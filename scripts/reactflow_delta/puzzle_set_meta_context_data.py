@@ -193,10 +193,13 @@ def predict_held_puzzle_points(
         candidate_hidden = candidate.encode_puzzle_set(contexts)
         null_hidden = null.encode_puzzle_set(contexts)
         observed = [context[3].bool() for context in contexts]
+        reactivity = [context[1] for context in contexts]
         candidate_mixed = candidate.meta_context.mix_construct_tokens(
-            candidate_hidden, observed
+            candidate_hidden, observed, reactivity
         )
-        null_mixed = null.meta_context.mix_construct_tokens(null_hidden, observed)
+        null_mixed = null.meta_context.mix_construct_tokens(
+            null_hidden, observed, reactivity
+        )
         for focal_index, construct_id in enumerate(construct_ids):
             construct_records = sorted(
                 by_construct[construct_id],

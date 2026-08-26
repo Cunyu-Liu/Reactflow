@@ -57,6 +57,6 @@ fi
   --seeds 0 \
   --point-epochs 3 \
   --calibration-epochs 3 \
-  --parameter-count 6170417 \
-  --trainable-parameter-count 1403137 \
+  --parameter-count 6171697 \
+  --trainable-parameter-count 1404417 \
   --out-json "${out}/p1m2_complete_unscored_merge.json"

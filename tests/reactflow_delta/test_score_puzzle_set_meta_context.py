@@ -96,6 +96,8 @@ def _integrity() -> dict[str, bool]:
         "null_block_diagonal_attention_all_runs": True,
         "puzzle_balanced_training_all_runs": True,
         "position_aligned_cross_construct_attention_all_runs": True,
+        "leave_one_construct_alignment_statistics_all_runs": True,
+        "matched_null_self_only_alignment_statistics_all_runs": True,
         "puzzle_coordinate_frames_validated_all_runs": True,
         "frozen_v13_point_parent_all_runs": True,
         "frozen_v14_context_encoder_all_runs": True,

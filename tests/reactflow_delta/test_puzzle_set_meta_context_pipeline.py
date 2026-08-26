@@ -15,6 +15,8 @@ def test_smoke_controller_is_two_fold_prediction_only() -> None:
     assert "--phase P1M2" in script
     assert "--point-epochs 3" in script
     assert "--calibration-epochs 3" in script
+    assert "--parameter-count 6171697" in script
+    assert "--trainable-parameter-count 1404417" in script
     assert "--folds 0,1" in script
     assert "score_puzzle_set_meta_context" not in script
 
@@ -36,6 +38,8 @@ def test_screen_controller_is_missing_fold_only_and_complete_before_merge() -> N
     assert "--seeds 0" in script
     assert "--point-epochs 40" in script
     assert "--calibration-epochs 40" in script
+    assert "--parameter-count 6171697" in script
+    assert "--trainable-parameter-count 1404417" in script
 
 
 def test_score_once_script_runs_one_scorer_then_one_qualifier() -> None:

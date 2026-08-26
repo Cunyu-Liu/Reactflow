@@ -67,7 +67,7 @@ from scripts.reactflow_delta.run_model_rescue_v9 import _read_json
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v5"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v6"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
 RUNNABLE_PHASES = {"P1M2", "P1M3", "P1M4"}
@@ -312,7 +312,10 @@ def _initial_parent_replay_max_difference(
             contexts = batch["contexts"]
             hidden = model.encode_puzzle_set(contexts)
             observed = [context[3].bool() for context in contexts]
-            mixed = model.meta_context.mix_construct_tokens(hidden, observed)
+            reactivity = [context[1] for context in contexts]
+            mixed = model.meta_context.mix_construct_tokens(
+                hidden, observed, reactivity
+            )
             for cell in batch["cells"]:
                 point, _residual = model.forward_from_encoded(
                     hidden,
@@ -521,6 +524,8 @@ def run_prepared_fold(
             "null_block_diagonal_attention": True,
             "puzzle_balanced_training": True,
             "position_aligned_cross_construct_attention": True,
+            "leave_one_construct_alignment_statistics": True,
+            "matched_null_self_only_alignment_statistics": True,
             "puzzle_coordinate_frames_validated": True,
             "frozen_v13_point_parent": True,
             "frozen_v14_context_encoder": True,
