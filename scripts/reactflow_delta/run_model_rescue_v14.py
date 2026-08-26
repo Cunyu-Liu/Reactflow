@@ -80,14 +80,37 @@ def _pretraining_contexts(
     all_contexts: dict[str, tuple[torch.Tensor, ...]],
     train_construct_ids: set[str],
     held_construct_ids: set[str],
-) -> dict[str, tuple[torch.Tensor, ...]]:
+) -> tuple[dict[str, tuple[torch.Tensor, ...]], list[str]]:
     if train_construct_ids & held_construct_ids:
         raise RuntimeError("V14 held construct entered the outer-train WT universe")
     if len(train_construct_ids) != 152:
         raise RuntimeError(
             f"V14 expected 152 outer-train WT constructs, got {len(train_construct_ids)}"
         )
-    return {construct_id: all_contexts[construct_id] for construct_id in sorted(train_construct_ids)}
+    zero_observed = [
+        construct_id
+        for construct_id in sorted(train_construct_ids)
+        if int(all_contexts[construct_id][3].bool().sum().item()) == 0
+    ]
+    underdetermined = [
+        construct_id
+        for construct_id in sorted(train_construct_ids)
+        if int(all_contexts[construct_id][3].bool().sum().item()) == 1
+    ]
+    if underdetermined:
+        raise RuntimeError(
+            "V14 encountered an unregistered one-observed-position WT construct"
+        )
+    if zero_observed not in ([], ["P20_Eterna"]):
+        raise RuntimeError("V14 zero-observed WT universe differs from the smoke audit")
+    eligible = {
+        construct_id: all_contexts[construct_id]
+        for construct_id in sorted(train_construct_ids)
+        if construct_id not in set(zero_observed)
+    }
+    if len(eligible) not in (151, 152):
+        raise RuntimeError("V14 eligible pretraining construct count changed")
+    return eligible, zero_observed
 
 
 def run_fold(
@@ -125,7 +148,7 @@ def run_fold(
         construct_id: aligned_wt_ctx_tensors(univ, construct_id, device)
         for construct_id in all_construct_ids
     }
-    pretraining_contexts = _pretraining_contexts(
+    pretraining_contexts, zero_observed_constructs = _pretraining_contexts(
         context_cache, train_construct_ids, held_construct_ids
     )
     replay = _feature41_replay_max_difference(
@@ -315,7 +338,9 @@ def run_fold(
                 for name, values in histories.items()
             },
         },
+        "n_registered_outer_train_wt_constructs": len(train_construct_ids),
         "n_pretraining_constructs": len(pretraining_contexts),
+        "zero_observed_pretraining_exclusions": zero_observed_constructs,
         "n_train_cells": len(cells),
         "n_registered_prediction_rows": int(len(prediction["keys"])),
         "feature41_replay_max_abs_difference": replay,
@@ -331,6 +356,7 @@ def run_fold(
         "invariants": {
             "target_profile_identity_exact": True,
             "outer_train_wt_only_pretraining": True,
+            "zero_observed_constructs_excluded_from_pretraining": True,
             "held_puzzle_wt_excluded_from_pretraining": True,
             "mutant_outcome_excluded_from_pretraining": True,
             "exact_initial_parameter_match": True,

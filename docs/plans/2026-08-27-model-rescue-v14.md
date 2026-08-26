@@ -29,7 +29,7 @@ Implementation tasks:
 
 1. Build the frozen 11-channel, width-256, six-block encoder, decoder and feature41 residual head.
 2. Prove exact candidate/null parameter equality and the registered parameter counts.
-3. Build per-outer-fold WT-only pretraining records from train construct IDs; fail if the held construct enters the pretraining universe.
+3. Build per-outer-fold WT-only pretraining records from all 152 registered train construct IDs; fail if the held construct enters the universe, and exclude only constructs with no WT-observed reconstruction target.
 4. Implement deterministic uniform 40% masking and construct-balanced masked L1.
 5. Start candidate/null from one common state; pretrain only the candidate encoder/decoder; prove the null and both residual heads remain unchanged before supervised training.
 6. Train both point models under identical cell order and paired dropout RNG using method-balanced signed-delta L1.

@@ -26,9 +26,9 @@ No width, depth, mask-rate, optimizer, loss, epoch, calibration-family or seed-s
 
 ## 3. Task-matched self-supervision
 
-For each outer fold, pretraining may read only the 152 outer-train WT constructs. The held puzzle WT profile and every mutant outcome are excluded. On each construct and epoch, 40% of WT-observed positions are selected uniformly without replacement using a deterministic seed/epoch/construct schedule. Their reactivity, precision and observed token are zeroed, a corruption indicator is set, and they are removed as attention keys. The target is the original construct-standardized WT reactivity at those masked positions.
+For each outer fold, pretraining may read only the 152 registered outer-train WT constructs. The held puzzle WT profile and every mutant outcome are excluded. An outcome-blind real-data smoke audit found one supported construct, `P20_Eterna`, with zero WT-observed positions; the other 159 constructs each have 100. Because the zero-observed construct has no reconstruction target, it is registered but mechanically excluded from pretraining. This yields 151 eligible constructs when P20 is in outer-train and 152 when P20 is outer-held. No zero target is fabricated. On each eligible construct and epoch, 40% of WT-observed positions are selected uniformly without replacement using a deterministic seed/epoch/construct schedule. Their reactivity, precision and observed token are zeroed, a corruption indicator is set, and they are removed as attention keys. The target is the original construct-standardized WT reactivity at those masked positions.
 
-The objective is mean absolute reconstruction error over masked positions with equal construct exposure. The screen/formal pretraining schedule is fixed at 200 epochs with AdamW, learning rate 3e-4, weight decay 0.01 and gradient clipping 5.0. Smoke uses three epochs. There is no early stopping.
+The objective is mean absolute reconstruction error over masked positions with equal exposure among eligible constructs. The screen/formal pretraining schedule is fixed at 200 epochs with AdamW, learning rate 3e-4, weight decay 0.01 and gradient clipping 5.0. Smoke uses three epochs. There is no early stopping.
 
 ## 4. Downstream task and calibration
 

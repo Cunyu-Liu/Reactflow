@@ -53,6 +53,7 @@ def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
         "prediction_only_schema",
         "target_identity_exact",
         "outer_train_wt_only_pretraining_all_runs",
+        "zero_observed_constructs_excluded_all_runs",
         "held_puzzle_wt_excluded_all_runs",
         "mutant_outcome_excluded_from_pretraining_all_runs",
         "exact_initial_and_parameter_match_all_runs",

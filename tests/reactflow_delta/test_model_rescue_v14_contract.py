@@ -35,6 +35,9 @@ def test_v14_freezes_matched_null_and_top_journal_gates() -> None:
         "v14_from_scratch_feature41_anchor"
     )
     assert contract["pretraining"]["data"] == "OUTER_TRAIN_WT_CONSTRUCTS_ONLY"
+    assert contract["pretraining"]["eligibility"][
+        "zero_observed_constructs"
+    ] == "EXCLUDED_BECAUSE_NO_RECONSTRUCTION_TARGET_EXISTS"
     assert contract["v14m3_screen"]["gates"]["task_crps"][
         "relative_gain_vs_from_scratch_null_min"
     ] == 0.015

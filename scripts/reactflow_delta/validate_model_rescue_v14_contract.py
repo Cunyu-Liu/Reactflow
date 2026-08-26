@@ -92,6 +92,13 @@ def _assert_frozen_pretraining(contract: dict[str, Any]) -> None:
     pretraining = contract["pretraining"]
     if pretraining.get("data") != "OUTER_TRAIN_WT_CONSTRUCTS_ONLY":
         raise RuntimeError("V14 pretraining data universe changed")
+    if pretraining.get("registered_outer_train_constructs_per_fold") != 152:
+        raise RuntimeError("V14 registered outer-train WT count changed")
+    eligibility = pretraining.get("eligibility", {})
+    if eligibility.get("minimum_wt_observed_positions") != 2 or eligibility.get(
+        "zero_observed_constructs"
+    ) != "EXCLUDED_BECAUSE_NO_RECONSTRUCTION_TARGET_EXISTS":
+        raise RuntimeError("V14 zero-observed pretraining rule changed")
     if pretraining.get("held_puzzle_wt_profile_access_allowed") is not False:
         raise RuntimeError("V14 held puzzle WT entered pretraining authority")
     if pretraining.get("mutant_outcome_access_allowed") is not False:

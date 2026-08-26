@@ -96,6 +96,7 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
     required_true = (
         "target_profile_identity_exact",
         "outer_train_wt_only_pretraining",
+        "zero_observed_constructs_excluded_from_pretraining",
         "held_puzzle_wt_excluded_from_pretraining",
         "mutant_outcome_excluded_from_pretraining",
         "exact_initial_parameter_match",
@@ -147,8 +148,14 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
             or int(row.get("calibration_epochs", -1)) != calibration_epochs
         ):
             raise ValueError(f"V14 fold-seed {pair} violates epoch freeze")
-        if int(row.get("n_pretraining_constructs", -1)) != 152:
-            raise ValueError(f"V14 fold-seed {pair} pretraining universe changed")
+        if int(row.get("n_registered_outer_train_wt_constructs", -1)) != 152:
+            raise ValueError(f"V14 fold-seed {pair} registered WT universe changed")
+        eligible = int(row.get("n_pretraining_constructs", -1))
+        exclusions = row.get("zero_observed_pretraining_exclusions", [])
+        if eligible not in (151, 152) or eligible + len(exclusions) != 152:
+            raise ValueError(f"V14 fold-seed {pair} eligible WT universe changed")
+        if exclusions not in ([], ["P20_Eterna"]):
+            raise ValueError(f"V14 fold-seed {pair} zero-observed exclusion changed")
         if not recorded_invariants_pass(row.get("invariants", {})):
             raise ValueError(f"V14 fold-seed {pair} lacks required invariants")
         total = set(map(int, row.get("total_parameter_counts", {}).values()))
@@ -195,6 +202,7 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
             "prediction_only_schema": True,
             "target_identity_exact": True,
             "outer_train_wt_only_pretraining_all_runs": True,
+            "zero_observed_constructs_excluded_all_runs": True,
             "held_puzzle_wt_excluded_all_runs": True,
             "mutant_outcome_excluded_from_pretraining_all_runs": True,
             "exact_initial_and_parameter_match_all_runs": True,

@@ -27,6 +27,7 @@ from scripts.reactflow_delta.merge_model_rescue_v14 import (
 from scripts.reactflow_delta.assemble_model_rescue_v14_formal import assemble_fold
 from scripts.reactflow_delta.qualify_model_rescue_v14 import qualify
 from scripts.reactflow_delta.score_model_rescue_v14 import SCHEMA as SCORE_SCHEMA
+from scripts.reactflow_delta.run_model_rescue_v14 import _pretraining_contexts
 from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
     assert_run_authority,
 )
@@ -102,6 +103,19 @@ def test_v14_pretraining_changes_only_candidate_encoder_and_decoder() -> None:
         assert torch.equal(value, residual_null[name])
 
 
+def test_v14_excludes_only_the_real_zero_observed_construct() -> None:
+    observed = _context()
+    zero = list(_context())
+    zero[3] = torch.zeros_like(zero[3])
+    train_ids = {"P20_Eterna"} | {f"eligible-{index}" for index in range(151)}
+    contexts = {construct_id: observed for construct_id in train_ids}
+    contexts["P20_Eterna"] = tuple(zero)
+    eligible, excluded = _pretraining_contexts(contexts, train_ids, {"held"})
+    assert len(eligible) == 151
+    assert excluded == ["P20_Eterna"]
+    assert "P20_Eterna" not in eligible
+
+
 def test_v14_active_runnable_authority_matches_current_phase() -> None:
     active = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
@@ -162,6 +176,7 @@ def test_v14_merge_invariants_require_pretraining_isolation() -> None:
     invariants = {
         "target_profile_identity_exact": True,
         "outer_train_wt_only_pretraining": True,
+        "zero_observed_constructs_excluded_from_pretraining": True,
         "held_puzzle_wt_excluded_from_pretraining": True,
         "mutant_outcome_excluded_from_pretraining": True,
         "exact_initial_parameter_match": True,

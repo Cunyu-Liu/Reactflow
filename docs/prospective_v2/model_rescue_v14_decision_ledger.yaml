@@ -97,6 +97,22 @@ events:
     focused_tests_passed: 12
     score_accessed: false
     external_outcome_accessed: false
+  - at: '2026-08-27T04:20:00+08:00'
+    phase: V14M2
+    event: REAL_DATA_SMOKE_RECOVERABLE_ZERO_OBSERVED_WT_CONSTRUCT
+    evidence:
+      registered_constructs: 160
+      wt_observed_histogram: {0: 1, 100: 159}
+      zero_observed_construct: P20_Eterna
+      one_observed_constructs: 0
+    decision: >-
+      REGISTER_ALL_OUTER_TRAIN_CONSTRUCTS BUT EXCLUDE ONLY ZERO_OBSERVED
+      CONSTRUCTS FROM PRETRAINING BECAUSE THEY HAVE NO RECONSTRUCTION TARGET
+    scientific_protocol_changed: false
+    model_gate_or_parameter_changed: false
+    completed_fold_artifacts_before_fix: 0
+    score_accessed: false
+    external_outcome_accessed: false
   - at: '2026-08-27T04:05:00+08:00'
     phase: V14M2
     event: REAL_DATA_PREDICTION_ONLY_ENGINEERING_SMOKE_AUTHORIZED

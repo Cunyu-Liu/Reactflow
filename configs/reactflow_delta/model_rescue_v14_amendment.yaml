@@ -101,7 +101,15 @@ models:
 pretraining:
   candidate_only: true
   data: OUTER_TRAIN_WT_CONSTRUCTS_ONLY
-  expected_outer_train_constructs_per_fold: 152
+  registered_outer_train_constructs_per_fold: 152
+  eligibility:
+    minimum_wt_observed_positions: 2
+    zero_observed_constructs: EXCLUDED_BECAUSE_NO_RECONSTRUCTION_TARGET_EXISTS
+    realized_openknot_v4_5_2:
+      P20_Eterna_wt_observed_positions: 0
+      all_other_constructs_wt_observed_positions: 100
+      eligible_constructs_if_P20_IS_OUTER_TRAIN: 151
+      eligible_constructs_if_P20_IS_OUTER_HELD: 152
   mutant_outcome_access_allowed: false
   held_puzzle_wt_profile_access_allowed: false
   target: ORIGINAL_CONSTRUCT_STANDARDIZED_WT_REACTIVITY_AT_MASKED_OBSERVED_POSITIONS
