@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
+import sys
 from types import SimpleNamespace
 
 import numpy as np
@@ -383,3 +385,22 @@ def test_prediction_and_score_authorities_are_mutually_exclusive(tmp_path: Path)
     assert_score_authority(tmp_path)
     with pytest.raises(RuntimeError, match="outside PV13D2"):
         assert_prediction_authority(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "script",
+    (
+        "scripts/reactflow_delta/merge_post_v13_route_diagnostics.py",
+        "scripts/reactflow_delta/qualify_post_v13_route_diagnostics.py",
+    ),
+)
+def test_pipeline_entrypoints_resolve_project_package(script: str) -> None:
+    root = Path(__file__).resolve().parents[2]
+    result = subprocess.run(
+        [sys.executable, str(root / script), "--help"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr

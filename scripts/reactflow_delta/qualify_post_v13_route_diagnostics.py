@@ -7,10 +7,14 @@ import argparse
 import json
 import math
 from pathlib import Path
+import sys
 from typing import Any
 
 import numpy as np
 from scipy.stats import t as student_t
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.reactflow_delta.score_post_v13_route_diagnostics import (
     SCHEMA as SCORE_SCHEMA,

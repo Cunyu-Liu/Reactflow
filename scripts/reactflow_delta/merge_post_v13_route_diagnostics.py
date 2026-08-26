@@ -6,9 +6,13 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
 import numpy as np
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.reactflow_delta.run_post_v13_route_diagnostics import (
     FOLD_SCHEMA,
