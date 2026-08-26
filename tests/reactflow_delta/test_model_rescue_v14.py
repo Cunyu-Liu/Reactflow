@@ -33,6 +33,7 @@ from scripts.reactflow_delta.score_model_rescue_v14 import SCHEMA as SCORE_SCHEM
 from scripts.reactflow_delta.score_model_rescue_v14 import main as score_main
 from scripts.reactflow_delta.score_model_rescue_v6_probe import _puzzle_macro
 from scripts.reactflow_delta.run_model_rescue_v14 import _pretraining_contexts
+from scripts.reactflow_delta.run_model_rescue_v11 import _held_prediction
 from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
     assert_run_authority,
 )
@@ -143,6 +144,18 @@ def test_v14_prediction_path_has_no_target_or_identity_shortcut_inputs() -> None
         "dataset_id",
     ):
         assert forbidden not in signature.parameters
+
+
+def test_v14_reused_held_prediction_cannot_read_mutant_targets() -> None:
+    source = inspect.getsource(_held_prediction)
+    for forbidden in (
+        "mutant_full_profile",
+        "_target_matrix",
+        "_qualified_mask",
+        "target_error",
+        "qualified_target_mask",
+    ):
+        assert forbidden not in source
 
 
 def _prediction_payload(rows: int = 2) -> dict[str, np.ndarray]:
