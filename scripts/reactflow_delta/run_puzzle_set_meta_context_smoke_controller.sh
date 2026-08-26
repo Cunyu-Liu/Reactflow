@@ -92,3 +92,7 @@ fi
   --parameter-count 6171697 \
   --trainable-parameter-count 1404417 \
   --out-json "${out}/p1m2_complete_unscored_merge.json"
+
+"${python_bin}" -m scripts.reactflow_delta.qualify_puzzle_set_meta_context_smoke \
+  --merged-json "${out}/p1m2_complete_unscored_merge.json" \
+  --out-json "${out}/p1m2_engineering_smoke_qualification.json"

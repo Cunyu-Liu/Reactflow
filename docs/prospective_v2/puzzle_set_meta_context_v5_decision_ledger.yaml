@@ -1,0 +1,434 @@
+schema_version: reactflow_delta.puzzle_set_meta_context_v5_decision_ledger.draft.v1
+contract_id: reactflow_delta_puzzle_set_meta_context_v5_20260827
+created_date: '2026-08-27'
+status: DRAFT_FROZEN_INACTIVE_V14_SOLE_ACTIVE
+
+history_boundary:
+  v1_through_v13_terminal_verdicts_immutable: true
+  v14_terminal_verdict_exists_at_draft: false
+  v14_frozen_protocol_change_allowed: false
+  v14_current_gates_change_allowed: false
+  v14_future_terminal_handoff_reinterpretation_allowed: false
+
+authority:
+  active_experiment: MODEL_RESCUE_V14
+  proposed_task_id: reactflow_delta_puzzle_set_meta_context
+  p1_training_allowed: false
+  p1_candidate_training_allowed: false
+  p1_held_score_read_allowed: false
+  partial_fold_scores_allowed: false
+  external_outcome_access_allowed: false
+  modifies_v14: false
+  implementation_design_head: b5450ff51699cd64f43d7c59481be6362baee247
+  activation_parent_head: TO_BE_RECORDED_AFTER_COMPLETE_V14_TERMINAL_HANDOFF
+  activation_requires_new_focused_commit: true
+
+activation_conditions:
+  - COMPLETE_V14_TERMINAL_HANDOFF
+  - FIRST_MATCHING_POST_V14_CONTINGENCY_BRANCH_SELECTS_P1
+  - BRANCH_SPECIFIC_ROUTE_PROBE_STATE_BOUND_AS_NOT_APPLICABLE_OR_REQUIRED_EXACT_PASS
+  - ALL_REALIZED_FROZEN_INPUT_PATHS_ROLES_AND_COUNTS_BOUND
+  - INACTIVE_MACHINE_CONTRACT_PROMOTED_AND_ACTIVE_POINTER_FROZEN_IN_FOCUSED_COMMIT
+  - CONTRACT_VALIDATOR_AND_V5_FOCUSED_TESTS_PASS_WITH_TRAINING_CLOSED
+activation_exclusions:
+  exact_v14m3_pass_routes_only_to_v14m4: true
+  v14m4_formal_failure_routes_to_p3_without_new_independent_data: true
+  implementation_or_test_pass_can_activate_p1: false
+  p1_and_p2_may_be_active_together: false
+
+post_v14_router:
+  source_path: docs/plans/2026-08-27-post-v14-model-contingency.md
+  selection_rule: FIRST_MATCHING_BRANCH_CONTROLS
+  selected_router_branch_id: PENDING_COMPLETE_V14_TERMINAL_HANDOFF
+  route_probe:
+    requirement: NOT_EVALUATED
+    status: NOT_EVALUATED
+  activation_cases:
+    '3':
+      classification: CAPACITY_WITHOUT_PRETRAINING_INCREMENT
+      result: P1_ELIGIBLE
+      route_probe: {requirement: NOT_APPLICABLE, status: NOT_APPLICABLE}
+    '4':
+      classification: PRETRAINING_SIGNAL_INSUFFICIENT_FOR_TRANSFER
+      result: P1_ELIGIBLE
+      route_probe: {requirement: NOT_APPLICABLE, status: NOT_APPLICABLE}
+    '5':
+      classification: INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED
+      result: P1_ELIGIBLE_ONLY_AFTER_ROUTE_PROBE
+      route_probe:
+        requirement: REQUIRED
+        status: EXACT_PASS
+        fixed_complete_outer_train_only_criteria:
+          signed_delta_relative_gain_min: 0.01
+          point_absolute_relative_gain_min: 0.01
+          signed_delta_paired_ci_lower_gt: 0.0
+          point_absolute_paired_ci_lower_gt: 0.0
+          signed_delta_positive_puzzles_min: 14
+          point_absolute_positive_puzzles_min: 14
+          independent_units: 20_PUZZLES
+  non_p1_cases:
+    '1': V14M4_ONLY
+    '2': REPAIR_SAME_FROZEN_V14_UNIVERSE_ONLY
+    '6': P2_OR_P3_ONLY
+    '7': P3_ONLY_NO_P1_WITHOUT_NEW_INDEPENDENT_DATA
+
+future_phase_training_tokens:
+  tokens_issued_now: false
+  P1M2: PUZZLE_SET_P1M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
+  P1M3: PUZZLE_SET_P1M3_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+  P1M4: PUZZLE_SET_P1M4_FIXED_FIVE_SEED_FORMAL_ONLY
+  generic_training_token_allowed: false
+
+frozen_input_sources:
+  activation_binding_status: REALIZED_PATHS_ROLES_AND_COUNTS_PENDING
+  each_outer_fold_0_through_19_must_be_bound: true
+  sources:
+    v13_seed0_point:
+      role: IMMUTABLE_POINT_ANCHOR
+      source: SAME_OUTER_FOLD_V13_CANDIDATE_SEED0_POINT_CHECKPOINT
+      expected_filename_pattern: v13_candidate_point_fold{outer_fold}_seed0.pt
+      parameter_count: 2064737
+      trainable_in_p1: false
+    v14_seed0_encoder:
+      role: IMMUTABLE_OUTCOME_BLIND_WT_REPRESENTATION
+      source: SAME_OUTER_FOLD_V14_CANDIDATE_SEED0_POINT_CHECKPOINT_ENCODER_SUBSET
+      expected_filename_pattern: v14_candidate_point_fold{outer_fold}_seed0.pt
+      imported_parameter_count: 4767280
+      trainable_in_p1: false
+    v8_seed0_meanaligned:
+      role: FROZEN_TRAINED_DIRECT_FEATURE_SOURCE_FOR_CALIBRATION
+      source: SAME_OUTER_FOLD_V8_SEED0_MEANALIGNED_CHECKPOINT
+      expected_checkpoint_filename_pattern: v8_corrected_mean_fold{outer_fold}_seed0.pt
+      path_source_field: >-
+        v8_corrected_expert_fold_result_fold{outer_fold}_seed0.json:meanaligned_checkpoint
+      calibration_direct_feature_width: 201
+      parameter_count: 109581
+      trainable_in_p1: false
+    tic2a_feature41_ridge:
+      role: OUTER_FOLD_FROZEN_FEATURE41_WEIGHTED_RIDGE_AND_41D_FEATURE_BASIS
+      source: TIC2A_COMPLETE_CORRECTED_OUTER_FOLD_MODEL_ARTIFACT_V6_FEATURE41
+      expected_model_artifact_filename_pattern: tic2a_corrected_models_fold{outer_fold}.json
+      path_source_field: >-
+        tic2a_complete_merged.fold[{outer_fold}].model_artifact:v6_feature41
+      feature_width: 41
+      realized_parameter_count: PENDING_ACTIVATION_BINDING
+      trainable_in_p1: false
+    tic2a_merged_registry:
+      role: COMPLETE_TWENTY_FOLD_SOURCE_REGISTRY_PROVENANCE_ONLY
+      source: TIC2A_COMPLETE_CORRECTED_MERGED_UNSCORED_JSON
+      realized_path: PENDING_ACTIVATION_BINDING
+      feature_source: false
+      trainable_in_p1: false
+    unconstrained_feature_cache:
+      role: FROZEN_FEATURE41_CONSTRUCTION_INPUT
+      source: UNCONSTRAINED_ENSEMBLE_FEATURE_CACHE
+      realized_path: PENDING_ACTIVATION_BINDING
+      trainable_in_p1: false
+    constrained_feature_cache:
+      role: FROZEN_FEATURE41_CONSTRUCTION_INPUT
+      source: CONSTRAINED_ENSEMBLE_FEATURE_CACHE
+      realized_path: PENDING_ACTIVATION_BINDING
+      trainable_in_p1: false
+    v10:
+      role: TERMINAL_HISTORICAL_COMPARATOR_AND_RESIDUAL_FAMILY_PROVENANCE_ONLY
+      expected_result_filename_pattern: v10_fold_result_fold{outer_fold}_seed0.json
+      same_fold_result_path: PENDING_ACTIVATION_BINDING
+      learned_checkpoint_imported_into_p1: false
+      feature_source: false
+      point_anchor: false
+  realized_binding_fields:
+    - OUTER_FOLD
+    - SOURCE_ID
+    - REALIZED_PATH
+    - ROLE
+    - SEED
+    - REALIZED_PARAMETER_COUNT
+    - TRAINABLE_IN_P1
+  feature41_ridge_realized_parameter_count: PENDING_ACTIVATION_BINDING
+  full_upstream_parameter_footprint: PENDING_ACTIVATION_BINDING
+
+artifact_schemas_and_provenance:
+  fold_schema: reactflow_delta.puzzle_set_meta_context_fold.proposed.v10
+  merged_schema: reactflow_delta.puzzle_set_meta_context_merged.proposed.v9
+  source_record_fields_exact: [path, role, used_in_candidate_prediction, outer_fold, seed]
+  required_source_records:
+    v13_point_checkpoint: [FROZEN_SAME_FOLD_POINT_ANCHOR, true, SAME_OUTER_FOLD, 0]
+    v14_encoder_checkpoint: [FROZEN_SAME_FOLD_OUTCOME_BLIND_ENCODER, true, SAME_OUTER_FOLD, 0]
+    v8_meanaligned_checkpoint: [FROZEN_SAME_FOLD_201D_CALIBRATION_FEATURE_GENERATOR, true, SAME_OUTER_FOLD, 0]
+    tic2a_feature41_model_artifact: [FROZEN_OUTER_FOLD_FEATURE41_RIDGE_AND_41D_BASIS, true, SAME_OUTER_FOLD, null]
+    tic2a_merged_registry: [FROZEN_COMPLETE_TWENTY_FOLD_SOURCE_REGISTRY, false, GLOBAL, null]
+    unconstrained_feature_cache: [FROZEN_OUTCOME_BLIND_ENSEMBLE_FEATURE_CACHE, true, GLOBAL, null]
+    constrained_feature_cache: [FROZEN_OUTCOME_BLIND_CONSTRAINED_FEATURE_CACHE, true, GLOBAL, null]
+    v10_fold_comparator: [COMPARATOR_PROVENANCE_ONLY_NOT_CANDIDATE_INPUT, false, SAME_OUTER_FOLD, 0]
+  fold_candidate_specific_trainable_parameter_field: >-
+    candidate_specific_trainable_parameter_counts.candidate
+  fold_candidate_specific_trainable_parameter_expected: 1468165
+  merged_complete_frozen_input_provenance_all_runs_required: true
+  merged_candidate_specific_trainable_parameter_expected: 1468165
+
+registered_scientific_question: >-
+  DOES CORRECTLY ALIGNED OUTCOME_BLIND WT CONTEXT FROM THE OTHER SEVEN DESIGNS
+  IN THE SAME UNSEEN PUZZLE ADD TRANSFERABLE MUTATION_EFFECT INFORMATION BEYOND
+  A STRONG FROZEN FOCAL_PARENT AND AN OTHERWISE IDENTICAL POSITION_DERANGED NULL
+
+registered_hypothesis:
+  status: HYPOTHESIS
+  statement: >-
+    A ZERO_PRESERVING POSITION_ALIGNED CROSS_CONSTRUCT OPERATOR LEARNS
+    PUZZLE_SPECIFIC WT CONTEXT THAT IMPROVES POINT_AND_DISTRIBUTIONAL PREDICTION
+    BEYOND FEATURE41, TERMINAL HISTORICAL COMPARATORS, THE FROZEN V13 PARENT AND
+    A PARAMETER_MATCHED SHIFT17 NULL
+  falsifier: >-
+    ANY TRAIN_ONLY CANDIDATE_RETENTION FAILURE, ANY COMPLETE P1M3 TOP_JOURNAL
+    GATE FAILURE, ANY V5 CAUSAL_PATH OR MATCHING INVARIANT FAILURE, OR ANY P1M4
+    FIVE_SEED FORMAL FAILURE TERMINATES THE PUZZLE_SET META_CONTEXT FAMILY
+
+frozen_model:
+  operator: POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5
+  candidate: puzzle_set_meta_context_v5_aligned
+  matched_null: puzzle_set_meta_context_v5_shift17_null
+  fixed_position_derangement_shift: 17
+  focal_role: QUERY_ONLY_EXCLUDED_FROM_KV
+  kv_support_each_focal_position:
+    nonfocal_individual_tokens: 7
+    nonfocal_summary_tokens: 1
+    total_tokens: 8
+  attention_weight_dropout: 0.0
+  ffn_and_output_residual_dropout: 0.1
+  raw_zero_reference:
+    zero_before_learned_projection: [hidden, reactivity, observed]
+    focal_query_reused_elementwise: true
+    full_shared_path: [individual_and_summary_projection, attention, ffn, output_norm]
+    formula: F(q,V)-F(q,V0)
+    shared_dropout_draw: true
+    rng_advances_as_one_call: true
+    raw_zero_exact_cancellation_required: true
+  point_residual:
+    formula: h(base,cross)-h(base,0)
+    frozen_anchor: SAME_FOLD_V13_CANDIDATE_SEED0
+    frozen_encoder: SAME_FOLD_V14_CANDIDATE_SEED0
+    shared_dropout_draw: true
+    zero_cross_exact_parent_replay_required: true
+    replay_tolerance: 1.0e-7
+  forbidden_inputs: [method_id, puzzle_id, dataset_id, held_target, held_target_error, held_qualified_target_mask]
+
+frozen_counts_each_arm:
+  p1_point_module_total: 6171697
+  p1_point_module_frozen_v14_encoder: 4767280
+  set_operator_trainable: 857600
+  shared_point_head_trainable: 546817
+  p1_point_module_trainable: 1404417
+  residual_calibration_head_trainable: 63748
+  p1_point_plus_residual_modules_total: 6235445
+  candidate_specific_trainable_point_plus_distribution: 1468165
+  temporary_reconstruction_decoder_parameters: 769
+  temporary_decoder_in_final_prediction_model: false
+  frozen_v13_point_upstream_parameters: 2064737
+  frozen_v8_meanaligned_upstream_parameters: 109581
+  feature41_ridge_upstream_parameters: PENDING_ACTIVATION_BINDING
+  full_upstream_parameter_footprint: PENDING_ACTIVATION_BINDING
+  p1_point_module_total_is_full_pipeline_total: false
+
+frozen_data_and_estimand:
+  dataset: OpenKnot_M2_v4.5.2
+  evidence_status: DEVELOPMENT_CONSUMED
+  independent_units: 20_PUZZLES
+  constructs_per_puzzle: 8
+  split: SPLIT_V4_OUTER_LEAVE_ONE_PUZZLE_OUT
+  output: ALL_REGISTERED_MUTANTS_FULL_CONSTRUCT
+  aggregation: POSITION_TO_MUTANT_TO_METHOD_CELL_TO_PUZZLE_TO_EQUAL_PUZZLE_MEAN
+  p20_zero_wt_observed_construct_context_retained: true
+  p20_supervised_target_fabricated: false
+
+frozen_training:
+  pretraining:
+    epochs: 200
+    mask_rate: 0.40
+    optimizer: AdamW
+    learning_rate: 3.0e-4
+    weight_decay: 0.01
+    gradient_clip: 5.0
+    objective: MASKED_POSITION_L1
+    puzzle_updates_each_arm: 3800
+    mutant_outcome_used: false
+  point:
+    epochs: 40
+    objective: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
+    epoch0: HEAD_ONLY
+    epochs1_39: HEAD_AND_CONTEXT
+    head_learning_rate: 1.0e-3
+    context_learning_rate: 3.0e-4
+    optimizer: Adam
+    weight_decay: 0.0
+    gradient_clip: 5.0
+    head_updates_each_arm: 760
+    context_updates_each_arm: 741
+    target_exposures_per_available_cell: 40
+  calibration:
+    epochs: 40
+    family: V10_MEDIAN_PRESERVING_ASYMMETRIC_RESIDUAL
+    objective: PUZZLE_BALANCED_METHOD_CELL_CRPS
+    point_frozen: true
+  selection:
+    early_stopping: false
+    best_epoch_selection: false
+    model_or_threshold_selection: false
+
+train_only_retention_gate:
+  mask_epoch: 200
+  accepted_input: OUTER_TRAIN_PUZZLE_CONTEXTS_ONLY
+  equal_puzzle_weighting: true
+  final_frozen_decoder_shared_across_snapshots: true
+  candidate_pretraining_established_all_runs: L_postpretraining_LT_L_initial
+  candidate_retention_positive_all_runs: >-
+    (L_initial-L_postpoint)/(L_initial-L_postpretraining) GT 0
+  null_retention: REPORT_ONLY
+  selection_performed: false
+  mutant_outcome_used: false
+  held_puzzle_accessed: false
+  failure_status: PUZZLE_SET_TRAIN_ONLY_RETENTION_GATE_FAIL
+  failure_keeps_held_score_closed: true
+
+phase_state:
+  P1M0: DRAFT_FROZEN_INACTIVE
+  P1M1: NOT_AUTHORIZED
+  P1M2: NOT_AUTHORIZED
+  P1M3: NOT_AUTHORIZED
+  P1M4: NOT_AUTHORIZED
+  P1M5: NOT_RUN
+
+phase_universes:
+  P1M2:
+    purpose: ENGINEERING_SMOKE_ONLY
+    training_token: PUZZLE_SET_P1M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
+    folds: [0, 1]
+    seeds: [0]
+    epochs: [3, 3, 3]
+    scientific_score_allowed: false
+    exact_pass_status: P1M2_ENGINEERING_SMOKE_PASS
+  P1M3:
+    training_token: PUZZLE_SET_P1M3_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seeds: [0]
+    epochs: [200, 40, 40]
+    complete_prediction_only_merge_required_before_score: true
+    score_token: PUZZLE_SET_COMPLETE_MERGE_SCORE_ONCE_ONLY
+    exact_pass_required_for_p1m4: PUZZLE_SET_M3_TOP_JOURNAL_SCREEN_PASS
+  P1M4:
+    training_token: PUZZLE_SET_P1M4_FIXED_FIVE_SEED_FORMAL_ONLY
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seeds: [0, 1, 2, 3, 4]
+    seed0_rerun_not_reused_from_screen: true
+    epochs: [200, 40, 40]
+    complete_fold_seed_runs: 100
+    complete_prediction_only_merge_and_assembly_required_before_score: true
+    score_token: PUZZLE_SET_FORMAL_COMPLETE_SCORE_ONCE_ONLY
+
+screen_top_journal_gates:
+  prediction_integrity:
+    registered_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_prediction_keys: 0
+  signed_delta_mae:
+    relative_gain_minimums:
+      feature41: 0.12
+      terminal_v12: 0.02
+      frozen_v13_parent: 0.02
+      matched_shift17_null: 0.015
+    positive_puzzles_minimums:
+      feature41: 16
+      terminal_v12: 14
+      frozen_v13_parent: 14
+      matched_shift17_null: 14
+  point_absolute_delta_mae:
+    relative_gain_minimums:
+      feature41: 0.07
+      terminal_v11: 0.02
+      frozen_v13_parent: 0.02
+      matched_shift17_null: 0.01
+    positive_puzzles_minimums:
+      feature41: 16
+      terminal_v11: 14
+      frozen_v13_parent: 14
+      matched_shift17_null: 14
+  crps:
+    relative_gain_minimums:
+      feature41: 0.05
+      terminal_v12: 0.02
+      matched_shift17_null: 0.015
+    positive_puzzles_minimums:
+      feature41: 16
+      terminal_v12: 14
+      matched_shift17_null: 14
+  distribution_absolute_delta_mae:
+    relative_gain_minimums:
+      feature41: 0.15
+      terminal_v10: 0.02
+      matched_shift17_null: 0.01
+    positive_puzzles_minimums:
+      feature41: 16
+      terminal_v10: 14
+      matched_shift17_null: 14
+  all_registered_paired_ci95_lower_gt_zero: true
+  all_headline_leave_one_puzzle_out_positive: true
+  max_single_puzzle_effect_fraction: 0.20
+  coverage_error_worsening_maximum: 0.01
+
+formal_additional_gates:
+  exact_screen_pass_prerequisite: true
+  equal_seed_mixture: true
+  best_seed_selection_performed: false
+  formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources: true
+  candidate_retention_gate_required_for_all_100_runs: true
+  signed_positive_individual_seeds_minimum: 4
+  crps_positive_individual_seeds_minimum: 4
+  repeats_all_screen_top_journal_gates: true
+
+qualification_rules:
+  engineering_or_test_pass_is_scientific_pass: false
+  retention_pass_is_performance_pass: false
+  partial_score_access_allowed: false
+  score_once_only: true
+  external_outcome_access_allowed: false
+  exact_p1m3_pass_required_for_formal: true
+  any_p1_failure_route: TERMINATE_PUZZLE_SET_META_CONTEXT_FAMILY_AND_RETURN_STRONGEST_VALID_BENCHMARK
+  pass_evidence_ceiling: POST_HOC_DEVELOPMENT_PASS
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
+
+frozen_decisions:
+  - id: P1V5-D001
+    type: DECISION
+    value: POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5_ONLY
+    reason: TESTS THE ONLY REGISTERED OUTCOME_BLIND CROSS_CONSTRUCT CAPABILITY ABSENT_FROM_V1_TO_V14
+  - id: P1V5-D002
+    type: DECISION
+    value: FIXED_SHIFT17_EQUAL_SUPPORT_ZERO_PRESERVING_MATCHED_NULL
+    reason: IDENTIFIES CORRECT_COORDINATE ALIGNMENT WITHOUT A CAPACITY_OR_ATTENTION_SUPPORT DIFFERENCE
+  - id: P1V5-D003
+    type: DECISION
+    value: FROZEN_V13_POINT_AND_V14_ENCODER_WITH_SHARED_PAIRED_POINT_HEAD
+    reason: PRESERVES THE_STRONG_PARENT_AND_FORCES_EVERY_INCREMENT_TO_DEPEND_ON_NONFOCAL_CONTEXT
+  - id: P1V5-D004
+    type: DECISION
+    value: OUTER_TRAIN_ONLY_CAPABILITY_RETENTION_GATE_BEFORE_SCORE
+    reason: REJECTS_A_MODEL_THAT_ERASES_ITS_PRETRAINED_CROSS_CONTEXT_BEFORE_HELD_OUTCOME_ACCESS
+  - id: P1V5-D005
+    type: DECISION
+    value: ORIGINAL_TOP_JOURNAL_GATES_WITH_NO_RELAXATION
+    reason: REPEATED_DEVELOPMENT_CONSUMPTION_REQUIRES_LARGE_ATTRIBUTABLE_AND_STABLE_EFFECTS
+  - id: P1V5-D006
+    type: DECISION
+    value: ONE_SCREEN_AND_ONE_FIXED_FIVE_SEED_CONFIRMATION
+    reason: PREVENTS_OPEN_ENDED_SAME_FAMILY_SEARCH
+
+events:
+  - date: '2026-08-27'
+    phase: P1M0
+    event: HUMAN_DRAFT_AND_DECISION_LEDGER_FROZEN_INACTIVE
+    status: DRAFT_FROZEN_INACTIVE_V14_SOLE_ACTIVE
+    p1_training_allowed: false
+    p1_score_accessed: false
+    external_outcome_accessed: false
+    v14_modified: false

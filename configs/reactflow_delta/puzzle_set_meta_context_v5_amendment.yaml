@@ -1,0 +1,467 @@
+schema_version: reactflow_delta.puzzle_set_meta_context_v5_amendment.v1
+contract_id: reactflow_delta_puzzle_set_meta_context_v5_20260827
+contract_status: DRAFT_FROZEN_INACTIVE_V14_SOLE_ACTIVE
+created_at: '2026-08-27T00:00:00+08:00'
+
+documents:
+  human_contract_path: docs/prospective_v2/puzzle_set_meta_context_v5_amendment_20260827.md
+  decision_ledger_path: docs/prospective_v2/puzzle_set_meta_context_v5_decision_ledger.yaml
+  implementation_plan_path: docs/plans/2026-08-27-puzzle-set-meta-context-v5-amendment.md
+  implementation_design_path: docs/plans/2026-08-27-puzzle-set-cross-only-retention-design.md
+  architecture_decision_path: docs/adr/0001-propose-puzzle-set-meta-context.md
+
+history_boundary:
+  v1_through_v13_terminal_verdicts_immutable: true
+  v14_terminal_verdict_exists_at_draft: false
+  v14_frozen_protocol_change_allowed: false
+  v14_current_gates_change_allowed: false
+  v14_future_terminal_handoff_reinterpretation_allowed: false
+
+inactive_authority:
+  active_pointer_path: configs/reactflow_delta/active_contract.yaml
+  sole_active_project_task_id: reactflow_delta_model_rescue_v14
+  sole_active_pointer_role: V14_SINGLE_ACTIVE_AUTHORITY
+  sole_active_branch: codex/reactflow-delta-model-rescue-v14-20260827
+  this_amendment_may_replace_active_pointer: false
+  activation_allowed_now: false
+  activation_prerequisites:
+    - COMPLETE_V14_TERMINAL_HANDOFF
+    - POST_V14_FIRST_MATCHING_ROUTER_EXPLICITLY_SELECTS_P1
+    - ROUTER_BRANCH_SPECIFIC_PROBE_STATE_BOUND_AS_NOT_APPLICABLE_OR_REQUIRED_EXACT_PASS
+    - ALL_REALIZED_FROZEN_INPUT_PATHS_ROLES_AND_COUNTS_BOUND
+    - CONTRACT_VALIDATOR_AND_V5_FOCUSED_TESTS_PASS_WITH_TRAINING_CLOSED
+    - FOCUSED_PUZZLE_SET_V5_ACTIVATION_COMMIT
+  v14_exact_pass_routes_only_to_v14m4: true
+  v14m4_formal_failure_can_activate_p1: false
+  training_allowed: false
+  candidate_model_training_allowed: false
+  smoke_allowed: false
+  screen_allowed: false
+  formal_confirmation_allowed: false
+  held_score_read_allowed: false
+  partial_fold_score_read_allowed: false
+  new_external_outcome_access_allowed: false
+
+post_v14_router:
+  source_path: docs/plans/2026-08-27-post-v14-model-contingency.md
+  rule: FIRST_MATCHING_BRANCH_CONTROLS
+  selected_router_branch_id: PENDING_COMPLETE_V14_TERMINAL_HANDOFF
+  current_route_probe:
+    requirement: NOT_EVALUATED
+    status: NOT_EVALUATED
+  p1_eligible_branches:
+    '3':
+      classification: CAPACITY_WITHOUT_PRETRAINING_INCREMENT
+      route_probe_at_activation:
+        requirement: NOT_APPLICABLE
+        status: NOT_APPLICABLE
+    '4':
+      classification: PRETRAINING_SIGNAL_INSUFFICIENT_FOR_TRANSFER
+      route_probe_at_activation:
+        requirement: NOT_APPLICABLE
+        status: NOT_APPLICABLE
+    '5':
+      classification: INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED
+      route_probe_at_activation:
+        requirement: REQUIRED
+        status: EXACT_PASS
+        exact_pass_criteria:
+          signed_delta_relative_gain_min: 0.01
+          point_absolute_relative_gain_min: 0.01
+          signed_delta_paired_ci_lower_gt: 0.0
+          point_absolute_paired_ci_lower_gt: 0.0
+          signed_delta_positive_puzzles_min: 14
+          point_absolute_positive_puzzles_min: 14
+          independent_units: 20_PUZZLES
+          data_access: OUTER_TRAIN_ONLY
+  excluded_branches:
+    '1': V14M4_ONLY
+    '2': REPAIR_SAME_FROZEN_V14_UNIVERSE_ONLY
+    '6': P2_OR_P3_ONLY
+    '7': P3_ONLY_NO_P1_WITHOUT_NEW_INDEPENDENT_DATA
+  activation_binding:
+    selected_router_branch_id_must_be_one_of: ['3', '4', '5']
+    branch_3_or_4_probe_requirement_and_status: NOT_APPLICABLE
+    branch_5_probe_requirement: REQUIRED
+    branch_5_probe_status: EXACT_PASS
+
+future_phase_training_tokens:
+  tokens_issued_now: false
+  P1M2: PUZZLE_SET_P1M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
+  P1M3: PUZZLE_SET_P1M3_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+  P1M4: PUZZLE_SET_P1M4_FIXED_FIVE_SEED_FORMAL_ONLY
+  generic_training_token_allowed: false
+
+frozen_input_sources:
+  activation_binding_status: REALIZED_PATHS_ROLES_AND_COUNTS_PENDING
+  bind_realized_sources_before_p1m1: true
+  bind_each_outer_fold_0_through_19: true
+  v13_seed0_point:
+    role: IMMUTABLE_POINT_ANCHOR
+    source: SAME_OUTER_FOLD_V13_CANDIDATE_SEED0_POINT_CHECKPOINT
+    expected_filename_pattern: v13_candidate_point_fold{outer_fold}_seed0.pt
+    parameter_count: 2064737
+    trainable_in_p1: false
+  v14_seed0_encoder:
+    role: IMMUTABLE_OUTCOME_BLIND_WT_REPRESENTATION
+    source: SAME_OUTER_FOLD_V14_CANDIDATE_SEED0_POINT_CHECKPOINT_ENCODER_SUBSET
+    expected_filename_pattern: v14_candidate_point_fold{outer_fold}_seed0.pt
+    imported_parameter_count: 4767280
+    trainable_in_p1: false
+  v8_seed0_meanaligned:
+    role: FROZEN_TRAINED_DIRECT_FEATURE_SOURCE_FOR_CALIBRATION
+    source: SAME_OUTER_FOLD_V8_SEED0_MEANALIGNED_CHECKPOINT
+    expected_checkpoint_filename_pattern: v8_corrected_mean_fold{outer_fold}_seed0.pt
+    path_source_field: >-
+      v8_corrected_expert_fold_result_fold{outer_fold}_seed0.json:meanaligned_checkpoint
+    calibration_direct_feature_width: 201
+    parameter_count: 109581
+    trainable_in_p1: false
+  tic2a_feature41_ridge:
+    role: OUTER_FOLD_FROZEN_FEATURE41_WEIGHTED_RIDGE_AND_41D_FEATURE_BASIS
+    source: TIC2A_COMPLETE_CORRECTED_OUTER_FOLD_MODEL_ARTIFACT_V6_FEATURE41
+    expected_model_artifact_filename_pattern: tic2a_corrected_models_fold{outer_fold}.json
+    path_source_field: >-
+      tic2a_complete_merged.fold[{outer_fold}].model_artifact:v6_feature41
+    feature_width: 41
+    realized_parameter_count: PENDING_ACTIVATION_BINDING
+    trainable_in_p1: false
+  tic2a_merged_registry:
+    role: COMPLETE_TWENTY_FOLD_SOURCE_REGISTRY_PROVENANCE_ONLY
+    source: TIC2A_COMPLETE_CORRECTED_MERGED_UNSCORED_JSON
+    realized_path: PENDING_ACTIVATION_BINDING
+    feature_source: false
+    trainable_in_p1: false
+  unconstrained_feature_cache:
+    role: FROZEN_FEATURE41_CONSTRUCTION_INPUT
+    source: UNCONSTRAINED_ENSEMBLE_FEATURE_CACHE
+    realized_path: PENDING_ACTIVATION_BINDING
+    trainable_in_p1: false
+  constrained_feature_cache:
+    role: FROZEN_FEATURE41_CONSTRUCTION_INPUT
+    source: CONSTRAINED_ENSEMBLE_FEATURE_CACHE
+    realized_path: PENDING_ACTIVATION_BINDING
+    trainable_in_p1: false
+  v10:
+    role: TERMINAL_HISTORICAL_COMPARATOR_AND_RESIDUAL_FAMILY_PROVENANCE_ONLY
+    expected_result_filename_pattern: v10_fold_result_fold{outer_fold}_seed0.json
+    same_fold_result_path: PENDING_ACTIVATION_BINDING
+    learned_checkpoint_imported_into_p1: false
+    feature_source: false
+    point_anchor: false
+  activation_binding_required_fields:
+    - OUTER_FOLD
+    - SOURCE_ID
+    - REALIZED_PATH
+    - ROLE
+    - SEED
+    - REALIZED_PARAMETER_COUNT
+    - TRAINABLE_IN_P1
+  feature41_ridge_realized_parameter_count_must_be_bound: true
+  full_upstream_parameter_footprint_must_be_bound: true
+  full_upstream_parameter_footprint: PENDING_ACTIVATION_BINDING
+
+artifact_schemas_and_provenance:
+  fold_schema: reactflow_delta.puzzle_set_meta_context_fold.proposed.v10
+  merged_schema: reactflow_delta.puzzle_set_meta_context_merged.proposed.v9
+  fold_frozen_input_sources_field: frozen_input_sources
+  source_record_fields_exact: [path, role, used_in_candidate_prediction, outer_fold, seed]
+  required_source_records:
+    v13_point_checkpoint:
+      role: FROZEN_SAME_FOLD_POINT_ANCHOR
+      used_in_candidate_prediction: true
+      outer_fold_scope: SAME_OUTER_FOLD
+      seed: 0
+    v14_encoder_checkpoint:
+      role: FROZEN_SAME_FOLD_OUTCOME_BLIND_ENCODER
+      used_in_candidate_prediction: true
+      outer_fold_scope: SAME_OUTER_FOLD
+      seed: 0
+    v8_meanaligned_checkpoint:
+      role: FROZEN_SAME_FOLD_201D_CALIBRATION_FEATURE_GENERATOR
+      used_in_candidate_prediction: true
+      outer_fold_scope: SAME_OUTER_FOLD
+      seed: 0
+    tic2a_feature41_model_artifact:
+      role: FROZEN_OUTER_FOLD_FEATURE41_RIDGE_AND_41D_BASIS
+      used_in_candidate_prediction: true
+      outer_fold_scope: SAME_OUTER_FOLD
+      seed: null
+    tic2a_merged_registry:
+      role: FROZEN_COMPLETE_TWENTY_FOLD_SOURCE_REGISTRY
+      used_in_candidate_prediction: false
+      outer_fold_scope: GLOBAL
+      seed: null
+    unconstrained_feature_cache:
+      role: FROZEN_OUTCOME_BLIND_ENSEMBLE_FEATURE_CACHE
+      used_in_candidate_prediction: true
+      outer_fold_scope: GLOBAL
+      seed: null
+    constrained_feature_cache:
+      role: FROZEN_OUTCOME_BLIND_CONSTRAINED_FEATURE_CACHE
+      used_in_candidate_prediction: true
+      outer_fold_scope: GLOBAL
+      seed: null
+    v10_fold_comparator:
+      role: COMPARATOR_PROVENANCE_ONLY_NOT_CANDIDATE_INPUT
+      used_in_candidate_prediction: false
+      outer_fold_scope: SAME_OUTER_FOLD
+      seed: 0
+  fold_parameter_provenance:
+    point_module_total_field: candidate_parameter_count
+    point_module_trainable_field: candidate_trainable_parameter_count
+    residual_trainable_field: residual_parameter_counts.candidate
+    candidate_specific_trainable_field: >-
+      candidate_specific_trainable_parameter_counts.candidate
+    candidate_specific_trainable_expected: 1468165
+  merged_integrity_required:
+    complete_frozen_input_provenance_all_runs: true
+    expected_candidate_specific_trainable_parameter_count_each: 1468165
+
+scope:
+  question: >-
+    DOES CORRECTLY ALIGNED OUTCOME_BLIND NONFOCAL WT PUZZLE_CONTEXT ADD
+    PREDICTIVE INFORMATION BEYOND AN IDENTICAL POSITION_DERANGED NULL AND THE
+    FROZEN V13 POINT PARENT ON UNSEEN PUZZLES
+  task: ENDPOINT_V7_ALL_MUTANT_FULL_CONSTRUCT_SIGNED_DELTA_DISTRIBUTION
+  data: REAL_OPENKNOT_M2_V4_5_2_DEVELOPMENT_CONSUMED
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  evaluator: METHOD_BALANCED_POSITION_TO_MUTANT_TO_METHOD_TO_PUZZLE
+  target_identity: EXACT_PUZZLE_METHOD_MUTATION
+  evidence_ceiling: POST_HOC_DEVELOPMENT_PASS
+  model_or_threshold_selection_allowed: false
+  new_external_outcome_access_allowed: false
+  prohibited_prediction_inputs:
+    - METHOD_ID
+    - PUZZLE_ID
+    - DATASET_ID
+    - HELD_MUTANT_REACTIVITY
+    - HELD_MUTANT_ERROR
+    - HELD_QUALIFIED_TARGET_MASK
+    - EXTERNAL_OUTCOME
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
+
+frozen_parents:
+  point_anchor:
+    model: V13_CANDIDATE_POINT
+    seed: 0
+    outer_fold_matched: true
+    trainable: false
+  representation_anchor:
+    model: V14_CANDIDATE_OUTCOME_BLIND_WT_ENCODER
+    seed: 0
+    outer_fold_matched: true
+    used_regardless_of_v14_score: true
+    trainable: false
+
+models:
+  only_allowed_candidate:
+    id: puzzle_set_meta_context_v5_aligned
+    connectivity: FULL_CROSS_CONSTRUCT
+    nonfocal_coordinate_alignment: REGISTERED
+  only_allowed_matched_null:
+    id: puzzle_set_meta_context_v5_shift17_null
+    connectivity: POSITION_DERANGED_NULL
+    nonfocal_coordinate_alignment: CIRCULAR_SHIFT_17
+  only_allowed_difference: REGISTERED_VERSUS_FIXED_SHIFT17_NONFOCAL_ALIGNMENT
+  operator:
+    id: POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5
+    constructs_per_puzzle: 8
+    focal_query_tokens: 1
+    focal_present_in_key_value: false
+    nonfocal_individual_key_value_tokens: 7
+    nonfocal_summary_key_value_tokens: 1
+    nonfocal_summary_dedicated_learned_token: false
+    total_key_value_tokens: 8
+    attention_weight_dropout: 0.0
+    residual_and_ffn_dropout: 0.1
+    focal_query_value_residual: false
+    raw_zero_reference_before_learned_projection: true
+    raw_zero_streams: [HIDDEN, WT_REACTIVITY, WT_OBSERVED]
+    actual_and_reference_focal_query_elementwise_equal: true
+    actual_and_reference_full_shared_path: PROJECTION_ATTENTION_FFN_OUTPUT_NORM
+    actual_and_reference_same_dropout_draw: true
+    actual_and_reference_rng_advances_as_one_call: true
+    returned_cross_state: F_Q_V_MINUS_F_Q_V0
+    raw_zero_cross_state_exact_zero: true
+  point_increment:
+    family: SHARED_PAIRED_HEAD_CONTRAST
+    expression: H_BASE_CROSS_MINUS_H_BASE_ZERO
+    actual_and_reference_same_parameters: true
+    actual_and_reference_same_dropout_draw: true
+    actual_and_reference_rng_advances_as_one_call: true
+    zero_cross_increment_exact_zero: true
+    prediction: FROZEN_V13_POINT_PLUS_PAIRED_INCREMENT
+  exact_parameter_counts_each:
+    p1_point_module_total: 6171697
+    p1_point_module_frozen_v14_encoder: 4767280
+    p1_point_module_trainable: 1404417
+    set_operator_trainable: 857600
+    paired_point_head_trainable: 546817
+    residual_calibration_head_trainable: 63748
+    p1_point_plus_residual_modules_total: 6235445
+    candidate_specific_trainable_point_plus_distribution: 1468165
+    temporary_pretraining_decoder: 769
+    pretraining_trainable_with_decoder: 858369
+    frozen_v13_point_upstream: 2064737
+    frozen_v8_meanaligned_upstream: 109581
+    feature41_ridge_upstream: PENDING_ACTIVATION_BINDING
+    full_upstream_footprint: PENDING_ACTIVATION_BINDING
+    p1_point_module_total_is_full_pipeline_total: false
+    candidate_and_null_equal: true
+
+pretraining:
+  data: OUTER_TRAIN_WT_PUZZLE_CONTEXTS_ONLY
+  mutant_outcome_access_allowed: false
+  held_puzzle_access_allowed: false
+  mask_fraction: 0.40
+  objective: PUZZLE_BALANCED_MASKED_WT_REACTIVITY_L1
+  epochs: {smoke: 3, screen_and_formal: 200}
+  optimizer: ADAMW
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  gradient_clip: 5.0
+  encoder_trainable: false
+  point_head_trainable: false
+  only_set_operator_and_temporary_decoder_trainable: true
+  candidate_and_null_same_masks_order_budget_and_random_stream: true
+  early_stopping_allowed: false
+
+point_training:
+  objective: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
+  epochs: {smoke: 3, screen_and_formal: 40}
+  head_only_warmup_epochs: 1
+  joint_context_and_head_epochs: {smoke: 2, screen_and_formal: 39}
+  optimizer: ADAM
+  head_learning_rate: 0.001
+  context_learning_rate: 0.0003
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  early_stopping_allowed: false
+  epoch_or_checkpoint_selection_allowed: false
+  candidate_and_null_same_order_budget_and_random_stream: true
+
+residual_calibration:
+  family: V10_MEDIAN_PRESERVING_ASYMMETRIC_TWO_COMPONENT_GAUSSIAN_MIXTURE
+  point_frozen: true
+  objective: EXACT_METHOD_BALANCED_GAUSSIAN_MIXTURE_CRPS
+  epochs: {smoke: 3, screen_and_formal: 40}
+  optimizer: ADAM
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  point_gradient_allowed: false
+  family_or_hyperparameter_search_allowed: false
+
+retention_pre_score_gate:
+  required_phases: [P1M3, P1M4]
+  data: OUTER_TRAIN_PUZZLE_CONTEXTS_ONLY
+  held_puzzle_access_allowed: false
+  mutant_outcome_access_allowed: false
+  diagnostic_mask_epoch: 200
+  training_mask_epochs: [0, 199]
+  same_final_frozen_decoder_for_all_snapshots: true
+  snapshots: [INITIAL, POST_PRETRAINING, POST_POINT]
+  candidate_pretraining_established_all_runs_required: true
+  candidate_retention_positive_all_runs_required: true
+  null_retention_report_only: true
+  selection_allowed: false
+  failure_status: PUZZLE_SET_TRAIN_ONLY_RETENTION_GATE_FAIL
+  held_score_remains_closed_on_failure: true
+
+p1m2_smoke:
+  activation_prerequisite: FOCUSED_PUZZLE_SET_V5_ACTIVATION_COMMIT
+  training_token: PUZZLE_SET_P1M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
+  folds: [0, 1]
+  seeds: [0]
+  pretraining_epochs: 3
+  point_epochs: 3
+  calibration_epochs: 3
+  scientific_score_allowed: false
+  artifact_status: ENGINEERING_SMOKE_ONLY
+  exact_pass_status: P1M2_ENGINEERING_SMOKE_PASS
+
+p1m3_screen:
+  prerequisite: P1M2_ENGINEERING_SMOKE_PASS
+  training_token: PUZZLE_SET_P1M3_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+  folds: 20
+  fold_ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  seeds: [0]
+  pretraining_epochs: 200
+  point_epochs: 40
+  calibration_epochs: 40
+  complete_before_score_access: true
+  score_once_after_complete_merge: true
+  gates:
+    signed_delta:
+      relative_gain_vs_feature41_min: 0.12
+      relative_gain_vs_terminal_v12_min: 0.02
+      relative_gain_vs_frozen_v13_parent_min: 0.02
+      relative_gain_vs_matched_null_min: 0.015
+      positive_puzzles: {feature41: 16, terminal_v12: 14, frozen_v13_parent: 14, matched_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    point_absolute:
+      relative_gain_vs_feature41_min: 0.07
+      relative_gain_vs_terminal_v11_min: 0.02
+      relative_gain_vs_frozen_v13_parent_min: 0.02
+      relative_gain_vs_matched_null_min: 0.01
+      positive_puzzles: {feature41: 16, terminal_v11: 14, frozen_v13_parent: 14, matched_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    task_crps:
+      relative_gain_vs_feature41_min: 0.05
+      relative_gain_vs_terminal_v12_min: 0.02
+      relative_gain_vs_matched_null_min: 0.015
+      positive_puzzles: {feature41: 16, terminal_v12: 14, matched_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    distribution_absolute:
+      relative_gain_vs_feature41_min: 0.15
+      relative_gain_vs_terminal_v10_min: 0.02
+      relative_gain_vs_matched_null_min: 0.01
+      positive_puzzles: {feature41: 16, terminal_v10: 14, matched_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    stability:
+      leave_one_puzzle_positive_all_headline_comparisons: true
+      max_single_puzzle_effect_fraction: 0.20
+      registered_prediction_coverage: 1.0
+      failure_rate: 0.0
+      unexpected_keys: 0
+    calibration:
+      levels: [0.68, 0.95]
+      max_absolute_error_worsening_vs_feature41: 0.01
+
+p1m4_formal:
+  prerequisite: PUZZLE_SET_M3_TOP_JOURNAL_SCREEN_PASS
+  training_token: PUZZLE_SET_P1M4_FIXED_FIVE_SEED_FORMAL_ONLY
+  folds_per_seed: 20
+  fold_ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+  seeds: [0, 1, 2, 3, 4]
+  screen_seed_zero_reused: false
+  pretraining_epochs: 200
+  point_epochs: 40
+  calibration_epochs: 40
+  equal_seed_mixture: true
+  gaussian_components_per_arm: 10
+  repeat_all_screen_gates: true
+  minimum_positive_individual_seeds_signed_vs_feature41: 4
+  minimum_positive_individual_seeds_crps_vs_feature41: 4
+  formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources: true
+  model_or_seed_selection_allowed: false
+  failed_seed_removal_allowed: false
+
+score_once:
+  training_must_be_closed: true
+  candidate_training_must_be_closed: true
+  partial_fold_score_read_allowed: false
+  external_outcome_access_allowed: false
+  screen_token: PUZZLE_SET_COMPLETE_MERGE_SCORE_ONCE_ONLY
+  formal_token: PUZZLE_SET_FORMAL_COMPLETE_SCORE_ONCE_ONLY
+  score_invocations_per_complete_universe: 1
+  overwrite_allowed: false
+
+terminal_rules:
+  any_screen_or_formal_gate_failure: TERMINATE_PUZZLE_SET_META_CONTEXT_FAMILY
+  gate_lowering_allowed: false
+  same_family_successor_allowed: false
+  external_confirmation_requires_separate_amendment: true

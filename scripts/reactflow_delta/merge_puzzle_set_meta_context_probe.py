@@ -38,10 +38,14 @@ from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
     EXPECTED_PRETRAINING_TRAINABLE_PARAMETERS,
     PRETRAINING_MASK_FRACTION,
 )
-from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
+from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
+    FOLD_SCOPED_INPUT_SOURCES,
+    FOLD_SCHEMA,
+    validate_frozen_input_sources,
+)
 
 
-MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v8"
+MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v9"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
@@ -324,6 +328,7 @@ def merge_complete_universe(
     retention_rows = []
     seen: set[tuple[int, int]] = set()
     keys_by_seed: dict[int, set[str]] = {int(seed): set() for seed in expected_seeds}
+    source_paths_by_scope: dict[tuple[str, int | None], Path] = {}
     for path in sorted(input_dir.glob("puzzle_set_fold_result_fold*_seed*.json")):
         row = json.loads(path.read_text(encoding="utf-8"))
         pair = (int(row.get("outer_fold", -1)), int(row.get("seed", -1)))
@@ -386,6 +391,30 @@ def merge_complete_universe(
             Path(value).is_file() for value in parents.values()
         ):
             raise FileNotFoundError(f"puzzle-set fold {pair} lacks frozen parents")
+        frozen_sources = row.get("frozen_input_sources", {})
+        validate_frozen_input_sources(
+            frozen_sources,
+            outer_fold=pair[0],
+            require_files=True,
+        )
+        if Path(frozen_sources["v13_point_checkpoint"]["path"]) != Path(
+            parents["v13_point"]
+        ) or Path(frozen_sources["v14_encoder_checkpoint"]["path"]) != Path(
+            parents["v14_encoder"]
+        ):
+            raise RuntimeError(
+                f"puzzle-set fold {pair} parent provenance is inconsistent"
+            )
+        for source_name, source in frozen_sources.items():
+            scope_fold = pair[0] if source_name in FOLD_SCOPED_INPUT_SOURCES else None
+            scope_key = (source_name, scope_fold)
+            source_path = Path(source["path"])
+            prior_path = source_paths_by_scope.setdefault(scope_key, source_path)
+            if prior_path != source_path:
+                raise RuntimeError(
+                    "puzzle-set frozen input source path changed within its "
+                    f"registered scope: {source_name}"
+                )
         if int(row.get("n_validated_puzzle_coordinate_frames", 0)) <= 0:
             raise ValueError(f"puzzle-set fold {pair} lacks coordinate validation")
         n_train_puzzles = int(row.get("n_outer_train_puzzles", 0))
@@ -428,10 +457,20 @@ def merge_complete_universe(
             history = np.asarray(histories.get(history_name, []), dtype=float)
             if len(history) != history_length or not np.isfinite(history).all():
                 raise ValueError(f"puzzle-set fold {pair} has invalid {history_name}")
-        if set(map(int, row.get("residual_parameter_counts", {}).values())) != {
-            EXPECTED_RESIDUAL_PARAMETERS
-        }:
+        residual_counts = row.get("residual_parameter_counts", {})
+        if set(residual_counts) != {"candidate", "null"} or set(
+            map(int, residual_counts.values())
+        ) != {EXPECTED_RESIDUAL_PARAMETERS}:
             raise ValueError(f"puzzle-set fold {pair} changed residual family")
+        candidate_specific_counts = row.get(
+            "candidate_specific_trainable_parameter_counts", {}
+        )
+        if set(candidate_specific_counts) != {"candidate", "null"} or set(
+            map(int, candidate_specific_counts.values())
+        ) != {int(expected_trainable_parameter_count) + EXPECTED_RESIDUAL_PARAMETERS}:
+            raise ValueError(
+                f"puzzle-set fold {pair} changed candidate-specific trainable count"
+            )
         decoder_counts = row.get("pretraining_decoder_parameter_counts", {})
         if set(decoder_counts) != {"candidate", "null"} or set(
             map(int, decoder_counts.values())
@@ -588,6 +627,9 @@ def merge_complete_universe(
             expected_trainable_parameter_count
         ),
         "expected_residual_parameter_count_each": EXPECTED_RESIDUAL_PARAMETERS,
+        "expected_candidate_specific_trainable_parameter_count_each": (
+            int(expected_trainable_parameter_count) + EXPECTED_RESIDUAL_PARAMETERS
+        ),
         "expected_pretraining_decoder_parameter_count_each": (
             EXPECTED_DECODER_PARAMETERS
         ),
@@ -630,6 +672,7 @@ def merge_complete_universe(
             "puzzle_coordinate_frames_validated_all_runs": True,
             "frozen_v13_point_parent_all_runs": True,
             "frozen_v14_context_encoder_all_runs": True,
+            "complete_frozen_input_provenance_all_runs": True,
             "parent_replay_before_and_after_pretraining_all_runs": True,
             "point_head_only_warmup_all_runs": True,
             "point_discriminative_learning_rates_all_runs": True,

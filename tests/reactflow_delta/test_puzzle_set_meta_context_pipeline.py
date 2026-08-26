@@ -23,6 +23,13 @@ def test_smoke_controller_is_two_fold_prediction_only() -> None:
     assert "puzzle_set_candidate_wt_decoder_fold${fold}_seed0.pt" in script
     assert "puzzle_set_null_wt_decoder_fold${fold}_seed0.pt" in script
     assert "score_puzzle_set_meta_context" not in script
+    assert script.count("merge_puzzle_set_meta_context_probe") == 1
+    assert script.count("qualify_puzzle_set_meta_context_smoke") == 1
+    assert "p1m2_complete_unscored_merge.json" in script
+    assert "p1m2_engineering_smoke_qualification.json" in script
+    assert script.index("merge_puzzle_set_meta_context_probe") < script.index(
+        "qualify_puzzle_set_meta_context_smoke"
+    )
 
 
 def test_screen_controller_is_missing_fold_only_and_complete_before_merge() -> None:

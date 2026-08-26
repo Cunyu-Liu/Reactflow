@@ -118,6 +118,7 @@ def _integrity() -> dict[str, bool]:
         "puzzle_coordinate_frames_validated_all_runs": True,
         "frozen_v13_point_parent_all_runs": True,
         "frozen_v14_context_encoder_all_runs": True,
+        "complete_frozen_input_provenance_all_runs": True,
         "parent_replay_before_and_after_pretraining_all_runs": True,
         "point_head_only_warmup_all_runs": True,
         "point_discriminative_learning_rates_all_runs": True,
@@ -215,6 +216,9 @@ def test_complete_merge_integrity_is_required_as_one_unit() -> None:
     assert not merged_integrity_pass(integrity)
     integrity = _integrity()
     integrity["mutant_outcome_excluded_from_pretraining_all_runs"] = False
+    assert not merged_integrity_pass(integrity)
+    integrity = _integrity()
+    integrity["complete_frozen_input_provenance_all_runs"] = False
     assert not merged_integrity_pass(integrity)
 
 

@@ -267,3 +267,10 @@ def test_formal_assembly_rejects_failed_merge_integrity(tmp_path: Path) -> None:
     ] = False
     with pytest.raises(ValueError, match="failed integrity check"):
         assemble(merged, tmp_path / "formal")
+
+
+def test_formal_assembly_rejects_incomplete_input_provenance(tmp_path: Path) -> None:
+    merged = _complete_merge(tmp_path)
+    merged["merge_integrity"]["complete_frozen_input_provenance_all_runs"] = False
+    with pytest.raises(ValueError, match="failed integrity check"):
+        assemble(merged, tmp_path / "formal")

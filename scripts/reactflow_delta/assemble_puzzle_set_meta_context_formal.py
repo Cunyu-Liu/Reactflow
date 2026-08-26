@@ -85,6 +85,7 @@ _REQUIRED_MERGE_INTEGRITY_TRUE = {
     "puzzle_coordinate_frames_validated_all_runs",
     "frozen_v13_point_parent_all_runs",
     "frozen_v14_context_encoder_all_runs",
+    "complete_frozen_input_provenance_all_runs",
     "parent_replay_before_and_after_pretraining_all_runs",
     "point_head_only_warmup_all_runs",
     "point_discriminative_learning_rates_all_runs",

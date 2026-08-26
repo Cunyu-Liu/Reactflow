@@ -50,7 +50,9 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
         and scores.get("target_profile_identity") == "EXACT_PUZZLE_METHOD_MUTATION"
         and scores.get("v13_parent_and_feature41_replay_at_5e_7") is True
         and scores.get("feature41_reference_fixed_across_seeds") is True
-        and scores.get("formal_assembly_reconstructed_exactly_from_merged_sources")
+        and scores.get(
+            "formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources"
+        )
         is True
         and scores.get("partial_fold_scores_inspected") is False
         and scores.get("external_outcome_accessed") is False
@@ -107,7 +109,9 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
         **mixture_result["gates"],
         "screen_prerequisite_exact_pass": True,
         "individual_seed_prediction_integrity": individual_integrity,
-        "formal_assembly_exactly_linked_to_merged_sources": True,
+        "formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources": (
+            True
+        ),
         "signed_positive_individual_seeds_ge_4": signed_positive_seeds >= 4,
         "task_crps_positive_individual_seeds_ge_4": crps_positive_seeds >= 4,
     }

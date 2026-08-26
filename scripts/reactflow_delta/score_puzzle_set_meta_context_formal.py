@@ -335,7 +335,9 @@ def score_formal(
         "target_join_after_complete_merge": True,
         "v13_parent_and_feature41_replay_at_5e_7": True,
         "feature41_reference_fixed_across_seeds": True,
-        "formal_assembly_reconstructed_exactly_from_merged_sources": True,
+        "formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources": (
+            True
+        ),
         "equal_seed_mixture": True,
         "best_seed_selection_performed": False,
         "partial_fold_scores_inspected": False,

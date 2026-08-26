@@ -238,7 +238,10 @@ def test_formal_scorer_scores_ten_component_mixture_not_seed_score_average(
     result = score_formal(assembly, merged, tic2a, {}, tmp_path / "unused.csv")
     assert result["status"] == "PUZZLE_SET_M4_COMPLETE_FORMAL_SCORE_PASS"
     assert result["context_retention_summary"] == _context_retention_summary()
-    assert result["formal_assembly_reconstructed_exactly_from_merged_sources"] is True
+    assert (
+        result["formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources"]
+        is True
+    )
     assert component_counts.count(10) == 20
     assert component_counts.count(2) == 100
 

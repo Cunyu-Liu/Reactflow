@@ -77,11 +77,201 @@ from scripts.reactflow_delta.run_model_rescue_v9 import _read_json
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v9"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v10"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
-EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
-RUNNABLE_PHASES = {"P1M2", "P1M3", "P1M4"}
+PHASE_TRAINING_TOKENS = {
+    "P1M2": "PUZZLE_SET_P1M2_REAL_DATA_ENGINEERING_SMOKE_ONLY",
+    "P1M3": "PUZZLE_SET_P1M3_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY",
+    "P1M4": "PUZZLE_SET_P1M4_FIXED_FIVE_SEED_FORMAL_ONLY",
+}
+RUNNABLE_PHASES = set(PHASE_TRAINING_TOKENS)
 FROZEN_PARENT_SEED = 0
+
+FROZEN_INPUT_SOURCE_SPEC = {
+    "v13_point_checkpoint": {
+        "role": "FROZEN_SAME_FOLD_POINT_ANCHOR",
+        "used_in_candidate_prediction": True,
+        "seed": FROZEN_PARENT_SEED,
+    },
+    "v14_encoder_checkpoint": {
+        "role": "FROZEN_SAME_FOLD_OUTCOME_BLIND_ENCODER",
+        "used_in_candidate_prediction": True,
+        "seed": FROZEN_PARENT_SEED,
+    },
+    "v8_meanaligned_checkpoint": {
+        "role": "FROZEN_SAME_FOLD_201D_CALIBRATION_FEATURE_GENERATOR",
+        "used_in_candidate_prediction": True,
+        "seed": FROZEN_PARENT_SEED,
+    },
+    "tic2a_feature41_model_artifact": {
+        "role": "FROZEN_OUTER_FOLD_FEATURE41_RIDGE_AND_41D_BASIS",
+        "used_in_candidate_prediction": True,
+        "seed": None,
+    },
+    "tic2a_merged_registry": {
+        "role": "FROZEN_COMPLETE_TWENTY_FOLD_SOURCE_REGISTRY",
+        "used_in_candidate_prediction": False,
+        "seed": None,
+    },
+    "unconstrained_feature_cache": {
+        "role": "FROZEN_OUTCOME_BLIND_ENSEMBLE_FEATURE_CACHE",
+        "used_in_candidate_prediction": True,
+        "seed": None,
+    },
+    "constrained_feature_cache": {
+        "role": "FROZEN_OUTCOME_BLIND_CONSTRAINED_FEATURE_CACHE",
+        "used_in_candidate_prediction": True,
+        "seed": None,
+    },
+    "v10_fold_comparator": {
+        "role": "COMPARATOR_PROVENANCE_ONLY_NOT_CANDIDATE_INPUT",
+        "used_in_candidate_prediction": False,
+        "seed": 0,
+    },
+}
+FOLD_SCOPED_INPUT_SOURCES = {
+    "v13_point_checkpoint",
+    "v14_encoder_checkpoint",
+    "v8_meanaligned_checkpoint",
+    "tic2a_feature41_model_artifact",
+    "v10_fold_comparator",
+}
+
+
+def validate_frozen_input_sources(
+    sources: dict[str, Any], *, outer_fold: int, require_files: bool
+) -> None:
+    """Validate every learned or cached input used by the final fold pipeline."""
+
+    if set(sources) != set(FROZEN_INPUT_SOURCE_SPEC):
+        raise RuntimeError("puzzle-set frozen input-source universe changed")
+    expected_fields = {
+        "path",
+        "role",
+        "used_in_candidate_prediction",
+        "outer_fold",
+        "seed",
+    }
+    for name, expected in FROZEN_INPUT_SOURCE_SPEC.items():
+        observed = sources[name]
+        expected_fold = int(outer_fold) if name in FOLD_SCOPED_INPUT_SOURCES else None
+        if (
+            not isinstance(observed, dict)
+            or set(observed) != expected_fields
+            or observed.get("role") != expected["role"]
+            or observed.get("used_in_candidate_prediction")
+            is not expected["used_in_candidate_prediction"]
+            or observed.get("outer_fold") != expected_fold
+            or observed.get("seed") != expected["seed"]
+        ):
+            raise RuntimeError(f"puzzle-set frozen input source changed: {name}")
+        path = Path(str(observed.get("path", "")))
+        if not str(path) or (require_files and not path.is_file()):
+            raise FileNotFoundError(f"puzzle-set frozen input source is absent: {name}")
+        expected_filename = {
+            "v13_point_checkpoint": (
+                f"v13_candidate_point_fold{int(outer_fold)}_seed0.pt"
+            ),
+            "v14_encoder_checkpoint": (
+                f"v14_candidate_point_fold{int(outer_fold)}_seed0.pt"
+            ),
+            "v8_meanaligned_checkpoint": (
+                f"v8_corrected_mean_fold{int(outer_fold)}_seed0.pt"
+            ),
+            "tic2a_feature41_model_artifact": (
+                f"tic2a_corrected_models_fold{int(outer_fold)}.json"
+            ),
+            "v10_fold_comparator": (
+                f"v10_fold_result_fold{int(outer_fold)}_seed0.json"
+            ),
+        }.get(name)
+        if expected_filename is not None and path.name != expected_filename:
+            raise RuntimeError(
+                f"puzzle-set frozen input source filename changed: {name}"
+            )
+
+
+def frozen_input_sources_for_fold(
+    *,
+    outer_fold: int,
+    v13_point_checkpoint: Path,
+    v14_encoder_checkpoint: Path,
+    v8_meanaligned_checkpoint: Path,
+    tic2a_feature41_model_artifact: Path,
+    tic2a_merged_registry: Path,
+    unconstrained_feature_cache: Path,
+    constrained_feature_cache: Path,
+    v10_fold_comparator: Path,
+) -> dict[str, dict[str, Any]]:
+    paths = {
+        "v13_point_checkpoint": v13_point_checkpoint,
+        "v14_encoder_checkpoint": v14_encoder_checkpoint,
+        "v8_meanaligned_checkpoint": v8_meanaligned_checkpoint,
+        "tic2a_feature41_model_artifact": tic2a_feature41_model_artifact,
+        "tic2a_merged_registry": tic2a_merged_registry,
+        "unconstrained_feature_cache": unconstrained_feature_cache,
+        "constrained_feature_cache": constrained_feature_cache,
+        "v10_fold_comparator": v10_fold_comparator,
+    }
+    result = {}
+    for name, path in paths.items():
+        expected = FROZEN_INPUT_SOURCE_SPEC[name]
+        result[name] = {
+            "path": str(path),
+            "role": expected["role"],
+            "used_in_candidate_prediction": expected["used_in_candidate_prediction"],
+            "outer_fold": (
+                int(outer_fold) if name in FOLD_SCOPED_INPUT_SOURCES else None
+            ),
+            "seed": expected["seed"],
+        }
+    validate_frozen_input_sources(result, outer_fold=outer_fold, require_files=True)
+    return result
+
+
+def validate_fold_source_rows(
+    *,
+    outer_fold: int,
+    held_puzzle: str,
+    v8_row: dict[str, Any],
+    tic2a_row: dict[str, Any],
+    v10_row: dict[str, Any],
+) -> None:
+    """Reject learned/comparator sources that are not from the same outer fold."""
+
+    expected_fold = int(outer_fold)
+    expected_held = str(held_puzzle)
+    try:
+        identities_match = (
+            int(v8_row.get("outer_fold", -1)) == expected_fold
+            and int(v8_row.get("seed", -1)) == FROZEN_PARENT_SEED
+            and str(v8_row.get("held_puzzle")) == expected_held
+            and v8_row.get("held_score_computed") is False
+            and v8_row.get("external_outcome_accessed") is False
+            and int(tic2a_row.get("outer_fold", -1)) == expected_fold
+            and str(tic2a_row.get("held_puzzle")) == expected_held
+            and int(v10_row.get("outer_fold", -1)) == expected_fold
+            and int(v10_row.get("seed", -1)) == FROZEN_PARENT_SEED
+            and str(v10_row.get("held_puzzle")) == expected_held
+        )
+    except (TypeError, ValueError):
+        identities_match = False
+    if not identities_match:
+        raise RuntimeError(
+            "puzzle-set frozen source row does not match the outer fold identity"
+        )
+
+
+def validate_tic2a_source_registry(tic2a_merged: dict[str, Any]) -> None:
+    rows = tic2a_merged.get("folds")
+    if not isinstance(rows, list) or len(rows) != 20:
+        raise RuntimeError("puzzle-set requires exactly twenty TIC2A source rows")
+    try:
+        folds = [int(row["outer_fold"]) for row in rows]
+    except (KeyError, TypeError, ValueError):
+        raise RuntimeError("puzzle-set TIC2A source registry is malformed") from None
+    if sorted(folds) != list(range(20)) or len(set(folds)) != 20:
+        raise RuntimeError("puzzle-set TIC2A source registry is not folds0-19")
 
 
 def _load_frozen_v13_parent(path: Path, *, device: str) -> V13PointModel:
@@ -141,9 +331,10 @@ def assert_real_training_authority(repo_root: Path, phase: str) -> None:
         "runnable_phases"
     ) != [phase]:
         raise RuntimeError(f"puzzle-set runner is closed outside active {phase}")
+    required_token = PHASE_TRAINING_TOKENS[phase]
     if (
-        active.get("training_allowed") != EXPECTED_TRAINING_TOKEN
-        or active.get("candidate_model_training_allowed") != EXPECTED_TRAINING_TOKEN
+        active.get("training_allowed") != required_token
+        or active.get("candidate_model_training_allowed") != required_token
     ):
         raise RuntimeError("puzzle-set real training token is absent")
     if (
@@ -168,11 +359,24 @@ def prepare_real_fold(
     v14_point_state: dict[str, torch.Tensor],
     v13_parent_checkpoint: Path,
     v14_parent_checkpoint: Path,
+    frozen_input_sources: dict[str, dict[str, Any]],
     device: str,
 ) -> dict[str, Any]:
     """Prepare outer-train batches and held outcome-blind inputs."""
 
     train_puzzles = set(fold.train_puzzles)
+    validate_frozen_input_sources(
+        frozen_input_sources,
+        outer_fold=int(fold.outer_fold),
+        require_files=True,
+    )
+    if (
+        Path(frozen_input_sources["v13_point_checkpoint"]["path"])
+        != v13_parent_checkpoint
+        or Path(frozen_input_sources["v14_encoder_checkpoint"]["path"])
+        != v14_parent_checkpoint
+    ):
+        raise RuntimeError("puzzle-set parent and input-source provenance disagree")
     train_records = [record for record in records if record.puzzle in train_puzzles]
     held_records = [record for record in records if record.puzzle == fold.held_puzzle]
     coordinate_frames = validate_puzzle_coordinate_frames(
@@ -313,6 +517,7 @@ def prepare_real_fold(
             "v13_point": str(v13_parent_checkpoint),
             "v14_encoder": str(v14_parent_checkpoint),
         },
+        "frozen_input_sources": frozen_input_sources,
         "coordinate_frames": coordinate_frames,
     }
 
@@ -385,6 +590,11 @@ def run_prepared_fold(
             "puzzle-set WT pretraining must use exactly the unique outer-train "
             "puzzles and exclude the held puzzle"
         )
+    validate_frozen_input_sources(
+        prepared.get("frozen_input_sources", {}),
+        outer_fold=int(outer_fold),
+        require_files=True,
+    )
     expected_eligible_construct_counts = sorted(
         {
             sum(int(int(context[3].bool().sum()) >= 2) for context in batch["contexts"])
@@ -611,6 +821,7 @@ def run_prepared_fold(
         "null_trainable_parameter_count": point_trainable_counts["null"],
         "frozen_parent_seed": FROZEN_PARENT_SEED,
         "frozen_parent_checkpoints": prepared["frozen_parent_checkpoints"],
+        "frozen_input_sources": prepared["frozen_input_sources"],
         "initial_parent_replay_max_abs_difference": initial_replay,
         "post_pretraining_parent_replay_max_abs_difference": (post_pretraining_replay),
         "n_validated_puzzle_coordinate_frames": len(
@@ -685,6 +896,12 @@ def run_prepared_fold(
             "candidate": EXPECTED_RESIDUAL_PARAMETERS,
             "null": EXPECTED_RESIDUAL_PARAMETERS,
         },
+        "candidate_specific_trainable_parameter_counts": {
+            "candidate": (
+                point_trainable_counts["candidate"] + EXPECTED_RESIDUAL_PARAMETERS
+            ),
+            "null": point_trainable_counts["null"] + EXPECTED_RESIDUAL_PARAMETERS,
+        },
         "invariants": {
             "outcome_blind_puzzle_set_inputs": True,
             "exact_parameter_and_initialization_match": True,
@@ -744,6 +961,7 @@ def run_real_fold(
     v8_model: MeanAlignedModel,
     v13_parent_checkpoint: Path,
     v14_parent_checkpoint: Path,
+    frozen_input_sources: dict[str, dict[str, Any]],
     phase: str,
     seed: int,
     pretraining_epochs: int,
@@ -772,6 +990,7 @@ def run_real_fold(
         v14_point_state=v14_point_state,
         v13_parent_checkpoint=v13_parent_checkpoint,
         v14_parent_checkpoint=v14_parent_checkpoint,
+        frozen_input_sources=frozen_input_sources,
         device=device,
     )
     return run_prepared_fold(
@@ -850,19 +1069,49 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("one or more requested puzzle-set folds are absent")
 
     tic2a_merged = _read_json(args.tic2a_merged_json)
+    validate_tic2a_source_registry(tic2a_merged)
     unconstrained = EnsembleFeatureCache(args.unconstrained_cache)
     constrained = ConstrainedFeatureCache(args.constrained_cache)
     validate_cache_alignment(unconstrained, constrained)
     try:
         for fold in selected:
             fold_id = int(fold.outer_fold)
-            v8_row, _tic_row, _v10_row, feature41_model = _fold_sources(
+            v8_row, tic_row, v10_row, feature41_model = _fold_sources(
                 fold_id,
                 v8_dir=args.v8_dir,
                 v10_dir=args.v10_dir,
                 tic2a_merged=tic2a_merged,
             )
-            v8_model = _load_v8_mean(Path(v8_row["meanaligned_checkpoint"]), device)
+            validate_fold_source_rows(
+                outer_fold=fold_id,
+                held_puzzle=str(fold.held_puzzle),
+                v8_row=v8_row,
+                tic2a_row=tic_row,
+                v10_row=v10_row,
+            )
+            v8_checkpoint = Path(v8_row["meanaligned_checkpoint"])
+            v13_checkpoint = (
+                args.v13_dir
+                / f"v13_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
+            )
+            v14_checkpoint = (
+                args.v14_dir
+                / f"v14_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
+            )
+            frozen_input_sources = frozen_input_sources_for_fold(
+                outer_fold=fold_id,
+                v13_point_checkpoint=v13_checkpoint,
+                v14_encoder_checkpoint=v14_checkpoint,
+                v8_meanaligned_checkpoint=v8_checkpoint,
+                tic2a_feature41_model_artifact=Path(tic_row["model_artifact"]),
+                tic2a_merged_registry=args.tic2a_merged_json,
+                unconstrained_feature_cache=args.unconstrained_cache,
+                constrained_feature_cache=args.constrained_cache,
+                v10_fold_comparator=(
+                    args.v10_dir / f"v10_fold_result_fold{fold_id}_seed0.json"
+                ),
+            )
+            v8_model = _load_v8_mean(v8_checkpoint, device)
             print(
                 f"[{args.phase}] fold={fold_id} held={fold.held_puzzle} "
                 f"seed={args.seed} start",
@@ -877,14 +1126,9 @@ def main(argv: list[str] | None = None) -> int:
                 unconstrained=unconstrained,
                 constrained=constrained,
                 v8_model=v8_model,
-                v13_parent_checkpoint=(
-                    args.v13_dir
-                    / f"v13_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
-                ),
-                v14_parent_checkpoint=(
-                    args.v14_dir
-                    / f"v14_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
-                ),
+                v13_parent_checkpoint=v13_checkpoint,
+                v14_parent_checkpoint=v14_checkpoint,
+                frozen_input_sources=frozen_input_sources,
                 phase=args.phase,
                 seed=args.seed,
                 pretraining_epochs=args.pretraining_epochs,

@@ -24,7 +24,10 @@ from scripts.reactflow_delta.puzzle_set_meta_context_retention import (
     RETENTION_DIAGNOSTIC_EPOCH,
     RETENTION_SCHEMA,
 )
-from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
+from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
+    FOLD_SCHEMA,
+    frozen_input_sources_for_fold,
+)
 
 
 def _retention_diagnostic(
@@ -87,6 +90,7 @@ def _write_fold(
     target_field: bool = False,
     short_candidate: bool = False,
 ) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
     keys = np.asarray([f"k{fold}-0", f"k{fold}-1"], dtype=object)
     prediction = {
         "schema_version": np.asarray(PREDICTION_SCHEMA),
@@ -118,11 +122,32 @@ def _write_fold(
             path = directory / f"{name}_{stage}{fold}_{seed}.pt"
             path.write_bytes(f"{name}-{stage}".encode())
             checkpoints[stage][name] = str(path)
-    frozen_parents = {}
-    for name in ("v13_point", "v14_encoder"):
-        path = directory / f"{name}_parent{fold}_{seed}.pt"
-        path.write_bytes(name.encode())
-        frozen_parents[name] = str(path)
+    frozen_parents = {
+        "v13_point": str(directory / f"v13_candidate_point_fold{fold}_seed0.pt"),
+        "v14_encoder": str(directory / f"v14_candidate_point_fold{fold}_seed0.pt"),
+    }
+    for name, raw_path in frozen_parents.items():
+        Path(raw_path).write_bytes(name.encode())
+    source_paths = {
+        "v8_meanaligned_checkpoint": (
+            directory / f"v8_corrected_mean_fold{fold}_seed0.pt"
+        ),
+        "tic2a_feature41_model_artifact": (
+            directory / f"tic2a_corrected_models_fold{fold}.json"
+        ),
+        "tic2a_merged_registry": directory / "tic2a_merged.json",
+        "unconstrained_feature_cache": directory / "unconstrained.h5",
+        "constrained_feature_cache": directory / "constrained.h5",
+        "v10_fold_comparator": directory / f"v10_fold_result_fold{fold}_seed0.json",
+    }
+    for path in source_paths.values():
+        path.touch()
+    frozen_input_sources = frozen_input_sources_for_fold(
+        outer_fold=fold,
+        v13_point_checkpoint=Path(frozen_parents["v13_point"]),
+        v14_encoder_checkpoint=Path(frozen_parents["v14_encoder"]),
+        **source_paths,
+    )
     held_puzzle = f"P{fold + 1:02d}"
     outer_train_puzzle_ids = [f"train{fold}_{index}" for index in range(19)]
     point_training_summary = {
@@ -164,6 +189,7 @@ def _write_fold(
             "null": 0.0,
         },
         "frozen_parent_checkpoints": frozen_parents,
+        "frozen_input_sources": frozen_input_sources,
         "n_validated_puzzle_coordinate_frames": 20,
         "n_outer_train_puzzles": 19,
         "n_pretraining_puzzles": 19,
@@ -215,6 +241,10 @@ def _write_fold(
         },
         "residual_checkpoints": checkpoints["residual"],
         "residual_parameter_counts": {"candidate": 63748, "null": 63748},
+        "candidate_specific_trainable_parameter_counts": {
+            "candidate": 50 + 63748,
+            "null": 50 + 63748,
+        },
         "prediction_artifact": str(prediction_path),
         "n_registered_prediction_rows": 2,
         "invariants": {
@@ -376,6 +406,121 @@ def test_merger_rejects_changed_position_derangement(tmp_path: Path) -> None:
         assert "changed connectivity" in str(error)
     else:
         raise AssertionError("puzzle-set merger accepted a changed derangement")
+
+
+def test_merger_rejects_changed_frozen_input_role(tmp_path: Path) -> None:
+    _write_fold(tmp_path, fold=0)
+    path = tmp_path / "puzzle_set_fold_result_fold0_seed0.json"
+    row = json.loads(path.read_text(encoding="utf-8"))
+    row["frozen_input_sources"]["v8_meanaligned_checkpoint"]["role"] = "COMPARATOR_ONLY"
+    path.write_text(json.dumps(row), encoding="utf-8")
+    try:
+        merge_complete_universe(
+            tmp_path,
+            expected_phase="P1M3",
+            expected_folds=[0],
+            expected_seeds=[0],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+        )
+    except RuntimeError as error:
+        assert "frozen input source changed" in str(error)
+    else:
+        raise AssertionError("puzzle-set merger accepted a changed input role")
+
+
+def test_merger_requires_both_arms_in_parameter_provenance(tmp_path: Path) -> None:
+    for field, message in (
+        ("residual_parameter_counts", "changed residual family"),
+        (
+            "candidate_specific_trainable_parameter_counts",
+            "changed candidate-specific trainable count",
+        ),
+    ):
+        directory = tmp_path / field
+        _write_fold(directory, fold=0)
+        path = directory / "puzzle_set_fold_result_fold0_seed0.json"
+        row = json.loads(path.read_text(encoding="utf-8"))
+        del row[field]["null"]
+        path.write_text(json.dumps(row), encoding="utf-8")
+        try:
+            merge_complete_universe(
+                directory,
+                expected_phase="P1M3",
+                expected_folds=[0],
+                expected_seeds=[0],
+                expected_pretraining_epochs=1,
+                expected_point_epochs=1,
+                expected_calibration_epochs=1,
+                expected_parameter_count=100,
+                expected_trainable_parameter_count=50,
+            )
+        except ValueError as error:
+            assert message in str(error)
+        else:
+            raise AssertionError(f"puzzle-set merger accepted missing null {field}")
+
+
+def test_merger_requires_source_paths_to_be_fixed_within_scope(tmp_path: Path) -> None:
+    global_dir = tmp_path / "global"
+    _write_fold(global_dir, fold=0)
+    _write_fold(global_dir, fold=1)
+    global_row_path = global_dir / "puzzle_set_fold_result_fold1_seed0.json"
+    global_row = json.loads(global_row_path.read_text(encoding="utf-8"))
+    alternate_cache = global_dir / "alternate_unconstrained.h5"
+    alternate_cache.touch()
+    global_row["frozen_input_sources"]["unconstrained_feature_cache"]["path"] = str(
+        alternate_cache
+    )
+    global_row_path.write_text(json.dumps(global_row), encoding="utf-8")
+    try:
+        merge_complete_universe(
+            global_dir,
+            expected_phase="P1M3",
+            expected_folds=[0, 1],
+            expected_seeds=[0],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+        )
+    except RuntimeError as error:
+        assert "path changed within its registered scope" in str(error)
+    else:
+        raise AssertionError("puzzle-set merger accepted fold-varying global cache")
+
+    fold_dir = tmp_path / "fold"
+    _write_fold(fold_dir, fold=0, seed=0)
+    _write_fold(fold_dir, fold=0, seed=1)
+    fold_row_path = fold_dir / "puzzle_set_fold_result_fold0_seed1.json"
+    fold_row = json.loads(fold_row_path.read_text(encoding="utf-8"))
+    alternate_v8 = fold_dir / "alternate" / "v8_corrected_mean_fold0_seed0.pt"
+    alternate_v8.parent.mkdir()
+    alternate_v8.touch()
+    fold_row["frozen_input_sources"]["v8_meanaligned_checkpoint"]["path"] = str(
+        alternate_v8
+    )
+    fold_row_path.write_text(json.dumps(fold_row), encoding="utf-8")
+    try:
+        merge_complete_universe(
+            fold_dir,
+            expected_phase="P1M3",
+            expected_folds=[0],
+            expected_seeds=[0, 1],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+        )
+    except RuntimeError as error:
+        assert "path changed within its registered scope" in str(error)
+    else:
+        raise AssertionError("puzzle-set merger accepted seed-varying fold source")
 
 
 def test_merger_rejects_misaligned_prediction_rows(tmp_path: Path) -> None:

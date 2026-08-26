@@ -20,11 +20,14 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
 )
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
     EXPECTED_PROJECT_TASK,
-    EXPECTED_TRAINING_TOKEN,
     FOLD_SCHEMA,
+    PHASE_TRAINING_TOKENS,
     _assert_parent_checkpoint_identity,
     assert_real_training_authority,
+    frozen_input_sources_for_fold,
     run_prepared_fold,
+    validate_fold_source_rows,
+    validate_tic2a_source_registry,
 )
 
 
@@ -137,22 +140,47 @@ def _prepared():
     )
 
 
-def _write_active(repo_root: Path, *, authorized: bool) -> None:
+def _write_active(repo_root: Path, *, authorized: bool, phase: str = "P1M3") -> None:
     path = repo_root / "configs/reactflow_delta"
     path.mkdir(parents=True)
     payload = {
         "project_task_id": EXPECTED_PROJECT_TASK if authorized else "v14",
-        "authority": {"current_phase": "P1M3"},
-        "runnable_phases": ["P1M3"],
-        "training_allowed": EXPECTED_TRAINING_TOKEN if authorized else False,
+        "authority": {"current_phase": phase},
+        "runnable_phases": [phase],
+        "training_allowed": PHASE_TRAINING_TOKENS[phase] if authorized else False,
         "candidate_model_training_allowed": (
-            EXPECTED_TRAINING_TOKEN if authorized else False
+            PHASE_TRAINING_TOKENS[phase] if authorized else False
         ),
         "held_score_read_allowed": False,
         "partial_fold_score_read_allowed": False,
         "new_external_outcome_access_allowed": False,
     }
     (path / "active_contract.yaml").write_text(yaml.safe_dump(payload))
+
+
+def _frozen_input_sources(
+    tmp_path: Path, *, fold: int, v13_parent: Path, v14_parent: Path
+) -> dict[str, dict[str, object]]:
+    paths = {
+        "v8_meanaligned_checkpoint": (
+            tmp_path / f"v8_corrected_mean_fold{fold}_seed0.pt"
+        ),
+        "tic2a_feature41_model_artifact": (
+            tmp_path / f"tic2a_corrected_models_fold{fold}.json"
+        ),
+        "tic2a_merged_registry": tmp_path / "tic2a_merged.json",
+        "unconstrained_feature_cache": tmp_path / "unconstrained.h5",
+        "constrained_feature_cache": tmp_path / "constrained.h5",
+        "v10_fold_comparator": tmp_path / f"v10_fold_result_fold{fold}_seed0.json",
+    }
+    for path in paths.values():
+        path.touch()
+    return frozen_input_sources_for_fold(
+        outer_fold=fold,
+        v13_point_checkpoint=v13_parent,
+        v14_encoder_checkpoint=v14_parent,
+        **paths,
+    )
 
 
 def test_current_or_other_authority_cannot_run_real_puzzle_set_training(
@@ -168,8 +196,25 @@ def test_current_or_other_authority_cannot_run_real_puzzle_set_training(
 
 
 def test_exact_future_authority_shape_is_accepted(tmp_path: Path) -> None:
-    _write_active(tmp_path, authorized=True)
-    assert_real_training_authority(tmp_path, "P1M3")
+    for phase in sorted(PHASE_TRAINING_TOKENS):
+        phase_root = tmp_path / phase
+        _write_active(phase_root, authorized=True, phase=phase)
+        assert_real_training_authority(phase_root, phase)
+
+
+def test_training_token_is_phase_specific(tmp_path: Path) -> None:
+    _write_active(tmp_path, authorized=True, phase="P1M3")
+    active_path = tmp_path / "configs/reactflow_delta/active_contract.yaml"
+    active = yaml.safe_load(active_path.read_text(encoding="utf-8"))
+    active["training_allowed"] = PHASE_TRAINING_TOKENS["P1M2"]
+    active["candidate_model_training_allowed"] = PHASE_TRAINING_TOKENS["P1M2"]
+    active_path.write_text(yaml.safe_dump(active), encoding="utf-8")
+    try:
+        assert_real_training_authority(tmp_path, "P1M3")
+    except RuntimeError as error:
+        assert "token is absent" in str(error)
+    else:
+        raise AssertionError("P1M3 accepted the P1M2 training token")
 
 
 def test_parent_checkpoint_identity_is_fixed_to_same_fold_and_seed_zero(
@@ -192,6 +237,97 @@ def test_parent_checkpoint_identity_is_fixed_to_same_fold_and_seed_zero(
         assert "identity mismatch" in str(error)
     else:
         raise AssertionError("puzzle-set runner accepted a wrong-fold parent")
+
+
+def test_fold_source_rows_must_match_outer_fold_and_held_puzzle() -> None:
+    v8 = {
+        "outer_fold": 4,
+        "seed": 0,
+        "held_puzzle": "P05",
+        "held_score_computed": False,
+        "external_outcome_accessed": False,
+    }
+    tic2a = {"outer_fold": 4, "held_puzzle": "P05"}
+    v10 = {"outer_fold": 4, "seed": 0, "held_puzzle": "P05"}
+    validate_fold_source_rows(
+        outer_fold=4,
+        held_puzzle="P05",
+        v8_row=v8,
+        tic2a_row=tic2a,
+        v10_row=v10,
+    )
+    for row_name, field, value in (
+        ("v8", "outer_fold", 3),
+        ("v8", "seed", 1),
+        ("v8", "held_puzzle", "P04"),
+        ("v8", "held_score_computed", True),
+        ("tic2a", "held_puzzle", "P04"),
+        ("v10", "outer_fold", 3),
+    ):
+        rows = {"v8": dict(v8), "tic2a": dict(tic2a), "v10": dict(v10)}
+        rows[row_name][field] = value
+        try:
+            validate_fold_source_rows(
+                outer_fold=4,
+                held_puzzle="P05",
+                v8_row=rows["v8"],
+                tic2a_row=rows["tic2a"],
+                v10_row=rows["v10"],
+            )
+        except RuntimeError as error:
+            assert "does not match the outer fold identity" in str(error)
+        else:
+            raise AssertionError(f"puzzle-set accepted wrong-fold {row_name}.{field}")
+
+
+def test_frozen_input_sources_reject_wrong_fold_v8_checkpoint(tmp_path: Path) -> None:
+    v13 = tmp_path / "v13_candidate_point_fold4_seed0.pt"
+    v14 = tmp_path / "v14_candidate_point_fold4_seed0.pt"
+    wrong_v8 = tmp_path / "v8_corrected_mean_fold3_seed0.pt"
+    tic2a_model = tmp_path / "tic2a_corrected_models_fold4.json"
+    registry = tmp_path / "tic2a_merged.json"
+    unconstrained = tmp_path / "unconstrained.h5"
+    constrained = tmp_path / "constrained.h5"
+    v10 = tmp_path / "v10_fold_result_fold4_seed0.json"
+    for path in (
+        v13,
+        v14,
+        wrong_v8,
+        tic2a_model,
+        registry,
+        unconstrained,
+        constrained,
+        v10,
+    ):
+        path.touch()
+    try:
+        frozen_input_sources_for_fold(
+            outer_fold=4,
+            v13_point_checkpoint=v13,
+            v14_encoder_checkpoint=v14,
+            v8_meanaligned_checkpoint=wrong_v8,
+            tic2a_feature41_model_artifact=tic2a_model,
+            tic2a_merged_registry=registry,
+            unconstrained_feature_cache=unconstrained,
+            constrained_feature_cache=constrained,
+            v10_fold_comparator=v10,
+        )
+    except RuntimeError as error:
+        assert "filename changed: v8_meanaligned_checkpoint" in str(error)
+    else:
+        raise AssertionError("puzzle-set accepted a wrong-fold V8 checkpoint")
+
+
+def test_tic2a_source_registry_requires_unique_folds_zero_through_nineteen() -> None:
+    rows = [{"outer_fold": fold} for fold in range(20)]
+    validate_tic2a_source_registry({"folds": rows})
+    duplicated = rows + [{"outer_fold": 0}]
+    try:
+        validate_tic2a_source_registry({"folds": duplicated})
+    except RuntimeError as error:
+        assert "exactly twenty" in str(error)
+    else:
+        raise AssertionError("puzzle-set accepted a duplicate TIC2A source fold")
 
 
 def test_prepared_fold_rejects_held_puzzle_pretraining(tmp_path: Path) -> None:
@@ -230,6 +366,12 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         "v13_point": str(v13_parent),
         "v14_encoder": str(v14_parent),
     }
+    prepared["frozen_input_sources"] = _frozen_input_sources(
+        tmp_path,
+        fold=19,
+        v13_parent=v13_parent,
+        v14_parent=v14_parent,
+    )
     result = run_prepared_fold(
         univ=univ,
         prepared=prepared,
@@ -250,7 +392,22 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
     assert result["invariants"]["candidate_null_equal_attention_support"] is True
     assert result["invariants"]["attention_weight_dropout_disabled"] is True
     assert set(result["residual_parameter_counts"].values()) == {63748}
+    assert set(result["candidate_specific_trainable_parameter_counts"].values()) == {
+        result["candidate_trainable_parameter_count"] + 63748
+    }
     assert result["pretraining_puzzle_ids"] == ["P01"]
+    assert (
+        result["frozen_input_sources"]["v8_meanaligned_checkpoint"][
+            "used_in_candidate_prediction"
+        ]
+        is True
+    )
+    assert (
+        result["frozen_input_sources"]["v10_fold_comparator"][
+            "used_in_candidate_prediction"
+        ]
+        is False
+    )
     assert result["outer_train_puzzle_ids"] == ["P01"]
     assert result["held_puzzle"] not in result["pretraining_puzzle_ids"]
     assert result["expected_pretraining_eligible_construct_counts"] == [8]
