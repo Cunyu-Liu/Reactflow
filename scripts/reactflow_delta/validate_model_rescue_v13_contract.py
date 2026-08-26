@@ -17,6 +17,32 @@ def _load(path: Path) -> dict[str, Any]:
     return value
 
 
+def assert_outcome_authority_is_narrow(active: dict[str, Any]) -> None:
+    """Allow held-score access only for the frozen, training-closed score step."""
+    if active.get("partial_fold_score_read_allowed") is not False:
+        raise RuntimeError("V13 partial score authority is too broad")
+    if active.get("new_external_outcome_access_allowed") is not False:
+        raise RuntimeError("V13 external outcome authority is too broad")
+    if active.get("v12_terminal_verdict_change_allowed") is not False:
+        raise RuntimeError("V13 parent-verdict authority is too broad")
+
+    held = active.get("held_score_read_allowed")
+    if held is False:
+        return
+    phase = active.get("authority", {}).get("current_phase")
+    expected_token = {
+        "V13M3": "V13_COMPLETE_MERGE_SCORE_ONCE_ONLY",
+        "V13M4": "V13_FORMAL_COMPLETE_SCORE_ONCE_ONLY",
+    }.get(phase)
+    if (
+        held != expected_token
+        or active.get("training_allowed") is not False
+        or active.get("candidate_model_training_allowed") is not False
+        or active.get("runnable_phases") != [phase]
+    ):
+        raise RuntimeError("V13 held-score authority is not the frozen training-closed step")
+
+
 def validate_contract(repo_root: Path) -> dict[str, Any]:
     active = _load(repo_root / "configs/reactflow_delta/active_contract.yaml")
     contract = _load(
@@ -44,16 +70,7 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         raise RuntimeError("V13 machine contract changed the V12 terminal status")
     if ledger["immutable_parent_verdicts"]["v12"] != parent:
         raise RuntimeError("V13 ledger changed the V12 terminal status")
-    if any(
-        active[name] is not False
-        for name in (
-            "held_score_read_allowed",
-            "partial_fold_score_read_allowed",
-            "new_external_outcome_access_allowed",
-            "v12_terminal_verdict_change_allowed",
-        )
-    ):
-        raise RuntimeError("V13 outcome or parent-verdict authority is too broad")
+    assert_outcome_authority_is_narrow(active)
     if contract["scope"]["candidate"] != (
         "v13_feature41_anchored_exact_mutant_contrast"
     ) or contract["scope"]["nested_null"] != (

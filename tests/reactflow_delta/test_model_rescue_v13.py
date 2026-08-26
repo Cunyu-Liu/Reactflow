@@ -42,6 +42,7 @@ from scripts.reactflow_delta.run_model_rescue_v9 import (
     _feature41_replay_max_difference,
 )
 from scripts.reactflow_delta.validate_model_rescue_v13_contract import (
+    assert_outcome_authority_is_narrow,
     assert_run_authority,
     validate_contract,
 )
@@ -89,7 +90,11 @@ def test_v13_contract_preserves_v12_and_keeps_training_closed() -> None:
         "TERMINAL_V12M3_TOP_JOURNAL_SCREEN_FAIL_DIAGNOSTICS_COMPLETE"
     )
     assert active["parent_state"]["shrinkage_gate_route"] == "TERMINATED"
-    assert active["held_score_read_allowed"] is False
+    assert active["held_score_read_allowed"] in {
+        False,
+        "V13_COMPLETE_MERGE_SCORE_ONCE_ONLY",
+        "V13_FORMAL_COMPLETE_SCORE_ONCE_ONLY",
+    }
     assert contract["screen"]["signed_delta"][
         "relative_gain_vs_feature41_min"
     ] == 0.12
@@ -136,6 +141,38 @@ def test_future_training_authority_requires_matching_primary_and_candidate_token
     active_path.write_text(yaml.safe_dump(active), encoding="utf-8")
     with pytest.raises(RuntimeError, match="candidate training authority is absent"):
         assert_run_authority(tmp_path, phase)
+
+
+@pytest.mark.parametrize(
+    ("phase", "token"),
+    (
+        ("V13M3", "V13_COMPLETE_MERGE_SCORE_ONCE_ONLY"),
+        ("V13M4", "V13_FORMAL_COMPLETE_SCORE_ONCE_ONLY"),
+    ),
+)
+def test_complete_score_authority_requires_training_closed_and_exact_token(
+    phase: str, token: str
+) -> None:
+    active = {
+        "authority": {"current_phase": phase},
+        "runnable_phases": [phase],
+        "training_allowed": False,
+        "candidate_model_training_allowed": False,
+        "held_score_read_allowed": token,
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+        "v12_terminal_verdict_change_allowed": False,
+    }
+    assert_outcome_authority_is_narrow(active)
+
+    active["training_allowed"] = "V13_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY"
+    with pytest.raises(RuntimeError, match="not the frozen training-closed step"):
+        assert_outcome_authority_is_narrow(active)
+
+    active["training_allowed"] = False
+    active["held_score_read_allowed"] = f"{token}_CHANGED"
+    with pytest.raises(RuntimeError, match="not the frozen training-closed step"):
+        assert_outcome_authority_is_narrow(active)
 
 
 def test_candidate_and_null_are_exact_parameter_matches() -> None:
