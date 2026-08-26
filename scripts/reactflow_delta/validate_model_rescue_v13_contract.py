@@ -95,6 +95,8 @@ def assert_run_authority(repo_root: Path, phase: str) -> None:
     }.get(phase)
     if required is None or active.get("training_allowed") != required:
         raise RuntimeError(f"V13 {phase} training authority is absent")
+    if active.get("candidate_model_training_allowed") != required:
+        raise RuntimeError(f"V13 {phase} candidate training authority is absent")
     if active.get("held_score_read_allowed") is not False:
         raise RuntimeError(f"V13 {phase} requires held scores closed")
     if active.get("partial_fold_score_read_allowed") is not False:

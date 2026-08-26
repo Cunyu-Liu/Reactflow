@@ -106,6 +106,37 @@ def test_v13_contract_preserves_v12_and_keeps_training_closed() -> None:
         assert active["authorization"]["implementation_allowed"] is True
 
 
+@pytest.mark.parametrize(
+    ("phase", "token"),
+    (
+        ("V13M3", "V13_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY"),
+        ("V13M4", "V13_FIXED_FIVE_SEED_FORMAL_ONLY"),
+    ),
+)
+def test_future_training_authority_requires_matching_primary_and_candidate_tokens(
+    tmp_path: Path, phase: str, token: str
+) -> None:
+    config_dir = tmp_path / "configs" / "reactflow_delta"
+    config_dir.mkdir(parents=True)
+    active_path = config_dir / "active_contract.yaml"
+    active = {
+        "authority": {"current_phase": phase},
+        "runnable_phases": [phase],
+        "training_allowed": token,
+        "candidate_model_training_allowed": token,
+        "held_score_read_allowed": False,
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+    }
+    active_path.write_text(yaml.safe_dump(active), encoding="utf-8")
+    assert_run_authority(tmp_path, phase)
+
+    active["candidate_model_training_allowed"] = False
+    active_path.write_text(yaml.safe_dump(active), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="candidate training authority is absent"):
+        assert_run_authority(tmp_path, phase)
+
+
 def test_candidate_and_null_are_exact_parameter_matches() -> None:
     candidate, null = make_exact_matched_pair(seed=17, device="cpu")
     assert candidate.second_pass_mode == SECOND_PASS_EXACT
