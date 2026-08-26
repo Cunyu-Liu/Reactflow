@@ -120,6 +120,13 @@ The implementation must establish:
 - candidate/null state, total parameters, trainable parameters, input universe,
   optimizer, and random initialization match exactly;
 - both arms replay the frozen V13 parent within `1e-7` before training;
+- after the zero-initialized output layer has received its first update, a
+  second supervised backward pass gives finite nonzero gradients to the
+  construct projection and cross-construct attention while the frozen encoder
+  still has no gradients;
+- after two deterministic optimizer updates, perturbing only a non-focal WT
+  profile changes the candidate focal prediction by more than `1e-6`, whereas
+  the matched null remains bitwise invariant;
 - the frozen V14 encoder receives no gradient and remains bitwise unchanged;
 - P20_Eterna stays in all 177 aligned context positions with observed flag zero
   and no fabricated supervised cell.
@@ -129,6 +136,11 @@ candidate does not beat its block-diagonal null under the predeclared
 attribution Gate, the result means that aligned cross-design WT context lacks
 usable incremental signal; the response is to terminate the family, not return
 to global pooling, widen the mixer, or add a structure graph.
+
+The counterfactual and gradient checks establish executable model capability,
+not benchmark performance. They prevent a negative real-data result from being
+misread when the intended cross-construct path was never trainable, but they do
+not count as scientific evidence for P1.
 
 ## 6. Proposed complete experiment and top-journal Gate
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import inspect
 
 import torch
@@ -327,6 +328,68 @@ def test_puzzle_training_replays_identically_under_same_connectivity() -> None:
     assert all(parameter.grad is None for parameter in first.encoder.parameters())
     for expected, cell in zip(parent_before, training["cells"]):
         assert torch.equal(expected, cell["parent_point"])
+
+
+def test_trained_candidate_uses_nonfocal_context_but_matched_null_cannot() -> None:
+    candidate, null = _full_pair(91)
+    fit_puzzle_set_point_model(
+        candidate, [_training_batch()], epochs=2, seed=17
+    )
+    fit_puzzle_set_point_model(null, [_training_batch()], epochs=2, seed=17)
+    candidate.eval()
+    null.eval()
+
+    original = [_context(4) for _ in range(8)]
+    perturbed = copy.deepcopy(original)
+    nonfocal = list(perturbed[1])
+    nonfocal[1] = nonfocal[1] + torch.tensor([5.0, -4.0, 3.0, -2.0])
+    perturbed[1] = tuple(nonfocal)
+    edit = torch.tensor([0])
+    distance = torch.arange(4)[None, :].float()
+
+    def focal_prediction(model, contexts):
+        with torch.no_grad():
+            return model(
+                contexts,
+                0,
+                edit,
+                distance,
+                ["A"],
+                ["G"],
+                torch.zeros(1, 4),
+                torch.zeros(1, 4),
+                torch.ones(1, 4, dtype=torch.bool),
+            )[0]
+
+    candidate_original = focal_prediction(candidate, original)
+    candidate_perturbed = focal_prediction(candidate, perturbed)
+    null_original = focal_prediction(null, original)
+    null_perturbed = focal_prediction(null, perturbed)
+    assert float((candidate_original - candidate_perturbed).abs().max()) > 1e-6
+    assert torch.equal(null_original, null_perturbed)
+
+
+def test_cross_construct_path_receives_gradient_after_zero_init_bootstrap() -> None:
+    candidate, _null = _full_pair(92)
+    fit_puzzle_set_point_model(
+        candidate, [_training_batch()], epochs=1, seed=19
+    )
+    candidate.zero_grad(set_to_none=True)
+    torch.manual_seed(1901)
+    loss = puzzle_balanced_point_loss(candidate, _training_batch())
+    loss.backward()
+
+    parameters = dict(candidate.named_parameters())
+    for name in (
+        "meta_context.construct_projection.weight",
+        "meta_context.set_attention.in_proj_weight",
+        "meta_context.point_head.0.weight",
+    ):
+        gradient = parameters[name].grad
+        assert gradient is not None
+        assert torch.isfinite(gradient).all()
+        assert float(gradient.abs().sum()) > 0.0
+    assert all(parameter.grad is None for parameter in candidate.encoder.parameters())
 
 
 def test_puzzle_training_rejects_duplicate_or_missing_focal_cells() -> None:

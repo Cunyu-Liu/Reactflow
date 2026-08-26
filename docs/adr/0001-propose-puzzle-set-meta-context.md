@@ -207,6 +207,11 @@ branch.
 - If either arm fails to replay its same-fold V13 parent at `1e-7` before the
   first optimizer step, or if any frozen V14 encoder parameter changes, no
   scientific run may proceed.
+- If a non-focal WT-profile counterfactual changes the trained matched null, or
+  does not change the trained candidate, the proposed capability is absent and
+  no real-data probe may proceed. The same fail-closed decision applies if the
+  cross-construct projection and attention do not receive finite nonzero
+  gradients after the zero-initialized output layer has been bootstrapped.
 - If a future complete candidate-minus-null effect misses its attribution Gate,
   terminate the puzzle-set family without connectivity, width or epoch search.
 
