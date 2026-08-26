@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v13_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v13_anchored_exact_mutant_contrast_20260826
-current_status: V13M3_COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
+current_status: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL_EXACT_MUTANT_REENCODING_CLOSED
 created_at: '2026-08-26T09:00:00+08:00'
 
 immutable_parent_verdicts:
@@ -49,16 +49,46 @@ phase_state:
   V13M0: PASS
   V13M1: PASS
   V13M2: PASS
-  V13M3: COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
-  V13M4: NOT_AUTHORIZED
-  V13M5: NOT_RUN
+  V13M3: TOP_JOURNAL_SCREEN_FAIL_TERMINAL
+  V13M4: PERMANENTLY_CLOSED
+  V13M5: TERMINAL_HANDOFF_COMPLETE
 
 outcome_access:
   v13_partial_score_accessed: false
-  v13_complete_score_accessed: false
+  v13_complete_score_accessed: true
   new_external_outcome_accessed: false
 
 events:
+  - id: V13M3_TERMINAL_TOP_JOURNAL_SCREEN_FAIL
+    observed_at: '2026-08-27T00:42:00+08:00'
+    status: V13M3_TOP_JOURNAL_SCREEN_FAIL
+    complete_score_status: V13M3_COMPLETE_SCORE_PASS
+    qualification_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0/v13m3_qualification.json
+    candidate_signed_delta_mae: 0.17226978785325572
+    signed_delta_relative_gain_vs_feature41: 0.09881758130147567
+    signed_delta_relative_gain_vs_terminal_v12: -0.002221955542810679
+    signed_delta_relative_gain_vs_nested_null: 0.0012243221551274882
+    candidate_point_absolute_delta_mae: 0.1449819772913149
+    point_absolute_relative_gain_vs_feature41: 0.05255568851451023
+    point_absolute_relative_gain_vs_terminal_v11: 0.007203963538431359
+    point_absolute_relative_gain_vs_nested_null: 0.002170226879048027
+    candidate_crps: 0.12546202529189698
+    crps_relative_gain_vs_feature41: 0.03919092468648939
+    crps_relative_gain_vs_terminal_v12: 0.0018465711200642398
+    crps_relative_gain_vs_nested_null: 0.0009604345520437197
+    candidate_distribution_absolute_delta_mae: 0.13367114754066708
+    distribution_absolute_relative_gain_vs_feature41: 0.12647095374709516
+    distribution_absolute_relative_gain_vs_terminal_v10: -0.019240714226159007
+    distribution_absolute_relative_gain_vs_nested_null: -0.00033876992488255335
+    prediction_integrity: true
+    coverage_guardrail: true
+    exact_mutant_increment_identified: false
+    v13m4_opened: false
+    route_decision: TERMINATE_EXACT_MUTANT_REENCODING_FAMILY_AND_RETURN_TO_M6
+    gate_or_threshold_changed_after_score: false
+    partial_score_accessed: false
+    external_outcome_accessed: false
+
   - id: V13M3_COMPLETE_UNSCORED_MERGE_AND_SCORE_AUTHORITY
     observed_at: '2026-08-27T00:25:00+08:00'
     status: V13M3_COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
