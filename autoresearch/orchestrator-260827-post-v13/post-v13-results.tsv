@@ -1,0 +1,3 @@
+route	signed_relative_gain	signed_ci_lower	signed_positive_puzzles	point_absolute_relative_gain	point_absolute_ci_lower	point_absolute_positive_puzzles	gate_passed
+noise_aware	0.0038869916082692637	0.000583219581527264	20	0.0013744443894628843	0.000020204901496323485	13	false
+coherent_factorization	-0.142567656417662	-0.03306886546454807	0	0.015184974596471782	-0.001783079588380549	13	false

@@ -18,9 +18,9 @@ def test_frozen_post_v13_diagnostic_contract_passes() -> None:
     result = validate_contract(ROOT)
     assert result == {
         "status": "POST_V13_ROUTE_DIAGNOSTIC_CONTRACT_VALIDATION_PASS",
-        "phase": "PV13D3",
+        "phase": "M6",
         "training_allowed": False,
-        "held_score_read_allowed": "PV13D_COMPLETE_MERGE_SCORE_ONCE_ONLY",
+        "held_score_read_allowed": False,
         "external_outcome_access_allowed": False,
     }
 

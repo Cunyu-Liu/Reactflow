@@ -1,0 +1,10 @@
+{
+  "archetype": "optimize-metric",
+  "outcome": "progressed",
+  "completed_unit": "post_v13_route_diagnostic",
+  "qualification_status": "PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY",
+  "selected_next_route": "WT_PROFILE_SELF_SUPERVISED_PRETRAINING_ONLY",
+  "units_remaining": 5,
+  "external_outcome_accessed": false,
+  "partial_score_accessed": false
+}

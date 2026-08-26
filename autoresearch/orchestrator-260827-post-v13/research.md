@@ -59,17 +59,16 @@
 - Risk: the evaluation-optimal signed median is not automatically recovered by separately optimized heads; an auxiliary-task gain may not survive the combined point metric.
 - Required null: parameter-matched direct point model with the same encoder, hidden width, optimizer and compute, differing only in the frozen output factorization and auxiliary objectives.
 
-## Current routing decision
+## Completed route diagnostic
 
-Do not open training yet. The next unit is a post-hoc, fully reproducible diagnostic that compares A and C using only complete development artifacts and outer-train-only probes. B remains second-line because the available WT universe is small and adjacent static-pretraining evidence is negative. Structure/contact, exact-mutant, foundation, rank and gate-capacity routes are closed.
+The frozen 20-puzzle diagnostic closed A and C. Noise-aware feature41 produced a statistically consistent but practically sub-threshold signed gain (0.3887%, 20/20, CI lower above zero) and only 0.1374% point-absolute gain (13/20). Coherent sign-magnitude reconstruction improved point-absolute by 1.5185% but worsened signed MAE by 14.2568% (0/20). Neither route is eligible for a neural amendment.
+
+The deterministic qualifier selected B: task-matched WT-profile self-supervised pretraining. Its required null is the identical downstream architecture trained from scratch with the identical supervised task and budget. Structure/contact, exact-mutant, foundation-feature concatenation, rank, calibration capacity, shrinkage gates, noise-aware reweighting and signed-magnitude factorization are closed.
 
 ## Units remaining
 
-1. Freeze and implement post-V13 diagnostic definitions.
-2. Select exactly one capability based on the frozen routing rule.
-3. Create a new isolated amendment/worktree/artifact universe.
-4. Implement candidate, task/parameter-matched null, runner, merger, scorer, qualifier and invariants.
-5. Complete real-data prediction-only smoke.
-6. Complete score-blind seed-0 20-fold screen.
-7. If and only if exact screen PASS, complete fixed five-seed formal confirmation.
-
+1. Create the isolated WT-profile pretraining amendment/worktree/artifact universe.
+2. Implement candidate, identical-architecture from-scratch null, runner, merger, scorer, qualifier and invariants.
+3. Complete real-data prediction-only smoke.
+4. Complete score-blind seed-0 20-fold screen.
+5. If and only if exact screen PASS, complete fixed five-seed formal confirmation.

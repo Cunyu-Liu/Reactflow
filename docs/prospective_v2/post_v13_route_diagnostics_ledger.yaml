@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.post_v13_route_diagnostics_ledger.v1
 contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
-current_status: PV13D3_COMPLETE_SCORE_ONCE_AUTHORIZED
+current_status: TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
 created_at: '2026-08-27T01:20:00+08:00'
 
 immutable_parent_verdicts:
@@ -26,6 +26,14 @@ evidence:
     type: REASONED_INFERENCE
     statement: A route-level linear falsifier should precede another expensive neural amendment.
     source: autoresearch/orchestrator-260827-post-v13/research.md
+  - id: PVD_E005
+    type: CONFIRMED_FACT
+    statement: Noise-aware feature41 improved signed-delta MAE by 0.388699% with CI lower above zero and 20/20 positive puzzles, but missed the frozen 0.5% Gate; point-absolute gain was 0.137444% with 13/20 positive puzzles.
+    source: /mnt/cunyuliu/reactflow_delta_post_v13_diagnostics/pv13d2_prediction_only/pv13d3_qualification.json
+  - id: PVD_E006
+    type: CONFIRMED_FACT
+    statement: Coherent signed-magnitude reconstruction worsened signed-delta MAE by 14.256766% with 0/20 positive puzzles despite a 1.518497% point-absolute gain.
+    source: /mnt/cunyuliu/reactflow_delta_post_v13_diagnostics/pv13d2_prediction_only/pv13d3_qualification.json
 
 decisions:
   - id: PVD_D001
@@ -40,19 +48,46 @@ decisions:
   - id: PVD_D004
     status: FROZEN
     decision: NEITHER_PASS_CLOSES_BOTH_ROUTES_WITHOUT_THRESHOLD_CHANGES
+  - id: PVD_D005
+    status: TERMINAL
+    decision: CLOSE_NOISE_AWARE_AND_SIGNED_MAGNITUDE_NEURAL_AMENDMENTS
+  - id: PVD_D006
+    status: FROZEN_NEXT_ROUTE
+    decision: RETAIN_ONLY_TASK_MATCHED_WT_PROFILE_SELF_SUPERVISED_PRETRAINING_WITH_FROM_SCRATCH_MATCHED_NULL
 
 phase_state:
   PV13D0: CONTRACT_FROZEN
   PV13D1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   PV13D2: COMPLETE_UNSCORED_MERGE_PASS
-  PV13D3: COMPLETE_SCORE_ONCE_AUTHORIZED
+  PV13D3: COMPLETE_SCORE_AND_ROUTE_QUALIFICATION_FINISHED
+  M6: WT_PROFILE_SELF_SUPERVISED_PRETRAINING_AMENDMENT_DRAFTING_ONLY
 
 outcome_access:
   partial_score_accessed: false
-  complete_diagnostic_score_accessed: false
+  complete_diagnostic_score_accessed: true
   new_external_outcome_accessed: false
 
 events:
+  - id: PV13D3_TERMINAL_ROUTE_QUALIFICATION
+    observed_at: '2026-08-27T02:15:00+08:00'
+    status: TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
+    score_artifact: /mnt/cunyuliu/reactflow_delta_post_v13_diagnostics/pv13d2_prediction_only/pv13d3_complete_score.json
+    qualification_artifact: /mnt/cunyuliu/reactflow_delta_post_v13_diagnostics/pv13d2_prediction_only/pv13d3_qualification.json
+    qualification_status: PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
+    noise_signed_relative_gain: 0.0038869916082692637
+    noise_signed_ci95: [0.000583219581527264, 0.0009028529513028682]
+    noise_signed_positive_puzzles: 20
+    noise_point_absolute_relative_gain: 0.0013744443894628843
+    noise_point_absolute_positive_puzzles: 13
+    coherent_signed_relative_gain: -0.142567656417662
+    coherent_signed_positive_puzzles: 0
+    coherent_point_absolute_relative_gain: 0.015184974596471782
+    coherent_point_absolute_positive_puzzles: 13
+    partial_score_accessed: false
+    external_outcome_accessed: false
+    selected_next_route: WT_PROFILE_SELF_SUPERVISED_PRETRAINING_ONLY
+    next_action: FREEZE_DISTINCT_WT_PROFILE_SELF_SUPERVISED_PRETRAINING_AMENDMENT
+
   - id: PV13D3_COMPLETE_SCORE_ONCE_AUTHORITY_OPEN
     observed_at: '2026-08-27T02:00:00+08:00'
     status: COMPLETE_MERGE_SCORE_ONCE_ONLY

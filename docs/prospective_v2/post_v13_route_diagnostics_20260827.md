@@ -49,3 +49,12 @@ If exactly one arm passes, it is the only capability allowed to seed a new model
 For the both-pass comparison, the four numeric margins are signed relative gain divided by its frozen minimum, point-absolute relative gain divided by its frozen minimum, signed positive-puzzle count divided by 14, and point-absolute positive-puzzle count divided by 14. The route margin is the minimum of these four values. The two CI-lower-bound checks are binary prerequisites and are not converted into a post-hoc numeric scale.
 
 No result from this diagnostic is SOTA, external replication, mechanism evidence or publication readiness.
+
+## Terminal result
+
+The complete 20-puzzle score selected `WT_PROFILE_SELF_SUPERVISED_PRETRAINING_ONLY` and closed both tested routes.
+
+- Noise-aware feature41 improved signed-delta MAE by 0.3887% with a positive 95% CI and 20/20 positive puzzles, but missed the frozen 0.5% practical threshold. Its point-absolute gain was 0.1374% with 13/20 positive puzzles, also below Gate.
+- Coherent signed-magnitude reconstruction improved point-absolute MAE by 1.5185%, but worsened signed-delta MAE by 14.2568% with 0/20 positive puzzles. The factorization therefore breaks the primary point estimand.
+
+Neither result authorizes a neural amendment of its family. The only route retained by the prospective decision rule is task-matched WT-profile self-supervised pretraining with an identical-architecture, identical-downstream-task from-scratch null. This conclusion cannot change V13 or establish a publication claim.
