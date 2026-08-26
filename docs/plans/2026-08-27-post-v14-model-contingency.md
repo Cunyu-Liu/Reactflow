@@ -63,11 +63,14 @@ These are `IDEA` records, not findings or authorized candidates.
 ### P1 — Puzzle-set meta-context operator
 
 - `IDEA`: encode the eight WT constructs belonging to one puzzle as a
-  permutation-equivariant set at every shared full-sequence coordinate. A
-  focal construct's parent-anchored increment may attend to outcome-blind V14
-  states from the other seven constructs at the mutation source and each
-  receiver coordinate. Metadata-only audit confirms all eight constructs in
-  every puzzle share length, design interval and target structure.
+  permutation-equivariant set at every shared full-sequence coordinate. For
+  each focal query, exclude the focal token from K/V and use exactly seven
+  outcome-blind non-focal V14 states plus one non-focal summary at the mutation
+  source and each receiver coordinate. The attention output contains no focal
+  query residual. Operator `POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5`
+  subtracts the same full block evaluated on a raw-zero non-focal reference.
+  Metadata-only audit confirms all eight constructs in every puzzle share
+  length, design interval and target structure.
 - `NEW_CAPABILITY`: cross-construct conditioning inside an unseen puzzle. This
   differs from V11/V13/V14, which use only the focal construct, and from generic
   structure message passing, which propagates positions inside one construct.
@@ -75,24 +78,46 @@ These are `IDEA` records, not findings or authorized candidates.
   the puzzle's structural regime and measurement difficulty that is not
   recoverable from one WT profile alone.
 - `PREDICTION`: the cross-construct candidate improves signed and point-absolute
-  metrics over an identical position-deranged full-attention set encoder, with
+  metrics over an identical position-deranged zero-preserving V5 encoder, with
   the largest gains on puzzles where V11–V14 residual transfer is heterogeneous.
 - `FALSIFIER`: the complete candidate-minus-position-deranged-null increment is
   below the existing 1–1.5% attribution margins, lacks a positive puzzle-level
-  CI, or agrees in fewer than 14/20 puzzles.
+  CI, or agrees in fewer than 14/20 puzzles. Before performance can be tested,
+  failure of exact raw-zero representation cancellation also falsifies V5.
 - `MATCHED_NULL`: identical inputs, parameters, initialization, optimization
-  and calibration. Both arms use eight legal attention tokens and trainable
-  Q/K/V projections; the null keeps the focal position fixed and circularly
-  shifts every non-focal position by the predeclared offset 17. Internal
-  attention-weight dropout is zero in both arms. No method ID, puzzle ID, held
-  outcome or target mask is an input to either arm.
+  and calibration. Both arms use seven non-focal individual K/V tokens plus one
+  non-focal summary and trainable Q/K/V projections; the focal token is query
+  only. The null keeps that query registered and circularly shifts every
+  non-focal stream by the predeclared offset 17 before building individual and
+  summary tokens. Internal attention-weight dropout is zero in both arms. No
+  method ID, puzzle ID, held outcome or target mask is an input to either arm.
+- `REPRESENTATION_PROTOCOL`: for each arm, construct a reference by zeroing all
+  seven non-focal hidden/reactivity/observed streams before learned projection
+  while reusing the real focal query elementwise. Actual and reference both
+  traverse individual/summary projection, attention, FFN and output norm with
+  the same dropout draw; RNG advances as one call. The returned state is
+  `F(q,V)-F(q,V0)`, so raw-zero non-focal inputs cancel exactly despite learned
+  biases, summary constants and query-only terms. Nonzero output proves
+  dependence, not utility.
 - `INITIALIZATION_PROTOCOL`: before point fitting, initialize only the new set
   operator with 200 epochs of outer-train masked-WT reconstruction. Candidate
   may use aligned non-focal WT profiles and the null uses the same profiles only
   at the fixed wrong-position coordinates; both use the same 40% masks,
   temporary decoder, puzzle order and optimization budget. The imported V14
-  encoder and zero-initialized point head remain frozen, and mutant outcomes
+  encoder and shared point head remain frozen, and mutant outcomes
   are unavailable to this stage.
+- `POINT_PROTOCOL`: the residual is the shared-head contrast
+  `h(base,cross)-h(base,0)` under one replayed dropout draw. Point epoch 0 is a
+  head-only warmup at `1e-3`; epochs 1–39 keep the head at `1e-3` and update the
+  context path at `3e-4`. The point objective remains method-balanced
+  signed-delta L1; frozen-point calibration remains puzzle-balanced CRPS.
+- `RETENTION_QUALIFICATION`: one outer-train-only diagnostic uses the same final
+  frozen decoder and fixed mask epoch `200` to compare initial,
+  post-pretraining and post-point context states. Candidate
+  `pretraining_established` and `retention_positive` are required; null values
+  are report-only. The diagnostic cannot tune or select the model.
+- `OBJECTIVE_BOUNDARY`: MGDA, absolute-delta auxiliaries and other objective
+  changes are deferred to a separate amendment; they are not part of P1.
 - `PRIMARY_RISK`: the eight designs may be conditionally redundant, and the set
   model may memorize outer-train target motifs rather than generalize to an
   unseen puzzle.
@@ -170,20 +195,40 @@ residual experiment.
 If P1 becomes eligible, its amendment must freeze before training:
 
 - one correctly aligned cross-construct candidate and one fixed
-  position-deranged full-attention matched null;
+  position-deranged zero-preserving V5 matched null; for every focal query both must use
+  seven non-focal individual K/V tokens plus one non-focal summary, exclude the
+  focal token from K/V and omit a focal-query attention residual;
+- operator `POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5`: the raw-zero
+  reference zeros all seven non-focal hidden/reactivity/observed streams before
+  learned projection, reuses the focal query exactly, and follows the same full
+  projection/attention/FFN/output-normalization path as actual input;
+- actual/reference cross passes replay one dropout draw, advance RNG as one
+  ordinary pass and return `F(q,V)-F(q,V0)`; deliberately nonzero learned biases
+  and arbitrary focal queries must still cancel exactly for raw-zero actual
+  input;
 - the same-fold V13 candidate seed-0 point as an immutable prediction anchor
   for both arms, selected here before V14 scoring rather than after observing a
   route result;
 - the same-fold V14 candidate seed-0 encoder as an immutable outcome-blind
   representation for both arms, used regardless of V14's eventual score;
-- a zero-initialized incremental point head so both arms replay the frozen V13
-  parent at `1e-7` before training;
+- one shared point head computing `h(base,cross)-h(base,0)` under exactly the
+  same dropout draw, so both arms replay the frozen V13 parent at `1e-7` before
+  training and zero cross cancels after arbitrary head updates;
 - one outer-train-only, 40%-mask, 200-epoch WT reconstruction stage with an
   exactly initialized 769-parameter temporary decoder; during this stage only
   the set mixer and decoder are trainable, and both arms must preserve parent
   replay at `1e-7` afterward;
-- the decoder is frozen and removed downstream; point fitting then trains only
-  the set mixer and incremental head;
+- the decoder is frozen and excluded from downstream prediction/calibration,
+  but retained for the fixed retention diagnostic; point epoch 0 trains only
+  the shared head at `1e-3`, followed by 39 epochs with head `1e-3` and context
+  `3e-4`, Adam weight decay zero and gradient clipping `5.0`;
+- the original method-balanced signed-delta L1 point objective and frozen-point
+  puzzle-balanced CRPS calibration objective; MGDA or any other objective change
+  requires a separate amendment;
+- one fixed outer-train-only epoch-200 retention diagnostic using the same final
+  frozen decoder across initial, post-pretraining and post-point snapshots;
+  candidate `pretraining_established` and `retention_positive` are qualification
+  Gates, while null retention is report-only;
 - the exact set membership derived from outcome-blind puzzle metadata;
 - no method-ID or puzzle-ID embeddings and no held target/error/mask access;
 - a single fixed architecture, parameter count, optimizer, epoch count and seed
@@ -195,17 +240,27 @@ If P1 becomes eligible, its amendment must freeze before training:
   exact PASS;
 - all current top-journal margins versus feature41, terminal historical parents
   and the matched null, with coverage, LOO and influence Gates unchanged;
+- a mechanical falsifier closing P1 if reference zeros are introduced after
+  projection, focal queries differ, the reference skips a layer, stochastic
+  draws differ, RNG advances twice or raw-zero cancellation is not exact;
 - an unconditional failure rule terminating cross-construct meta-context.
 
 ## 6. Adversarial review
 
 - `ALTERNATIVE_EXPLANATION`: P1 may exploit design-method composition instead
   of puzzle biology. `CONTROL`: method and puzzle identifiers are absent; the
-  nested null receives the same construct set and eight-token attention but
-  destroys only correct non-focal coordinate alignment.
+  nested null receives the same seven-individual-plus-summary non-focal K/V
+  support but destroys only correct coordinate alignment with shift 17.
 - `ALTERNATIVE_EXPLANATION`: P1 gains may be pure capacity. `CONTROL`: exact
   parameter, initialization, input, legal attention support and optimization
   matching, with only correct versus fixed wrong-position alignment changed.
+- `ALTERNATIVE_EXPLANATION`: the point head may ignore puzzle-set evidence and
+  relearn a focal/base residual, or the cross block may emit only learned/query
+  constants. `CONTROL`: the focal token is absent from K/V, no query residual is
+  added, the full raw-zero cross reference is subtracted under one stochastic
+  draw, and the same point head/dropout draw is subtracted at zero cross.
+  Candidate retention of the WT capability is a pre-score Gate. These controls
+  establish causal-path validity, not performance.
 - `ALTERNATIVE_EXPLANATION`: P2 may improve CRPS by moving the point.
   `CONTROL`: the median is an algebraic invariant and point arrays must replay
   exactly at `1e-7` before scoring.

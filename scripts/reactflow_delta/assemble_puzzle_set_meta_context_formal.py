@@ -18,7 +18,7 @@ from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
 from scripts.reactflow_delta.model_rescue_v9 import expected_absolute_delta
 
 
-SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_assembly.proposed.v1"
+SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_assembly.proposed.v2"
 FORMAL_PREDICTION_SCHEMA = (
     "reactflow_delta.puzzle_set_meta_context_formal_prediction.proposed.v1"
 )
@@ -31,6 +31,27 @@ EXPECTED_PRETRAINING_EPOCHS = 200
 EXPECTED_POINT_EPOCHS = 40
 EXPECTED_CALIBRATION_EPOCHS = 40
 DISTRIBUTION_NAMES = ("candidate", "null")
+FORMAL_PREDICTION_FIELDS = {
+    "schema_version",
+    "keys",
+    "biological_scoring_key",
+    "outer_fold",
+    "seed",
+    "assembled_seed_count",
+    "registered_status",
+    "feature41_point",
+    "parent_point",
+    "candidate_point",
+    "null_point",
+    "candidate_weights",
+    "candidate_locations",
+    "candidate_scales",
+    "candidate_expected_absolute_delta",
+    "null_weights",
+    "null_locations",
+    "null_scales",
+    "null_expected_absolute_delta",
+}
 
 _REQUIRED_MERGE_INTEGRITY_TRUE = {
     "complete_fold_seed_universe",
@@ -38,14 +59,21 @@ _REQUIRED_MERGE_INTEGRITY_TRUE = {
     "prediction_only_schema",
     "outcome_blind_puzzle_set_inputs_all_runs",
     "exact_parameter_and_initialization_match_all_runs",
-    "candidate_full_cross_construct_attention_all_runs",
-    "null_position_deranged_full_attention_all_runs",
+    "candidate_nonfocal_only_cross_attention_all_runs",
+    "null_position_deranged_nonfocal_cross_attention_all_runs",
     "candidate_null_equal_attention_support_all_runs",
     "attention_weight_dropout_disabled_all_runs",
     "puzzle_balanced_training_all_runs",
-    "position_aligned_cross_construct_attention_all_runs",
-    "leave_one_construct_alignment_statistics_all_runs",
-    "matched_null_position_deranged_alignment_statistics_all_runs",
+    "position_aligned_nonfocal_cross_values_all_runs",
+    "nonfocal_summary_alignment_statistics_all_runs",
+    "matched_null_position_deranged_summary_statistics_all_runs",
+    "nonfocal_only_cross_values_all_runs",
+    "focal_excluded_from_cross_kv_all_runs",
+    "eight_token_cross_support_all_runs",
+    "paired_point_head_reference_cancellation_all_runs",
+    "zero_cross_exact_parent_replay_all_runs",
+    "paired_cross_block_reference_cancellation_all_runs",
+    "zero_nonfocal_exact_cross_replay_all_runs",
     "fixed_position_derangement_shift_17_all_runs",
     "outer_train_wt_only_puzzle_set_pretraining_all_runs",
     "held_puzzle_excluded_from_pretraining_all_runs",
@@ -58,6 +86,9 @@ _REQUIRED_MERGE_INTEGRITY_TRUE = {
     "frozen_v13_point_parent_all_runs",
     "frozen_v14_context_encoder_all_runs",
     "parent_replay_before_and_after_pretraining_all_runs",
+    "point_head_only_warmup_all_runs",
+    "point_discriminative_learning_rates_all_runs",
+    "pretraining_capability_retention_diagnostic_complete_all_runs",
     "point_frozen_during_calibration_all_runs",
     "v10_residual_family_all_runs",
     "puzzle_balanced_residual_calibration_all_runs",
@@ -183,12 +214,13 @@ def _validate_cross_seed_alignment(
     return keys
 
 
-def assemble_fold(
-    rows: list[dict[str, Any]], *, fold: int, out_dir: Path
-) -> dict[str, Any]:
-    """Assemble one fold from all five seeds, preserving the frozen parents."""
+def assemble_fold_prediction_arrays(
+    sources: list[dict[str, np.ndarray]], *, fold: int
+) -> dict[str, np.ndarray]:
+    """Purely assemble one formal fold from ordered seed prediction arrays."""
 
-    sources = _ordered_sources(rows, fold=fold)
+    if len(sources) != len(EXPECTED_SEEDS):
+        raise ValueError(f"formal puzzle-set fold {fold} requires five source arrays")
     keys = _validate_cross_seed_alignment(sources, fold=fold)
     n_rows = len(keys)
     output: dict[str, np.ndarray] = {
@@ -272,6 +304,22 @@ def assemble_fold(
         output[f"{name}_expected_absolute_delta"] = _expected_absolute(
             weights, locations, scales
         )
+
+    if set(output) != FORMAL_PREDICTION_FIELDS:
+        raise RuntimeError(
+            "formal puzzle-set array assembly changed its field universe"
+        )
+    return output
+
+
+def assemble_fold(
+    rows: list[dict[str, Any]], *, fold: int, out_dir: Path
+) -> dict[str, Any]:
+    """Assemble one fold from all five seeds, preserving the frozen parents."""
+
+    sources = _ordered_sources(rows, fold=fold)
+    output = assemble_fold_prediction_arrays(sources, fold=fold)
+    n_rows = len(output["keys"])
 
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"puzzle_set_formal_predictions_fold{fold}_seeds0_4.npz"

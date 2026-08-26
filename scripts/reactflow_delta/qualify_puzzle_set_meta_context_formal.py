@@ -21,7 +21,7 @@ from scripts.reactflow_delta.score_puzzle_set_meta_context_formal import (
 )
 
 
-SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_qualification.proposed.v1"
+SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_qualification.proposed.v2"
 
 
 def _complete_seed_rows(individual: dict[str, Any], seed: int) -> list[dict[str, Any]]:
@@ -50,6 +50,8 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
         and scores.get("target_profile_identity") == "EXACT_PUZZLE_METHOD_MUTATION"
         and scores.get("v13_parent_and_feature41_replay_at_5e_7") is True
         and scores.get("feature41_reference_fixed_across_seeds") is True
+        and scores.get("formal_assembly_reconstructed_exactly_from_merged_sources")
+        is True
         and scores.get("partial_fold_scores_inspected") is False
         and scores.get("external_outcome_accessed") is False
         and scores.get("model_or_threshold_selection_performed") is False
@@ -67,6 +69,7 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
         "schema_version": SCREEN_SCORE_SCHEMA,
         "status": "PUZZLE_SET_M3_COMPLETE_SCORE_PASS",
         "scores": mixture_rows,
+        "context_retention_summary": scores.get("context_retention_summary", {}),
     }
     mixture_result = qualify_screen(screen_equivalent)
 
@@ -104,6 +107,7 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
         **mixture_result["gates"],
         "screen_prerequisite_exact_pass": True,
         "individual_seed_prediction_integrity": individual_integrity,
+        "formal_assembly_exactly_linked_to_merged_sources": True,
         "signed_positive_individual_seeds_ge_4": signed_positive_seeds >= 4,
         "task_crps_positive_individual_seeds_ge_4": crps_positive_seeds >= 4,
     }

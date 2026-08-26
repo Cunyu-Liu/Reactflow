@@ -32,7 +32,7 @@ from scripts.reactflow_delta.score_model_rescue_v9 import TIC2A_MERGED_SCHEMA
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-SCHEMA = "reactflow_delta.puzzle_set_meta_context_score.proposed.v1"
+SCHEMA = "reactflow_delta.puzzle_set_meta_context_score.proposed.v2"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_PHASE = "P1M3"
 EXPECTED_SCORE_TOKEN = "PUZZLE_SET_COMPLETE_MERGE_SCORE_ONCE_ONLY"
@@ -71,14 +71,21 @@ def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
         "prediction_only_schema",
         "outcome_blind_puzzle_set_inputs_all_runs",
         "exact_parameter_and_initialization_match_all_runs",
-        "candidate_full_cross_construct_attention_all_runs",
-        "null_position_deranged_full_attention_all_runs",
+        "candidate_nonfocal_only_cross_attention_all_runs",
+        "null_position_deranged_nonfocal_cross_attention_all_runs",
         "candidate_null_equal_attention_support_all_runs",
         "attention_weight_dropout_disabled_all_runs",
         "puzzle_balanced_training_all_runs",
-        "position_aligned_cross_construct_attention_all_runs",
-        "leave_one_construct_alignment_statistics_all_runs",
-        "matched_null_position_deranged_alignment_statistics_all_runs",
+        "position_aligned_nonfocal_cross_values_all_runs",
+        "nonfocal_summary_alignment_statistics_all_runs",
+        "matched_null_position_deranged_summary_statistics_all_runs",
+        "nonfocal_only_cross_values_all_runs",
+        "focal_excluded_from_cross_kv_all_runs",
+        "eight_token_cross_support_all_runs",
+        "paired_cross_block_reference_cancellation_all_runs",
+        "zero_nonfocal_exact_cross_replay_all_runs",
+        "paired_point_head_reference_cancellation_all_runs",
+        "zero_cross_exact_parent_replay_all_runs",
         "fixed_position_derangement_shift_17_all_runs",
         "outer_train_wt_only_puzzle_set_pretraining_all_runs",
         "held_puzzle_excluded_from_pretraining_all_runs",
@@ -91,6 +98,9 @@ def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
         "frozen_v13_point_parent_all_runs",
         "frozen_v14_context_encoder_all_runs",
         "parent_replay_before_and_after_pretraining_all_runs",
+        "point_head_only_warmup_all_runs",
+        "point_discriminative_learning_rates_all_runs",
+        "pretraining_capability_retention_diagnostic_complete_all_runs",
         "point_frozen_during_calibration_all_runs",
         "v10_residual_family_all_runs",
         "puzzle_balanced_residual_calibration_all_runs",
@@ -363,6 +373,7 @@ def score_complete(
         "phase": EXPECTED_PHASE,
         "status": "PUZZLE_SET_M3_COMPLETE_SCORE_PASS",
         "scores": rows,
+        "context_retention_summary": merged["context_retention_summary"],
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
         "target_join_after_complete_merge": True,
         "v13_parent_and_feature41_replay_at_5e_7": True,

@@ -29,7 +29,7 @@ FULL_CROSS_CONSTRUCT = "FULL_CROSS_CONSTRUCT"
 POSITION_DERANGED_NULL = "POSITION_DERANGED_NULL"
 POSITION_DERANGEMENT_SHIFT = 17
 CONNECTIVITY_MODES = {FULL_CROSS_CONSTRUCT, POSITION_DERANGED_NULL}
-POSITION_ALIGNED_OPERATOR = "POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V3"
+POSITION_ALIGNED_OPERATOR = "POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5"
 
 EXPECTED_CONSTRUCTS_PER_PUZZLE = 8
 CONTEXT_WIDTH = 256
@@ -41,6 +41,10 @@ POINT_HEAD_WIDTH = 384
 DROPOUT = 0.1
 EXPECTED_TOTAL_PARAMETERS = 6_171_697
 EXPECTED_TRAINABLE_PARAMETERS = 1_404_417
+POINT_HEAD_WARMUP_EPOCHS = 1
+POINT_HEAD_LR = 1e-3
+POINT_CONTEXT_LR = 3e-4
+POINT_GRADIENT_CLIP = 5.0
 
 
 class OutcomeBlindWTEncoder(nn.Module):
@@ -222,81 +226,151 @@ class PuzzleSetMetaContext(nn.Module):
         if hidden.shape[0] == 0:
             raise ValueError("puzzle-set construct cannot be empty")
 
-    def align_construct_tokens(
+    def project_individual_construct_tokens(
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
         construct_reactivity: Sequence[torch.Tensor],
     ) -> torch.Tensor:
+        """Project eight constructs without putting non-focal data in a query.
+
+        Cross-construct statistics are represented by the separate summary token
+        below.  Keeping each individual token self-only makes the focal query
+        identical in the aligned candidate and position-deranged null.
+        """
+
         if (
             len(construct_hidden) != EXPECTED_CONSTRUCTS_PER_PUZZLE
             or len(construct_observed) != EXPECTED_CONSTRUCTS_PER_PUZZLE
             or len(construct_reactivity) != EXPECTED_CONSTRUCTS_PER_PUZZLE
         ):
-            raise ValueError("puzzle-set context requires exactly eight constructs")
+            raise ValueError("individual projection requires exactly eight constructs")
         lengths = {int(hidden.shape[0]) for hidden in construct_hidden}
         if len(lengths) != 1:
             raise ValueError("puzzle-set constructs do not share one coordinate frame")
-        aligned = []
+        projected_inputs = []
+        individual_statistics = []
         for hidden, observed, reactivity in zip(
             construct_hidden, construct_observed, construct_reactivity
         ):
             self._validate_construct(hidden, observed)
             if reactivity.shape != observed.shape:
                 raise ValueError("puzzle-set WT reactivity is misaligned")
-            aligned.append(
+            finite_observed = observed & torch.isfinite(reactivity)
+            safe_reactivity = torch.where(
+                finite_observed, reactivity, torch.zeros_like(reactivity)
+            )
+            projected_inputs.append(
                 torch.cat([hidden, observed.to(hidden.dtype)[:, None]], dim=-1)
             )
-        projected = self.construct_projection(torch.stack(aligned, dim=0))
-        statistics = self.construct_alignment_statistics(
-            construct_reactivity, construct_observed
+            individual_statistics.append(
+                torch.stack(
+                    [
+                        safe_reactivity,
+                        torch.zeros_like(reactivity),
+                        finite_observed.to(reactivity.dtype),
+                        torch.zeros_like(reactivity),
+                    ],
+                    dim=-1,
+                )
+            )
+        return self.construct_projection(torch.stack(projected_inputs, dim=0)) + (
+            self.alignment_projection(torch.stack(individual_statistics, dim=0))
         )
-        return projected + self.alignment_projection(statistics)
 
-    def construct_alignment_statistics(
+    def nonfocal_summary_token(
         self,
-        construct_reactivity: Sequence[torch.Tensor],
+        individual_tokens: torch.Tensor,
         construct_observed: Sequence[torch.Tensor],
+        construct_reactivity: Sequence[torch.Tensor],
+        focal_construct_index: int,
     ) -> torch.Tensor:
-        """Return mean, spread, support and focal deviation at each coordinate.
-
-        Every focal query uses the other seven supplied constructs. The caller
-        gives the candidate correctly aligned inputs and gives the matched null
-        the same eight-token set with every non-focal construct position
-        deranged by the frozen circular shift.
-        """
+        """Pool the seven non-focal tokens without a learned summary parameter."""
 
         if (
-            len(construct_reactivity) != EXPECTED_CONSTRUCTS_PER_PUZZLE
-            or len(construct_observed) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+            individual_tokens.ndim != 3
+            or individual_tokens.shape[0] != EXPECTED_CONSTRUCTS_PER_PUZZLE
+            or individual_tokens.shape[2] != CONTEXT_WIDTH
         ):
-            raise ValueError("alignment statistics require exactly eight constructs")
-        values = torch.stack(list(construct_reactivity), dim=0)
-        observed = torch.stack(list(construct_observed), dim=0).bool()
-        if values.ndim != 2 or observed.shape != values.shape:
-            raise ValueError("alignment statistics have incompatible coordinates")
-        finite = torch.isfinite(values)
-        observed = observed & finite
+            raise ValueError("individual puzzle-set tokens have invalid shape")
+        if (
+            len(construct_observed) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+            or len(construct_reactivity) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+        ):
+            raise ValueError("nonfocal summary requires exactly eight constructs")
+        if not 0 <= int(focal_construct_index) < EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError("nonfocal summary focal construct is outside the set")
+        nonfocal = [
+            index
+            for index in range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
+            if index != int(focal_construct_index)
+        ]
+        pooled = individual_tokens[nonfocal].mean(dim=0)
+        values = torch.stack([construct_reactivity[index] for index in nonfocal], dim=0)
+        observed = torch.stack(
+            [construct_observed[index] for index in nonfocal], dim=0
+        ).bool()
+        observed = observed & torch.isfinite(values)
         safe = torch.where(observed, values, torch.zeros_like(values))
-        counts = observed.sum(dim=0, keepdim=True) - observed.to(torch.int64)
-        sums = safe.sum(dim=0, keepdim=True) - safe
-        squared = safe.square().sum(dim=0, keepdim=True) - safe.square()
-        supported = counts > 0
+        counts = observed.sum(dim=0)
         denominator = counts.clamp_min(1).to(values.dtype)
-        mean = torch.where(supported, sums / denominator, torch.zeros_like(values))
+        supported = counts > 0
+        mean = torch.where(
+            supported, safe.sum(dim=0) / denominator, torch.zeros_like(denominator)
+        )
         variance = torch.where(
             supported,
-            squared / denominator - mean.square(),
-            torch.zeros_like(values),
+            safe.square().sum(dim=0) / denominator - mean.square(),
+            torch.zeros_like(mean),
         ).clamp_min(0.0)
-        spread = torch.sqrt(variance)
-        support = counts.to(values.dtype) / float(EXPECTED_CONSTRUCTS_PER_PUZZLE - 1)
-        deviation = torch.where(
-            observed & supported,
-            safe - mean,
-            torch.zeros_like(values),
+        statistics = torch.stack(
+            [
+                mean,
+                torch.sqrt(variance),
+                counts.to(values.dtype) / float(EXPECTED_CONSTRUCTS_PER_PUZZLE - 1),
+                torch.zeros_like(mean),
+            ],
+            dim=-1,
         )
-        return torch.stack([mean, spread, support, deviation], dim=-1)
+        return pooled + self.alignment_projection(statistics)
+
+    def zero_nonfocal_reference_tokens(self, hidden: torch.Tensor) -> torch.Tensor:
+        """Build the projected seven-plus-one reference from raw zero inputs.
+
+        The reference is defined before either learned projection.  It therefore
+        contains the same learned biases as the observed path, which are removed
+        only after both paths traverse the complete attention/FFN/norm block.
+        """
+
+        if hidden.ndim != 2 or hidden.shape[1] != CONTEXT_WIDTH:
+            raise ValueError("zero-nonfocal reference has invalid hidden shape")
+        length = int(hidden.shape[0])
+        individual_input = torch.zeros(
+            length,
+            CONTEXT_WIDTH + 1,
+            dtype=hidden.dtype,
+            device=hidden.device,
+        )
+        alignment_input = torch.zeros(
+            length,
+            ALIGNMENT_STAT_WIDTH,
+            dtype=hidden.dtype,
+            device=hidden.device,
+        )
+        individual = self.construct_projection(individual_input) + (
+            self.alignment_projection(alignment_input)
+        )
+        individual_tokens = individual[:, None, :].expand(-1, 7, -1)
+        summary = individual_tokens.mean(dim=1) + self.alignment_projection(
+            alignment_input
+        )
+        return torch.cat(
+            [
+                individual_tokens,
+                summary[:, None, :],
+            ],
+            dim=1,
+        )
 
     @staticmethod
     def _position_deranged_inputs(
@@ -315,18 +389,85 @@ class PuzzleSetMetaContext(nn.Module):
             for index, value in enumerate(values)
         ]
 
+    def _cross_block(
+        self, query: torch.Tensor, key_value: torch.Tensor
+    ) -> torch.Tensor:
+        normalized_query = self.attention_norm(query)
+        normalized_key_value = self.attention_norm(key_value)
+        attended, _weights = self.set_attention(
+            normalized_query,
+            normalized_key_value,
+            normalized_key_value,
+            need_weights=False,
+        )
+        cross = attended + self.residual_dropout(self.ffn(self.ffn_norm(attended)))
+        return self.output_norm(cross)
+
+    def paired_cross_block(
+        self,
+        query: torch.Tensor,
+        actual_key_value: torch.Tensor,
+        reference_key_value: torch.Tensor,
+    ) -> torch.Tensor:
+        """Remove every query-only or learned-constant cross contribution.
+
+        Both paths reuse the identical focal query and, in training mode, the
+        identical stochastic draw.  RNG advances as one cross-block forward.
+        Consequently raw-zero non-focal inputs yield exact zero cross evidence,
+        regardless of learned projection, attention, FFN or normalization bias.
+        """
+
+        if actual_key_value.shape != reference_key_value.shape:
+            raise ValueError("paired cross-block K/V tensors have different shapes")
+        if query.ndim != 3 or actual_key_value.ndim != 3:
+            raise ValueError("paired cross-block tensors must be batched sequences")
+        if query.shape[0] != actual_key_value.shape[0] or query.shape[2] != (
+            actual_key_value.shape[2]
+        ):
+            raise ValueError("paired cross-block query and K/V are misaligned")
+        if not self.training:
+            return self._cross_block(query, actual_key_value) - self._cross_block(
+                query, reference_key_value
+            )
+
+        cpu_before = torch.get_rng_state()
+        cuda_before = (
+            torch.cuda.get_rng_state(query.device)
+            if query.device.type == "cuda"
+            else None
+        )
+        observed = self._cross_block(query, actual_key_value)
+        cpu_after = torch.get_rng_state()
+        cuda_after = (
+            torch.cuda.get_rng_state(query.device)
+            if query.device.type == "cuda"
+            else None
+        )
+        torch.set_rng_state(cpu_before)
+        if cuda_before is not None:
+            torch.cuda.set_rng_state(cuda_before, query.device)
+        try:
+            baseline = self._cross_block(query, reference_key_value)
+        finally:
+            torch.set_rng_state(cpu_after)
+            if cuda_after is not None:
+                torch.cuda.set_rng_state(cuda_after, query.device)
+        return observed - baseline
+
     def mix_construct_tokens(
         self,
         construct_hidden: Sequence[torch.Tensor],
         construct_observed: Sequence[torch.Tensor],
         construct_reactivity: Sequence[torch.Tensor],
     ) -> torch.Tensor:
-        # Every focal construct is one query over eight construct tokens. The
-        # candidate keys/values share the registered coordinate. The null keeps
-        # the focal token fixed while circularly shifting every non-focal input,
-        # preserving the same attention support and effective Q/K/V capacity.
+        # Every focal query attends to seven non-focal individual tokens and one
+        # parameter-free non-focal summary. The focal token is never a K/V. The
+        # candidate uses registered coordinates; the null keeps the query fixed
+        # and circularly shifts all seven non-focal inputs, preserving identical
+        # attention support, parameterization and compute.
         query_batches = []
         key_value_batches = []
+        reference_key_value_batches = []
         for focal_index in range(EXPECTED_CONSTRUCTS_PER_PUZZLE):
             if self.connectivity == POSITION_DERANGED_NULL:
                 hidden = self._position_deranged_inputs(construct_hidden, focal_index)
@@ -340,28 +481,71 @@ class PuzzleSetMetaContext(nn.Module):
                 hidden = list(construct_hidden)
                 observed = list(construct_observed)
                 reactivity = list(construct_reactivity)
-            tokens = self.align_construct_tokens(hidden, observed, reactivity).permute(
-                1, 0, 2
+            individual = self.project_individual_construct_tokens(
+                hidden, observed, reactivity
             )
-            query_batches.append(tokens[:, focal_index : focal_index + 1])
-            key_value_batches.append(tokens)
+            summary = self.nonfocal_summary_token(
+                individual, observed, reactivity, focal_index
+            )
+            nonfocal = [
+                index
+                for index in range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
+                if index != focal_index
+            ]
+            query_batches.append(individual[focal_index][:, None, :])
+            key_value_batches.append(
+                torch.cat(
+                    [individual[nonfocal].permute(1, 0, 2), summary[:, None, :]],
+                    dim=1,
+                )
+            )
+            reference_key_value_batches.append(
+                self.zero_nonfocal_reference_tokens(hidden[focal_index])
+            )
 
         query = torch.cat(query_batches, dim=0)
         key_value = torch.cat(key_value_batches, dim=0)
-        normalized_query = self.attention_norm(query)
-        normalized_key_value = self.attention_norm(key_value)
-        attended, _weights = self.set_attention(
-            normalized_query,
-            normalized_key_value,
-            normalized_key_value,
-            need_weights=False,
-        )
-        query = query + self.residual_dropout(attended)
-        query = query + self.residual_dropout(self.ffn(self.ffn_norm(query)))
+        reference_key_value = torch.cat(reference_key_value_batches, dim=0)
+        cross = self.paired_cross_block(query, key_value, reference_key_value)
         length = int(construct_hidden[0].shape[0])
-        return self.output_norm(query).reshape(
-            EXPECTED_CONSTRUCTS_PER_PUZZLE, length, CONTEXT_WIDTH
+        return cross.reshape(EXPECTED_CONSTRUCTS_PER_PUZZLE, length, CONTEXT_WIDTH)
+
+    def paired_point_head(
+        self, actual: torch.Tensor, reference: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Evaluate actual/reference with one shared dropout draw.
+
+        The RNG is advanced exactly as one point-head forward. This makes a
+        zero-cross reference cancel base-only behavior exactly in train mode.
+        """
+
+        if actual.shape != reference.shape:
+            raise ValueError("paired point-head inputs have different shapes")
+        if not self.training:
+            return self.point_head(actual), self.point_head(reference)
+        cpu_before = torch.get_rng_state()
+        cuda_before = (
+            torch.cuda.get_rng_state(actual.device)
+            if actual.device.type == "cuda"
+            else None
         )
+        observed = self.point_head(actual)
+        cpu_after = torch.get_rng_state()
+        cuda_after = (
+            torch.cuda.get_rng_state(actual.device)
+            if actual.device.type == "cuda"
+            else None
+        )
+        torch.set_rng_state(cpu_before)
+        if cuda_before is not None:
+            torch.cuda.set_rng_state(cuda_before, actual.device)
+        try:
+            baseline = self.point_head(reference)
+        finally:
+            torch.set_rng_state(cpu_after)
+            if cuda_after is not None:
+                torch.cuda.set_rng_state(cuda_after, actual.device)
+        return observed, baseline
 
     def forward(
         self,
@@ -433,9 +617,11 @@ class PuzzleSetMetaContext(nn.Module):
         focal = mixed[int(focal_construct_index)]
         source = focal[edit_index][:, None, :].expand(*expected, -1)
         receiver = focal[None, :, :].expand(expected[0], -1, -1)
-        residual = self.point_head(
-            torch.cat([base_point_features, source, receiver], dim=-1)
-        ).squeeze(-1)
+        cross = torch.cat([source, receiver], dim=-1)
+        actual = torch.cat([base_point_features, cross], dim=-1)
+        reference = torch.cat([base_point_features, torch.zeros_like(cross)], dim=-1)
+        observed, baseline = self.paired_point_head(actual, reference)
+        residual = (observed - baseline).squeeze(-1)
         point = (parent_point + residual).masked_fill(~prediction_mask, 0.0)
         return point, residual
 
@@ -718,8 +904,14 @@ def fit_puzzle_set_point_model(
     *,
     epochs: int,
     seed: int,
-) -> list[float]:
-    """Visit every puzzle once per epoch under an exactly balanced objective."""
+) -> dict[str, object]:
+    """Fit the paired point residual without overwriting cross pretraining.
+
+    Epoch zero updates only the point head. The remaining epochs keep the head
+    at its original learning rate while the context layers inherit the exact
+    masked-WT pretraining learning rate. Target exposure and optimizer-step
+    counts remain unchanged.
+    """
 
     if not puzzle_batches:
         raise ValueError("puzzle-set point training requires outer-train puzzles")
@@ -728,26 +920,103 @@ def fit_puzzle_set_point_model(
     torch.manual_seed(int(seed) + 1_500_000)
     model.train()
     model.encoder.eval()
-    trainable = [
-        parameter for parameter in model.parameters() if parameter.requires_grad
+    context_named = [
+        (name, parameter)
+        for name, parameter in model.meta_context.named_parameters()
+        if not name.startswith("point_head.")
     ]
-    if not trainable or any(
-        parameter.requires_grad for parameter in model.encoder.parameters()
+    context_parameters = [parameter for _name, parameter in context_named]
+    head_parameters = list(model.meta_context.point_head.parameters())
+    if (
+        not context_parameters
+        or not head_parameters
+        or any(not parameter.requires_grad for parameter in context_parameters)
+        or any(not parameter.requires_grad for parameter in head_parameters)
+        or any(parameter.requires_grad for parameter in model.encoder.parameters())
     ):
         raise RuntimeError("puzzle-set trainable parameter boundary changed")
-    optimizer = torch.optim.Adam(trainable, lr=1e-3, weight_decay=0.0)
+    context_before_warmup = {
+        name: parameter.detach().clone() for name, parameter in context_named
+    }
+    for parameter in context_parameters:
+        parameter.requires_grad_(False)
+        parameter.grad = None
+    optimizer = torch.optim.Adam(
+        [
+            {"params": head_parameters, "lr": POINT_HEAD_LR},
+            {"params": context_parameters, "lr": POINT_CONTEXT_LR},
+        ],
+        weight_decay=0.0,
+    )
     history: list[float] = []
-    for epoch in range(int(epochs)):
-        losses = []
-        for index in _puzzle_order(len(puzzle_batches), seed, epoch):
-            optimizer.zero_grad()
-            loss = puzzle_balanced_point_loss(model, puzzle_batches[index])
-            loss.backward()
-            _finite_gradients(model)
-            torch.nn.utils.clip_grad_norm_(trainable, 5.0)
-            optimizer.step()
-            losses.append(float(loss.detach().cpu()))
-        history.append(float(np.mean(losses)))
+    optimizer_steps = 0
+    head_update_steps = 0
+    context_update_steps = 0
+    warmup_context_unchanged = False
+    try:
+        for epoch in range(int(epochs)):
+            if epoch == POINT_HEAD_WARMUP_EPOCHS:
+                warmup_context_unchanged = all(
+                    torch.equal(context_before_warmup[name], parameter.detach())
+                    for name, parameter in context_named
+                )
+                if not warmup_context_unchanged:
+                    raise RuntimeError(
+                        "puzzle-set point warmup changed frozen context layers"
+                    )
+                for parameter in context_parameters:
+                    parameter.requires_grad_(True)
+            losses = []
+            for index in _puzzle_order(len(puzzle_batches), seed, epoch):
+                optimizer.zero_grad(set_to_none=True)
+                loss = puzzle_balanced_point_loss(model, puzzle_batches[index])
+                loss.backward()
+                _finite_gradients(model)
+                joint = epoch >= POINT_HEAD_WARMUP_EPOCHS
+                if not joint and any(
+                    parameter.grad is not None for parameter in context_parameters
+                ):
+                    raise RuntimeError("puzzle-set warmup produced a context gradient")
+                active_parameters = head_parameters + (
+                    context_parameters if joint else []
+                )
+                torch.nn.utils.clip_grad_norm_(active_parameters, POINT_GRADIENT_CLIP)
+                optimizer.step()
+                optimizer_steps += 1
+                head_update_steps += 1
+                context_update_steps += int(joint)
+                losses.append(float(loss.detach().cpu()))
+            history.append(float(np.mean(losses)))
+        if not warmup_context_unchanged:
+            warmup_context_unchanged = all(
+                torch.equal(context_before_warmup[name], parameter.detach())
+                for name, parameter in context_named
+            )
+    finally:
+        for parameter in context_parameters:
+            parameter.requires_grad_(True)
     if len(history) != epochs or not np.isfinite(history).all():
         raise RuntimeError("puzzle-set point history is incomplete or nonfinite")
-    return history
+    expected_steps = int(epochs) * len(puzzle_batches)
+    expected_context_steps = max(int(epochs) - POINT_HEAD_WARMUP_EPOCHS, 0) * len(
+        puzzle_batches
+    )
+    if (
+        optimizer_steps != expected_steps
+        or head_update_steps != expected_steps
+        or context_update_steps != expected_context_steps
+    ):
+        raise RuntimeError("puzzle-set point update accounting changed")
+    return {
+        "history": history,
+        "optimizer_steps": optimizer_steps,
+        "head_update_steps": head_update_steps,
+        "context_update_steps": context_update_steps,
+        "target_exposures_per_available_cell": int(epochs),
+        "head_only_warmup_epochs": POINT_HEAD_WARMUP_EPOCHS,
+        "head_learning_rate": POINT_HEAD_LR,
+        "context_learning_rate": POINT_CONTEXT_LR,
+        "gradient_clip": POINT_GRADIENT_CLIP,
+        "warmup_context_unchanged": warmup_context_unchanged,
+        "best_epoch_selection_performed": False,
+    }

@@ -62,6 +62,10 @@ from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
     fit_puzzle_set_wt_pretraining,
     make_exact_decoder_pair,
 )
+from scripts.reactflow_delta.puzzle_set_meta_context_retention import (
+    evaluate_context_retention,
+    snapshot_context_for_retention,
+)
 from scripts.reactflow_delta.run_model_rescue_v11 import (
     _feature41_matrix,
     _fold_sources,
@@ -73,7 +77,7 @@ from scripts.reactflow_delta.run_model_rescue_v9 import _read_json
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v8"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v9"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
 RUNNABLE_PHASES = {"P1M2", "P1M3", "P1M4"}
@@ -435,6 +439,10 @@ def run_prepared_fold(
         v14_point_state=prepared["v14_point_state"],
         device=device,
     )
+    initial_context_snapshots = {
+        "candidate": snapshot_context_for_retention(candidate),
+        "null": snapshot_context_for_retention(null),
+    }
     initial_replay = {
         "candidate": _initial_parent_replay_max_difference(
             candidate, prepared["training_batches"]
@@ -479,6 +487,10 @@ def run_prepared_fold(
     }
     if max(post_pretraining_replay.values()) > 1e-7:
         raise RuntimeError("puzzle-set WT pretraining changed V13 parent replay")
+    post_pretraining_context_snapshots = {
+        "candidate": snapshot_context_for_retention(candidate),
+        "null": snapshot_context_for_retention(null),
+    }
     torch.save(candidate_decoder.state_dict(), candidate_decoder_checkpoint)
     torch.save(null_decoder.state_dict(), null_decoder_checkpoint)
     point_parameter_counts = {
@@ -489,18 +501,46 @@ def run_prepared_fold(
         "candidate": parameter_count(candidate, trainable_only=True),
         "null": parameter_count(null, trainable_only=True),
     }
-    candidate_history = fit_puzzle_set_point_model(
+    candidate_point_training = fit_puzzle_set_point_model(
         candidate,
         prepared["training_batches"],
         epochs=point_epochs,
         seed=seed,
     )
-    null_history = fit_puzzle_set_point_model(
+    null_point_training = fit_puzzle_set_point_model(
         null,
         prepared["training_batches"],
         epochs=point_epochs,
         seed=seed,
     )
+    context_retention_diagnostics = {
+        "candidate": evaluate_context_retention(
+            arm="candidate",
+            post_point_model=candidate,
+            final_frozen_decoder=candidate_decoder,
+            initial_context_snapshot=initial_context_snapshots["candidate"],
+            post_pretraining_context_snapshot=(
+                post_pretraining_context_snapshots["candidate"]
+            ),
+            puzzle_batches=prepared["pretraining_batches"],
+            held_puzzle=str(held_puzzle),
+            seed=seed,
+            training_epochs=pretraining_epochs,
+        ),
+        "null": evaluate_context_retention(
+            arm="null",
+            post_point_model=null,
+            final_frozen_decoder=null_decoder,
+            initial_context_snapshot=initial_context_snapshots["null"],
+            post_pretraining_context_snapshot=post_pretraining_context_snapshots[
+                "null"
+            ],
+            puzzle_batches=prepared["pretraining_batches"],
+            held_puzzle=str(held_puzzle),
+            seed=seed,
+            training_epochs=pretraining_epochs,
+        ),
+    }
     torch.save(candidate.state_dict(), candidate_point_checkpoint)
     torch.save(null.state_dict(), null_point_checkpoint)
     residual = fit_residual_pair(
@@ -579,8 +619,8 @@ def run_prepared_fold(
         "training_histories": {
             "candidate_pretraining": candidate_pretraining["history"],
             "null_pretraining": null_pretraining["history"],
-            "candidate_point": candidate_history,
-            "null_point": null_history,
+            "candidate_point": candidate_point_training["history"],
+            "null_point": null_point_training["history"],
             "candidate_residual": residual["histories"]["candidate"],
             "null_residual": residual["histories"]["null"],
         },
@@ -608,6 +648,19 @@ def run_prepared_fold(
                 if name != "history"
             },
         },
+        "point_training_summaries": {
+            "candidate": {
+                name: value
+                for name, value in candidate_point_training.items()
+                if name != "history"
+            },
+            "null": {
+                name: value
+                for name, value in null_point_training.items()
+                if name != "history"
+            },
+        },
+        "context_retention_diagnostics": context_retention_diagnostics,
         "residual_checkpoints": residual_checkpoints,
         "prediction_artifact": str(prediction_path),
         "n_registered_prediction_rows": int(len(prediction["keys"])),
@@ -635,14 +688,21 @@ def run_prepared_fold(
         "invariants": {
             "outcome_blind_puzzle_set_inputs": True,
             "exact_parameter_and_initialization_match": True,
-            "candidate_full_cross_construct_attention": True,
-            "null_position_deranged_full_attention": True,
+            "candidate_nonfocal_only_cross_attention": True,
+            "null_position_deranged_nonfocal_cross_attention": True,
             "candidate_null_equal_attention_support": True,
             "attention_weight_dropout_disabled": True,
             "puzzle_balanced_training": True,
-            "position_aligned_cross_construct_attention": True,
-            "leave_one_construct_alignment_statistics": True,
-            "matched_null_position_deranged_alignment_statistics": True,
+            "position_aligned_nonfocal_cross_values": True,
+            "nonfocal_summary_alignment_statistics": True,
+            "matched_null_position_deranged_summary_statistics": True,
+            "nonfocal_only_cross_values": True,
+            "focal_excluded_from_cross_kv": True,
+            "eight_token_cross_support": True,
+            "paired_cross_block_reference_cancellation": True,
+            "zero_nonfocal_exact_cross_replay": True,
+            "paired_point_head_reference_cancellation": True,
+            "zero_cross_exact_parent_replay": True,
             "fixed_position_derangement_shift_17": True,
             "outer_train_wt_only_puzzle_set_pretraining": True,
             "held_puzzle_excluded_from_pretraining": True,
@@ -654,6 +714,9 @@ def run_prepared_fold(
             "frozen_v13_point_parent": True,
             "frozen_v14_context_encoder": True,
             "zero_initialized_parent_replay_at_1e_7": True,
+            "point_head_only_warmup": True,
+            "point_discriminative_learning_rates": True,
+            "pretraining_capability_retention_diagnostic_complete": True,
             "point_frozen_during_calibration": True,
             "v10_residual_family_reused": True,
             "puzzle_balanced_residual_calibration": True,

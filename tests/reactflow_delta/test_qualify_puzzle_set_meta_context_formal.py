@@ -13,6 +13,19 @@ from scripts.reactflow_delta.score_puzzle_set_meta_context_formal import (
 )
 
 
+def _context_retention_summary() -> dict[str, object]:
+    return {
+        "candidate_pretraining_established_all_runs": True,
+        "candidate_retention_positive_all_runs": True,
+        "null_pretraining_established_all_runs": True,
+        "null_retention_positive_all_runs": True,
+        "fold_seed_diagnostics": [],
+        "selection_performed": False,
+        "mutant_outcome_used": False,
+        "held_puzzle_accessed": False,
+    }
+
+
 def _row(fold: int, *, candidate: float = 0.80) -> dict:
     return {
         "outer_fold": fold,
@@ -64,9 +77,11 @@ def _formal_score() -> dict:
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
         "v13_parent_and_feature41_replay_at_5e_7": True,
         "feature41_reference_fixed_across_seeds": True,
+        "formal_assembly_reconstructed_exactly_from_merged_sources": True,
         "partial_fold_scores_inspected": False,
         "external_outcome_accessed": False,
         "model_or_threshold_selection_performed": False,
+        "context_retention_summary": _context_retention_summary(),
     }
 
 
@@ -120,3 +135,20 @@ def test_formal_mixture_does_not_drop_the_terminal_comparator_gate() -> None:
     result = qualify(score, _screen())
     assert result["gates"]["signed_gain_vs_terminal_v12_ge_2pct"] is False
     assert result["gate_passed"] is False
+
+
+def test_formal_gate_rejects_negative_candidate_retention() -> None:
+    score = _formal_score()
+    score["context_retention_summary"][
+        "candidate_pretraining_established_all_runs"
+    ] = False
+    result = qualify(score, _screen())
+    assert result["gates"]["candidate_pretraining_established_all_runs"] is False
+    assert result["gate_passed"] is False
+
+
+def test_formal_gate_rejects_score_without_exact_source_assembly_link() -> None:
+    score = _formal_score()
+    score["formal_assembly_reconstructed_exactly_from_merged_sources"] = False
+    with pytest.raises(ValueError, match="violates the frozen protocol"):
+        qualify(score, _screen())

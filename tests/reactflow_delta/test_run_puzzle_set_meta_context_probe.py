@@ -235,7 +235,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         prepared=prepared,
         outer_fold=19,
         held_puzzle="P20",
-        phase="P1M3",
+        phase="P1M2",
         seed=0,
         pretraining_epochs=1,
         point_epochs=1,
@@ -254,6 +254,14 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
     assert result["outer_train_puzzle_ids"] == ["P01"]
     assert result["held_puzzle"] not in result["pretraining_puzzle_ids"]
     assert result["expected_pretraining_eligible_construct_counts"] == [8]
+    assert result["point_training_summaries"]["candidate"]["warmup_context_unchanged"]
+    assert result["point_training_summaries"]["candidate"]["context_update_steps"] == 0
+    assert set(result["context_retention_diagnostics"]) == {"candidate", "null"}
+    for arm, diagnostic in result["context_retention_diagnostics"].items():
+        assert diagnostic["arm"] == arm
+        assert diagnostic["training_mask_epochs"] == [0, 0]
+        assert diagnostic["mutant_outcome_used"] is False
+        assert diagnostic["held_puzzle_accessed"] is False
     assert result["n_registered_prediction_rows"] == 32
     with np.load(result["prediction_artifact"], allow_pickle=True) as handle:
         assert not (set(handle.files) & FORBIDDEN_PREDICTION_FIELDS)
@@ -270,7 +278,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
             assert torch.allclose(cdf, torch.full_like(cdf, 0.5), atol=3e-6, rtol=0.0)
     merged = merge_complete_universe(
         tmp_path,
-        expected_phase="P1M3",
+        expected_phase="P1M2",
         expected_folds=[19],
         expected_seeds=[0],
         expected_pretraining_epochs=1,
@@ -282,13 +290,14 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         ],
     )
     assert merged["status"] == "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS"
+    assert merged["context_retention_gate_required"] is False
     try:
         run_prepared_fold(
             univ=univ,
             prepared=prepared,
             outer_fold=19,
             held_puzzle="P20",
-            phase="P1M3",
+            phase="P1M2",
             seed=0,
             pretraining_epochs=1,
             point_epochs=1,

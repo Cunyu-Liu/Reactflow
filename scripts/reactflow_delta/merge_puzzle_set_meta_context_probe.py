@@ -14,9 +14,17 @@ from scipy.special import ndtr
 
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     FULL_CROSS_CONSTRUCT,
+    POINT_CONTEXT_LR,
+    POINT_GRADIENT_CLIP,
+    POINT_HEAD_LR,
+    POINT_HEAD_WARMUP_EPOCHS,
     POSITION_ALIGNED_OPERATOR,
     POSITION_DERANGEMENT_SHIFT,
     POSITION_DERANGED_NULL,
+)
+from scripts.reactflow_delta.puzzle_set_meta_context_retention import (
+    RETENTION_DIAGNOSTIC_EPOCH,
+    RETENTION_SCHEMA,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     FORBIDDEN_PREDICTION_FIELDS,
@@ -33,7 +41,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
 
 
-MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v7"
+MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v8"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
@@ -138,14 +146,21 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
     required_true = (
         "outcome_blind_puzzle_set_inputs",
         "exact_parameter_and_initialization_match",
-        "candidate_full_cross_construct_attention",
-        "null_position_deranged_full_attention",
+        "candidate_nonfocal_only_cross_attention",
+        "null_position_deranged_nonfocal_cross_attention",
         "candidate_null_equal_attention_support",
         "attention_weight_dropout_disabled",
         "puzzle_balanced_training",
-        "position_aligned_cross_construct_attention",
-        "leave_one_construct_alignment_statistics",
-        "matched_null_position_deranged_alignment_statistics",
+        "position_aligned_nonfocal_cross_values",
+        "nonfocal_summary_alignment_statistics",
+        "matched_null_position_deranged_summary_statistics",
+        "nonfocal_only_cross_values",
+        "focal_excluded_from_cross_kv",
+        "eight_token_cross_support",
+        "paired_cross_block_reference_cancellation",
+        "zero_nonfocal_exact_cross_replay",
+        "paired_point_head_reference_cancellation",
+        "zero_cross_exact_parent_replay",
         "fixed_position_derangement_shift_17",
         "outer_train_wt_only_puzzle_set_pretraining",
         "held_puzzle_excluded_from_pretraining",
@@ -157,6 +172,9 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
         "frozen_v13_point_parent",
         "frozen_v14_context_encoder",
         "zero_initialized_parent_replay_at_1e_7",
+        "point_head_only_warmup",
+        "point_discriminative_learning_rates",
+        "pretraining_capability_retention_diagnostic_complete",
         "point_frozen_during_calibration",
         "v10_residual_family_reused",
         "puzzle_balanced_residual_calibration",
@@ -167,6 +185,118 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
     return all(invariants.get(name) is True for name in required_true) and all(
         invariants.get(name) is False for name in required_false
     )
+
+
+def _validate_retention_diagnostics(
+    row: dict[str, Any],
+    *,
+    pair: tuple[int, int],
+    n_train_puzzles: int,
+    outer_train_puzzle_ids: list[str],
+    expected_pretraining_epochs: int,
+) -> dict[str, dict[str, Any]]:
+    diagnostics = row.get("context_retention_diagnostics", {})
+    if set(diagnostics) != {"candidate", "null"}:
+        raise ValueError(f"puzzle-set fold {pair} lacks retention diagnostics")
+    validated: dict[str, dict[str, Any]] = {}
+    for arm in ("candidate", "null"):
+        diagnostic = diagnostics[arm]
+        per_puzzle = diagnostic.get("per_puzzle", [])
+        means = diagnostic.get("mean", {})
+        if (
+            diagnostic.get("schema_version") != RETENTION_SCHEMA
+            or diagnostic.get("arm") != arm
+            or diagnostic.get("evidence_status")
+            != "OUTER_TRAIN_WT_RETENTION_DIAGNOSTIC_ONLY"
+            or int(diagnostic.get("diagnostic_epoch", -1)) != RETENTION_DIAGNOSTIC_EPOCH
+            or diagnostic.get("training_mask_epochs")
+            != [0, int(expected_pretraining_epochs) - 1]
+            or str(diagnostic.get("held_puzzle")) != str(row.get("held_puzzle"))
+            or list(map(str, diagnostic.get("outer_train_puzzle_ids", [])))
+            != sorted(outer_train_puzzle_ids)
+            or not isinstance(per_puzzle, list)
+            or len(per_puzzle) != n_train_puzzles
+        ):
+            raise ValueError(
+                f"puzzle-set fold {pair} has malformed {arm} retention identity"
+            )
+        per_puzzle_ids = [str(item.get("puzzle")) for item in per_puzzle]
+        metric_names = (
+            "initial_context_l1",
+            "post_pretraining_l1",
+            "post_point_l1",
+        )
+        if (
+            per_puzzle_ids != sorted(outer_train_puzzle_ids)
+            or any(
+                int(item.get("eligible_constructs", -1)) not in {7, 8}
+                or any(
+                    not np.isfinite(float(item.get(metric, np.nan)))
+                    or float(item.get(metric, np.nan)) < 0.0
+                    for metric in metric_names
+                )
+                for item in per_puzzle
+            )
+            or set(means) != set(metric_names)
+            or any(not np.isfinite(float(means[metric])) for metric in metric_names)
+            or any(
+                not np.isclose(
+                    float(means[metric]),
+                    float(np.mean([float(item[metric]) for item in per_puzzle])),
+                    atol=1e-12,
+                    rtol=0.0,
+                )
+                for metric in metric_names
+            )
+        ):
+            raise ValueError(
+                f"puzzle-set fold {pair} has malformed {arm} retention values"
+            )
+        pretraining_gain = float(means["initial_context_l1"]) - float(
+            means["post_pretraining_l1"]
+        )
+        expected_fraction = (
+            None
+            if abs(pretraining_gain) <= 1.0e-12
+            else (float(means["initial_context_l1"]) - float(means["post_point_l1"]))
+            / pretraining_gain
+        )
+        observed_fraction = diagnostic.get("retained_fraction")
+        fraction_matches = (
+            expected_fraction is None and observed_fraction is None
+        ) or (
+            expected_fraction is not None
+            and observed_fraction is not None
+            and np.isclose(
+                float(observed_fraction), expected_fraction, atol=1e-12, rtol=0.0
+            )
+        )
+        pretraining_established = pretraining_gain > 0.0
+        retention_positive = bool(
+            pretraining_established
+            and expected_fraction is not None
+            and expected_fraction > 0.0
+        )
+        if (
+            not fraction_matches
+            or diagnostic.get("pretraining_established") is not pretraining_established
+            or diagnostic.get("retention_positive") is not retention_positive
+            or diagnostic.get("same_final_frozen_decoder") is not True
+            or diagnostic.get("diagnostic_mask_disjoint_from_training") is not True
+            or diagnostic.get("mutant_outcome_used") is not False
+            or diagnostic.get("held_puzzle_accessed") is not False
+            or diagnostic.get("checkpoint_selection_performed") is not False
+            or diagnostic.get("learning_rate_selection_performed") is not False
+        ):
+            raise ValueError(
+                f"puzzle-set fold {pair} has inconsistent {arm} retention result"
+            )
+        validated[arm] = {
+            "pretraining_established": pretraining_established,
+            "retention_positive": retention_positive,
+            "retained_fraction": expected_fraction,
+        }
+    return validated
 
 
 def merge_complete_universe(
@@ -191,6 +321,7 @@ def merge_complete_universe(
     if not expected:
         raise ValueError("expected puzzle-set universe cannot be empty")
     rows = []
+    retention_rows = []
     seen: set[tuple[int, int]] = set()
     keys_by_seed: dict[int, set[str]] = {int(seed): set() for seed in expected_seeds}
     for path in sorted(input_dir.glob("puzzle_set_fold_result_fold*_seed*.json")):
@@ -334,6 +465,44 @@ def merge_complete_universe(
                 raise ValueError(
                     f"puzzle-set fold {pair} has invalid {arm} pretraining summary"
                 )
+        point_summaries = row.get("point_training_summaries", {})
+        if set(point_summaries) != {"candidate", "null"}:
+            raise ValueError(f"puzzle-set fold {pair} lacks point-training summaries")
+        expected_point_summary = {
+            "optimizer_steps": int(expected_point_epochs) * n_train_puzzles,
+            "head_update_steps": int(expected_point_epochs) * n_train_puzzles,
+            "context_update_steps": max(
+                int(expected_point_epochs) - POINT_HEAD_WARMUP_EPOCHS, 0
+            )
+            * n_train_puzzles,
+            "target_exposures_per_available_cell": int(expected_point_epochs),
+            "head_only_warmup_epochs": POINT_HEAD_WARMUP_EPOCHS,
+            "head_learning_rate": POINT_HEAD_LR,
+            "context_learning_rate": POINT_CONTEXT_LR,
+            "gradient_clip": POINT_GRADIENT_CLIP,
+            "warmup_context_unchanged": True,
+            "best_epoch_selection_performed": False,
+        }
+        if any(
+            point_summaries[arm] != expected_point_summary
+            for arm in ("candidate", "null")
+        ):
+            raise ValueError(
+                f"puzzle-set fold {pair} changed point warmup or optimizer schedule"
+            )
+        retention_rows.append(
+            {
+                "outer_fold": pair[0],
+                "seed": pair[1],
+                **_validate_retention_diagnostics(
+                    row,
+                    pair=pair,
+                    n_train_puzzles=n_train_puzzles,
+                    outer_train_puzzle_ids=outer_train_puzzle_ids,
+                    expected_pretraining_epochs=expected_pretraining_epochs,
+                ),
+            }
+        )
         if not recorded_invariants_pass(row.get("invariants", {})):
             raise ValueError(f"puzzle-set fold {pair} lacks required invariants")
         checks, prediction_keys = prediction_checks(
@@ -376,9 +545,38 @@ def merge_complete_universe(
             f"found={sorted(seen)} expected={sorted(expected)}"
         )
     rows.sort(key=lambda row: (int(row["seed"]), int(row["outer_fold"])))
+    retention_rows.sort(key=lambda row: (int(row["seed"]), int(row["outer_fold"])))
+    context_retention_summary = {
+        "candidate_pretraining_established_all_runs": all(
+            item["candidate"]["pretraining_established"] for item in retention_rows
+        ),
+        "candidate_retention_positive_all_runs": all(
+            item["candidate"]["retention_positive"] for item in retention_rows
+        ),
+        "null_pretraining_established_all_runs": all(
+            item["null"]["pretraining_established"] for item in retention_rows
+        ),
+        "null_retention_positive_all_runs": all(
+            item["null"]["retention_positive"] for item in retention_rows
+        ),
+        "fold_seed_diagnostics": retention_rows,
+        "selection_performed": False,
+        "mutant_outcome_used": False,
+        "held_puzzle_accessed": False,
+    }
+    context_retention_gate_passed = bool(
+        context_retention_summary["candidate_pretraining_established_all_runs"]
+        and context_retention_summary["candidate_retention_positive_all_runs"]
+    )
+    retention_gate_required = expected_phase in {"P1M3", "P1M4"}
+    merge_status = (
+        "PUZZLE_SET_TRAIN_ONLY_RETENTION_GATE_FAIL"
+        if retention_gate_required and not context_retention_gate_passed
+        else "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS"
+    )
     return {
         "schema_version": MERGED_SCHEMA,
-        "status": "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS",
+        "status": merge_status,
         "phase": expected_phase,
         "expected_folds": sorted(map(int, expected_folds)),
         "expected_seeds": sorted(map(int, expected_seeds)),
@@ -397,20 +595,30 @@ def merge_complete_universe(
             EXPECTED_PRETRAINING_TRAINABLE_PARAMETERS
         ),
         "folds": rows,
+        "context_retention_gate_required": retention_gate_required,
+        "context_retention_gate_passed": context_retention_gate_passed,
+        "context_retention_summary": context_retention_summary,
         "merge_integrity": {
             "complete_fold_seed_universe": True,
             "unique_fold_seed_pairs": True,
             "prediction_only_schema": True,
             "outcome_blind_puzzle_set_inputs_all_runs": True,
             "exact_parameter_and_initialization_match_all_runs": True,
-            "candidate_full_cross_construct_attention_all_runs": True,
-            "null_position_deranged_full_attention_all_runs": True,
+            "candidate_nonfocal_only_cross_attention_all_runs": True,
+            "null_position_deranged_nonfocal_cross_attention_all_runs": True,
             "candidate_null_equal_attention_support_all_runs": True,
             "attention_weight_dropout_disabled_all_runs": True,
             "puzzle_balanced_training_all_runs": True,
-            "position_aligned_cross_construct_attention_all_runs": True,
-            "leave_one_construct_alignment_statistics_all_runs": True,
-            "matched_null_position_deranged_alignment_statistics_all_runs": True,
+            "position_aligned_nonfocal_cross_values_all_runs": True,
+            "nonfocal_summary_alignment_statistics_all_runs": True,
+            "matched_null_position_deranged_summary_statistics_all_runs": True,
+            "nonfocal_only_cross_values_all_runs": True,
+            "focal_excluded_from_cross_kv_all_runs": True,
+            "eight_token_cross_support_all_runs": True,
+            "paired_cross_block_reference_cancellation_all_runs": True,
+            "zero_nonfocal_exact_cross_replay_all_runs": True,
+            "paired_point_head_reference_cancellation_all_runs": True,
+            "zero_cross_exact_parent_replay_all_runs": True,
             "fixed_position_derangement_shift_17_all_runs": True,
             "outer_train_wt_only_puzzle_set_pretraining_all_runs": True,
             "held_puzzle_excluded_from_pretraining_all_runs": True,
@@ -423,6 +631,9 @@ def merge_complete_universe(
             "frozen_v13_point_parent_all_runs": True,
             "frozen_v14_context_encoder_all_runs": True,
             "parent_replay_before_and_after_pretraining_all_runs": True,
+            "point_head_only_warmup_all_runs": True,
+            "point_discriminative_learning_rates_all_runs": True,
+            "pretraining_capability_retention_diagnostic_complete_all_runs": True,
             "point_frozen_during_calibration_all_runs": True,
             "v10_residual_family_all_runs": True,
             "puzzle_balanced_residual_calibration_all_runs": True,
@@ -468,7 +679,7 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
-    return 0
+    return 0 if result["status"] == "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS" else 1
 
 
 if __name__ == "__main__":

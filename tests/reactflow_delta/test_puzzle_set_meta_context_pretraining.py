@@ -158,18 +158,35 @@ def test_focal_corruption_is_excluded_from_aligned_and_deranged_statistics() -> 
     )
     assert torch.equal(reactivity[0][corruption], torch.zeros(2))
     assert torch.equal(observed[0][corruption], torch.zeros(2, dtype=torch.bool))
-    candidate_stats = candidate.meta_context.construct_alignment_statistics(
-        reactivity, observed
-    )
+    with torch.no_grad():
+        hidden = candidate.encode_puzzle_set(contexts)
+
+    def summary_statistics(model, local_hidden, local_reactivity, local_observed):
+        individual = model.meta_context.project_individual_construct_tokens(
+            local_hidden, local_observed, local_reactivity
+        )
+        captured = []
+
+        def capture(_module, args, _output):
+            captured.append(args[0].detach().clone())
+
+        handle = model.meta_context.alignment_projection.register_forward_hook(capture)
+        try:
+            model.meta_context.nonfocal_summary_token(
+                individual, local_observed, local_reactivity, 0
+            )
+        finally:
+            handle.remove()
+        assert len(captured) == 1
+        return captured[0]
+
+    candidate_stats = summary_statistics(candidate, hidden, reactivity, observed)
+    null_hidden = null.meta_context._position_deranged_inputs(hidden, 0)
     null_reactivity = null.meta_context._position_deranged_inputs(reactivity, 0)
     null_observed = null.meta_context._position_deranged_inputs(observed, 0)
-    null_stats = null.meta_context.construct_alignment_statistics(
-        null_reactivity, null_observed
-    )
-    assert torch.equal(candidate_stats[0, corruption, 2], torch.ones(2))
-    assert torch.equal(null_stats[0, corruption, 2], torch.ones(2))
-    assert torch.equal(candidate_stats[0, corruption, 3], torch.zeros(2))
-    assert torch.equal(null_stats[0, corruption, 3], torch.zeros(2))
-    assert not torch.equal(
-        candidate_stats[0, corruption, 0], null_stats[0, corruption, 0]
-    )
+    null_stats = summary_statistics(null, null_hidden, null_reactivity, null_observed)
+    assert torch.equal(candidate_stats[corruption, 2], torch.ones(2))
+    assert torch.equal(null_stats[corruption, 2], torch.ones(2))
+    assert torch.equal(candidate_stats[corruption, 3], torch.zeros(2))
+    assert torch.equal(null_stats[corruption, 3], torch.zeros(2))
+    assert not torch.equal(candidate_stats[corruption, 0], null_stats[corruption, 0])

@@ -12,6 +12,10 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
     EXPECTED_TOTAL_PARAMETERS,
     EXPECTED_TRAINABLE_PARAMETERS,
     FULL_CROSS_CONSTRUCT,
+    POINT_CONTEXT_LR,
+    POINT_GRADIENT_CLIP,
+    POINT_HEAD_LR,
+    POINT_HEAD_WARMUP_EPOCHS,
     POSITION_DERANGED_NULL,
     POSITION_DERANGEMENT_SHIFT,
     PuzzleSetMetaContextPointModel,
@@ -119,36 +123,11 @@ def test_puzzle_set_handles_the_registered_zero_observed_construct() -> None:
     model = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).eval()
     hidden, observed = _set_inputs()
     observed[0] = torch.zeros_like(observed[0])
-    tokens = model.align_construct_tokens(hidden, observed, _reactivity(hidden))
+    tokens = model.project_individual_construct_tokens(
+        hidden, observed, _reactivity(hidden)
+    )
     assert tokens.shape == (EXPECTED_CONSTRUCTS_PER_PUZZLE, 7, CONTEXT_WIDTH)
     assert torch.isfinite(tokens).all()
-
-
-def test_alignment_statistics_are_leave_one_construct_and_missing_aware() -> None:
-    candidate, null = make_exact_matched_pair(seed=1402)
-    reactivity = [torch.full((4,), float(index)) for index in range(8)]
-    observed = [torch.ones(4, dtype=torch.bool) for _index in range(8)]
-    candidate_stats = candidate.construct_alignment_statistics(reactivity, observed)
-    null_stats = null.construct_alignment_statistics(reactivity, observed)
-    assert torch.allclose(
-        candidate_stats[0, :, 0], torch.full((4,), 4.0), atol=1e-7, rtol=0.0
-    )
-    assert torch.allclose(
-        candidate_stats[0, :, 1], torch.full((4,), 2.0), atol=1e-7, rtol=0.0
-    )
-    assert torch.equal(candidate_stats[0, :, 2], torch.ones(4))
-    assert torch.allclose(
-        candidate_stats[0, :, 3], torch.full((4,), -4.0), atol=1e-7, rtol=0.0
-    )
-    assert torch.equal(null_stats, candidate_stats)
-
-    observed[0] = torch.zeros(4, dtype=torch.bool)
-    candidate_missing = candidate.construct_alignment_statistics(reactivity, observed)
-    null_missing = null.construct_alignment_statistics(reactivity, observed)
-    assert torch.equal(candidate_missing[0, :, 0], torch.full((4,), 4.0))
-    assert torch.equal(candidate_missing[0, :, 2], torch.ones(4))
-    assert torch.equal(candidate_missing[0, :, 3], torch.zeros(4))
-    assert torch.equal(null_missing, candidate_missing)
 
 
 def test_full_context_is_permutation_equivariant() -> None:
@@ -195,7 +174,9 @@ def test_candidate_and_deranged_null_use_the_same_eight_token_attention_support(
 
     def capture(label):
         def hook(_module, args, _output):
-            captured[label] = (args[0].shape, args[1].shape, args[2].shape)
+            captured.setdefault(label, []).append(
+                (args[0].shape, args[1].shape, args[2].shape)
+            )
 
         return hook
 
@@ -210,11 +191,118 @@ def test_candidate_and_deranged_null_use_the_same_eight_token_attention_support(
         candidate_handle.remove()
         null_handle.remove()
 
+    assert len(captured["candidate"]) == len(captured["null"]) == 2
     assert captured["candidate"] == captured["null"]
-    query, key, value = captured["candidate"]
-    assert query == (8 * len(hidden[0]), 1, CONTEXT_WIDTH)
-    assert key == value == (8 * len(hidden[0]), 8, CONTEXT_WIDTH)
+    for query, key, value in captured["candidate"]:
+        assert query == (8 * len(hidden[0]), 1, CONTEXT_WIDTH)
+        assert key == value == (8 * len(hidden[0]), 8, CONTEXT_WIDTH)
     assert candidate.set_attention.dropout == null.set_attention.dropout == 0.0
+
+
+def test_attention_kv_is_seven_nonfocal_tokens_plus_parameter_free_summary() -> None:
+    candidate, null = make_exact_matched_pair(seed=501)
+    candidate.eval()
+    null.eval()
+    hidden, observed = _set_inputs(length=23)
+    reactivity = _reactivity(hidden)
+    captured = {}
+
+    def capture(label):
+        def hook(_module, args, _output):
+            captured.setdefault(label, []).append(
+                tuple(value.detach().clone() for value in args[:3])
+            )
+
+        return hook
+
+    candidate_handle = candidate.set_attention.register_forward_hook(
+        capture("candidate")
+    )
+    null_handle = null.set_attention.register_forward_hook(capture("null"))
+    try:
+        candidate.mix_construct_tokens(hidden, observed, reactivity)
+        null.mix_construct_tokens(hidden, observed, reactivity)
+    finally:
+        candidate_handle.remove()
+        null_handle.remove()
+
+    assert len(captured["candidate"]) == len(captured["null"]) == 2
+    candidate_query, candidate_key, candidate_value = captured["candidate"][0]
+    candidate_reference_query, candidate_reference_key, _ = captured["candidate"][1]
+    null_query, null_key, null_value = captured["null"][0]
+    null_reference_query, null_reference_key, _ = captured["null"][1]
+    assert torch.equal(candidate_query, null_query)
+    assert torch.equal(candidate_query, candidate_reference_query)
+    assert torch.equal(null_query, null_reference_query)
+    assert torch.equal(candidate_key, candidate_value)
+    assert torch.equal(null_key, null_value)
+    assert torch.equal(candidate_reference_key, null_reference_key)
+
+    individual = candidate.project_individual_construct_tokens(
+        hidden, observed, reactivity
+    )
+    summary = candidate.nonfocal_summary_token(
+        individual, observed, reactivity, focal_construct_index=0
+    )
+    expected_query = candidate.attention_norm(individual[0])
+    expected_key = candidate.attention_norm(
+        torch.cat([individual[1:].permute(1, 0, 2), summary[:, None, :]], dim=1)
+    )
+    length = len(hidden[0])
+    assert torch.equal(candidate_query[:length, 0], expected_query)
+    assert torch.equal(candidate_key[:length], expected_key)
+    assert not torch.equal(candidate_key, null_key)
+
+
+def test_zero_nonfocal_cross_reference_cancels_bias_and_focal_query() -> None:
+    generator = torch.Generator().manual_seed(1502)
+    for connectivity in (FULL_CROSS_CONSTRUCT, POSITION_DERANGED_NULL):
+        model = PuzzleSetMetaContext(connectivity=connectivity)
+        with torch.no_grad():
+            for name, parameter in model.named_parameters():
+                if name.endswith("bias"):
+                    parameter.copy_(torch.randn(parameter.shape, generator=generator))
+        for training in (False, True):
+            model.train(training)
+            for focal in range(EXPECTED_CONSTRUCTS_PER_PUZZLE):
+                hidden = [
+                    torch.zeros(5, CONTEXT_WIDTH)
+                    for _ in range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
+                ]
+                observed = [
+                    torch.zeros(5, dtype=torch.bool)
+                    for _ in range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
+                ]
+                reactivity = [
+                    torch.zeros(5) for _ in range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
+                ]
+                hidden[focal] = torch.randn(5, CONTEXT_WIDTH, generator=generator)
+                observed[focal] = torch.ones(5, dtype=torch.bool)
+                reactivity[focal] = torch.randn(5, generator=generator)
+                first = model.mix_construct_tokens(hidden, observed, reactivity)[focal]
+                hidden[focal] = torch.randn(5, CONTEXT_WIDTH, generator=generator)
+                reactivity[focal] = torch.randn(5, generator=generator)
+                second = model.mix_construct_tokens(hidden, observed, reactivity)[focal]
+                assert torch.equal(first, torch.zeros_like(first))
+                assert torch.equal(second, torch.zeros_like(second))
+
+
+def test_paired_cross_block_reuses_dropout_and_advances_rng_once() -> None:
+    model = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).train()
+    generator = torch.Generator().manual_seed(1503)
+    query = torch.randn(6, 1, CONTEXT_WIDTH, generator=generator)
+    key_value = torch.randn(6, 8, CONTEXT_WIDTH, generator=generator)
+
+    torch.manual_seed(1504)
+    rng_before = torch.get_rng_state()
+    observed = model.paired_cross_block(query, key_value, key_value)
+    observed_next = torch.rand(8)
+    assert torch.equal(observed, torch.zeros_like(observed))
+
+    torch.set_rng_state(rng_before)
+    model._cross_block(query, key_value)
+    expected_next = torch.rand(8)
+    assert torch.equal(observed_next, expected_next)
 
 
 def test_candidate_and_deranged_null_have_finite_nonzero_qkv_gradients() -> None:
@@ -285,6 +373,49 @@ def test_zero_initialized_adapter_replays_parent_in_both_arms() -> None:
     assert torch.equal(null_residual, torch.zeros_like(null_residual))
     assert torch.equal(candidate_point, parent)
     assert torch.equal(null_point, parent)
+
+
+def test_zero_cross_exactly_cancels_base_shortcut_and_replays_rng() -> None:
+    model = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).train()
+    generator = torch.Generator().manual_seed(502)
+    with torch.no_grad():
+        model.point_head[-1].weight.copy_(
+            torch.randn(
+                model.point_head[-1].weight.shape,
+                generator=generator,
+            )
+        )
+        model.point_head[-1].bias.copy_(
+            torch.randn(model.point_head[-1].bias.shape, generator=generator)
+        )
+    batch = 2
+    length = 7
+    mixed = torch.zeros(EXPECTED_CONSTRUCTS_PER_PUZZLE, length, CONTEXT_WIDTH)
+    edit = torch.tensor([1, 4])
+    base = torch.randn(batch, length, BASE_FEATURE_WIDTH, generator=generator)
+    parent = torch.randn(batch, length, generator=generator)
+    mask = torch.ones(batch, length, dtype=torch.bool)
+
+    torch.manual_seed(503)
+    rng_before = torch.get_rng_state()
+    point, residual = model.point_from_mixed(mixed, 0, edit, base, parent, mask)
+    observed_next = torch.rand(8)
+    assert torch.equal(residual, torch.zeros_like(residual))
+    assert torch.equal(point, parent)
+
+    torch.set_rng_state(rng_before)
+    zero_cross = torch.zeros(batch, length, 2 * CONTEXT_WIDTH)
+    model.point_head(torch.cat([base, zero_cross], dim=-1))
+    expected_next = torch.rand(8)
+    assert torch.equal(observed_next, expected_next)
+
+    changed_base = torch.randn(batch, length, BASE_FEATURE_WIDTH, generator=generator)
+    changed_parent = torch.randn(batch, length, generator=generator)
+    changed_point, changed_residual = model.point_from_mixed(
+        mixed, 0, edit, changed_base, changed_parent, mask
+    )
+    assert torch.equal(changed_residual, torch.zeros_like(changed_residual))
+    assert torch.equal(changed_point, changed_parent)
 
 
 def test_full_point_models_are_exact_matches_and_target_free() -> None:
@@ -414,11 +545,15 @@ def test_puzzle_training_replays_identically_under_same_connectivity() -> None:
         parent_before = [
             cell["parent_point"].detach().clone() for cell in training["cells"]
         ]
-        first_history = fit_puzzle_set_point_model(first, [training], epochs=1, seed=9)
-        second_history = fit_puzzle_set_point_model(
+        first_training = fit_puzzle_set_point_model(first, [training], epochs=1, seed=9)
+        second_training = fit_puzzle_set_point_model(
             second, [_training_batch()], epochs=1, seed=9
         )
-        assert first_history == second_history
+        assert first_training == second_training
+        assert len(first_training["history"]) == 1
+        assert first_training["head_update_steps"] == 1
+        assert first_training["context_update_steps"] == 0
+        assert first_training["warmup_context_unchanged"] is True
         for left, right in zip(first.parameters(), second.parameters()):
             assert torch.equal(left, right)
         for name, value in first.encoder.state_dict().items():
@@ -428,9 +563,67 @@ def test_puzzle_training_replays_identically_under_same_connectivity() -> None:
             assert torch.equal(expected, cell["parent_point"])
 
 
-def test_deranged_null_statistics_use_the_same_shifted_nonfocal_set() -> None:
+def test_point_warmup_freezes_context_then_uses_discriminative_learning_rates() -> None:
+    warmup, _null = _full_pair(72)
+    warmup_context_before = {
+        name: value.detach().clone()
+        for name, value in warmup.meta_context.state_dict().items()
+        if not name.startswith("point_head.")
+    }
+    warmup_head_before = {
+        name: value.detach().clone()
+        for name, value in warmup.meta_context.point_head.state_dict().items()
+    }
+    warmup_training = fit_puzzle_set_point_model(
+        warmup, [_training_batch()], epochs=1, seed=10
+    )
+    assert all(
+        torch.equal(value, warmup.meta_context.state_dict()[name])
+        for name, value in warmup_context_before.items()
+    )
+    assert any(
+        not torch.equal(value, warmup.meta_context.point_head.state_dict()[name])
+        for name, value in warmup_head_before.items()
+    )
+    assert warmup_training == {
+        "history": warmup_training["history"],
+        "optimizer_steps": 1,
+        "head_update_steps": 1,
+        "context_update_steps": 0,
+        "target_exposures_per_available_cell": 1,
+        "head_only_warmup_epochs": POINT_HEAD_WARMUP_EPOCHS,
+        "head_learning_rate": POINT_HEAD_LR,
+        "context_learning_rate": POINT_CONTEXT_LR,
+        "gradient_clip": POINT_GRADIENT_CLIP,
+        "warmup_context_unchanged": True,
+        "best_epoch_selection_performed": False,
+    }
+
+    joint, _null = _full_pair(73)
+    joint_context_before = {
+        name: value.detach().clone()
+        for name, value in joint.meta_context.state_dict().items()
+        if not name.startswith("point_head.")
+    }
+    joint_training = fit_puzzle_set_point_model(
+        joint, [_training_batch()], epochs=2, seed=11
+    )
+    assert any(
+        not torch.equal(value, joint.meta_context.state_dict()[name])
+        for name, value in joint_context_before.items()
+    )
+    assert joint_training["optimizer_steps"] == 2
+    assert joint_training["head_update_steps"] == 2
+    assert joint_training["context_update_steps"] == 1
+    assert joint_training["target_exposures_per_available_cell"] == 2
+    assert joint_training["head_learning_rate"] == POINT_HEAD_LR
+    assert joint_training["context_learning_rate"] == POINT_CONTEXT_LR
+
+
+def test_deranged_null_summary_uses_the_same_shifted_nonfocal_set() -> None:
     _candidate, null = make_exact_matched_pair(seed=90)
     length = 23
+    hidden, _ = _set_inputs(length=length)
     reactivity = [
         torch.arange(length, dtype=torch.float32) + 100.0 * index
         for index in range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
@@ -440,21 +633,34 @@ def test_deranged_null_statistics_use_the_same_shifted_nonfocal_set() -> None:
         for _index in range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
     ]
     focal = 0
+    shifted_hidden = null._position_deranged_inputs(hidden, focal)
     shifted_reactivity = null._position_deranged_inputs(reactivity, focal)
     shifted_observed = null._position_deranged_inputs(observed, focal)
-    statistics = null.construct_alignment_statistics(
-        shifted_reactivity, shifted_observed
+    individual = null.project_individual_construct_tokens(
+        shifted_hidden, shifted_observed, shifted_reactivity
     )
+    captured = []
+
+    def capture(_module, args, _output):
+        captured.append(args[0].detach().clone())
+
+    handle = null.alignment_projection.register_forward_hook(capture)
+    try:
+        null.nonfocal_summary_token(
+            individual, shifted_observed, shifted_reactivity, focal
+        )
+    finally:
+        handle.remove()
+    assert len(captured) == 1
+    statistics = captured[0]
     receiver = 3
     source = (receiver - POSITION_DERANGEMENT_SHIFT) % length
     expected_mean = torch.stack(
         [reactivity[index][source] for index in range(1, 8)]
     ).mean()
-    assert torch.allclose(
-        statistics[focal, receiver, 0], expected_mean, atol=1e-7, rtol=0.0
-    )
+    assert torch.allclose(statistics[receiver, 0], expected_mean, atol=1e-7, rtol=0.0)
     assert not torch.equal(
-        statistics[focal, receiver, 0],
+        statistics[receiver, 0],
         torch.stack(reactivity[1:])[:, receiver].mean(),
     )
 

@@ -34,8 +34,8 @@ Rejected. It would preserve a useful initialization but could immediately
 overwrite it. It also entangles WT-profile pretraining, focal point adaptation,
 and cross-construct transfer, weakening both sample efficiency and attribution.
 
-### C. Freeze a qualified parent and train only a zero-initialized
-cross-construct increment
+### C. Freeze a qualified parent and train only a paired-head cross-construct
+increment
 
 Selected. The parent point is the completed V13 seed-0 candidate from the same
 outer fold. V13 is selected before V14 scoring because it has the strongest
@@ -70,20 +70,29 @@ For outer fold \(f\):
    other seven aligned WT profiles; the null uses the same seven profiles at a
    fixed 17-position circular derangement. Both use identical masks, puzzle
    order, initialization, optimizer and 200-epoch budget. The frozen encoder
-   and zero-initialized point head cannot change, and no mutant cell or outcome
+   and shared point head cannot change, and no mutant cell or outcome
    is accepted by the pretraining interface.
 5. Freeze and remove the reconstruction decoder from downstream prediction.
    Require both arms still to replay the V13 parent within `1e-7`.
-6. At every focal position, both arms use full permutation-equivariant
-   eight-token attention. Candidate uses correctly aligned non-focal states;
-   the matched null uses the fixed 17-position-shifted non-focal states. Their
-   inputs, parameters, initialization, optimizer, legal attention support,
-   order and epochs are otherwise identical; attention-weight dropout is zero
-   in both arms.
-7. A zero-initialized incremental head receives focal V14 source/receiver
-   features, signed distance, mutation identity, feature41, the frozen V13
-   parent point, and the position-aligned mixed states at the mutation source
-   and receiver.
+6. Operator `POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5` uses the focal state
+   as the one-token query and never includes it in K/V. Candidate K/V consists
+   of seven correctly aligned non-focal individual states plus one summary
+   without a dedicated learned token; the matched null uses the same
+   eight-token support after shifting all seven
+   non-focal streams by 17 positions. The attention output does not add the
+   focal query as a residual. For both arms, a reference first zeros all seven
+   non-focal hidden/reactivity/observed streams before learned projection while
+   reusing the real focal query exactly. Actual and raw-zero reference traverse
+   the same complete projection, attention, FFN and output-normalization path
+   with one shared dropout draw; the returned state is `F(q,V)-F(q,V0)` and RNG
+   advances as one `F` call. Inputs, parameters, initialization, optimizer,
+   legal attention support, order and epochs are otherwise identical;
+   attention-weight dropout is zero in both arms.
+7. One shared point head receives `base=[focal V14 source/receiver, signed
+   distance, mutation identity, feature41, frozen V13 parent]` and the
+   zero-preserving nonfocal-dependent source/receiver states. The residual is
+   `h(base,cross)-h(base,0)` under one shared dropout draw, so base-only and
+   focal-only shortcuts cancel exactly.
 8. The prediction is
 
    \[
@@ -92,10 +101,21 @@ For outer fold \(f\):
    \]
 
 At initialization \(g_{\mathrm{set}}(x)=0\), so both arms replay the V13
-parent point exactly on every registered key. During WT pretraining only the set
-mixer and temporary decoder are trainable; during point fitting the set mixer
-and incremental head are trainable. The parent point and frozen encoder cannot
-receive gradient in either stage.
+parent point exactly on every registered key. More strongly, zero cross context
+always yields zero residual after training because both shared-head calls use
+the same base and dropout realization. During WT pretraining only the set mixer
+and temporary decoder are trainable. Point epoch 0 updates only the shared head
+at learning rate `1e-3` while keeping context bitwise frozen; epochs 1–39 update
+the head at `1e-3` and set mixer at `3e-4`. Adam has zero weight decay and
+gradient clipping `5.0`. The parent point and frozen encoder cannot receive
+gradient in either stage.
+
+The V5 representation itself has the stronger invariant that raw non-focal
+input `V=0` yields exact elementwise zero for every focal query and arbitrary
+learned biases. Subtracting `F(q,V0)` removes projection biases, summary
+constants and query-only attention/FFN/norm terms before the point-head contrast
+is applied. A nonzero representation proves causal dependence on non-focal
+inputs, not predictive usefulness.
 
 P1 experiment seeds vary the new mixer/head initialization and training order;
 the parent remains the predeclared V13/V14 seed-0 outer-fold checkpoint pair for
@@ -104,10 +124,26 @@ post-hoc parent or seed selection.
 
 The stage-specific trainable counts are explicit. Masked-WT initialization
 updates 857,600 set-operator parameters plus the 769-parameter temporary
-decoder, for 858,369 trainable parameters. Point fitting updates the 857,600 set
-parameters plus the 546,817-parameter incremental head, giving the frozen final
-model's 1,404,417 trainable parameters. Residual calibration then freezes the
-entire point model and trains only the predeclared residual head.
+decoder, for 858,369 trainable parameters. Joint point fitting updates the
+857,600 set parameters plus the 546,817-parameter shared paired head, giving the
+frozen final model's 1,404,417 trainable parameters; the first warmup epoch
+updates only those 546,817 head parameters. Residual calibration then freezes
+the entire point model and trains only the predeclared residual head.
+
+The point objective remains the original method-balanced signed-delta L1, and
+the frozen-point residual objective remains the original puzzle-balanced CRPS.
+CRPS gradients cannot return to the point model. MGDA, absolute-delta auxiliary
+losses, learned objective weights and other multi-objective changes are reserved
+for a separate amendment rather than confounded with the cross-context test.
+
+After point fitting, a fixed outer-train-only capability-retention diagnostic
+uses the same final frozen reconstruction decoder and deterministic mask epoch
+`200` to evaluate initial, post-pretraining and post-point context snapshots.
+It reports per-puzzle L1 and an equal-puzzle mean without reading the held puzzle
+or any mutant outcome. The candidate must have both
+`pretraining_established=true` and `retention_positive=true` to qualify; the
+matched null is reported identically but its retention booleans are descriptive
+only. The diagnostic cannot choose a checkpoint, learning rate, model or Gate.
 
 ## 4. Error and provenance rules
 
@@ -126,8 +162,10 @@ entire point model and trains only the predeclared residual head.
   mutant cell or target-bearing batch.
 - Fold artifacts record the fixed mask rate, pretraining epoch/history/step
   count, eligible-construct counts, candidate/null decoder checkpoints and the
-  bitwise-frozen encoder/point result. The temporary decoders are frozen before
-  point fitting.
+  bitwise-frozen encoder/point result. They also record the one-epoch head-only
+  warmup, 39 joint epochs, separate head/context learning rates and update
+  counts, plus the outer-train-only retention reports. The temporary decoders
+  are frozen before point fitting.
 - The active V14 authority cannot run P1. A future narrow amendment must freeze
   the P1 fold/seed/epoch/Gate universe before real training.
 
@@ -145,29 +183,53 @@ entire point model and trains only the predeclared residual head.
    the same eligibility set.
 6. The temporary decoder is frozen downstream and never enters point or
    calibration prediction.
-7. Supervised backpropagation changes only the set mixer and incremental head;
-   the encoder and parent arrays remain unchanged.
-8. Candidate and null Q/K/V gradients are all finite and nonzero. Perturbing a
-   non-focal WT value at the registered coordinate changes the candidate but
-   not the null when the null's shifted-coordinate input is held fixed.
-9. Construct-order permutation preserves the corresponding focal output.
-10. Seven-cell P20 training retains all eight context constructs without
+7. Point epoch 0 changes only the shared head at learning rate `1e-3`; the
+   context path is bitwise unchanged. Epochs 1–39 update the head at `1e-3` and
+   set mixer at `3e-4`; the encoder and parent arrays remain unchanged.
+8. Every focal query excludes itself from K/V, attends to exactly seven
+   non-focal individual tokens plus one non-focal summary, and is not added back
+   as an attention residual. Candidate and null Q/K/V gradients are all finite
+   and nonzero. Perturbing a non-focal WT value at the registered coordinate
+   changes the candidate but not the null when the null's shifted-coordinate
+   input is held fixed; this establishes dependence only.
+9. The V5 raw-zero reference zeros all seven non-focal
+   hidden/reactivity/observed streams before projection, reuses the focal query,
+   traverses the full shared cross block, replays one dropout draw and advances
+   RNG once. Raw-zero actual input cancels exactly despite arbitrary focal query
+   and nonzero learned biases.
+10. The paired shared head reuses one dropout draw, and
+   `h(base,cross)-h(base,0)` is exactly zero whenever cross is zero in both train
+   and evaluation modes after arbitrary head updates.
+11. Construct-order permutation preserves the corresponding focal output.
+12. Seven-cell P20 training retains all eight context constructs without
    inventing supervision.
-11. The fold runner rejects mismatched parent fold/seed provenance and emits one
+13. The fixed epoch-200 retention diagnostic reads only outer-train
+   `{puzzle, contexts}`, preserves model/decoder state, gradients and modes, and
+   requires candidate `pretraining_established` and `retention_positive`; null
+   retention is report-only.
+14. The fold runner rejects mismatched parent fold/seed provenance and emits one
    complete target-free prediction universe.
-12. The scorer remains closed until folds 0–19 have one complete prediction-only
+15. The scorer remains closed until folds 0–19 have one complete prediction-only
    merge, training has been closed, and a future authority issues the exact
    score-once token.
 
-The final position-aware operator and its coordinate audit are specified in
-`docs/plans/2026-08-27-puzzle-set-position-alignment-design.md`.
+If reference zeros are introduced after projection, the focal query differs
+between paths, any layer is skipped, stochastic draws differ, RNG advances
+twice, or raw-zero actual input does not cancel exactly, the operator is not V5
+and real-data eligibility remains closed. The downstream point-head subtraction
+cannot compensate for that upstream failure.
+
+The final position-aware operator, raw-zero cancellation and coordinate audit
+are specified in `docs/plans/2026-08-27-puzzle-set-position-alignment-design.md`
+and `docs/plans/2026-08-27-puzzle-set-cross-only-retention-design.md`.
 
 ## 6. Scientific interpretation
 
-This design raises the probability of a real performance improvement without
-making the architecture broader for its own sake. It preserves the strongest
-known point level, reduces trainable capacity to the new capability, and keeps
-the matched-null contrast identifiable. A future PASS would support the claim
+This design isolates a new causal input path without making the architecture
+broader for its own sake. It preserves the strongest known point level, reduces
+trainable capacity to the new capability, and keeps the matched-null contrast
+identifiable. Raw-zero cancellation or a nonzero counterfactual response is not
+performance evidence. A future complete PASS would support the claim
 that cross-construct WT context adds predictive information beyond a strong
 focal parent. A failure would terminate puzzle-set meta-context rather than be
 explained away as loss of the parent model during retraining.

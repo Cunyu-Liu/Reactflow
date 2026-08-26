@@ -13,12 +13,16 @@ import yaml
 
 from scripts.reactflow_delta.assemble_puzzle_set_meta_context_formal import (
     ASSEMBLY_STATUS,
+    EXPECTED_SEEDS,
+    FORMAL_PREDICTION_FIELDS,
     FORMAL_PREDICTION_SCHEMA,
     SCHEMA as ASSEMBLY_SCHEMA,
+    assemble_fold_prediction_arrays,
 )
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     MERGED_SCHEMA,
+    PREDICTION_FIELDS,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context_data import PREDICTION_SCHEMA
 from scripts.reactflow_delta.score_model_rescue_v10 import _load_tic2a_absolute
@@ -32,7 +36,7 @@ from scripts.reactflow_delta.score_puzzle_set_meta_context import (
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_score.proposed.v1"
+SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_score.proposed.v2"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_PHASE = "P1M4"
 EXPECTED_SCORE_TOKEN = "PUZZLE_SET_FORMAL_COMPLETE_SCORE_ONCE_ONLY"
@@ -67,10 +71,20 @@ def assert_score_authority(repo_root: Path) -> None:
 
 
 def _load_prediction(
-    path: Path, *, schema: str, fold: int, seed: int | None
+    path: Path,
+    *,
+    schema: str,
+    fold: int,
+    seed: int | None,
+    expected_fields: set[str] | None = None,
 ) -> dict[str, np.ndarray]:
     with np.load(path, allow_pickle=True) as handle:
-        prediction = {name: np.asarray(handle[name]) for name in handle.files}
+        names = set(handle.files)
+        if expected_fields is not None and names != expected_fields:
+            raise ValueError(
+                f"puzzle-set formal source field universe mismatch in {path}"
+            )
+        prediction = {name: np.asarray(handle[name]).copy() for name in handle.files}
     if str(prediction.get("schema_version", np.asarray("")).item()) != schema:
         raise ValueError(f"invalid puzzle-set formal prediction schema in {path}")
     if set(map(int, prediction["outer_fold"])) != {fold}:
@@ -82,6 +96,89 @@ def _load_prediction(
     if len(keys) != len(set(keys)):
         raise ValueError(f"duplicate puzzle-set formal source keys in {path}")
     return prediction
+
+
+def _assert_exact_formal_reconstruction(
+    observed: dict[str, np.ndarray],
+    expected: dict[str, np.ndarray],
+    *,
+    fold: int,
+) -> None:
+    if set(observed) != set(expected):
+        raise ValueError(
+            f"formal fold {fold} does not exactly derive from merged source artifacts: "
+            "field universe differs"
+        )
+    for name in sorted(expected):
+        actual_array = np.asarray(observed[name])
+        expected_array = np.asarray(expected[name])
+        if (
+            actual_array.shape != expected_array.shape
+            or actual_array.dtype != expected_array.dtype
+            or not np.array_equal(actual_array, expected_array)
+        ):
+            raise ValueError(
+                f"formal fold {fold} does not exactly derive from merged source "
+                f"artifacts at {name}"
+            )
+
+
+def _reconstruct_and_validate_formal_predictions(
+    assembly_rows: dict[int, dict[str, Any]],
+    source_rows: dict[tuple[int, int], dict[str, Any]],
+) -> tuple[
+    dict[int, dict[str, np.ndarray]],
+    dict[tuple[int, int], dict[str, np.ndarray]],
+]:
+    mixtures: dict[int, dict[str, np.ndarray]] = {}
+    sources_by_pair: dict[tuple[int, int], dict[str, np.ndarray]] = {}
+    for fold in range(20):
+        ordered_sources = []
+        for seed in EXPECTED_SEEDS:
+            source_row = source_rows[(fold, seed)]
+            source = _load_prediction(
+                Path(source_row["prediction_artifact"]),
+                schema=PREDICTION_SCHEMA,
+                fold=fold,
+                seed=seed,
+                expected_fields=PREDICTION_FIELDS,
+            )
+            if int(source_row.get("n_registered_prediction_rows", -1)) != len(
+                source["keys"]
+            ):
+                raise ValueError(
+                    f"formal fold {fold} seed{seed} merged source row count differs"
+                )
+            sources_by_pair[(fold, seed)] = source
+            ordered_sources.append(source)
+        reconstructed = assemble_fold_prediction_arrays(ordered_sources, fold=fold)
+        assembly_row = assembly_rows[fold]
+        observed = _load_prediction(
+            Path(assembly_row["prediction_artifact"]),
+            schema=FORMAL_PREDICTION_SCHEMA,
+            fold=fold,
+            seed=None,
+            expected_fields=FORMAL_PREDICTION_FIELDS,
+        )
+        expected_metadata = {
+            "seeds": list(EXPECTED_SEEDS),
+            "n_registered_prediction_rows": len(reconstructed["keys"]),
+            "components_per_seed": 2,
+            "components_per_distribution": 10,
+            "equal_seed_weight": 0.2,
+            "parent_point_policy": "fixed_seed0_parent_not_averaged",
+            "candidate_null_point_policy": "five_seed_arithmetic_mean",
+        }
+        if any(
+            assembly_row.get(name) != value for name, value in expected_metadata.items()
+        ):
+            raise ValueError(
+                f"formal fold {fold} does not exactly derive from merged source "
+                "artifacts: assembly metadata differs"
+            )
+        _assert_exact_formal_reconstruction(observed, reconstructed, fold=fold)
+        mixtures[fold] = observed
+    return mixtures, sources_by_pair
 
 
 def _add_frozen_references(observed: dict[str, Any], reference: dict[str, Any]) -> None:
@@ -139,6 +236,7 @@ def score_formal(
         raise ValueError("puzzle-set formal merged integrity is not qualified")
     if not (
         assembly.get("equal_seed_mixture") is True
+        and int(assembly.get("source_run_count", -1)) == 100
         and assembly.get("best_seed_selection_performed") is False
         and assembly.get("score_computed") is False
         and assembly.get("partial_scores_inspected") is False
@@ -151,21 +249,35 @@ def score_formal(
     ):
         raise ValueError("puzzle-set formal scorer requires corrected TIC2A merge")
 
-    assembly_rows = {int(row["outer_fold"]): row for row in assembly.get("folds", [])}
+    assembly_fold_rows = assembly.get("folds", [])
+    source_fold_rows = merged.get("folds", [])
+    tic_fold_rows = tic2a_merged.get("folds", [])
+    if not all(
+        isinstance(rows, list)
+        for rows in (assembly_fold_rows, source_fold_rows, tic_fold_rows)
+    ):
+        raise ValueError("puzzle-set formal score universes are malformed")
+    assembly_rows = {int(row["outer_fold"]): row for row in assembly_fold_rows}
     source_rows = {
-        (int(row["outer_fold"]), int(row["seed"])): row
-        for row in merged.get("folds", [])
+        (int(row["outer_fold"]), int(row["seed"])): row for row in source_fold_rows
     }
-    tic_rows = {int(row["outer_fold"]): row for row in tic2a_merged.get("folds", [])}
-    reference_rows = _v13_reference_rows(v13_score)
+    tic_rows = {int(row["outer_fold"]): row for row in tic_fold_rows}
     expected = {(fold, seed) for fold in range(20) for seed in range(5)}
     if (
-        sorted(assembly_rows) != list(range(20))
+        len(assembly_fold_rows) != 20
+        or sorted(assembly_rows) != list(range(20))
+        or len(source_fold_rows) != 100
         or set(source_rows) != expected
+        or len(tic_fold_rows) != 20
         or sorted(tic_rows) != list(range(20))
     ):
         raise ValueError("puzzle-set formal score universes are incomplete")
 
+    mixture_predictions, source_predictions = (
+        _reconstruct_and_validate_formal_predictions(assembly_rows, source_rows)
+    )
+
+    reference_rows = _v13_reference_rows(v13_score)
     univ = M2Universe(m2_csv)
     identity = univ.build()
     if identity.get("canonical_mutant_full_profile_identity") != (
@@ -194,12 +306,7 @@ def score_formal(
         mixture = score_fold(
             univ,
             held_records,
-            _load_prediction(
-                Path(assembly_rows[fold_id]["prediction_artifact"]),
-                schema=FORMAL_PREDICTION_SCHEMA,
-                fold=fold_id,
-                seed=None,
-            ),
+            mixture_predictions[fold_id],
             absolute,
         )
         _add_frozen_references(mixture, reference)
@@ -210,12 +317,7 @@ def score_formal(
             score = score_fold(
                 univ,
                 held_records,
-                _load_prediction(
-                    Path(source_rows[(fold_id, seed)]["prediction_artifact"]),
-                    schema=PREDICTION_SCHEMA,
-                    fold=fold_id,
-                    seed=seed,
-                ),
+                source_predictions[(fold_id, seed)],
                 absolute,
             )
             _add_frozen_references(score, reference)
@@ -228,10 +330,12 @@ def score_formal(
         "status": "PUZZLE_SET_M4_COMPLETE_FORMAL_SCORE_PASS",
         "mixture_scores": mixture_scores,
         "individual_seed_scores": individual_seed_scores,
+        "context_retention_summary": merged["context_retention_summary"],
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
         "target_join_after_complete_merge": True,
         "v13_parent_and_feature41_replay_at_5e_7": True,
         "feature41_reference_fixed_across_seeds": True,
+        "formal_assembly_reconstructed_exactly_from_merged_sources": True,
         "equal_seed_mixture": True,
         "best_seed_selection_performed": False,
         "partial_fold_scores_inspected": False,

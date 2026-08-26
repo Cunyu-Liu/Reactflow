@@ -1,4 +1,4 @@
-# Position-aligned puzzle-set context design
+# V5 position-aligned, zero-preserving puzzle-set context design
 
 **Status:** `PRE_SCORE_IMPLEMENTATION_DESIGN_ONLY_NO_TRAINING_AUTHORITY`
 
@@ -32,8 +32,8 @@ A metadata-only audit of the 160 registered WT rows in OpenKnot M2 v4.5.2 found:
 Thus full-sequence position is a registered shared coordinate frame inside a
 puzzle. At a fixed coordinate, the eight WT profiles provide different designed
 sequences and measurements for the same target-position role. This makes
-position-aligned cross-construct conditioning both legal and materially more
-informative than global mean pooling. No mutant outcome column was used for this
+position-aligned cross-construct conditioning legal and more explicitly
+coordinate-indexed than global mean pooling. No mutant outcome column was used for this
 audit.
 
 ## 3. Alternatives
@@ -47,19 +47,25 @@ its width would not repair that missing indexing ability.
 ### B. Position-aligned cross-construct attention
 
 Selected. For every full-sequence coordinate independently, the eight frozen
-V14 hidden states and their observed flags form an unordered set. Candidate
-attention can exchange information across all eight constructs at that
-coordinate. The matched null executes the same projection, eight-token
-attention, FFN, and normalization, but circularly shifts every non-focal
-construct by 17 full-sequence positions while leaving the focal construct at
-its registered coordinate. Thus both arms expose every Q/K/V parameter to the
-same number of legal attention tokens; only correct cross-construct coordinate
-alignment differs.
+V14 hidden states and their observed flags form an unordered set. For each focal
+construct, its state supplies the single query and is excluded from K/V. The
+candidate query sees exactly seven registered-coordinate non-focal individual
+tokens plus one non-focal summary with no dedicated learned token. The matched
+null
+executes the same projection, eight-token K/V attention, FFN and normalization,
+but circularly shifts all seven non-focal streams by 17 full-sequence positions
+while leaving the focal query registered. Thus both arms expose every Q/K/V
+parameter to the same number of legal non-focal tokens; only correct
+cross-construct coordinate alignment differs.
 
-The focal incremental head receives both the aligned mixed state at the mutation
-source and the aligned mixed state at each receiver. The frozen V14 local source
-and receiver states, signed distance, mutation identity, feature41, and frozen
-V13 parent point remain explicit inputs.
+The focal query is never added back to the attention output. V5 also subtracts
+the complete cross block evaluated on a raw-zero non-focal reference, removing
+learned constants and query-only terms. The resulting source and receiver
+states enter one shared point head as a paired
+contrast, `h(base,cross)-h(base,0)`. The two evaluations use the same dropout
+draw, so the frozen V14 local source/receiver features, signed distance,
+mutation identity, feature41 and frozen V13 parent cannot by themselves create
+an increment.
 
 ### C. Target-structure graph alignment
 
@@ -71,46 +77,61 @@ registered eight-design relationship with a cleaner null.
 ## 4. Frozen architecture
 
 For hidden states \(H\in\mathbb R^{8\times177\times256}\), concatenate the WT
-observed indicator and project each aligned state:
+observed indicator and project each individual state:
 
 \[
-Z_{c,j}=W_p[H_{c,j};O_{c,j}]+W_qQ_{c,j},
+I_{c,j}=W_p[H_{c,j};O_{c,j}]+W_qR_{c,j}.
 \]
 
-where `Q` is the four-dimensional aligned WT statistic. It is
-leave-one-construct at the registered coordinate for the candidate and
-leave-one-construct at the fixed wrong-position coordinate for the matched
-null.
+Here `R` is an individual, missingness-aware four-vector containing the safe WT
+value and observed support; it contains no cross-construct or focal-deviation
+statistic. For focal construct \(c\), pool the other seven individual tokens and
+add their WT mean, population spread and support fraction to form one summary
+\(S_{-c,j}\) without a dedicated learned summary token.
 
-For each position \(j\), apply the same eight-token attention block:
+For each focal construct and position, the one-token query and eight-token K/V
+set are
 
 \[
-\widetilde Z_{:,j}=
-\operatorname{SetBlock}(Z_{:,j}).
+Q_{c,j}=I_{c,j},\qquad
+K/V_{c,j}=\{I_{d,j}:d\ne c\}\cup\{S_{-c,j}\}.
 \]
 
-For each focal construct, candidate and null both use eight legal K/V tokens.
-Candidate uses the eight registered-position states. Null keeps the focal state
-at position \(j\) and takes each of the other seven states from
+The focal token is never a K/V. Candidate uses the seven registered-position
+non-focal states and their summary. Null keeps the focal query at position
+\(j\) and takes each of the other seven states from
 \((j-17)\bmod L\), which is the value produced at position \(j\) by the fixed
-`torch.roll(..., shifts=17)` operation. No construct-order or method embedding
-is present. The fixed shift is independent of puzzle, method, target, fold and
-seed. Internal attention-weight dropout is zero in both arms; the matched
-residual and FFN dropouts remain `0.1`. Within-construct positional context has
-already been encoded by the frozen six-layer V14 encoder.
+`torch.roll(..., shifts=17)` operation, then rebuilds the summary from those
+shifted non-focal values. No construct-order or method embedding is present.
+The fixed shift is independent of puzzle, method, target, fold and seed.
+Internal attention-weight dropout is zero in both arms; the matched FFN and
+output-side residual dropouts remain `0.1`. Within-construct positional context
+has already been encoded by the frozen six-layer V14 encoder.
 
-The WT-only alignment audit justifies a low-dimensional explicit statistic at
-the same coordinate. For each focal construct, the candidate computes the
-leave-one-construct WT mean, population spread, observed support fraction and
-focal-minus-consensus deviation from the other seven constructs. The matched
-null supplies the same four-dimensional interface and the same projection
-parameters, but computes its mean, spread, support and focal deviation using
-the same seven constructs at their fixed 17-position-shifted coordinates.
-Therefore both arms use non-focal information, identical attention support and
-identical effective trainable parameter families; only biologically correct
-coordinate alignment is removed. The projected statistics are added before the
-set block; they do not introduce method or puzzle identity and remain
-permutation equivariant.
+The actual tokens above are not yet sufficient to define a zero-preserving
+representation because learned biases and query-conditioned attention can be
+nonzero without raw non-focal input. V5 therefore creates a reference before
+either learned projection by setting all seven non-focal hidden states,
+reactivities and observed indicators to zero. The real focal query is reused
+element by element. Let `F(q,V)` include individual and summary projection,
+Q/K/V attention, the FFN residual and output normalization. The returned state
+is
+
+\[
+C_{c,j}=F(Q_{c,j},V_{c,j})-F(Q_{c,j},V^{0}_{c,j}).
+\]
+
+There is deliberately no `Q + attention` residual. In training mode the actual
+and reference calls use the same dropout draw and leave RNG advanced by exactly
+one ordinary `F` call. This cancels learned projection biases, summary
+constants, attention/FFN/output-normalization biases and every query-only term.
+For arbitrary focal query and learned parameters, raw non-focal `V=0` therefore
+implies exact elementwise `C=0`. A nonzero `C` demonstrates causal dependence on
+non-focal inputs, not that the dependence is predictive or useful. Candidate
+and null use identical raw-zero references, non-focal support, summary interface
+and trainable parameter families; only registered versus fixed wrong-position
+coordinates differ. The frozen identifier is
+`POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V5`.
 
 Before mutation-effect fitting, the set operator receives one narrow,
 outer-train-only initialization stage. For each outer-train puzzle and each
@@ -122,25 +143,25 @@ wrong-position coordinates. A temporary `LayerNorm(256) -> Linear(256, 1)`
 decoder reconstructs the masked focal WT values with L1 loss. Candidate and
 null start from identical mixer/decoder states and use the same masks, puzzle
 order, AdamW settings, matched residual/FFN dropout stream and epoch count. The
-V14 encoder and the zero-initialized point head remain bitwise unchanged. The
+V14 encoder and shared point head remain bitwise unchanged. The
 769-parameter decoder is frozen and never enters point prediction or residual
 calibration. This initializes the new cross-construct operator using the exact
 relationship that the WT-only audit established, without giving either arm
 mutant outcomes.
 
-For mutation source \(s\), receiver \(i\), and focal construct \(c\), the
-trainable increment uses
+For mutation source \(s\), receiver \(i\), and focal construct \(c\), define
+`base` as the frozen focal V14 source/receiver features, signed distance,
+mutation identity, feature41 and frozen V13 parent. Define
+`cross=[C_{c,s},C_{c,i}]`. One shared head produces the paired increment
 
 \[
-g(x)=\operatorname{MLP}[
-f_{V14}(c,s,i),
-\widetilde Z_{c,s},
-\widetilde Z_{c,i},
-\widehat\Delta_{V13}(c,s,i)
-].
+g(x)=h([\mathrm{base},\mathrm{cross}])-h([\mathrm{base},0]).
 \]
 
-Its final layer is zero initialized and the prediction remains
+The two calls replay the same dropout mask in training and advance the random
+stream as one ordinary head call. Therefore base-only behavior cancels exactly;
+if the cross state is zero, \(g(x)=0\) even after arbitrary head updates. The
+head's final layer is zero initialized and the prediction remains
 
 \[
 \widehat\Delta=\widehat\Delta_{V13}+g(x).
@@ -152,23 +173,58 @@ V13 parent is evaluated outside the module and never optimized. The temporary
 769-parameter reconstruction decoder is a stage-specific training tool and is
 not counted in the final prediction model.
 
+Point fitting keeps the existing method-balanced signed-delta L1 objective and
+uses one fixed warmup plus joint schedule. Epoch 0 updates only the shared point
+head at learning rate `1e-3`; the context path is frozen and must remain bitwise
+unchanged. Epochs 1–39 continue the head at `1e-3` and update the pretrained
+context path at `3e-4`. Adam uses zero weight decay and gradient clipping `5.0`,
+with no early stopping or checkpoint selection. Frozen-point residual
+calibration then uses the existing puzzle-balanced CRPS objective; its gradients
+cannot return to the point model. MGDA, absolute-delta auxiliaries, learned loss
+weights and other objective changes are deferred to a separate amendment so
+this experiment identifies representation rather than a compound loss change.
+
+After point fitting, one outer-train-only retention diagnostic evaluates the
+initial, post-pretraining and post-point context snapshots using the same final
+frozen decoder and deterministic mask epoch `200`, which is disjoint from the
+training mask epochs. It accepts only `{puzzle, contexts}` from the nineteen
+outer-train puzzles, reports per-puzzle reconstruction L1 and then averages
+equally over puzzles. Candidate qualification requires both
+`pretraining_established` (post-pretraining mean L1 below initial) and
+`retention_positive` (post-point state preserves a positive fraction of that
+gain). The null receives the identical report, but its two retention booleans
+are not Gates. The diagnostic performs no checkpoint, learning-rate,
+architecture or threshold selection.
+
 ## 5. Verification and failure meaning
 
 The implementation must establish:
 
 - all eight constructs have one exact length before mixing;
 - construct permutation changes only the corresponding construct axis;
-- candidate focal output depends on non-focal input at the same coordinate;
+- candidate representation changes under a registered-coordinate non-focal
+  counterfactual; this verifies dependence only, not predictive value;
 - the null focal output is invariant to a registered-position non-focal
   counterfactual when the corresponding shifted input remains fixed;
-- candidate and null each expose all eight legal attention tokens and have
+- candidate and null each expose seven non-focal individual K/V tokens plus one
+  non-focal summary token, exclude the focal token from K/V, and have
   finite nonzero Q, K and V gradients on the same nondegenerate probe;
+- neither arm adds the focal query as an attention residual;
+- raw-zero references set all seven non-focal hidden/reactivity/observed streams
+  to zero before learned projection and reuse the actual focal query exactly;
+- actual and reference both traverse individual/summary projection, attention,
+  FFN residual and output normalization;
+- with arbitrary focal query and deliberately nonzero learned biases, raw-zero
+  actual input cancels the V5 representation exactly in train and evaluation
+  modes;
+- actual/reference cross-block passes share one dropout draw and advance RNG as
+  exactly one ordinary cross-block evaluation;
 - attention-weight dropout is exactly zero in both arms;
 - candidate/null state, total parameters, trainable parameters, input universe,
   optimizer, and random initialization match exactly;
-- candidate statistics exclude the focal construct at the registered
-  coordinate, while null statistics exclude it at the fixed 17-position-shifted
-  coordinate;
+- candidate summary statistics use only the seven registered-coordinate
+  non-focal constructs, while null summaries use only their fixed
+  17-position-shifted values;
 - both arms replay the frozen V13 parent within `1e-7` before training;
 - masked-WT batches contain only the nineteen outer-train `{puzzle, contexts}`
   records, exclude the held puzzle, and cannot carry mutant cells or targets;
@@ -178,6 +234,12 @@ The implementation must establish:
 - pretraining changes the set operator but leaves the frozen V14 encoder and
   point head bitwise unchanged, preserves parent replay within `1e-7`, and
   freezes the 769-parameter decoder before point fitting;
+- the shared point head computes `h(base,cross)-h(base,0)` under one replayed
+  dropout draw, and zero cross cancels the residual exactly in train and
+  evaluation modes even after nonzero head updates;
+- point epoch 0 updates only the head at `1e-3` while context stays bitwise
+  unchanged; epochs 1–39 update the head at `1e-3` and context at `3e-4`, for
+  exactly 760 head and 741 context updates per arm;
 - after the zero-initialized output layer has received its first update, a
   second supervised backward pass gives finite nonzero gradients to the
   construct projection and cross-construct attention while the frozen encoder
@@ -188,11 +250,22 @@ The implementation must establish:
   shifted-coordinate input is unchanged;
 - the frozen V14 encoder receives no gradient and remains bitwise unchanged;
 - P20_Eterna stays in all 177 aligned context positions with observed flag zero
-  and no fabricated supervised cell.
+  and no fabricated supervised cell;
+- the fixed outer-train-only epoch-200 retention diagnostic uses one final
+  frozen decoder for initial/post-pretraining/post-point snapshots, leaves all
+  model state, gradients and modes unchanged, and qualifies the candidate only
+  when both `pretraining_established` and `retention_positive` are true; null
+  retention is report-only.
+
+Constructing the reference after projection, changing the focal query between
+passes, skipping any layer in the reference path, using a second stochastic
+draw, advancing RNG twice or failing exact raw-zero cancellation falsifies V5
+and closes real-data eligibility. The point-head contrast cannot repair a
+non-zero-preserving representation upstream.
 
 This architecture is still implementation-only. If a future complete P1
-candidate does not beat its position-deranged full-attention null under the
-predeclared attribution Gate, the result means that aligned cross-design WT
+candidate does not beat its position-deranged, zero-preserving V5 null under
+the predeclared attribution Gate, the result means that aligned cross-design WT
 context has not provided usable incremental signal under this frozen model and
 protocol; the response is to terminate the family, not return to global
 pooling, widen the mixer, or add a structure graph.
@@ -241,15 +314,22 @@ One pretraining epoch visits each outer-train puzzle once, yielding exactly
 `200 x 19 = 3,800` WT-only puzzle updates per arm. It has no mutant target
 exposure. One point epoch then visits every outer-train puzzle once and exposes
 every available supervised cell once; 40 epochs retain the historical 40 target
-exposures per cell and yield 760 puzzle-level Adam updates per arm. Residual
-calibration adds another 760 puzzle-level updates. The fold artifact records all
-three counts and histories separately. The point stage does not inflate to 320
-epochs merely to match cell-level update count, because that would reuse each
-mutant target eight times more often and confound the new capability with a much
-larger outcome-exposure budget.
+exposures per cell and yield 760 puzzle-level Adam updates per arm. The first 19
+updates (epoch 0) are head-only at `1e-3`; the remaining 741 updates train the
+head at `1e-3` and context path at `3e-4`. Residual calibration adds another 760
+puzzle-level updates with the point model frozen. The fold artifact records all
+stage counts, histories, learning rates, warmup invariance and retention
+diagnostics separately. The point stage does not inflate to 320 epochs merely
+to match cell-level update count, because that would reuse each mutant target
+eight times more often and confound the new capability with a much larger
+outcome-exposure budget.
 
-The inactive score-once path joins targets only after that merge. Candidate
-must simultaneously satisfy the existing top-journal margins:
+The inactive score-once path joins targets only after that merge. Before any
+score access, the candidate retention report must have both
+`pretraining_established=true` and `retention_positive=true`; failure terminates
+qualification, while the null report never selects or blocks the model. An
+eligible candidate must then simultaneously satisfy the existing top-journal
+margins:
 
 - signed-delta MAE: at least 12% versus feature41, 2% versus terminal V12,
   2% versus its frozen V13 parent and 1.5% versus the matched null;
@@ -271,10 +351,11 @@ must simultaneously satisfy the existing top-journal margins:
 If and only if that complete P1M3 screen passes exactly, P1M4 is a new,
 independent 20-fold by five-seed universe. Seed 0 is rerun rather than copied
 from the screen. Each seed independently trains both the correctly aligned
-full-context candidate and the position-deranged full-attention matched null
-under the same `200 + 40 + 40` schedule. The formal point prediction is the
-arithmetic mean of the five seed points. Candidate and null probability
-predictions are ten-component Gaussian mixtures: each seed contributes its two
+zero-preserving V5 candidate and the position-deranged zero-preserving V5 matched null, each
+with seven non-focal individual K/V tokens plus the summary, under the same
+`200 + 1 head-only + 39 joint + 40 calibration` schedule. The formal point
+prediction is the arithmetic mean of the five seed points. Candidate and null
+probability predictions are ten-component Gaussian mixtures: each seed contributes its two
 components and exactly one fifth of the total probability mass. CRPS, coverage
 and distribution-derived absolute delta are recomputed from those ten
 components; they are not averages of five single-seed scores.

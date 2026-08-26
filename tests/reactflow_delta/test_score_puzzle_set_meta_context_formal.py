@@ -12,6 +12,7 @@ from scripts.reactflow_delta.assemble_puzzle_set_meta_context_formal import (
     FORMAL_PREDICTION_SCHEMA,
     SCHEMA as ASSEMBLY_SCHEMA,
     _REQUIRED_MERGE_INTEGRITY_TRUE,
+    assemble,
 )
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import MERGED_SCHEMA
 from scripts.reactflow_delta.puzzle_set_meta_context_data import PREDICTION_SCHEMA
@@ -36,6 +37,97 @@ def _write_prediction(path: Path, *, schema: str, fold: int, seed: int) -> None:
         outer_fold=np.asarray([fold], dtype=np.int64),
         seed=np.asarray([seed], dtype=np.int64),
     )
+
+
+def _context_retention_summary() -> dict[str, object]:
+    return {
+        "candidate_pretraining_established_all_runs": True,
+        "candidate_retention_positive_all_runs": True,
+        "null_pretraining_established_all_runs": True,
+        "null_retention_positive_all_runs": True,
+        "fold_seed_diagnostics": [],
+        "selection_performed": False,
+        "mutant_outcome_used": False,
+        "held_puzzle_accessed": False,
+    }
+
+
+def _write_source_prediction(
+    directory: Path,
+    *,
+    fold: int,
+    seed: int,
+    rerun_shift: float,
+) -> dict[str, object]:
+    key = f"key-{fold}"
+    candidate_point = np.asarray([0.1 * fold + seed + rerun_shift])
+    null_point = np.asarray([10.0 + 0.1 * fold + seed + rerun_shift])
+    payload: dict[str, np.ndarray] = {
+        "schema_version": np.asarray(PREDICTION_SCHEMA),
+        "keys": np.asarray([key], dtype=object),
+        "biological_scoring_key": np.asarray([key], dtype=object),
+        "outer_fold": np.asarray([fold], dtype=np.int64),
+        "seed": np.asarray([seed], dtype=np.int64),
+        "registered_status": np.asarray(["covered"], dtype=object),
+        "feature41_point": np.asarray([0.0]),
+        "parent_point": np.asarray([0.05]),
+        "candidate_point": candidate_point,
+        "null_point": null_point,
+    }
+    for name, point in (("candidate", candidate_point), ("null", null_point)):
+        payload[f"{name}_weights"] = np.asarray([[0.5, 0.5]])
+        payload[f"{name}_locations"] = np.stack([point, point], axis=1)
+        payload[f"{name}_scales"] = np.asarray([[0.1, 0.2]])
+        payload[f"{name}_expected_absolute_delta"] = np.abs(point)
+    path = directory / f"source_{fold}_{seed}.npz"
+    np.savez_compressed(path, **payload)
+    return {
+        "outer_fold": fold,
+        "seed": seed,
+        "prediction_artifact": str(path),
+        "n_registered_prediction_rows": 1,
+    }
+
+
+def _complete_merge(directory: Path, *, rerun_shift: float = 0.0) -> dict[str, object]:
+    directory.mkdir(parents=True, exist_ok=True)
+    source_rows = [
+        _write_source_prediction(
+            directory,
+            fold=fold,
+            seed=seed,
+            rerun_shift=rerun_shift,
+        )
+        for fold in range(20)
+        for seed in range(5)
+    ]
+    integrity = {name: True for name in _REQUIRED_MERGE_INTEGRITY_TRUE}
+    integrity.update(
+        {"partial_scores_inspected": False, "external_outcome_accessed": False}
+    )
+    return {
+        "schema_version": MERGED_SCHEMA,
+        "status": "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS",
+        "phase": "P1M4",
+        "expected_folds": list(range(20)),
+        "expected_seeds": list(range(5)),
+        "expected_pretraining_epochs": 200,
+        "expected_point_epochs": 40,
+        "expected_calibration_epochs": 40,
+        "folds": source_rows,
+        "context_retention_summary": _context_retention_summary(),
+        "merge_integrity": integrity,
+    }
+
+
+def _tic2a_merge() -> dict[str, object]:
+    return {
+        "schema_version": formal_module.TIC2A_MERGED_SCHEMA,
+        "status": "TIC2A_COMPLETE_UNSCORED_MERGE_PASS",
+        "folds": [
+            {"outer_fold": fold, "prediction_artifact": "unused"} for fold in range(20)
+        ],
+    }
 
 
 def test_formal_loader_distinguishes_ensemble_from_constituent_seed(
@@ -99,72 +191,9 @@ def test_formal_scorer_rejects_a_nonformal_merge_before_target_access(
 def test_formal_scorer_scores_ten_component_mixture_not_seed_score_average(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    assembly_rows = []
-    source_rows = []
-    for fold in range(20):
-        assembled_path = tmp_path / f"assembled_{fold}.npz"
-        np.savez_compressed(
-            assembled_path,
-            schema_version=np.asarray(FORMAL_PREDICTION_SCHEMA),
-            keys=np.asarray([f"key-{fold}"], dtype=object),
-            outer_fold=np.asarray([fold]),
-            seed=np.asarray([-1]),
-            candidate_weights=np.full((1, 10), 0.1),
-        )
-        assembly_rows.append(
-            {"outer_fold": fold, "prediction_artifact": str(assembled_path)}
-        )
-        for seed in range(5):
-            source_path = tmp_path / f"source_{fold}_{seed}.npz"
-            np.savez_compressed(
-                source_path,
-                schema_version=np.asarray(PREDICTION_SCHEMA),
-                keys=np.asarray([f"key-{fold}"], dtype=object),
-                outer_fold=np.asarray([fold]),
-                seed=np.asarray([seed]),
-                candidate_weights=np.full((1, 2), 0.5),
-            )
-            source_rows.append(
-                {
-                    "outer_fold": fold,
-                    "seed": seed,
-                    "prediction_artifact": str(source_path),
-                }
-            )
-    assembly = {
-        "schema_version": ASSEMBLY_SCHEMA,
-        "status": ASSEMBLY_STATUS,
-        "phase": "P1M4",
-        "folds": assembly_rows,
-        "equal_seed_mixture": True,
-        "best_seed_selection_performed": False,
-        "score_computed": False,
-        "partial_scores_inspected": False,
-        "external_outcome_accessed": False,
-    }
-    integrity = {name: True for name in _REQUIRED_MERGE_INTEGRITY_TRUE}
-    integrity.update(
-        {"partial_scores_inspected": False, "external_outcome_accessed": False}
-    )
-    merged = {
-        "schema_version": MERGED_SCHEMA,
-        "status": "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS",
-        "phase": "P1M4",
-        "expected_folds": list(range(20)),
-        "expected_seeds": list(range(5)),
-        "expected_pretraining_epochs": 200,
-        "expected_point_epochs": 40,
-        "expected_calibration_epochs": 40,
-        "folds": source_rows,
-        "merge_integrity": integrity,
-    }
-    tic2a = {
-        "schema_version": formal_module.TIC2A_MERGED_SCHEMA,
-        "status": "TIC2A_COMPLETE_UNSCORED_MERGE_PASS",
-        "folds": [
-            {"outer_fold": fold, "prediction_artifact": "unused"} for fold in range(20)
-        ],
-    }
+    merged = _complete_merge(tmp_path / "rerun_a")
+    assembly = assemble(merged, tmp_path / "formal_a")
+    tic2a = _tic2a_merge()
 
     class _Universe:
         def __init__(self, _path: Path) -> None:
@@ -208,5 +237,40 @@ def test_formal_scorer_scores_ten_component_mixture_not_seed_score_average(
 
     result = score_formal(assembly, merged, tic2a, {}, tmp_path / "unused.csv")
     assert result["status"] == "PUZZLE_SET_M4_COMPLETE_FORMAL_SCORE_PASS"
+    assert result["context_retention_summary"] == _context_retention_summary()
+    assert result["formal_assembly_reconstructed_exactly_from_merged_sources"] is True
     assert component_counts.count(10) == 20
     assert component_counts.count(2) == 100
+
+
+def test_formal_scorer_rejects_assembly_from_a_different_legal_rerun_before_targets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    merged_a = _complete_merge(tmp_path / "rerun_a", rerun_shift=0.0)
+    assembly_a = assemble(merged_a, tmp_path / "formal_a")
+    merged_b = _complete_merge(tmp_path / "rerun_b", rerun_shift=0.25)
+    # Establish that rerun B independently forms a legal formal assembly; the
+    # rejected condition is cross-pairing legal assembly A with legal merge B.
+    assemble(merged_b, tmp_path / "formal_b")
+
+    target_accessed = False
+
+    class _ForbiddenUniverse:
+        def __init__(self, _path: Path) -> None:
+            nonlocal target_accessed
+            target_accessed = True
+            raise AssertionError("target universe opened before source reconstruction")
+
+    monkeypatch.setattr(formal_module, "M2Universe", _ForbiddenUniverse)
+
+    with pytest.raises(
+        ValueError, match="does not exactly derive from merged source artifacts"
+    ):
+        score_formal(
+            assembly_a,
+            merged_b,
+            _tic2a_merge(),
+            {},
+            tmp_path / "must-not-open.csv",
+        )
+    assert target_accessed is False

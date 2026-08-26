@@ -16,7 +16,7 @@ from scripts.reactflow_delta.score_puzzle_set_meta_context import (
 )
 
 
-SCHEMA = "reactflow_delta.puzzle_set_meta_context_qualification.proposed.v1"
+SCHEMA = "reactflow_delta.puzzle_set_meta_context_qualification.proposed.v2"
 
 
 def qualify(scores: dict[str, Any]) -> dict[str, Any]:
@@ -110,6 +110,13 @@ def qualify(scores: dict[str, Any]) -> dict[str, Any]:
         }
         calibration_gate = calibration_gate and passed
 
+    retention = scores.get("context_retention_summary", {})
+    retention_protocol = bool(
+        retention.get("selection_performed") is False
+        and retention.get("mutant_outcome_used") is False
+        and retention.get("held_puzzle_accessed") is False
+    )
+
     signed = (
         comparisons["signed_vs_feature41"],
         comparisons["signed_vs_terminal_v12"],
@@ -135,6 +142,13 @@ def qualify(scores: dict[str, Any]) -> dict[str, Any]:
     headline = signed + point + crps + distribution
     gates = {
         "prediction_integrity": integrity,
+        "candidate_pretraining_established_all_runs": (
+            retention.get("candidate_pretraining_established_all_runs") is True
+        ),
+        "candidate_context_retention_positive_all_runs": (
+            retention.get("candidate_retention_positive_all_runs") is True
+        ),
+        "retention_protocol_selection_free_and_outcome_blind": retention_protocol,
         "signed_gain_vs_feature41_ge_12pct": signed[0]["relative_gain"] >= 0.12,
         "signed_gain_vs_terminal_v12_ge_2pct": signed[1]["relative_gain"] >= 0.02,
         "signed_gain_vs_v13_parent_ge_2pct": signed[2]["relative_gain"] >= 0.02,
@@ -147,9 +161,11 @@ def qualify(scores: dict[str, Any]) -> dict[str, Any]:
             and signed[3]["positive_puzzles"] >= 14
         ),
         "point_absolute_gain_vs_feature41_ge_7pct": point[0]["relative_gain"] >= 0.07,
-        "point_absolute_gain_vs_terminal_v11_ge_2pct": point[1]["relative_gain"] >= 0.02,
+        "point_absolute_gain_vs_terminal_v11_ge_2pct": point[1]["relative_gain"]
+        >= 0.02,
         "point_absolute_gain_vs_v13_parent_ge_2pct": point[2]["relative_gain"] >= 0.02,
-        "point_absolute_gain_vs_matched_null_ge_1pct": point[3]["relative_gain"] >= 0.01,
+        "point_absolute_gain_vs_matched_null_ge_1pct": point[3]["relative_gain"]
+        >= 0.01,
         "point_absolute_ci_lower_each_gt_zero": all(
             item["ci95"][0] > 0.0 for item in point
         ),
@@ -206,6 +222,7 @@ def qualify(scores: dict[str, Any]) -> dict[str, Any]:
         "gates": gates,
         "comparisons": comparisons,
         "calibration": calibration,
+        "context_retention_summary": retention,
         "target_profile_identity_exact": True,
         "model_or_threshold_selection_performed": False,
         "evidence_status": "POST_HOC_DEVELOPMENT_SCREEN_ONLY",

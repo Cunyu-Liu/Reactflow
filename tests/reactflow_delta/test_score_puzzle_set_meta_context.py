@@ -92,14 +92,21 @@ def _integrity() -> dict[str, bool]:
         "prediction_only_schema": True,
         "outcome_blind_puzzle_set_inputs_all_runs": True,
         "exact_parameter_and_initialization_match_all_runs": True,
-        "candidate_full_cross_construct_attention_all_runs": True,
-        "null_position_deranged_full_attention_all_runs": True,
+        "candidate_nonfocal_only_cross_attention_all_runs": True,
+        "null_position_deranged_nonfocal_cross_attention_all_runs": True,
         "candidate_null_equal_attention_support_all_runs": True,
         "attention_weight_dropout_disabled_all_runs": True,
         "puzzle_balanced_training_all_runs": True,
-        "position_aligned_cross_construct_attention_all_runs": True,
-        "leave_one_construct_alignment_statistics_all_runs": True,
-        "matched_null_position_deranged_alignment_statistics_all_runs": True,
+        "position_aligned_nonfocal_cross_values_all_runs": True,
+        "nonfocal_summary_alignment_statistics_all_runs": True,
+        "matched_null_position_deranged_summary_statistics_all_runs": True,
+        "nonfocal_only_cross_values_all_runs": True,
+        "focal_excluded_from_cross_kv_all_runs": True,
+        "eight_token_cross_support_all_runs": True,
+        "paired_cross_block_reference_cancellation_all_runs": True,
+        "zero_nonfocal_exact_cross_replay_all_runs": True,
+        "paired_point_head_reference_cancellation_all_runs": True,
+        "zero_cross_exact_parent_replay_all_runs": True,
         "fixed_position_derangement_shift_17_all_runs": True,
         "outer_train_wt_only_puzzle_set_pretraining_all_runs": True,
         "held_puzzle_excluded_from_pretraining_all_runs": True,
@@ -112,12 +119,28 @@ def _integrity() -> dict[str, bool]:
         "frozen_v13_point_parent_all_runs": True,
         "frozen_v14_context_encoder_all_runs": True,
         "parent_replay_before_and_after_pretraining_all_runs": True,
+        "point_head_only_warmup_all_runs": True,
+        "point_discriminative_learning_rates_all_runs": True,
+        "pretraining_capability_retention_diagnostic_complete_all_runs": True,
         "point_frozen_during_calibration_all_runs": True,
         "v10_residual_family_all_runs": True,
         "puzzle_balanced_residual_calibration_all_runs": True,
         "median_constraint_all_runs": True,
         "partial_scores_inspected": False,
         "external_outcome_accessed": False,
+    }
+
+
+def _context_retention_summary() -> dict[str, object]:
+    return {
+        "candidate_pretraining_established_all_runs": True,
+        "candidate_retention_positive_all_runs": True,
+        "null_pretraining_established_all_runs": True,
+        "null_retention_positive_all_runs": True,
+        "fold_seed_diagnostics": [],
+        "selection_performed": False,
+        "mutant_outcome_used": False,
+        "held_puzzle_accessed": False,
     }
 
 
@@ -188,7 +211,7 @@ def test_score_authority_requires_complete_score_once_token(tmp_path: Path) -> N
 def test_complete_merge_integrity_is_required_as_one_unit() -> None:
     integrity = _integrity()
     assert merged_integrity_pass(integrity)
-    integrity["position_aligned_cross_construct_attention_all_runs"] = False
+    integrity["position_aligned_nonfocal_cross_values_all_runs"] = False
     assert not merged_integrity_pass(integrity)
     integrity = _integrity()
     integrity["mutant_outcome_excluded_from_pretraining_all_runs"] = False
@@ -205,6 +228,7 @@ def test_scorer_cannot_score_smoke_or_nonseedzero_merge(tmp_path: Path) -> None:
         "expected_pretraining_epochs": 3,
         "expected_point_epochs": 3,
         "expected_calibration_epochs": 3,
+        "context_retention_summary": _context_retention_summary(),
     }
     with pytest.raises(ValueError, match="complete unscored merge"):
         score_complete(merged, {}, {}, tmp_path / "unused.csv")

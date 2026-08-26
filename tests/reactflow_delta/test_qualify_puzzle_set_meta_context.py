@@ -8,6 +8,19 @@ from scripts.reactflow_delta.qualify_puzzle_set_meta_context import qualify
 from scripts.reactflow_delta.score_puzzle_set_meta_context import SCHEMA as SCORE_SCHEMA
 
 
+def _context_retention_summary() -> dict[str, object]:
+    return {
+        "candidate_pretraining_established_all_runs": True,
+        "candidate_retention_positive_all_runs": True,
+        "null_pretraining_established_all_runs": True,
+        "null_retention_positive_all_runs": True,
+        "fold_seed_diagnostics": [],
+        "selection_performed": False,
+        "mutant_outcome_used": False,
+        "held_puzzle_accessed": False,
+    }
+
+
 def _score_artifact() -> dict:
     rows = []
     for fold in range(20):
@@ -44,6 +57,7 @@ def _score_artifact() -> dict:
         "schema_version": SCORE_SCHEMA,
         "status": "PUZZLE_SET_M3_COMPLETE_SCORE_PASS",
         "scores": rows,
+        "context_retention_summary": _context_retention_summary(),
     }
 
 
@@ -78,3 +92,23 @@ def test_coverage_or_unexpected_key_failure_cannot_be_overridden() -> None:
     result = qualify(score)
     assert result["gates"]["prediction_integrity"] is False
     assert result["gate_passed"] is False
+
+
+@pytest.mark.parametrize("retention_state", ["missing", "negative"])
+def test_missing_or_negative_candidate_retention_cannot_pass(
+    retention_state: str,
+) -> None:
+    score = _score_artifact()
+    if retention_state == "missing":
+        score.pop("context_retention_summary")
+    else:
+        score["context_retention_summary"][
+            "candidate_retention_positive_all_runs"
+        ] = False
+    result = qualify(score)
+    assert not (
+        result["gates"]["candidate_pretraining_established_all_runs"]
+        and result["gates"]["candidate_context_retention_positive_all_runs"]
+    )
+    assert result["gate_passed"] is False
+    assert result["puzzle_set_m4_authorized"] is False

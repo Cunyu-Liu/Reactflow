@@ -16,6 +16,7 @@ from scripts.reactflow_delta.assemble_puzzle_set_meta_context_formal import (
     _REQUIRED_MERGE_INTEGRITY_TRUE,
     assemble,
     assemble_fold,
+    assemble_fold_prediction_arrays,
 )
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import MERGED_SCHEMA
 from scripts.reactflow_delta.model_rescue_v9 import expected_absolute_delta
@@ -77,6 +78,19 @@ def _fold_rows(directory: Path, *, fold: int = 0) -> list[dict[str, object]]:
     ]
 
 
+def _context_retention_summary() -> dict[str, object]:
+    return {
+        "candidate_pretraining_established_all_runs": True,
+        "candidate_retention_positive_all_runs": True,
+        "null_pretraining_established_all_runs": True,
+        "null_retention_positive_all_runs": True,
+        "fold_seed_diagnostics": [],
+        "selection_performed": False,
+        "mutant_outcome_used": False,
+        "held_puzzle_accessed": False,
+    }
+
+
 def _complete_merge(directory: Path) -> dict[str, object]:
     rows = []
     for fold in EXPECTED_FOLDS:
@@ -106,6 +120,7 @@ def _complete_merge(directory: Path) -> dict[str, object]:
         "expected_point_epochs": 40,
         "expected_calibration_epochs": 40,
         "folds": rows,
+        "context_retention_summary": _context_retention_summary(),
         "merge_integrity": integrity,
     }
 
@@ -155,6 +170,28 @@ def test_formal_assembly_uses_complete_universe_and_equal_seed_mixture(
             for field in prediction.files
             for fragment in forbidden_fragments
         )
+
+
+def test_persisted_formal_fold_exactly_matches_the_pure_array_assembly(
+    tmp_path: Path,
+) -> None:
+    rows = _fold_rows(tmp_path)
+    sources = []
+    for row in sorted(rows, key=lambda item: int(item["seed"])):
+        with np.load(row["prediction_artifact"], allow_pickle=True) as handle:
+            sources.append(
+                {name: np.asarray(handle[name]).copy() for name in handle.files}
+            )
+    expected = assemble_fold_prediction_arrays(sources, fold=0)
+    assembled = assemble_fold(rows, fold=0, out_dir=tmp_path / "formal")
+    with np.load(assembled["prediction_artifact"], allow_pickle=True) as handle:
+        observed = {name: np.asarray(handle[name]).copy() for name in handle.files}
+
+    assert set(observed) == set(expected)
+    for name in expected:
+        assert observed[name].shape == expected[name].shape
+        assert observed[name].dtype == expected[name].dtype
+        assert np.array_equal(observed[name], expected[name])
 
 
 def test_formal_fold_rejects_missing_or_duplicate_seed(tmp_path: Path) -> None:
