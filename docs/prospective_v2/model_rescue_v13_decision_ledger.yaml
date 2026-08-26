@@ -59,6 +59,23 @@ outcome_access:
   new_external_outcome_accessed: false
 
 events:
+  - id: V13M3_WORKER4_OOM_RECOVERY
+    observed_at: '2026-08-26T12:04:00+08:00'
+    status: V13M3_INTERRUPTED_RECOVERABLE_WORKER4_ONLY
+    failed_worker: 4
+    original_physical_gpu: 6
+    process_visible_cuda_capacity_gib: 4.75
+    missing_folds: [4, 10, 16]
+    complete_artifacts_before_recovery: 0
+    recovery_physical_gpu: 5
+    recovery_session: reactflow_v13_v13m3_recovery_worker4_gpu5_20260826
+    model_epoch_seed_gate_or_microbatch_changed: false
+    scientific_score_read: false
+    partial_score_read: false
+    external_outcome_accessed: false
+    expected_controller_outcome: EXIT_NONZERO_WITHOUT_MERGE_AFTER_OTHER_WORKERS_COMPLETE
+    recovery_action: COMPLETE_MISSING_FOLDS_THEN_RUN_FROZEN_MERGER_MANUALLY_AT_20_OF_20
+
   - id: V13M2_PAIRED_DROPOUT_ENGINEERING_SMOKE_PASS
     observed_at: '2026-08-26T11:47:00+08:00'
     status: V13M2_ENGINEERING_SMOKE_PASS
