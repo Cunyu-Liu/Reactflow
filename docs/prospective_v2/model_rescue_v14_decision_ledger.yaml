@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-updated_at: '2026-08-27T03:05:00+08:00'
+updated_at: '2026-08-27T04:05:00+08:00'
 
 immutable_parent_verdicts:
   v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -60,8 +60,8 @@ frozen_counts:
 
 phase_state:
   V14M0: CONTRACT_FROZEN_PASS
-  V14M1: IMPLEMENTATION_AUTHORIZED_TRAINING_CLOSED
-  V14M2: NOT_AUTHORIZED
+  V14M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
+  V14M2: REAL_DATA_ENGINEERING_SMOKE_AUTHORIZED
   V14M3: NOT_AUTHORIZED
   V14M4: NOT_AUTHORIZED
   V14M5: NOT_RUN
@@ -89,5 +89,19 @@ events:
     phase: V14M1
     event: CORRECTED_NONEXISTENT_V8_DIRECTORY_TO_EXISTING_TWENTY_FOLD_V8M1_ARTIFACT_PATH
     scientific_protocol_changed: false
+    score_accessed: false
+    external_outcome_accessed: false
+  - at: '2026-08-27T04:05:00+08:00'
+    phase: V14M1
+    event: LOCAL_AND_REMOTE_FOCUSED_TESTS_AND_CONTRACT_VALIDATOR_PASS
+    focused_tests_passed: 12
+    score_accessed: false
+    external_outcome_accessed: false
+  - at: '2026-08-27T04:05:00+08:00'
+    phase: V14M2
+    event: REAL_DATA_PREDICTION_ONLY_ENGINEERING_SMOKE_AUTHORIZED
+    folds: [0, 1]
+    seed: 0
+    epochs: [3, 3, 3]
     score_accessed: false
     external_outcome_accessed: false

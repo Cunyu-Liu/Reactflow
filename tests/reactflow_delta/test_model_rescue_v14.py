@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import yaml
 
 from scripts.reactflow_delta.model_rescue_v14 import (
     EXPECTED_TOTAL_PARAMETERS,
@@ -101,8 +102,15 @@ def test_v14_pretraining_changes_only_candidate_encoder_and_decoder() -> None:
         assert torch.equal(value, residual_null[name])
 
 
-def test_v14_active_authority_opens_only_implementation() -> None:
-    assert_run_authority(ROOT, "V14M1")
+def test_v14_active_runnable_authority_matches_current_phase() -> None:
+    active = yaml.safe_load(
+        (ROOT / "configs/reactflow_delta/active_contract.yaml").read_text()
+    )
+    phase = active["authority"]["current_phase"]
+    if phase in {"V14M1", "V14M2", "V14M3", "V14M4"} and active.get(
+        "held_score_read_allowed"
+    ) is False:
+        assert_run_authority(ROOT, phase)
 
 
 def test_v14_prediction_path_has_no_target_or_identity_shortcut_inputs() -> None:

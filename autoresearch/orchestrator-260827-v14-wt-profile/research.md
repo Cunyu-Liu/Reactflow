@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260827-v14-wt-profile
 date: 2026-08-27
-status: IMPLEMENTATION_IN_PROGRESS
+status: ENGINEERING_SMOKE_AUTHORIZED
 parent: orchestrator-260827-post-v13
 ---
 
@@ -43,3 +43,4 @@ The hypothesis is falsified if the candidate misses any frozen V14M3 top-journal
 
 - 2026-08-27: V14 architecture, objective, attribution null and gates selected before implementation and outcome access.
 - 2026-08-27: contract validation passed; V14M1 implementation opened with real-data training and score access closed.
+- 2026-08-27: 12 focused tests passed locally and remotely; V14M2 folds 0/1 engineering smoke opened with scientific score access closed.
