@@ -97,6 +97,15 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         "signed_and_point_positive_puzzles_min": 14,
     }:
         raise RuntimeError("coherent diagnostic Gate changed")
+    if gates.get("both_pass_margin_terms") != [
+        "SIGNED_RELATIVE_GAIN_DIVIDED_BY_ITS_MINIMUM",
+        "POINT_ABSOLUTE_RELATIVE_GAIN_DIVIDED_BY_ITS_MINIMUM",
+        "SIGNED_POSITIVE_PUZZLES_DIVIDED_BY_14",
+        "POINT_ABSOLUTE_POSITIVE_PUZZLES_DIVIDED_BY_14",
+    ] or gates.get("ci_terms_in_both_pass_margin") != (
+        "BINARY_PASS_PREREQUISITE_NOT_NUMERIC_MARGIN"
+    ):
+        raise RuntimeError("post-V13 deterministic both-pass rule changed")
 
     if ledger.get("immutable_parent_verdicts", {}).get("v13") != (
         "TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL"
@@ -126,4 +135,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

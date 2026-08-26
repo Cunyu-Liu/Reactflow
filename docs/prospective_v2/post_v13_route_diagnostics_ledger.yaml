@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.post_v13_route_diagnostics_ledger.v1
 contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
-current_status: PV13D0_CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+current_status: PV13D1_IMPLEMENTATION_AND_FOCUSED_TESTS_ONLY
 created_at: '2026-08-27T01:20:00+08:00'
 
 immutable_parent_verdicts:
@@ -43,7 +43,7 @@ decisions:
 
 phase_state:
   PV13D0: CONTRACT_FROZEN
-  PV13D1: NOT_AUTHORIZED
+  PV13D1: IMPLEMENTATION_AUTHORIZED
   PV13D2: NOT_AUTHORIZED
   PV13D3: NOT_AUTHORIZED
 
@@ -53,6 +53,17 @@ outcome_access:
   new_external_outcome_accessed: false
 
 events:
+  - id: PV13D1_IMPLEMENTATION_AUTHORITY_OPEN
+    observed_at: '2026-08-27T01:35:00+08:00'
+    status: IMPLEMENTATION_AND_FOCUSED_TESTS_ONLY
+    contract_commit: cdb5f7ad67e32e707310ee4dcd1e869367fca53d
+    contract_tests_passed: 3
+    contract_validation_status: POST_V13_ROUTE_DIAGNOSTIC_CONTRACT_VALIDATION_PASS
+    real_data_diagnostic_allowed: false
+    held_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: IMPLEMENT_RUNNER_MERGER_SCORER_QUALIFIER_AND_TESTS
+
   - id: PV13D0_CONTRACT_FREEZE
     observed_at: '2026-08-27T01:20:00+08:00'
     status: CONTRACT_FROZEN_NO_IMPLEMENTATION_OR_DIAGNOSTIC_RUN
@@ -62,4 +73,3 @@ events:
     held_score_read_allowed: false
     external_outcome_accessed: false
     next_action: IMPLEMENT_DIAGNOSTIC_RUNNER_MERGER_SCORER_QUALIFIER_AND_TESTS
-

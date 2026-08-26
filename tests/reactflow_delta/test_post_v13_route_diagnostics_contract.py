@@ -18,7 +18,7 @@ def test_frozen_post_v13_diagnostic_contract_passes() -> None:
     result = validate_contract(ROOT)
     assert result == {
         "status": "POST_V13_ROUTE_DIAGNOSTIC_CONTRACT_VALIDATION_PASS",
-        "phase": "PV13D0",
+        "phase": "PV13D1",
         "training_allowed": False,
         "held_score_read_allowed": False,
         "external_outcome_access_allowed": False,
@@ -71,4 +71,3 @@ def test_validator_rejects_broader_score_authority(
     )
     with pytest.raises(RuntimeError, match="held-score authority"):
         validate_contract(copied)
-

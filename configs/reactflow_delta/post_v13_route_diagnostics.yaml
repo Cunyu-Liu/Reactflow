@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.post_v13_route_diagnostics.v1
 contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
-contract_status: PV13D0_CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+contract_status: PV13D1_IMPLEMENTATION_AND_FOCUSED_TESTS_ONLY
 created_at: '2026-08-27T01:20:00+08:00'
 
 parent:
@@ -87,12 +87,18 @@ route_gates:
     unexpected_keys: 0
     complete_folds: 20
   deterministic_route_if_both_pass: MAXIMIZE_MINIMUM_NORMALIZED_GATE_MARGIN
+  both_pass_margin_terms:
+    - SIGNED_RELATIVE_GAIN_DIVIDED_BY_ITS_MINIMUM
+    - POINT_ABSOLUTE_RELATIVE_GAIN_DIVIDED_BY_ITS_MINIMUM
+    - SIGNED_POSITIVE_PUZZLES_DIVIDED_BY_14
+    - POINT_ABSOLUTE_POSITIVE_PUZZLES_DIVIDED_BY_14
+  ci_terms_in_both_pass_margin: BINARY_PASS_PREREQUISITE_NOT_NUMERIC_MARGIN
   deterministic_tie_breaker: NOISE_AWARE
   if_neither_passes: CLOSE_A_AND_C_RETAIN_ONLY_UNTESTED_WT_PROFILE_PRETRAINING_HYPOTHESIS
 
 phases:
   PV13D0: CONTRACT_FROZEN
-  PV13D1: NOT_AUTHORIZED
+  PV13D1: IMPLEMENTATION_AUTHORIZED
   PV13D2: NOT_AUTHORIZED
   PV13D3: NOT_AUTHORIZED
 
@@ -105,4 +111,3 @@ boundaries:
   ridge_alpha_search_allowed: false
   score_before_complete_merge_allowed: false
   new_external_outcome_access_allowed: false
-

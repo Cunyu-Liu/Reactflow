@@ -46,5 +46,6 @@ All 20 LOPO prediction-only folds are generated before any diagnostic score is r
 
 If exactly one arm passes, it is the only capability allowed to seed a new model amendment. If both pass, the deterministic rule chooses the larger minimum normalized Gate margin, with Arm A as an exact tie-breaker. If neither passes, both routes close; the only remaining untested candidate class is task-matched WT-profile self-supervised pretraining, which would require a separate contract and matched from-scratch control.
 
-No result from this diagnostic is SOTA, external replication, mechanism evidence or publication readiness.
+For the both-pass comparison, the four numeric margins are signed relative gain divided by its frozen minimum, point-absolute relative gain divided by its frozen minimum, signed positive-puzzle count divided by 14, and point-absolute positive-puzzle count divided by 14. The route margin is the minimum of these four values. The two CI-lower-bound checks are binary prerequisites and are not converted into a post-hoc numeric scale.
 
+No result from this diagnostic is SOTA, external replication, mechanism evidence or publication readiness.
