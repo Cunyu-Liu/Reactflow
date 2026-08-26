@@ -86,6 +86,12 @@ construct position. The prediction schema contains only biological keys,
 registration status, fold/seed, feature41, candidate point and null point;
 mutant target, target error, qualified mask, loss and score are scorer-only.
 
+An implementation-only fold runner now exists, but real outer-train outcome
+access remains fail-closed. It requires a future active task ID
+`reactflow_delta_puzzle_set_meta_context`, the exact training token
+`PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY`, held and partial scores closed,
+and external outcomes locked. V14 authority cannot satisfy this predicate.
+
 ## Consequences
 
 ### Positive
