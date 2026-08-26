@@ -1,0 +1,82 @@
+schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
+contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
+updated_at: '2026-08-27T02:30:00+08:00'
+
+immutable_parent_verdicts:
+  v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
+  v13m4_opened: false
+  exact_mutant_reencoding_family: TERMINATED
+  post_v13: TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
+  parent_head: ec38e701f0528f8141e5724f334923dd49c266e4
+
+registered_hypothesis:
+  status: HYPOTHESIS
+  statement: >-
+    OUTER_TRAIN_ONLY_MASKED_WT_PROFILE_RECONSTRUCTION LEARNS REUSABLE
+    INTRA_CONSTRUCT_CONTEXT THAT IMPROVES MUTATION_EFFECT POINT_AND
+    DISTRIBUTIONAL PREDICTION BEYOND IDENTICAL_ARCHITECTURE CAPACITY ALONE
+  falsifier: >-
+    THE PRETRAINED CANDIDATE FAILS ANY FROZEN V14M3 HEADLINE GATE OR FAILS
+    THE REQUIRED INCREMENT OVER THE IDENTICAL FROM_SCRATCH NULL
+
+decisions:
+  - id: V14-D001
+    type: DECISION
+    value: TASK_MATCHED_MASKED_WT_PROFILE_RECONSTRUCTION
+    reason: >-
+      POST_V13 CLOSED NOISE_REWEIGHTING AND SIGN_MAGNITUDE FACTORIZATION;
+      WT_PROFILE PRETRAINING IS THE ONLY RETAINED DISTINCT CAPABILITY ROUTE
+  - id: V14-D002
+    type: DECISION
+    value: IDENTICAL_ARCHITECTURE_FROM_SCRATCH_ATTRIBUTION_NULL
+    reason: >-
+      SEPARATES SELF_SUPERVISION FROM PURE PARAMETER_CAPACITY AND DOWNSTREAM
+      TRAINING EFFECTS
+  - id: V14-D003
+    type: DECISION
+    value: SINGLE_FIXED_UNIFORM_40_PERCENT_OBSERVED_POSITION_MASK
+    rejected: [SPAN_MASK_SEARCH, GAUSSIAN_NOISE_SCALE_SEARCH]
+    reason: >-
+      AVOIDS NEW SPAN OR NOISE HYPERPARAMETERS AND REMOVES THE IDENTITY
+      SHORTCUT AT MASKED TARGETS
+  - id: V14-D004
+    type: DECISION
+    value: FEATURE41_ANCHORED_NEURAL_RESIDUAL
+    reason: >-
+      PRESERVES THE STRONG ESTABLISHED POINT ANCHOR WHILE TESTING WHETHER
+      PRETRAINED CONTEXT ADDS TASK_RELEVANT INFORMATION
+  - id: V14-D005
+    type: DECISION
+    value: V13_TOP_JOURNAL_GATES_REUSED_WITH_ATTRIBUTION_NULL
+    reason: >-
+      PREVENTS GATE RELAXATION AFTER REPEATED DEVELOPMENT CONSUMPTION
+
+frozen_counts:
+  total_parameters_each: 5117874
+  encoder_without_heads: 4767280
+  pretraining_decoder_each: 769
+  downstream_residual_head_each: 349825
+  downstream_trainable_each: 5117105
+
+phase_state:
+  V14M0: CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+  V14M1: NOT_AUTHORIZED
+  V14M2: NOT_AUTHORIZED
+  V14M3: NOT_AUTHORIZED
+  V14M4: NOT_AUTHORIZED
+  V14M5: NOT_RUN
+
+qualification_rules:
+  implementation_or_smoke_pass_is_scientific_pass: false
+  partial_fold_scores_allowed: false
+  external_outcome_access_allowed: false
+  exact_v14m3_pass_required_for_formal: true
+  failure_route: TERMINATE_WT_PROFILE_PRETRAINING_FAMILY_AND_RETURN_BENCHMARK_ROUTE
+  pass_evidence_ceiling: POST_HOC_DEVELOPMENT_PASS
+
+events:
+  - at: '2026-08-27T02:30:00+08:00'
+    phase: V14M0
+    event: CONTRACT_AND_DECISION_LEDGER_FROZEN
+    score_accessed: false
+    external_outcome_accessed: false

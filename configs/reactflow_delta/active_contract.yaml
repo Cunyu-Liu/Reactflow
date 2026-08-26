@@ -1,42 +1,47 @@
-schema_version: reactflow_delta.active_contract.post_v13_diagnostics.v1
-manifest_id: reactflow_delta_post_v13_route_diagnostics_authority_20260827
-project_task_id: reactflow_delta_post_v13_route_diagnostics
-created_at: '2026-08-27T01:20:00+08:00'
-updated_at: '2026-08-27T02:15:00+08:00'
+schema_version: reactflow_delta.active_contract.v14
+manifest_id: reactflow_delta_model_rescue_v14_active_authority_20260827
+project_task_id: reactflow_delta_model_rescue_v14
+created_at: '2026-08-27T02:30:00+08:00'
+updated_at: '2026-08-27T02:30:00+08:00'
 
 authority:
-  pointer_role: POST_V13_DIAGNOSTICS_SINGLE_ACTIVE_AUTHORITY
-  current_phase: M6
-  current_authority_state: POST_V13_DIAGNOSTIC_TERMINAL_HANDOFF
+  pointer_role: V14_SINGLE_ACTIVE_AUTHORITY
+  current_phase: V14M0
+  current_authority_state: CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
   current_runnable_phase: NONE
   conflict_policy: FAIL_CLOSED
-  branch: codex/reactflow-delta-post-v13-diagnostics-20260827
-  worktree: /home/cunyuliu/reactflow_delta_worktrees/post_v13_diagnostics_20260827
-  machine_contract_path: configs/reactflow_delta/post_v13_route_diagnostics.yaml
-  human_contract_path: docs/prospective_v2/post_v13_route_diagnostics_20260827.md
-  decision_ledger_path: docs/prospective_v2/post_v13_route_diagnostics_ledger.yaml
-  implementation_plan_path: docs/plans/2026-08-27-post-v13-route-diagnostics.md
-  binding_status: TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
+  branch: codex/reactflow-delta-model-rescue-v14-20260827
+  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v14_20260827
+  artifact_root: /mnt/cunyuliu/reactflow_delta_model_rescue_v14
+  machine_contract_path: configs/reactflow_delta/model_rescue_v14_amendment.yaml
+  human_contract_path: docs/prospective_v2/model_rescue_v14_amendment_20260827.md
+  decision_ledger_path: docs/prospective_v2/model_rescue_v14_decision_ledger.yaml
+  implementation_plan_path: docs/plans/2026-08-27-model-rescue-v14.md
+  research_record_path: autoresearch/orchestrator-260827-v14-wt-profile/research.md
+  binding_status: V14M0_CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
 
 parent_state:
   v13_status: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
   v13_head: 90a8c6372d354126b49c4406a88c44a59b0427ff
   v13m4_opened: false
-  v13_verdict_change_allowed: false
   exact_mutant_reencoding_family: TERMINATED
+  post_v13_status: TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
+  parent_head: ec38e701f0528f8141e5724f334923dd49c266e4
+  parent_verdict_change_allowed: false
 
 authorization:
   owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION_WITH_AUTONOMOUS_SCIENTIFIC_JUDGMENT
   owner_instruction_date: '2026-08-25'
-  scope: POST_V13_NOISE_AWARE_AND_SIGN_MAGNITUDE_ROUTE_DIAGNOSTICS_ONLY
+  scope: MEANINGFULLY_DISTINCT_MASKED_WT_PROFILE_PRETRAINING_ONLY
   contract_drafting_allowed: true
   implementation_allowed: false
-  fixed_ridge_diagnostic_allowed: false
   neural_training_allowed: false
+  smoke_allowed: false
+  screen_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
 
-allowed_phases: [PV13D0, PV13D1, PV13D2, PV13D3, M6]
+allowed_phases: [V14M0, V14M1, V14M2, V14M3, V14M4, V14M5, M6]
 runnable_phases: []
 training_allowed: false
 candidate_model_training_allowed: false
@@ -47,13 +52,16 @@ new_external_metadata_access_allowed: true
 new_split_allowed: false
 unrelated_job_interference_allowed: false
 v13_artifact_overwrite_allowed: false
-v13_terminal_verdict_change_allowed: false
+post_v13_artifact_overwrite_allowed: false
+parent_terminal_verdict_change_allowed: false
 
 gate_state:
-  PV13D0: CONTRACT_FROZEN
-  PV13D1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
-  PV13D2: COMPLETE_UNSCORED_MERGE_PASS
-  PV13D3: COMPLETE_SCORE_AND_ROUTE_QUALIFICATION_FINISHED
-  M6: WT_PROFILE_SELF_SUPERVISED_PRETRAINING_AMENDMENT_DRAFTING_ONLY
+  V14M0: CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+  V14M1: NOT_AUTHORIZED
+  V14M2: NOT_AUTHORIZED
+  V14M3: NOT_AUTHORIZED
+  V14M4: NOT_AUTHORIZED
+  V14M5: NOT_RUN
+  M6: BENCHMARK_ROUTE_REMAINS_FALLBACK
 
-next_allowed_action: FREEZE_DISTINCT_WT_PROFILE_SELF_SUPERVISED_PRETRAINING_AMENDMENT
+next_allowed_action: VALIDATE_AND_COMMIT_V14_CONTRACT_THEN_EXPLICITLY_OPEN_V14M1_IMPLEMENTATION_ONLY

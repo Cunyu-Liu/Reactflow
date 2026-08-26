@@ -1,0 +1,273 @@
+schema_version: reactflow_delta.model_rescue_v14_amendment.v1
+contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
+contract_status: V14M0_CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+created_at: '2026-08-27T02:30:00+08:00'
+
+parent:
+  v13_status: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
+  v13m4_opened: false
+  exact_mutant_reencoding_family: TERMINATED
+  post_v13_diagnostic_status: TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
+  retained_route: WT_PROFILE_SELF_SUPERVISED_PRETRAINING_ONLY
+  parent_head: ec38e701f0528f8141e5724f334923dd49c266e4
+  v1_through_v13_verdict_change_allowed: false
+
+scope:
+  question: >-
+    CAN_OUTER_TRAIN_ONLY_MASKED_WT_REACTIVITY_RECONSTRUCTION PRETRAIN THE
+    MUTATION_EFFECT_CONTEXT_ENCODER ENOUGH TO IMPROVE UNSEEN_PUZZLE POINT_AND
+    PROBABILISTIC PERFORMANCE OVER AN IDENTICAL_ARCHITECTURE FROM_SCRATCH NULL
+  task: ENDPOINT_V7_ALL_MUTANT_FULL_CONSTRUCT_SIGNED_DELTA_DISTRIBUTION
+  data: REAL_OPENKNOT_M2_V4_5_2_DEVELOPMENT_CONSUMED
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  evaluator: METHOD_BALANCED_POSITION_TO_MUTANT_TO_METHOD_TO_PUZZLE
+  target_identity: EXACT_PUZZLE_METHOD_MUTATION
+  evidence_ceiling: POST_HOC_DEVELOPMENT_ONLY
+  external_outcome_access_allowed: false
+  model_or_threshold_selection_allowed: false
+
+inputs:
+  m2_csv: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  unconstrained_cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
+  constrained_cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+  corrected_baseline_dir: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines
+  terminal_v8_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m2_corrected_experts_seed0
+  terminal_v10_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0
+  terminal_v11_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0
+  terminal_v12_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m3_screen_seed0
+  prediction_allowed:
+    - WT_SEQUENCE
+    - WT_REACTIVITY
+    - WT_ERROR_PRECISION
+    - WT_OBSERVED_MASK
+    - NORMALIZED_POSITION
+    - REGION
+    - CORRECTED_MUTATION_POSITION
+    - MUTATION_REF_ALT
+    - SIGNED_SOURCE_RECEIVER_DISTANCE
+    - OUTER_TRAIN_FEATURE41_POINT_AND_BASIS
+  prohibited:
+    - HELD_MUTANT_REACTIVITY
+    - HELD_MUTANT_ERROR
+    - HELD_QUALIFIED_TARGET_MASK
+    - HELD_SCORE
+    - METHOD_ID
+    - PUZZLE_ID
+    - DATASET_ID
+    - EXACT_MUTANT_SEQUENCE_SECOND_PASS
+    - FOUNDATION_EMBEDDING
+    - EXTERNAL_OUTCOME
+
+models:
+  candidate:
+    id: v14_masked_wt_profile_pretrained_feature41_anchor
+    initialization: COMMON_FROZEN_SEED_INITIALIZATION_THEN_OUTER_TRAIN_WT_PRETRAINING
+    downstream_point: FEATURE41_OUTER_TRAIN_POINT_PLUS_NEURAL_RESIDUAL
+  matched_null:
+    id: v14_from_scratch_feature41_anchor
+    initialization: IDENTICAL_COMMON_FROZEN_SEED_INITIALIZATION_NO_PRETRAINING
+    downstream_point: FEATURE41_OUTER_TRAIN_POINT_PLUS_NEURAL_RESIDUAL
+  only_allowed_difference_before_supervised_training: CANDIDATE_ENCODER_WAS_UPDATED_BY_FROZEN_MASKED_WT_PROFILE_OBJECTIVE
+  architecture:
+    input_channels: 11
+    channels:
+      sequence_one_hot: 4
+      construct_standardized_wt_reactivity: 1
+      wt_error_precision: 1
+      wt_observed_token: 1
+      normalized_position: 1
+      region_one_hot: 2
+      corruption_indicator: 1
+    context_width: 256
+    attention_heads: 8
+    context_blocks: 6
+    ffn_width: 1024
+    relative_distance_window: 256
+    dropout: 0.1
+    normalization: PRE_NORM
+    point_head_input: SOURCE_256_RECEIVER_256_DISTANCE_1_REFALT_8_FEATURE41_1
+    point_head_width: 384
+    point_head_hidden_layers: 2
+    point_head_output_initialization: EXACT_ZERO
+    pretraining_decoder: LAYERNORM_256_LINEAR_TO_ONE
+  exact_parameter_counts:
+    total_each: 5117874
+    encoder_without_heads: 4767280
+    pretraining_decoder_each: 769
+    downstream_residual_head_each: 349825
+    downstream_trainable_each_after_decoder_freeze: 5117105
+    candidate_and_null_total_equal: true
+
+pretraining:
+  candidate_only: true
+  data: OUTER_TRAIN_WT_CONSTRUCTS_ONLY
+  expected_outer_train_constructs_per_fold: 152
+  mutant_outcome_access_allowed: false
+  held_puzzle_wt_profile_access_allowed: false
+  target: ORIGINAL_CONSTRUCT_STANDARDIZED_WT_REACTIVITY_AT_MASKED_OBSERVED_POSITIONS
+  masking:
+    fraction: 0.40
+    universe: WT_OBSERVED_POSITIONS_ONLY
+    count_rule: CLAMP_ROUND_0_40_TIMES_N_OBSERVED_BETWEEN_ONE_AND_N_MINUS_ONE
+    sampling: UNIFORM_WITHOUT_REPLACEMENT
+    schedule: DETERMINISTIC_FROM_SEED_EPOCH_AND_SORTED_CONSTRUCT_INDEX
+    mask_token:
+      reactivity: 0.0
+      precision: 0.0
+      observed_token: 0.0
+      corruption_indicator: 1.0
+      attention_key_valid: false
+  objective: MEAN_L1_OVER_MASKED_POSITIONS_THEN_EQUAL_CONSTRUCT_EXPOSURE
+  epochs: {smoke: 3, screen_and_formal: 200}
+  optimizer: ADAMW
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  gradient_clip: 5.0
+  early_stopping_allowed: false
+  mask_fraction_or_optimizer_search_allowed: false
+  residual_head_gradient_allowed: false
+  decoder_frozen_and_unused_downstream: true
+
+downstream_point_training:
+  candidate_and_null_same_task: true
+  loss: EXACT_METHOD_BALANCED_SIGNED_DELTA_L1
+  hierarchy: POSITION_THEN_MUTANT_THEN_PUZZLE_METHOD_CELL_THEN_EPOCH_CELL_MEAN
+  epochs: {smoke: 3, screen_and_formal: 40}
+  optimizer: ADAM
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  early_stopping_allowed: false
+  fresh_outer_fold_and_seed_initialization: true
+  same_cell_order_and_dropout_stream: true
+  candidate_residual_head_equals_null_before_supervised_step_one: true
+  decoder_gradient_allowed: false
+
+residual_calibration:
+  family: EXACT_V10_MEDIAN_CONSTRAINED_ASYMMETRIC_RESIDUAL
+  point_frozen_before_calibration: true
+  objective: EXACT_METHOD_BALANCED_GAUSSIAN_MIXTURE_CRPS
+  epochs: {smoke: 3, screen_and_formal: 40}
+  optimizer: ADAM
+  learning_rate: 0.001
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  point_gradient_allowed: false
+  architecture_or_family_search_allowed: false
+
+comparators:
+  attribution_null: V14_IDENTICAL_ARCHITECTURE_FROM_SCRATCH_FEATURE41_ANCHOR
+  point_signed: [TIC2A_FEATURE41, TERMINAL_V12, V14_FROM_SCRATCH_NULL]
+  point_absolute: [TIC2A_FEATURE41, TERMINAL_V11, V14_FROM_SCRATCH_NULL]
+  task_crps: [FRESH_FAIR_FEATURE41_ASYMMETRIC, TERMINAL_V12, V14_FROM_SCRATCH_NULL]
+  distribution_absolute: [TIC2A_FEATURE41, TERMINAL_V10, V14_FROM_SCRATCH_NULL]
+  same_downstream_parameter_count: true
+  same_downstream_optimizer_epochs_order_and_dropout: true
+  extra_pretraining_compute_reported_not_hidden: true
+
+v14m2_smoke:
+  folds: [0, 1]
+  seed: 0
+  pretraining_epochs: 3
+  point_epochs: 3
+  calibration_epochs: 3
+  scientific_score_allowed: false
+  artifact_status: ENGINEERING_SMOKE_ONLY
+  invariants:
+    - OUTER_TRAIN_WT_ONLY_PRETRAINING
+    - HELD_PUZZLE_WT_EXCLUDED_FROM_PRETRAINING
+    - MUTANT_OUTCOME_EXCLUDED_FROM_PRETRAINING
+    - EXACT_INITIAL_PARAMETER_MATCH
+    - EXACT_TOTAL_AND_DOWNSTREAM_PARAMETER_MATCH
+    - CANDIDATE_ENCODER_CHANGES_DURING_PRETRAINING
+    - NULL_STATE_UNCHANGED_BEFORE_SUPERVISED_TRAINING
+    - RESIDUAL_HEADS_IDENTICAL_BEFORE_SUPERVISED_STEP_ONE
+    - PRETRAIN_DECODER_FROZEN_DOWNSTREAM
+    - FINITE_LOSS_AND_GRADIENT
+    - POINT_FROZEN_DURING_CALIBRATION
+    - MEDIAN_CONSTRAINT_ALL_ROWS
+    - TARGET_ERROR_MASK_INVARIANCE
+    - COMPLETE_REGISTERED_OUTPUT
+
+v14m3_screen:
+  prerequisite: EXACT_V14M2_ENGINEERING_SMOKE_PASS
+  seed: 0
+  folds: 20
+  pretraining_epochs: 200
+  point_epochs: 40
+  calibration_epochs: 40
+  complete_before_score_access: true
+  score_once_after_complete_merge: true
+  gates:
+    signed_delta:
+      relative_gain_vs_feature41_min: 0.12
+      relative_gain_vs_terminal_v12_min: 0.02
+      relative_gain_vs_from_scratch_null_min: 0.015
+      positive_puzzles: {feature41: 16, terminal_v12: 14, from_scratch_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    point_absolute:
+      relative_gain_vs_feature41_min: 0.07
+      relative_gain_vs_terminal_v11_min: 0.02
+      relative_gain_vs_from_scratch_null_min: 0.01
+      positive_puzzles: {feature41: 16, terminal_v11: 14, from_scratch_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    task_crps:
+      relative_gain_vs_feature41_min: 0.05
+      relative_gain_vs_terminal_v12_min: 0.02
+      relative_gain_vs_from_scratch_null_min: 0.015
+      positive_puzzles: {feature41: 16, terminal_v12: 14, from_scratch_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    distribution_absolute:
+      relative_gain_vs_feature41_min: 0.15
+      relative_gain_vs_terminal_v10_min: 0.02
+      relative_gain_vs_from_scratch_null_min: 0.01
+      positive_puzzles: {feature41: 16, terminal_v10: 14, from_scratch_null: 14}
+      paired_ci_lower_each_gt: 0.0
+    stability:
+      leave_one_puzzle_positive_all_headline_comparisons: true
+      max_single_puzzle_effect_fraction: 0.20
+      max_coverage_error_worsening_pp: 1.0
+      registered_prediction_coverage: 1.0
+      failure_rate: 0.0
+      unexpected_keys: 0
+
+v14m4_formal:
+  prerequisite: EXACT_V14M3_TOP_JOURNAL_SCREEN_PASS
+  seeds: [0, 1, 2, 3, 4]
+  folds_per_seed: 20
+  pretraining_epochs: 200
+  point_epochs: 40
+  calibration_epochs: 40
+  model_or_seed_selection_allowed: false
+  equal_seed_mixture: true
+  repeat_all_feature41_and_from_scratch_null_screen_gates: true
+  minimum_positive_individual_seeds_signed_and_crps: 4
+
+phases:
+  V14M0: CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+  V14M1: NOT_AUTHORIZED
+  V14M2: NOT_AUTHORIZED
+  V14M3: NOT_AUTHORIZED
+  V14M4: NOT_AUTHORIZED
+  V14M5: NOT_RUN
+
+resource_policy:
+  physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
+  co_location_when_memory_sufficient: true
+  preemption_termination_or_signal_allowed: false
+  persistent_sessions_required: true
+  low_frequency_monitor_seconds: 900
+  oom_recovery: CHANGE_GPU_OR_LOWER_MICROBATCH_ONLY
+  unlimited_compute_means_frozen_protocol_completion_only: true
+
+stop_and_claim_policy:
+  gate_lowering_allowed: false
+  same_family_v15_allowed: false
+  partial_score_access_allowed: false
+  external_outcome_access_allowed: false
+  v14m3_fail: TERMINATE_WT_PROFILE_PRETRAINING_FAMILY_RETURN_BENCHMARK_ROUTE
+  v14m4_fail: TERMINATE_FORMAL_CONFIRMATION_RETURN_BENCHMARK_ROUTE
+  pass_ceiling: POST_HOC_DEVELOPMENT_PASS_REQUIRES_NEW_SEALED_EXTERNAL_AMENDMENT
+  sota: NOT_ESTABLISHED
+  external_replication: NOT_ESTABLISHED
+  publication_ready: false
