@@ -265,6 +265,17 @@ def test_puzzle_training_rejects_duplicate_or_missing_focal_cells() -> None:
     try:
         puzzle_balanced_point_loss(candidate, batch)
     except ValueError as error:
-        assert "cover each focal construct once" in str(error)
+        assert "unique focal constructs" in str(error)
     else:
         raise AssertionError("puzzle-set training accepted an unbalanced cell set")
+
+
+def test_puzzle_loss_keeps_eight_contexts_with_seven_supervised_cells() -> None:
+    candidate, _null = make_exact_full_model_pair(seed=82)
+    candidate.eval()
+    batch = _training_batch()
+    batch["cells"] = batch["cells"][1:]
+    loss = puzzle_balanced_point_loss(candidate, batch)
+    # The zero-initialized model predicts zero. Available cell losses are
+    # 0.2, ..., 0.8 and are averaged without inventing the absent cell target.
+    assert torch.allclose(loss, torch.tensor(0.5), atol=1e-7, rtol=0.0)

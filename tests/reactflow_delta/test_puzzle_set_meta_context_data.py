@@ -65,6 +65,7 @@ def _cell(construct_id: str, length: int = 4):
         "target": torch.zeros(1, length),
         "qualified_mask": torch.ones(1, length, dtype=torch.bool),
         "wt": torch.zeros(length),
+        "feature41_basis": np.zeros((1, length, 41), dtype=np.float32),
     }
 
 
@@ -98,9 +99,27 @@ def test_training_assembler_rejects_incomplete_puzzle_set() -> None:
     try:
         assemble_puzzle_training_batches(records, cells, contexts)
     except ValueError as error:
-        assert "instead of eight" in str(error)
+        assert "constructs instead of eight" in str(error)
     else:
         raise AssertionError("assembler accepted an incomplete puzzle set")
+
+
+def test_zero_outcome_construct_remains_context_without_fake_supervision() -> None:
+    records = [
+        _Record("P20", f"method{index}", f"P20_method{index}", 1, 1)
+        for index in range(8)
+    ]
+    cells = [_cell(record.construct_id) for record in records[1:]]
+    contexts = {
+        record.construct_id: _context(4, observed=index != 0)
+        for index, record in enumerate(records)
+    }
+    batch = assemble_puzzle_training_batches(records, cells, contexts)[0]
+    assert len(batch["contexts"]) == 8
+    assert len(batch["cells"]) == 7
+    assert {cell["construct_id"] for cell in batch["cells"]} == {
+        record.construct_id for record in records[1:]
+    }
 
 
 def test_held_prediction_is_complete_target_free_and_feature41_replaying() -> None:

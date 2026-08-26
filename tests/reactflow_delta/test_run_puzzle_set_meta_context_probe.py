@@ -77,6 +77,7 @@ def _prepared():
                 "target": torch.full((1, 4), float(focal + 1) / 10.0),
                 "qualified_mask": torch.ones(1, 4, dtype=torch.bool),
                 "wt": torch.zeros(4),
+                "feature41_basis": np.zeros((1, 4, 41), dtype=np.float32),
             }
         )
         construct_id = f"P20_method{focal}"

@@ -49,7 +49,10 @@ def assemble_puzzle_training_batches(
     """Convert focal construct cells into equal eight-cell puzzle batches."""
 
     construct_puzzle = _construct_to_puzzle(records)
-    by_puzzle: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    constructs_by_puzzle: dict[str, list[str]] = defaultdict(list)
+    for construct_id, puzzle in construct_puzzle.items():
+        constructs_by_puzzle[puzzle].append(construct_id)
+    cells_by_construct: dict[str, dict[str, Any]] = {}
     seen_constructs: set[str] = set()
     for cell in cells:
         construct_id = str(cell["construct_id"])
@@ -58,24 +61,27 @@ def assemble_puzzle_training_batches(
         seen_constructs.add(construct_id)
         if construct_id not in construct_puzzle or construct_id not in context_cache:
             raise ValueError("puzzle-set cell lacks record or WT context metadata")
-        by_puzzle[construct_puzzle[construct_id]].append(cell)
+        cells_by_construct[construct_id] = cell
 
     batches = []
-    for puzzle in sorted(by_puzzle):
-        puzzle_cells = sorted(
-            by_puzzle[puzzle], key=lambda cell: str(cell["construct_id"])
-        )
-        if len(puzzle_cells) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+    for puzzle in sorted(constructs_by_puzzle):
+        construct_ids = sorted(constructs_by_puzzle[puzzle])
+        if len(construct_ids) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
             raise ValueError(
-                f"puzzle {puzzle} has {len(puzzle_cells)} cells instead of eight"
+                f"puzzle {puzzle} has {len(construct_ids)} constructs instead of eight"
             )
-        construct_ids = [str(cell["construct_id"]) for cell in puzzle_cells]
         converted = []
-        for focal_index, cell in enumerate(puzzle_cells):
+        for focal_index, construct_id in enumerate(construct_ids):
+            cell = cells_by_construct.get(construct_id)
+            if cell is None:
+                # P20_Eterna is a real registered construct without a qualified
+                # supervised cell.  Its outcome-blind WT context remains in the
+                # eight-construct set; no target or loss is fabricated for it.
+                continue
             converted.append(
                 {
                     "focal_construct_index": focal_index,
-                    "construct_id": construct_ids[focal_index],
+                    "construct_id": construct_id,
                     "edit_index": cell["edit"],
                     "signed_distance": cell["distance"],
                     "refs": list(cell["refs"]),
@@ -85,8 +91,11 @@ def assemble_puzzle_training_batches(
                     "target": cell["target"],
                     "qualified_mask": cell["qualified_mask"],
                     "wt": cell["wt"],
+                    "feature41_basis": cell["feature41_basis"],
                 }
             )
+        if not converted:
+            raise ValueError(f"puzzle {puzzle} has no qualified supervised cells")
         batches.append(
             {
                 "puzzle": puzzle,

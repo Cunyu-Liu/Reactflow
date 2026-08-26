@@ -75,10 +75,13 @@ training.
 
 The proposed training unit is one whole puzzle, not one pooled mutant table.
 Within a puzzle, loss is averaged position within mutant, then mutant within
-each of the eight method cells, then equally across those eight cells. Every
-outer-train puzzle is visited once per epoch in a deterministic shuffled order.
-Candidate and null reset the same Torch random stream before fitting, so model
-connectivity—not cell order or dropout randomness—is the intended difference.
+each qualified method cell, then equally across available cells. All eight WT
+constructs remain in the set context. The registered zero-outcome P20_Eterna
+construct contributes outcome-blind WT context but no fabricated supervised
+cell. Every outer-train puzzle is visited once per epoch in a deterministic
+shuffled order. Candidate and null reset the same Torch random stream before
+fitting, so model connectivity—not cell order or dropout randomness—is the
+intended difference.
 
 The proposed held path assembles all eight WT contexts once, encodes and mixes
 them once per arm, then emits a prediction for every registered mutant and full

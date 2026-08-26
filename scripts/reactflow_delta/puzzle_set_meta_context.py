@@ -463,13 +463,15 @@ def puzzle_balanced_point_loss(
         EXPECTED_CONSTRUCTS_PER_PUZZLE
     ):
         raise ValueError("puzzle training batch requires eight WT contexts")
-    if not isinstance(cells, Sequence) or len(cells) != (
+    if not isinstance(cells, Sequence) or not 1 <= len(cells) <= (
         EXPECTED_CONSTRUCTS_PER_PUZZLE
     ):
-        raise ValueError("puzzle training batch requires eight method cells")
+        raise ValueError("puzzle training batch requires qualified method cells")
     focal_indices = [int(cell["focal_construct_index"]) for cell in cells]
-    if sorted(focal_indices) != list(range(EXPECTED_CONSTRUCTS_PER_PUZZLE)):
-        raise ValueError("puzzle training cells must cover each focal construct once")
+    if len(focal_indices) != len(set(focal_indices)) or not set(focal_indices) <= set(
+        range(EXPECTED_CONSTRUCTS_PER_PUZZLE)
+    ):
+        raise ValueError("puzzle training cells must use unique focal constructs")
 
     hidden = model.encode_puzzle_set(contexts)
     observed = [context[3].bool() for context in contexts]
