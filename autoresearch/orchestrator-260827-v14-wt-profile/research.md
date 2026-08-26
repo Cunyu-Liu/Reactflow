@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260827-v14-wt-profile
 date: 2026-08-27
-status: CONTRACT_FREEZE_IN_PROGRESS
+status: IMPLEMENTATION_IN_PROGRESS
 parent: orchestrator-260827-post-v13
 ---
 
@@ -42,3 +42,4 @@ The hypothesis is falsified if the candidate misses any frozen V14M3 top-journal
 ## Progress log
 
 - 2026-08-27: V14 architecture, objective, attribution null and gates selected before implementation and outcome access.
+- 2026-08-27: contract validation passed; V14M1 implementation opened with real-data training and score access closed.

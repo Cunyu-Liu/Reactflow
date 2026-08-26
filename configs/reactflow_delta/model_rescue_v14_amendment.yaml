@@ -31,7 +31,7 @@ inputs:
   unconstrained_cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
   constrained_cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
   corrected_baseline_dir: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines
-  terminal_v8_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m2_corrected_experts_seed0
+  terminal_v8_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
   terminal_v10_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0
   terminal_v11_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v11/v11m3_screen_seed0
   terminal_v12_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v12/v12m3_screen_seed0

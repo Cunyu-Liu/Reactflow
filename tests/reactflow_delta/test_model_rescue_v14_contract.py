@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_frozen_v14_contract_passes() -> None:
     assert validate_contract(ROOT) == {
         "status": "V14_CONTRACT_VALIDATION_PASS",
-        "phase": "V14M0",
+        "phase": "V14M1",
         "training_allowed": False,
         "held_score_read_allowed": False,
         "external_outcome_access_allowed": False,
