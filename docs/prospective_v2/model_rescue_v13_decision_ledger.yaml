@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v13_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v13_anchored_exact_mutant_contrast_20260826
-current_status: V13M1_IMPLEMENTATION_AND_INVARIANTS_ONLY_NO_REAL_DATA_TRAINING
+current_status: V13M2_REAL_DATA_ENGINEERING_SMOKE_ONLY_NO_SCIENTIFIC_SCORING
 created_at: '2026-08-26T09:00:00+08:00'
 
 immutable_parent_verdicts:
@@ -47,8 +47,8 @@ decisions:
 
 phase_state:
   V13M0: PASS
-  V13M1: IMPLEMENTATION_ONLY
-  V13M2: NOT_AUTHORIZED
+  V13M1: PASS
+  V13M2: ENGINEERING_SMOKE_ONLY
   V13M3: NOT_AUTHORIZED
   V13M4: NOT_AUTHORIZED
   V13M5: NOT_RUN
@@ -84,3 +84,22 @@ events:
     partial_score_read_allowed: false
     external_outcome_accessed: false
     next_action: IMPLEMENT_MODEL_RUNNER_MERGER_SCORER_QUALIFIER_AND_FOCUSED_TESTS
+
+  - id: V13M1_IMPLEMENTATION_AND_INVARIANTS_PASS
+    observed_at: '2026-08-26T10:10:00+08:00'
+    status: V13M2_REAL_DATA_ENGINEERING_SMOKE_ONLY_NO_SCIENTIFIC_SCORING
+    implementation_commit_local: 6a14ac4
+    implementation_commit_remote: 6a14ac4
+    focused_tests_local_passed: 16
+    focused_tests_remote_passed: 16
+    exact_trainable_parameters_each: 2064737
+    candidate_null_exact_parameter_match: true
+    wt_replay_counterfactual_difference_exact_zero: true
+    prediction_only_merger_scorer_qualifier_prefrozen: true
+    five_seed_equal_mixture_tooling_prefrozen: true
+    real_data_smoke_allowed: V13_FOLDS0_1_SEED0_THREE_PLUS_THREE_EPOCHS_ONLY
+    scientific_score_allowed: false
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: RUN_V13M2_REAL_DATA_PREDICTION_ONLY_SMOKE
