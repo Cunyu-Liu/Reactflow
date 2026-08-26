@@ -59,3 +59,49 @@ def test_score_once_script_runs_one_scorer_then_one_qualifier() -> None:
     assert script.index("score_puzzle_set_meta_context") < script.index(
         "qualify_puzzle_set_meta_context"
     )
+
+
+def test_formal_controller_runs_full_fixed_universe_before_assembly() -> None:
+    script = (
+        ROOT
+        / "scripts/reactflow_delta/run_puzzle_set_meta_context_formal_controller.sh"
+    ).read_text(encoding="utf-8")
+    assert "for seed in 0 1 2 3 4" in script
+    assert "for fold in {0..19}" in script
+    assert "task=$((seed * 20 + fold))" in script
+    assert "puzzle_set_fold_result_fold${fold}_seed${seed}.json" in script
+    assert "archive_incomplete_run" in script
+    assert "puzzle_set_candidate_wt_decoder_fold${fold}_seed${seed}.pt" in script
+    assert "puzzle_set_null_wt_decoder_fold${fold}_seed${seed}.pt" in script
+    assert "--phase P1M4" in script
+    assert "--pretraining-epochs 200" in script
+    assert "--point-epochs 40" in script
+    assert "--calibration-epochs 40" in script
+    assert "--seeds 0,1,2,3,4" in script
+    assert 'wait "${pid}"' in script
+    assert script.index('wait "${pid}"') < script.index(
+        "merge_puzzle_set_meta_context_probe"
+    )
+    assert script.index("merge_puzzle_set_meta_context_probe") < script.index(
+        "assemble_puzzle_set_meta_context_formal"
+    )
+    assert "score_puzzle_set_meta_context_formal" not in script
+
+
+def test_formal_score_once_is_single_use_and_ordered() -> None:
+    script = (
+        ROOT
+        / "scripts/reactflow_delta/run_puzzle_set_meta_context_formal_score_once.sh"
+    ).read_text(encoding="utf-8")
+    assert (
+        script.count("scripts.reactflow_delta.score_puzzle_set_meta_context_formal")
+        == 1
+    )
+    assert (
+        script.count("scripts.reactflow_delta.qualify_puzzle_set_meta_context_formal")
+        == 1
+    )
+    assert "formal score-once output already exists; refusing to rerun" in script
+    assert script.index("score_puzzle_set_meta_context_formal") < script.index(
+        "qualify_puzzle_set_meta_context_formal"
+    )

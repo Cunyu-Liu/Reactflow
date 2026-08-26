@@ -155,13 +155,17 @@ checkpoints, initial or post-pretraining parent replay error above `1e-7`,
 changed trainable counts, incomplete histories, row misalignment, repeated
 biological keys within a seed, invalid mixture weights/scales, a shifted point
 median and absent point, decoder or residual checkpoints. It emits only a
-complete unscored merge. An implementation-only scorer and qualifier now exist,
-but their authority predicate cannot be satisfied by V14.
-They require training to be closed, the exact future
-`PUZZLE_SET_COMPLETE_MERGE_SCORE_ONCE_ONLY` token, partial scores closed and
-external outcomes locked. The target join therefore remains impossible until a
-future amendment ratifies the model, complete universe and unchanged
-top-journal Gate.
+complete unscored merge. Implementation-only P1M3 and P1M4 scoring paths now
+exist, but neither authority predicate can be satisfied by V14. P1M3 requires
+training to be closed and the exact future
+`PUZZLE_SET_COMPLETE_MERGE_SCORE_ONCE_ONLY` token. If that screen passes
+exactly, the P1M4 path independently runs all 20 folds for seeds 0--4, assembles
+candidate and matched-null ten-component equal-seed mixtures without scoring,
+then requires training to be closed and the exact
+`PUZZLE_SET_FORMAL_COMPLETE_SCORE_ONCE_ONLY` token. Partial scores and external
+outcomes remain locked throughout. The target join therefore remains
+impossible until a future amendment ratifies the model, complete universe and
+unchanged top-journal Gate.
 
 ## Consequences
 

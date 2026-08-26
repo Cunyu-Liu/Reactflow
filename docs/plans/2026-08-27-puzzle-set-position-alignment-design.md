@@ -248,6 +248,35 @@ must simultaneously satisfy the existing top-journal margins:
 - coverage is 100%, failure and unexpected keys are zero, and 68%/95%
   calibration error cannot worsen by more than one percentage point.
 
+If and only if that complete P1M3 screen passes exactly, P1M4 is a new,
+independent 20-fold by five-seed universe. Seed 0 is rerun rather than copied
+from the screen. Each seed independently trains both the full-context
+candidate and the block-diagonal matched null under the same `200 + 40 + 40`
+schedule. The formal point prediction is the arithmetic mean of the five seed
+points. Candidate and null probability predictions are ten-component Gaussian
+mixtures: each seed contributes its two components and exactly one fifth of the
+total probability mass. CRPS, coverage and distribution-derived absolute delta
+are recomputed from those ten components; they are not averages of five
+single-seed scores.
+
+The formal mixture must repeat every P1M3 margin, confidence interval,
+positive-puzzle, leave-one-puzzle-out, influence, coverage and calibration
+Gate above. It additionally requires candidate signed-delta and CRPS mean gains
+against feature41 to be positive in at least four of five individual seeds.
+All 100 fold-seed predictions must have complete key universes; no failed seed
+may be deleted and no seed subset may be selected. The fixed V13 parent remains
+a point comparator and feature41 probability scores remain frozen references;
+neither is fabricated as a five-seed distribution. A ten-component mixture is
+not required to have its median at the arithmetic mean point, so no such
+post-hoc invariant is asserted.
+
+The implementation-only P1M4 controller, assembler, scorer and qualifier are
+present but cannot run under V14 authority. A future exact P1M3 PASS must be
+followed by a focused authority commit that first opens P1M4 training and, only
+after the complete prediction-only assembly, closes training and issues
+`PUZZLE_SET_FORMAL_COMPLETE_SCORE_ONCE_ONLY`. This code path does not itself
+authorize P1M4 or read any outcome.
+
 These thresholds are implementation proposals frozen before any puzzle-set
 outcome is scored. They do not authorize training, scoring or P1M4; a future
 amendment must adopt them unchanged before real-data access.
