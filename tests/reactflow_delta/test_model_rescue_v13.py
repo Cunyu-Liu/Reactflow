@@ -37,6 +37,9 @@ from scripts.reactflow_delta.score_model_rescue_v13 import SCHEMA as SCORE_SCHEM
 from scripts.reactflow_delta.score_model_rescue_v13_formal import (
     SCHEMA as FORMAL_SCORE_SCHEMA,
 )
+from scripts.reactflow_delta.run_model_rescue_v9 import (
+    _feature41_replay_max_difference,
+)
 from scripts.reactflow_delta.validate_model_rescue_v13_contract import (
     assert_run_authority,
     validate_contract,
@@ -221,6 +224,18 @@ def test_prediction_path_cannot_accept_target_bearing_inputs() -> None:
         "puzzle_id",
     ):
         assert forbidden not in signature.parameters
+
+
+def test_reused_feature41_replay_helper_has_the_frozen_seven_argument_interface() -> None:
+    assert tuple(inspect.signature(_feature41_replay_max_difference).parameters) == (
+        "univ",
+        "held_records",
+        "feature41_model",
+        "unconstrained",
+        "constrained",
+        "reference_path",
+        "fold_id",
+    )
 
 
 def test_method_balanced_loss_does_not_pool_positions() -> None:

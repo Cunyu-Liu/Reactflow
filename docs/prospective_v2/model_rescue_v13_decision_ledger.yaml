@@ -103,3 +103,14 @@ events:
     partial_score_read_allowed: false
     external_outcome_accessed: false
     next_action: RUN_V13M2_REAL_DATA_PREDICTION_ONLY_SMOKE
+
+  - id: V13M2_RECOVERABLE_INTERRUPTION_FEATURE41_REPLAY_SIGNATURE
+    observed_at: '2026-08-26T11:00:00+08:00'
+    status: V13M2_INTERRUPTED_RECOVERABLE_NO_FOLD_ARTIFACT
+    completed_fold_artifacts: 0
+    cause: FEATURE41_REPLAY_HELPER_CALLED_WITH_ONE_DUPLICATE_UNIVERSE_ARGUMENT
+    occurred_before_point_training: true
+    scientific_score_computed: false
+    model_or_protocol_changed: false
+    recovery: REMOVE_DUPLICATE_ARGUMENT_ADD_SIGNATURE_REGRESSION_TEST_AND_RERUN_FOLDS0_1
+    external_outcome_accessed: false

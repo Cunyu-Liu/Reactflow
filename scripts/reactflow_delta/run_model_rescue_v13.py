@@ -475,7 +475,6 @@ def run_fold(
     }
     replay = _feature41_replay_max_difference(
         univ,
-        univ,
         held_records,
         feature41_model,
         unconstrained,
