@@ -15,6 +15,11 @@ from collections.abc import Sequence
 import torch
 from torch import nn
 
+from scripts.reactflow_delta.model_rescue_v11 import (
+    V11ContextBlock,
+    mutation_one_hot,
+)
+
 
 FULL_CROSS_CONSTRUCT = "FULL_CROSS_CONSTRUCT"
 BLOCK_DIAGONAL_NULL = "BLOCK_DIAGONAL_NULL"
@@ -26,6 +31,58 @@ ATTENTION_HEADS = 8
 BASE_FEATURE_WIDTH = 522
 POINT_HEAD_WIDTH = 384
 DROPOUT = 0.1
+
+
+class OutcomeBlindWTEncoder(nn.Module):
+    """Encode one WT construct without mutation outcomes or identity labels."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.input_projection = nn.Linear(11, CONTEXT_WIDTH)
+        self.input_norm = nn.LayerNorm(CONTEXT_WIDTH)
+        self.blocks = nn.ModuleList(
+            V11ContextBlock(
+                width=CONTEXT_WIDTH,
+                heads=ATTENTION_HEADS,
+                ffn_width=4 * CONTEXT_WIDTH,
+                dropout=DROPOUT,
+                relative_window=256,
+            )
+            for _ in range(6)
+        )
+        self.output_norm = nn.LayerNorm(CONTEXT_WIDTH)
+
+    def forward(self, context: tuple[torch.Tensor, ...]) -> torch.Tensor:
+        if len(context) != 6:
+            raise ValueError("WT context must contain six aligned tensors")
+        sequence, reactivity, precision, observed, position, region = context
+        length = sequence.shape[0]
+        if sequence.shape != (length, 4) or region.shape != (length, 2):
+            raise ValueError("WT sequence or region tensor has invalid shape")
+        for tensor in (reactivity, precision, observed, position):
+            if tensor.shape != (length,):
+                raise ValueError("WT scalar context tensor has invalid shape")
+        normalized_position = position / max(length - 1, 1)
+        corruption_token = torch.zeros(
+            length, 1, dtype=sequence.dtype, device=sequence.device
+        )
+        local = torch.cat(
+            [
+                sequence,
+                reactivity[:, None],
+                precision[:, None],
+                observed[:, None],
+                normalized_position[:, None],
+                region,
+                corruption_token,
+            ],
+            dim=-1,
+        )
+        state = self.input_norm(self.input_projection(local)).unsqueeze(0)
+        attention_keys = observed.bool().unsqueeze(0)
+        for block in self.blocks:
+            state = block(state, attention_keys)
+        return self.output_norm(state[0])
 
 
 class PuzzleSetMetaContext(nn.Module):
@@ -165,6 +222,111 @@ class PuzzleSetMetaContext(nn.Module):
         return point, residual, mixed
 
 
+class PuzzleSetMetaContextPointModel(nn.Module):
+    """Complete feature41-anchored point model for the proposed capability."""
+
+    def __init__(self, *, connectivity: str) -> None:
+        super().__init__()
+        self.encoder = OutcomeBlindWTEncoder()
+        self.meta_context = PuzzleSetMetaContext(connectivity=connectivity)
+
+    @property
+    def connectivity(self) -> str:
+        return self.meta_context.connectivity
+
+    @connectivity.setter
+    def connectivity(self, value: str) -> None:
+        if value not in CONNECTIVITY_MODES:
+            raise ValueError(f"unsupported puzzle-set connectivity: {value}")
+        self.meta_context.connectivity = value
+
+    def encode_puzzle_set(
+        self, contexts: Sequence[tuple[torch.Tensor, ...]]
+    ) -> list[torch.Tensor]:
+        if len(contexts) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError("point model requires exactly eight WT contexts")
+        return [self.encoder(context) for context in contexts]
+
+    @staticmethod
+    def base_point_features(
+        focal_hidden: torch.Tensor,
+        edit_index: torch.Tensor,
+        signed_distance: torch.Tensor,
+        refs: list[str],
+        alts: list[str],
+        feature41_point: torch.Tensor,
+    ) -> torch.Tensor:
+        if focal_hidden.ndim != 2 or focal_hidden.shape[1] != CONTEXT_WIDTH:
+            raise ValueError("focal WT hidden state has invalid shape")
+        batch = edit_index.shape[0]
+        length = focal_hidden.shape[0]
+        expected = (batch, length)
+        if signed_distance.shape != expected or feature41_point.shape != expected:
+            raise ValueError("distance or feature41 point is misaligned")
+        if len(refs) != batch or len(alts) != batch:
+            raise ValueError("mutation identity count is misaligned")
+        if bool((edit_index < 0).any()) or bool((edit_index >= length).any()):
+            raise ValueError("edit index is outside the focal construct")
+        source = focal_hidden[edit_index][:, None, :].expand(batch, length, -1)
+        receiver = focal_hidden[None, :, :].expand(batch, -1, -1)
+        normalized_distance = signed_distance / max(length - 1, 1)
+        mutation = mutation_one_hot(refs, alts, focal_hidden.device)
+        mutation = mutation[:, None, :].expand(batch, length, -1)
+        features = torch.cat(
+            [
+                source,
+                receiver,
+                normalized_distance[..., None],
+                mutation,
+                feature41_point[..., None],
+            ],
+            dim=-1,
+        )
+        if features.shape != (batch, length, BASE_FEATURE_WIDTH):
+            raise RuntimeError("puzzle-set base point feature width changed")
+        return features
+
+    def forward(
+        self,
+        contexts: Sequence[tuple[torch.Tensor, ...]],
+        focal_construct_index: int,
+        edit_index: torch.Tensor,
+        signed_distance: torch.Tensor,
+        refs: list[str],
+        alts: list[str],
+        feature41_point: torch.Tensor,
+        prediction_mask: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        hidden = self.encode_puzzle_set(contexts)
+        observed = [context[3].bool() for context in contexts]
+        base_features = self.base_point_features(
+            hidden[int(focal_construct_index)],
+            edit_index,
+            signed_distance,
+            refs,
+            alts,
+            feature41_point,
+        )
+        point, residual, mixed = self.meta_context(
+            hidden,
+            observed,
+            focal_construct_index,
+            base_features,
+            feature41_point,
+            prediction_mask,
+        )
+        same = torch.tensor(
+            [
+                ref.replace("T", "U") == alt.replace("T", "U")
+                for ref, alt in zip(refs, alts)
+            ],
+            dtype=torch.bool,
+            device=point.device,
+        )
+        point = point.masked_fill(same[:, None], 0.0)
+        return point, residual, mixed
+
+
 def parameter_count(module: nn.Module) -> int:
     return sum(parameter.numel() for parameter in module.parameters())
 
@@ -189,4 +351,27 @@ def make_exact_matched_pair(
             )
     if parameter_count(candidate) != parameter_count(null):
         raise RuntimeError("puzzle-set candidate and null parameter counts differ")
+    return candidate, null
+
+
+def make_exact_full_model_pair(
+    *, seed: int, device: str | torch.device = "cpu"
+) -> tuple[PuzzleSetMetaContextPointModel, PuzzleSetMetaContextPointModel]:
+    torch.manual_seed(int(seed))
+    candidate = PuzzleSetMetaContextPointModel(
+        connectivity=FULL_CROSS_CONSTRUCT
+    ).to(device)
+    null = copy.deepcopy(candidate)
+    null.connectivity = BLOCK_DIAGONAL_NULL
+    left = dict(candidate.named_parameters())
+    right = dict(null.named_parameters())
+    if left.keys() != right.keys():
+        raise RuntimeError("full puzzle-set candidate and null parameter names differ")
+    for name in left:
+        if not torch.equal(left[name].detach(), right[name].detach()):
+            raise RuntimeError(
+                f"full puzzle-set initialization differs at {name}"
+            )
+    if parameter_count(candidate) != parameter_count(null):
+        raise RuntimeError("full puzzle-set candidate and null counts differ")
     return candidate, null

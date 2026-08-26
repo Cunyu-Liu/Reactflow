@@ -40,9 +40,13 @@ Non-functional/scientific requirements:
 
 ## Decision
 
-Implement a proposed `PuzzleSetMetaContext` adapter:
+Implement a proposed `PuzzleSetMetaContextPointModel` with a shared
+outcome-blind WT encoder and `PuzzleSetMetaContext` adapter:
 
 ```text
+8 WT sequence/reactivity contexts
+        │ shared outcome-blind WT encoder
+        ▼
 8 WT construct hidden sequences
         │ observed-mean pooling; all-position fallback only for P20_Eterna
         ▼
@@ -62,6 +66,12 @@ The block-diagonal null uses every trainable layer on the focal token but cannot
 receive information from non-focal constructs. This identifies the
 cross-construct capability rather than model size. Both arms replay feature41
 exactly at initialization.
+
+The current implementation materializes `6,071,729` parameters in each arm:
+`4,767,280` in the shared-form WT encoder and `1,304,449` in the set mixer and
+point adapter. These are implementation observations, not an active contract;
+an eligible future amendment must freeze the final count before real-data
+training.
 
 ## Consequences
 
