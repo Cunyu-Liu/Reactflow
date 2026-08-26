@@ -10,13 +10,16 @@ puzzle set.
 from __future__ import annotations
 
 import copy
+import random
 from collections.abc import Sequence
 
+import numpy as np
 import torch
 from torch import nn
 
 from scripts.reactflow_delta.model_rescue_v11 import (
     V11ContextBlock,
+    method_cell_balanced_l1,
     mutation_one_hot,
 )
 
@@ -213,13 +216,43 @@ class PuzzleSetMetaContext(nn.Module):
             raise ValueError("prediction mask must be boolean")
 
         mixed = self.mix_construct_tokens(construct_hidden, construct_observed)
+        point, residual = self.point_from_mixed(
+            mixed,
+            focal_construct_index,
+            base_point_features,
+            feature41_point,
+            prediction_mask,
+        )
+        return point, residual, mixed
+
+    def point_from_mixed(
+        self,
+        mixed: torch.Tensor,
+        focal_construct_index: int,
+        base_point_features: torch.Tensor,
+        feature41_point: torch.Tensor,
+        prediction_mask: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if mixed.shape != (EXPECTED_CONSTRUCTS_PER_PUZZLE, CONTEXT_WIDTH):
+            raise ValueError("mixed puzzle-set tokens have invalid shape")
+        if not 0 <= int(focal_construct_index) < EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError("focal construct index is outside the puzzle set")
+        if base_point_features.ndim != 3 or base_point_features.shape[-1] != (
+            BASE_FEATURE_WIDTH
+        ):
+            raise ValueError("base point features have invalid shape")
+        expected = base_point_features.shape[:2]
+        if feature41_point.shape != expected or prediction_mask.shape != expected:
+            raise ValueError("point anchor or prediction mask is misaligned")
+        if prediction_mask.dtype != torch.bool:
+            raise ValueError("prediction mask must be boolean")
         focal = mixed[int(focal_construct_index)]
         expanded = focal.reshape(1, 1, -1).expand(*expected, -1)
         residual = self.point_head(
             torch.cat([base_point_features, expanded], dim=-1)
         ).squeeze(-1)
         point = (feature41_point + residual).masked_fill(~prediction_mask, 0.0)
-        return point, residual, mixed
+        return point, residual
 
 
 class PuzzleSetMetaContextPointModel(nn.Module):
@@ -299,6 +332,34 @@ class PuzzleSetMetaContextPointModel(nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         hidden = self.encode_puzzle_set(contexts)
         observed = [context[3].bool() for context in contexts]
+        mixed = self.meta_context.mix_construct_tokens(hidden, observed)
+        point, residual = self.forward_from_encoded(
+            hidden,
+            mixed,
+            focal_construct_index,
+            edit_index,
+            signed_distance,
+            refs,
+            alts,
+            feature41_point,
+            prediction_mask,
+        )
+        return point, residual, mixed
+
+    def forward_from_encoded(
+        self,
+        hidden: Sequence[torch.Tensor],
+        mixed: torch.Tensor,
+        focal_construct_index: int,
+        edit_index: torch.Tensor,
+        signed_distance: torch.Tensor,
+        refs: list[str],
+        alts: list[str],
+        feature41_point: torch.Tensor,
+        prediction_mask: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if len(hidden) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError("encoded puzzle set must contain eight constructs")
         base_features = self.base_point_features(
             hidden[int(focal_construct_index)],
             edit_index,
@@ -307,9 +368,8 @@ class PuzzleSetMetaContextPointModel(nn.Module):
             alts,
             feature41_point,
         )
-        point, residual, mixed = self.meta_context(
-            hidden,
-            observed,
+        point, residual = self.meta_context.point_from_mixed(
+            mixed,
             focal_construct_index,
             base_features,
             feature41_point,
@@ -324,7 +384,7 @@ class PuzzleSetMetaContextPointModel(nn.Module):
             device=point.device,
         )
         point = point.masked_fill(same[:, None], 0.0)
-        return point, residual, mixed
+        return point, residual
 
 
 def parameter_count(module: nn.Module) -> int:
@@ -375,3 +435,100 @@ def make_exact_full_model_pair(
     if parameter_count(candidate) != parameter_count(null):
         raise RuntimeError("full puzzle-set candidate and null counts differ")
     return candidate, null
+
+
+def _finite_gradients(module: nn.Module) -> None:
+    for name, parameter in module.named_parameters():
+        if parameter.grad is not None and not bool(
+            torch.isfinite(parameter.grad).all()
+        ):
+            raise RuntimeError(f"nonfinite puzzle-set point gradient: {name}")
+
+
+def _puzzle_order(n_puzzles: int, seed: int, epoch: int) -> list[int]:
+    order = list(range(n_puzzles))
+    random.Random(int(seed) * 100_003 + int(epoch)).shuffle(order)
+    return order
+
+
+def puzzle_balanced_point_loss(
+    model: PuzzleSetMetaContextPointModel,
+    puzzle_batch: dict,
+) -> torch.Tensor:
+    """Equal cell mean inside one puzzle after mutant/position balancing."""
+
+    contexts = puzzle_batch.get("contexts")
+    cells = puzzle_batch.get("cells")
+    if not isinstance(contexts, Sequence) or len(contexts) != (
+        EXPECTED_CONSTRUCTS_PER_PUZZLE
+    ):
+        raise ValueError("puzzle training batch requires eight WT contexts")
+    if not isinstance(cells, Sequence) or len(cells) != (
+        EXPECTED_CONSTRUCTS_PER_PUZZLE
+    ):
+        raise ValueError("puzzle training batch requires eight method cells")
+    focal_indices = [int(cell["focal_construct_index"]) for cell in cells]
+    if sorted(focal_indices) != list(range(EXPECTED_CONSTRUCTS_PER_PUZZLE)):
+        raise ValueError("puzzle training cells must cover each focal construct once")
+
+    hidden = model.encode_puzzle_set(contexts)
+    observed = [context[3].bool() for context in contexts]
+    mixed = model.meta_context.mix_construct_tokens(hidden, observed)
+    cell_losses = []
+    for cell in cells:
+        qualified = cell["qualified_mask"]
+        if qualified.dtype != torch.bool or not bool(qualified.any()):
+            raise ValueError("every puzzle training cell needs a qualified target")
+        point, _residual = model.forward_from_encoded(
+            hidden,
+            mixed,
+            int(cell["focal_construct_index"]),
+            cell["edit_index"],
+            cell["signed_distance"],
+            cell["refs"],
+            cell["alts"],
+            cell["feature41_point"],
+            cell["prediction_mask"],
+        )
+        cell_losses.append(
+            method_cell_balanced_l1(
+                point,
+                cell["target"],
+                qualified,
+                cell["wt"],
+            )
+        )
+    return torch.stack(cell_losses).mean()
+
+
+def fit_puzzle_set_point_model(
+    model: PuzzleSetMetaContextPointModel,
+    puzzle_batches: Sequence[dict],
+    *,
+    epochs: int,
+    seed: int,
+) -> list[float]:
+    """Visit every puzzle once per epoch under an exactly balanced objective."""
+
+    if not puzzle_batches:
+        raise ValueError("puzzle-set point training requires outer-train puzzles")
+    if epochs < 1:
+        raise ValueError("puzzle-set point training requires a positive epoch count")
+    torch.manual_seed(int(seed) + 1_500_000)
+    model.train()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=0.0)
+    history: list[float] = []
+    for epoch in range(int(epochs)):
+        losses = []
+        for index in _puzzle_order(len(puzzle_batches), seed, epoch):
+            optimizer.zero_grad()
+            loss = puzzle_balanced_point_loss(model, puzzle_batches[index])
+            loss.backward()
+            _finite_gradients(model)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+            optimizer.step()
+            losses.append(float(loss.detach().cpu()))
+        history.append(float(np.mean(losses)))
+    if len(history) != epochs or not np.isfinite(history).all():
+        raise RuntimeError("puzzle-set point history is incomplete or nonfinite")
+    return history

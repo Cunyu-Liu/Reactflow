@@ -73,6 +73,13 @@ point adapter. These are implementation observations, not an active contract;
 an eligible future amendment must freeze the final count before real-data
 training.
 
+The proposed training unit is one whole puzzle, not one pooled mutant table.
+Within a puzzle, loss is averaged position within mutant, then mutant within
+each of the eight method cells, then equally across those eight cells. Every
+outer-train puzzle is visited once per epoch in a deterministic shuffled order.
+Candidate and null reset the same Torch random stream before fitting, so model
+connectivity—not cell order or dropout randomness—is the intended difference.
+
 ## Consequences
 
 ### Positive

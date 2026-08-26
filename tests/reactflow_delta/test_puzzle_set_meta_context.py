@@ -12,9 +12,11 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
     FULL_CROSS_CONSTRUCT,
     PuzzleSetMetaContextPointModel,
     PuzzleSetMetaContext,
+    fit_puzzle_set_point_model,
     make_exact_full_model_pair,
     make_exact_matched_pair,
     parameter_count,
+    puzzle_balanced_point_loss,
 )
 
 
@@ -44,6 +46,29 @@ def _context(length: int, *, observed: bool = True):
     region = torch.zeros(length, 2)
     region[:, 0] = 1.0
     return sequence, reactivity, precision, observed_mask, position, region
+
+
+def _training_batch():
+    contexts = [_context(4) for _ in range(8)]
+    cells = []
+    for focal in range(8):
+        edit = torch.tensor([focal % 4])
+        distance = torch.arange(4)[None, :] - edit[:, None]
+        cells.append(
+            {
+                "focal_construct_index": focal,
+                "edit_index": edit,
+                "signed_distance": distance.float(),
+                "refs": ["A"],
+                "alts": ["G"],
+                "feature41_point": torch.zeros(1, 4),
+                "prediction_mask": torch.ones(1, 4, dtype=torch.bool),
+                "target": torch.full((1, 4), float(focal + 1) / 10.0),
+                "qualified_mask": torch.ones(1, 4, dtype=torch.bool),
+                "wt": torch.zeros(4),
+            }
+        )
+    return {"puzzle": "synthetic-puzzle", "contexts": contexts, "cells": cells}
 
 
 def test_puzzle_set_candidate_and_null_are_exact_parameter_matches() -> None:
@@ -208,3 +233,38 @@ def test_full_point_model_is_equivariant_to_construct_order() -> None:
         mask,
     )[2][new_focal]
     assert torch.allclose(original, repeated, atol=3e-6, rtol=0.0)
+
+
+def test_puzzle_balanced_loss_uses_all_eight_cells_equally() -> None:
+    candidate, _null = make_exact_full_model_pair(seed=61)
+    candidate.eval()
+    loss = puzzle_balanced_point_loss(candidate, _training_batch())
+    # At zero initialization point=feature41=0. Each single-mutant cell has
+    # constant loss 0.1, ..., 0.8; equal cell mean is therefore 0.45.
+    assert torch.allclose(loss, torch.tensor(0.45), atol=1e-7, rtol=0.0)
+
+
+def test_puzzle_training_replays_identically_under_same_connectivity() -> None:
+    first, second = make_exact_full_model_pair(seed=71)
+    second.connectivity = FULL_CROSS_CONSTRUCT
+    first_history = fit_puzzle_set_point_model(
+        first, [_training_batch()], epochs=1, seed=9
+    )
+    second_history = fit_puzzle_set_point_model(
+        second, [_training_batch()], epochs=1, seed=9
+    )
+    assert first_history == second_history
+    for left, right in zip(first.parameters(), second.parameters()):
+        assert torch.equal(left, right)
+
+
+def test_puzzle_training_rejects_duplicate_or_missing_focal_cells() -> None:
+    candidate, _null = make_exact_full_model_pair(seed=81)
+    batch = _training_batch()
+    batch["cells"][-1]["focal_construct_index"] = 0
+    try:
+        puzzle_balanced_point_loss(candidate, batch)
+    except ValueError as error:
+        assert "cover each focal construct once" in str(error)
+    else:
+        raise AssertionError("puzzle-set training accepted an unbalanced cell set")
