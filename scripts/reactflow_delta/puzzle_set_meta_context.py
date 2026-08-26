@@ -2,9 +2,9 @@
 """Outcome-blind cross-construct context proposed for post-V14 routing.
 
 This module is implementation-only.  It does not authorize a scientific run.
-The candidate and null share every parameter; their sole functional difference
-is whether a focal construct can attend to the other WT constructs in its
-puzzle set.
+The candidate and null share every parameter and eight-token attention graph;
+their sole functional difference is registered versus fixed wrong-position
+alignment of the seven non-focal WT constructs.
 """
 
 from __future__ import annotations
@@ -26,9 +26,10 @@ from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 
 
 FULL_CROSS_CONSTRUCT = "FULL_CROSS_CONSTRUCT"
-BLOCK_DIAGONAL_NULL = "BLOCK_DIAGONAL_NULL"
-CONNECTIVITY_MODES = {FULL_CROSS_CONSTRUCT, BLOCK_DIAGONAL_NULL}
-POSITION_ALIGNED_OPERATOR = "POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V2"
+POSITION_DERANGED_NULL = "POSITION_DERANGED_NULL"
+POSITION_DERANGEMENT_SHIFT = 17
+CONNECTIVITY_MODES = {FULL_CROSS_CONSTRUCT, POSITION_DERANGED_NULL}
+POSITION_ALIGNED_OPERATOR = "POSITION_ALIGNED_CROSS_CONSTRUCT_CONSENSUS_V3"
 
 EXPECTED_CONSTRUCTS_PER_PUZZLE = 8
 CONTEXT_WIDTH = 256
@@ -187,7 +188,7 @@ class PuzzleSetMetaContext(nn.Module):
         self.set_attention = nn.MultiheadAttention(
             CONTEXT_WIDTH,
             ATTENTION_HEADS,
-            dropout=DROPOUT,
+            dropout=0.0,
             batch_first=True,
         )
         self.ffn_norm = nn.LayerNorm(CONTEXT_WIDTH)
@@ -259,9 +260,10 @@ class PuzzleSetMetaContext(nn.Module):
     ) -> torch.Tensor:
         """Return mean, spread, support and focal deviation at each coordinate.
 
-        The candidate uses the other seven constructs. The matched null uses
-        the focal construct only, giving its alignment projection comparable
-        nonzero inputs without introducing any non-focal information.
+        Every focal query uses the other seven supplied constructs. The caller
+        gives the candidate correctly aligned inputs and gives the matched null
+        the same eight-token set with every non-focal construct position
+        deranged by the frozen circular shift.
         """
 
         if (
@@ -276,33 +278,42 @@ class PuzzleSetMetaContext(nn.Module):
         finite = torch.isfinite(values)
         observed = observed & finite
         safe = torch.where(observed, values, torch.zeros_like(values))
-        if self.connectivity == BLOCK_DIAGONAL_NULL:
-            mean = safe
-            spread = torch.zeros_like(values)
-            support = observed.to(values.dtype)
-            deviation = torch.zeros_like(values)
-        else:
-            counts = observed.sum(dim=0, keepdim=True) - observed.to(torch.int64)
-            sums = safe.sum(dim=0, keepdim=True) - safe
-            squared = safe.square().sum(dim=0, keepdim=True) - safe.square()
-            supported = counts > 0
-            denominator = counts.clamp_min(1).to(values.dtype)
-            mean = torch.where(supported, sums / denominator, torch.zeros_like(values))
-            variance = torch.where(
-                supported,
-                squared / denominator - mean.square(),
-                torch.zeros_like(values),
-            ).clamp_min(0.0)
-            spread = torch.sqrt(variance)
-            support = counts.to(values.dtype) / float(
-                EXPECTED_CONSTRUCTS_PER_PUZZLE - 1
-            )
-            deviation = torch.where(
-                observed & supported,
-                safe - mean,
-                torch.zeros_like(values),
-            )
+        counts = observed.sum(dim=0, keepdim=True) - observed.to(torch.int64)
+        sums = safe.sum(dim=0, keepdim=True) - safe
+        squared = safe.square().sum(dim=0, keepdim=True) - safe.square()
+        supported = counts > 0
+        denominator = counts.clamp_min(1).to(values.dtype)
+        mean = torch.where(supported, sums / denominator, torch.zeros_like(values))
+        variance = torch.where(
+            supported,
+            squared / denominator - mean.square(),
+            torch.zeros_like(values),
+        ).clamp_min(0.0)
+        spread = torch.sqrt(variance)
+        support = counts.to(values.dtype) / float(EXPECTED_CONSTRUCTS_PER_PUZZLE - 1)
+        deviation = torch.where(
+            observed & supported,
+            safe - mean,
+            torch.zeros_like(values),
+        )
         return torch.stack([mean, spread, support, deviation], dim=-1)
+
+    @staticmethod
+    def _position_deranged_inputs(
+        values: Sequence[torch.Tensor], focal_construct_index: int
+    ) -> list[torch.Tensor]:
+        if len(values) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError("position derangement requires exactly eight constructs")
+        if not 0 <= int(focal_construct_index) < EXPECTED_CONSTRUCTS_PER_PUZZLE:
+            raise ValueError("position derangement focal construct is outside the set")
+        return [
+            (
+                value
+                if index == int(focal_construct_index)
+                else torch.roll(value, shifts=POSITION_DERANGEMENT_SHIFT, dims=0)
+            )
+            for index, value in enumerate(values)
+        ]
 
     def mix_construct_tokens(
         self,
@@ -310,30 +321,47 @@ class PuzzleSetMetaContext(nn.Module):
         construct_observed: Sequence[torch.Tensor],
         construct_reactivity: Sequence[torch.Tensor],
     ) -> torch.Tensor:
-        # MultiheadAttention treats full-sequence position as the batch axis
-        # and the eight constructs as the unordered token axis. Information
-        # therefore crosses constructs only at the same registered coordinate.
-        tokens = self.align_construct_tokens(
-            construct_hidden, construct_observed, construct_reactivity
-        ).permute(1, 0, 2)
-        normalized = self.attention_norm(tokens)
-        attention_mask = None
-        if self.connectivity == BLOCK_DIAGONAL_NULL:
-            attention_mask = ~torch.eye(
-                EXPECTED_CONSTRUCTS_PER_PUZZLE,
-                dtype=torch.bool,
-                device=tokens.device,
+        # Every focal construct is one query over eight construct tokens. The
+        # candidate keys/values share the registered coordinate. The null keeps
+        # the focal token fixed while circularly shifting every non-focal input,
+        # preserving the same attention support and effective Q/K/V capacity.
+        query_batches = []
+        key_value_batches = []
+        for focal_index in range(EXPECTED_CONSTRUCTS_PER_PUZZLE):
+            if self.connectivity == POSITION_DERANGED_NULL:
+                hidden = self._position_deranged_inputs(construct_hidden, focal_index)
+                observed = self._position_deranged_inputs(
+                    construct_observed, focal_index
+                )
+                reactivity = self._position_deranged_inputs(
+                    construct_reactivity, focal_index
+                )
+            else:
+                hidden = list(construct_hidden)
+                observed = list(construct_observed)
+                reactivity = list(construct_reactivity)
+            tokens = self.align_construct_tokens(hidden, observed, reactivity).permute(
+                1, 0, 2
             )
+            query_batches.append(tokens[:, focal_index : focal_index + 1])
+            key_value_batches.append(tokens)
+
+        query = torch.cat(query_batches, dim=0)
+        key_value = torch.cat(key_value_batches, dim=0)
+        normalized_query = self.attention_norm(query)
+        normalized_key_value = self.attention_norm(key_value)
         attended, _weights = self.set_attention(
-            normalized,
-            normalized,
-            normalized,
-            attn_mask=attention_mask,
+            normalized_query,
+            normalized_key_value,
+            normalized_key_value,
             need_weights=False,
         )
-        tokens = tokens + self.residual_dropout(attended)
-        tokens = tokens + self.residual_dropout(self.ffn(self.ffn_norm(tokens)))
-        return self.output_norm(tokens).permute(1, 0, 2)
+        query = query + self.residual_dropout(attended)
+        query = query + self.residual_dropout(self.ffn(self.ffn_norm(query)))
+        length = int(construct_hidden[0].shape[0])
+        return self.output_norm(query).reshape(
+            EXPECTED_CONSTRUCTS_PER_PUZZLE, length, CONTEXT_WIDTH
+        )
 
     def forward(
         self,
@@ -570,7 +598,7 @@ def make_exact_matched_pair(
     torch.manual_seed(int(seed))
     candidate = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).to(device)
     null = copy.deepcopy(candidate)
-    null.connectivity = BLOCK_DIAGONAL_NULL
+    null.connectivity = POSITION_DERANGED_NULL
     left = dict(candidate.named_parameters())
     right = dict(null.named_parameters())
     if left.keys() != right.keys():
@@ -597,7 +625,7 @@ def make_exact_full_model_pair(
     )
     load_frozen_v14_encoder(candidate.encoder, v14_point_state)
     null = copy.deepcopy(candidate)
-    null.connectivity = BLOCK_DIAGONAL_NULL
+    null.connectivity = POSITION_DERANGED_NULL
     left = dict(candidate.named_parameters())
     right = dict(null.named_parameters())
     if left.keys() != right.keys():

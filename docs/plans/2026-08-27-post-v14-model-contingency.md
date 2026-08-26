@@ -75,21 +75,24 @@ These are `IDEA` records, not findings or authorized candidates.
   the puzzle's structural regime and measurement difficulty that is not
   recoverable from one WT profile alone.
 - `PREDICTION`: the cross-construct candidate improves signed and point-absolute
-  metrics over an identical block-diagonal set encoder, with the largest gains
-  on puzzles where V11–V14 residual transfer is heterogeneous.
-- `FALSIFIER`: the complete candidate-minus-block-diagonal increment is below
-  the existing 1–1.5% attribution margins, lacks a positive puzzle-level CI, or
-  agrees in fewer than 14/20 puzzles.
+  metrics over an identical position-deranged full-attention set encoder, with
+  the largest gains on puzzles where V11–V14 residual transfer is heterogeneous.
+- `FALSIFIER`: the complete candidate-minus-position-deranged-null increment is
+  below the existing 1–1.5% attribution margins, lacks a positive puzzle-level
+  CI, or agrees in fewer than 14/20 puzzles.
 - `MATCHED_NULL`: identical inputs, parameters, initialization, optimization
-  and calibration, but the focal-query attention mask permits access only to
-  its own construct tokens. No method ID, puzzle ID, held outcome or target mask
-  is an input to either arm.
+  and calibration. Both arms use eight legal attention tokens and trainable
+  Q/K/V projections; the null keeps the focal position fixed and circularly
+  shifts every non-focal position by the predeclared offset 17. Internal
+  attention-weight dropout is zero in both arms. No method ID, puzzle ID, held
+  outcome or target mask is an input to either arm.
 - `INITIALIZATION_PROTOCOL`: before point fitting, initialize only the new set
   operator with 200 epochs of outer-train masked-WT reconstruction. Candidate
-  may use aligned non-focal WT profiles and the null remains self-only; both use
-  the same 40% masks, temporary decoder, puzzle order and optimization budget.
-  The imported V14 encoder and zero-initialized point head remain frozen, and
-  mutant outcomes are unavailable to this stage.
+  may use aligned non-focal WT profiles and the null uses the same profiles only
+  at the fixed wrong-position coordinates; both use the same 40% masks,
+  temporary decoder, puzzle order and optimization budget. The imported V14
+  encoder and zero-initialized point head remain frozen, and mutant outcomes
+  are unavailable to this stage.
 - `PRIMARY_RISK`: the eight designs may be conditionally redundant, and the set
   model may memorize outer-train target motifs rather than generalize to an
   unseen puzzle.
@@ -166,7 +169,8 @@ residual experiment.
 
 If P1 becomes eligible, its amendment must freeze before training:
 
-- one cross-construct candidate and one block-diagonal matched null;
+- one correctly aligned cross-construct candidate and one fixed
+  position-deranged full-attention matched null;
 - the same-fold V13 candidate seed-0 point as an immutable prediction anchor
   for both arms, selected here before V14 scoring rather than after observing a
   route result;
@@ -197,11 +201,11 @@ If P1 becomes eligible, its amendment must freeze before training:
 
 - `ALTERNATIVE_EXPLANATION`: P1 may exploit design-method composition instead
   of puzzle biology. `CONTROL`: method and puzzle identifiers are absent; the
-  nested null receives the same construct set and differs only in legal
-  cross-construct attention.
+  nested null receives the same construct set and eight-token attention but
+  destroys only correct non-focal coordinate alignment.
 - `ALTERNATIVE_EXPLANATION`: P1 gains may be pure capacity. `CONTROL`: exact
-  parameter, initialization, input and optimization matching, with only the
-  attention connectivity changed.
+  parameter, initialization, input, legal attention support and optimization
+  matching, with only correct versus fixed wrong-position alignment changed.
 - `ALTERNATIVE_EXPLANATION`: P2 may improve CRPS by moving the point.
   `CONTROL`: the median is an algebraic invariant and point arrays must replay
   exactly at `1e-7` before scoring.

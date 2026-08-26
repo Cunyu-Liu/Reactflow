@@ -49,8 +49,12 @@ its width would not repair that missing indexing ability.
 Selected. For every full-sequence coordinate independently, the eight frozen
 V14 hidden states and their observed flags form an unordered set. Candidate
 attention can exchange information across all eight constructs at that
-coordinate. The matched null executes the same projection, attention, FFN, and
-normalization but masks every off-diagonal construct edge.
+coordinate. The matched null executes the same projection, eight-token
+attention, FFN, and normalization, but circularly shifts every non-focal
+construct by 17 full-sequence positions while leaving the focal construct at
+its registered coordinate. Thus both arms expose every Q/K/V parameter to the
+same number of legal attention tokens; only correct cross-construct coordinate
+alignment differs.
 
 The focal incremental head receives both the aligned mixed state at the mutation
 source and the aligned mixed state at each receiver. The frozen V14 local source
@@ -74,7 +78,9 @@ Z_{c,j}=W_p[H_{c,j};O_{c,j}]+W_qQ_{c,j},
 \]
 
 where `Q` is the four-dimensional aligned WT statistic. It is
-leave-one-construct for the candidate and focal-only for the matched null.
+leave-one-construct at the registered coordinate for the candidate and
+leave-one-construct at the fixed wrong-position coordinate for the matched
+null.
 
 For each position \(j\), apply the same eight-token attention block:
 
@@ -83,10 +89,14 @@ For each position \(j\), apply the same eight-token attention block:
 \operatorname{SetBlock}(Z_{:,j}).
 \]
 
-Candidate uses full eight-by-eight attention. Null uses an identity attention
-mask. No construct-order or method embedding is present. Position is the batch
-axis of the set block, so the cross-construct operator cannot mix position
-\(j\) with a different position \(k\); within-construct positional context has
+For each focal construct, candidate and null both use eight legal K/V tokens.
+Candidate uses the eight registered-position states. Null keeps the focal state
+at position \(j\) and takes each of the other seven states from
+\((j-17)\bmod L\), which is the value produced at position \(j\) by the fixed
+`torch.roll(..., shifts=17)` operation. No construct-order or method embedding
+is present. The fixed shift is independent of puzzle, method, target, fold and
+seed. Internal attention-weight dropout is zero in both arms; the matched
+residual and FFN dropouts remain `0.1`. Within-construct positional context has
 already been encoded by the frozen six-layer V14 encoder.
 
 The WT-only alignment audit justifies a low-dimensional explicit statistic at
@@ -94,25 +104,29 @@ the same coordinate. For each focal construct, the candidate computes the
 leave-one-construct WT mean, population spread, observed support fraction and
 focal-minus-consensus deviation from the other seven constructs. The matched
 null supplies the same four-dimensional interface and the same projection
-parameters, but its statistics are restricted to the focal construct itself:
-focal WT value, zero spread, focal observed flag and zero deviation. Thus the
-null receives comparable nonzero inputs without any non-focal information.
-The projected statistics are added before the set block; they do not introduce
-method or puzzle identity and remain permutation equivariant.
+parameters, but computes its mean, spread, support and focal deviation using
+the same seven constructs at their fixed 17-position-shifted coordinates.
+Therefore both arms use non-focal information, identical attention support and
+identical effective trainable parameter families; only biologically correct
+coordinate alignment is removed. The projected statistics are added before the
+set block; they do not introduce method or puzzle identity and remain
+permutation equivariant.
 
 Before mutation-effect fitting, the set operator receives one narrow,
 outer-train-only initialization stage. For each outer-train puzzle and each
 eligible focal WT construct, the V14 corruption schedule deterministically
 masks 40% of its observed positions. The frozen V14 encoder sees the masked
 focal profile; the candidate mixer may use the other seven aligned WT profiles,
-whereas the null remains self-only. A temporary `LayerNorm(256) -> Linear(256,
-1)` decoder reconstructs the masked focal WT values with L1 loss. Candidate and
+whereas the null receives the other seven WT profiles only at the fixed
+wrong-position coordinates. A temporary `LayerNorm(256) -> Linear(256, 1)`
+decoder reconstructs the masked focal WT values with L1 loss. Candidate and
 null start from identical mixer/decoder states and use the same masks, puzzle
-order, AdamW settings, dropout stream and epoch count. The V14 encoder and the
-zero-initialized point head remain bitwise unchanged. The 769-parameter decoder
-is frozen and never enters point prediction or residual calibration. This
-initializes the new cross-construct operator using the exact relationship that
-the WT-only audit established, without giving either arm mutant outcomes.
+order, AdamW settings, matched residual/FFN dropout stream and epoch count. The
+V14 encoder and the zero-initialized point head remain bitwise unchanged. The
+769-parameter decoder is frozen and never enters point prediction or residual
+calibration. This initializes the new cross-construct operator using the exact
+relationship that the WT-only audit established, without giving either arm
+mutant outcomes.
 
 For mutation source \(s\), receiver \(i\), and focal construct \(c\), the
 trainable increment uses
@@ -145,12 +159,16 @@ The implementation must establish:
 - all eight constructs have one exact length before mixing;
 - construct permutation changes only the corresponding construct axis;
 - candidate focal output depends on non-focal input at the same coordinate;
-- that dependency is exactly zero at all different coordinates;
-- null focal output has zero dependency on every non-focal construct;
+- the null focal output is invariant to a registered-position non-focal
+  counterfactual when the corresponding shifted input remains fixed;
+- candidate and null each expose all eight legal attention tokens and have
+  finite nonzero Q, K and V gradients on the same nondegenerate probe;
+- attention-weight dropout is exactly zero in both arms;
 - candidate/null state, total parameters, trainable parameters, input universe,
   optimizer, and random initialization match exactly;
-- candidate statistics exclude the focal construct, while null statistics are
-  self-only and non-focal counterfactuals leave them bitwise unchanged;
+- candidate statistics exclude the focal construct at the registered
+  coordinate, while null statistics exclude it at the fixed 17-position-shifted
+  coordinate;
 - both arms replay the frozen V13 parent within `1e-7` before training;
 - masked-WT batches contain only the nineteen outer-train `{puzzle, contexts}`
   records, exclude the held puzzle, and cannot carry mutant cells or targets;
@@ -165,17 +183,19 @@ The implementation must establish:
   construct projection and cross-construct attention while the frozen encoder
   still has no gradients;
 - after two deterministic optimizer updates, perturbing only a non-focal WT
-  profile changes the candidate focal prediction by more than `1e-6`, whereas
-  the matched null remains bitwise invariant;
+  value at the registered coordinate changes the candidate focal prediction by
+  more than `1e-6`, whereas the matched null remains bitwise invariant when its
+  shifted-coordinate input is unchanged;
 - the frozen V14 encoder receives no gradient and remains bitwise unchanged;
 - P20_Eterna stays in all 177 aligned context positions with observed flag zero
   and no fabricated supervised cell.
 
 This architecture is still implementation-only. If a future complete P1
-candidate does not beat its block-diagonal null under the predeclared
-attribution Gate, the result means that aligned cross-design WT context lacks
-usable incremental signal; the response is to terminate the family, not return
-to global pooling, widen the mixer, or add a structure graph.
+candidate does not beat its position-deranged full-attention null under the
+predeclared attribution Gate, the result means that aligned cross-design WT
+context has not provided usable incremental signal under this frozen model and
+protocol; the response is to terminate the family, not return to global
+pooling, widen the mixer, or add a structure graph.
 
 The counterfactual and gradient checks establish executable model capability,
 not benchmark performance. They prevent a negative real-data result from being
@@ -250,14 +270,14 @@ must simultaneously satisfy the existing top-journal margins:
 
 If and only if that complete P1M3 screen passes exactly, P1M4 is a new,
 independent 20-fold by five-seed universe. Seed 0 is rerun rather than copied
-from the screen. Each seed independently trains both the full-context
-candidate and the block-diagonal matched null under the same `200 + 40 + 40`
-schedule. The formal point prediction is the arithmetic mean of the five seed
-points. Candidate and null probability predictions are ten-component Gaussian
-mixtures: each seed contributes its two components and exactly one fifth of the
-total probability mass. CRPS, coverage and distribution-derived absolute delta
-are recomputed from those ten components; they are not averages of five
-single-seed scores.
+from the screen. Each seed independently trains both the correctly aligned
+full-context candidate and the position-deranged full-attention matched null
+under the same `200 + 40 + 40` schedule. The formal point prediction is the
+arithmetic mean of the five seed points. Candidate and null probability
+predictions are ten-component Gaussian mixtures: each seed contributes its two
+components and exactly one fifth of the total probability mass. CRPS, coverage
+and distribution-derived absolute delta are recomputed from those ten
+components; they are not averages of five single-seed scores.
 
 The formal mixture must repeat every P1M3 margin, confidence interval,
 positive-puzzle, leave-one-puzzle-out, influence, coverage and calibration

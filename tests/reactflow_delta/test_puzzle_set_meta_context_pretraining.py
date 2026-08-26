@@ -149,7 +149,7 @@ def test_pretraining_interface_cannot_accept_mutant_target_cells() -> None:
         raise AssertionError("pretraining accepted mutant outcome cells")
 
 
-def test_focal_corruption_is_removed_from_null_visible_statistics() -> None:
+def test_focal_corruption_is_excluded_from_aligned_and_deranged_statistics() -> None:
     candidate, null = _full_pair(seed=1704)
     contexts = _batches()[0]["contexts"]
     corruption = torch.tensor([False, True, False, True, False, False])
@@ -161,6 +161,15 @@ def test_focal_corruption_is_removed_from_null_visible_statistics() -> None:
     candidate_stats = candidate.meta_context.construct_alignment_statistics(
         reactivity, observed
     )
-    null_stats = null.meta_context.construct_alignment_statistics(reactivity, observed)
+    null_reactivity = null.meta_context._position_deranged_inputs(reactivity, 0)
+    null_observed = null.meta_context._position_deranged_inputs(observed, 0)
+    null_stats = null.meta_context.construct_alignment_statistics(
+        null_reactivity, null_observed
+    )
     assert torch.equal(candidate_stats[0, corruption, 2], torch.ones(2))
-    assert torch.equal(null_stats[0, corruption], torch.zeros(2, 4))
+    assert torch.equal(null_stats[0, corruption, 2], torch.ones(2))
+    assert torch.equal(candidate_stats[0, corruption, 3], torch.zeros(2))
+    assert torch.equal(null_stats[0, corruption, 3], torch.zeros(2))
+    assert not torch.equal(
+        candidate_stats[0, corruption, 0], null_stats[0, corruption, 0]
+    )

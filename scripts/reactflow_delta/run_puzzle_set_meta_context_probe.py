@@ -35,11 +35,12 @@ from scripts.reactflow_delta.model_rescue_v6_probe import (
     validate_cache_alignment,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context import (
-    BLOCK_DIAGONAL_NULL,
     EXPECTED_TOTAL_PARAMETERS,
     EXPECTED_TRAINABLE_PARAMETERS,
     FULL_CROSS_CONSTRUCT,
     POSITION_ALIGNED_OPERATOR,
+    POSITION_DERANGEMENT_SHIFT,
+    POSITION_DERANGED_NULL,
     V14_ENCODER_PREFIXES,
     fit_puzzle_set_point_model,
     make_exact_full_model_pair,
@@ -72,7 +73,7 @@ from scripts.reactflow_delta.run_model_rescue_v9 import _read_json
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v7"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v8"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
 RUNNABLE_PHASES = {"P1M2", "P1M3", "P1M4"}
@@ -561,8 +562,9 @@ def run_prepared_fold(
         "point_epochs": int(point_epochs),
         "calibration_epochs": int(calibration_epochs),
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
-        "null_connectivity": BLOCK_DIAGONAL_NULL,
+        "null_connectivity": POSITION_DERANGED_NULL,
         "cross_construct_operator": POSITION_ALIGNED_OPERATOR,
+        "position_derangement_shift": POSITION_DERANGEMENT_SHIFT,
         "candidate_parameter_count": point_parameter_counts["candidate"],
         "null_parameter_count": point_parameter_counts["null"],
         "candidate_trainable_parameter_count": point_trainable_counts["candidate"],
@@ -634,11 +636,14 @@ def run_prepared_fold(
             "outcome_blind_puzzle_set_inputs": True,
             "exact_parameter_and_initialization_match": True,
             "candidate_full_cross_construct_attention": True,
-            "null_block_diagonal_attention": True,
+            "null_position_deranged_full_attention": True,
+            "candidate_null_equal_attention_support": True,
+            "attention_weight_dropout_disabled": True,
             "puzzle_balanced_training": True,
             "position_aligned_cross_construct_attention": True,
             "leave_one_construct_alignment_statistics": True,
-            "matched_null_self_only_alignment_statistics": True,
+            "matched_null_position_deranged_alignment_statistics": True,
+            "fixed_position_derangement_shift_17": True,
             "outer_train_wt_only_puzzle_set_pretraining": True,
             "held_puzzle_excluded_from_pretraining": True,
             "mutant_outcome_excluded_from_pretraining": True,

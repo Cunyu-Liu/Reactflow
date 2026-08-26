@@ -10,9 +10,10 @@ from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     merge_complete_universe,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context import (
-    BLOCK_DIAGONAL_NULL,
     FULL_CROSS_CONSTRUCT,
     POSITION_ALIGNED_OPERATOR,
+    POSITION_DERANGEMENT_SHIFT,
+    POSITION_DERANGED_NULL,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context_data import PREDICTION_SCHEMA
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
@@ -73,8 +74,9 @@ def _write_fold(
         "point_epochs": epochs,
         "calibration_epochs": epochs,
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
-        "null_connectivity": BLOCK_DIAGONAL_NULL,
+        "null_connectivity": POSITION_DERANGED_NULL,
         "cross_construct_operator": POSITION_ALIGNED_OPERATOR,
+        "position_derangement_shift": POSITION_DERANGEMENT_SHIFT,
         "candidate_parameter_count": 100,
         "null_parameter_count": 100,
         "candidate_trainable_parameter_count": 50,
@@ -134,11 +136,14 @@ def _write_fold(
             "outcome_blind_puzzle_set_inputs": True,
             "exact_parameter_and_initialization_match": True,
             "candidate_full_cross_construct_attention": True,
-            "null_block_diagonal_attention": True,
+            "null_position_deranged_full_attention": True,
+            "candidate_null_equal_attention_support": True,
+            "attention_weight_dropout_disabled": True,
             "puzzle_balanced_training": True,
             "position_aligned_cross_construct_attention": True,
             "leave_one_construct_alignment_statistics": True,
-            "matched_null_self_only_alignment_statistics": True,
+            "matched_null_position_deranged_alignment_statistics": True,
+            "fixed_position_derangement_shift_17": True,
             "outer_train_wt_only_puzzle_set_pretraining": True,
             "held_puzzle_excluded_from_pretraining": True,
             "mutant_outcome_excluded_from_pretraining": True,
@@ -242,6 +247,30 @@ def test_merger_rejects_wrong_epoch_or_parameter_count(tmp_path: Path) -> None:
         assert "epoch freeze" in str(error)
     else:
         raise AssertionError("puzzle-set merger accepted an epoch mismatch")
+
+
+def test_merger_rejects_changed_position_derangement(tmp_path: Path) -> None:
+    _write_fold(tmp_path, fold=0)
+    path = tmp_path / "puzzle_set_fold_result_fold0_seed0.json"
+    row = json.loads(path.read_text(encoding="utf-8"))
+    row["position_derangement_shift"] = POSITION_DERANGEMENT_SHIFT - 1
+    path.write_text(json.dumps(row), encoding="utf-8")
+    try:
+        merge_complete_universe(
+            tmp_path,
+            expected_phase="P1M3",
+            expected_folds=[0],
+            expected_seeds=[0],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+        )
+    except ValueError as error:
+        assert "changed connectivity" in str(error)
+    else:
+        raise AssertionError("puzzle-set merger accepted a changed derangement")
 
 
 def test_merger_rejects_misaligned_prediction_rows(tmp_path: Path) -> None:

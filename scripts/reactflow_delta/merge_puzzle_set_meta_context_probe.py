@@ -13,9 +13,10 @@ import numpy as np
 from scipy.special import ndtr
 
 from scripts.reactflow_delta.puzzle_set_meta_context import (
-    BLOCK_DIAGONAL_NULL,
     FULL_CROSS_CONSTRUCT,
     POSITION_ALIGNED_OPERATOR,
+    POSITION_DERANGEMENT_SHIFT,
+    POSITION_DERANGED_NULL,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     FORBIDDEN_PREDICTION_FIELDS,
@@ -32,7 +33,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
 
 
-MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v6"
+MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v7"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
@@ -138,11 +139,14 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
         "outcome_blind_puzzle_set_inputs",
         "exact_parameter_and_initialization_match",
         "candidate_full_cross_construct_attention",
-        "null_block_diagonal_attention",
+        "null_position_deranged_full_attention",
+        "candidate_null_equal_attention_support",
+        "attention_weight_dropout_disabled",
         "puzzle_balanced_training",
         "position_aligned_cross_construct_attention",
         "leave_one_construct_alignment_statistics",
-        "matched_null_self_only_alignment_statistics",
+        "matched_null_position_deranged_alignment_statistics",
+        "fixed_position_derangement_shift_17",
         "outer_train_wt_only_puzzle_set_pretraining",
         "held_puzzle_excluded_from_pretraining",
         "mutant_outcome_excluded_from_pretraining",
@@ -216,7 +220,9 @@ def merge_complete_universe(
             raise ValueError(f"puzzle-set fold {pair} violates the epoch freeze")
         if (
             row.get("candidate_connectivity") != FULL_CROSS_CONSTRUCT
-            or row.get("null_connectivity") != BLOCK_DIAGONAL_NULL
+            or row.get("null_connectivity") != POSITION_DERANGED_NULL
+            or int(row.get("position_derangement_shift", -1))
+            != POSITION_DERANGEMENT_SHIFT
         ):
             raise ValueError(f"puzzle-set fold {pair} changed connectivity")
         if row.get("cross_construct_operator") != POSITION_ALIGNED_OPERATOR:
@@ -398,11 +404,14 @@ def merge_complete_universe(
             "outcome_blind_puzzle_set_inputs_all_runs": True,
             "exact_parameter_and_initialization_match_all_runs": True,
             "candidate_full_cross_construct_attention_all_runs": True,
-            "null_block_diagonal_attention_all_runs": True,
+            "null_position_deranged_full_attention_all_runs": True,
+            "candidate_null_equal_attention_support_all_runs": True,
+            "attention_weight_dropout_disabled_all_runs": True,
             "puzzle_balanced_training_all_runs": True,
             "position_aligned_cross_construct_attention_all_runs": True,
             "leave_one_construct_alignment_statistics_all_runs": True,
-            "matched_null_self_only_alignment_statistics_all_runs": True,
+            "matched_null_position_deranged_alignment_statistics_all_runs": True,
+            "fixed_position_derangement_shift_17_all_runs": True,
             "outer_train_wt_only_puzzle_set_pretraining_all_runs": True,
             "held_puzzle_excluded_from_pretraining_all_runs": True,
             "mutant_outcome_excluded_from_pretraining_all_runs": True,

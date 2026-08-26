@@ -6,6 +6,18 @@ Proposed, implementation-only, no training or score authority. V14 remains the
 sole active experiment, and exact V14M3 PASS supersedes this proposal by routing
 only to V14M4.
 
+### Pre-run null correction
+
+Before any P1 training or score access, a static gradient probe showed that the
+original block-diagonal self-only null was not an effective-capacity-matched
+control: one legal key makes its attention softmax identically one, leaving Q/K
+projections effectively unidentifiable, while attention-weight dropout injects
+substantially greater noise into the single-edge null than the eight-edge
+candidate. That obsolete null is scientifically ineligible and is not retained
+as a compatibility mode. The decision below therefore uses the fixed
+17-position deranged, eight-token, zero-attention-dropout null. This correction
+changes no active V14 code, authority, result or Gate.
+
 ## Context
 
 V11–V13 show that a focal-construct neural residual can improve feature41 but
@@ -34,7 +46,8 @@ Non-functional/scientific requirements:
 
 - candidate and null have identical parameters, initialization, inputs,
   optimizer and downstream calibration;
-- only cross-construct attention connectivity differs;
+- candidate and null have equal eight-token attention support and trainable
+  Q/K/V projections; only correct versus fixed wrong-position alignment differs;
 - no V14 artifact, authority, process or score is modified;
 - implementation tests establish mechanics, not scientific performance.
 
@@ -59,7 +72,7 @@ frozen V13 outer-fold point ─────────────────�
 177 aligned sets of eight construct states
         │
         ├── candidate: full cross-construct attention at each position
-        └── matched null: identical self-only attention at each position
+        └── matched null: full attention with non-focal positions shifted by 17
         │ outer-train masked-WT initialization of this set operator
         │ identical 40% masks/budgets; temporary decoder; no mutant outcomes
         │
@@ -70,23 +83,26 @@ mixed source + mixed receiver + focal/mutation/feature41/parent features
 zero-initialized incremental head → frozen V13 point + increment
 ```
 
-The block-diagonal null uses every trainable layer at every focal position but
-cannot receive information from non-focal constructs. Cross-construct attention
-is position aligned: full-sequence position is the attention batch axis, so it
-cannot mix different coordinates. This identifies the
-cross-construct capability rather than model size. Both arms replay the frozen
-V13 parent point exactly at initialization. V13 is fixed before V14 scoring
-because it has the strongest known combined point profile; using its prediction
-as an immutable parent does not reopen the terminated exact-mutant mechanism
-claim.
+The matched null keeps the focal token at its registered coordinate and
+circularly shifts all seven non-focal hidden/reactivity/observed streams by the
+fixed offset 17. Candidate and null therefore each use eight legal K/V tokens,
+all Q/K/V parameters are identifiable in both arms, and internal
+attention-weight dropout is zero. The residual and FFN dropouts remain matched
+at `0.1`. This identifies correct cross-construct coordinate alignment rather
+than nominal model size or effective attention capacity. Both arms replay the
+frozen V13 parent point exactly at initialization. V13 is fixed before V14
+scoring because it has the strongest known combined point profile; using its
+prediction as an immutable parent does not reopen the terminated exact-mutant
+mechanism claim.
 
-The final pre-run representation also projects four missingness-aware aligned
-WT statistics. Candidate statistics are leave-one-construct mean, spread,
-support fraction and focal deviation across the other seven constructs. The
-matched null uses the identical projection and parameter count but supplies
-only focal value, zero spread, focal observed flag and zero deviation. This
-turns the positive WT-only alignment diagnostic into a sample-efficient input
-bias while preserving a strict no-cross-construct null.
+The final pre-run representation also projects four missingness-aware WT
+statistics. Candidate statistics are leave-one-construct mean, spread, support
+fraction and focal deviation across the other seven constructs at the
+registered coordinate. The matched null uses the identical projection and
+parameter count but computes the same four statistics from the seven fixed
+wrong-position coordinates. This turns the positive WT-only alignment
+diagnostic into a sample-efficient input bias while preserving a strict
+alignment-destruction null.
 
 The set operator is not left randomly initialized before the scarce
 mutation-effect objective. Within each outer fold, both arms receive a fixed
@@ -94,13 +110,14 @@ mutation-effect objective. Within each outer fold, both arms receive a fixed
 focal construct at a time has 40% of its observed WT positions hidden using the
 frozen V14 deterministic mask schedule. A temporary, exactly matched
 769-parameter decoder reconstructs those values with L1 loss. Candidate may
-draw on the other seven aligned WT profiles; null remains self-only. The V14
-encoder and zero-initialized incremental point head are bitwise frozen, and the
-pretraining API accepts only `{puzzle, contexts}`. Candidate and null use the
-same mask, order, optimizer, epoch budget, decoder initialization and dropout
-stream. The decoder is frozen and unused after this stage. Thus the stage
-initializes the new cross-construct capability without reopening V14 focal
-pretraining or exposing a mutant outcome.
+draw on the other seven aligned WT profiles; the null receives the same seven
+profiles at the fixed shifted coordinates. The V14 encoder and zero-initialized
+incremental point head are bitwise frozen, and the pretraining API accepts only
+`{puzzle, contexts}`. Candidate and null use the same mask, order, optimizer,
+epoch budget, decoder initialization and matched residual/FFN dropout stream.
+The decoder is frozen and unused after this stage. Thus the stage initializes
+the new cross-construct capability without reopening V14 focal pretraining or
+exposing a mutant outcome.
 
 The current implementation materializes `6,171,697` parameters in each arm:
 `4,767,280` frozen V14 encoder parameters and `1,404,417` trainable
@@ -121,8 +138,8 @@ registered zero-outcome P20_Eterna construct contributes outcome-blind WT
 context but no fabricated supervised cell. Every outer-train puzzle is visited
 once per point epoch in a deterministic shuffled order, giving 760 point
 updates per arm at 40 epochs. Candidate and null reset the same Torch random
-stream before each stage, so connectivity—not cell order, mask or dropout
-randomness—is the intended difference.
+stream before each stage, so registered versus fixed wrong-position alignment—
+not cell order, mask or dropout randomness—is the intended difference.
 
 The proposed held path first computes the same-fold V13 parent point, then
 assembles all eight WT contexts once, encodes them once, and mixes each aligned
@@ -203,8 +220,8 @@ unchanged top-journal Gate.
 Rejected: V14 already tests focal capacity plus task-matched focal WT
 pretraining, and its contract terminates same-family iteration on failure. The
 selected outer-train masked-WT stage is narrower and different: it initializes
-only the new cross-construct set operator against a self-only matched null while
-the imported V14 encoder remains frozen.
+only the new cross-construct set operator against a position-deranged matched
+null while the imported V14 encoder remains frozen.
 
 **Train the full puzzle-set model from scratch**
 
@@ -235,7 +252,8 @@ branch.
 
 ## Failure modes and handling
 
-- If non-focal input gradients reach the block-diagonal null, the matched null
+- If either arm lacks finite nonzero Q/K/V gradients, if their legal attention
+  support differs, or if attention-weight dropout is nonzero, the matched null
   is invalid and no real-data probe may run.
 - If construct permutation changes the corresponding candidate output, method
   order has leaked into the model and the design is invalid.
@@ -250,9 +268,10 @@ branch.
   fields; if candidate/null masks, eligible-construct counts or optimizer steps
   differ; or if the temporary decoder remains trainable downstream, no
   scientific run may proceed.
-- If a non-focal WT-profile counterfactual changes the trained matched null, or
-  does not change the trained candidate, the proposed capability is absent and
-  no real-data probe may proceed. The same fail-closed decision applies if the
+- If a registered-coordinate non-focal counterfactual changes the trained
+  matched null while its shifted-coordinate input is held fixed, or does not
+  change the trained candidate, the attribution contrast is invalid and no
+  real-data probe may proceed. The same fail-closed decision applies if the
   cross-construct projection and attention do not receive finite nonzero
   gradients after the zero-initialized output layer has been bootstrapped.
 - The WT-only registered-position audit is positive in all 20 puzzles for both

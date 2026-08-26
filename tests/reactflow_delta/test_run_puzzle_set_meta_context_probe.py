@@ -14,6 +14,10 @@ from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     FORBIDDEN_PREDICTION_FIELDS,
 )
+from scripts.reactflow_delta.puzzle_set_meta_context import (
+    POSITION_DERANGEMENT_SHIFT,
+    POSITION_DERANGED_NULL,
+)
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
     EXPECTED_PROJECT_TASK,
     EXPECTED_TRAINING_TOKEN,
@@ -241,6 +245,10 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
     )
     assert result["schema_version"] == FOLD_SCHEMA
     assert result["candidate_parameter_count"] == result["null_parameter_count"]
+    assert result["null_connectivity"] == POSITION_DERANGED_NULL
+    assert result["position_derangement_shift"] == POSITION_DERANGEMENT_SHIFT
+    assert result["invariants"]["candidate_null_equal_attention_support"] is True
+    assert result["invariants"]["attention_weight_dropout_disabled"] is True
     assert set(result["residual_parameter_counts"].values()) == {63748}
     assert result["pretraining_puzzle_ids"] == ["P01"]
     assert result["outer_train_puzzle_ids"] == ["P01"]

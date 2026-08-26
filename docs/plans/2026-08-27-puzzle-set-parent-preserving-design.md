@@ -67,16 +67,19 @@ For outer fold \(f\):
    contexts. Deterministically mask 40% of one focal WT construct's observed
    positions, reconstruct them with a temporary 769-parameter decoder, and
    average L1 across eligible constructs and puzzles. Candidate may use the
-   other seven aligned WT profiles; null is self-only. Both use identical
-   masks, puzzle order, initialization, optimizer and 200-epoch budget. The
-   frozen encoder and zero-initialized point head cannot change, and no mutant
-   cell or outcome is accepted by the pretraining interface.
+   other seven aligned WT profiles; the null uses the same seven profiles at a
+   fixed 17-position circular derangement. Both use identical masks, puzzle
+   order, initialization, optimizer and 200-epoch budget. The frozen encoder
+   and zero-initialized point head cannot change, and no mutant cell or outcome
+   is accepted by the pretraining interface.
 5. Freeze and remove the reconstruction decoder from downstream prediction.
    Require both arms still to replay the V13 parent within `1e-7`.
-6. At every position, candidate uses full permutation-equivariant attention
-   across the eight constructs. The matched null uses block-diagonal self-only
-   attention with identical inputs, parameters, initialization, optimizer,
-   order, and epochs.
+6. At every focal position, both arms use full permutation-equivariant
+   eight-token attention. Candidate uses correctly aligned non-focal states;
+   the matched null uses the fixed 17-position-shifted non-focal states. Their
+   inputs, parameters, initialization, optimizer, legal attention support,
+   order and epochs are otherwise identical; attention-weight dropout is zero
+   in both arms.
 7. A zero-initialized incremental head receives focal V14 source/receiver
    features, signed distance, mutation identity, feature41, the frozen V13
    parent point, and the position-aligned mixed states at the mutation source
@@ -144,8 +147,9 @@ entire point model and trains only the predeclared residual head.
    calibration prediction.
 7. Supervised backpropagation changes only the set mixer and incremental head;
    the encoder and parent arrays remain unchanged.
-8. Non-focal construct gradients are nonzero for the candidate and exactly zero
-   for the block-diagonal null.
+8. Candidate and null Q/K/V gradients are all finite and nonzero. Perturbing a
+   non-focal WT value at the registered coordinate changes the candidate but
+   not the null when the null's shifted-coordinate input is held fixed.
 9. Construct-order permutation preserves the corresponding focal output.
 10. Seven-cell P20 training retains all eight context constructs without
    inventing supervision.
