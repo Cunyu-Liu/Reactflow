@@ -48,8 +48,8 @@ decisions:
 phase_state:
   V13M0: PASS
   V13M1: PASS
-  V13M2: ENGINEERING_SMOKE_ONLY
-  V13M3: NOT_AUTHORIZED
+  V13M2: PASS
+  V13M3: SCORE_BLIND_SCREEN_AUTHORIZED
   V13M4: NOT_AUTHORIZED
   V13M5: NOT_RUN
 
@@ -59,6 +59,18 @@ outcome_access:
   new_external_outcome_accessed: false
 
 events:
+  - id: V13M2_PAIRED_DROPOUT_ENGINEERING_SMOKE_PASS
+    observed_at: '2026-08-26T11:47:00+08:00'
+    status: V13M2_ENGINEERING_SMOKE_PASS
+    artifact_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m2_real_smoke_paired_dropout
+    complete_fold_artifacts: 2
+    merge_status: V13M2_COMPLETE_UNSCORED_SMOKE_MERGE_PASS
+    paired_encoder_dropout_mask_shared_all_runs: true
+    scientific_score_computed: false
+    partial_score_inspected: false
+    external_outcome_accessed: false
+    next_authority: V13M3_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+
   - id: V13M2_PRE_PAIRED_DROPOUT_SMOKE_INVALIDATED
     observed_at: '2026-08-26T11:30:00+08:00'
     status: INVALIDATED_ENGINEERING_SMOKE_PRE_PAIRED_DROPOUT
