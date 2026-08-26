@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.post_v13_route_diagnostics_ledger.v1
 contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
-current_status: PV13D1_IMPLEMENTATION_AND_FOCUSED_TESTS_ONLY
+current_status: PV13D2_FIXED_RIDGE_PREDICTION_ONLY_AUTHORIZED
 created_at: '2026-08-27T01:20:00+08:00'
 
 immutable_parent_verdicts:
@@ -43,8 +43,8 @@ decisions:
 
 phase_state:
   PV13D0: CONTRACT_FROZEN
-  PV13D1: IMPLEMENTATION_AUTHORIZED
-  PV13D2: NOT_AUTHORIZED
+  PV13D1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
+  PV13D2: FIXED_RIDGE_PREDICTION_ONLY_AUTHORIZED
   PV13D3: NOT_AUTHORIZED
 
 outcome_access:
@@ -53,6 +53,19 @@ outcome_access:
   new_external_outcome_accessed: false
 
 events:
+  - id: PV13D2_FIXED_RIDGE_PREDICTION_AUTHORITY_OPEN
+    observed_at: '2026-08-27T01:50:00+08:00'
+    status: COMPLETE_TWENTY_FOLD_PREDICTION_ONLY_DIAGNOSTIC
+    implementation_commit: 8020b8d2c129a049d39234c73f472f3874e417e7
+    focused_tests_passed: 13
+    contract_validation_status: POST_V13_ROUTE_DIAGNOSTIC_CONTRACT_VALIDATION_PASS
+    fixed_ridge_diagnostic_allowed: true
+    neural_training_allowed: false
+    held_score_read_allowed: false
+    partial_score_accessed: false
+    external_outcome_accessed: false
+    next_action: RUN_FOLDS_0_THROUGH_19_WITHOUT_SCORE_THEN_CREATE_COMPLETE_UNSCORED_MERGE
+
   - id: PV13D1_IMPLEMENTATION_AUTHORITY_OPEN
     observed_at: '2026-08-27T01:35:00+08:00'
     status: IMPLEMENTATION_AND_FOCUSED_TESTS_ONLY
