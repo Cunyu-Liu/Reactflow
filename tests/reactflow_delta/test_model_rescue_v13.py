@@ -389,15 +389,45 @@ def test_prediction_checks_reject_target_bearing_artifact(tmp_path: Path) -> Non
         "null_point": np.zeros(rows),
         "null_hidden_delta_max_abs": np.zeros(rows),
     }
-    for name in ("candidate", "null"):
+    for name in ("feature41", "candidate", "null"):
         common[f"{name}_weights"] = np.full((rows, 2), 0.5)
         common[f"{name}_locations"] = np.zeros((rows, 2))
         common[f"{name}_scales"] = np.ones((rows, 2))
+    for name in ("candidate", "null"):
         common[f"{name}_expected_absolute_delta"] = np.ones(rows)
     common["target"] = np.zeros(rows)
     np.savez_compressed(path, **common)
     checks = prediction_checks(path, fold=0, seed=0, expected_rows=rows)
     assert checks["target_free"] is False
+
+
+def test_prediction_checks_require_feature41_probability_distribution(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "prediction.npz"
+    rows = 1
+    payload = {
+        "schema_version": np.asarray("reactflow_delta.model_rescue_v13_prediction.v1"),
+        "keys": np.asarray(["a"], dtype=object),
+        "biological_scoring_key": np.asarray(["a"], dtype=object),
+        "outer_fold": np.zeros(rows, dtype=np.int64),
+        "seed": np.zeros(rows, dtype=np.int64),
+        "registered_status": np.full(rows, "covered", dtype=object),
+        "feature41_point": np.zeros(rows),
+        "feature41_weights": np.ones((rows, 1)),
+        "feature41_locations": np.zeros((rows, 1)),
+        "candidate_point": np.zeros(rows),
+        "null_point": np.zeros(rows),
+        "null_hidden_delta_max_abs": np.zeros(rows),
+    }
+    for name in ("candidate", "null"):
+        payload[f"{name}_weights"] = np.ones((rows, 1))
+        payload[f"{name}_locations"] = np.zeros((rows, 1))
+        payload[f"{name}_scales"] = np.ones((rows, 1))
+        payload[f"{name}_expected_absolute_delta"] = np.ones(rows)
+    np.savez_compressed(path, **payload)
+    checks = prediction_checks(path, fold=0, seed=0, expected_rows=rows)
+    assert checks["required_fields"] is False
 
 
 def test_complete_merger_rejects_incomplete_v13_universe(tmp_path: Path) -> None:
