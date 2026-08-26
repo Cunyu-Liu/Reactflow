@@ -25,6 +25,7 @@ from scripts.reactflow_delta.assemble_model_rescue_v13_formal import assemble_fo
 from scripts.reactflow_delta.merge_model_rescue_v13 import (
     merge_folds,
     prediction_checks,
+    recorded_invariants_pass,
 )
 from scripts.reactflow_delta.qualify_model_rescue_v13 import qualify
 from scripts.reactflow_delta.qualify_model_rescue_v13_smoke import (
@@ -212,6 +213,28 @@ def test_paired_encoder_dropout_cannot_create_a_counterfactual_difference() -> N
             refs,
         )
     assert torch.equal(identical, wt)
+
+
+def test_pre_shared_dropout_fold_invariants_are_not_qualified() -> None:
+    invariants = {
+        "target_profile_identity_exact": True,
+        "exact_point_parameter_and_initial_state_match": True,
+        "second_pass_sequence_is_only_candidate_null_difference": True,
+        "candidate_exact_mutant_null_wt_replay": True,
+        "null_hidden_delta_at_most_1e_7": True,
+        "same_point_training_order_and_dropout_seed": True,
+        "paired_encoder_dropout_mask_shared": True,
+        "point_frozen_during_calibration": True,
+        "v10_residual_family_reused": True,
+        "feature41_replay_at_1e_7": True,
+        "median_constraint_all_held_rows": True,
+        "held_score_computed": False,
+        "prediction_contains_target_fields": False,
+        "external_outcome_accessed": False,
+    }
+    assert recorded_invariants_pass(invariants)
+    invariants.pop("paired_encoder_dropout_mask_shared")
+    assert not recorded_invariants_pass(invariants)
 
 
 def test_exact_mutant_produces_receiver_shaped_counterfactual_signal() -> None:
