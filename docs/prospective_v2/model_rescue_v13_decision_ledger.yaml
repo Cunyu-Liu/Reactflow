@@ -59,6 +59,19 @@ outcome_access:
   new_external_outcome_accessed: false
 
 events:
+  - id: V13M2_PRE_PAIRED_DROPOUT_SMOKE_INVALIDATED
+    observed_at: '2026-08-26T11:30:00+08:00'
+    status: INVALIDATED_ENGINEERING_SMOKE_PRE_PAIRED_DROPOUT
+    artifact_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m2_real_smoke
+    complete_fold_artifacts: 2
+    complete_merge_present: true
+    engineering_qualification_file_present: true
+    engineering_qualification_content_read: false
+    scientific_score_computed_or_read: false
+    invalidation_reason: INDEPENDENT_WT_AND_SECOND_PASS_DROPOUT_MASKS_CONTAMINATED_COUNTERFACTUAL_HIDDEN_DIFFERENCE
+    eligible_to_open_v13m3: false
+    artifacts_overwritten: false
+
   - id: V13M2_PAIRED_DROPOUT_IMPLEMENTATION_CORRECTION
     observed_at: '2026-08-26T11:05:00+08:00'
     status: V13M2_ENGINEERING_SMOKE_RESTART_REQUIRED_NO_SCIENTIFIC_SCORE_READ
