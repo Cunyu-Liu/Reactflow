@@ -169,6 +169,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
     assert_score_authority(args.repo_root.resolve())
+    if args.out_json.exists():
+        raise FileExistsError("V14 refuses to overwrite its one formal score")
     result = score_formal(
         json.loads(args.assembly_json.read_text(encoding="utf-8")),
         json.loads(args.merged_json.read_text(encoding="utf-8")),

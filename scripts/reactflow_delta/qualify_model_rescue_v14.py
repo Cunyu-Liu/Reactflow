@@ -47,6 +47,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--score-json", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
+    if args.out_json.exists():
+        raise FileExistsError("V14 refuses to overwrite its one qualification")
     result = qualify(json.loads(args.score_json.read_text(encoding="utf-8")))
     args.out_json.parent.mkdir(parents=True, exist_ok=True)
     args.out_json.write_text(
