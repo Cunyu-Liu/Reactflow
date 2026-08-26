@@ -51,9 +51,10 @@ def assert_score_authority(repo_root: Path) -> None:
         "runnable_phases"
     ) != [EXPECTED_PHASE]:
         raise RuntimeError("puzzle-set scorer is closed outside complete P1M3")
-    if active.get("training_allowed") is not False or active.get(
-        "candidate_model_training_allowed"
-    ) is not False:
+    if (
+        active.get("training_allowed") is not False
+        or active.get("candidate_model_training_allowed") is not False
+    ):
         raise RuntimeError("puzzle-set training must be closed before scoring")
     if active.get("held_score_read_allowed") != EXPECTED_SCORE_TOKEN:
         raise RuntimeError("puzzle-set complete score-once authority is closed")
@@ -76,10 +77,17 @@ def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
         "position_aligned_cross_construct_attention_all_runs",
         "leave_one_construct_alignment_statistics_all_runs",
         "matched_null_self_only_alignment_statistics_all_runs",
+        "outer_train_wt_only_puzzle_set_pretraining_all_runs",
+        "held_puzzle_excluded_from_pretraining_all_runs",
+        "mutant_outcome_excluded_from_pretraining_all_runs",
+        "candidate_null_equal_pretraining_budget_all_runs",
+        "pretraining_decoder_frozen_downstream_all_runs",
+        "encoder_and_point_unchanged_during_pretraining_all_runs",
+        "masked_wt_pretraining_protocol_all_runs",
         "puzzle_coordinate_frames_validated_all_runs",
         "frozen_v13_point_parent_all_runs",
         "frozen_v14_context_encoder_all_runs",
-        "zero_initialized_parent_replay_all_runs",
+        "parent_replay_before_and_after_pretraining_all_runs",
         "point_frozen_during_calibration_all_runs",
         "v10_residual_family_all_runs",
         "puzzle_balanced_residual_calibration_all_runs",
@@ -174,9 +182,7 @@ def score_fold(
             "candidate_signed_delta_mae": np.abs(
                 signed - prediction["candidate_point"][rows]
             ),
-            "null_signed_delta_mae": np.abs(
-                signed - prediction["null_point"][rows]
-            ),
+            "null_signed_delta_mae": np.abs(signed - prediction["null_point"][rows]),
             "feature41_absolute_delta_mae": np.abs(
                 absolute - np.asarray([tic2a_absolute[key] for key in keys])
             ),
@@ -210,20 +216,14 @@ def score_fold(
             "candidate_coverage68": _central_covered(
                 signed, *distributions["candidate"], 0.68
             ),
-            "null_coverage68": _central_covered(
-                signed, *distributions["null"], 0.68
-            ),
+            "null_coverage68": _central_covered(signed, *distributions["null"], 0.68),
             "candidate_coverage95": _central_covered(
                 signed, *distributions["candidate"], 0.95
             ),
-            "null_coverage95": _central_covered(
-                signed, *distributions["null"], 0.95
-            ),
+            "null_coverage95": _central_covered(signed, *distributions["null"], 0.95),
         }
         for name, array in arrays.items():
-            values[name].update(
-                {key: float(value) for key, value in zip(keys, array)}
-            )
+            values[name].update({key: float(value) for key, value in zip(keys, array)})
         n_qualified += len(keys)
     result = {name: _puzzle_macro(data) for name, data in values.items()}
     result.update(
@@ -284,15 +284,17 @@ def score_complete(
         or merged.get("phase") != EXPECTED_PHASE
         or merged.get("expected_folds") != list(range(20))
         or merged.get("expected_seeds") != [0]
+        or int(merged.get("expected_pretraining_epochs", -1)) != 200
         or int(merged.get("expected_point_epochs", -1)) != 40
         or int(merged.get("expected_calibration_epochs", -1)) != 40
     ):
         raise ValueError("puzzle-set scorer requires one complete unscored merge")
     if not merged_integrity_pass(merged.get("merge_integrity", {})):
         raise ValueError("puzzle-set merged integrity is not qualified")
-    if tic2a_merged.get("schema_version") != TIC2A_MERGED_SCHEMA or tic2a_merged.get(
-        "status"
-    ) != "TIC2A_COMPLETE_UNSCORED_MERGE_PASS":
+    if (
+        tic2a_merged.get("schema_version") != TIC2A_MERGED_SCHEMA
+        or tic2a_merged.get("status") != "TIC2A_COMPLETE_UNSCORED_MERGE_PASS"
+    ):
         raise ValueError("puzzle-set scorer requires the corrected TIC2A merge")
     fold_rows = {int(row["outer_fold"]): row for row in merged.get("folds", [])}
     tic_rows = {int(row["outer_fold"]): row for row in tic2a_merged.get("folds", [])}
@@ -321,9 +323,7 @@ def score_complete(
         score = score_fold(
             univ,
             held_records,
-            _load_prediction(
-                Path(fold_rows[fold_id]["prediction_artifact"]), fold_id
-            ),
+            _load_prediction(Path(fold_rows[fold_id]["prediction_artifact"]), fold_id),
             _load_tic2a_absolute(
                 Path(tic_rows[fold_id]["prediction_artifact"]), fold_id
             ),

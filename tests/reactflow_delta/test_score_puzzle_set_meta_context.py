@@ -98,10 +98,17 @@ def _integrity() -> dict[str, bool]:
         "position_aligned_cross_construct_attention_all_runs": True,
         "leave_one_construct_alignment_statistics_all_runs": True,
         "matched_null_self_only_alignment_statistics_all_runs": True,
+        "outer_train_wt_only_puzzle_set_pretraining_all_runs": True,
+        "held_puzzle_excluded_from_pretraining_all_runs": True,
+        "mutant_outcome_excluded_from_pretraining_all_runs": True,
+        "candidate_null_equal_pretraining_budget_all_runs": True,
+        "pretraining_decoder_frozen_downstream_all_runs": True,
+        "encoder_and_point_unchanged_during_pretraining_all_runs": True,
+        "masked_wt_pretraining_protocol_all_runs": True,
         "puzzle_coordinate_frames_validated_all_runs": True,
         "frozen_v13_point_parent_all_runs": True,
         "frozen_v14_context_encoder_all_runs": True,
-        "zero_initialized_parent_replay_all_runs": True,
+        "parent_replay_before_and_after_pretraining_all_runs": True,
         "point_frozen_during_calibration_all_runs": True,
         "v10_residual_family_all_runs": True,
         "puzzle_balanced_residual_calibration_all_runs": True,
@@ -167,14 +174,10 @@ def test_score_authority_requires_complete_score_once_token(tmp_path: Path) -> N
     }
     path = tmp_path / "configs/reactflow_delta"
     path.mkdir(parents=True)
-    (path / "active_contract.yaml").write_text(
-        yaml.safe_dump(active), encoding="utf-8"
-    )
+    (path / "active_contract.yaml").write_text(yaml.safe_dump(active), encoding="utf-8")
     assert_score_authority(tmp_path)
     active["training_allowed"] = "still-open"
-    (path / "active_contract.yaml").write_text(
-        yaml.safe_dump(active), encoding="utf-8"
-    )
+    (path / "active_contract.yaml").write_text(yaml.safe_dump(active), encoding="utf-8")
     with pytest.raises(RuntimeError, match="training must be closed"):
         assert_score_authority(tmp_path)
 
@@ -183,6 +186,9 @@ def test_complete_merge_integrity_is_required_as_one_unit() -> None:
     integrity = _integrity()
     assert merged_integrity_pass(integrity)
     integrity["position_aligned_cross_construct_attention_all_runs"] = False
+    assert not merged_integrity_pass(integrity)
+    integrity = _integrity()
+    integrity["mutant_outcome_excluded_from_pretraining_all_runs"] = False
     assert not merged_integrity_pass(integrity)
 
 
@@ -193,6 +199,7 @@ def test_scorer_cannot_score_smoke_or_nonseedzero_merge(tmp_path: Path) -> None:
         "phase": "P1M2",
         "expected_folds": [0, 1],
         "expected_seeds": [0],
+        "expected_pretraining_epochs": 3,
         "expected_point_epochs": 3,
         "expected_calibration_epochs": 3,
     }

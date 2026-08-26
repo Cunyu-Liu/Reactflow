@@ -61,7 +61,11 @@ class OutcomeBlindWTEncoder(nn.Module):
         )
         self.output_norm = nn.LayerNorm(CONTEXT_WIDTH)
 
-    def forward(self, context: tuple[torch.Tensor, ...]) -> torch.Tensor:
+    def forward(
+        self,
+        context: tuple[torch.Tensor, ...],
+        corruption_mask: torch.Tensor | None = None,
+    ) -> torch.Tensor:
         if len(context) != 6:
             raise ValueError("WT context must contain six aligned tensors")
         sequence, reactivity, precision, observed, position, region = context
@@ -71,24 +75,32 @@ class OutcomeBlindWTEncoder(nn.Module):
         for tensor in (reactivity, precision, observed, position):
             if tensor.shape != (length,):
                 raise ValueError("WT scalar context tensor has invalid shape")
+        if corruption_mask is None:
+            corruption_mask = torch.zeros(
+                length, dtype=torch.bool, device=sequence.device
+            )
+        if corruption_mask.shape != (length,) or corruption_mask.dtype != torch.bool:
+            raise ValueError("WT corruption mask has invalid shape or dtype")
+        if bool((corruption_mask & ~observed.bool()).any()):
+            raise ValueError("WT corruption can mask only observed positions")
+        visible_reactivity = reactivity.masked_fill(corruption_mask, 0.0)
+        visible_precision = precision.masked_fill(corruption_mask, 0.0)
+        visible_observed = observed.masked_fill(corruption_mask, 0.0)
         normalized_position = position / max(length - 1, 1)
-        corruption_token = torch.zeros(
-            length, 1, dtype=sequence.dtype, device=sequence.device
-        )
         local = torch.cat(
             [
                 sequence,
-                reactivity[:, None],
-                precision[:, None],
-                observed[:, None],
+                visible_reactivity[:, None],
+                visible_precision[:, None],
+                visible_observed[:, None],
                 normalized_position[:, None],
                 region,
-                corruption_token,
+                corruption_mask.to(sequence.dtype)[:, None],
             ],
             dim=-1,
         )
         state = self.input_norm(self.input_projection(local)).unsqueeze(0)
-        attention_keys = observed.bool().unsqueeze(0)
+        attention_keys = (observed.bool() & ~corruption_mask).unsqueeze(0)
         for block in self.blocks:
             state = block(state, attention_keys)
         return self.output_norm(state[0])
@@ -170,9 +182,7 @@ class PuzzleSetMetaContext(nn.Module):
             raise ValueError(f"unsupported puzzle-set connectivity: {connectivity}")
         self.connectivity = connectivity
         self.construct_projection = nn.Linear(CONTEXT_WIDTH + 1, CONTEXT_WIDTH)
-        self.alignment_projection = nn.Linear(
-            ALIGNMENT_STAT_WIDTH, CONTEXT_WIDTH
-        )
+        self.alignment_projection = nn.Linear(ALIGNMENT_STAT_WIDTH, CONTEXT_WIDTH)
         self.attention_norm = nn.LayerNorm(CONTEXT_WIDTH)
         self.set_attention = nn.MultiheadAttention(
             CONTEXT_WIDTH,
@@ -203,9 +213,7 @@ class PuzzleSetMetaContext(nn.Module):
         nn.init.zeros_(self.point_head[-1].bias)
 
     @staticmethod
-    def _validate_construct(
-        hidden: torch.Tensor, observed: torch.Tensor
-    ) -> None:
+    def _validate_construct(hidden: torch.Tensor, observed: torch.Tensor) -> None:
         if hidden.ndim != 2 or hidden.shape[1] != CONTEXT_WIDTH:
             raise ValueError("puzzle-set hidden state has invalid shape")
         if observed.shape != (hidden.shape[0],) or observed.dtype != torch.bool:
@@ -219,11 +227,11 @@ class PuzzleSetMetaContext(nn.Module):
         construct_observed: Sequence[torch.Tensor],
         construct_reactivity: Sequence[torch.Tensor],
     ) -> torch.Tensor:
-        if len(construct_hidden) != EXPECTED_CONSTRUCTS_PER_PUZZLE or len(
-            construct_observed
-        ) != EXPECTED_CONSTRUCTS_PER_PUZZLE or len(
-            construct_reactivity
-        ) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+        if (
+            len(construct_hidden) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+            or len(construct_observed) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+            or len(construct_reactivity) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+        ):
             raise ValueError("puzzle-set context requires exactly eight constructs")
         lengths = {int(hidden.shape[0]) for hidden in construct_hidden}
         if len(lengths) != 1:
@@ -236,9 +244,7 @@ class PuzzleSetMetaContext(nn.Module):
             if reactivity.shape != observed.shape:
                 raise ValueError("puzzle-set WT reactivity is misaligned")
             aligned.append(
-                torch.cat(
-                    [hidden, observed.to(hidden.dtype)[:, None]], dim=-1
-                )
+                torch.cat([hidden, observed.to(hidden.dtype)[:, None]], dim=-1)
             )
         projected = self.construct_projection(torch.stack(aligned, dim=0))
         statistics = self.construct_alignment_statistics(
@@ -258,9 +264,10 @@ class PuzzleSetMetaContext(nn.Module):
         nonzero inputs without introducing any non-focal information.
         """
 
-        if len(construct_reactivity) != EXPECTED_CONSTRUCTS_PER_PUZZLE or len(
-            construct_observed
-        ) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
+        if (
+            len(construct_reactivity) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+            or len(construct_observed) != EXPECTED_CONSTRUCTS_PER_PUZZLE
+        ):
             raise ValueError("alignment statistics require exactly eight constructs")
         values = torch.stack(list(construct_reactivity), dim=0)
         observed = torch.stack(list(construct_observed), dim=0).bool()
@@ -373,8 +380,10 @@ class PuzzleSetMetaContext(nn.Module):
         parent_point: torch.Tensor,
         prediction_mask: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        if mixed.ndim != 3 or mixed.shape[0] != EXPECTED_CONSTRUCTS_PER_PUZZLE or (
-            mixed.shape[2] != CONTEXT_WIDTH
+        if (
+            mixed.ndim != 3
+            or mixed.shape[0] != EXPECTED_CONSTRUCTS_PER_PUZZLE
+            or (mixed.shape[2] != CONTEXT_WIDTH)
         ):
             raise ValueError("mixed aligned puzzle-set states have invalid shape")
         if not 0 <= int(focal_construct_index) < EXPECTED_CONSTRUCTS_PER_PUZZLE:
@@ -488,9 +497,7 @@ class PuzzleSetMetaContextPointModel(nn.Module):
         hidden = self.encode_puzzle_set(contexts)
         observed = [context[3].bool() for context in contexts]
         reactivity = [context[1] for context in contexts]
-        mixed = self.meta_context.mix_construct_tokens(
-            hidden, observed, reactivity
-        )
+        mixed = self.meta_context.mix_construct_tokens(hidden, observed, reactivity)
         point, residual = self.forward_from_encoded(
             hidden,
             mixed,
@@ -561,9 +568,7 @@ def make_exact_matched_pair(
     *, seed: int, device: str | torch.device = "cpu"
 ) -> tuple[PuzzleSetMetaContext, PuzzleSetMetaContext]:
     torch.manual_seed(int(seed))
-    candidate = PuzzleSetMetaContext(
-        connectivity=FULL_CROSS_CONSTRUCT
-    ).to(device)
+    candidate = PuzzleSetMetaContext(connectivity=FULL_CROSS_CONSTRUCT).to(device)
     null = copy.deepcopy(candidate)
     null.connectivity = BLOCK_DIAGONAL_NULL
     left = dict(candidate.named_parameters())
@@ -587,9 +592,9 @@ def make_exact_full_model_pair(
     device: str | torch.device = "cpu",
 ) -> tuple[PuzzleSetMetaContextPointModel, PuzzleSetMetaContextPointModel]:
     torch.manual_seed(int(seed))
-    candidate = PuzzleSetMetaContextPointModel(
-        connectivity=FULL_CROSS_CONSTRUCT
-    ).to(device)
+    candidate = PuzzleSetMetaContextPointModel(connectivity=FULL_CROSS_CONSTRUCT).to(
+        device
+    )
     load_frozen_v14_encoder(candidate.encoder, v14_point_state)
     null = copy.deepcopy(candidate)
     null.connectivity = BLOCK_DIAGONAL_NULL
@@ -599,9 +604,7 @@ def make_exact_full_model_pair(
         raise RuntimeError("full puzzle-set candidate and null parameter names differ")
     for name in left:
         if not torch.equal(left[name].detach(), right[name].detach()):
-            raise RuntimeError(
-                f"full puzzle-set initialization differs at {name}"
-            )
+            raise RuntimeError(f"full puzzle-set initialization differs at {name}")
     if parameter_count(candidate) != parameter_count(null):
         raise RuntimeError("full puzzle-set candidate and null counts differ")
     if parameter_count(candidate, trainable_only=True) != parameter_count(
@@ -652,9 +655,7 @@ def puzzle_balanced_point_loss(
     hidden = model.encode_puzzle_set(contexts)
     observed = [context[3].bool() for context in contexts]
     reactivity = [context[1] for context in contexts]
-    mixed = model.meta_context.mix_construct_tokens(
-        hidden, observed, reactivity
-    )
+    mixed = model.meta_context.mix_construct_tokens(hidden, observed, reactivity)
     cell_losses = []
     for cell in cells:
         qualified = cell["qualified_mask"]
@@ -699,7 +700,9 @@ def fit_puzzle_set_point_model(
     torch.manual_seed(int(seed) + 1_500_000)
     model.train()
     model.encoder.eval()
-    trainable = [parameter for parameter in model.parameters() if parameter.requires_grad]
+    trainable = [
+        parameter for parameter in model.parameters() if parameter.requires_grad
+    ]
     if not trainable or any(
         parameter.requires_grad for parameter in model.encoder.parameters()
     ):

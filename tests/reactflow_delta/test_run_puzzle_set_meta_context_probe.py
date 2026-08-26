@@ -98,6 +98,12 @@ def _prepared():
     return (
         _Universe(constructs),
         {
+            "pretraining_batches": [
+                {
+                    "puzzle": "P01",
+                    "contexts": contexts,
+                }
+            ],
             "training_batches": [
                 {
                     "puzzle": "P01",
@@ -184,6 +190,30 @@ def test_parent_checkpoint_identity_is_fixed_to_same_fold_and_seed_zero(
         raise AssertionError("puzzle-set runner accepted a wrong-fold parent")
 
 
+def test_prepared_fold_rejects_held_puzzle_pretraining(tmp_path: Path) -> None:
+    univ, prepared = _prepared()
+    prepared["training_batches"][0]["puzzle"] = "P20"
+    prepared["pretraining_batches"][0]["puzzle"] = "P20"
+    try:
+        run_prepared_fold(
+            univ=univ,
+            prepared=prepared,
+            outer_fold=19,
+            held_puzzle="P20",
+            phase="P1M3",
+            seed=0,
+            pretraining_epochs=1,
+            point_epochs=1,
+            calibration_epochs=1,
+            device="cpu",
+            out_dir=tmp_path,
+        )
+    except RuntimeError as error:
+        assert "exclude the held puzzle" in str(error)
+    else:
+        raise AssertionError("puzzle-set pretraining accepted the held puzzle")
+
+
 def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
     tmp_path: Path,
 ) -> None:
@@ -203,6 +233,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         held_puzzle="P20",
         phase="P1M3",
         seed=0,
+        pretraining_epochs=1,
         point_epochs=1,
         calibration_epochs=1,
         device="cpu",
@@ -211,6 +242,10 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
     assert result["schema_version"] == FOLD_SCHEMA
     assert result["candidate_parameter_count"] == result["null_parameter_count"]
     assert set(result["residual_parameter_counts"].values()) == {63748}
+    assert result["pretraining_puzzle_ids"] == ["P01"]
+    assert result["outer_train_puzzle_ids"] == ["P01"]
+    assert result["held_puzzle"] not in result["pretraining_puzzle_ids"]
+    assert result["expected_pretraining_eligible_construct_counts"] == [8]
     assert result["n_registered_prediction_rows"] == 32
     with np.load(result["prediction_artifact"], allow_pickle=True) as handle:
         assert not (set(handle.files) & FORBIDDEN_PREDICTION_FIELDS)
@@ -221,18 +256,16 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
             locations = torch.tensor(handle[f"{name}_locations"])
             scales = torch.tensor(handle[f"{name}_scales"])
             cdf = torch.sum(
-                weights
-                * torch.special.ndtr((point[:, None] - locations) / scales),
+                weights * torch.special.ndtr((point[:, None] - locations) / scales),
                 dim=-1,
             )
-            assert torch.allclose(
-                cdf, torch.full_like(cdf, 0.5), atol=3e-6, rtol=0.0
-            )
+            assert torch.allclose(cdf, torch.full_like(cdf, 0.5), atol=3e-6, rtol=0.0)
     merged = merge_complete_universe(
         tmp_path,
         expected_phase="P1M3",
         expected_folds=[19],
         expected_seeds=[0],
+        expected_pretraining_epochs=1,
         expected_point_epochs=1,
         expected_calibration_epochs=1,
         expected_parameter_count=result["candidate_parameter_count"],
@@ -249,6 +282,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
             held_puzzle="P20",
             phase="P1M3",
             seed=0,
+            pretraining_epochs=1,
             point_epochs=1,
             calibration_epochs=1,
             device="cpu",

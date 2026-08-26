@@ -56,6 +56,11 @@ from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     predict_held_puzzle_distributions,
     validate_puzzle_coordinate_frames,
 )
+from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
+    EXPECTED_DECODER_PARAMETERS,
+    fit_puzzle_set_wt_pretraining,
+    make_exact_decoder_pair,
+)
 from scripts.reactflow_delta.run_model_rescue_v11 import (
     _feature41_matrix,
     _fold_sources,
@@ -67,7 +72,7 @@ from scripts.reactflow_delta.run_model_rescue_v9 import _read_json
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v6"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v7"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
 RUNNABLE_PHASES = {"P1M2", "P1M3", "P1M4"}
@@ -131,13 +136,15 @@ def assert_real_training_authority(repo_root: Path, phase: str) -> None:
         "runnable_phases"
     ) != [phase]:
         raise RuntimeError(f"puzzle-set runner is closed outside active {phase}")
-    if active.get("training_allowed") != EXPECTED_TRAINING_TOKEN or active.get(
-        "candidate_model_training_allowed"
-    ) != EXPECTED_TRAINING_TOKEN:
+    if (
+        active.get("training_allowed") != EXPECTED_TRAINING_TOKEN
+        or active.get("candidate_model_training_allowed") != EXPECTED_TRAINING_TOKEN
+    ):
         raise RuntimeError("puzzle-set real training token is absent")
-    if active.get("held_score_read_allowed") is not False or active.get(
-        "partial_fold_score_read_allowed"
-    ) is not False:
+    if (
+        active.get("held_score_read_allowed") is not False
+        or active.get("partial_fold_score_read_allowed") is not False
+    ):
         raise RuntimeError("puzzle-set training requires all held scores closed")
     if active.get("new_external_outcome_access_allowed") is not False:
         raise RuntimeError("puzzle-set training requires external outcomes locked")
@@ -213,8 +220,8 @@ def prepare_real_fold(
                     cell["alts"],
                     cell["prediction_mask"],
                 )
-                cell["direct_features"] = direct.detach().cpu().numpy().astype(
-                    np.float32
+                cell["direct_features"] = (
+                    direct.detach().cpu().numpy().astype(np.float32)
                 )
     by_construct: dict[str, list[Any]] = defaultdict(list)
     for record in held_records:
@@ -286,6 +293,10 @@ def prepare_real_fold(
         )
     return {
         "training_batches": training_batches,
+        "pretraining_batches": [
+            {"puzzle": batch["puzzle"], "contexts": batch["contexts"]}
+            for batch in training_batches
+        ],
         "held_records": held_records,
         "held_contexts": held_contexts,
         "held_feature41": held_feature41,
@@ -347,6 +358,7 @@ def run_prepared_fold(
     held_puzzle: str,
     phase: str,
     seed: int,
+    pretraining_epochs: int,
     point_epochs: int,
     calibration_epochs: int,
     device: str,
@@ -355,6 +367,29 @@ def run_prepared_fold(
     """Fit exact matched arms and emit one target-free fold artifact."""
 
     out_dir.mkdir(parents=True, exist_ok=True)
+    training_puzzles = [str(batch["puzzle"]) for batch in prepared["training_batches"]]
+    pretraining_puzzles = [
+        str(batch["puzzle"]) for batch in prepared["pretraining_batches"]
+    ]
+    if (
+        len(training_puzzles) != len(set(training_puzzles))
+        or sorted(pretraining_puzzles) != sorted(training_puzzles)
+        or str(held_puzzle) in set(pretraining_puzzles)
+    ):
+        raise RuntimeError(
+            "puzzle-set WT pretraining must use exactly the unique outer-train "
+            "puzzles and exclude the held puzzle"
+        )
+    expected_eligible_construct_counts = sorted(
+        {
+            sum(int(int(context[3].bool().sum()) >= 2) for context in batch["contexts"])
+            for batch in prepared["pretraining_batches"]
+        }
+    )
+    if not expected_eligible_construct_counts or not set(
+        expected_eligible_construct_counts
+    ) <= {7, 8}:
+        raise RuntimeError("puzzle-set WT pretraining eligibility changed")
     fold_path = out_dir / f"puzzle_set_fold_result_fold{outer_fold}_seed{seed}.json"
     prediction_path = out_dir / (
         f"puzzle_set_predictions_fold{outer_fold}_seed{seed}.npz"
@@ -364,6 +399,12 @@ def run_prepared_fold(
     )
     null_point_checkpoint = out_dir / (
         f"puzzle_set_null_point_fold{outer_fold}_seed{seed}.pt"
+    )
+    candidate_decoder_checkpoint = out_dir / (
+        f"puzzle_set_candidate_wt_decoder_fold{outer_fold}_seed{seed}.pt"
+    )
+    null_decoder_checkpoint = out_dir / (
+        f"puzzle_set_null_wt_decoder_fold{outer_fold}_seed{seed}.pt"
     )
     candidate_residual_checkpoint = out_dir / (
         f"puzzle_set_candidate_residual_fold{outer_fold}_seed{seed}.pt"
@@ -378,6 +419,8 @@ def run_prepared_fold(
             prediction_path,
             candidate_point_checkpoint,
             null_point_checkpoint,
+            candidate_decoder_checkpoint,
+            null_decoder_checkpoint,
             candidate_residual_checkpoint,
             null_residual_checkpoint,
         )
@@ -401,6 +444,42 @@ def run_prepared_fold(
     }
     if max(initial_replay.values()) > 1e-7:
         raise RuntimeError("puzzle-set initialization does not replay V13 parent")
+    candidate_decoder, null_decoder = make_exact_decoder_pair(seed=seed, device=device)
+    candidate_pretraining = fit_puzzle_set_wt_pretraining(
+        candidate,
+        candidate_decoder,
+        prepared["pretraining_batches"],
+        epochs=pretraining_epochs,
+        seed=seed,
+    )
+    null_pretraining = fit_puzzle_set_wt_pretraining(
+        null,
+        null_decoder,
+        prepared["pretraining_batches"],
+        epochs=pretraining_epochs,
+        seed=seed,
+    )
+    if (
+        candidate_pretraining["eligible_construct_counts"]
+        != expected_eligible_construct_counts
+        or null_pretraining["eligible_construct_counts"]
+        != expected_eligible_construct_counts
+        or candidate_pretraining["optimizer_steps"]
+        != null_pretraining["optimizer_steps"]
+    ):
+        raise RuntimeError("puzzle-set candidate/null pretraining budget changed")
+    post_pretraining_replay = {
+        "candidate": _initial_parent_replay_max_difference(
+            candidate, prepared["training_batches"]
+        ),
+        "null": _initial_parent_replay_max_difference(
+            null, prepared["training_batches"]
+        ),
+    }
+    if max(post_pretraining_replay.values()) > 1e-7:
+        raise RuntimeError("puzzle-set WT pretraining changed V13 parent replay")
+    torch.save(candidate_decoder.state_dict(), candidate_decoder_checkpoint)
+    torch.save(null_decoder.state_dict(), null_decoder_checkpoint)
     point_parameter_counts = {
         "candidate": parameter_count(candidate),
         "null": parameter_count(null),
@@ -461,9 +540,10 @@ def run_prepared_fold(
         outer_fold=outer_fold,
         seed=seed,
     )
-    if str(prediction["schema_version"].item()) != PREDICTION_SCHEMA or set(
-        prediction
-    ) & FORBIDDEN_PREDICTION_FIELDS:
+    if (
+        str(prediction["schema_version"].item()) != PREDICTION_SCHEMA
+        or set(prediction) & FORBIDDEN_PREDICTION_FIELDS
+    ):
         raise RuntimeError("puzzle-set fold prediction schema is invalid")
     np.savez_compressed(prediction_path, **prediction)
     result = {
@@ -477,6 +557,7 @@ def run_prepared_fold(
         "outer_fold": int(outer_fold),
         "held_puzzle": str(held_puzzle),
         "seed": int(seed),
+        "pretraining_epochs": int(pretraining_epochs),
         "point_epochs": int(point_epochs),
         "calibration_epochs": int(calibration_epochs),
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
@@ -489,10 +570,13 @@ def run_prepared_fold(
         "frozen_parent_seed": FROZEN_PARENT_SEED,
         "frozen_parent_checkpoints": prepared["frozen_parent_checkpoints"],
         "initial_parent_replay_max_abs_difference": initial_replay,
+        "post_pretraining_parent_replay_max_abs_difference": (post_pretraining_replay),
         "n_validated_puzzle_coordinate_frames": len(
             prepared.get("coordinate_frames", {})
         ),
         "training_histories": {
+            "candidate_pretraining": candidate_pretraining["history"],
+            "null_pretraining": null_pretraining["history"],
             "candidate_point": candidate_history,
             "null_point": null_history,
             "candidate_residual": residual["histories"]["candidate"],
@@ -502,11 +586,40 @@ def run_prepared_fold(
             "candidate": str(candidate_point_checkpoint),
             "null": str(null_point_checkpoint),
         },
+        "pretraining_decoder_checkpoints": {
+            "candidate": str(candidate_decoder_checkpoint),
+            "null": str(null_decoder_checkpoint),
+        },
+        "pretraining_decoder_parameter_counts": {
+            "candidate": EXPECTED_DECODER_PARAMETERS,
+            "null": EXPECTED_DECODER_PARAMETERS,
+        },
+        "pretraining_summaries": {
+            "candidate": {
+                name: value
+                for name, value in candidate_pretraining.items()
+                if name != "history"
+            },
+            "null": {
+                name: value
+                for name, value in null_pretraining.items()
+                if name != "history"
+            },
+        },
         "residual_checkpoints": residual_checkpoints,
         "prediction_artifact": str(prediction_path),
         "n_registered_prediction_rows": int(len(prediction["keys"])),
         "n_calibration_cells": int(residual["n_calibration_cells"]),
         "n_outer_train_puzzles": len(prepared["training_batches"]),
+        "n_pretraining_puzzles": len(prepared["pretraining_batches"]),
+        "outer_train_puzzle_ids": sorted(training_puzzles),
+        "pretraining_puzzle_ids": sorted(pretraining_puzzles),
+        "expected_pretraining_eligible_construct_counts": (
+            expected_eligible_construct_counts
+        ),
+        "pretraining_optimizer_steps_each": (
+            int(pretraining_epochs) * len(prepared["pretraining_batches"])
+        ),
         "point_optimizer_steps_each": (
             int(point_epochs) * len(prepared["training_batches"])
         ),
@@ -526,6 +639,12 @@ def run_prepared_fold(
             "position_aligned_cross_construct_attention": True,
             "leave_one_construct_alignment_statistics": True,
             "matched_null_self_only_alignment_statistics": True,
+            "outer_train_wt_only_puzzle_set_pretraining": True,
+            "held_puzzle_excluded_from_pretraining": True,
+            "mutant_outcome_excluded_from_pretraining": True,
+            "candidate_null_equal_pretraining_budget": True,
+            "pretraining_decoder_frozen_downstream": True,
+            "encoder_and_point_unchanged_during_pretraining": True,
             "puzzle_coordinate_frames_validated": True,
             "frozen_v13_point_parent": True,
             "frozen_v14_context_encoder": True,
@@ -559,6 +678,7 @@ def run_real_fold(
     v14_parent_checkpoint: Path,
     phase: str,
     seed: int,
+    pretraining_epochs: int,
     point_epochs: int,
     calibration_epochs: int,
     device: str,
@@ -570,12 +690,8 @@ def run_real_fold(
         v14_checkpoint=v14_parent_checkpoint,
         outer_fold=int(fold.outer_fold),
     )
-    v13_parent = _load_frozen_v13_parent(
-        v13_parent_checkpoint, device=device
-    )
-    v14_point_state = _load_v14_parent_state(
-        v14_parent_checkpoint, device=device
-    )
+    v13_parent = _load_frozen_v13_parent(v13_parent_checkpoint, device=device)
+    v14_point_state = _load_v14_parent_state(v14_parent_checkpoint, device=device)
     prepared = prepare_real_fold(
         univ=univ,
         records=records,
@@ -597,6 +713,7 @@ def run_real_fold(
         held_puzzle=str(fold.held_puzzle),
         phase=phase,
         seed=seed,
+        pretraining_epochs=pretraining_epochs,
         point_epochs=point_epochs,
         calibration_epochs=calibration_epochs,
         device=device,
@@ -619,6 +736,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--folds", required=True)
+    parser.add_argument("--pretraining-epochs", type=int, required=True)
     parser.add_argument("--point-epochs", type=int, required=True)
     parser.add_argument("--calibration-epochs", type=int, required=True)
     parser.add_argument("--seed", type=int, required=True)
@@ -627,15 +745,19 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = args.repo_root.resolve()
     assert_real_training_authority(repo_root, args.phase)
     folds = _parse_folds(args.folds)
-    schedule = (args.point_epochs, args.calibration_epochs)
+    schedule = (
+        args.pretraining_epochs,
+        args.point_epochs,
+        args.calibration_epochs,
+    )
     if args.phase == "P1M2":
-        if args.seed != 0 or not set(folds) <= {0, 1} or schedule != (3, 3):
-            raise ValueError("P1M2 is frozen to seed0 folds0/1 and 3+3 epochs")
+        if args.seed != 0 or not set(folds) <= {0, 1} or schedule != (3, 3, 3):
+            raise ValueError("P1M2 is frozen to seed0 folds0/1 and 3+3+3 epochs")
     elif args.phase == "P1M3":
-        if args.seed != 0 or schedule != (40, 40):
-            raise ValueError("P1M3 is frozen to seed0 and 40+40 epochs")
-    elif args.seed not in range(5) or schedule != (40, 40):
-        raise ValueError("P1M4 is frozen to seeds0-4 and 40+40 epochs")
+        if args.seed != 0 or schedule != (200, 40, 40):
+            raise ValueError("P1M3 is frozen to seed0 and 200+40+40 epochs")
+    elif args.seed not in range(5) or schedule != (200, 40, 40):
+        raise ValueError("P1M4 is frozen to seeds0-4 and 200+40+40 epochs")
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for fold_id in folds:
@@ -647,15 +769,15 @@ def main(argv: list[str] | None = None) -> int:
     device = args.device if torch.cuda.is_available() else "cpu"
     univ = M2Universe(args.m2_csv)
     identity = univ.build()
-    if identity.get("n_canonical_mutant_full_profiles") != 13_976 or identity.get(
-        "canonical_mutant_full_profile_identity"
-    ) != "EXACT_PUZZLE_METHOD_MUTATION":
+    if (
+        identity.get("n_canonical_mutant_full_profiles") != 13_976
+        or identity.get("canonical_mutant_full_profile_identity")
+        != "EXACT_PUZZLE_METHOD_MUTATION"
+    ):
         raise RuntimeError("puzzle-set runner requires exact canonical target identity")
     records = univ.get_records()
     split = build_split_v4(sorted({record.puzzle for record in records}), seed=20260813)
-    selected = [
-        fold for fold in split["folds"] if int(fold.outer_fold) in set(folds)
-    ]
+    selected = [fold for fold in split["folds"] if int(fold.outer_fold) in set(folds)]
     if len(selected) != len(folds):
         raise ValueError("one or more requested puzzle-set folds are absent")
 
@@ -697,6 +819,7 @@ def main(argv: list[str] | None = None) -> int:
                 ),
                 phase=args.phase,
                 seed=args.seed,
+                pretraining_epochs=args.pretraining_epochs,
                 point_epochs=args.point_epochs,
                 calibration_epochs=args.calibration_epochs,
                 device=device,

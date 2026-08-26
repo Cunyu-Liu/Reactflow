@@ -18,12 +18,42 @@ if [[ "$#" -ne 1 ]]; then
   exit 2
 fi
 gpu=$1
-mkdir -p "${out}/logs"
+mkdir -p "${out}/logs" "${out}/interrupted_attempts"
 cd "${repo}"
+
+archive_incomplete_fold() {
+  local fold=$1
+  local result="${out}/puzzle_set_fold_result_fold${fold}_seed0.json"
+  if [[ -f "${result}" ]]; then
+    return 0
+  fi
+  local partial=(
+    "${out}/puzzle_set_predictions_fold${fold}_seed0.npz"
+    "${out}/puzzle_set_candidate_point_fold${fold}_seed0.pt"
+    "${out}/puzzle_set_null_point_fold${fold}_seed0.pt"
+    "${out}/puzzle_set_candidate_wt_decoder_fold${fold}_seed0.pt"
+    "${out}/puzzle_set_null_wt_decoder_fold${fold}_seed0.pt"
+    "${out}/puzzle_set_candidate_residual_fold${fold}_seed0.pt"
+    "${out}/puzzle_set_null_residual_fold${fold}_seed0.pt"
+  )
+  local present=()
+  local path
+  for path in "${partial[@]}"; do
+    if [[ -e "${path}" ]]; then
+      present+=("${path}")
+    fi
+  done
+  if [[ "${#present[@]}" -gt 0 ]]; then
+    local interrupted="${out}/interrupted_attempts/fold${fold}_$(date +%Y%m%dT%H%M%S)"
+    mkdir -p "${interrupted}"
+    mv "${present[@]}" "${interrupted}/"
+  fi
+}
 
 missing=()
 for fold in 0 1; do
   if [[ ! -f "${out}/puzzle_set_fold_result_fold${fold}_seed0.json" ]]; then
+    archive_incomplete_fold "${fold}"
     missing+=("${fold}")
   fi
 done
@@ -44,6 +74,7 @@ if [[ "${#missing[@]}" -gt 0 ]]; then
       --out-dir "${out}" \
       --device cuda:0 \
       --folds "${csv}" \
+      --pretraining-epochs 3 \
       --point-epochs 3 \
       --calibration-epochs 3 \
       --seed 0 \
@@ -55,6 +86,7 @@ fi
   --phase P1M2 \
   --folds 0,1 \
   --seeds 0 \
+  --pretraining-epochs 3 \
   --point-epochs 3 \
   --calibration-epochs 3 \
   --parameter-count 6171697 \

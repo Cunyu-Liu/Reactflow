@@ -84,6 +84,12 @@ These are `IDEA` records, not findings or authorized candidates.
   and calibration, but the focal-query attention mask permits access only to
   its own construct tokens. No method ID, puzzle ID, held outcome or target mask
   is an input to either arm.
+- `INITIALIZATION_PROTOCOL`: before point fitting, initialize only the new set
+  operator with 200 epochs of outer-train masked-WT reconstruction. Candidate
+  may use aligned non-focal WT profiles and the null remains self-only; both use
+  the same 40% masks, temporary decoder, puzzle order and optimization budget.
+  The imported V14 encoder and zero-initialized point head remain frozen, and
+  mutant outcomes are unavailable to this stage.
 - `PRIMARY_RISK`: the eight designs may be conditionally redundant, and the set
   model may memorize outer-train target motifs rather than generalize to an
   unseen puzzle.
@@ -129,7 +135,9 @@ only independent units.
 3. **Candidate beats feature41 and historical parents but fails the matched-null
    attribution Gates:** classify as `CAPACITY_WITHOUT_PRETRAINING_INCREMENT`.
    V14 remains terminal FAIL. P1 is the only eligible new point capability;
-   neither a wider focal encoder nor another WT-pretraining schedule is allowed.
+   neither a wider focal encoder nor another focal WT-pretraining schedule is
+   allowed. P1's set-operator initialization is part of its matched
+   cross-construct capability test, not a V14 retry.
 4. **Candidate passes every candidate-versus-null attribution Gate but misses
    one or more historical point margins:** classify as
    `PRETRAINING_SIGNAL_INSUFFICIENT_FOR_TRANSFER`. P1 is eligible because the
@@ -165,8 +173,13 @@ If P1 becomes eligible, its amendment must freeze before training:
 - the same-fold V14 candidate seed-0 encoder as an immutable outcome-blind
   representation for both arms, used regardless of V14's eventual score;
 - a zero-initialized incremental point head so both arms replay the frozen V13
-  parent at `1e-7` before training, with only the set mixer and increment head
-  trainable;
+  parent at `1e-7` before training;
+- one outer-train-only, 40%-mask, 200-epoch WT reconstruction stage with an
+  exactly initialized 769-parameter temporary decoder; during this stage only
+  the set mixer and decoder are trainable, and both arms must preserve parent
+  replay at `1e-7` afterward;
+- the decoder is frozen and removed downstream; point fitting then trains only
+  the set mixer and incremental head;
 - the exact set membership derived from outcome-blind puzzle metadata;
 - no method-ID or puzzle-ID embeddings and no held target/error/mask access;
 - a single fixed architecture, parameter count, optimizer, epoch count and seed

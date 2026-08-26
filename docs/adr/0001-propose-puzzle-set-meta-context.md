@@ -43,8 +43,10 @@ Non-functional/scientific requirements:
 Implement a parent-preserving `PuzzleSetMetaContextPointModel`. The frozen V13
 seed-0 candidate from the same outer fold supplies the point anchor; the frozen
 encoder subset of the V14 seed-0 candidate from that fold supplies the
-outcome-blind representation. Only `PuzzleSetMetaContext` and its incremental
-head are trainable:
+outcome-blind representation. Training is staged: masked-WT initialization
+updates `PuzzleSetMetaContext` plus a temporary decoder; point fitting updates
+`PuzzleSetMetaContext` plus its incremental head. The imported encoder and V13
+parent remain frozen:
 
 ```text
 frozen V13 outer-fold point ───────────────────────────────────────┐
@@ -58,6 +60,8 @@ frozen V13 outer-fold point ─────────────────�
         │
         ├── candidate: full cross-construct attention at each position
         └── matched null: identical self-only attention at each position
+        │ outer-train masked-WT initialization of this set operator
+        │ identical 40% masks/budgets; temporary decoder; no mutant outcomes
         │
         ▼
 mixed source + mixed receiver + focal/mutation/feature41/parent features
@@ -84,24 +88,41 @@ only focal value, zero spread, focal observed flag and zero deviation. This
 turns the positive WT-only alignment diagnostic into a sample-efficient input
 bias while preserving a strict no-cross-construct null.
 
+The set operator is not left randomly initialized before the scarce
+mutation-effect objective. Within each outer fold, both arms receive a fixed
+200-epoch masked-WT stage over the nineteen outer-train puzzles. One eligible
+focal construct at a time has 40% of its observed WT positions hidden using the
+frozen V14 deterministic mask schedule. A temporary, exactly matched
+769-parameter decoder reconstructs those values with L1 loss. Candidate may
+draw on the other seven aligned WT profiles; null remains self-only. The V14
+encoder and zero-initialized incremental point head are bitwise frozen, and the
+pretraining API accepts only `{puzzle, contexts}`. Candidate and null use the
+same mask, order, optimizer, epoch budget, decoder initialization and dropout
+stream. The decoder is frozen and unused after this stage. Thus the stage
+initializes the new cross-construct capability without reopening V14 focal
+pretraining or exposing a mutant outcome.
+
 The current implementation materializes `6,171,697` parameters in each arm:
 `4,767,280` frozen V14 encoder parameters and `1,404,417` trainable
 position-aware mixer and incremental-head parameters. The head receives the
 aligned mixed states at both source and receiver plus the explicit parent-point
 scalar. The V13 parent is evaluated outside the new module and is never
-optimized by P1. These are implementation observations, not an active contract;
-an eligible future amendment must freeze the final count before real-data
-training.
+optimized by P1. The temporary 769-parameter reconstruction decoder is not part
+of the final 6,171,697-parameter prediction model. These are implementation
+observations, not an active contract; an eligible future amendment must freeze
+the final count before real-data training.
 
 The proposed training unit is one whole puzzle, not one pooled mutant table.
-Within a puzzle, loss is averaged position within mutant, then mutant within
-each qualified method cell, then equally across available cells. All eight WT
-constructs remain in the set context. The registered zero-outcome P20_Eterna
-construct contributes outcome-blind WT context but no fabricated supervised
-cell. Every outer-train puzzle is visited once per epoch in a deterministic
-shuffled order. Candidate and null reset the same Torch random stream before
-fitting, so model connectivity—not cell order or dropout randomness—is the
-intended difference.
+Pretraining visits every outer-train puzzle once per epoch, giving 3,800 WT-only
+puzzle updates per arm at 200 epochs. Point loss is then averaged position
+within mutant, mutant within each qualified method cell, and equally across
+available cells. All eight WT constructs remain in the set context. The
+registered zero-outcome P20_Eterna construct contributes outcome-blind WT
+context but no fabricated supervised cell. Every outer-train puzzle is visited
+once per point epoch in a deterministic shuffled order, giving 760 point
+updates per arm at 40 epochs. Candidate and null reset the same Torch random
+stream before each stage, so connectivity—not cell order, mask or dropout
+randomness—is the intended difference.
 
 The proposed held path first computes the same-fold V13 parent point, then
 assembles all eight WT contexts once, encodes them once, and mixes each aligned
@@ -125,14 +146,17 @@ access remains fail-closed. It requires a future active task ID
 and external outcomes locked. V14 authority cannot satisfy this predicate.
 
 The implementation-only merger requires the future amendment to supply the
-exact fold, seed, epoch and parameter-count universe. It rejects missing,
-duplicate or unexpected fold-seed pairs, target-bearing predictions, changed
-connectivity, missing same-fold seed-0 V13/V14 parent checkpoints, parent replay
-error above `1e-7`, changed trainable counts, incomplete histories, row
-misalignment, repeated biological keys within a seed, invalid mixture
-weights/scales, a shifted point median and absent point or residual checkpoints.
-It emits only a complete unscored merge. An implementation-only scorer and
-qualifier now exist, but their authority predicate cannot be satisfied by V14.
+exact fold, seed, pretraining/point/calibration epoch and parameter-count
+universe. It rejects missing, duplicate or unexpected fold-seed pairs,
+target-bearing predictions, changed connectivity, held-puzzle or mutant-outcome
+pretraining access, unequal candidate/null pretraining budgets, wrong mask
+rate, missing decoder evidence, missing same-fold seed-0 V13/V14 parent
+checkpoints, initial or post-pretraining parent replay error above `1e-7`,
+changed trainable counts, incomplete histories, row misalignment, repeated
+biological keys within a seed, invalid mixture weights/scales, a shifted point
+median and absent point, decoder or residual checkpoints. It emits only a
+complete unscored merge. An implementation-only scorer and qualifier now exist,
+but their authority predicate cannot be satisfied by V14.
 They require training to be closed, the exact future
 `PUZZLE_SET_COMPLETE_MERGE_SCORE_ONCE_ONLY` token, partial scores closed and
 external outcomes locked. The target join therefore remains impossible until a
@@ -170,10 +194,13 @@ top-journal Gate.
 
 ## Alternatives considered
 
-**Another larger focal encoder or WT masking schedule**
+**Another larger focal encoder or focal WT masking schedule**
 
-Rejected: V14 already tests focal capacity plus task-matched WT pretraining, and
-its contract terminates same-family iteration on failure.
+Rejected: V14 already tests focal capacity plus task-matched focal WT
+pretraining, and its contract terminates same-family iteration on failure. The
+selected outer-train masked-WT stage is narrower and different: it initializes
+only the new cross-construct set operator against a self-only matched null while
+the imported V14 encoder remains frozen.
 
 **Train the full puzzle-set model from scratch**
 
@@ -213,7 +240,11 @@ branch.
 - If zero-observed P20 cannot be represented without a fake target, exclude the
   adapter rather than inventing data.
 - If either arm fails to replay its same-fold V13 parent at `1e-7` before the
-  first optimizer step, or if any frozen V14 encoder parameter changes, no
+  first optimizer step or after masked-WT pretraining, or if any frozen V14
+  encoder or point-head parameter changes, no scientific run may proceed.
+- If a pretraining batch contains the held puzzle, mutant cells or target-side
+  fields; if candidate/null masks, eligible-construct counts or optimizer steps
+  differ; or if the temporary decoder remains trainable downstream, no
   scientific run may proceed.
 - If a non-focal WT-profile counterfactual changes the trained matched null, or
   does not change the trained candidate, the proposed capability is absent and

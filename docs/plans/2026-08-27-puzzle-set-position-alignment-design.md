@@ -100,6 +100,20 @@ null receives comparable nonzero inputs without any non-focal information.
 The projected statistics are added before the set block; they do not introduce
 method or puzzle identity and remain permutation equivariant.
 
+Before mutation-effect fitting, the set operator receives one narrow,
+outer-train-only initialization stage. For each outer-train puzzle and each
+eligible focal WT construct, the V14 corruption schedule deterministically
+masks 40% of its observed positions. The frozen V14 encoder sees the masked
+focal profile; the candidate mixer may use the other seven aligned WT profiles,
+whereas the null remains self-only. A temporary `LayerNorm(256) -> Linear(256,
+1)` decoder reconstructs the masked focal WT values with L1 loss. Candidate and
+null start from identical mixer/decoder states and use the same masks, puzzle
+order, AdamW settings, dropout stream and epoch count. The V14 encoder and the
+zero-initialized point head remain bitwise unchanged. The 769-parameter decoder
+is frozen and never enters point prediction or residual calibration. This
+initializes the new cross-construct operator using the exact relationship that
+the WT-only audit established, without giving either arm mutant outcomes.
+
 For mutation source \(s\), receiver \(i\), and focal construct \(c\), the
 trainable increment uses
 
@@ -120,7 +134,9 @@ Its final layer is zero initialized and the prediction remains
 
 Each arm has 6,171,697 total parameters: 4,767,280 frozen V14 encoder
 parameters and 1,404,417 trainable position-aware mixer/head parameters. The
-V13 parent is evaluated outside the module and never optimized.
+V13 parent is evaluated outside the module and never optimized. The temporary
+769-parameter reconstruction decoder is a stage-specific training tool and is
+not counted in the final prediction model.
 
 ## 5. Verification and failure meaning
 
@@ -136,6 +152,14 @@ The implementation must establish:
 - candidate statistics exclude the focal construct, while null statistics are
   self-only and non-focal counterfactuals leave them bitwise unchanged;
 - both arms replay the frozen V13 parent within `1e-7` before training;
+- masked-WT batches contain only the nineteen outer-train `{puzzle, contexts}`
+  records, exclude the held puzzle, and cannot carry mutant cells or targets;
+- candidate and null use identical deterministic 40% masks, 200-epoch budgets,
+  initialization and optimizer steps, including the real seven-eligible-context
+  P20 case;
+- pretraining changes the set operator but leaves the frozen V14 encoder and
+  point head bitwise unchanged, preserves parent replay within `1e-7`, and
+  freezes the 769-parameter decoder before point fitting;
 - after the zero-initialized output layer has received its first update, a
   second supervised backward pass gives finite nonzero gradients to the
   construct projection and cross-construct attention while the frozen encoder
@@ -186,20 +210,23 @@ comparison can answer that question.
 ## 6. Proposed complete experiment and top-journal Gate
 
 The executable implementation is fixed to a seed-0, folds 0–19 score-blind
-screen with 40 point epochs and 40 calibration epochs. Each fold uses the same
-fold's frozen V13 candidate seed-0 point and frozen V14 candidate seed-0
-encoder. The persistent controller only schedules missing folds, preserves
-complete artifacts and moves interrupted partial outputs aside before a clean
-fold restart. It merges only after every worker exits and the full fold
-universe is present.
+screen with 200 masked-WT pretraining epochs, 40 point epochs and 40 calibration
+epochs. Each fold uses the same fold's frozen V13 candidate seed-0 point and
+frozen V14 candidate seed-0 encoder. The persistent controller only schedules
+missing folds, preserves complete artifacts and moves interrupted prediction,
+point, decoder and residual outputs aside before a clean fold restart. It
+merges only after every worker exits and the full fold universe is present.
 
-One epoch visits every outer-train puzzle once and therefore exposes every
-available supervised cell once; 40 epochs retain the same 40 target exposures
-per cell as the historical point protocol. This yields 760 puzzle-level Adam
-updates per arm rather than 6,080 cell-level updates. The implementation records
-both counts explicitly. It does not inflate to 320 epochs merely to match update
-count, because that would reuse each target eight times more often and confound
-the new capability with a much larger outcome-exposure budget.
+One pretraining epoch visits each outer-train puzzle once, yielding exactly
+`200 x 19 = 3,800` WT-only puzzle updates per arm. It has no mutant target
+exposure. One point epoch then visits every outer-train puzzle once and exposes
+every available supervised cell once; 40 epochs retain the historical 40 target
+exposures per cell and yield 760 puzzle-level Adam updates per arm. Residual
+calibration adds another 760 puzzle-level updates. The fold artifact records all
+three counts and histories separately. The point stage does not inflate to 320
+epochs merely to match cell-level update count, because that would reuse each
+mutant target eight times more often and confound the new capability with a much
+larger outcome-exposure budget.
 
 The inactive score-once path joins targets only after that merge. Candidate
 must simultaneously satisfy the existing top-journal margins:

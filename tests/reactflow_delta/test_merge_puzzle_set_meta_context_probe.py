@@ -52,7 +52,7 @@ def _write_fold(
     prediction_path = directory / f"prediction{fold}_{seed}.npz"
     np.savez_compressed(prediction_path, **prediction)
     checkpoints = {}
-    for stage in ("point", "residual"):
+    for stage in ("point", "decoder", "residual"):
         checkpoints[stage] = {}
         for name in ("candidate", "null"):
             path = directory / f"{name}_{stage}{fold}_{seed}.pt"
@@ -69,6 +69,7 @@ def _write_fold(
         "outer_fold": fold,
         "held_puzzle": f"P{fold + 1:02d}",
         "seed": seed,
+        "pretraining_epochs": epochs,
         "point_epochs": epochs,
         "calibration_epochs": epochs,
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
@@ -83,18 +84,48 @@ def _write_fold(
             "candidate": 0.0,
             "null": 0.0,
         },
+        "post_pretraining_parent_replay_max_abs_difference": {
+            "candidate": 0.0,
+            "null": 0.0,
+        },
         "frozen_parent_checkpoints": frozen_parents,
         "n_validated_puzzle_coordinate_frames": 20,
         "n_outer_train_puzzles": 19,
+        "n_pretraining_puzzles": 19,
+        "outer_train_puzzle_ids": [f"train{fold}_{index}" for index in range(19)],
+        "pretraining_puzzle_ids": [f"train{fold}_{index}" for index in range(19)],
+        "expected_pretraining_eligible_construct_counts": [8],
+        "pretraining_optimizer_steps_each": 19 * epochs,
         "point_optimizer_steps_each": 19 * epochs,
         "residual_optimizer_steps_each": 19 * epochs,
         "training_histories": {
+            "candidate_pretraining": [0.7] * epochs,
+            "null_pretraining": [0.8] * epochs,
             "candidate_point": [0.5] * epochs,
             "null_point": [0.6] * epochs,
             "candidate_residual": [0.4] * epochs,
             "null_residual": [0.45] * epochs,
         },
         "point_checkpoints": checkpoints["point"],
+        "pretraining_decoder_checkpoints": checkpoints["decoder"],
+        "pretraining_decoder_parameter_counts": {
+            "candidate": 769,
+            "null": 769,
+        },
+        "pretraining_summaries": {
+            name: {
+                "optimizer_steps": 19 * epochs,
+                "trainable_parameter_count": 858369,
+                "eligible_construct_counts": [8],
+                "mask_fraction": 0.4,
+                "context_layers_changed": True,
+                "encoder_changed": False,
+                "point_head_changed": False,
+                "decoder_frozen_downstream": True,
+                "mutant_outcome_used": False,
+            }
+            for name in ("candidate", "null")
+        },
         "residual_checkpoints": checkpoints["residual"],
         "residual_parameter_counts": {"candidate": 63748, "null": 63748},
         "prediction_artifact": str(prediction_path),
@@ -108,6 +139,12 @@ def _write_fold(
             "position_aligned_cross_construct_attention": True,
             "leave_one_construct_alignment_statistics": True,
             "matched_null_self_only_alignment_statistics": True,
+            "outer_train_wt_only_puzzle_set_pretraining": True,
+            "held_puzzle_excluded_from_pretraining": True,
+            "mutant_outcome_excluded_from_pretraining": True,
+            "candidate_null_equal_pretraining_budget": True,
+            "pretraining_decoder_frozen_downstream": True,
+            "encoder_and_point_unchanged_during_pretraining": True,
             "puzzle_coordinate_frames_validated": True,
             "frozen_v13_point_parent": True,
             "frozen_v14_context_encoder": True,
@@ -135,6 +172,7 @@ def test_merger_accepts_only_the_exact_complete_prediction_universe(
         expected_phase="P1M3",
         expected_folds=[0, 1],
         expected_seeds=[0],
+        expected_pretraining_epochs=1,
         expected_point_epochs=1,
         expected_calibration_epochs=1,
         expected_parameter_count=100,
@@ -154,6 +192,7 @@ def test_merger_rejects_missing_fold(tmp_path: Path) -> None:
             expected_phase="P1M3",
             expected_folds=[0, 1],
             expected_seeds=[0],
+            expected_pretraining_epochs=1,
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
@@ -173,6 +212,7 @@ def test_merger_rejects_target_bearing_prediction(tmp_path: Path) -> None:
             expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
+            expected_pretraining_epochs=1,
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
@@ -192,6 +232,7 @@ def test_merger_rejects_wrong_epoch_or_parameter_count(tmp_path: Path) -> None:
             expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
+            expected_pretraining_epochs=1,
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
@@ -211,6 +252,7 @@ def test_merger_rejects_misaligned_prediction_rows(tmp_path: Path) -> None:
             expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
+            expected_pretraining_epochs=1,
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
@@ -237,6 +279,7 @@ def test_merger_rejects_biological_key_overlap_across_folds(tmp_path: Path) -> N
             expected_phase="P1M3",
             expected_folds=[0, 1],
             expected_seeds=[0],
+            expected_pretraining_epochs=1,
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
@@ -263,6 +306,7 @@ def test_merger_rejects_distribution_that_moves_the_point_median(
             expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
+            expected_pretraining_epochs=1,
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
@@ -272,3 +316,51 @@ def test_merger_rejects_distribution_that_moves_the_point_median(
         assert "median_preserved" in str(error)
     else:
         raise AssertionError("puzzle-set merger accepted a shifted distribution median")
+
+
+def test_merger_rejects_pretraining_protocol_drift(tmp_path: Path) -> None:
+    _write_fold(tmp_path, fold=0)
+    path = tmp_path / "puzzle_set_fold_result_fold0_seed0.json"
+    row = json.loads(path.read_text(encoding="utf-8"))
+    row["pretraining_summaries"]["candidate"]["mask_fraction"] = 0.5
+    path.write_text(json.dumps(row), encoding="utf-8")
+    try:
+        merge_complete_universe(
+            tmp_path,
+            expected_phase="P1M3",
+            expected_folds=[0],
+            expected_seeds=[0],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+        )
+    except ValueError as error:
+        assert "candidate pretraining summary" in str(error)
+    else:
+        raise AssertionError("puzzle-set merger accepted changed pretraining protocol")
+
+
+def test_merger_rejects_post_pretraining_parent_shift(tmp_path: Path) -> None:
+    _write_fold(tmp_path, fold=0)
+    path = tmp_path / "puzzle_set_fold_result_fold0_seed0.json"
+    row = json.loads(path.read_text(encoding="utf-8"))
+    row["post_pretraining_parent_replay_max_abs_difference"]["candidate"] = 1e-4
+    path.write_text(json.dumps(row), encoding="utf-8")
+    try:
+        merge_complete_universe(
+            tmp_path,
+            expected_phase="P1M3",
+            expected_folds=[0],
+            expected_seeds=[0],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+        )
+    except ValueError as error:
+        assert "post_pretraining_parent_replay" in str(error)
+    else:
+        raise AssertionError("puzzle-set merger accepted a shifted parent point")

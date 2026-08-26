@@ -24,10 +24,15 @@ from scripts.reactflow_delta.puzzle_set_meta_context_data import (
 from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
     EXPECTED_RESIDUAL_PARAMETERS,
 )
+from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
+    EXPECTED_DECODER_PARAMETERS,
+    EXPECTED_PRETRAINING_TRAINABLE_PARAMETERS,
+    PRETRAINING_MASK_FRACTION,
+)
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
 
 
-MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v5"
+MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v6"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
@@ -63,13 +68,17 @@ def prediction_checks(
             len(handle[name]) == len(keys)
             for name in PREDICTION_FIELDS - {"schema_version"}
         )
-        distribution_shapes = PREDICTION_FIELDS <= names and all(
-            handle[f"{name}_{suffix}"].shape == (len(keys), 2)
-            for name in ("candidate", "null")
-            for suffix in ("weights", "locations", "scales")
-        ) and all(
-            handle[f"{name}_expected_absolute_delta"].shape == (len(keys),)
-            for name in ("candidate", "null")
+        distribution_shapes = (
+            PREDICTION_FIELDS <= names
+            and all(
+                handle[f"{name}_{suffix}"].shape == (len(keys), 2)
+                for name in ("candidate", "null")
+                for suffix in ("weights", "locations", "scales")
+            )
+            and all(
+                handle[f"{name}_expected_absolute_delta"].shape == (len(keys),)
+                for name in ("candidate", "null")
+            )
         )
         distribution_valid = distribution_shapes and all(
             np.all(handle[f"{name}_scales"] > 0.0)
@@ -86,10 +95,7 @@ def prediction_checks(
                 np.sum(
                     handle[f"{name}_weights"]
                     * ndtr(
-                        (
-                            handle[f"{name}_point"][:, None]
-                            - handle[f"{name}_locations"]
-                        )
+                        (handle[f"{name}_point"][:, None] - handle[f"{name}_locations"])
                         / handle[f"{name}_scales"]
                     ),
                     axis=1,
@@ -105,16 +111,14 @@ def prediction_checks(
             and str(handle["schema_version"].item()) == PREDICTION_SCHEMA,
             "exact_fields": names == PREDICTION_FIELDS,
             "target_free": not bool(names & FORBIDDEN_PREDICTION_FIELDS),
-            "expected_rows": int(expected_rows) > 0
-            and len(keys) == int(expected_rows),
+            "expected_rows": int(expected_rows) > 0 and len(keys) == int(expected_rows),
             "aligned_rows": aligned,
             "unique_keys": len(keys) == len(set(keys)),
             "biological_key_match": "biological_scoring_key" in names
             and keys == list(map(str, handle["biological_scoring_key"])),
             "fold": "outer_fold" in names
             and set(map(int, handle["outer_fold"])) == {int(fold)},
-            "seed": "seed" in names
-            and set(map(int, handle["seed"])) == {int(seed)},
+            "seed": "seed" in names and set(map(int, handle["seed"])) == {int(seed)},
             "covered": "registered_status" in names
             and set(map(str, handle["registered_status"])) == {"covered"},
             "finite": all(
@@ -139,6 +143,12 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
         "position_aligned_cross_construct_attention",
         "leave_one_construct_alignment_statistics",
         "matched_null_self_only_alignment_statistics",
+        "outer_train_wt_only_puzzle_set_pretraining",
+        "held_puzzle_excluded_from_pretraining",
+        "mutant_outcome_excluded_from_pretraining",
+        "candidate_null_equal_pretraining_budget",
+        "pretraining_decoder_frozen_downstream",
+        "encoder_and_point_unchanged_during_pretraining",
         "puzzle_coordinate_frames_validated",
         "frozen_v13_point_parent",
         "frozen_v14_context_encoder",
@@ -161,6 +171,7 @@ def merge_complete_universe(
     expected_phase: str,
     expected_folds: list[int],
     expected_seeds: list[int],
+    expected_pretraining_epochs: int,
     expected_point_epochs: int,
     expected_calibration_epochs: int,
     expected_parameter_count: int,
@@ -171,17 +182,13 @@ def merge_complete_universe(
     ) != len(expected_seeds):
         raise ValueError("expected puzzle-set fold or seed universe is duplicated")
     expected = {
-        (int(fold), int(seed))
-        for seed in expected_seeds
-        for fold in expected_folds
+        (int(fold), int(seed)) for seed in expected_seeds for fold in expected_folds
     }
     if not expected:
         raise ValueError("expected puzzle-set universe cannot be empty")
     rows = []
     seen: set[tuple[int, int]] = set()
-    keys_by_seed: dict[int, set[str]] = {
-        int(seed): set() for seed in expected_seeds
-    }
+    keys_by_seed: dict[int, set[str]] = {int(seed): set() for seed in expected_seeds}
     for path in sorted(input_dir.glob("puzzle_set_fold_result_fold*_seed*.json")):
         row = json.loads(path.read_text(encoding="utf-8"))
         pair = (int(row.get("outer_fold", -1)), int(row.get("seed", -1)))
@@ -200,23 +207,23 @@ def merge_complete_universe(
             raise ValueError(f"invalid puzzle-set fold schema in {path}")
         if row.get("phase") != expected_phase:
             raise ValueError(f"puzzle-set fold {pair} changed phase")
-        if int(row.get("point_epochs", -1)) != int(
-            expected_point_epochs
-        ) or int(row.get("calibration_epochs", -1)) != int(
-            expected_calibration_epochs
+        if (
+            int(row.get("pretraining_epochs", -1)) != int(expected_pretraining_epochs)
+            or int(row.get("point_epochs", -1)) != int(expected_point_epochs)
+            or int(row.get("calibration_epochs", -1))
+            != int(expected_calibration_epochs)
         ):
             raise ValueError(f"puzzle-set fold {pair} violates the epoch freeze")
-        if row.get("candidate_connectivity") != FULL_CROSS_CONSTRUCT or row.get(
-            "null_connectivity"
-        ) != BLOCK_DIAGONAL_NULL:
+        if (
+            row.get("candidate_connectivity") != FULL_CROSS_CONSTRUCT
+            or row.get("null_connectivity") != BLOCK_DIAGONAL_NULL
+        ):
             raise ValueError(f"puzzle-set fold {pair} changed connectivity")
         if row.get("cross_construct_operator") != POSITION_ALIGNED_OPERATOR:
             raise ValueError(f"puzzle-set fold {pair} changed aligned operator")
         if int(row.get("candidate_parameter_count", -1)) != int(
             expected_parameter_count
-        ) or int(row.get("null_parameter_count", -1)) != int(
-            expected_parameter_count
-        ):
+        ) or int(row.get("null_parameter_count", -1)) != int(expected_parameter_count):
             raise ValueError(f"puzzle-set fold {pair} changed parameter count")
         trainable_counts = {
             int(row.get("candidate_trainable_parameter_count", -1)),
@@ -224,11 +231,19 @@ def merge_complete_universe(
         }
         if trainable_counts != {int(expected_trainable_parameter_count)}:
             raise ValueError(f"puzzle-set fold {pair} changed trainable count")
-        replay = row.get("initial_parent_replay_max_abs_difference", {})
-        if set(replay) != {"candidate", "null"} or max(
-            map(float, replay.values())
-        ) > 1e-7:
-            raise ValueError(f"puzzle-set fold {pair} does not replay its parent")
+        for replay_name in (
+            "initial_parent_replay_max_abs_difference",
+            "post_pretraining_parent_replay_max_abs_difference",
+        ):
+            replay = row.get(replay_name, {})
+            if (
+                set(replay) != {"candidate", "null"}
+                or max(map(float, replay.values())) > 1e-7
+            ):
+                raise ValueError(
+                    f"puzzle-set fold {pair} does not replay its parent at "
+                    f"{replay_name}"
+                )
         parents = row.get("frozen_parent_checkpoints", {})
         if set(parents) != {"v13_point", "v14_encoder"} or not all(
             Path(value).is_file() for value in parents.values()
@@ -237,14 +252,36 @@ def merge_complete_universe(
         if int(row.get("n_validated_puzzle_coordinate_frames", 0)) <= 0:
             raise ValueError(f"puzzle-set fold {pair} lacks coordinate validation")
         n_train_puzzles = int(row.get("n_outer_train_puzzles", 0))
-        if n_train_puzzles <= 0 or int(row.get("point_optimizer_steps_each", -1)) != (
-            int(expected_point_epochs) * n_train_puzzles
-        ) or int(row.get("residual_optimizer_steps_each", -1)) != (
-            int(expected_calibration_epochs) * n_train_puzzles
+        n_pretraining_puzzles = int(row.get("n_pretraining_puzzles", 0))
+        outer_train_puzzle_ids = list(map(str, row.get("outer_train_puzzle_ids", [])))
+        pretraining_puzzle_ids = list(map(str, row.get("pretraining_puzzle_ids", [])))
+        expected_eligible = {
+            int(value)
+            for value in row.get("expected_pretraining_eligible_construct_counts", [])
+        }
+        if (
+            n_train_puzzles <= 0
+            or n_pretraining_puzzles != n_train_puzzles
+            or len(outer_train_puzzle_ids) != n_train_puzzles
+            or len(set(outer_train_puzzle_ids)) != n_train_puzzles
+            or sorted(pretraining_puzzle_ids) != sorted(outer_train_puzzle_ids)
+            or str(row.get("held_puzzle")) in set(pretraining_puzzle_ids)
+            or not expected_eligible
+            or not expected_eligible <= {7, 8}
+            or int(row.get("pretraining_optimizer_steps_each", -1))
+            != int(expected_pretraining_epochs) * n_pretraining_puzzles
+            or int(row.get("point_optimizer_steps_each", -1))
+            != (int(expected_point_epochs) * n_train_puzzles)
+            or int(row.get("residual_optimizer_steps_each", -1))
+            != (int(expected_calibration_epochs) * n_train_puzzles)
         ):
-            raise ValueError(f"puzzle-set fold {pair} changed optimizer-step accounting")
+            raise ValueError(
+                f"puzzle-set fold {pair} changed optimizer-step accounting"
+            )
         histories = row.get("training_histories", {})
         expected_history_lengths = {
+            "candidate_pretraining": expected_pretraining_epochs,
+            "null_pretraining": expected_pretraining_epochs,
             "candidate_point": expected_point_epochs,
             "null_point": expected_point_epochs,
             "candidate_residual": expected_calibration_epochs,
@@ -258,6 +295,39 @@ def merge_complete_universe(
             EXPECTED_RESIDUAL_PARAMETERS
         }:
             raise ValueError(f"puzzle-set fold {pair} changed residual family")
+        decoder_counts = row.get("pretraining_decoder_parameter_counts", {})
+        if set(decoder_counts) != {"candidate", "null"} or set(
+            map(int, decoder_counts.values())
+        ) != {EXPECTED_DECODER_PARAMETERS}:
+            raise ValueError(f"puzzle-set fold {pair} changed pretraining decoder")
+        summaries = row.get("pretraining_summaries", {})
+        if set(summaries) != {"candidate", "null"}:
+            raise ValueError(f"puzzle-set fold {pair} lacks pretraining summaries")
+        for arm, summary in summaries.items():
+            eligible = {
+                int(value) for value in summary.get("eligible_construct_counts", [])
+            }
+            if (
+                int(summary.get("optimizer_steps", -1))
+                != int(expected_pretraining_epochs) * n_pretraining_puzzles
+                or int(summary.get("trainable_parameter_count", -1))
+                != EXPECTED_PRETRAINING_TRAINABLE_PARAMETERS
+                or eligible != expected_eligible
+                or not np.isclose(
+                    float(summary.get("mask_fraction", np.nan)),
+                    PRETRAINING_MASK_FRACTION,
+                    atol=0.0,
+                    rtol=0.0,
+                )
+                or summary.get("context_layers_changed") is not True
+                or summary.get("encoder_changed") is not False
+                or summary.get("point_head_changed") is not False
+                or summary.get("decoder_frozen_downstream") is not True
+                or summary.get("mutant_outcome_used") is not False
+            ):
+                raise ValueError(
+                    f"puzzle-set fold {pair} has invalid {arm} pretraining summary"
+                )
         if not recorded_invariants_pass(row.get("invariants", {})):
             raise ValueError(f"puzzle-set fold {pair} lacks required invariants")
         checks, prediction_keys = prediction_checks(
@@ -278,15 +348,18 @@ def merge_complete_universe(
             )
         keys_by_seed[pair[1]].update(prediction_keys)
         point_checkpoints = row.get("point_checkpoints", {})
+        decoder_checkpoints = row.get("pretraining_decoder_checkpoints", {})
         residual_checkpoints = row.get("residual_checkpoints", {})
         checkpoint_paths = [
             *point_checkpoints.values(),
+            *decoder_checkpoints.values(),
             *residual_checkpoints.values(),
         ]
         if (
             set(point_checkpoints) != {"candidate", "null"}
+            or set(decoder_checkpoints) != {"candidate", "null"}
             or set(residual_checkpoints) != {"candidate", "null"}
-            or len(checkpoint_paths) != 4
+            or len(checkpoint_paths) != 6
             or not all(Path(value).is_file() for value in checkpoint_paths)
         ):
             raise FileNotFoundError(f"puzzle-set fold {pair} lacks checkpoints")
@@ -303,6 +376,7 @@ def merge_complete_universe(
         "phase": expected_phase,
         "expected_folds": sorted(map(int, expected_folds)),
         "expected_seeds": sorted(map(int, expected_seeds)),
+        "expected_pretraining_epochs": int(expected_pretraining_epochs),
         "expected_point_epochs": int(expected_point_epochs),
         "expected_calibration_epochs": int(expected_calibration_epochs),
         "expected_parameter_count_each": int(expected_parameter_count),
@@ -310,6 +384,12 @@ def merge_complete_universe(
             expected_trainable_parameter_count
         ),
         "expected_residual_parameter_count_each": EXPECTED_RESIDUAL_PARAMETERS,
+        "expected_pretraining_decoder_parameter_count_each": (
+            EXPECTED_DECODER_PARAMETERS
+        ),
+        "expected_pretraining_trainable_parameter_count_each": (
+            EXPECTED_PRETRAINING_TRAINABLE_PARAMETERS
+        ),
         "folds": rows,
         "merge_integrity": {
             "complete_fold_seed_universe": True,
@@ -323,10 +403,17 @@ def merge_complete_universe(
             "position_aligned_cross_construct_attention_all_runs": True,
             "leave_one_construct_alignment_statistics_all_runs": True,
             "matched_null_self_only_alignment_statistics_all_runs": True,
+            "outer_train_wt_only_puzzle_set_pretraining_all_runs": True,
+            "held_puzzle_excluded_from_pretraining_all_runs": True,
+            "mutant_outcome_excluded_from_pretraining_all_runs": True,
+            "candidate_null_equal_pretraining_budget_all_runs": True,
+            "pretraining_decoder_frozen_downstream_all_runs": True,
+            "encoder_and_point_unchanged_during_pretraining_all_runs": True,
+            "masked_wt_pretraining_protocol_all_runs": True,
             "puzzle_coordinate_frames_validated_all_runs": True,
             "frozen_v13_point_parent_all_runs": True,
             "frozen_v14_context_encoder_all_runs": True,
-            "zero_initialized_parent_replay_all_runs": True,
+            "parent_replay_before_and_after_pretraining_all_runs": True,
             "point_frozen_during_calibration_all_runs": True,
             "v10_residual_family_all_runs": True,
             "puzzle_balanced_residual_calibration_all_runs": True,
@@ -347,6 +434,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--phase", choices=("P1M2", "P1M3", "P1M4"), required=True)
     parser.add_argument("--folds", required=True)
     parser.add_argument("--seeds", required=True)
+    parser.add_argument("--pretraining-epochs", type=int, required=True)
     parser.add_argument("--point-epochs", type=int, required=True)
     parser.add_argument("--calibration-epochs", type=int, required=True)
     parser.add_argument("--parameter-count", type=int, required=True)
@@ -360,6 +448,7 @@ def main(argv: list[str] | None = None) -> int:
         expected_phase=args.phase,
         expected_folds=_csv_ints(args.folds),
         expected_seeds=_csv_ints(args.seeds),
+        expected_pretraining_epochs=args.pretraining_epochs,
         expected_point_epochs=args.point_epochs,
         expected_calibration_epochs=args.calibration_epochs,
         expected_parameter_count=args.parameter_count,

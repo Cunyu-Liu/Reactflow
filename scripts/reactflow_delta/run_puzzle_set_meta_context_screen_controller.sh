@@ -31,6 +31,8 @@ archive_incomplete_fold() {
     "${out}/puzzle_set_predictions_fold${fold}_seed0.npz"
     "${out}/puzzle_set_candidate_point_fold${fold}_seed0.pt"
     "${out}/puzzle_set_null_point_fold${fold}_seed0.pt"
+    "${out}/puzzle_set_candidate_wt_decoder_fold${fold}_seed0.pt"
+    "${out}/puzzle_set_null_wt_decoder_fold${fold}_seed0.pt"
     "${out}/puzzle_set_candidate_residual_fold${fold}_seed0.pt"
     "${out}/puzzle_set_null_residual_fold${fold}_seed0.pt"
   )
@@ -84,6 +86,7 @@ run_worker() {
       --out-dir "${out}" \
       --device cuda:0 \
       --folds "${csv}" \
+      --pretraining-epochs 200 \
       --point-epochs 40 \
       --calibration-epochs 40 \
       --seed 0 \
@@ -117,6 +120,7 @@ fi
   --phase P1M3 \
   --folds 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 \
   --seeds 0 \
+  --pretraining-epochs 200 \
   --point-epochs 40 \
   --calibration-epochs 40 \
   --parameter-count 6171697 \

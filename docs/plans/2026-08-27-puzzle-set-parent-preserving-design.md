@@ -58,20 +58,30 @@ For outer fold \(f\):
 1. Load `v13_candidate_point_fold{f}_seed0.pt` and compute a frozen parent point
    for every outer-train cell and every registered held-puzzle key.
 2. Load the encoder subset of `v14_candidate_point_fold{f}_seed0.pt` into both
-   P1 arms. Freeze it and keep it in evaluation mode during point training.
+   P1 arms. Freeze it and keep it in evaluation mode throughout P1.
 3. Encode all eight outcome-blind WT construct contexts in their common
    full-sequence coordinate frame. The registered zero-outcome P20_Eterna
    construct remains present at all aligned positions but contributes no
    fabricated target.
-4. At every position, candidate uses full permutation-equivariant attention
+4. Initialize only the new set operator using the nineteen outer-train puzzle
+   contexts. Deterministically mask 40% of one focal WT construct's observed
+   positions, reconstruct them with a temporary 769-parameter decoder, and
+   average L1 across eligible constructs and puzzles. Candidate may use the
+   other seven aligned WT profiles; null is self-only. Both use identical
+   masks, puzzle order, initialization, optimizer and 200-epoch budget. The
+   frozen encoder and zero-initialized point head cannot change, and no mutant
+   cell or outcome is accepted by the pretraining interface.
+5. Freeze and remove the reconstruction decoder from downstream prediction.
+   Require both arms still to replay the V13 parent within `1e-7`.
+6. At every position, candidate uses full permutation-equivariant attention
    across the eight constructs. The matched null uses block-diagonal self-only
    attention with identical inputs, parameters, initialization, optimizer,
    order, and epochs.
-5. A zero-initialized incremental head receives focal V14 source/receiver
+7. A zero-initialized incremental head receives focal V14 source/receiver
    features, signed distance, mutation identity, feature41, the frozen V13
    parent point, and the position-aligned mixed states at the mutation source
    and receiver.
-6. The prediction is
+8. The prediction is
 
    \[
    \widehat\Delta = \widehat\Delta_{V13,f,seed0} +
@@ -79,13 +89,22 @@ For outer fold \(f\):
    \]
 
 At initialization \(g_{\mathrm{set}}(x)=0\), so both arms replay the V13
-parent point exactly on every registered key. Only the set mixer and incremental
-head are trainable. The parent point and frozen encoder cannot receive gradient.
+parent point exactly on every registered key. During WT pretraining only the set
+mixer and temporary decoder are trainable; during point fitting the set mixer
+and incremental head are trainable. The parent point and frozen encoder cannot
+receive gradient in either stage.
 
 P1 experiment seeds vary the new mixer/head initialization and training order;
 the parent remains the predeclared V13/V14 seed-0 outer-fold checkpoint pair for
 all P1 seeds. This makes the parent a fixed foundation rather than allowing a
 post-hoc parent or seed selection.
+
+The stage-specific trainable counts are explicit. Masked-WT initialization
+updates 857,600 set-operator parameters plus the 769-parameter temporary
+decoder, for 858,369 trainable parameters. Point fitting updates the 857,600 set
+parameters plus the 546,817-parameter incremental head, giving the frozen final
+model's 1,404,417 trainable parameters. Residual calibration then freezes the
+entire point model and trains only the predeclared residual head.
 
 ## 4. Error and provenance rules
 
@@ -97,8 +116,15 @@ post-hoc parent or seed selection.
   context blocks, and output norm. Missing or shape-mismatched tensors are an
   implementation error.
 - Prediction artifacts record both parent checkpoint paths and the maximum
-  absolute initial replay difference, but contain no target, score, loss, target
-  error, or qualified target mask.
+  absolute initial and post-pretraining replay differences, but contain no
+  target, score, loss, target error, or qualified target mask.
+- Pretraining batches contain exactly `{puzzle, contexts}` for the outer-train
+  puzzle IDs. The runner mechanically rejects a held puzzle, duplicate puzzle,
+  mutant cell or target-bearing batch.
+- Fold artifacts record the fixed mask rate, pretraining epoch/history/step
+  count, eligible-construct counts, candidate/null decoder checkpoints and the
+  bitwise-frozen encoder/point result. The temporary decoders are frozen before
+  point fitting.
 - The active V14 authority cannot run P1. A future narrow amendment must freeze
   the P1 fold/seed/epoch/Gate universe before real training.
 
@@ -108,16 +134,24 @@ post-hoc parent or seed selection.
    `V14PointModel.encode(context, None)` in evaluation mode.
 2. Candidate and null have identical state and parameter counts after import.
 3. Both arms exactly replay an arbitrary frozen parent point before training.
-4. Backpropagation changes only the set mixer and incremental head; the encoder
-   and parent arrays remain unchanged.
-5. Non-focal construct gradients are nonzero for the candidate and exactly zero
+4. Masked-WT pretraining uses identical masks and budgets for both arms, changes
+   the set operator, leaves the encoder and point head bitwise unchanged, and
+   preserves parent replay at `1e-7`.
+5. The real P20 case may have seven eligible reconstruction targets while all
+   eight constructs remain present as context; candidate and null must report
+   the same eligibility set.
+6. The temporary decoder is frozen downstream and never enters point or
+   calibration prediction.
+7. Supervised backpropagation changes only the set mixer and incremental head;
+   the encoder and parent arrays remain unchanged.
+8. Non-focal construct gradients are nonzero for the candidate and exactly zero
    for the block-diagonal null.
-6. Construct-order permutation preserves the corresponding focal output.
-7. Seven-cell P20 training retains all eight context constructs without
+9. Construct-order permutation preserves the corresponding focal output.
+10. Seven-cell P20 training retains all eight context constructs without
    inventing supervision.
-8. The fold runner rejects mismatched parent fold/seed provenance and emits one
+11. The fold runner rejects mismatched parent fold/seed provenance and emits one
    complete target-free prediction universe.
-9. The scorer remains closed until folds 0–19 have one complete prediction-only
+12. The scorer remains closed until folds 0–19 have one complete prediction-only
    merge, training has been closed, and a future authority issues the exact
    score-once token.
 
