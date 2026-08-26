@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import inspect
+import json
 from pathlib import Path
 
 import numpy as np
@@ -21,6 +22,7 @@ from scripts.reactflow_delta.model_rescue_v14 import (
     pretrain_wt_encoder,
 )
 from scripts.reactflow_delta.merge_model_rescue_v14 import (
+    merge_folds,
     prediction_checks,
     recorded_invariants_pass,
 )
@@ -197,6 +199,37 @@ def test_v14_merge_invariants_require_pretraining_isolation() -> None:
     assert recorded_invariants_pass(invariants)
     invariants["held_puzzle_wt_excluded_from_pretraining"] = False
     assert not recorded_invariants_pass(invariants)
+
+
+def test_v14_merge_assigns_zero_observed_exclusion_to_non_p20_folds(
+    tmp_path: Path,
+) -> None:
+    # A full merge fixture is intentionally unnecessary: the fold-level rule
+    # is reached before prediction/checkpoint validation and detects the exact
+    # wrong-universe failure this test targets.
+    row = {
+        "schema_version": "reactflow_delta.model_rescue_v14_fold.v1",
+        "phase": "V14M2",
+        "outer_fold": 0,
+        "held_puzzle": "P01",
+        "seed": 0,
+        "pretraining_epochs": 3,
+        "point_epochs": 3,
+        "calibration_epochs": 3,
+        "n_registered_outer_train_wt_constructs": 152,
+        "n_pretraining_constructs": 152,
+        "zero_observed_pretraining_exclusions": [],
+        "invariants": {},
+    }
+    (tmp_path / "v14_fold_result_fold0_seed0.json").write_text(
+        json.dumps(row)
+    )
+    try:
+        merge_folds(tmp_path, "V14M2")
+    except ValueError as error:
+        assert "wrong held puzzle" in str(error)
+    else:
+        raise AssertionError("V14 merge accepted the zero-observed construct in fold0")
 
 
 def test_v14_qualifier_reuses_strict_top_journal_gates() -> None:

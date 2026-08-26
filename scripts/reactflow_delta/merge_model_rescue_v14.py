@@ -156,6 +156,12 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
             raise ValueError(f"V14 fold-seed {pair} eligible WT universe changed")
         if exclusions not in ([], ["P20_Eterna"]):
             raise ValueError(f"V14 fold-seed {pair} zero-observed exclusion changed")
+        expected_exclusions = [] if str(row.get("held_puzzle")) == "P20" else ["P20_Eterna"]
+        expected_eligible = 152 - len(expected_exclusions)
+        if exclusions != expected_exclusions or eligible != expected_eligible:
+            raise ValueError(
+                f"V14 fold-seed {pair} zero-observed exclusion is assigned to the wrong held puzzle"
+            )
         if not recorded_invariants_pass(row.get("invariants", {})):
             raise ValueError(f"V14 fold-seed {pair} lacks required invariants")
         total = set(map(int, row.get("total_parameter_counts", {}).values()))
