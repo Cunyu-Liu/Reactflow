@@ -66,6 +66,7 @@ model:
     all_other_inputs_identical: true
     parameter_names_count_and_initial_state_identical: true
     compute_path_identical: true
+    exact_trainable_parameters_each: 2064737
   search:
     architecture: false
     width: false

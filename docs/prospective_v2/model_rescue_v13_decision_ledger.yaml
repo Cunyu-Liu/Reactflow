@@ -37,6 +37,7 @@ decisions:
   - id: V13D003
     status: FROZEN
     decision: KEEP_V11_ENCODER_SIZE_AND_V10_CALIBRATION_FAMILY
+    exact_trainable_parameters_each: 2064737
   - id: V13D004
     status: FROZEN
     decision: USE_HIGH_CONJUNCTIVE_POINT_PROBABILITY_AND_ATTRIBUTION_GATES

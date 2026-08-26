@@ -64,6 +64,8 @@ Candidate and null differ only in the second sequence tensor:
 
 Both still receive the same legal mutation metadata, so the contrast isolates re-encoding rather than mutation identity.
 
+The frozen trainable parameter count is 2,064,737 for each model.
+
 ### 3.3 Training
 
 - initialize candidate and null identically from scratch for every fold and seed;
@@ -186,4 +188,3 @@ Only exact V13M3 PASS opens V13M4. Run seeds 0–4, 20 folds, fixed 40+40 epochs
 - no new external outcome;
 - no new split;
 - no hash/checksum scaffolding, compatibility layer, feature flag or unrelated refactor.
-
