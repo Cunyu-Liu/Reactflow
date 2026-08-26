@@ -28,7 +28,9 @@ from scripts.reactflow_delta.merge_model_rescue_v14 import (
 )
 from scripts.reactflow_delta.assemble_model_rescue_v14_formal import assemble_fold
 from scripts.reactflow_delta.qualify_model_rescue_v14 import qualify
+from scripts.reactflow_delta.qualify_model_rescue_v14 import main as qualify_main
 from scripts.reactflow_delta.score_model_rescue_v14 import SCHEMA as SCORE_SCHEMA
+from scripts.reactflow_delta.score_model_rescue_v14 import main as score_main
 from scripts.reactflow_delta.run_model_rescue_v14 import _pretraining_contexts
 from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
     assert_run_authority,
@@ -288,3 +290,56 @@ def test_v14_formal_assembly_uses_all_five_seeds_equally(tmp_path: Path) -> None
         assert float(handle["candidate_point"][0]) == 2.0
         assert np.allclose(handle["candidate_weights"].sum(axis=1), 1.0)
         assert handle["candidate_weights"].shape == (1, 10)
+
+
+def test_v14_qualifier_refuses_to_overwrite_before_reading_score(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "qualification.json"
+    output.write_text("already frozen")
+    try:
+        qualify_main(
+            [
+                "--score-json",
+                str(tmp_path / "missing-score.json"),
+                "--out-json",
+                str(output),
+            ]
+        )
+    except FileExistsError as error:
+        assert "one qualification" in str(error)
+    else:
+        raise AssertionError("V14 qualifier overwrote an existing qualification")
+
+
+def test_v14_scorer_refuses_to_overwrite_before_reading_targets(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "scripts.reactflow_delta.score_model_rescue_v14.assert_score_authority",
+        lambda _repo_root: None,
+    )
+    output = tmp_path / "score.json"
+    output.write_text("already frozen")
+    missing = tmp_path / "missing.json"
+    try:
+        score_main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--merged-json",
+                str(missing),
+                "--tic2a-merged-json",
+                str(missing),
+                "--v12-score-json",
+                str(missing),
+                "--m2-csv",
+                str(missing),
+                "--out-json",
+                str(output),
+            ]
+        )
+    except FileExistsError as error:
+        assert "one complete score" in str(error)
+    else:
+        raise AssertionError("V14 scorer overwrote an existing score")
