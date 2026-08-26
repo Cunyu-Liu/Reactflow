@@ -142,6 +142,31 @@ not benchmark performance. They prevent a negative real-data result from being
 misread when the intended cross-construct path was never trainable, but they do
 not count as scientific evidence for P1.
 
+### Outcome-blind real-input alignment audit
+
+Before any P1 mutant outcome was scored, the reproducible WT-only audit at
+`/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/preflight/wt_alignment_audit_20260827.json`
+compared registered coordinates with fixed circular wrong-position controls
+`[1, 17, 43, 89]`. It used only WT sequence, WT reactivity and WT observation
+masks. Its artifact explicitly records `mutant_outcome_used=false` and
+`external_outcome_accessed=false`.
+
+- mean pairwise sequence identity is only `0.510674`, so this is not a
+  near-duplicate sequence ensemble;
+- design-region same-position pair correlation exceeds the wrong-position
+  control by `0.372299` on average and is positive in `20/20` puzzles;
+- design-region leave-one-construct consensus correlation exceeds the control
+  by `0.507915` on average and is positive in `20/20` puzzles;
+- the corresponding full-construct increments are `0.359160` and `0.496006`,
+  again positive in `20/20` puzzles;
+- P20's sole design-region WT-missing construct receives observed aligned
+  context from the other constructs at `100%` of its missing design positions.
+
+This input audit supports the position-aligned inductive bias and rules against
+terminating P1 for lack of aligned WT context. It does not establish that the
+context predicts mutation response: only a complete candidate-minus-null P1M3
+comparison can answer that question.
+
 ## 6. Proposed complete experiment and top-journal Gate
 
 The executable implementation is fixed to a seed-0, folds 0–19 score-blind

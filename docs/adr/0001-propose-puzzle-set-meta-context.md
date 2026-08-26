@@ -212,6 +212,11 @@ branch.
   no real-data probe may proceed. The same fail-closed decision applies if the
   cross-construct projection and attention do not receive finite nonzero
   gradients after the zero-initialized output layer has been bootstrapped.
+- The WT-only registered-position audit is positive in all 20 puzzles for both
+  pairwise and leave-one-construct consensus alignment increments, while mean
+  pairwise sequence identity is only 0.511. The input-level termination branch
+  is therefore closed; this is architecture support, not mutation-effect
+  performance evidence.
 - If a future complete candidate-minus-null effect misses its attribution Gate,
   terminate the puzzle-set family without connectivity, width or epoch search.
 
