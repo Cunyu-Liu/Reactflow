@@ -69,6 +69,8 @@ events:
     parameter_count_changed: false
     loss_epoch_seed_or_gate_changed: false
     existing_smoke_scientific_score_read: false
+    focused_tests_remote_passed: 21
+    paired_dropout_cuda_invariant_passed: true
     action: PRESERVE_OLD_ENGINEERING_ARTIFACTS_AS_INVALIDATED_AND_RERUN_FOLDS0_1
 
   - id: V13M0_CONTRACT_AND_ARCHITECTURE_FREEZE
