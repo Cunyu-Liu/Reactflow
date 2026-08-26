@@ -182,6 +182,10 @@ def run_fold(
         epochs=pretraining_epochs,
         seed=seed,
     )
+    print(
+        f"[{phase}] fold={fold_id} seed={seed} pretraining_complete",
+        flush=True,
+    )
     assert_snapshot_equal(null_common_initialization, null, "from-scratch null before supervised training")
     assert_snapshot_equal(candidate_residual_before, candidate.residual_head, "candidate residual before supervised training")
     assert_snapshot_equal(null_residual_before, null.residual_head, "null residual before supervised training")
@@ -201,12 +205,20 @@ def run_fold(
         epochs=point_epochs,
         seed=seed,
     )
+    print(
+        f"[{phase}] fold={fold_id} seed={seed} candidate_point_complete",
+        flush=True,
+    )
     null_history = fit_point_model(
         null,
         cells,
         context_cache,
         epochs=point_epochs,
         seed=seed,
+    )
+    print(
+        f"[{phase}] fold={fold_id} seed={seed} null_point_complete",
+        flush=True,
     )
     point_parameter_counts = {
         PRETRAINED_CANDIDATE: parameter_count(candidate, trainable_only=True),
@@ -269,6 +281,10 @@ def run_fold(
         parameter.grad is not None for parameter in null.parameters()
     ):
         raise RuntimeError("V14 calibration produced point gradients")
+    print(
+        f"[{phase}] fold={fold_id} seed={seed} calibration_complete",
+        flush=True,
+    )
 
     residual_checkpoints = {}
     for name, head in heads.items():
@@ -309,6 +325,10 @@ def run_fold(
     )
     prediction_path = out_dir / f"v14_predictions_fold{fold_id}_seed{seed}.npz"
     np.savez_compressed(prediction_path, **prediction)
+    print(
+        f"[{phase}] fold={fold_id} seed={seed} prediction_complete",
+        flush=True,
+    )
     return {
         "schema_version": FOLD_SCHEMA,
         "phase": phase,
