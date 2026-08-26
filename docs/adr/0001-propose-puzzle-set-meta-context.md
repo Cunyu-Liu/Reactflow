@@ -92,6 +92,13 @@ access remains fail-closed. It requires a future active task ID
 `PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY`, held and partial scores closed,
 and external outcomes locked. V14 authority cannot satisfy this predicate.
 
+The implementation-only merger requires the future amendment to supply the
+exact fold, seed, epoch and parameter-count universe. It rejects missing,
+duplicate or unexpected fold-seed pairs, target-bearing predictions, changed
+connectivity, incomplete histories, row misalignment, repeated biological keys
+within a seed and absent checkpoints. It emits only a complete unscored merge;
+no target scorer or Gate is active at this stage.
+
 ## Consequences
 
 ### Positive
