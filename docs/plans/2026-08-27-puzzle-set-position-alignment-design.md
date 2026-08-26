@@ -129,3 +129,45 @@ candidate does not beat its block-diagonal null under the predeclared
 attribution Gate, the result means that aligned cross-design WT context lacks
 usable incremental signal; the response is to terminate the family, not return
 to global pooling, widen the mixer, or add a structure graph.
+
+## 6. Proposed complete experiment and top-journal Gate
+
+The executable implementation is fixed to a seed-0, folds 0–19 score-blind
+screen with 40 point epochs and 40 calibration epochs. Each fold uses the same
+fold's frozen V13 candidate seed-0 point and frozen V14 candidate seed-0
+encoder. The persistent controller only schedules missing folds, preserves
+complete artifacts and moves interrupted partial outputs aside before a clean
+fold restart. It merges only after every worker exits and the full fold
+universe is present.
+
+One epoch visits every outer-train puzzle once and therefore exposes every
+available supervised cell once; 40 epochs retain the same 40 target exposures
+per cell as the historical point protocol. This yields 760 puzzle-level Adam
+updates per arm rather than 6,080 cell-level updates. The implementation records
+both counts explicitly. It does not inflate to 320 epochs merely to match update
+count, because that would reuse each target eight times more often and confound
+the new capability with a much larger outcome-exposure budget.
+
+The inactive score-once path joins targets only after that merge. Candidate
+must simultaneously satisfy the existing top-journal margins:
+
+- signed-delta MAE: at least 12% versus feature41, 2% versus terminal V12,
+  2% versus its frozen V13 parent and 1.5% versus the matched null;
+- point absolute-delta MAE: at least 7% versus feature41, 2% versus terminal
+  V11, 2% versus its frozen V13 parent and 1% versus the matched null;
+- CRPS: at least 5% versus feature41, 2% versus terminal V12 and 1.5% versus
+  the matched null;
+- distribution absolute-delta MAE: at least 15% versus feature41, 2% versus
+  terminal V10 and 1% versus the matched null;
+- every paired comparison has puzzle-level 95% CI lower bound above zero;
+- feature41 comparisons are positive on at least 16/20 puzzles and every
+  historical-parent, frozen-parent and matched-null comparison on at least
+  14/20;
+- every headline comparison stays positive under leave-one-puzzle-out and no
+  puzzle contributes more than 20% of the total effect;
+- coverage is 100%, failure and unexpected keys are zero, and 68%/95%
+  calibration error cannot worsen by more than one percentage point.
+
+These thresholds are implementation proposals frozen before any puzzle-set
+outcome is scored. They do not authorize training, scoring or P1M4; a future
+amendment must adopt them unchanged before real-data access.

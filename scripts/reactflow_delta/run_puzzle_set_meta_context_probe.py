@@ -8,6 +8,7 @@ training token before ``run_real_fold`` can access outer-train outcomes.
 
 from __future__ import annotations
 
+import argparse
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -17,6 +18,7 @@ import numpy as np
 import torch
 import yaml
 
+from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.model_rescue_v1 import aligned_wt_ctx_tensors
 from scripts.reactflow_delta.model_rescue_v2 import (
     MeanAlignedModel,
@@ -27,8 +29,15 @@ from scripts.reactflow_delta.model_rescue_v13 import (
     V13PointModel,
 )
 from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
+from scripts.reactflow_delta.model_rescue_v5_probe import EnsembleFeatureCache
+from scripts.reactflow_delta.model_rescue_v6_probe import (
+    ConstrainedFeatureCache,
+    validate_cache_alignment,
+)
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     BLOCK_DIAGONAL_NULL,
+    EXPECTED_TOTAL_PARAMETERS,
+    EXPECTED_TRAINABLE_PARAMETERS,
     FULL_CROSS_CONSTRUCT,
     POSITION_ALIGNED_OPERATOR,
     V14_ENCODER_PREFIXES,
@@ -49,13 +58,19 @@ from scripts.reactflow_delta.puzzle_set_meta_context_data import (
 )
 from scripts.reactflow_delta.run_model_rescue_v11 import (
     _feature41_matrix,
+    _fold_sources,
+    _load_v8_mean,
+    _parse_folds,
     _point_cells,
 )
+from scripts.reactflow_delta.run_model_rescue_v9 import _read_json
+from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v4"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v5"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
+RUNNABLE_PHASES = {"P1M2", "P1M3", "P1M4"}
 FROZEN_PARENT_SEED = 0
 
 
@@ -105,11 +120,17 @@ def _assert_parent_checkpoint_identity(
         raise FileNotFoundError("puzzle-set frozen parent checkpoint is absent")
 
 
-def assert_real_training_authority(repo_root: Path) -> None:
+def assert_real_training_authority(repo_root: Path, phase: str) -> None:
+    if phase not in RUNNABLE_PHASES:
+        raise ValueError(f"unsupported puzzle-set phase: {phase}")
     active_path = repo_root / "configs/reactflow_delta/active_contract.yaml"
     active = yaml.safe_load(active_path.read_text(encoding="utf-8"))
     if active.get("project_task_id") != EXPECTED_PROJECT_TASK:
         raise RuntimeError("puzzle-set real training is not the active task")
+    if active.get("authority", {}).get("current_phase") != phase or active.get(
+        "runnable_phases"
+    ) != [phase]:
+        raise RuntimeError(f"puzzle-set runner is closed outside active {phase}")
     if active.get("training_allowed") != EXPECTED_TRAINING_TOKEN or active.get(
         "candidate_model_training_allowed"
     ) != EXPECTED_TRAINING_TOKEN:
@@ -321,6 +342,7 @@ def run_prepared_fold(
     prepared: dict[str, Any],
     outer_fold: int,
     held_puzzle: str,
+    phase: str,
     seed: int,
     point_epochs: int,
     calibration_epochs: int,
@@ -443,7 +465,12 @@ def run_prepared_fold(
     np.savez_compressed(prediction_path, **prediction)
     result = {
         "schema_version": FOLD_SCHEMA,
-        "evidence_status": "IMPLEMENTATION_PROBE_ONLY_NO_SCIENTIFIC_AUTHORITY",
+        "phase": phase,
+        "evidence_status": (
+            "ENGINEERING_SMOKE_ONLY"
+            if phase == "P1M2"
+            else "POST_HOC_DEVELOPMENT_PREDICTION_ONLY"
+        ),
         "outer_fold": int(outer_fold),
         "held_puzzle": str(held_puzzle),
         "seed": int(seed),
@@ -476,6 +503,13 @@ def run_prepared_fold(
         "prediction_artifact": str(prediction_path),
         "n_registered_prediction_rows": int(len(prediction["keys"])),
         "n_calibration_cells": int(residual["n_calibration_cells"]),
+        "n_outer_train_puzzles": len(prepared["training_batches"]),
+        "point_optimizer_steps_each": (
+            int(point_epochs) * len(prepared["training_batches"])
+        ),
+        "residual_optimizer_steps_each": (
+            int(calibration_epochs) * len(prepared["training_batches"])
+        ),
         "residual_parameter_counts": {
             "candidate": EXPECTED_RESIDUAL_PARAMETERS,
             "null": EXPECTED_RESIDUAL_PARAMETERS,
@@ -518,13 +552,14 @@ def run_real_fold(
     v8_model: MeanAlignedModel,
     v13_parent_checkpoint: Path,
     v14_parent_checkpoint: Path,
+    phase: str,
     seed: int,
     point_epochs: int,
     calibration_epochs: int,
     device: str,
     out_dir: Path,
 ) -> dict[str, Any]:
-    assert_real_training_authority(repo_root)
+    assert_real_training_authority(repo_root, phase)
     _assert_parent_checkpoint_identity(
         v13_checkpoint=v13_parent_checkpoint,
         v14_checkpoint=v14_parent_checkpoint,
@@ -555,9 +590,126 @@ def run_real_fold(
         prepared=prepared,
         outer_fold=int(fold.outer_fold),
         held_puzzle=str(fold.held_puzzle),
+        phase=phase,
         seed=seed,
         point_epochs=point_epochs,
         calibration_epochs=calibration_epochs,
         device=device,
         out_dir=out_dir,
     )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument("--phase", choices=sorted(RUNNABLE_PHASES), required=True)
+    parser.add_argument("--m2-csv", type=Path, required=True)
+    parser.add_argument("--v8-dir", type=Path, required=True)
+    parser.add_argument("--v10-dir", type=Path, required=True)
+    parser.add_argument("--v13-dir", type=Path, required=True)
+    parser.add_argument("--v14-dir", type=Path, required=True)
+    parser.add_argument("--tic2a-merged-json", type=Path, required=True)
+    parser.add_argument("--unconstrained-cache", type=Path, required=True)
+    parser.add_argument("--constrained-cache", type=Path, required=True)
+    parser.add_argument("--out-dir", type=Path, required=True)
+    parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--folds", required=True)
+    parser.add_argument("--point-epochs", type=int, required=True)
+    parser.add_argument("--calibration-epochs", type=int, required=True)
+    parser.add_argument("--seed", type=int, required=True)
+    args = parser.parse_args(argv)
+
+    repo_root = args.repo_root.resolve()
+    assert_real_training_authority(repo_root, args.phase)
+    folds = _parse_folds(args.folds)
+    schedule = (args.point_epochs, args.calibration_epochs)
+    if args.phase == "P1M2":
+        if args.seed != 0 or not set(folds) <= {0, 1} or schedule != (3, 3):
+            raise ValueError("P1M2 is frozen to seed0 folds0/1 and 3+3 epochs")
+    elif args.phase == "P1M3":
+        if args.seed != 0 or schedule != (40, 40):
+            raise ValueError("P1M3 is frozen to seed0 and 40+40 epochs")
+    elif args.seed not in range(5) or schedule != (40, 40):
+        raise ValueError("P1M4 is frozen to seeds0-4 and 40+40 epochs")
+
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    for fold_id in folds:
+        result_path = args.out_dir / (
+            f"puzzle_set_fold_result_fold{fold_id}_seed{args.seed}.json"
+        )
+        if result_path.exists():
+            raise FileExistsError(f"refusing to overwrite puzzle-set fold {fold_id}")
+    device = args.device if torch.cuda.is_available() else "cpu"
+    univ = M2Universe(args.m2_csv)
+    identity = univ.build()
+    if identity.get("n_canonical_mutant_full_profiles") != 13_976 or identity.get(
+        "canonical_mutant_full_profile_identity"
+    ) != "EXACT_PUZZLE_METHOD_MUTATION":
+        raise RuntimeError("puzzle-set runner requires exact canonical target identity")
+    records = univ.get_records()
+    split = build_split_v4(sorted({record.puzzle for record in records}), seed=20260813)
+    selected = [
+        fold for fold in split["folds"] if int(fold.outer_fold) in set(folds)
+    ]
+    if len(selected) != len(folds):
+        raise ValueError("one or more requested puzzle-set folds are absent")
+
+    tic2a_merged = _read_json(args.tic2a_merged_json)
+    unconstrained = EnsembleFeatureCache(args.unconstrained_cache)
+    constrained = ConstrainedFeatureCache(args.constrained_cache)
+    validate_cache_alignment(unconstrained, constrained)
+    try:
+        for fold in selected:
+            fold_id = int(fold.outer_fold)
+            v8_row, _tic_row, _v10_row, feature41_model = _fold_sources(
+                fold_id,
+                v8_dir=args.v8_dir,
+                v10_dir=args.v10_dir,
+                tic2a_merged=tic2a_merged,
+            )
+            v8_model = _load_v8_mean(Path(v8_row["meanaligned_checkpoint"]), device)
+            print(
+                f"[{args.phase}] fold={fold_id} held={fold.held_puzzle} "
+                f"seed={args.seed} start",
+                flush=True,
+            )
+            result = run_real_fold(
+                repo_root=repo_root,
+                univ=univ,
+                records=records,
+                fold=fold,
+                feature41_model=feature41_model,
+                unconstrained=unconstrained,
+                constrained=constrained,
+                v8_model=v8_model,
+                v13_parent_checkpoint=(
+                    args.v13_dir
+                    / f"v13_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
+                ),
+                v14_parent_checkpoint=(
+                    args.v14_dir
+                    / f"v14_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
+                ),
+                phase=args.phase,
+                seed=args.seed,
+                point_epochs=args.point_epochs,
+                calibration_epochs=args.calibration_epochs,
+                device=device,
+                out_dir=args.out_dir,
+            )
+            if result["candidate_parameter_count"] != EXPECTED_TOTAL_PARAMETERS or (
+                result["candidate_trainable_parameter_count"]
+                != EXPECTED_TRAINABLE_PARAMETERS
+            ):
+                raise RuntimeError("puzzle-set frozen parameter count changed")
+            print(f"[{args.phase}] fold={fold_id} complete", flush=True)
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+    finally:
+        unconstrained.close()
+        constrained.close()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

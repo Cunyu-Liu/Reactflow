@@ -156,6 +156,7 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
 def merge_complete_universe(
     input_dir: Path,
     *,
+    expected_phase: str,
     expected_folds: list[int],
     expected_seeds: list[int],
     expected_point_epochs: int,
@@ -195,6 +196,8 @@ def merge_complete_universe(
         seen.add(pair)
         if row.get("schema_version") != FOLD_SCHEMA:
             raise ValueError(f"invalid puzzle-set fold schema in {path}")
+        if row.get("phase") != expected_phase:
+            raise ValueError(f"puzzle-set fold {pair} changed phase")
         if int(row.get("point_epochs", -1)) != int(
             expected_point_epochs
         ) or int(row.get("calibration_epochs", -1)) != int(
@@ -231,6 +234,13 @@ def merge_complete_universe(
             raise FileNotFoundError(f"puzzle-set fold {pair} lacks frozen parents")
         if int(row.get("n_validated_puzzle_coordinate_frames", 0)) <= 0:
             raise ValueError(f"puzzle-set fold {pair} lacks coordinate validation")
+        n_train_puzzles = int(row.get("n_outer_train_puzzles", 0))
+        if n_train_puzzles <= 0 or int(row.get("point_optimizer_steps_each", -1)) != (
+            int(expected_point_epochs) * n_train_puzzles
+        ) or int(row.get("residual_optimizer_steps_each", -1)) != (
+            int(expected_calibration_epochs) * n_train_puzzles
+        ):
+            raise ValueError(f"puzzle-set fold {pair} changed optimizer-step accounting")
         histories = row.get("training_histories", {})
         expected_history_lengths = {
             "candidate_point": expected_point_epochs,
@@ -288,6 +298,7 @@ def merge_complete_universe(
     return {
         "schema_version": MERGED_SCHEMA,
         "status": "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS",
+        "phase": expected_phase,
         "expected_folds": sorted(map(int, expected_folds)),
         "expected_seeds": sorted(map(int, expected_seeds)),
         "expected_point_epochs": int(expected_point_epochs),
@@ -329,6 +340,7 @@ def _csv_ints(value: str) -> list[int]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input-dir", type=Path, required=True)
+    parser.add_argument("--phase", choices=("P1M2", "P1M3", "P1M4"), required=True)
     parser.add_argument("--folds", required=True)
     parser.add_argument("--seeds", required=True)
     parser.add_argument("--point-epochs", type=int, required=True)
@@ -341,6 +353,7 @@ def main(argv: list[str] | None = None) -> int:
         raise FileExistsError("refusing to overwrite puzzle-set complete merge")
     result = merge_complete_universe(
         args.input_dir,
+        expected_phase=args.phase,
         expected_folds=_csv_ints(args.folds),
         expected_seeds=_csv_ints(args.seeds),
         expected_point_epochs=args.point_epochs,

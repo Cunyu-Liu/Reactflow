@@ -117,6 +117,9 @@ post-hoc parent or seed selection.
    inventing supervision.
 8. The fold runner rejects mismatched parent fold/seed provenance and emits one
    complete target-free prediction universe.
+9. The scorer remains closed until folds 0–19 have one complete prediction-only
+   merge, training has been closed, and a future authority issues the exact
+   score-once token.
 
 The final position-aware operator and its coordinate audit are specified in
 `docs/plans/2026-08-27-puzzle-set-position-alignment-design.md`.

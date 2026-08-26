@@ -132,6 +132,8 @@ def _write_active(repo_root: Path, *, authorized: bool) -> None:
     path.mkdir(parents=True)
     payload = {
         "project_task_id": EXPECTED_PROJECT_TASK if authorized else "v14",
+        "authority": {"current_phase": "P1M3"},
+        "runnable_phases": ["P1M3"],
         "training_allowed": EXPECTED_TRAINING_TOKEN if authorized else False,
         "candidate_model_training_allowed": (
             EXPECTED_TRAINING_TOKEN if authorized else False
@@ -148,7 +150,7 @@ def test_current_or_other_authority_cannot_run_real_puzzle_set_training(
 ) -> None:
     _write_active(tmp_path, authorized=False)
     try:
-        assert_real_training_authority(tmp_path)
+        assert_real_training_authority(tmp_path, "P1M3")
     except RuntimeError as error:
         assert "not the active task" in str(error)
     else:
@@ -157,7 +159,7 @@ def test_current_or_other_authority_cannot_run_real_puzzle_set_training(
 
 def test_exact_future_authority_shape_is_accepted(tmp_path: Path) -> None:
     _write_active(tmp_path, authorized=True)
-    assert_real_training_authority(tmp_path)
+    assert_real_training_authority(tmp_path, "P1M3")
 
 
 def test_parent_checkpoint_identity_is_fixed_to_same_fold_and_seed_zero(
@@ -199,6 +201,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         prepared=prepared,
         outer_fold=19,
         held_puzzle="P20",
+        phase="P1M3",
         seed=0,
         point_epochs=1,
         calibration_epochs=1,
@@ -227,6 +230,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
             )
     merged = merge_complete_universe(
         tmp_path,
+        expected_phase="P1M3",
         expected_folds=[19],
         expected_seeds=[0],
         expected_point_epochs=1,
@@ -243,6 +247,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
             prepared=prepared,
             outer_fold=19,
             held_puzzle="P20",
+            phase="P1M3",
             seed=0,
             point_epochs=1,
             calibration_epochs=1,

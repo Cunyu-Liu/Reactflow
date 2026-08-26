@@ -65,6 +65,7 @@ def _write_fold(
         frozen_parents[name] = str(path)
     row = {
         "schema_version": FOLD_SCHEMA,
+        "phase": "P1M3",
         "outer_fold": fold,
         "held_puzzle": f"P{fold + 1:02d}",
         "seed": seed,
@@ -84,6 +85,9 @@ def _write_fold(
         },
         "frozen_parent_checkpoints": frozen_parents,
         "n_validated_puzzle_coordinate_frames": 20,
+        "n_outer_train_puzzles": 19,
+        "point_optimizer_steps_each": 19 * epochs,
+        "residual_optimizer_steps_each": 19 * epochs,
         "training_histories": {
             "candidate_point": [0.5] * epochs,
             "null_point": [0.6] * epochs,
@@ -126,6 +130,7 @@ def test_merger_accepts_only_the_exact_complete_prediction_universe(
     _write_fold(tmp_path, fold=1)
     result = merge_complete_universe(
         tmp_path,
+        expected_phase="P1M3",
         expected_folds=[0, 1],
         expected_seeds=[0],
         expected_point_epochs=1,
@@ -144,6 +149,7 @@ def test_merger_rejects_missing_fold(tmp_path: Path) -> None:
     try:
         merge_complete_universe(
             tmp_path,
+            expected_phase="P1M3",
             expected_folds=[0, 1],
             expected_seeds=[0],
             expected_point_epochs=1,
@@ -162,6 +168,7 @@ def test_merger_rejects_target_bearing_prediction(tmp_path: Path) -> None:
     try:
         merge_complete_universe(
             tmp_path,
+            expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
             expected_point_epochs=1,
@@ -180,6 +187,7 @@ def test_merger_rejects_wrong_epoch_or_parameter_count(tmp_path: Path) -> None:
     try:
         merge_complete_universe(
             tmp_path,
+            expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
             expected_point_epochs=1,
@@ -198,6 +206,7 @@ def test_merger_rejects_misaligned_prediction_rows(tmp_path: Path) -> None:
     try:
         merge_complete_universe(
             tmp_path,
+            expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
             expected_point_epochs=1,
@@ -223,6 +232,7 @@ def test_merger_rejects_biological_key_overlap_across_folds(tmp_path: Path) -> N
     try:
         merge_complete_universe(
             tmp_path,
+            expected_phase="P1M3",
             expected_folds=[0, 1],
             expected_seeds=[0],
             expected_point_epochs=1,
@@ -248,6 +258,7 @@ def test_merger_rejects_distribution_that_moves_the_point_median(
     try:
         merge_complete_universe(
             tmp_path,
+            expected_phase="P1M3",
             expected_folds=[0],
             expected_seeds=[0],
             expected_point_epochs=1,
