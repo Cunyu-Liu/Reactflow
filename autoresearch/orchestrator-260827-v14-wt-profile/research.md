@@ -45,3 +45,4 @@ The hypothesis is falsified if the candidate misses any frozen V14M3 top-journal
 - 2026-08-27: contract validation passed; V14M1 implementation opened with real-data training and score access closed.
 - 2026-08-27: 12 focused tests passed locally and remotely; V14M2 folds 0/1 engineering smoke opened with scientific score access closed.
 - 2026-08-27: first smoke failed before artifact creation because `P20_Eterna` has zero WT-observed positions. Outcome-blind audit found histogram `{0: 1, 100: 159}` and no one-observed construct. The zero-target construct is now registered but excluded from the reconstruction objective; no target value is fabricated and all scientific settings remain frozen.
+- 2026-08-27: pre-score code trace confirmed the V14 scorer uses position → mutant → method-balanced puzzle aggregation through `_puzzle_macro`; an imbalanced-method regression fixture was added before any V14 held score access.

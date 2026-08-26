@@ -31,6 +31,7 @@ from scripts.reactflow_delta.qualify_model_rescue_v14 import qualify
 from scripts.reactflow_delta.qualify_model_rescue_v14 import main as qualify_main
 from scripts.reactflow_delta.score_model_rescue_v14 import SCHEMA as SCORE_SCHEMA
 from scripts.reactflow_delta.score_model_rescue_v14 import main as score_main
+from scripts.reactflow_delta.score_model_rescue_v6_probe import _puzzle_macro
 from scripts.reactflow_delta.run_model_rescue_v14 import _pretraining_contexts
 from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
     assert_run_authority,
@@ -343,3 +344,15 @@ def test_v14_scorer_refuses_to_overwrite_before_reading_targets(
         assert "one complete score" in str(error)
     else:
         raise AssertionError("V14 scorer overwrote an existing score")
+
+
+def test_v14_scorer_is_method_balanced_not_pooled_mutant_balanced() -> None:
+    losses = {
+        "openknot_m2|P01|method_a|construct_a|1|A>G|0": 1.0,
+        "openknot_m2|P01|method_a|construct_a|1|A>G|1": 1.0,
+        "openknot_m2|P01|method_a|construct_b|2|C>U|0": 3.0,
+        "openknot_m2|P01|method_b|construct_c|3|G>A|0": 10.0,
+    }
+    # method_a = mean(mutant means 1,3) = 2; method_b = 10;
+    # equal-method macro = 6, rather than pooled-mutant mean 14/3.
+    assert _puzzle_macro(losses) == 6.0
