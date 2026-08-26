@@ -1,0 +1,65 @@
+schema_version: reactflow_delta.post_v13_route_diagnostics_ledger.v1
+contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
+current_status: PV13D0_CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+created_at: '2026-08-27T01:20:00+08:00'
+
+immutable_parent_verdicts:
+  v1_through_v12: TERMINAL_UNCHANGED
+  v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
+  v13m4_opened: false
+  exact_mutant_reencoding_family: TERMINATED
+
+evidence:
+  - id: PVD_E001
+    type: CONFIRMED_FACT
+    statement: V13 candidate did not identify an increment over its exact parameter-matched WT-replay null on any headline metric.
+    source: docs/prospective_v2/model_rescue_v13_decision_ledger.yaml
+  - id: PVD_E002
+    type: CONFIRMED_FACT
+    statement: Recent point models use unweighted method-balanced signed-delta L1; reported mutant error is not part of their point loss.
+    source: scripts/reactflow_delta/model_rescue_v11.py::method_balanced_l1
+  - id: PVD_E003
+    type: CONFIRMED_FACT
+    statement: Corrected feature41 outer-fold models contain separate signed and absolute targets.
+    source: scripts/reactflow_delta/model_rescue_v6_probe.py::accumulate_train_stats
+  - id: PVD_E004
+    type: REASONED_INFERENCE
+    statement: A route-level linear falsifier should precede another expensive neural amendment.
+    source: autoresearch/orchestrator-260827-post-v13/research.md
+
+decisions:
+  - id: PVD_D001
+    status: FROZEN
+    decision: RUN_ONLY_NOISE_AWARE_FEATURE41_AND_COHERENT_SIGN_MAGNITUDE_DIAGNOSTICS
+  - id: PVD_D002
+    status: FROZEN
+    decision: REQUIRE_COMPLETE_TWENTY_FOLD_PREDICTION_UNIVERSE_BEFORE_SCORE
+  - id: PVD_D003
+    status: FROZEN
+    decision: USE_FIXED_ROUTE_GATES_AND_DETERMINISTIC_BOTH_PASS_RULE
+  - id: PVD_D004
+    status: FROZEN
+    decision: NEITHER_PASS_CLOSES_BOTH_ROUTES_WITHOUT_THRESHOLD_CHANGES
+
+phase_state:
+  PV13D0: CONTRACT_FROZEN
+  PV13D1: NOT_AUTHORIZED
+  PV13D2: NOT_AUTHORIZED
+  PV13D3: NOT_AUTHORIZED
+
+outcome_access:
+  partial_score_accessed: false
+  complete_diagnostic_score_accessed: false
+  new_external_outcome_accessed: false
+
+events:
+  - id: PV13D0_CONTRACT_FREEZE
+    observed_at: '2026-08-27T01:20:00+08:00'
+    status: CONTRACT_FROZEN_NO_IMPLEMENTATION_OR_DIAGNOSTIC_RUN
+    parent_head: 90a8c6372d354126b49c4406a88c44a59b0427ff
+    v13_verdict_changed: false
+    training_allowed: false
+    held_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: IMPLEMENT_DIAGNOSTIC_RUNNER_MERGER_SCORER_QUALIFIER_AND_TESTS
+

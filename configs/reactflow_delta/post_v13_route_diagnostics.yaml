@@ -1,0 +1,108 @@
+schema_version: reactflow_delta.post_v13_route_diagnostics.v1
+contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
+contract_status: PV13D0_CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
+created_at: '2026-08-27T01:20:00+08:00'
+
+parent:
+  v13_status: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
+  v13m4_opened: false
+  v13_verdict_change_allowed: false
+  exact_mutant_reencoding_family: TERMINATED
+  parent_head: 90a8c6372d354126b49c4406a88c44a59b0427ff
+
+scope:
+  evidence_status: POST_HOC_DEVELOPMENT_ROUTE_DIAGNOSTIC_ONLY
+  task: ENDPOINT_V7_ALL_MUTANT_FULL_CONSTRUCT_SIGNED_DELTA
+  data: REAL_OPENKNOT_M2_V4_5_2_DEVELOPMENT_CONSUMED
+  split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+  evaluator: METHOD_BALANCED_POSITION_TO_MUTANT_TO_METHOD_TO_PUZZLE
+  external_outcome_access_allowed: false
+  partial_score_access_allowed: false
+  model_training_allowed: FIXED_WEIGHTED_RIDGE_DIAGNOSTIC_ONLY_AFTER_PV13D1_PASS
+  neural_training_allowed: false
+
+inputs:
+  m2_csv: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  unconstrained_cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
+  constrained_cache: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+  corrected_baseline_dir: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines
+  allowed_training_target_fields: [MUTANT_REACTIVITY, MUTANT_REACTIVITY_ERROR]
+  allowed_prediction_fields:
+    - WT_SEQUENCE
+    - WT_REACTIVITY
+    - WT_ERROR
+    - WT_OBSERVED_MASK
+    - CORRECTED_MUTATION_POSITION
+    - MUTATION_REF_ALT
+    - V5_UNCONSTRAINED_ENSEMBLE_DELTA
+    - V6_CONSTRAINED_ENSEMBLE_DELTA
+  prohibited_prediction_fields:
+    - HELD_MUTANT_REACTIVITY
+    - HELD_MUTANT_ERROR
+    - HELD_TARGET_MASK
+    - HELD_SCORE
+    - METHOD_ID_AS_FEATURE
+    - PUZZLE_ID_AS_FEATURE
+    - EXTERNAL_OUTCOME
+
+diagnostic_arms:
+  baseline:
+    id: feature41_replay
+    features: DIRECT18_PLUS_V5_12_PLUS_V6_11
+    ridge_alpha: 1.0
+    training_weight: EXACT_EXISTING_METHOD_BALANCED_CELL_MUTANT_POSITION_WEIGHT
+    corrected_replay_atol: 1.0e-12
+  noise_aware:
+    id: feature41_inverse_observation_variance
+    features: IDENTICAL_FEATURE41
+    ridge_alpha: 1.0
+    observation_variance: MUTANT_ERROR_SQUARED_PLUS_WT_ERROR_SQUARED_PLUS_0_05_SQUARED
+    reliability_weight: INVERSE_OBSERVATION_VARIANCE
+    normalization: MEAN_ONE_WITHIN_EACH_MUTANT_THEN_EXISTING_CELL_MUTANT_WEIGHT
+    missing_or_nonpositive_error_weight: 1.0
+    clipping: false
+  coherent_sign_magnitude:
+    id: feature41_sign_times_nonnegative_absolute_head
+    signed_source: SIGN_OF_BASELINE_SIGNED_OUTPUT
+    magnitude_source: MAX_BASELINE_ABSOLUTE_OUTPUT_AND_ZERO
+    equation: SIGNED_POINT_EQUALS_SIGN_SIGNED_TIMES_MAX_ABSOLUTE_ZERO
+    fitted_parameters: 0
+
+route_gates:
+  independent_unit: HELD_PUZZLE_N20
+  ci: TWO_SIDED_STUDENT_T_95_PERCENT
+  noise_aware_supported:
+    signed_relative_gain_min: 0.005
+    point_absolute_relative_gain_min: 0.005
+    signed_and_point_ci_lower_gt: 0.0
+    signed_and_point_positive_puzzles_min: 14
+  coherent_factorization_supported:
+    signed_relative_gain_min: 0.005
+    point_absolute_relative_gain_min: 0.01
+    signed_and_point_ci_lower_gt: 0.0
+    signed_and_point_positive_puzzles_min: 14
+  integrity:
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_keys: 0
+    complete_folds: 20
+  deterministic_route_if_both_pass: MAXIMIZE_MINIMUM_NORMALIZED_GATE_MARGIN
+  deterministic_tie_breaker: NOISE_AWARE
+  if_neither_passes: CLOSE_A_AND_C_RETAIN_ONLY_UNTESTED_WT_PROFILE_PRETRAINING_HYPOTHESIS
+
+phases:
+  PV13D0: CONTRACT_FROZEN
+  PV13D1: NOT_AUTHORIZED
+  PV13D2: NOT_AUTHORIZED
+  PV13D3: NOT_AUTHORIZED
+
+boundaries:
+  v13_gate_change_allowed: false
+  same_family_v14_allowed: false
+  architecture_search_allowed: false
+  threshold_search_allowed: false
+  error_floor_search_allowed: false
+  ridge_alpha_search_allowed: false
+  score_before_complete_merge_allowed: false
+  new_external_outcome_access_allowed: false
+
