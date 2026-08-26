@@ -5,13 +5,22 @@ from dataclasses import dataclass
 import numpy as np
 import torch
 
+from scripts.reactflow_delta.model_rescue_v10 import (
+    TrainOnlyStandardizer,
+    calibration_input,
+)
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     make_exact_full_model_pair,
 )
+from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
+    make_exact_residual_pair,
+)
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     FORBIDDEN_PREDICTION_FIELDS,
+    POINT_PREDICTION_SCHEMA,
     PREDICTION_SCHEMA,
     assemble_puzzle_training_batches,
+    predict_held_puzzle_distributions,
     predict_held_puzzle_points,
 )
 
@@ -147,7 +156,7 @@ def test_held_prediction_is_complete_target_free_and_feature41_replaying() -> No
         outer_fold=19,
         seed=0,
     )
-    assert str(prediction["schema_version"].item()) == PREDICTION_SCHEMA
+    assert str(prediction["schema_version"].item()) == POINT_PREDICTION_SCHEMA
     assert len(prediction["keys"]) == 32
     assert len(set(map(str, prediction["keys"]))) == 32
     assert set(prediction["registered_status"]) == {"covered"}
@@ -197,3 +206,56 @@ def test_held_prediction_rejects_nonexact_context_universe() -> None:
         assert "universe is not exact" in str(error)
     else:
         raise AssertionError("prediction accepted a missing WT context")
+
+
+def test_held_distribution_is_target_free_and_preserves_each_point_median() -> None:
+    records = []
+    constructs = {}
+    contexts = {}
+    feature41_point = {}
+    feature41_basis = {}
+    direct_features = {}
+    for method in range(8):
+        construct_id = f"P01_method{method}"
+        records.append(_Record("P01", f"method{method}", construct_id, 1, 1))
+        constructs[construct_id] = _Construct(
+            sequence="ACGU", wt_observed=np.ones(4, dtype=bool)
+        )
+        contexts[construct_id] = _context(4)
+        feature41_point[construct_id] = np.zeros((1, 4), dtype=np.float32)
+        feature41_basis[construct_id] = np.zeros((1, 4, 41), dtype=np.float32)
+        direct_features[construct_id] = np.zeros((1, 4, 201), dtype=np.float32)
+    candidate, null = make_exact_full_model_pair(seed=111)
+    candidate_head, null_head = make_exact_residual_pair(seed=0, device="cpu")
+    raw = calibration_input(
+        np.zeros((1, 41)), np.zeros(1), np.zeros((1, 201))
+    )
+    standardizer = TrainOnlyStandardizer.fit([raw])
+    prediction = predict_held_puzzle_distributions(
+        univ=_Universe(constructs),
+        held_records=records,
+        context_cache=contexts,
+        feature41_by_construct=feature41_point,
+        feature41_basis_by_construct=feature41_basis,
+        direct_features_by_construct=direct_features,
+        candidate=candidate,
+        null=null,
+        residual_heads={"candidate": candidate_head, "null": null_head},
+        standardizers={"candidate": standardizer, "null": standardizer},
+        outer_fold=0,
+        seed=0,
+    )
+    assert str(prediction["schema_version"].item()) == PREDICTION_SCHEMA
+    assert not (set(prediction) & FORBIDDEN_PREDICTION_FIELDS)
+    for name in ("candidate", "null"):
+        weights = torch.tensor(prediction[f"{name}_weights"])
+        locations = torch.tensor(prediction[f"{name}_locations"])
+        scales = torch.tensor(prediction[f"{name}_scales"])
+        point = torch.tensor(prediction[f"{name}_point"])
+        cdf = torch.sum(
+            weights * torch.special.ndtr((point[:, None] - locations) / scales),
+            dim=-1,
+        )
+        assert torch.allclose(
+            cdf, torch.full_like(cdf, 0.5), atol=3e-6, rtol=0.0
+        )

@@ -18,6 +18,10 @@ import torch
 import yaml
 
 from scripts.reactflow_delta.model_rescue_v1 import aligned_wt_ctx_tensors
+from scripts.reactflow_delta.model_rescue_v2 import (
+    MeanAlignedModel,
+    freeze_mean_model,
+)
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     BLOCK_DIAGONAL_NULL,
     FULL_CROSS_CONSTRUCT,
@@ -25,11 +29,15 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
     make_exact_full_model_pair,
     parameter_count,
 )
+from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
+    EXPECTED_RESIDUAL_PARAMETERS,
+    fit_residual_pair,
+)
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     FORBIDDEN_PREDICTION_FIELDS,
     PREDICTION_SCHEMA,
     assemble_puzzle_training_batches,
-    predict_held_puzzle_points,
+    predict_held_puzzle_distributions,
 )
 from scripts.reactflow_delta.run_model_rescue_v11 import (
     _feature41_matrix,
@@ -37,7 +45,7 @@ from scripts.reactflow_delta.run_model_rescue_v11 import (
 )
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v1"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v2"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
 
@@ -67,6 +75,7 @@ def prepare_real_fold(
     feature41_model: dict[str, Any],
     unconstrained: Any,
     constrained: Any,
+    v8_model: MeanAlignedModel,
     device: str,
 ) -> dict[str, Any]:
     """Prepare outer-train batches and held outcome-blind inputs."""
@@ -92,6 +101,23 @@ def prepare_real_fold(
     training_batches = assemble_puzzle_training_batches(
         train_records, cells, context_cache
     )
+    freeze_mean_model(v8_model)
+    with torch.no_grad():
+        for batch in training_batches:
+            for cell in batch["cells"]:
+                context = batch["contexts"][int(cell["focal_construct_index"])]
+                hidden = v8_model.encode(context)
+                _point, direct = v8_model.forward_mean_and_features(
+                    hidden,
+                    cell["edit_index"],
+                    cell["signed_distance"],
+                    cell["refs"],
+                    cell["alts"],
+                    cell["prediction_mask"],
+                )
+                cell["direct_features"] = direct.detach().cpu().numpy().astype(
+                    np.float32
+                )
     by_construct: dict[str, list[Any]] = defaultdict(list)
     for record in held_records:
         by_construct[str(record.construct_id)].append(record)
@@ -100,6 +126,8 @@ def prepare_real_fold(
         for construct_id in sorted(by_construct)
     }
     held_feature41 = {}
+    held_feature41_basis = {}
+    held_direct_features = {}
     for construct_id, construct_records in sorted(by_construct.items()):
         construct_records.sort(
             key=lambda record: (
@@ -109,7 +137,7 @@ def prepare_real_fold(
             )
         )
         construct = univ.get_construct(construct_id)
-        _basis, matrix = _feature41_matrix(
+        basis, matrix = _feature41_matrix(
             construct,
             construct_records,
             feature41_model,
@@ -117,11 +145,41 @@ def prepare_real_fold(
             constrained,
         )
         held_feature41[construct_id] = matrix
+        held_feature41_basis[construct_id] = basis
+        length = len(construct.sequence)
+        edit = torch.tensor(
+            [int(record.full_pos) for record in construct_records], device=device
+        )
+        distance = (
+            torch.arange(length, device=device)[None, :] - edit[:, None]
+        ).float()
+        prediction_mask = torch.tensor(
+            np.tile(
+                np.asarray(construct.wt_observed, dtype=bool),
+                (len(construct_records), 1),
+            ),
+            device=device,
+        )
+        with torch.no_grad():
+            hidden = v8_model.encode(held_contexts[construct_id])
+            _point, direct = v8_model.forward_mean_and_features(
+                hidden,
+                edit,
+                distance,
+                [str(record.ref) for record in construct_records],
+                [str(record.alt) for record in construct_records],
+                prediction_mask,
+            )
+        held_direct_features[construct_id] = (
+            direct.detach().cpu().numpy().astype(np.float32)
+        )
     return {
         "training_batches": training_batches,
         "held_records": held_records,
         "held_contexts": held_contexts,
         "held_feature41": held_feature41,
+        "held_feature41_basis": held_feature41_basis,
+        "held_direct_features": held_direct_features,
     }
 
 
@@ -132,7 +190,8 @@ def run_prepared_fold(
     outer_fold: int,
     held_puzzle: str,
     seed: int,
-    epochs: int,
+    point_epochs: int,
+    calibration_epochs: int,
     device: str,
     out_dir: Path,
 ) -> dict[str, Any]:
@@ -143,17 +202,27 @@ def run_prepared_fold(
     prediction_path = out_dir / (
         f"puzzle_set_predictions_fold{outer_fold}_seed{seed}.npz"
     )
-    candidate_checkpoint = out_dir / (
-        f"puzzle_set_candidate_fold{outer_fold}_seed{seed}.pt"
+    candidate_point_checkpoint = out_dir / (
+        f"puzzle_set_candidate_point_fold{outer_fold}_seed{seed}.pt"
     )
-    null_checkpoint = out_dir / f"puzzle_set_null_fold{outer_fold}_seed{seed}.pt"
+    null_point_checkpoint = out_dir / (
+        f"puzzle_set_null_point_fold{outer_fold}_seed{seed}.pt"
+    )
+    candidate_residual_checkpoint = out_dir / (
+        f"puzzle_set_candidate_residual_fold{outer_fold}_seed{seed}.pt"
+    )
+    null_residual_checkpoint = out_dir / (
+        f"puzzle_set_null_residual_fold{outer_fold}_seed{seed}.pt"
+    )
     existing = [
         path
         for path in (
             fold_path,
             prediction_path,
-            candidate_checkpoint,
-            null_checkpoint,
+            candidate_point_checkpoint,
+            null_point_checkpoint,
+            candidate_residual_checkpoint,
+            null_residual_checkpoint,
         )
         if path.exists()
     ]
@@ -164,24 +233,51 @@ def run_prepared_fold(
     candidate_history = fit_puzzle_set_point_model(
         candidate,
         prepared["training_batches"],
-        epochs=epochs,
+        epochs=point_epochs,
         seed=seed,
     )
     null_history = fit_puzzle_set_point_model(
         null,
         prepared["training_batches"],
-        epochs=epochs,
+        epochs=point_epochs,
         seed=seed,
     )
-    torch.save(candidate.state_dict(), candidate_checkpoint)
-    torch.save(null.state_dict(), null_checkpoint)
-    prediction = predict_held_puzzle_points(
+    torch.save(candidate.state_dict(), candidate_point_checkpoint)
+    torch.save(null.state_dict(), null_point_checkpoint)
+    residual = fit_residual_pair(
+        prepared["training_batches"],
+        candidate=candidate,
+        null=null,
+        epochs=calibration_epochs,
+        seed=seed,
+        device=device,
+    )
+    residual_checkpoints = {}
+    for name, path in (
+        ("candidate", candidate_residual_checkpoint),
+        ("null", null_residual_checkpoint),
+    ):
+        torch.save(
+            {
+                "state_dict": residual["heads"][name].state_dict(),
+                "standardizer_mean": residual["standardizers"][name].mean,
+                "standardizer_scale": residual["standardizers"][name].scale,
+                "point_name": name,
+            },
+            path,
+        )
+        residual_checkpoints[name] = str(path)
+    prediction = predict_held_puzzle_distributions(
         univ=univ,
         held_records=prepared["held_records"],
         context_cache=prepared["held_contexts"],
         feature41_by_construct=prepared["held_feature41"],
+        feature41_basis_by_construct=prepared["held_feature41_basis"],
+        direct_features_by_construct=prepared["held_direct_features"],
         candidate=candidate,
         null=null,
+        residual_heads=residual["heads"],
+        standardizers=residual["standardizers"],
         outer_fold=outer_fold,
         seed=seed,
     )
@@ -196,23 +292,40 @@ def run_prepared_fold(
         "outer_fold": int(outer_fold),
         "held_puzzle": str(held_puzzle),
         "seed": int(seed),
-        "epochs": int(epochs),
+        "point_epochs": int(point_epochs),
+        "calibration_epochs": int(calibration_epochs),
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
         "null_connectivity": BLOCK_DIAGONAL_NULL,
         "candidate_parameter_count": parameter_count(candidate),
         "null_parameter_count": parameter_count(null),
-        "candidate_history": candidate_history,
-        "null_history": null_history,
-        "candidate_checkpoint": str(candidate_checkpoint),
-        "null_checkpoint": str(null_checkpoint),
+        "training_histories": {
+            "candidate_point": candidate_history,
+            "null_point": null_history,
+            "candidate_residual": residual["histories"]["candidate"],
+            "null_residual": residual["histories"]["null"],
+        },
+        "point_checkpoints": {
+            "candidate": str(candidate_point_checkpoint),
+            "null": str(null_point_checkpoint),
+        },
+        "residual_checkpoints": residual_checkpoints,
         "prediction_artifact": str(prediction_path),
         "n_registered_prediction_rows": int(len(prediction["keys"])),
+        "n_calibration_cells": int(residual["n_calibration_cells"]),
+        "residual_parameter_counts": {
+            "candidate": EXPECTED_RESIDUAL_PARAMETERS,
+            "null": EXPECTED_RESIDUAL_PARAMETERS,
+        },
         "invariants": {
             "outcome_blind_puzzle_set_inputs": True,
             "exact_parameter_and_initialization_match": True,
             "candidate_full_cross_construct_attention": True,
             "null_block_diagonal_attention": True,
             "puzzle_balanced_training": True,
+            "point_frozen_during_calibration": True,
+            "v10_residual_family_reused": True,
+            "puzzle_balanced_residual_calibration": True,
+            "median_constraint_all_held_rows": True,
             "prediction_target_free": True,
             "held_score_computed": False,
             "external_outcome_accessed": False,
@@ -233,8 +346,10 @@ def run_real_fold(
     feature41_model: dict[str, Any],
     unconstrained: Any,
     constrained: Any,
+    v8_model: MeanAlignedModel,
     seed: int,
-    epochs: int,
+    point_epochs: int,
+    calibration_epochs: int,
     device: str,
     out_dir: Path,
 ) -> dict[str, Any]:
@@ -246,6 +361,7 @@ def run_real_fold(
         feature41_model=feature41_model,
         unconstrained=unconstrained,
         constrained=constrained,
+        v8_model=v8_model,
         device=device,
     )
     return run_prepared_fold(
@@ -254,7 +370,8 @@ def run_real_fold(
         outer_fold=int(fold.outer_fold),
         held_puzzle=str(fold.held_puzzle),
         seed=seed,
-        epochs=epochs,
+        point_epochs=point_epochs,
+        calibration_epochs=calibration_epochs,
         device=device,
         out_dir=out_dir,
     )

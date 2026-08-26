@@ -85,9 +85,15 @@ intended difference.
 
 The proposed held path assembles all eight WT contexts once, encodes and mixes
 them once per arm, then emits a prediction for every registered mutant and full
-construct position. The prediction schema contains only biological keys,
-registration status, fold/seed, feature41, candidate point and null point;
-mutant target, target error, qualified mask, loss and score are scorer-only.
+construct position. After point fitting, both complete point models are frozen.
+Each arm then receives an exactly initialized copy of the V10
+median-preserving asymmetric residual family, trained only on its outer-train
+residuals with the same feature41 basis, frozen V8 direct features, optimizer,
+epoch count and puzzle-balanced method-cell CRPS objective. Calibration cannot
+move either point median. The prediction schema contains only biological keys, registration
+status, fold/seed, feature41, candidate/null points and their distribution
+weights, locations, scales and expected absolute delta; mutant target, target
+error, qualified mask, loss and score are scorer-only.
 
 An implementation-only fold runner now exists, but real outer-train outcome
 access remains fail-closed. It requires a future active task ID
@@ -99,8 +105,9 @@ The implementation-only merger requires the future amendment to supply the
 exact fold, seed, epoch and parameter-count universe. It rejects missing,
 duplicate or unexpected fold-seed pairs, target-bearing predictions, changed
 connectivity, incomplete histories, row misalignment, repeated biological keys
-within a seed and absent checkpoints. It emits only a complete unscored merge;
-no target scorer or Gate is active at this stage.
+within a seed, invalid mixture weights/scales, a shifted point median and absent
+point or residual checkpoints. It emits only a complete unscored merge; no
+target scorer or Gate is active at this stage.
 
 ## Consequences
 

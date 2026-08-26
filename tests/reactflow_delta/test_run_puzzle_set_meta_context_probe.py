@@ -7,6 +7,9 @@ import numpy as np
 import torch
 import yaml
 
+from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
+    merge_complete_universe,
+)
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     FORBIDDEN_PREDICTION_FIELDS,
 )
@@ -68,6 +71,7 @@ def _prepared():
         cells.append(
             {
                 "focal_construct_index": focal,
+                "construct_id": f"P01_method{focal}",
                 "edit_index": edit,
                 "signed_distance": distance.float(),
                 "refs": ["A"],
@@ -78,6 +82,7 @@ def _prepared():
                 "qualified_mask": torch.ones(1, 4, dtype=torch.bool),
                 "wt": torch.zeros(4),
                 "feature41_basis": np.zeros((1, 4, 41), dtype=np.float32),
+                "direct_features": np.zeros((1, 4, 201), dtype=np.float32),
             }
         )
         construct_id = f"P20_method{focal}"
@@ -100,6 +105,14 @@ def _prepared():
             "held_records": held_records,
             "held_contexts": held_contexts,
             "held_feature41": held_feature41,
+            "held_feature41_basis": {
+                construct_id: np.zeros((1, 4, 41), dtype=np.float32)
+                for construct_id in held_contexts
+            },
+            "held_direct_features": {
+                construct_id: np.zeros((1, 4, 201), dtype=np.float32)
+                for construct_id in held_contexts
+            },
         },
     )
 
@@ -147,16 +160,40 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         outer_fold=19,
         held_puzzle="P20",
         seed=0,
-        epochs=1,
+        point_epochs=1,
+        calibration_epochs=1,
         device="cpu",
         out_dir=tmp_path,
     )
     assert result["schema_version"] == FOLD_SCHEMA
     assert result["candidate_parameter_count"] == result["null_parameter_count"]
+    assert set(result["residual_parameter_counts"].values()) == {63748}
     assert result["n_registered_prediction_rows"] == 32
     with np.load(result["prediction_artifact"], allow_pickle=True) as handle:
         assert not (set(handle.files) & FORBIDDEN_PREDICTION_FIELDS)
         assert len(handle["keys"]) == 32
+        for name in ("candidate", "null"):
+            point = torch.tensor(handle[f"{name}_point"])
+            weights = torch.tensor(handle[f"{name}_weights"])
+            locations = torch.tensor(handle[f"{name}_locations"])
+            scales = torch.tensor(handle[f"{name}_scales"])
+            cdf = torch.sum(
+                weights
+                * torch.special.ndtr((point[:, None] - locations) / scales),
+                dim=-1,
+            )
+            assert torch.allclose(
+                cdf, torch.full_like(cdf, 0.5), atol=3e-6, rtol=0.0
+            )
+    merged = merge_complete_universe(
+        tmp_path,
+        expected_folds=[19],
+        expected_seeds=[0],
+        expected_point_epochs=1,
+        expected_calibration_epochs=1,
+        expected_parameter_count=result["candidate_parameter_count"],
+    )
+    assert merged["status"] == "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS"
     try:
         run_prepared_fold(
             univ=univ,
@@ -164,7 +201,8 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
             outer_fold=19,
             held_puzzle="P20",
             seed=0,
-            epochs=1,
+            point_epochs=1,
+            calibration_epochs=1,
             device="cpu",
             out_dir=tmp_path,
         )

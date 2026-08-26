@@ -14,10 +14,16 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
     EXPECTED_CONSTRUCTS_PER_PUZZLE,
     PuzzleSetMetaContextPointModel,
 )
+from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
+    calibrated_distribution,
+)
 from scripts.reactflow_delta.run_p2_v3 import _bio_key
 
 
-PREDICTION_SCHEMA = "reactflow_delta.puzzle_set_meta_context_prediction.proposed.v1"
+POINT_PREDICTION_SCHEMA = (
+    "reactflow_delta.puzzle_set_meta_context_point_prediction.proposed.v1"
+)
+PREDICTION_SCHEMA = "reactflow_delta.puzzle_set_meta_context_prediction.proposed.v2"
 FORBIDDEN_PREDICTION_FIELDS = {
     "target",
     "target_error",
@@ -222,7 +228,7 @@ def predict_held_puzzle_points(
     if len(keys) != len(set(keys)):
         raise RuntimeError("puzzle-set held prediction contains duplicate keys")
     output = {
-        "schema_version": np.asarray(PREDICTION_SCHEMA),
+        "schema_version": np.asarray(POINT_PREDICTION_SCHEMA),
         "keys": np.asarray(keys, dtype=object),
         "biological_scoring_key": np.asarray(keys, dtype=object),
         "outer_fold": np.full(len(keys), int(outer_fold), dtype=np.int64),
@@ -240,4 +246,109 @@ def predict_held_puzzle_points(
         if isinstance(value, np.ndarray) and value.dtype.kind in "fiu"
     ):
         raise RuntimeError("puzzle-set prediction contains nonfinite values")
+    return output
+
+
+def _flatten_held_calibration_features(
+    *,
+    held_records: Sequence[Any],
+    feature41_basis_by_construct: dict[str, np.ndarray],
+    direct_features_by_construct: dict[str, np.ndarray],
+    context_cache: dict[str, tuple[torch.Tensor, ...]],
+) -> tuple[np.ndarray, np.ndarray]:
+    by_construct: dict[str, list[Any]] = defaultdict(list)
+    for record in held_records:
+        by_construct[str(record.construct_id)].append(record)
+    if set(by_construct) != set(feature41_basis_by_construct) or set(
+        by_construct
+    ) != set(direct_features_by_construct) or set(by_construct) != set(context_cache):
+        raise ValueError("held calibration feature universe is not exact")
+    feature_rows = []
+    direct_rows = []
+    for construct_id in sorted(by_construct):
+        records = sorted(
+            by_construct[construct_id],
+            key=lambda record: (
+                int(record.design_pos),
+                str(record.ref),
+                str(record.alt),
+            ),
+        )
+        length = int(context_cache[construct_id][0].shape[0])
+        feature41 = np.asarray(
+            feature41_basis_by_construct[construct_id], dtype=np.float32
+        )
+        direct = np.asarray(
+            direct_features_by_construct[construct_id], dtype=np.float32
+        )
+        if feature41.shape != (len(records), length, 41) or direct.shape != (
+            len(records),
+            length,
+            201,
+        ):
+            raise ValueError("held calibration feature matrices are misaligned")
+        feature_rows.append(feature41.reshape(-1, 41))
+        direct_rows.append(direct.reshape(-1, 201))
+    return np.concatenate(feature_rows), np.concatenate(direct_rows)
+
+
+def predict_held_puzzle_distributions(
+    *,
+    univ: Any,
+    held_records: Sequence[Any],
+    context_cache: dict[str, tuple[torch.Tensor, ...]],
+    feature41_by_construct: dict[str, np.ndarray],
+    feature41_basis_by_construct: dict[str, np.ndarray],
+    direct_features_by_construct: dict[str, np.ndarray],
+    candidate: PuzzleSetMetaContextPointModel,
+    null: PuzzleSetMetaContextPointModel,
+    residual_heads: dict[str, Any],
+    standardizers: dict[str, Any],
+    outer_fold: int,
+    seed: int,
+) -> dict[str, np.ndarray]:
+    """Emit target-free point and median-preserving probability predictions."""
+
+    if set(residual_heads) != {"candidate", "null"} or set(standardizers) != {
+        "candidate",
+        "null",
+    }:
+        raise ValueError("puzzle-set held calibration requires both exact arms")
+    output = predict_held_puzzle_points(
+        univ=univ,
+        held_records=held_records,
+        context_cache=context_cache,
+        feature41_by_construct=feature41_by_construct,
+        candidate=candidate,
+        null=null,
+        outer_fold=outer_fold,
+        seed=seed,
+    )
+    output["schema_version"] = np.asarray(PREDICTION_SCHEMA)
+    feature41, direct = _flatten_held_calibration_features(
+        held_records=held_records,
+        feature41_basis_by_construct=feature41_basis_by_construct,
+        direct_features_by_construct=direct_features_by_construct,
+        context_cache=context_cache,
+    )
+    if len(feature41) != len(output["keys"]):
+        raise RuntimeError("held calibration rows do not match biological keys")
+    for name in ("candidate", "null"):
+        distribution = calibrated_distribution(
+            point=np.asarray(output[f"{name}_point"], dtype=np.float64),
+            feature41=feature41,
+            direct_features=direct,
+            head=residual_heads[name],
+            standardizer=standardizers[name],
+        )
+        for suffix, values in distribution.items():
+            output[f"{name}_{suffix}"] = values
+    if set(output) & FORBIDDEN_PREDICTION_FIELDS:
+        raise RuntimeError("puzzle-set distribution contains target-side fields")
+    if not all(
+        np.isfinite(value).all()
+        for value in output.values()
+        if isinstance(value, np.ndarray) and value.dtype.kind in "fiu"
+    ):
+        raise RuntimeError("puzzle-set distribution contains nonfinite values")
     return output
