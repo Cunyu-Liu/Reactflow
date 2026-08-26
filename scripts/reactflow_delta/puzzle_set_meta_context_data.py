@@ -21,9 +21,9 @@ from scripts.reactflow_delta.run_p2_v3 import _bio_key
 
 
 POINT_PREDICTION_SCHEMA = (
-    "reactflow_delta.puzzle_set_meta_context_point_prediction.proposed.v1"
+    "reactflow_delta.puzzle_set_meta_context_point_prediction.proposed.v2"
 )
-PREDICTION_SCHEMA = "reactflow_delta.puzzle_set_meta_context_prediction.proposed.v2"
+PREDICTION_SCHEMA = "reactflow_delta.puzzle_set_meta_context_prediction.proposed.v3"
 FORBIDDEN_PREDICTION_FIELDS = {
     "target",
     "target_error",
@@ -93,6 +93,7 @@ def assemble_puzzle_training_batches(
                     "refs": list(cell["refs"]),
                     "alts": list(cell["alts"]),
                     "feature41_point": cell["feature41_point"],
+                    "parent_point": cell["parent_point"],
                     "prediction_mask": cell["prediction_mask"],
                     "target": cell["target"],
                     "qualified_mask": cell["qualified_mask"],
@@ -121,6 +122,7 @@ def predict_held_puzzle_points(
     held_records: Sequence[Any],
     context_cache: dict[str, tuple[torch.Tensor, ...]],
     feature41_by_construct: dict[str, np.ndarray],
+    parent_point_by_construct: dict[str, np.ndarray],
     candidate: PuzzleSetMetaContextPointModel,
     null: PuzzleSetMetaContextPointModel,
     outer_fold: int,
@@ -137,16 +139,19 @@ def predict_held_puzzle_points(
     construct_ids = sorted(by_construct)
     if len(construct_ids) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
         raise ValueError("held puzzle prediction requires exactly eight constructs")
-    if set(construct_ids) != set(context_cache) or set(construct_ids) != set(
-        feature41_by_construct
+    if (
+        set(construct_ids) != set(context_cache)
+        or set(construct_ids) != set(feature41_by_construct)
+        or set(construct_ids) != set(parent_point_by_construct)
     ):
-        raise ValueError("held puzzle context or feature41 universe is not exact")
+        raise ValueError("held puzzle context, feature41, or parent universe is not exact")
 
     contexts = [context_cache[construct_id] for construct_id in construct_ids]
     candidate.eval()
     null.eval()
     keys: list[str] = []
     feature41_values = []
+    parent_values = []
     candidate_values = []
     null_values = []
     with torch.no_grad():
@@ -171,9 +176,12 @@ def predict_held_puzzle_points(
             feature41 = np.asarray(
                 feature41_by_construct[construct_id], dtype=np.float32
             )
+            parent = np.asarray(
+                parent_point_by_construct[construct_id], dtype=np.float32
+            )
             expected = (len(construct_records), length)
-            if feature41.shape != expected:
-                raise ValueError("held puzzle feature41 matrix is misaligned")
+            if feature41.shape != expected or parent.shape != expected:
+                raise ValueError("held puzzle feature41 or parent matrix is misaligned")
             device = next(candidate.parameters()).device
             if next(null.parameters()).device != device:
                 raise ValueError("candidate and null must use the same device")
@@ -191,6 +199,7 @@ def predict_held_puzzle_points(
                 device=device,
             )
             feature41_tensor = torch.tensor(feature41, device=device)
+            parent_tensor = torch.tensor(parent, device=device)
             refs = [str(record.ref) for record in construct_records]
             alts = [str(record.alt) for record in construct_records]
             candidate_point, _ = candidate.forward_from_encoded(
@@ -202,6 +211,7 @@ def predict_held_puzzle_points(
                 refs,
                 alts,
                 feature41_tensor,
+                parent_tensor,
                 prediction_mask,
             )
             null_point, _ = null.forward_from_encoded(
@@ -213,6 +223,7 @@ def predict_held_puzzle_points(
                 refs,
                 alts,
                 feature41_tensor,
+                parent_tensor,
                 prediction_mask,
             )
             for mutant, record in enumerate(construct_records):
@@ -220,6 +231,7 @@ def predict_held_puzzle_points(
                     _bio_key(univ, record, position) for position in range(length)
                 )
                 feature41_values.append(feature41[mutant].astype(np.float64))
+                parent_values.append(parent[mutant].astype(np.float64))
                 candidate_values.append(
                     candidate_point[mutant].cpu().numpy().astype(np.float64)
                 )
@@ -235,6 +247,7 @@ def predict_held_puzzle_points(
         "seed": np.full(len(keys), int(seed), dtype=np.int64),
         "registered_status": np.full(len(keys), "covered", dtype=object),
         "feature41_point": np.concatenate(feature41_values),
+        "parent_point": np.concatenate(parent_values),
         "candidate_point": np.concatenate(candidate_values),
         "null_point": np.concatenate(null_values),
     }
@@ -298,6 +311,7 @@ def predict_held_puzzle_distributions(
     held_records: Sequence[Any],
     context_cache: dict[str, tuple[torch.Tensor, ...]],
     feature41_by_construct: dict[str, np.ndarray],
+    parent_point_by_construct: dict[str, np.ndarray],
     feature41_basis_by_construct: dict[str, np.ndarray],
     direct_features_by_construct: dict[str, np.ndarray],
     candidate: PuzzleSetMetaContextPointModel,
@@ -319,6 +333,7 @@ def predict_held_puzzle_distributions(
         held_records=held_records,
         context_cache=context_cache,
         feature41_by_construct=feature41_by_construct,
+        parent_point_by_construct=parent_point_by_construct,
         candidate=candidate,
         null=null,
         outer_fold=outer_fold,

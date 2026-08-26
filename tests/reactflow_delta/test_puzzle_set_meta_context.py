@@ -4,6 +4,7 @@ import inspect
 
 import torch
 
+from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     BASE_FEATURE_WIDTH,
     BLOCK_DIAGONAL_NULL,
@@ -12,12 +13,25 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
     FULL_CROSS_CONSTRUCT,
     PuzzleSetMetaContextPointModel,
     PuzzleSetMetaContext,
+    assert_v14_encoder_replay,
     fit_puzzle_set_point_model,
     make_exact_full_model_pair,
     make_exact_matched_pair,
     parameter_count,
     puzzle_balanced_point_loss,
 )
+
+
+def _v14_source(seed: int = 1400) -> V14PointModel:
+    torch.manual_seed(seed)
+    return V14PointModel()
+
+
+def _full_pair(seed: int):
+    source = _v14_source()
+    return make_exact_full_model_pair(
+        seed=seed, v14_point_state=source.state_dict()
+    )
 
 
 def _set_inputs(*, requires_grad: bool = False):
@@ -62,6 +76,7 @@ def _training_batch():
                 "refs": ["A"],
                 "alts": ["G"],
                 "feature41_point": torch.zeros(1, 4),
+                "parent_point": torch.zeros(1, 4),
                 "prediction_mask": torch.ones(1, 4, dtype=torch.bool),
                 "target": torch.full((1, 4), float(focal + 1) / 10.0),
                 "qualified_mask": torch.ones(1, 4, dtype=torch.bool),
@@ -137,29 +152,29 @@ def test_candidate_focal_context_uses_other_constructs() -> None:
     assert float(gradient.abs().sum()) > 0.0
 
 
-def test_zero_initialized_adapter_replays_feature41_in_both_arms() -> None:
+def test_zero_initialized_adapter_replays_parent_in_both_arms() -> None:
     candidate, null = make_exact_matched_pair(seed=22)
     candidate.eval()
     null.eval()
     hidden, observed = _set_inputs()
     generator = torch.Generator().manual_seed(77)
     base = torch.randn(3, 11, BASE_FEATURE_WIDTH, generator=generator)
-    feature41 = torch.randn(3, 11, generator=generator)
+    parent = torch.randn(3, 11, generator=generator)
     mask = torch.ones(3, 11, dtype=torch.bool)
     candidate_point, candidate_residual, _ = candidate(
-        hidden, observed, 0, base, feature41, mask
+        hidden, observed, 0, base, parent, mask
     )
     null_point, null_residual, _ = null(
-        hidden, observed, 0, base, feature41, mask
+        hidden, observed, 0, base, parent, mask
     )
     assert torch.equal(candidate_residual, torch.zeros_like(candidate_residual))
     assert torch.equal(null_residual, torch.zeros_like(null_residual))
-    assert torch.equal(candidate_point, feature41)
-    assert torch.equal(null_point, feature41)
+    assert torch.equal(candidate_point, parent)
+    assert torch.equal(null_point, parent)
 
 
 def test_full_point_models_are_exact_matches_and_target_free() -> None:
-    candidate, null = make_exact_full_model_pair(seed=31)
+    candidate, null = _full_pair(31)
     assert candidate.connectivity == FULL_CROSS_CONSTRUCT
     assert null.connectivity == BLOCK_DIAGONAL_NULL
     assert parameter_count(candidate) == parameter_count(null)
@@ -176,14 +191,27 @@ def test_full_point_models_are_exact_matches_and_target_free() -> None:
         assert forbidden not in signature.parameters
 
 
-def test_full_point_model_replays_feature41_and_handles_zero_observed_p20() -> None:
-    candidate, _null = make_exact_full_model_pair(seed=41)
+def test_frozen_puzzle_encoder_exactly_replays_v14_source() -> None:
+    source = _v14_source(seed=1414).eval()
+    candidate, null = make_exact_full_model_pair(
+        seed=32, v14_point_state=source.state_dict()
+    )
+    context = _context(9)
+    assert_v14_encoder_replay(candidate.encoder, source, context)
+    assert_v14_encoder_replay(null.encoder, source, context)
+    assert all(not parameter.requires_grad for parameter in candidate.encoder.parameters())
+    assert all(not parameter.requires_grad for parameter in null.encoder.parameters())
+
+
+def test_full_point_model_replays_parent_and_handles_zero_observed_p20() -> None:
+    candidate, _null = _full_pair(41)
     candidate.eval()
     contexts = [_context(9) for _ in range(8)]
     contexts[0] = _context(9, observed=False)
     edit = torch.tensor([2, 4])
     distance = torch.arange(9)[None, :] - edit[:, None]
     feature41 = torch.randn(2, 9, generator=torch.Generator().manual_seed(6))
+    parent = torch.randn(2, 9, generator=torch.Generator().manual_seed(7))
     prediction_mask = torch.ones(2, 9, dtype=torch.bool)
     point, residual, mixed = candidate(
         contexts,
@@ -193,21 +221,23 @@ def test_full_point_model_replays_feature41_and_handles_zero_observed_p20() -> N
         ["A", "C"],
         ["G", "U"],
         feature41,
+        parent,
         prediction_mask,
     )
-    assert torch.equal(point, feature41)
+    assert torch.equal(point, parent)
     assert torch.equal(residual, torch.zeros_like(residual))
     assert mixed.shape == (8, CONTEXT_WIDTH)
     assert torch.isfinite(mixed).all()
 
 
 def test_full_point_model_is_equivariant_to_construct_order() -> None:
-    candidate, _null = make_exact_full_model_pair(seed=51)
+    candidate, _null = _full_pair(51)
     candidate.eval()
     contexts = [_context(8 + (index % 2)) for index in range(8)]
     edit = torch.tensor([2])
     distance = torch.arange(8)[None, :] - edit[:, None]
     feature41 = torch.randn(1, 8, generator=torch.Generator().manual_seed(8))
+    parent = torch.randn(1, 8, generator=torch.Generator().manual_seed(9))
     mask = torch.ones(1, 8, dtype=torch.bool)
     original = candidate(
         contexts,
@@ -217,6 +247,7 @@ def test_full_point_model_is_equivariant_to_construct_order() -> None:
         ["A"],
         ["G"],
         feature41,
+        parent,
         mask,
     )[2][0]
     permutation = [3, 2, 0, 7, 1, 6, 5, 4]
@@ -230,13 +261,14 @@ def test_full_point_model_is_equivariant_to_construct_order() -> None:
         ["A"],
         ["G"],
         feature41,
+        parent,
         mask,
     )[2][new_focal]
     assert torch.allclose(original, repeated, atol=3e-6, rtol=0.0)
 
 
 def test_puzzle_balanced_loss_uses_all_eight_cells_equally() -> None:
-    candidate, _null = make_exact_full_model_pair(seed=61)
+    candidate, _null = _full_pair(61)
     candidate.eval()
     loss = puzzle_balanced_point_loss(candidate, _training_batch())
     # At zero initialization point=feature41=0. Each single-mutant cell has
@@ -245,10 +277,18 @@ def test_puzzle_balanced_loss_uses_all_eight_cells_equally() -> None:
 
 
 def test_puzzle_training_replays_identically_under_same_connectivity() -> None:
-    first, second = make_exact_full_model_pair(seed=71)
+    first, second = _full_pair(71)
     second.connectivity = FULL_CROSS_CONSTRUCT
+    encoder_before = {
+        name: value.detach().clone()
+        for name, value in first.encoder.state_dict().items()
+    }
+    training = _training_batch()
+    parent_before = [
+        cell["parent_point"].detach().clone() for cell in training["cells"]
+    ]
     first_history = fit_puzzle_set_point_model(
-        first, [_training_batch()], epochs=1, seed=9
+        first, [training], epochs=1, seed=9
     )
     second_history = fit_puzzle_set_point_model(
         second, [_training_batch()], epochs=1, seed=9
@@ -256,10 +296,15 @@ def test_puzzle_training_replays_identically_under_same_connectivity() -> None:
     assert first_history == second_history
     for left, right in zip(first.parameters(), second.parameters()):
         assert torch.equal(left, right)
+    for name, value in first.encoder.state_dict().items():
+        assert torch.equal(value, encoder_before[name])
+    assert all(parameter.grad is None for parameter in first.encoder.parameters())
+    for expected, cell in zip(parent_before, training["cells"]):
+        assert torch.equal(expected, cell["parent_point"])
 
 
 def test_puzzle_training_rejects_duplicate_or_missing_focal_cells() -> None:
-    candidate, _null = make_exact_full_model_pair(seed=81)
+    candidate, _null = _full_pair(81)
     batch = _training_batch()
     batch["cells"][-1]["focal_construct_index"] = 0
     try:
@@ -271,7 +316,7 @@ def test_puzzle_training_rejects_duplicate_or_missing_focal_cells() -> None:
 
 
 def test_puzzle_loss_keeps_eight_contexts_with_seven_supervised_cells() -> None:
-    candidate, _null = make_exact_full_model_pair(seed=82)
+    candidate, _null = _full_pair(82)
     candidate.eval()
     batch = _training_batch()
     batch["cells"] = batch["cells"][1:]

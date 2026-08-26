@@ -115,6 +115,7 @@ def build_calibration_cells(
                     source["refs"],
                     source["alts"],
                     source["feature41_point"],
+                    source["parent_point"],
                     source["prediction_mask"],
                 )
                 null_point, _ = null.forward_from_encoded(
@@ -126,6 +127,7 @@ def build_calibration_cells(
                     source["refs"],
                     source["alts"],
                     source["feature41_point"],
+                    source["parent_point"],
                     source["prediction_mask"],
                 )
                 qualified = source["qualified_mask"].detach().cpu().numpy()

@@ -5,10 +5,19 @@ from dataclasses import dataclass
 import numpy as np
 import torch
 
+from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 from scripts.reactflow_delta.model_rescue_v10 import (
     TrainOnlyStandardizer,
     calibration_input,
 )
+
+
+def _full_pair(seed: int):
+    torch.manual_seed(1400)
+    source = V14PointModel()
+    return make_exact_full_model_pair(
+        seed=seed, v14_point_state=source.state_dict()
+    )
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     make_exact_full_model_pair,
 )
@@ -70,6 +79,7 @@ def _cell(construct_id: str, length: int = 4):
         "refs": ["A"],
         "alts": ["G"],
         "feature41_point": torch.zeros(1, length),
+        "parent_point": torch.zeros(1, length),
         "prediction_mask": torch.ones(1, length, dtype=torch.bool),
         "target": torch.zeros(1, length),
         "qualified_mask": torch.ones(1, length, dtype=torch.bool),
@@ -136,6 +146,7 @@ def test_held_prediction_is_complete_target_free_and_feature41_replaying() -> No
     constructs = {}
     contexts = {}
     feature41 = {}
+    parent = {}
     for method in range(8):
         construct_id = f"P20_method{method}"
         records.append(_Record("P20", f"method{method}", construct_id, 1, 1))
@@ -145,12 +156,16 @@ def test_held_prediction_is_complete_target_free_and_feature41_replaying() -> No
         )
         contexts[construct_id] = _context(4, observed=observed)
         feature41[construct_id] = np.full((1, 4), method / 10.0, dtype=np.float32)
-    candidate, null = make_exact_full_model_pair(seed=91)
+        parent[construct_id] = np.full(
+            (1, 4), method / 10.0 + 0.05, dtype=np.float32
+        )
+    candidate, null = _full_pair(91)
     prediction = predict_held_puzzle_points(
         univ=_Universe(constructs),
         held_records=records,
         context_cache=contexts,
         feature41_by_construct=feature41,
+        parent_point_by_construct=parent,
         candidate=candidate,
         null=null,
         outer_fold=19,
@@ -161,13 +176,17 @@ def test_held_prediction_is_complete_target_free_and_feature41_replaying() -> No
     assert len(set(map(str, prediction["keys"]))) == 32
     assert set(prediction["registered_status"]) == {"covered"}
     assert not (set(prediction) & FORBIDDEN_PREDICTION_FIELDS)
-    # Zero-initialized candidate/null replay feature41 on observed positions.
+    # Zero-initialized candidate/null replay the frozen parent on observed positions.
     # P20_method0 is the registered zero-observed construct and is output as
     # zero by the prediction mask rather than by fabricating WT observations.
     for method in range(8):
         start = method * 4
         stop = start + 4
-        expected = np.zeros(4) if method == 0 else np.full(4, method / 10.0)
+        expected = (
+            np.zeros(4)
+            if method == 0
+            else np.full(4, method / 10.0 + 0.05)
+        )
         assert np.allclose(
             prediction["candidate_point"][start:stop], expected, atol=1e-7, rtol=0.0
         )
@@ -190,13 +209,18 @@ def test_held_prediction_rejects_nonexact_context_universe() -> None:
         record.construct_id: np.zeros((1, 4), dtype=np.float32)
         for record in records
     }
-    candidate, null = make_exact_full_model_pair(seed=101)
+    parent = {
+        record.construct_id: np.zeros((1, 4), dtype=np.float32)
+        for record in records
+    }
+    candidate, null = _full_pair(101)
     try:
         predict_held_puzzle_points(
             univ=_Universe(constructs),
             held_records=records,
             context_cache=contexts,
             feature41_by_construct=feature41,
+            parent_point_by_construct=parent,
             candidate=candidate,
             null=null,
             outer_fold=19,
@@ -213,6 +237,7 @@ def test_held_distribution_is_target_free_and_preserves_each_point_median() -> N
     constructs = {}
     contexts = {}
     feature41_point = {}
+    parent_point = {}
     feature41_basis = {}
     direct_features = {}
     for method in range(8):
@@ -223,9 +248,10 @@ def test_held_distribution_is_target_free_and_preserves_each_point_median() -> N
         )
         contexts[construct_id] = _context(4)
         feature41_point[construct_id] = np.zeros((1, 4), dtype=np.float32)
+        parent_point[construct_id] = np.zeros((1, 4), dtype=np.float32)
         feature41_basis[construct_id] = np.zeros((1, 4, 41), dtype=np.float32)
         direct_features[construct_id] = np.zeros((1, 4, 201), dtype=np.float32)
-    candidate, null = make_exact_full_model_pair(seed=111)
+    candidate, null = _full_pair(111)
     candidate_head, null_head = make_exact_residual_pair(seed=0, device="cpu")
     raw = calibration_input(
         np.zeros((1, 41)), np.zeros(1), np.zeros((1, 201))
@@ -236,6 +262,7 @@ def test_held_distribution_is_target_free_and_preserves_each_point_median() -> N
         held_records=records,
         context_cache=contexts,
         feature41_by_construct=feature41_point,
+        parent_point_by_construct=parent_point,
         feature41_basis_by_construct=feature41_basis,
         direct_features_by_construct=direct_features,
         candidate=candidate,

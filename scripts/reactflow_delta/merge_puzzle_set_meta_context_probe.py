@@ -26,7 +26,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import FOLD_SCHEMA
 
 
-MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v2"
+MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v3"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
@@ -38,6 +38,7 @@ PREDICTION_FIELDS = {
     "seed",
     "registered_status",
     "feature41_point",
+    "parent_point",
     "candidate_point",
     "null_point",
     "candidate_weights",
@@ -134,6 +135,9 @@ def recorded_invariants_pass(invariants: dict[str, Any]) -> bool:
         "candidate_full_cross_construct_attention",
         "null_block_diagonal_attention",
         "puzzle_balanced_training",
+        "frozen_v13_point_parent",
+        "frozen_v14_context_encoder",
+        "zero_initialized_parent_replay_at_1e_7",
         "point_frozen_during_calibration",
         "v10_residual_family_reused",
         "puzzle_balanced_residual_calibration",
@@ -154,6 +158,7 @@ def merge_complete_universe(
     expected_point_epochs: int,
     expected_calibration_epochs: int,
     expected_parameter_count: int,
+    expected_trainable_parameter_count: int,
 ) -> dict[str, Any]:
     if len(set(expected_folds)) != len(expected_folds) or len(
         set(expected_seeds)
@@ -203,6 +208,22 @@ def merge_complete_universe(
             expected_parameter_count
         ):
             raise ValueError(f"puzzle-set fold {pair} changed parameter count")
+        trainable_counts = {
+            int(row.get("candidate_trainable_parameter_count", -1)),
+            int(row.get("null_trainable_parameter_count", -1)),
+        }
+        if trainable_counts != {int(expected_trainable_parameter_count)}:
+            raise ValueError(f"puzzle-set fold {pair} changed trainable count")
+        replay = row.get("initial_parent_replay_max_abs_difference", {})
+        if set(replay) != {"candidate", "null"} or max(
+            map(float, replay.values())
+        ) > 1e-7:
+            raise ValueError(f"puzzle-set fold {pair} does not replay its parent")
+        parents = row.get("frozen_parent_checkpoints", {})
+        if set(parents) != {"v13_point", "v14_encoder"} or not all(
+            Path(value).is_file() for value in parents.values()
+        ):
+            raise FileNotFoundError(f"puzzle-set fold {pair} lacks frozen parents")
         histories = row.get("training_histories", {})
         expected_history_lengths = {
             "candidate_point": expected_point_epochs,
@@ -265,6 +286,9 @@ def merge_complete_universe(
         "expected_point_epochs": int(expected_point_epochs),
         "expected_calibration_epochs": int(expected_calibration_epochs),
         "expected_parameter_count_each": int(expected_parameter_count),
+        "expected_trainable_parameter_count_each": int(
+            expected_trainable_parameter_count
+        ),
         "expected_residual_parameter_count_each": EXPECTED_RESIDUAL_PARAMETERS,
         "folds": rows,
         "merge_integrity": {
@@ -298,6 +322,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--point-epochs", type=int, required=True)
     parser.add_argument("--calibration-epochs", type=int, required=True)
     parser.add_argument("--parameter-count", type=int, required=True)
+    parser.add_argument("--trainable-parameter-count", type=int, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.out_json.exists():
@@ -309,6 +334,7 @@ def main(argv: list[str] | None = None) -> int:
         expected_point_epochs=args.point_epochs,
         expected_calibration_epochs=args.calibration_epochs,
         expected_parameter_count=args.parameter_count,
+        expected_trainable_parameter_count=args.trainable_parameter_count,
     )
     args.out_json.parent.mkdir(parents=True, exist_ok=True)
     args.out_json.write_text(

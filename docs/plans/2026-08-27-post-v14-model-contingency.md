@@ -157,12 +157,21 @@ residual experiment.
 If P1 becomes eligible, its amendment must freeze before training:
 
 - one cross-construct candidate and one block-diagonal matched null;
+- the same-fold V13 candidate seed-0 point as an immutable prediction anchor
+  for both arms, selected here before V14 scoring rather than after observing a
+  route result;
+- the same-fold V14 candidate seed-0 encoder as an immutable outcome-blind
+  representation for both arms, used regardless of V14's eventual score;
+- a zero-initialized incremental point head so both arms replay the frozen V13
+  parent at `1e-7` before training, with only the set mixer and increment head
+  trainable;
 - the exact set membership derived from outcome-blind puzzle metadata;
 - no method-ID or puzzle-ID embeddings and no held target/error/mask access;
 - a single fixed architecture, parameter count, optimizer, epoch count and seed
   universe;
-- feature41 anchoring and one shared frozen residual family across candidate
-  and null;
+- feature41 remains an explicit adapter input, while the frozen V13 parent is
+  the point anchor; candidate and null use the same residual family and
+  calibration protocol;
 - seed-0 twenty-fold complete-before-score screen followed by seeds 0–4 only on
   exact PASS;
 - all current top-journal margins versus feature41, terminal historical parents

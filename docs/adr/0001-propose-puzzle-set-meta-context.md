@@ -40,12 +40,16 @@ Non-functional/scientific requirements:
 
 ## Decision
 
-Implement a proposed `PuzzleSetMetaContextPointModel` with a shared
-outcome-blind WT encoder and `PuzzleSetMetaContext` adapter:
+Implement a parent-preserving `PuzzleSetMetaContextPointModel`. The frozen V13
+seed-0 candidate from the same outer fold supplies the point anchor; the frozen
+encoder subset of the V14 seed-0 candidate from that fold supplies the
+outcome-blind representation. Only `PuzzleSetMetaContext` and its incremental
+head are trainable:
 
 ```text
-8 WT sequence/reactivity contexts
-        │ shared outcome-blind WT encoder
+frozen V13 outer-fold point ───────────────────────────────────────┐
+8 WT sequence/reactivity contexts                                 │
+        │ frozen outer-fold V14 outcome-blind WT encoder           │
         ▼
 8 WT construct hidden sequences
         │ observed-mean pooling; all-position fallback only for P20_Eterna
@@ -56,22 +60,27 @@ outcome-blind WT encoder and `PuzzleSetMetaContext` adapter:
         └── matched null: identical attention with block-diagonal mask
         │
         ▼
-focal mixed token + existing focal source/receiver/mutation/feature41 features
+focal mixed token + focal source/receiver/mutation/feature41/parent features
         │
         ▼
-zero-initialized residual head → feature41 + residual
+zero-initialized incremental head → frozen V13 point + increment
 ```
 
 The block-diagonal null uses every trainable layer on the focal token but cannot
 receive information from non-focal constructs. This identifies the
-cross-construct capability rather than model size. Both arms replay feature41
-exactly at initialization.
+cross-construct capability rather than model size. Both arms replay the frozen
+V13 parent point exactly at initialization. V13 is fixed before V14 scoring
+because it has the strongest known combined point profile; using its prediction
+as an immutable parent does not reopen the terminated exact-mutant mechanism
+claim.
 
-The current implementation materializes `6,071,729` parameters in each arm:
-`4,767,280` in the shared-form WT encoder and `1,304,449` in the set mixer and
-point adapter. These are implementation observations, not an active contract;
-an eligible future amendment must freeze the final count before real-data
-training.
+The current implementation materializes `6,072,113` parameters in each arm:
+`4,767,280` frozen V14 encoder parameters and `1,304,833` trainable set-mixer
+and incremental-head parameters. The extra parent-point scalar is an explicit
+input to the incremental head. The V13 parent is evaluated outside the new
+module and is never optimized by P1. These are implementation observations,
+not an active contract; an eligible future amendment must freeze the final
+count before real-data training.
 
 The proposed training unit is one whole puzzle, not one pooled mutant table.
 Within a puzzle, loss is averaged position within mutant, then mutant within
@@ -83,15 +92,17 @@ shuffled order. Candidate and null reset the same Torch random stream before
 fitting, so model connectivity—not cell order or dropout randomness—is the
 intended difference.
 
-The proposed held path assembles all eight WT contexts once, encodes and mixes
-them once per arm, then emits a prediction for every registered mutant and full
-construct position. After point fitting, both complete point models are frozen.
+The proposed held path first computes the same-fold V13 parent point, then
+assembles all eight WT contexts once, encodes and mixes them once per arm, and
+emits a prediction for every registered mutant and full construct position.
+The V14 encoder stays in evaluation mode throughout point fitting. After point
+fitting, both complete incremental models are frozen.
 Each arm then receives an exactly initialized copy of the V10
 median-preserving asymmetric residual family, trained only on its outer-train
 residuals with the same feature41 basis, frozen V8 direct features, optimizer,
 epoch count and puzzle-balanced method-cell CRPS objective. Calibration cannot
 move either point median. The prediction schema contains only biological keys, registration
-status, fold/seed, feature41, candidate/null points and their distribution
+status, fold/seed, feature41, frozen parent, candidate/null points and their distribution
 weights, locations, scales and expected absolute delta; mutant target, target
 error, qualified mask, loss and score are scorer-only.
 
@@ -104,10 +115,12 @@ and external outcomes locked. V14 authority cannot satisfy this predicate.
 The implementation-only merger requires the future amendment to supply the
 exact fold, seed, epoch and parameter-count universe. It rejects missing,
 duplicate or unexpected fold-seed pairs, target-bearing predictions, changed
-connectivity, incomplete histories, row misalignment, repeated biological keys
-within a seed, invalid mixture weights/scales, a shifted point median and absent
-point or residual checkpoints. It emits only a complete unscored merge; no
-target scorer or Gate is active at this stage.
+connectivity, missing same-fold seed-0 V13/V14 parent checkpoints, parent replay
+error above `1e-7`, changed trainable counts, incomplete histories, row
+misalignment, repeated biological keys within a seed, invalid mixture
+weights/scales, a shifted point median and absent point or residual checkpoints.
+It emits only a complete unscored merge; no target scorer or Gate is active at
+this stage.
 
 ## Consequences
 
@@ -117,6 +130,8 @@ target scorer or Gate is active at this stage.
   previous rescue models.
 - Supplies an exact parameter-matched attribution null.
 - Directly targets unseen-puzzle transfer rather than adding focal capacity.
+- Preserves the strongest known point level and reduces the trainable problem
+  from 6.07M parameters to the 1.30M parameters that implement the new ability.
 - Cleanly supports a future full model without changing the frozen evaluator.
 
 ### Negative
@@ -142,6 +157,17 @@ target scorer or Gate is active at this stage.
 Rejected: V14 already tests focal capacity plus task-matched WT pretraining, and
 its contract terminates same-family iteration on failure.
 
+**Train the full puzzle-set model from scratch**
+
+Rejected: it would spend most of the nineteen-puzzle training signal relearning
+the focal predictor and could hide a real cross-construct increment behind
+variance or parent degradation.
+
+**Fine-tune the imported V14 encoder end to end**
+
+Rejected: it can overwrite the representation that P1 is meant to augment and
+would entangle focal transfer with the cross-construct attribution contrast.
+
 **Method-ID or puzzle-ID conditioning**
 
 Rejected: these identifiers can become shortcuts and do not identify a
@@ -166,6 +192,9 @@ branch.
   order has leaked into the model and the design is invalid.
 - If zero-observed P20 cannot be represented without a fake target, exclude the
   adapter rather than inventing data.
+- If either arm fails to replay its same-fold V13 parent at `1e-7` before the
+  first optimizer step, or if any frozen V14 encoder parameter changes, no
+  scientific run may proceed.
 - If a future complete candidate-minus-null effect misses its attribution Gate,
   terminate the puzzle-set family without connectivity, width or epoch search.
 

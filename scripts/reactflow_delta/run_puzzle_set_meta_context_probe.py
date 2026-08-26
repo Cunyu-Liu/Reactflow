@@ -22,9 +22,15 @@ from scripts.reactflow_delta.model_rescue_v2 import (
     MeanAlignedModel,
     freeze_mean_model,
 )
+from scripts.reactflow_delta.model_rescue_v13 import (
+    SECOND_PASS_EXACT,
+    V13PointModel,
+)
+from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     BLOCK_DIAGONAL_NULL,
     FULL_CROSS_CONSTRUCT,
+    V14_ENCODER_PREFIXES,
     fit_puzzle_set_point_model,
     make_exact_full_model_pair,
     parameter_count,
@@ -45,9 +51,56 @@ from scripts.reactflow_delta.run_model_rescue_v11 import (
 )
 
 
-FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v2"
+FOLD_SCHEMA = "reactflow_delta.puzzle_set_meta_context_fold.proposed.v3"
 EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_TRAINING_TOKEN = "PUZZLE_SET_META_CONTEXT_REAL_DATA_TRAINING_ONLY"
+FROZEN_PARENT_SEED = 0
+
+
+def _load_frozen_v13_parent(path: Path, *, device: str) -> V13PointModel:
+    model = V13PointModel(second_pass_mode=SECOND_PASS_EXACT).to(device)
+    state = torch.load(path, map_location=device, weights_only=True)
+    model.load_state_dict(state, strict=True)
+    model.eval()
+    for parameter in model.parameters():
+        parameter.requires_grad_(False)
+        parameter.grad = None
+    return model
+
+
+def _load_v14_parent_state(path: Path, *, device: str) -> dict[str, torch.Tensor]:
+    source = V14PointModel().to(device)
+    state = torch.load(path, map_location=device, weights_only=True)
+    source.load_state_dict(state, strict=True)
+    source.eval()
+    return {
+        name: value.detach().clone()
+        for name, value in source.state_dict().items()
+        if name.startswith(V14_ENCODER_PREFIXES)
+    }
+
+
+def _assert_parent_checkpoint_identity(
+    *,
+    v13_checkpoint: Path,
+    v14_checkpoint: Path,
+    outer_fold: int,
+) -> None:
+    expected = {
+        v13_checkpoint.name: (
+            f"v13_candidate_point_fold{int(outer_fold)}_seed{FROZEN_PARENT_SEED}.pt"
+        ),
+        v14_checkpoint.name: (
+            f"v14_candidate_point_fold{int(outer_fold)}_seed{FROZEN_PARENT_SEED}.pt"
+        ),
+    }
+    for observed, required in expected.items():
+        if observed != required:
+            raise ValueError(
+                f"puzzle-set parent checkpoint identity mismatch: {observed} != {required}"
+            )
+    if not v13_checkpoint.is_file() or not v14_checkpoint.is_file():
+        raise FileNotFoundError("puzzle-set frozen parent checkpoint is absent")
 
 
 def assert_real_training_authority(repo_root: Path) -> None:
@@ -76,6 +129,10 @@ def prepare_real_fold(
     unconstrained: Any,
     constrained: Any,
     v8_model: MeanAlignedModel,
+    v13_parent: V13PointModel,
+    v14_point_state: dict[str, torch.Tensor],
+    v13_parent_checkpoint: Path,
+    v14_parent_checkpoint: Path,
     device: str,
 ) -> dict[str, Any]:
     """Prepare outer-train batches and held outcome-blind inputs."""
@@ -98,6 +155,21 @@ def prepare_real_fold(
         constrained,
         device,
     )
+    v13_parent.eval()
+    if any(parameter.requires_grad for parameter in v13_parent.parameters()):
+        raise RuntimeError("V13 parent must be frozen before puzzle-set preparation")
+    with torch.no_grad():
+        for cell in cells:
+            context = context_cache[str(cell["construct_id"])]
+            cell["parent_point"] = v13_parent.forward_point(
+                context,
+                cell["edit"],
+                cell["distance"],
+                cell["refs"],
+                cell["alts"],
+                cell["prediction_mask"],
+                cell["feature41_point"],
+            ).detach()
     training_batches = assemble_puzzle_training_batches(
         train_records, cells, context_cache
     )
@@ -126,6 +198,7 @@ def prepare_real_fold(
         for construct_id in sorted(by_construct)
     }
     held_feature41 = {}
+    held_parent_point = {}
     held_feature41_basis = {}
     held_direct_features = {}
     for construct_id, construct_records in sorted(by_construct.items()):
@@ -170,17 +243,70 @@ def prepare_real_fold(
                 [str(record.alt) for record in construct_records],
                 prediction_mask,
             )
+            parent = v13_parent.forward_point(
+                held_contexts[construct_id],
+                edit,
+                distance,
+                [str(record.ref) for record in construct_records],
+                [str(record.alt) for record in construct_records],
+                prediction_mask,
+                torch.tensor(matrix, device=device),
+            )
         held_direct_features[construct_id] = (
             direct.detach().cpu().numpy().astype(np.float32)
+        )
+        held_parent_point[construct_id] = (
+            parent.detach().cpu().numpy().astype(np.float32)
         )
     return {
         "training_batches": training_batches,
         "held_records": held_records,
         "held_contexts": held_contexts,
         "held_feature41": held_feature41,
+        "held_parent_point": held_parent_point,
         "held_feature41_basis": held_feature41_basis,
         "held_direct_features": held_direct_features,
+        "v14_point_state": v14_point_state,
+        "frozen_parent_checkpoints": {
+            "v13_point": str(v13_parent_checkpoint),
+            "v14_encoder": str(v14_parent_checkpoint),
+        },
     }
+
+
+def _initial_parent_replay_max_difference(
+    model: Any,
+    puzzle_batches: list[dict[str, Any]],
+) -> float:
+    model.eval()
+    maximum = 0.0
+    with torch.no_grad():
+        for batch in puzzle_batches:
+            contexts = batch["contexts"]
+            hidden = model.encode_puzzle_set(contexts)
+            observed = [context[3].bool() for context in contexts]
+            mixed = model.meta_context.mix_construct_tokens(hidden, observed)
+            for cell in batch["cells"]:
+                point, _residual = model.forward_from_encoded(
+                    hidden,
+                    mixed,
+                    int(cell["focal_construct_index"]),
+                    cell["edit_index"],
+                    cell["signed_distance"],
+                    cell["refs"],
+                    cell["alts"],
+                    cell["feature41_point"],
+                    cell["parent_point"],
+                    cell["prediction_mask"],
+                )
+                expected = cell["parent_point"].masked_fill(
+                    ~cell["prediction_mask"], 0.0
+                )
+                maximum = max(
+                    maximum,
+                    float(torch.max(torch.abs(point - expected)).detach().cpu()),
+                )
+    return maximum
 
 
 def run_prepared_fold(
@@ -229,7 +355,29 @@ def run_prepared_fold(
     if existing:
         raise FileExistsError(f"refusing to overwrite puzzle-set fold: {existing}")
 
-    candidate, null = make_exact_full_model_pair(seed=seed, device=device)
+    candidate, null = make_exact_full_model_pair(
+        seed=seed,
+        v14_point_state=prepared["v14_point_state"],
+        device=device,
+    )
+    initial_replay = {
+        "candidate": _initial_parent_replay_max_difference(
+            candidate, prepared["training_batches"]
+        ),
+        "null": _initial_parent_replay_max_difference(
+            null, prepared["training_batches"]
+        ),
+    }
+    if max(initial_replay.values()) > 1e-7:
+        raise RuntimeError("puzzle-set initialization does not replay V13 parent")
+    point_parameter_counts = {
+        "candidate": parameter_count(candidate),
+        "null": parameter_count(null),
+    }
+    point_trainable_counts = {
+        "candidate": parameter_count(candidate, trainable_only=True),
+        "null": parameter_count(null, trainable_only=True),
+    }
     candidate_history = fit_puzzle_set_point_model(
         candidate,
         prepared["training_batches"],
@@ -272,6 +420,7 @@ def run_prepared_fold(
         held_records=prepared["held_records"],
         context_cache=prepared["held_contexts"],
         feature41_by_construct=prepared["held_feature41"],
+        parent_point_by_construct=prepared["held_parent_point"],
         feature41_basis_by_construct=prepared["held_feature41_basis"],
         direct_features_by_construct=prepared["held_direct_features"],
         candidate=candidate,
@@ -296,8 +445,13 @@ def run_prepared_fold(
         "calibration_epochs": int(calibration_epochs),
         "candidate_connectivity": FULL_CROSS_CONSTRUCT,
         "null_connectivity": BLOCK_DIAGONAL_NULL,
-        "candidate_parameter_count": parameter_count(candidate),
-        "null_parameter_count": parameter_count(null),
+        "candidate_parameter_count": point_parameter_counts["candidate"],
+        "null_parameter_count": point_parameter_counts["null"],
+        "candidate_trainable_parameter_count": point_trainable_counts["candidate"],
+        "null_trainable_parameter_count": point_trainable_counts["null"],
+        "frozen_parent_seed": FROZEN_PARENT_SEED,
+        "frozen_parent_checkpoints": prepared["frozen_parent_checkpoints"],
+        "initial_parent_replay_max_abs_difference": initial_replay,
         "training_histories": {
             "candidate_point": candidate_history,
             "null_point": null_history,
@@ -322,6 +476,9 @@ def run_prepared_fold(
             "candidate_full_cross_construct_attention": True,
             "null_block_diagonal_attention": True,
             "puzzle_balanced_training": True,
+            "frozen_v13_point_parent": True,
+            "frozen_v14_context_encoder": True,
+            "zero_initialized_parent_replay_at_1e_7": True,
             "point_frozen_during_calibration": True,
             "v10_residual_family_reused": True,
             "puzzle_balanced_residual_calibration": True,
@@ -347,6 +504,8 @@ def run_real_fold(
     unconstrained: Any,
     constrained: Any,
     v8_model: MeanAlignedModel,
+    v13_parent_checkpoint: Path,
+    v14_parent_checkpoint: Path,
     seed: int,
     point_epochs: int,
     calibration_epochs: int,
@@ -354,6 +513,17 @@ def run_real_fold(
     out_dir: Path,
 ) -> dict[str, Any]:
     assert_real_training_authority(repo_root)
+    _assert_parent_checkpoint_identity(
+        v13_checkpoint=v13_parent_checkpoint,
+        v14_checkpoint=v14_parent_checkpoint,
+        outer_fold=int(fold.outer_fold),
+    )
+    v13_parent = _load_frozen_v13_parent(
+        v13_parent_checkpoint, device=device
+    )
+    v14_point_state = _load_v14_parent_state(
+        v14_parent_checkpoint, device=device
+    )
     prepared = prepare_real_fold(
         univ=univ,
         records=records,
@@ -362,6 +532,10 @@ def run_real_fold(
         unconstrained=unconstrained,
         constrained=constrained,
         v8_model=v8_model,
+        v13_parent=v13_parent,
+        v14_point_state=v14_point_state,
+        v13_parent_checkpoint=v13_parent_checkpoint,
+        v14_parent_checkpoint=v14_parent_checkpoint,
         device=device,
     )
     return run_prepared_fold(

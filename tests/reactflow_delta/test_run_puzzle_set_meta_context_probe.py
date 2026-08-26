@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import yaml
 
+from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     merge_complete_universe,
 )
@@ -17,6 +18,7 @@ from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
     EXPECTED_PROJECT_TASK,
     EXPECTED_TRAINING_TOKEN,
     FOLD_SCHEMA,
+    _assert_parent_checkpoint_identity,
     assert_real_training_authority,
     run_prepared_fold,
 )
@@ -77,6 +79,7 @@ def _prepared():
                 "refs": ["A"],
                 "alts": ["G"],
                 "feature41_point": torch.zeros(1, 4),
+                "parent_point": torch.full((1, 4), 0.02),
                 "prediction_mask": torch.ones(1, 4, dtype=torch.bool),
                 "target": torch.full((1, 4), float(focal + 1) / 10.0),
                 "qualified_mask": torch.ones(1, 4, dtype=torch.bool),
@@ -105,6 +108,10 @@ def _prepared():
             "held_records": held_records,
             "held_contexts": held_contexts,
             "held_feature41": held_feature41,
+            "held_parent_point": {
+                construct_id: np.full((1, 4), 0.02, dtype=np.float32)
+                for construct_id in held_contexts
+            },
             "held_feature41_basis": {
                 construct_id: np.zeros((1, 4, 41), dtype=np.float32)
                 for construct_id in held_contexts
@@ -113,6 +120,8 @@ def _prepared():
                 construct_id: np.zeros((1, 4, 201), dtype=np.float32)
                 for construct_id in held_contexts
             },
+            "v14_point_state": V14PointModel().state_dict(),
+            "frozen_parent_checkpoints": {},
         },
     )
 
@@ -150,10 +159,40 @@ def test_exact_future_authority_shape_is_accepted(tmp_path: Path) -> None:
     assert_real_training_authority(tmp_path)
 
 
+def test_parent_checkpoint_identity_is_fixed_to_same_fold_and_seed_zero(
+    tmp_path: Path,
+) -> None:
+    v13 = tmp_path / "v13_candidate_point_fold4_seed0.pt"
+    v14 = tmp_path / "v14_candidate_point_fold4_seed0.pt"
+    v13.touch()
+    v14.touch()
+    _assert_parent_checkpoint_identity(
+        v13_checkpoint=v13, v14_checkpoint=v14, outer_fold=4
+    )
+    wrong = tmp_path / "v14_candidate_point_fold5_seed0.pt"
+    wrong.touch()
+    try:
+        _assert_parent_checkpoint_identity(
+            v13_checkpoint=v13, v14_checkpoint=wrong, outer_fold=4
+        )
+    except ValueError as error:
+        assert "identity mismatch" in str(error)
+    else:
+        raise AssertionError("puzzle-set runner accepted a wrong-fold parent")
+
+
 def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
     tmp_path: Path,
 ) -> None:
     univ, prepared = _prepared()
+    v13_parent = tmp_path / "v13_candidate_point_fold19_seed0.pt"
+    v14_parent = tmp_path / "v14_candidate_point_fold19_seed0.pt"
+    v13_parent.touch()
+    v14_parent.touch()
+    prepared["frozen_parent_checkpoints"] = {
+        "v13_point": str(v13_parent),
+        "v14_encoder": str(v14_parent),
+    }
     result = run_prepared_fold(
         univ=univ,
         prepared=prepared,
@@ -192,6 +231,9 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         expected_point_epochs=1,
         expected_calibration_epochs=1,
         expected_parameter_count=result["candidate_parameter_count"],
+        expected_trainable_parameter_count=result[
+            "candidate_trainable_parameter_count"
+        ],
     )
     assert merged["status"] == "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS"
     try:

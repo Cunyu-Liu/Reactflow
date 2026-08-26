@@ -3,10 +3,19 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 from scripts.reactflow_delta.model_rescue_v10 import parameter_count
 from scripts.reactflow_delta.puzzle_set_meta_context import (
     make_exact_full_model_pair,
 )
+
+
+def _full_pair(seed: int):
+    torch.manual_seed(1400)
+    source = V14PointModel()
+    return make_exact_full_model_pair(
+        seed=seed, v14_point_state=source.state_dict()
+    )
 from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
     EXPECTED_RESIDUAL_PARAMETERS,
     calibrated_distribution,
@@ -44,6 +53,7 @@ def _training_batch(*, seven_cells: bool = False):
                 "refs": ["A"],
                 "alts": ["G"],
                 "feature41_point": torch.zeros(1, 4),
+                "parent_point": torch.zeros(1, 4),
                 "prediction_mask": torch.ones(1, 4, dtype=torch.bool),
                 "target": torch.full((1, 4), float(focal + 1) / 10.0),
                 "qualified_mask": torch.ones(1, 4, dtype=torch.bool),
@@ -68,7 +78,7 @@ def test_residual_heads_are_exact_v10_family_matches() -> None:
 
 
 def test_residual_fit_freezes_both_point_models_and_supports_p20_context() -> None:
-    candidate, null = make_exact_full_model_pair(seed=11)
+    candidate, null = _full_pair(11)
     candidate_before = {
         name: value.detach().clone() for name, value in candidate.state_dict().items()
     }
@@ -95,11 +105,11 @@ def test_residual_fit_freezes_both_point_models_and_supports_p20_context() -> No
 
 
 def test_calibrated_distribution_preserves_point_median() -> None:
-    candidate, _null = make_exact_full_model_pair(seed=21)
+    candidate, _null = _full_pair(21)
     fitted = fit_residual_pair(
         [_training_batch()],
         candidate=candidate,
-        null=make_exact_full_model_pair(seed=21)[1],
+        null=_full_pair(21)[1],
         epochs=1,
         seed=0,
         device="cpu",

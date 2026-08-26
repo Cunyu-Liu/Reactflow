@@ -22,6 +22,7 @@ from scripts.reactflow_delta.model_rescue_v11 import (
     method_cell_balanced_l1,
     mutation_one_hot,
 )
+from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
 
 
 FULL_CROSS_CONSTRUCT = "FULL_CROSS_CONSTRUCT"
@@ -31,7 +32,8 @@ CONNECTIVITY_MODES = {FULL_CROSS_CONSTRUCT, BLOCK_DIAGONAL_NULL}
 EXPECTED_CONSTRUCTS_PER_PUZZLE = 8
 CONTEXT_WIDTH = 256
 ATTENTION_HEADS = 8
-BASE_FEATURE_WIDTH = 522
+V14_LOCAL_FEATURE_WIDTH = 522
+BASE_FEATURE_WIDTH = V14_LOCAL_FEATURE_WIDTH + 1
 POINT_HEAD_WIDTH = 384
 DROPOUT = 0.1
 
@@ -86,6 +88,65 @@ class OutcomeBlindWTEncoder(nn.Module):
         for block in self.blocks:
             state = block(state, attention_keys)
         return self.output_norm(state[0])
+
+
+V14_ENCODER_PREFIXES = (
+    "input_projection.",
+    "input_norm.",
+    "blocks.",
+    "output_norm.",
+)
+
+
+def load_frozen_v14_encoder(
+    encoder: OutcomeBlindWTEncoder,
+    v14_point_state: dict[str, torch.Tensor],
+) -> None:
+    """Import the exact V14 encoder subset and make it immutable.
+
+    The source is one outer-fold V14 seed-0 candidate checkpoint. The
+    pretraining decoder and V14 residual head are intentionally not consumers
+    of the puzzle-set model.
+    """
+
+    expected = encoder.state_dict()
+    imported = {
+        name: value
+        for name, value in v14_point_state.items()
+        if name.startswith(V14_ENCODER_PREFIXES)
+    }
+    if set(imported) != set(expected):
+        missing = sorted(set(expected) - set(imported))
+        unexpected = sorted(set(imported) - set(expected))
+        raise ValueError(
+            "V14 encoder checkpoint does not match the puzzle-set encoder: "
+            f"missing={missing} unexpected={unexpected}"
+        )
+    for name, value in imported.items():
+        if value.shape != expected[name].shape:
+            raise ValueError(f"V14 encoder tensor shape changed at {name}")
+    encoder.load_state_dict(imported, strict=True)
+    encoder.eval()
+    for parameter in encoder.parameters():
+        parameter.requires_grad_(False)
+        parameter.grad = None
+
+
+def assert_v14_encoder_replay(
+    encoder: OutcomeBlindWTEncoder,
+    source: V14PointModel,
+    context: tuple[torch.Tensor, ...],
+) -> None:
+    """Prove that the frozen P1 encoder exactly replays V14 without masking."""
+
+    encoder.eval()
+    source.eval()
+    with torch.no_grad():
+        observed = encoder(context)
+        expected = source.encode(context, None)
+    if not torch.equal(observed, expected):
+        maximum = float(torch.max(torch.abs(observed - expected)).cpu())
+        raise RuntimeError(f"puzzle-set V14 encoder replay differs by {maximum}")
 
 
 class PuzzleSetMetaContext(nn.Module):
@@ -200,7 +261,7 @@ class PuzzleSetMetaContext(nn.Module):
         construct_observed: Sequence[torch.Tensor],
         focal_construct_index: int,
         base_point_features: torch.Tensor,
-        feature41_point: torch.Tensor,
+        parent_point: torch.Tensor,
         prediction_mask: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         if not 0 <= int(focal_construct_index) < EXPECTED_CONSTRUCTS_PER_PUZZLE:
@@ -210,7 +271,7 @@ class PuzzleSetMetaContext(nn.Module):
         ):
             raise ValueError("base point features have invalid shape")
         expected = base_point_features.shape[:2]
-        if feature41_point.shape != expected or prediction_mask.shape != expected:
+        if parent_point.shape != expected or prediction_mask.shape != expected:
             raise ValueError("point anchor or prediction mask is misaligned")
         if prediction_mask.dtype != torch.bool:
             raise ValueError("prediction mask must be boolean")
@@ -220,7 +281,7 @@ class PuzzleSetMetaContext(nn.Module):
             mixed,
             focal_construct_index,
             base_point_features,
-            feature41_point,
+            parent_point,
             prediction_mask,
         )
         return point, residual, mixed
@@ -230,7 +291,7 @@ class PuzzleSetMetaContext(nn.Module):
         mixed: torch.Tensor,
         focal_construct_index: int,
         base_point_features: torch.Tensor,
-        feature41_point: torch.Tensor,
+        parent_point: torch.Tensor,
         prediction_mask: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if mixed.shape != (EXPECTED_CONSTRUCTS_PER_PUZZLE, CONTEXT_WIDTH):
@@ -242,7 +303,7 @@ class PuzzleSetMetaContext(nn.Module):
         ):
             raise ValueError("base point features have invalid shape")
         expected = base_point_features.shape[:2]
-        if feature41_point.shape != expected or prediction_mask.shape != expected:
+        if parent_point.shape != expected or prediction_mask.shape != expected:
             raise ValueError("point anchor or prediction mask is misaligned")
         if prediction_mask.dtype != torch.bool:
             raise ValueError("prediction mask must be boolean")
@@ -251,7 +312,7 @@ class PuzzleSetMetaContext(nn.Module):
         residual = self.point_head(
             torch.cat([base_point_features, expanded], dim=-1)
         ).squeeze(-1)
-        point = (feature41_point + residual).masked_fill(~prediction_mask, 0.0)
+        point = (parent_point + residual).masked_fill(~prediction_mask, 0.0)
         return point, residual
 
 
@@ -288,13 +349,18 @@ class PuzzleSetMetaContextPointModel(nn.Module):
         refs: list[str],
         alts: list[str],
         feature41_point: torch.Tensor,
+        parent_point: torch.Tensor,
     ) -> torch.Tensor:
         if focal_hidden.ndim != 2 or focal_hidden.shape[1] != CONTEXT_WIDTH:
             raise ValueError("focal WT hidden state has invalid shape")
         batch = edit_index.shape[0]
         length = focal_hidden.shape[0]
         expected = (batch, length)
-        if signed_distance.shape != expected or feature41_point.shape != expected:
+        if (
+            signed_distance.shape != expected
+            or feature41_point.shape != expected
+            or parent_point.shape != expected
+        ):
             raise ValueError("distance or feature41 point is misaligned")
         if len(refs) != batch or len(alts) != batch:
             raise ValueError("mutation identity count is misaligned")
@@ -312,6 +378,7 @@ class PuzzleSetMetaContextPointModel(nn.Module):
                 normalized_distance[..., None],
                 mutation,
                 feature41_point[..., None],
+                parent_point[..., None],
             ],
             dim=-1,
         )
@@ -328,6 +395,7 @@ class PuzzleSetMetaContextPointModel(nn.Module):
         refs: list[str],
         alts: list[str],
         feature41_point: torch.Tensor,
+        parent_point: torch.Tensor,
         prediction_mask: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         hidden = self.encode_puzzle_set(contexts)
@@ -342,6 +410,7 @@ class PuzzleSetMetaContextPointModel(nn.Module):
             refs,
             alts,
             feature41_point,
+            parent_point,
             prediction_mask,
         )
         return point, residual, mixed
@@ -356,6 +425,7 @@ class PuzzleSetMetaContextPointModel(nn.Module):
         refs: list[str],
         alts: list[str],
         feature41_point: torch.Tensor,
+        parent_point: torch.Tensor,
         prediction_mask: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         if len(hidden) != EXPECTED_CONSTRUCTS_PER_PUZZLE:
@@ -367,12 +437,13 @@ class PuzzleSetMetaContextPointModel(nn.Module):
             refs,
             alts,
             feature41_point,
+            parent_point,
         )
         point, residual = self.meta_context.point_from_mixed(
             mixed,
             focal_construct_index,
             base_features,
-            feature41_point,
+            parent_point,
             prediction_mask,
         )
         same = torch.tensor(
@@ -387,8 +458,12 @@ class PuzzleSetMetaContextPointModel(nn.Module):
         return point, residual
 
 
-def parameter_count(module: nn.Module) -> int:
-    return sum(parameter.numel() for parameter in module.parameters())
+def parameter_count(module: nn.Module, *, trainable_only: bool = False) -> int:
+    return sum(
+        parameter.numel()
+        for parameter in module.parameters()
+        if not trainable_only or parameter.requires_grad
+    )
 
 
 def make_exact_matched_pair(
@@ -415,12 +490,16 @@ def make_exact_matched_pair(
 
 
 def make_exact_full_model_pair(
-    *, seed: int, device: str | torch.device = "cpu"
+    *,
+    seed: int,
+    v14_point_state: dict[str, torch.Tensor],
+    device: str | torch.device = "cpu",
 ) -> tuple[PuzzleSetMetaContextPointModel, PuzzleSetMetaContextPointModel]:
     torch.manual_seed(int(seed))
     candidate = PuzzleSetMetaContextPointModel(
         connectivity=FULL_CROSS_CONSTRUCT
     ).to(device)
+    load_frozen_v14_encoder(candidate.encoder, v14_point_state)
     null = copy.deepcopy(candidate)
     null.connectivity = BLOCK_DIAGONAL_NULL
     left = dict(candidate.named_parameters())
@@ -434,6 +513,12 @@ def make_exact_full_model_pair(
             )
     if parameter_count(candidate) != parameter_count(null):
         raise RuntimeError("full puzzle-set candidate and null counts differ")
+    if parameter_count(candidate, trainable_only=True) != parameter_count(
+        null, trainable_only=True
+    ):
+        raise RuntimeError("full puzzle-set trainable counts differ")
+    if any(parameter.requires_grad for parameter in candidate.encoder.parameters()):
+        raise RuntimeError("puzzle-set V14 parent encoder is not frozen")
     return candidate, null
 
 
@@ -490,6 +575,7 @@ def puzzle_balanced_point_loss(
             cell["refs"],
             cell["alts"],
             cell["feature41_point"],
+            cell["parent_point"],
             cell["prediction_mask"],
         )
         cell_losses.append(
@@ -518,7 +604,13 @@ def fit_puzzle_set_point_model(
         raise ValueError("puzzle-set point training requires a positive epoch count")
     torch.manual_seed(int(seed) + 1_500_000)
     model.train()
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=0.0)
+    model.encoder.eval()
+    trainable = [parameter for parameter in model.parameters() if parameter.requires_grad]
+    if not trainable or any(
+        parameter.requires_grad for parameter in model.encoder.parameters()
+    ):
+        raise RuntimeError("puzzle-set trainable parameter boundary changed")
+    optimizer = torch.optim.Adam(trainable, lr=1e-3, weight_decay=0.0)
     history: list[float] = []
     for epoch in range(int(epochs)):
         losses = []
@@ -527,7 +619,7 @@ def fit_puzzle_set_point_model(
             loss = puzzle_balanced_point_loss(model, puzzle_batches[index])
             loss.backward()
             _finite_gradients(model)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+            torch.nn.utils.clip_grad_norm_(trainable, 5.0)
             optimizer.step()
             losses.append(float(loss.detach().cpu()))
         history.append(float(np.mean(losses)))

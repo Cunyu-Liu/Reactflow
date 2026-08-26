@@ -35,6 +35,7 @@ def _write_fold(
         "seed": np.full(2, seed, dtype=np.int64),
         "registered_status": np.full(2, "covered", dtype=object),
         "feature41_point": np.zeros(2),
+        "parent_point": np.zeros(2),
         "candidate_point": np.zeros(2),
         "null_point": np.zeros(2),
     }
@@ -56,6 +57,11 @@ def _write_fold(
             path = directory / f"{name}_{stage}{fold}_{seed}.pt"
             path.write_bytes(f"{name}-{stage}".encode())
             checkpoints[stage][name] = str(path)
+    frozen_parents = {}
+    for name in ("v13_point", "v14_encoder"):
+        path = directory / f"{name}_parent{fold}_{seed}.pt"
+        path.write_bytes(name.encode())
+        frozen_parents[name] = str(path)
     row = {
         "schema_version": FOLD_SCHEMA,
         "outer_fold": fold,
@@ -67,6 +73,14 @@ def _write_fold(
         "null_connectivity": BLOCK_DIAGONAL_NULL,
         "candidate_parameter_count": 100,
         "null_parameter_count": 100,
+        "candidate_trainable_parameter_count": 50,
+        "null_trainable_parameter_count": 50,
+        "frozen_parent_seed": 0,
+        "initial_parent_replay_max_abs_difference": {
+            "candidate": 0.0,
+            "null": 0.0,
+        },
+        "frozen_parent_checkpoints": frozen_parents,
         "training_histories": {
             "candidate_point": [0.5] * epochs,
             "null_point": [0.6] * epochs,
@@ -84,6 +98,9 @@ def _write_fold(
             "candidate_full_cross_construct_attention": True,
             "null_block_diagonal_attention": True,
             "puzzle_balanced_training": True,
+            "frozen_v13_point_parent": True,
+            "frozen_v14_context_encoder": True,
+            "zero_initialized_parent_replay_at_1e_7": True,
             "point_frozen_during_calibration": True,
             "v10_residual_family_reused": True,
             "puzzle_balanced_residual_calibration": True,
@@ -109,6 +126,7 @@ def test_merger_accepts_only_the_exact_complete_prediction_universe(
         expected_point_epochs=1,
         expected_calibration_epochs=1,
         expected_parameter_count=100,
+        expected_trainable_parameter_count=50,
     )
     assert result["schema_version"] == MERGED_SCHEMA
     assert result["status"] == "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS"
@@ -126,6 +144,7 @@ def test_merger_rejects_missing_fold(tmp_path: Path) -> None:
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
         )
     except ValueError as error:
         assert "incomplete or unexpected" in str(error)
@@ -143,6 +162,7 @@ def test_merger_rejects_target_bearing_prediction(tmp_path: Path) -> None:
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
         )
     except ValueError as error:
         assert "target_free" in str(error)
@@ -160,6 +180,7 @@ def test_merger_rejects_wrong_epoch_or_parameter_count(tmp_path: Path) -> None:
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
         )
     except ValueError as error:
         assert "epoch freeze" in str(error)
@@ -177,6 +198,7 @@ def test_merger_rejects_misaligned_prediction_rows(tmp_path: Path) -> None:
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
         )
     except ValueError as error:
         assert "aligned_rows" in str(error)
@@ -201,6 +223,7 @@ def test_merger_rejects_biological_key_overlap_across_folds(tmp_path: Path) -> N
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
         )
     except ValueError as error:
         assert "repeats biological keys" in str(error)
@@ -225,6 +248,7 @@ def test_merger_rejects_distribution_that_moves_the_point_median(
             expected_point_epochs=1,
             expected_calibration_epochs=1,
             expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
         )
     except ValueError as error:
         assert "median_preserved" in str(error)
