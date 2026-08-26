@@ -80,6 +80,12 @@ outer-train puzzle is visited once per epoch in a deterministic shuffled order.
 Candidate and null reset the same Torch random stream before fitting, so model
 connectivity—not cell order or dropout randomness—is the intended difference.
 
+The proposed held path assembles all eight WT contexts once, encodes and mixes
+them once per arm, then emits a prediction for every registered mutant and full
+construct position. The prediction schema contains only biological keys,
+registration status, fold/seed, feature41, candidate point and null point;
+mutant target, target error, qualified mask, loss and score are scorer-only.
+
 ## Consequences
 
 ### Positive
