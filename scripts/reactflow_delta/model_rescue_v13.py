@@ -218,6 +218,11 @@ class V13PointModel(nn.Module):
             wt = wt_context[0].unsqueeze(0).expand(len(second), -1, -1)
             paired = self.encode_sequence_batch(torch.cat([wt, second], dim=0), wt_context)
             wt_encoded, second_encoded = paired.split(len(second), dim=0)
+            if self.second_pass_mode == SECOND_PASS_WT_REPLAY:
+                # The nested null is defined by an exactly zero counterfactual
+                # representation.  The replay encoder is still executed for
+                # matched compute, but batch-kernel roundoff is not a feature.
+                second_encoded = wt_encoded
             wt_rows.append(wt_encoded)
             second_rows.append(second_encoded)
         return torch.cat(wt_rows, dim=0), torch.cat(second_rows, dim=0)
