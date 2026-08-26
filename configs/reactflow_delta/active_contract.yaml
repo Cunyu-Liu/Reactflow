@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.post_v13_diagnostics.v1
 manifest_id: reactflow_delta_post_v13_route_diagnostics_authority_20260827
 project_task_id: reactflow_delta_post_v13_route_diagnostics
 created_at: '2026-08-27T01:20:00+08:00'
-updated_at: '2026-08-27T01:50:00+08:00'
+updated_at: '2026-08-27T02:00:00+08:00'
 
 authority:
   pointer_role: POST_V13_DIAGNOSTICS_SINGLE_ACTIVE_AUTHORITY
-  current_phase: PV13D2
-  current_authority_state: COMPLETE_TWENTY_FOLD_PREDICTION_ONLY_DIAGNOSTIC
-  current_runnable_phase: PV13D2
+  current_phase: PV13D3
+  current_authority_state: COMPLETE_MERGE_SCORE_ONCE_ONLY
+  current_runnable_phase: PV13D3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-post-v13-diagnostics-20260827
   worktree: /home/cunyuliu/reactflow_delta_worktrees/post_v13_diagnostics_20260827
@@ -16,7 +16,7 @@ authority:
   human_contract_path: docs/prospective_v2/post_v13_route_diagnostics_20260827.md
   decision_ledger_path: docs/prospective_v2/post_v13_route_diagnostics_ledger.yaml
   implementation_plan_path: docs/plans/2026-08-27-post-v13-route-diagnostics.md
-  binding_status: PV13D2_FIXED_RIDGE_PREDICTION_ONLY
+  binding_status: PV13D3_COMPLETE_SCORE_ONCE_ONLY
 
 parent_state:
   v13_status: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -31,16 +31,16 @@ authorization:
   scope: POST_V13_NOISE_AWARE_AND_SIGN_MAGNITUDE_ROUTE_DIAGNOSTICS_ONLY
   contract_drafting_allowed: true
   implementation_allowed: false
-  fixed_ridge_diagnostic_allowed: true
+  fixed_ridge_diagnostic_allowed: false
   neural_training_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
 
 allowed_phases: [PV13D0, PV13D1, PV13D2, PV13D3, M6]
-runnable_phases: [PV13D2]
-training_allowed: FIXED_WEIGHTED_RIDGE_DIAGNOSTIC_ONLY
+runnable_phases: [PV13D3]
+training_allowed: false
 candidate_model_training_allowed: false
-held_score_read_allowed: false
+held_score_read_allowed: PV13D_COMPLETE_MERGE_SCORE_ONCE_ONLY
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -52,7 +52,7 @@ v13_terminal_verdict_change_allowed: false
 gate_state:
   PV13D0: CONTRACT_FROZEN
   PV13D1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
-  PV13D2: FIXED_RIDGE_PREDICTION_ONLY_AUTHORIZED
-  PV13D3: NOT_AUTHORIZED
+  PV13D2: COMPLETE_UNSCORED_MERGE_PASS
+  PV13D3: COMPLETE_SCORE_ONCE_AUTHORIZED
 
-next_allowed_action: RUN_FOLDS_0_THROUGH_19_WITHOUT_SCORE_THEN_CREATE_COMPLETE_UNSCORED_MERGE
+next_allowed_action: RUN_SCORE_POST_V13_ROUTE_DIAGNOSTICS_ONCE_THEN_QUALIFY_ONCE

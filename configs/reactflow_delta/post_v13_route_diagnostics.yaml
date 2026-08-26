@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.post_v13_route_diagnostics.v1
 contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
-contract_status: PV13D2_FIXED_RIDGE_PREDICTION_ONLY_AUTHORIZED
+contract_status: PV13D3_COMPLETE_SCORE_ONCE_AUTHORIZED
 created_at: '2026-08-27T01:20:00+08:00'
 
 parent:
@@ -99,8 +99,8 @@ route_gates:
 phases:
   PV13D0: CONTRACT_FROZEN
   PV13D1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
-  PV13D2: FIXED_RIDGE_PREDICTION_ONLY_AUTHORIZED
-  PV13D3: NOT_AUTHORIZED
+  PV13D2: COMPLETE_UNSCORED_MERGE_PASS
+  PV13D3: COMPLETE_SCORE_ONCE_AUTHORIZED
 
 boundaries:
   v13_gate_change_allowed: false

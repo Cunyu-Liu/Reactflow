@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.post_v13_route_diagnostics_ledger.v1
 contract_id: reactflow_delta_post_v13_route_diagnostics_20260827
-current_status: PV13D2_FIXED_RIDGE_PREDICTION_ONLY_AUTHORIZED
+current_status: PV13D3_COMPLETE_SCORE_ONCE_AUTHORIZED
 created_at: '2026-08-27T01:20:00+08:00'
 
 immutable_parent_verdicts:
@@ -44,8 +44,8 @@ decisions:
 phase_state:
   PV13D0: CONTRACT_FROZEN
   PV13D1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
-  PV13D2: FIXED_RIDGE_PREDICTION_ONLY_AUTHORIZED
-  PV13D3: NOT_AUTHORIZED
+  PV13D2: COMPLETE_UNSCORED_MERGE_PASS
+  PV13D3: COMPLETE_SCORE_ONCE_AUTHORIZED
 
 outcome_access:
   partial_score_accessed: false
@@ -53,6 +53,23 @@ outcome_access:
   new_external_outcome_accessed: false
 
 events:
+  - id: PV13D3_COMPLETE_SCORE_ONCE_AUTHORITY_OPEN
+    observed_at: '2026-08-27T02:00:00+08:00'
+    status: COMPLETE_MERGE_SCORE_ONCE_ONLY
+    complete_unscored_merge: /mnt/cunyuliu/reactflow_delta_post_v13_diagnostics/pv13d2_prediction_only/pv13d2_complete_unscored_merge.json
+    complete_unscored_merge_status: PV13D2_COMPLETE_UNSCORED_MERGE_PASS
+    complete_folds: 20
+    corrected_feature41_replay_all_folds: true
+    prediction_only_fields: true
+    recovery_fix_commit: 7355f42c644eac947e876015a76762979c7dfcac
+    focused_tests_passed: 15
+    fixed_ridge_diagnostic_allowed: false
+    neural_training_allowed: false
+    held_score_read_allowed: PV13D_COMPLETE_MERGE_SCORE_ONCE_ONLY
+    partial_score_accessed: false
+    external_outcome_accessed: false
+    next_action: RUN_UNIQUE_COMPLETE_SCORER_AND_MECHANICAL_QUALIFIER_ONCE
+
   - id: PV13D2_FIXED_RIDGE_PREDICTION_AUTHORITY_OPEN
     observed_at: '2026-08-27T01:50:00+08:00'
     status: COMPLETE_TWENTY_FOLD_PREDICTION_ONLY_DIAGNOSTIC
