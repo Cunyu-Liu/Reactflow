@@ -1,0 +1,383 @@
+schema_version: reactflow_delta.post_v14_p2_quantile_residual_amendment.v1
+contract_id: reactflow_delta_post_v14_p2_quantile_residual_20260827
+created_date: '2026-08-27'
+status: DRAFT_FROZEN_INACTIVE
+project_task_id: reactflow_delta_post_v14_p2_quantile_residual
+
+documents:
+  human_contract_path: docs/prospective_v2/post_v14_p2_quantile_residual_amendment_20260827.md
+  decision_ledger_path: docs/prospective_v2/post_v14_p2_quantile_residual_decision_ledger.yaml
+  design_path: docs/plans/2026-08-27-post-v14-p2-quantile-residual-design.md
+  implementation_plan_path: docs/plans/2026-08-27-post-v14-p2-quantile-residual-implementation.md
+
+design_provenance:
+  classification: NEW_FOCUSED_PRE_SCORE_DESIGN_JUDGMENT
+  historical_contract_fact: false
+  scientific_result: false
+  route_eligibility_is_p2_result: false
+
+# These top-level denials are intentional duplicates of inactive_authority. A
+# future active-pointer commit must change both layers together after binding.
+authority_issued_now: false
+activation_allowed: false
+source_projection_allowed: false
+training_allowed: false
+candidate_model_training_allowed: false
+prediction_allowed: false
+smoke_allowed: false
+screen_allowed: false
+held_score_read_allowed: false
+partial_fold_score_read_allowed: false
+scoring_allowed: false
+qualification_allowed: false
+formal_confirmation_allowed: false
+new_external_outcome_access_allowed: false
+
+inactive_authority:
+  canonical_active_pointer: configs/reactflow_delta/active_contract.yaml
+  authority_state: DRAFT_FROZEN_INACTIVE
+  authority_issued_now: false
+  activation_allowed: false
+  source_projection_allowed: false
+  training_allowed: false
+  candidate_model_training_allowed: false
+  prediction_allowed: false
+  smoke_allowed: false
+  screen_allowed: false
+  held_score_read_allowed: false
+  partial_fold_score_read_allowed: false
+  scoring_allowed: false
+  qualification_allowed: false
+  formal_confirmation_allowed: false
+  new_external_outcome_access_allowed: false
+  runnable_phases: []
+  phase_tokens_issued_now: false
+  generic_training_token_allowed: false
+  next_allowed_action_now: WAIT_FOR_EXACT_TERMINAL_BINDING
+
+parent_route:
+  binding_status: PENDING_TERMINAL_BINDING
+  selected_router_branch_id: '6'
+  route_classification: DISTRIBUTION_ONLY_FAILURE
+  diagnostic_schema: reactflow_delta.post_v14_branch6_tail_diagnostic.v1
+  diagnostic_status: POST_V14_BRANCH6_TAIL_DIAGNOSTIC_PASS
+  diagnostic_primary_statistic: LOWER_MINUS_UPPER_TAIL_MISS90
+  diagnostic_interval_requirement: PUZZLE_LEVEL_95_PERCENT_INTERVAL_WHOLLY_ONE_SIDE_OF_ZERO
+  diagnostic_direction_agreement_min_puzzles: 14
+  diagnostic_total_puzzles: 20
+  diagnostic_next_action: OPEN_FOCUSED_P2_AMENDMENT_AUTHORITY
+  route_eligibility_only: true
+
+pending_terminal_binding:
+  binding_status: PENDING_TERMINAL_BINDING
+  v14_terminal_handoff_path: PENDING_TERMINAL_BINDING
+  post_v14_router_output_path: PENDING_TERMINAL_BINDING
+  branch6_diagnostic_output_path: PENDING_TERMINAL_BINDING
+  source_manifest_path: PENDING_TERMINAL_BINDING
+  artifact_root: PENDING_TERMINAL_BINDING
+  smoke_output_path: PENDING_TERMINAL_BINDING
+  screen_output_path: PENDING_TERMINAL_BINDING
+  formal_output_path: PENDING_TERMINAL_BINDING
+  copied_v14_gate_values: PENDING_TERMINAL_BINDING
+
+scope:
+  dataset: OPENKNOT_M2_V4_5_2
+  split: SPLIT_V4_TWENTY_FOLD_LEAVE_ONE_PUZZLE_OUT
+  identity: EXACT_PUZZLE_METHOD_MUTATION
+  prediction_universe: EVERY_REGISTERED_MUTANT_FULL_CONSTRUCT_POSITION
+  aggregation_order:
+    - EQUAL_POSITION_TO_MUTANT_MEAN
+    - EQUAL_MUTANT_TO_METHOD_CELL_MEAN
+    - EQUAL_METHOD_CELL_TO_PUZZLE_MEAN
+  independent_inference_units: 20_PUZZLES
+  primary_estimands:
+    - PAIRED_EQUAL_PUZZLE_CANDIDATE_MINUS_MATCHED_V10_CRPS_IMPROVEMENT
+    - PAIRED_EQUAL_PUZZLE_CANDIDATE_MINUS_MATCHED_V10_DISTRIBUTION_ABSOLUTE_MAE_IMPROVEMENT
+  relative_gain_formula: (MEAN_COMPARATOR_ERROR_MINUS_MEAN_CANDIDATE_ERROR)_DIVIDED_BY_MEAN_COMPARATOR_ERROR
+
+frozen_input:
+  total_width: 244
+  order:
+    - {name: FEATURE41_BASIS, width: 41}
+    - {name: FROZEN_V14_POINT, width: 1}
+    - {name: ABSOLUTE_FROZEN_V14_POINT, width: 1}
+    - {name: FROZEN_TRAINED_V8_DIRECT_FEATURES, width: 201}
+  v8_direct_feature_order:
+    - {name: SOURCE_HIDDEN, width: 96}
+    - {name: RECEIVER_HIDDEN, width: 96}
+    - {name: SIGNED_DISTANCE, width: 1}
+    - {name: MUTATION_ONE_HOT, width: 8}
+  builder: scripts.reactflow_delta.model_rescue_v10.calibration_input
+  standardizer: scripts.reactflow_delta.model_rescue_v10.TrainOnlyStandardizer
+  standardizer_fit_rows: OUTER_TRAIN_ONLY
+  standardizer_scale_below: 1.0e-6
+  standardizer_replacement_scale: 1.0
+  same_rows_order_and_standardizer_for_both_arms: true
+  forbidden_inputs:
+    - METHOD_ID
+    - PUZZLE_ID
+    - DATASET_ID
+    - HELD_TARGET
+    - HELD_ERROR
+    - HELD_QUALIFIED_TARGET_MASK
+    - EXTERNAL_OUTCOME
+    - SCORE_DERIVED_FIELD
+
+frozen_point_anchor:
+  model: SAME_OUTER_FOLD_V14_CANDIDATE
+  seed: 0
+  checkpoint_filename_pattern: v14_candidate_point_fold{outer_fold}_seed0.pt
+  prediction_filename_pattern: v14_predictions_fold{outer_fold}_seed0.npz
+  trainable: false
+  outer_train_mode: EVAL_NO_GRAD_FULL_STATE_SNAPSHOT
+  held_point_authority: CANDIDATE_POINT_BY_BIOLOGICAL_KEY_FROM_BOUND_V14_PREDICTION
+  held_gpu_recomputation_is_authority: false
+  raw_point_passed_separately_to_both_heads: true
+  candidate_tau_0_50_assignment: DETACHED_FLOAT64_RAW_POINT
+  point_replay:
+    invariant: FROZEN_V14_POINT_REPLAY
+    atol: 1.0e-7
+    rtol: 0.0
+    candidate_median_exact_array_equality_required: true
+    initialization_grid_tolerance_applies: false
+
+candidate_predictive_distribution:
+  definition_from_phase: P2M3
+  family: FIXED_THIRTEEN_ATOM_MONOTONE_QUANTILE_DISTRIBUTION
+  taus: [0.025, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 0.975]
+  weights: [0.0375, 0.0375, 0.075, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.075, 0.0375, 0.0375]
+  total_mass: 1.0
+  mass_below_median: 0.45
+  median_mass: 0.10
+  mass_above_median: 0.45
+  learned_atom_masses_allowed: false
+  interpolation_or_extrapolation_allowed: false
+  result_dependent_tail_refinement_allowed: false
+  training_surrogate:
+    name: TWO_TIMES_WEIGHTED_PINBALL
+    formula: 2_SUM_I_WEIGHT_I_RHO_TAU_I_OF_Y_MINUS_Q_I
+    scientific_crps: false
+    allowed_in_scientific_score_or_gate_fields: false
+  scientific_scores:
+    crps:
+      name: EXACT_FINITE_DISTRIBUTION_CRPS
+      formula: SUM_I_W_I_ABS_Y_MINUS_Q_I_MINUS_HALF_SUM_IJ_W_I_W_J_ABS_Q_I_MINUS_Q_J
+      exact_for_declared_distribution: true
+    expected_absolute_delta:
+      name: EXACT_WEIGHTED_ABSOLUTE_ATOM_MEAN
+      formula: SUM_I_W_I_ABS_Q_I
+      exact_for_declared_distribution: true
+
+candidate_model:
+  class: MonotoneQuantileResidual
+  architecture: LINEAR_244_248_RELU_LINEAR_248_12
+  input_width: 244
+  hidden_width: 248
+  output_width: 12
+  hidden_dtype: FLOAT32
+  distribution_dtype: FLOAT64
+  adjacent_gap_formula: 1E_4_PLUS_SOFTPLUS_RAW
+  adjacent_gap_floor: 1.0e-4
+  median_index: 6
+  exact_parameter_formula: (244_PLUS_1)_TIMES_248_PLUS_(248_PLUS_1)_TIMES_12
+  exact_parameter_count: 63748
+
+matched_v10_replay:
+  class: scripts.reactflow_delta.model_rescue_v10.MedianAsymmetricResidual
+  architecture: LINEAR_244_256_RELU_LINEAR_256_4
+  input_width: 244
+  hidden_width: 256
+  output_width: 4
+  exact_parameter_formula: (244_PLUS_1)_TIMES_256_PLUS_(256_PLUS_1)_TIMES_4
+  exact_parameter_count: 63748
+  newly_trained_each_authorized_fold_and_seed: true
+  historical_v10_predictions_allowed: false
+  predictive_distribution: EXACT_TWO_GAUSSIAN_MEDIAN_PRESERVING_MIXTURE
+  training_objective: EXACT_GAUSSIAN_MIXTURE_CRPS
+  scientific_crps:
+    name: EXACT_GAUSSIAN_MIXTURE_CRPS
+    exact_for_declared_distribution: true
+  same_proper_scoring_rule_estimand_as_candidate: CRPS
+
+input_independent_initialization:
+  comparator:
+    construct_existing_model_first: true
+    entire_output_layer_weight: ALL_ZERO
+    output_biases:
+      mixture_weight_logit: 0.0
+      narrow_scale_raw: INVERSE_SOFTPLUS_0_08
+      wide_gap_raw: INVERSE_SOFTPLUS_0_20
+      allocation_raw: 0.0
+  comparator_initial_distribution_input_independent: true
+  target_grid:
+    dtype: FLOAT64
+    method: FIXED_BOUNDED_FLOAT64_INVERSE_CDF_BISECTION
+    taus_source: candidate_predictive_distribution.taus
+    adjacent_gap_required_gt: 1.0e-4
+  candidate:
+    entire_output_layer_weight: ALL_ZERO
+    output_bias_formula: INVERSE_SOFTPLUS_TARGET_ADJACENT_GAP_MINUS_1E_4
+  initial_grid_replay:
+    invariant: INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0
+    comparison: NP_ALLCLOSE_CANDIDATE_FLOAT32_GRID_VS_REGISTERED_COMPARATOR_FLOAT64_GRID
+    atol: 1.0e-6
+    rtol: 0.0
+    tolerance_scope: FIXED_FLOAT64_BISECTION_TO_FLOAT32_BIAS_AND_FORWARD_ROUND_TRIP_ONLY
+    applies_to_point_replay: false
+    applies_to_scientific_crps: false
+    applies_to_any_scientific_score: false
+  initial_quantile_grids_match_within_registered_tolerance: true
+  full_initial_predictive_distributions_identical: false
+
+training:
+  both_arms_same_input_point_rows_standardizer_seed_epochs_and_puzzle_order: true
+  optimizer: ADAM
+  learning_rate: 1.0e-3
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  early_stopping_allowed: false
+  best_epoch_selection_allowed: false
+  puzzle_order_formula: SEED_TIMES_100003_PLUS_EPOCH
+  cuda_required_for_future_training: true
+  cpu_fallback_allowed: false
+  gpu_memory_gate_allowed: false
+
+phase_state:
+  P2M0: DRAFT_FROZEN_INACTIVE_PREPARATION_ONLY
+  P2M1: NOT_AUTHORIZED
+  P2M2: NOT_AUTHORIZED
+  P2M3: NOT_AUTHORIZED
+  P2M4: NOT_AUTHORIZED
+  P2M5: NOT_RUN
+
+future_phase_tokens:
+  tokens_issued_now: false
+  P2M1: PENDING_TERMINAL_BINDING
+  P2M2: PENDING_TERMINAL_BINDING
+  P2M3: PENDING_TERMINAL_BINDING
+  P2M4: PENDING_TERMINAL_BINDING
+  generic_training_token_allowed: false
+
+phase_universes:
+  P2M1:
+    purpose: SOURCE_PROJECTION_ONLY
+    folds: 20
+    training_allowed: false
+    prediction_allowed: false
+    scoring_allowed: false
+  P2M2:
+    purpose: ENGINEERING_SMOKE_ONLY
+    folds: [0, 1]
+    seeds: [0]
+    epochs: 3
+    scientific_scorer_allowed: false
+  P2M3:
+    purpose: TWENTY_FOLD_SCREEN
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seeds: [0]
+    epochs: 40
+    complete_prediction_only_merge_before_score: true
+    partial_fold_score_allowed: false
+  P2M4:
+    purpose: FIXED_FIVE_SEED_FORMAL_CONFIRMATION
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seeds: [0, 1, 2, 3, 4]
+    epochs: 40
+    seed0_retrained: true
+    screen_predictions_reused: false
+    expected_runs: 100
+    failed_seed_removal_allowed: false
+    seed_subset_or_best_seed_selection_allowed: false
+
+artifact_schemas:
+  status: FROZEN_INACTIVE_SCHEMA_ONLY
+  source_manifest: reactflow_delta.post_v14_p2_quantile_residual_source_manifest.v1
+  fold: reactflow_delta.post_v14_p2_quantile_residual_fold.v1
+  prediction: reactflow_delta.post_v14_p2_quantile_residual_prediction.v1
+  merged: reactflow_delta.post_v14_p2_quantile_residual_merged.v1
+  score: reactflow_delta.post_v14_p2_quantile_residual_score.v1
+  qualification: reactflow_delta.post_v14_p2_quantile_residual_qualification.v1
+  formal_assembly: reactflow_delta.post_v14_p2_quantile_residual_formal_assembly.v1
+  prediction_only_forbidden_fields:
+    - HELD_TARGET
+    - HELD_ERROR
+    - HELD_QUALIFIED_TARGET_MASK
+    - SCORE
+    - PER_PUZZLE_EFFECT
+    - GATE
+    - EXTERNAL_OUTCOME
+
+p2m3_screen_gates:
+  integrity:
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+    unexpected_keys: 0
+    complete_folds: 20
+    frozen_point_state_unchanged: true
+    point_gradients_absent: true
+    finite_strictly_increasing_quantiles: true
+    candidate_median_exactly_equals_v14_point: true
+    point_replay_atol: 1.0e-7
+    point_replay_rtol: 0.0
+    held_target_prediction_input_allowed: false
+    partial_score_allowed: false
+    external_outcome_allowed: false
+  copied_v14_gates:
+    binding_status: PENDING_TERMINAL_BINDING
+    feature41_and_terminal_crps_distribution_absolute_coverage_calibration: PENDING_TERMINAL_BINDING
+    signed_and_point_absolute_replay: PENDING_TERMINAL_BINDING
+    relaxation_allowed: false
+  matched_v10_replay:
+    crps_relative_gain_min: 0.015
+    distribution_absolute_mae_relative_gain_min: 0.01
+    paired_ci_level: 0.95
+    paired_ci_lower_each_gt: 0.0
+    t_0_975_df19: 2.093024054408263
+    positive_puzzles_min: 14
+    total_puzzles: 20
+    leave_one_puzzle_positive_all_headline_comparisons: true
+    max_single_puzzle_effect_fraction: 0.20
+    candidate_crps: EXACT_FINITE_DISTRIBUTION_CRPS
+    comparator_crps: EXACT_GAUSSIAN_MIXTURE_CRPS
+    weighted_pinball_allowed_in_scientific_score_or_gate_fields: false
+
+p2m4_formal:
+  activation_requires_exact_p2m3_pass: true
+  candidate_distribution: EQUAL_SEED_SIXTY_FIVE_ATOM_MIXTURE
+  candidate_atom_count: 65
+  candidate_atom_weight_formula: SCREEN_WEIGHT_DIVIDED_BY_5
+  candidate_scientific_crps: EXACT_FINITE_DISTRIBUTION_CRPS
+  comparator_distribution: EQUAL_FIVE_SEED_GAUSSIAN_MIXTURE
+  comparator_scientific_crps: EXACT_GAUSSIAN_MIXTURE_CRPS
+  same_crps_estimand_as_screen: true
+  average_quantile_curves_allowed: false
+  average_per_seed_crps_allowed: false
+  repeat_all_screen_gates: true
+  positive_seeds_min_each_metric: 4
+  total_seeds: 5
+  all_runs_reported: true
+
+qualification_and_claim:
+  valid_complete_gate_failure: SCIENTIFIC_FAIL
+  integrity_or_provenance_failure: INDETERMINATE
+  smoke_proxy_or_training_loss_is_scientific_result: false
+  maximum_pass_claim: POST_HOC_DEVELOPMENT_FORMAL_PASS
+  external_replication_claim_allowed: false
+  sota_claim_allowed: false
+  mechanism_claim_allowed: false
+  practical_utility_claim_allowed: false
+  publication_ready_claim_allowed: false
+  historical_qualification_restored: false
+
+forbidden_now:
+  active_pointer_change: true
+  terminal_or_source_path_invention: true
+  v14_gate_value_invention: true
+  artifact_read: true
+  artifact_write: true
+  output_creation: true
+  training_or_gpu_validation: true
+  score_or_qualification: true
+  external_outcome_access: true
+  generic_model_family_wrapper: true
+  compatibility_layer: true

@@ -1,0 +1,160 @@
+schema_version: reactflow_delta.post_v14_p2_quantile_residual_decision_ledger.draft.v1
+contract_id: reactflow_delta_post_v14_p2_quantile_residual_20260827
+created_date: '2026-08-27'
+status: DRAFT_FROZEN_INACTIVE
+
+provenance:
+  decision_class: NEW_FOCUSED_PRE_SCORE_DESIGN_JUDGMENT
+  historical_contract_fact: false
+  scientific_result: false
+  design_path: docs/plans/2026-08-27-post-v14-p2-quantile-residual-design.md
+  implementation_plan_path: docs/plans/2026-08-27-post-v14-p2-quantile-residual-implementation.md
+
+authority:
+  active_pointer_path: configs/reactflow_delta/active_contract.yaml
+  p2_authority_issued_now: false
+  p2_activation_allowed: false
+  p2_source_projection_allowed: false
+  p2_training_allowed: false
+  p2_candidate_training_allowed: false
+  p2_prediction_allowed: false
+  p2_smoke_allowed: false
+  p2_screen_allowed: false
+  p2_held_score_read_allowed: false
+  p2_partial_fold_score_read_allowed: false
+  p2_scoring_allowed: false
+  p2_qualification_allowed: false
+  p2_formal_confirmation_allowed: false
+  p2_external_outcome_access_allowed: false
+  p2_runnable_phases: []
+  p2_phase_tokens_issued_now: false
+  generic_training_token_allowed: false
+  active_pointer_modified_by_this_amendment: false
+
+unique_entry:
+  terminal_binding_status: PENDING_TERMINAL_BINDING
+  branch_id: '6'
+  classification: DISTRIBUTION_ONLY_FAILURE
+  diagnostic_schema: reactflow_delta.post_v14_branch6_tail_diagnostic.v1
+  diagnostic_status: POST_V14_BRANCH6_TAIL_DIAGNOSTIC_PASS
+  diagnostic_primary_statistic: LOWER_MINUS_UPPER_TAIL_MISS90
+  diagnostic_interval: PUZZLE_LEVEL_95_PERCENT_INTERVAL_WHOLLY_ONE_SIDE_OF_ZERO
+  diagnostic_direction_agreement: 14_OF_20_OR_MORE
+  next_action: OPEN_FOCUSED_P2_AMENDMENT_AUTHORITY
+  diagnostic_pass_is_route_eligibility_only: true
+
+pending_bindings:
+  terminal_artifact_paths: PENDING_TERMINAL_BINDING
+  realized_source_paths: PENDING_TERMINAL_BINDING
+  realized_output_paths: PENDING_TERMINAL_BINDING
+  copied_v14_feature41_terminal_gates: PENDING_TERMINAL_BINDING
+  phase_specific_tokens: PENDING_TERMINAL_BINDING
+  invention_allowed: false
+
+frozen_scientific_decisions:
+  data_split_identity: OPENKNOT_M2_V4_5_2_SPLIT_V4_LOPO_EXACT_PUZZLE_METHOD_MUTATION
+  inference_units: 20_PUZZLES
+  aggregation: POSITION_TO_EQUAL_MUTANT_TO_EQUAL_METHOD_CELL_TO_EQUAL_PUZZLE
+  input_width: 244
+  input_order: [FEATURE41_41, FROZEN_V14_POINT_1, ABS_FROZEN_V14_POINT_1,
+    FROZEN_TRAINED_V8_DIRECT_201]
+  frozen_point: SAME_OUTER_FOLD_V14_CANDIDATE_SEED0
+  taus: [0.025, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 0.975]
+  weights: [0.0375, 0.0375, 0.075, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.075, 0.0375, 0.0375]
+  candidate_predictive_distribution: FIXED_THIRTEEN_ATOM_DISTRIBUTION_FROM_P2M3
+  candidate_training_surrogate: TWO_TIMES_WEIGHTED_PINBALL_ONLY
+  candidate_scientific_crps: EXACT_FINITE_DISTRIBUTION_CRPS
+  comparator_predictive_distribution: EXACT_TWO_GAUSSIAN_MEDIAN_PRESERVING_MIXTURE
+  comparator_scientific_crps: EXACT_GAUSSIAN_MIXTURE_CRPS
+  same_proper_scoring_rule_estimand: CRPS
+  weighted_pinball_is_scientific_crps: false
+  candidate_architecture: LINEAR_244_248_RELU_LINEAR_248_12_MONOTONE_SOFTPLUS_GAPS
+  candidate_gap_floor: 1.0e-4
+  candidate_parameter_count: 63748
+  comparator_architecture: LINEAR_244_256_RELU_LINEAR_256_4_MEDIAN_ASYMMETRIC_RESIDUAL
+  comparator_parameter_count: 63748
+
+initialization_decision:
+  class: P2_SPECIFIC_INPUT_INDEPENDENT_INITIALIZATION
+  comparator_entire_output_layer_weight: ALL_ZERO
+  comparator_output_biases: [0, INVERSE_SOFTPLUS_0_08,
+    INVERSE_SOFTPLUS_0_20, 0]
+  target_grid: FIXED_FLOAT64_COMPARATOR_INVERSE_CDF_AT_THIRTEEN_TAUS
+  target_adjacent_gap_required_gt: 1.0e-4
+  candidate_entire_output_layer_weight: ALL_ZERO
+  candidate_bias_formula: INVERSE_SOFTPLUS_TARGET_ADJACENT_GAP_MINUS_1E_4
+  replay_invariant: INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0
+  replay_atol: 1.0e-6
+  replay_rtol: 0.0
+  replay_scope: FLOAT64_BISECTION_TO_FLOAT32_BIAS_FORWARD_ROUND_TRIP_ONLY
+  point_replay_atol: 1.0e-7
+  point_replay_rtol: 0.0
+  candidate_median_exact_array_equality_required: true
+  full_initial_predictive_distributions_identical: false
+
+training_decision:
+  optimizer: ADAM
+  learning_rate: 1.0e-3
+  weight_decay: 0.0
+  gradient_clip: 5.0
+  early_stopping_allowed: false
+  best_epoch_selection_allowed: false
+  puzzle_order_formula: SEED_TIMES_100003_PLUS_EPOCH
+  smoke: {folds: [0, 1], seeds: [0], epochs: 3, scientific_scorer_allowed: false}
+  screen: {folds: 20, seeds: [0], epochs: 40}
+  formal: {folds: 20, seeds: [0, 1, 2, 3, 4], epochs: 40,
+    seed0_retrained: true, expected_runs: 100}
+  cuda_fail_fast_required_for_future_training: true
+  cpu_fallback_allowed: false
+  gpu_memory_gate_allowed: false
+
+phase_state:
+  P2M0: DRAFT_FROZEN_INACTIVE_PREPARATION_ONLY
+  P2M1: NOT_AUTHORIZED
+  P2M2: NOT_AUTHORIZED
+  P2M3: NOT_AUTHORIZED
+  P2M4: NOT_AUTHORIZED
+  P2M5: NOT_RUN
+
+screen_gate_decisions:
+  copied_v14_gates: PENDING_TERMINAL_BINDING
+  matched_v10_crps_relative_gain_min: 0.015
+  matched_v10_distribution_absolute_mae_relative_gain_min: 0.01
+  paired_ci_lower_each_gt: 0.0
+  positive_puzzles_min: 14
+  total_puzzles: 20
+  leave_one_puzzle_positive_all_headline_comparisons: true
+  max_single_puzzle_effect_fraction: 0.20
+  coverage: 1.0
+  failure_rate: 0.0
+  unexpected_keys: 0
+
+formal_gate_decisions:
+  candidate_distribution: EQUAL_SEED_SIXTY_FIVE_ATOM_MIXTURE
+  candidate_scientific_crps: EXACT_FINITE_DISTRIBUTION_CRPS
+  comparator_distribution: EQUAL_FIVE_SEED_GAUSSIAN_MIXTURE
+  comparator_scientific_crps: EXACT_GAUSSIAN_MIXTURE_CRPS
+  repeats_same_estimand_and_all_screen_gates: true
+  positive_seeds_min_each_metric: 4
+  total_seeds: 5
+  seed_selection_allowed: false
+
+claim_boundary:
+  maximum_pass_claim: POST_HOC_DEVELOPMENT_FORMAL_PASS
+  external_replication: false
+  sota: false
+  mechanism: false
+  practical_utility: false
+  publication_readiness: false
+  historical_qualification_restoration: false
+  smoke_proxy_or_training_loss_as_final_scientific_conclusion: false
+
+batch1_record:
+  scope: STATIC_INACTIVE_CONTRACT_ONLY
+  runtime_created: false
+  artifact_accessed: false
+  output_created: false
+  gpu_validated: false
+  trained: false
+  scored: false
+  qualified: false
