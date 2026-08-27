@@ -1,6 +1,6 @@
 """RiNALMo foundation backbone for ReactFlow Phase C1-3 (manifest-only).
 
-RiNALMo (Penič et al., 2025) is a ribonucleic acid language model that covers
+RiNALMo (Penić et al., 2025) is a ribonucleic acid language model that covers
 a wide range of RNA tasks.  This adapter does not yet implement checkpoint
 loading (``downloaded=False``), so :meth:`RiNALMoBackbone.forward` raises
 :class:`BackboneNotAvailableError` with download instructions.  When the loader
@@ -13,7 +13,7 @@ Provenance (per C1-1 audit)
   ``2c2c5c14a5ae609d8c560a5d9ca32e51e0288955`` (``Apache-2.0``)
 - Parameters: RiNALMo ``giga-v1`` from Zenodo record ``15043668`` / DOI
   ``10.5281/zenodo.15043668`` (``CC-BY-4.0``)
-- Citation: Penič et al., *Nature Communications* (2025), DOI
+- Citation: Penić et al., *Nature Communications* (2025), DOI
   ``10.1038/s41467-025-60872-5``
 - Max length: 1024 nucleotides
 - Contamination status: ``unknown_contamination`` (not yet audited against the
@@ -55,7 +55,7 @@ DOWNLOAD_URL = (
     "https://zenodo.org/records/15043668/files/rinalmo_giga_pretrained.pt"
 )
 LICENSE = CHECKPOINT_LICENSE
-CITATION = "Penič et al., Nature Communications (2025)"
+CITATION = "Penić et al., Nature Communications (2025)"
 CITATION_DOI = "10.1038/s41467-025-60872-5"
 MAX_LENGTH = 1024
 CONTAMINATION_STATUS = "unknown_contamination"

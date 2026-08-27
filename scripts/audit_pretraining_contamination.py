@@ -125,7 +125,7 @@ KNOWN_MODELS: List[PretrainedModelSpec] = [
         name="RiNALMo",
         version="giga-v1",
         paper=(
-            "Penič et al., Nature Communications 2025 "
+            "Penić et al., Nature Communications 2025 "
             "(https://doi.org/10.1038/s41467-025-60872-5)"
         ),
         training_data_description=(

@@ -18,7 +18,7 @@ def test_rinalmo_giga_provenance_distinguishes_code_and_weights() -> None:
     assert rinalmo.CHECKPOINT_REVISION == "10.5281/zenodo.15043668"
     assert rinalmo.CHECKPOINT_LICENSE == "CC-BY-4.0"
     assert rinalmo.CODE_LICENSE != rinalmo.CHECKPOINT_LICENSE
-    assert rinalmo.CITATION == "Penič et al., Nature Communications (2025)"
+    assert rinalmo.CITATION == "Penić et al., Nature Communications (2025)"
     assert rinalmo.CITATION_DOI == "10.1038/s41467-025-60872-5"
     assert rinalmo.DOWNLOAD_URL == (
         "https://zenodo.org/records/15043668/files/"

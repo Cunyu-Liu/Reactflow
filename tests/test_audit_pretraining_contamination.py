@@ -44,7 +44,7 @@ class TestKnownModels:
         model = next(m for m in audit_module.KNOWN_MODELS if m.name == "RiNALMo")
         assert model.version == "giga-v1"
         assert model.paper == (
-            "Penič et al., Nature Communications 2025 "
+            "Penić et al., Nature Communications 2025 "
             "(https://doi.org/10.1038/s41467-025-60872-5)"
         )
         assert model.weights_url == (
