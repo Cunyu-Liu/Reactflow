@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-updated_at: '2026-08-28T05:40:37+08:00'
+updated_at: '2026-08-28T05:48:11+08:00'
 
 immutable_parent_verdicts:
   v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -67,8 +67,8 @@ phase_state:
   V14M5: NOT_RUN
 
 post_v14_branch5_route_probe_state:
-  B5RP0: SOURCE_PROJECTION_ONLY_AUTHORIZED
-  B5RP1: NOT_AUTHORIZED
+  B5RP0: SAFE_SOURCE_MANIFEST_EXACT_PASS
+  B5RP1: PREDICTION_ONLY_GPU_REQUIRED_AUTHORIZED
   B5RP2: NOT_AUTHORIZED
   B5RP3: NOT_RUN
 
@@ -267,3 +267,37 @@ events:
     external_outcome_accessed: false
     contract_validation_status: V14_CONTRACT_VALIDATION_PASS
     next_action: RUN_SINGLE_POST_V14_BRANCH5_SAFE_SOURCE_PROJECTION
+  - at: '2026-08-28T05:43:49+08:00'
+    phase: B5RP0
+    event: BRANCH5_SAFE_SOURCE_MANIFEST_EXACT_PASS
+    status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS
+    projector_exit_code: 0
+    execution_device: CPU_EXPLICIT_CHECKPOINT_STRUCTURE_PROJECTION_NOT_TRAINING_OR_GPU_VALIDATION
+    v13_checkpoint_count: 20
+    v14_checkpoint_count: 20
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seed: 0
+    source_manifest_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
+    target_score_loss_history_or_gate_fields_present: false
+    held_score_accessed: false
+    partial_score_accessed: false
+    external_outcome_accessed: false
+    scientific_performance_conclusion_allowed: false
+    next_action: AUTHORIZE_B5RP1_PREDICTION_ONLY_GPU_REQUIRED
+  - at: '2026-08-28T05:48:11+08:00'
+    phase: B5RP1
+    event: BRANCH5_PREDICTION_ONLY_GPU_REQUIRED_AUTHORIZED
+    status: B5RP1_PREDICTION_ONLY_GPU_REQUIRED_AUTHORIZED
+    runtime_integration_commit: d9cbf77fa420dfcc210214d0b31249e1845a43ec
+    runtime_focused_tests_passed: 25
+    source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seed: 0
+    prediction_token: POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY
+    gpu_policy: CUDA_REQUIRED_NO_CPU_FALLBACK_NO_MINIMUM_FREE_MEMORY_GATE
+    prediction_dir: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0
+    complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: RUN_SINGLE_POST_V14_BRANCH5_PREDICTION_ONLY_CONTROLLER

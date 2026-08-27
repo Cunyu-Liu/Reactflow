@@ -11,7 +11,11 @@ from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
     EXPECTED_B5RP0_AUTHORITY,
     EXPECTED_B5RP0_PARENT_STATE,
     EXPECTED_B5RP0_PROJECT_TASK,
+    EXPECTED_B5RP1_ACTION,
+    EXPECTED_B5RP1_AUTHORITY,
+    EXPECTED_B5RP1_TOKEN,
     assert_branch5_b5rp0_authority_is_narrow,
+    assert_branch5_b5rp1_authority_is_narrow,
     assert_outcome_authority_is_narrow,
     validate_contract,
 )
@@ -104,6 +108,7 @@ def test_frozen_v14_contract_passes() -> None:
         "V14M5",
         "M6",
         "B5RP0",
+        "B5RP1",
     }
     assert result["held_score_read_allowed"] in {
         False,
@@ -187,6 +192,83 @@ def test_validator_rejects_broadened_or_changed_branch5_b5rp0_authority(
         assert_branch5_b5rp0_authority_is_narrow(active)
 
 
+def _b5rp1_active() -> dict[str, object]:
+    return {
+        "project_task_id": EXPECTED_B5RP0_PROJECT_TASK,
+        "parent_state": copy.deepcopy(EXPECTED_B5RP0_PARENT_STATE),
+        "authority": copy.deepcopy(EXPECTED_B5RP1_AUTHORITY),
+        "authorization": {
+            "neural_training_allowed": False,
+            "screen_allowed": True,
+        },
+        "runnable_phases": ["B5RP1"],
+        "training_allowed": EXPECTED_B5RP1_TOKEN,
+        "candidate_model_training_allowed": EXPECTED_B5RP1_TOKEN,
+        "held_score_read_allowed": False,
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+        "next_allowed_action": EXPECTED_B5RP1_ACTION,
+    }
+
+
+def test_validator_accepts_exact_branch5_b5rp1_authority() -> None:
+    assert_branch5_b5rp1_authority_is_narrow(_b5rp1_active())
+
+
+@pytest.mark.parametrize(
+    "failure",
+    (
+        "parent",
+        "phase",
+        "runnable",
+        "training",
+        "candidate_training",
+        "neural_training",
+        "held",
+        "path",
+        "manifest_status",
+        "screen",
+        "action",
+    ),
+)
+def test_validator_rejects_broadened_or_changed_branch5_b5rp1_authority(
+    failure: str,
+) -> None:
+    active = _b5rp1_active()
+    authority = active["authority"]
+    assert isinstance(authority, dict)
+    if failure == "parent":
+        parent = active["parent_state"]
+        assert isinstance(parent, dict)
+        parent["post_v14_first_matching_branch_id"] = "4"
+    elif failure == "phase":
+        authority["current_phase"] = "B5RP0"
+    elif failure == "runnable":
+        active["runnable_phases"] = ["B5RP0", "B5RP1"]
+    elif failure == "training":
+        active["training_allowed"] = False
+    elif failure == "candidate_training":
+        active["candidate_model_training_allowed"] = False
+    elif failure == "neural_training":
+        authorization = active["authorization"]
+        assert isinstance(authorization, dict)
+        authorization["neural_training_allowed"] = EXPECTED_B5RP1_TOKEN
+    elif failure == "held":
+        active["held_score_read_allowed"] = True
+    elif failure == "path":
+        authority["prediction_dir"] = "/mnt/cunyuliu/wrong"
+    elif failure == "manifest_status":
+        authority["source_manifest_status"] = "PENDING"
+    elif failure == "screen":
+        authorization = active["authorization"]
+        assert isinstance(authorization, dict)
+        authorization["screen_allowed"] = False
+    else:
+        active["next_allowed_action"] = "RUN_SOMETHING_ELSE"
+    with pytest.raises(RuntimeError, match="B5RP1"):
+        assert_branch5_b5rp1_authority_is_narrow(active)
+
+
 def test_v14_freezes_matched_null_and_top_journal_gates() -> None:
     contract = yaml.safe_load(
         (ROOT / "configs/reactflow_delta/model_rescue_v14_amendment.yaml").read_text()
@@ -227,7 +309,7 @@ def test_validator_rejects_broader_v14_score_authority(tmp_path: Path) -> None:
     bad = copy.deepcopy(active)
     bad["held_score_read_allowed"] = True
     active_path.write_text(yaml.safe_dump(bad, sort_keys=False))
-    with pytest.raises(RuntimeError, match="held-score authority|B5RP0"):
+    with pytest.raises(RuntimeError, match="held-score authority|B5RP0|B5RP1"):
         validate_contract(copied)
 
 

@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260827-v14-wt-profile
 date: 2026-08-27
-status: B5RP0_SOURCE_PROJECTION_ONLY_AUTHORIZED
+status: B5RP1_PREDICTION_ONLY_GPU_REQUIRED_AUTHORIZED
 parent: orchestrator-260827-post-v13
 ---
 
@@ -53,3 +53,5 @@ The hypothesis is falsified if the candidate misses any frozen V14M3 top-journal
 - 2026-08-28: Training, screen reruns, partial-score access and new external outcomes remain closed. Exactly one first-matching router read is authorized over the three canonical bound paths under `POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY`; its output does not yet exist and this authority commit does not itself authorize any downstream branch.
 - 2026-08-28: The canonical first-matching router completed once with valid terminal inputs and selected branch `5`, classification `INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED`. V14M4 and branch 6 are closed; the selected path requires the frozen branch-5 route probe before any P1 activation.
 - 2026-08-28: The minimal B5RP0 source-projection dependency closure was integrated at `5660621` and passed 25 focused tests. B5RP0 now authorizes exactly one target-, score-, loss- and history-free projection of the 20 same-fold V13 candidate point checkpoints and 20 V14 candidate checkpoints into the canonical safe-source manifest. Training, held score, partial score and external outcomes remain closed; B5RP1 is not authorized.
+- 2026-08-28: B5RP0 completed once with `POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS`: 20 V13 and 20 V14 same-fold seed-0 checkpoints strictly loaded, the target-free canonical manifest passed its exact schema/path/fold audit, and no scientific performance claim was produced. This was an explicit CPU checkpoint-structure projection, not training or GPU validation.
+- 2026-08-28: The remaining B5RP1 GPU route-probe runtime was integrated at `d9cbf77` and passed 25 focused tests. B5RP1 now authorizes only the fixed seed-0 folds 0-19 prediction universe under `POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY`; controller and runner both require real CUDA, no CPU fallback or minimum-free-memory gate is permitted, and held/partial/external scores remain closed.

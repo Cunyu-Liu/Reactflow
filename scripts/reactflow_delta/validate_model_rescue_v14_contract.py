@@ -44,6 +44,51 @@ EXPECTED_B5RP0_AUTHORITY = {
     ),
     "binding_status": "B5RP0_SAFE_SOURCE_PROJECTION_ONLY",
 }
+EXPECTED_B5RP1_ACTION = "RUN_SINGLE_POST_V14_BRANCH5_PREDICTION_ONLY_CONTROLLER"
+EXPECTED_B5RP1_TOKEN = (
+    "POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY"
+)
+EXPECTED_B5RP1_AUTHORITY = {
+    "current_phase": "B5RP1",
+    "current_authority_state": "POST_V14_BRANCH5_PREDICTION_ONLY",
+    "current_runnable_phase": "B5RP1",
+    "v13_checkpoint_dir": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0"
+    ),
+    "v14_checkpoint_dir": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0"
+    ),
+    "source_manifest_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "source_binding/post_v14_branch5_safe_source_manifest.json"
+    ),
+    "source_manifest_status": "POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS",
+    "m2_csv_path": (
+        "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/"
+        "openknot_m2/OK7a_M2_data.v4.5.2.csv"
+    ),
+    "tic2a_merged_registry_path": (
+        "/mnt/cunyuliu/reactflow_delta_target_identity_correction/"
+        "tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json"
+    ),
+    "unconstrained_feature_cache_path": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/"
+        "ensemble_delta_cache.h5"
+    ),
+    "constrained_feature_cache_path": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/"
+        "constrained_cache.h5"
+    ),
+    "prediction_dir": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0"
+    ),
+    "complete_unscored_merge_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json"
+    ),
+    "binding_status": "B5RP1_PREDICTION_ONLY_GPU_REQUIRED",
+}
 POST_V14_ONCE_ONLY_AUTHORITIES: dict[str, dict[str, Any]] = {
     "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY": {
         "next_allowed_action": "RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER",
@@ -197,6 +242,41 @@ def assert_branch5_b5rp0_authority_is_narrow(active: dict[str, Any]) -> None:
         raise RuntimeError("B5RP0 action changed")
 
 
+def assert_branch5_b5rp1_authority_is_narrow(active: dict[str, Any]) -> None:
+    if active.get("project_task_id") != EXPECTED_B5RP0_PROJECT_TASK:
+        raise RuntimeError("B5RP1 project task changed")
+    if active.get("parent_state") != EXPECTED_B5RP0_PARENT_STATE:
+        raise RuntimeError("B5RP1 terminal parent state changed")
+    authority = active.get("authority")
+    if not isinstance(authority, dict) or any(
+        authority.get(name) != value
+        for name, value in EXPECTED_B5RP1_AUTHORITY.items()
+    ):
+        raise RuntimeError("B5RP1 authority mapping or canonical paths changed")
+    if active.get("runnable_phases") != ["B5RP1"]:
+        raise RuntimeError("B5RP1 must be the sole runnable phase")
+    if (
+        active.get("training_allowed") != EXPECTED_B5RP1_TOKEN
+        or active.get("candidate_model_training_allowed") != EXPECTED_B5RP1_TOKEN
+    ):
+        raise RuntimeError("B5RP1 prediction-only training token changed")
+    if any(
+        active.get(name) is not False
+        for name in (
+            "held_score_read_allowed",
+            "partial_fold_score_read_allowed",
+            "new_external_outcome_access_allowed",
+        )
+    ):
+        raise RuntimeError("B5RP1 requires held and external outcomes closed")
+    if active.get("authorization", {}).get("neural_training_allowed") is not False:
+        raise RuntimeError("B5RP1 neural training authority is open")
+    if active.get("authorization", {}).get("screen_allowed") is not True:
+        raise RuntimeError("B5RP1 prediction-only screen authority is closed")
+    if active.get("next_allowed_action") != EXPECTED_B5RP1_ACTION:
+        raise RuntimeError("B5RP1 action changed")
+
+
 def _assert_frozen_model(contract: dict[str, Any]) -> None:
     models = contract["models"]
     if models["candidate"]["id"] != (
@@ -316,7 +396,13 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
 
     project_task_id = active.get("project_task_id")
     if project_task_id == EXPECTED_B5RP0_PROJECT_TASK:
-        assert_branch5_b5rp0_authority_is_narrow(active)
+        phase = active.get("authority", {}).get("current_phase")
+        if phase == "B5RP0":
+            assert_branch5_b5rp0_authority_is_narrow(active)
+        elif phase == "B5RP1":
+            assert_branch5_b5rp1_authority_is_narrow(active)
+        else:
+            raise RuntimeError("branch5 active phase is not validated")
     elif project_task_id == EXPECTED_V14_PROJECT_TASK:
         if active["parent_state"].get("v13_status") != EXPECTED_V13_STATUS:
             raise RuntimeError("V14 active authority changed the V13 terminal status")

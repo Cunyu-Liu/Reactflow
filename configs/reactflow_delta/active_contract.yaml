@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v14
 manifest_id: reactflow_delta_post_v14_branch5_route_probe_active_authority_20260828
 project_task_id: reactflow_delta_post_v14_branch5_route_probe
 created_at: '2026-08-27T02:30:00+08:00'
-updated_at: '2026-08-28T05:40:37+08:00'
+updated_at: '2026-08-28T05:48:11+08:00'
 
 authority:
   pointer_role: POST_V14_BRANCH5_ROUTE_PROBE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: B5RP0
-  current_authority_state: SOURCE_MANIFEST_PROJECTION_ONLY
-  current_runnable_phase: B5RP0
+  current_phase: B5RP1
+  current_authority_state: POST_V14_BRANCH5_PREDICTION_ONLY
+  current_runnable_phase: B5RP1
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v14-20260827
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v14_20260827
@@ -21,8 +21,14 @@ authority:
   v13_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
   v14_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
   source_manifest_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
-  source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION
-  binding_status: B5RP0_SAFE_SOURCE_PROJECTION_ONLY
+  source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS
+  m2_csv_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+  tic2a_merged_registry_path: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json
+  unconstrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
+  constrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+  prediction_dir: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0
+  complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json
+  binding_status: B5RP1_PREDICTION_ONLY_GPU_REQUIRED
 
 parent_state:
   v14_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL
@@ -33,19 +39,19 @@ parent_state:
 authorization:
   owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION_WITH_AUTONOMOUS_SCIENTIFIC_JUDGMENT
   owner_instruction_date: '2026-08-25'
-  scope: POST_V14_BRANCH5_SAFE_SOURCE_PROJECTION_ONLY
+  scope: POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY
   contract_drafting_allowed: true
   implementation_allowed: true
   neural_training_allowed: false
   smoke_allowed: false
-  screen_allowed: false
+  screen_allowed: true
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
 
 allowed_phases: [B5RP0, B5RP1, B5RP2, B5RP3]
-runnable_phases: [B5RP0]
-training_allowed: false
-candidate_model_training_allowed: false
+runnable_phases: [B5RP1]
+training_allowed: POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY
+candidate_model_training_allowed: POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY
 held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
@@ -57,9 +63,9 @@ post_v13_artifact_overwrite_allowed: false
 parent_terminal_verdict_change_allowed: false
 
 gate_state:
-  B5RP0: SOURCE_PROJECTION_ONLY_AUTHORIZED
-  B5RP1: NOT_AUTHORIZED
+  B5RP0: SAFE_SOURCE_MANIFEST_EXACT_PASS
+  B5RP1: PREDICTION_ONLY_GPU_REQUIRED_AUTHORIZED
   B5RP2: NOT_AUTHORIZED
   B5RP3: NOT_RUN
 
-next_allowed_action: RUN_SINGLE_POST_V14_BRANCH5_SAFE_SOURCE_PROJECTION
+next_allowed_action: RUN_SINGLE_POST_V14_BRANCH5_PREDICTION_ONLY_CONTROLLER
