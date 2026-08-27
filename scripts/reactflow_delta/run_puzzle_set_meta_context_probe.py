@@ -19,6 +19,7 @@ import numpy as np
 import torch
 import yaml
 
+from scripts.reactflow_delta.gpu_runtime import require_cuda_device
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.model_rescue_v1 import aligned_wt_ctx_tensors
 from scripts.reactflow_delta.model_rescue_v2 import (
@@ -1054,6 +1055,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.seed not in range(5) or schedule != (200, 40, 40):
         raise ValueError("P1M4 is frozen to seeds0-4 and 200+40+40 epochs")
 
+    device = require_cuda_device(args.device)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     for fold_id in folds:
         result_path = args.out_dir / (
@@ -1061,7 +1063,6 @@ def main(argv: list[str] | None = None) -> int:
         )
         if result_path.exists():
             raise FileExistsError(f"refusing to overwrite puzzle-set fold {fold_id}")
-    device = args.device if torch.cuda.is_available() else "cpu"
     univ = M2Universe(args.m2_csv)
     identity = univ.build()
     if (

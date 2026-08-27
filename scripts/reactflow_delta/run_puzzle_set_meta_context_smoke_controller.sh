@@ -14,12 +14,25 @@ source_manifest=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_bin
 out=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m2_real_smoke
 
 if [[ "$#" -ne 1 ]]; then
-  printf 'usage: %s PHYSICAL_GPU\n' "$0" >&2
+  printf 'usage: %s CUDA_VISIBLE_DEVICES_VALUE\n' "$0" >&2
   exit 2
 fi
 gpu=$1
-mkdir -p "${out}/logs" "${out}/interrupted_attempts"
 cd "${repo}"
+
+require_gpu() {
+  local cuda_visible_devices_value=$1
+  local status
+  if CUDA_VISIBLE_DEVICES="${cuda_visible_devices_value}" "${python_bin}" -c \
+    "from scripts.reactflow_delta.gpu_runtime import require_cuda_device; require_cuda_device('cuda:0')"; then
+    return 0
+  else
+    status=$?
+  fi
+  printf 'CUDA_REQUIRED: cuda_visible_devices_value=%s logical_device=cuda:0 preflight_status=%s\n' \
+    "${cuda_visible_devices_value}" "${status}" >&2
+  return "${status}"
+}
 
 archive_incomplete_fold() {
   local fold=$1
@@ -53,11 +66,19 @@ archive_incomplete_fold() {
 missing=()
 for fold in 0 1; do
   if [[ ! -f "${out}/puzzle_set_fold_result_fold${fold}_seed0.json" ]]; then
-    archive_incomplete_fold "${fold}"
     missing+=("${fold}")
   fi
 done
 if [[ "${#missing[@]}" -gt 0 ]]; then
+  require_gpu "${gpu}"
+fi
+
+mkdir -p "${out}/logs" "${out}/interrupted_attempts"
+
+if [[ "${#missing[@]}" -gt 0 ]]; then
+  for fold in "${missing[@]}"; do
+    archive_incomplete_fold "${fold}"
+  done
   csv=$(IFS=,; printf '%s' "${missing[*]}")
   CUDA_VISIBLE_DEVICES="${gpu}" "${python_bin}" -m \
     scripts.reactflow_delta.run_puzzle_set_meta_context_probe \

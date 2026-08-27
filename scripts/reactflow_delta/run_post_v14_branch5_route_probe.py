@@ -22,6 +22,7 @@ import numpy as np
 import torch
 import yaml
 
+from scripts.reactflow_delta.gpu_runtime import require_cuda_device
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.model_rescue_v1 import aligned_wt_ctx_tensors
 from scripts.reactflow_delta.model_rescue_v5_probe import (
@@ -50,11 +51,12 @@ from scripts.reactflow_delta.post_v14_branch5_route_probe import (
     PROBE_FEATURE_WIDTH,
     RAW_SUMMARY_WIDTH,
     RIDGE_ALPHA,
+    CudaProbeRidgeStats,
     ProbeRidgeStats,
-    fit_probe_ridge,
+    fit_probe_ridge_cuda,
     nonfocal_linear_summary,
-    predict_probe_ridge,
-    puzzle_method_balanced_weights,
+    predict_probe_ridge_cuda,
+    puzzle_method_balanced_weights_cuda,
     source_receiver_features,
     zero_preserving_v14_content_hidden,
 )
@@ -178,10 +180,14 @@ def _atomic_write_json(path: Path, value: dict[str, Any]) -> None:
     os.replace(temporary, path)
 
 
-def _atomic_write_prediction(path: Path, value: dict[str, np.ndarray]) -> None:
+def _atomic_write_prediction(path: Path, value: dict[str, Any]) -> None:
+    serialized = {
+        name: item.detach().cpu().numpy() if isinstance(item, torch.Tensor) else item
+        for name, item in value.items()
+    }
     temporary = path.with_name(f"{path.name}.tmp")
     with temporary.open("wb") as handle:
-        np.savez_compressed(handle, **value)
+        np.savez_compressed(handle, **serialized)
     os.replace(temporary, path)
 
 
@@ -540,16 +546,104 @@ def add_weighted_grid_to_stats(
     stats.xty += xty
 
 
+def add_weighted_grid_to_cuda_stats(
+    stats: CudaProbeRidgeStats,
+    *,
+    summary: torch.Tensor,
+    edit_index: torch.Tensor,
+    residual: torch.Tensor,
+    weight: torch.Tensor,
+) -> None:
+    """Accumulate the frozen grid statistics in CUDA float64."""
+
+    tensors = {
+        "receiver summary": summary,
+        "edit index": edit_index,
+        "residual": residual,
+        "weight": weight,
+    }
+    for name, value in tensors.items():
+        if not isinstance(value, torch.Tensor) or not value.is_cuda:
+            raise RuntimeError(f"branch5 grid {name} must remain on CUDA")
+        if value.device != stats.device:
+            raise RuntimeError(f"branch5 grid {name} is on a different CUDA device")
+    if summary.dtype != torch.float64:
+        raise RuntimeError("branch5 grid receiver summary must use torch.float64")
+    if edit_index.dtype not in (torch.int32, torch.int64):
+        raise ValueError("branch5 grid edit index must be an integer tensor")
+    if residual.dtype != torch.float64 or weight.dtype != torch.float64:
+        raise RuntimeError("branch5 grid residual and weight must use torch.float64")
+
+    receiver = summary
+    edit = edit_index
+    y = residual
+    w = weight
+    if receiver.ndim != 2 or receiver.shape[1] != RAW_SUMMARY_WIDTH:
+        raise ValueError("branch5 grid receiver summary has invalid shape")
+    source = receiver[edit]
+    if y.shape != w.shape or y.shape != (len(edit), len(receiver)):
+        raise ValueError("branch5 grid residual or weight is misaligned")
+    positive = w > 0
+    if (
+        not bool(positive.any())
+        or not bool(torch.isfinite(w).all())
+        or bool((w < 0).any())
+    ):
+        raise ValueError("branch5 grid requires finite nonnegative weights")
+    if not bool(torch.isfinite(y[positive]).all()):
+        raise ValueError("branch5 qualified residuals must be finite")
+    safe_y = torch.where(positive, y, torch.zeros_like(y))
+    row_weight = w.sum(dim=1)
+    column_weight = w.sum(dim=0)
+    weighted_y = w * safe_y
+    sum_x = torch.cat([source.T @ row_weight, receiver.T @ column_weight])
+    sum_x2 = torch.cat(
+        [(source.square()).T @ row_weight, (receiver.square()).T @ column_weight]
+    )
+    source_source = source.T @ (row_weight[:, None] * source)
+    receiver_receiver = receiver.T @ (column_weight[:, None] * receiver)
+    source_receiver = source.T @ (w @ receiver)
+    xtx = torch.cat(
+        [
+            torch.cat([source_source, source_receiver], dim=1),
+            torch.cat([source_receiver.T, receiver_receiver], dim=1),
+        ],
+        dim=0,
+    )
+    xty = torch.cat(
+        [source.T @ weighted_y.sum(dim=1), receiver.T @ weighted_y.sum(dim=0)]
+    )
+    stats.sum_weight.add_(w.sum())
+    stats.sum_x.add_(sum_x)
+    stats.sum_x2.add_(sum_x2)
+    stats.xtx.add_(xtx)
+    stats.sum_y.add_(weighted_y.sum())
+    stats.xty.add_(xty)
+
+
 def _fit_probe_models(
     *,
     train_records: list[Any],
     cells: list[dict[str, Any]],
     context_cache: dict[str, tuple[torch.Tensor, ...]],
     v14_encoder: V14PointModel,
-) -> tuple[dict[str, dict[str, np.ndarray | float]], dict[str, int]]:
+) -> tuple[dict[str, dict[str, torch.Tensor | float]], dict[str, int]]:
+    first_context = next(iter(context_cache.values()), None)
+    if first_context is None or not first_context:
+        raise ValueError("branch5 ridge requires a nonempty CUDA context cache")
+    device = first_context[0].device
+    if device.type != "cuda":
+        raise RuntimeError("branch5 production ridge fitting requires CUDA")
+    for context in context_cache.values():
+        if any(not value.is_cuda or value.device != device for value in context):
+            raise RuntimeError("branch5 ridge context cache left its CUDA device")
+    encoder_parameter = next(v14_encoder.parameters(), None)
+    if encoder_parameter is not None and encoder_parameter.device != device:
+        raise RuntimeError("branch5 V14 encoder and context CUDA devices differ")
+
     cells_by_construct = {str(cell["construct_id"]): cell for cell in cells}
     grouped = _records_by_puzzle_construct(train_records)
-    puzzle_cells: list[list[np.ndarray]] = []
+    puzzle_cells: list[list[torch.Tensor]] = []
     puzzle_cell_ids: list[list[str]] = []
     for puzzle, constructs in grouped.items():
         construct_ids = sorted(constructs)
@@ -560,19 +654,22 @@ def _fit_probe_models(
         eligible = [value for value in construct_ids if value in cells_by_construct]
         if not eligible:
             raise ValueError(f"branch5 train puzzle {puzzle} has no supervised cell")
-        puzzle_cells.append(
-            [
-                cells_by_construct[value]["qualified_mask"].cpu().numpy()
-                for value in eligible
-            ]
-        )
+        masks = [cells_by_construct[value]["qualified_mask"] for value in eligible]
+        if any(
+            not isinstance(mask, torch.Tensor)
+            or not mask.is_cuda
+            or mask.device != device
+            for mask in masks
+        ):
+            raise RuntimeError("branch5 qualified masks must remain on CUDA")
+        puzzle_cells.append([mask.to(dtype=torch.bool) for mask in masks])
         puzzle_cell_ids.append(eligible)
-    weights = puzzle_method_balanced_weights(puzzle_cells)
+    weights = puzzle_method_balanced_weights_cuda(puzzle_cells)
     stats = {
-        "aligned": ProbeRidgeStats.zeros(),
-        "shift17": ProbeRidgeStats.zeros(),
+        "aligned": CudaProbeRidgeStats.zeros(device=device),
+        "shift17": CudaProbeRidgeStats.zeros(device=device),
     }
-    n_rows = 0
+    n_rows = torch.zeros((), dtype=torch.int64, device=device)
     for (puzzle, constructs), cell_ids, cell_weights in zip(
         grouped.items(), puzzle_cell_ids, weights
     ):
@@ -585,48 +682,71 @@ def _fit_probe_models(
         for construct_id, weight in zip(cell_ids, cell_weights):
             cell = cells_by_construct[construct_id]
             focal = construct_ids.index(construct_id)
+            ridge_inputs = {
+                "target": cell["target"],
+                "WT": cell["wt"],
+                "parent prediction": cell["parent_point"],
+                "edit index": cell["edit"],
+            }
+            if any(
+                not isinstance(value, torch.Tensor)
+                or not value.is_cuda
+                or value.device != device
+                for value in ridge_inputs.values()
+            ):
+                raise RuntimeError(
+                    "branch5 ridge inputs must remain on one CUDA device"
+                )
             target_delta = (
-                cell["target"].cpu().numpy() - cell["wt"].cpu().numpy()[None, :]
+                cell["target"].to(dtype=torch.float64)
+                - cell["wt"].to(dtype=torch.float64)[None, :]
             )
-            parent = cell["parent_point"].cpu().numpy()
+            parent = cell["parent_point"].to(dtype=torch.float64)
             residual = target_delta - parent
             for name, shift in (
                 ("aligned", ALIGNED_SHIFT),
                 ("shift17", MATCHED_NULL_SHIFT),
             ):
-                summary = (
-                    nonfocal_linear_summary(
-                        hidden,
-                        reactivity,
-                        observed,
-                        focal_index=focal,
-                        shift=shift,
-                    )
-                    .cpu()
-                    .numpy()
-                )
-                add_weighted_grid_to_stats(
+                summary = nonfocal_linear_summary(
+                    hidden,
+                    reactivity,
+                    observed,
+                    focal_index=focal,
+                    shift=shift,
+                ).to(dtype=torch.float64)
+                add_weighted_grid_to_cuda_stats(
                     stats[name],
                     summary=summary,
-                    edit_index=cell["edit"].cpu().numpy(),
+                    edit_index=cell["edit"],
                     residual=residual,
                     weight=weight,
                 )
-            n_rows += int(np.count_nonzero(weight))
-    models = {name: fit_probe_ridge(value) for name, value in stats.items()}
+            n_rows.add_(torch.count_nonzero(weight))
+    models = {name: fit_probe_ridge_cuda(value) for name, value in stats.items()}
     if (
-        not np.isclose(stats["aligned"].sum_weight, n_rows, atol=1e-6, rtol=0.0)
-        or not np.isclose(
-            stats["aligned"].sum_weight,
-            stats["shift17"].sum_weight,
-            atol=1e-9,
-            rtol=0.0,
+        not bool(
+            torch.isclose(
+                stats["aligned"].sum_weight,
+                n_rows.to(dtype=torch.float64),
+                atol=1e-6,
+                rtol=0.0,
+            )
         )
-        or not np.isclose(
-            stats["aligned"].sum_y,
-            stats["shift17"].sum_y,
-            atol=1e-9,
-            rtol=0.0,
+        or not bool(
+            torch.isclose(
+                stats["aligned"].sum_weight,
+                stats["shift17"].sum_weight,
+                atol=1e-9,
+                rtol=0.0,
+            )
+        )
+        or not bool(
+            torch.isclose(
+                stats["aligned"].sum_y,
+                stats["shift17"].sum_y,
+                atol=1e-9,
+                rtol=0.0,
+            )
         )
     ):
         raise RuntimeError(
@@ -635,7 +755,7 @@ def _fit_probe_models(
     return models, {
         "n_outer_train_puzzles": len(grouped),
         "n_outer_train_supervised_cells": len(cells),
-        "n_outer_train_qualified_rows": n_rows,
+        "n_outer_train_qualified_rows": int(n_rows.item()),
     }
 
 
@@ -649,9 +769,20 @@ def _held_prediction(
     constrained: ConstrainedFeatureCache,
     v13_parent: V13PointModel,
     v14_encoder: V14PointModel,
-    ridge_models: dict[str, dict[str, np.ndarray | float]],
+    ridge_models: dict[str, dict[str, torch.Tensor | float]],
     fold_id: int,
-) -> dict[str, np.ndarray]:
+) -> dict[str, Any]:
+    device = next(v13_parent.parameters()).device
+    if device.type != "cuda":
+        raise RuntimeError("branch5 production held prediction requires CUDA")
+    if any(
+        not value.is_cuda or value.device != device
+        for context in context_cache.values()
+        for value in context
+    ):
+        raise RuntimeError(
+            "branch5 held contexts must remain on the parent CUDA device"
+        )
     grouped = _records_by_puzzle_construct(held_records)
     if len(grouped) != 1:
         raise ValueError("branch5 held prediction requires exactly one puzzle")
@@ -663,7 +794,7 @@ def _held_prediction(
         context_cache=context_cache,
     )
     keys: list[str] = []
-    values: dict[str, list[np.ndarray]] = {
+    values: dict[str, list[torch.Tensor]] = {
         "parent_point": [],
         "aligned_point": [],
         "shift17_point": [],
@@ -677,7 +808,6 @@ def _held_prediction(
             _basis, feature41 = _feature41_matrix(
                 construct, records, feature41_model, unconstrained, constrained
             )
-            device = next(v13_parent.parameters()).device
             edit = torch.tensor([int(row.full_pos) for row in records], device=device)
             distance = (
                 torch.arange(length, device=device)[None, :] - edit[:, None]
@@ -686,20 +816,19 @@ def _held_prediction(
                 np.tile(construct.wt_observed.astype(bool), (len(records), 1)),
                 device=device,
             )
-            parent = (
-                v13_parent.forward_point(
-                    context_cache[construct_id],
-                    edit,
-                    distance,
-                    [str(row.ref) for row in records],
-                    [str(row.alt) for row in records],
-                    prediction_mask,
-                    torch.tensor(feature41, device=device),
+            parent = v13_parent.forward_point(
+                context_cache[construct_id],
+                edit,
+                distance,
+                [str(row.ref) for row in records],
+                [str(row.alt) for row in records],
+                prediction_mask,
+                torch.tensor(feature41, device=device),
+            ).to(dtype=torch.float64)
+            if not parent.is_cuda or parent.device != device:
+                raise RuntimeError(
+                    "branch5 parent prediction left the selected CUDA device"
                 )
-                .cpu()
-                .numpy()
-                .astype(np.float64)
-            )
             predictions = {"parent_point": parent}
             for name, shift in (
                 ("aligned", ALIGNED_SHIFT),
@@ -711,18 +840,20 @@ def _held_prediction(
                     observed,
                     focal_index=focal,
                     shift=shift,
-                )
-                features = source_receiver_features(summary, edit).cpu().numpy()
-                increment = predict_probe_ridge(
+                ).to(dtype=torch.float64)
+                features = source_receiver_features(summary, edit)
+                increment = predict_probe_ridge_cuda(
                     ridge_models[name], features.reshape(-1, PROBE_FEATURE_WIDTH)
                 ).reshape(len(records), length)
                 point = parent + increment
-                point[~prediction_mask.cpu().numpy()] = 0.0
-                same = np.asarray(
+                point = point.masked_fill(~prediction_mask, 0.0)
+                same = torch.tensor(
                     [
                         str(row.ref).replace("T", "U") == str(row.alt).replace("T", "U")
                         for row in records
-                    ]
+                    ],
+                    dtype=torch.bool,
+                    device=device,
                 )
                 point[same] = 0.0
                 predictions[f"{name}_point"] = point
@@ -732,7 +863,7 @@ def _held_prediction(
                 )
                 for name in values:
                     values[name].append(predictions[name][mutant])
-    output: dict[str, np.ndarray] = {
+    output: dict[str, Any] = {
         "schema_version": np.asarray(PREDICTION_SCHEMA),
         "keys": np.asarray(keys, dtype=object),
         "biological_scoring_key": np.asarray(keys, dtype=object),
@@ -740,26 +871,46 @@ def _held_prediction(
         "seed": np.full(len(keys), EXPECTED_SEED, dtype=np.int64),
         "registered_status": np.full(len(keys), "covered", dtype=object),
         **{
-            name: np.concatenate(rows).astype(np.float64)
+            name: torch.cat(rows).to(dtype=torch.float64)
             for name, rows in values.items()
         },
     }
     if set(output) & FORBIDDEN_PREDICTION_FIELDS:
         raise RuntimeError("branch5 held prediction contains target-side fields")
     if len(keys) != len(set(keys)) or not all(
-        np.isfinite(value).all()
+        (
+            bool(torch.isfinite(value).all())
+            if isinstance(value, torch.Tensor)
+            else np.isfinite(value).all()
+        )
         for value in output.values()
-        if isinstance(value, np.ndarray) and value.dtype.kind in "fiu"
+        if (
+            isinstance(value, torch.Tensor)
+            and value.dtype in (torch.float32, torch.float64, torch.int32, torch.int64)
+        )
+        or (isinstance(value, np.ndarray) and value.dtype.kind in "fiu")
     ):
         raise RuntimeError("branch5 held prediction key or numeric integrity failed")
     return output
 
 
-def _serializable_model(model: dict[str, np.ndarray | float]) -> dict[str, Any]:
-    return {
-        name: value.tolist() if isinstance(value, np.ndarray) else float(value)
-        for name, value in model.items()
-    }
+def _serializable_model(
+    model: dict[str, torch.Tensor | np.ndarray | float],
+) -> dict[str, Any]:
+    output: dict[str, Any] = {}
+    for name, value in model.items():
+        if isinstance(value, torch.Tensor):
+            host_value = value.detach().cpu()
+            output[name] = (
+                float(host_value.item())
+                if host_value.ndim == 0
+                else host_value.numpy().tolist()
+            )
+        elif isinstance(value, np.ndarray):
+            output[name] = value.tolist()
+        else:
+            output[name] = float(value)
+    return output
 
 
 def run_fold(
@@ -983,8 +1134,8 @@ def main(argv: list[str] | None = None) -> int:
         constrained_feature_cache=constrained_cache_path,
         prediction_dir=out_dir,
     )
+    device = require_cuda_device(args.device)
     out_dir.mkdir(parents=True, exist_ok=True)
-    device = args.device if torch.cuda.is_available() else "cpu"
     univ = M2Universe(m2_csv_path)
     identity = univ.build()
     if (

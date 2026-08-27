@@ -183,6 +183,70 @@ def puzzle_method_balanced_weights(
     return [[weights * total_qualified_rows for weights in cells] for cells in output]
 
 
+def _require_cuda_tensor(
+    value: torch.Tensor,
+    *,
+    name: str,
+    device: torch.device | None = None,
+    dtype: torch.dtype | None = None,
+) -> torch.Tensor:
+    if not isinstance(value, torch.Tensor) or not value.is_cuda:
+        raise RuntimeError(f"branch5 {name} must remain on CUDA")
+    if device is not None and value.device != device:
+        raise RuntimeError(f"branch5 {name} is on a different CUDA device")
+    if dtype is not None and value.dtype != dtype:
+        raise RuntimeError(f"branch5 {name} must use {dtype}")
+    return value
+
+
+def puzzle_method_balanced_weights_cuda(
+    puzzle_cell_masks: Iterable[Iterable[torch.Tensor]],
+) -> list[list[torch.Tensor]]:
+    """CUDA float64 form of the frozen puzzle→cell→mutant→position weights."""
+
+    puzzles = [list(cells) for cells in puzzle_cell_masks]
+    if not puzzles:
+        raise ValueError("branch5 weighting requires outer-train puzzles")
+    first = next((mask for cells in puzzles for mask in cells), None)
+    if first is None:
+        raise ValueError("branch5 weighting received an empty puzzle")
+    device = _require_cuda_tensor(first, name="weight mask").device
+    normalized: list[list[torch.Tensor]] = []
+    for cells in puzzles:
+        if not cells:
+            raise ValueError("branch5 weighting received an empty puzzle")
+        normalized_cells = []
+        for mask in cells:
+            _require_cuda_tensor(mask, name="weight mask", device=device)
+            boolean_mask = mask.to(dtype=torch.bool)
+            if boolean_mask.ndim != 2 or not bool(boolean_mask.any()):
+                raise ValueError(
+                    "branch5 weighting received an empty or malformed cell"
+                )
+            normalized_cells.append(boolean_mask)
+        normalized.append(normalized_cells)
+
+    total_qualified_rows = torch.stack(
+        [mask.sum(dtype=torch.float64) for cells in normalized for mask in cells]
+    ).sum()
+    output: list[list[torch.Tensor]] = []
+    for cells in normalized:
+        puzzle_output = []
+        for mask in cells:
+            valid_mutants = mask.any(dim=1)
+            n_mutants = valid_mutants.sum(dtype=torch.float64)
+            if not bool(valid_mutants.any()):
+                raise ValueError("branch5 cell has no qualified mutant")
+            n_positions = mask.sum(dim=1, dtype=torch.float64).clamp_min(1.0)
+            denominator = (
+                float(len(normalized) * len(cells)) * n_mutants * n_positions[:, None]
+            )
+            weights = mask.to(dtype=torch.float64) / denominator
+            puzzle_output.append(weights * total_qualified_rows)
+        output.append(puzzle_output)
+    return output
+
+
 @dataclass
 class ProbeRidgeStats:
     sum_weight: float
@@ -229,6 +293,85 @@ class ProbeRidgeStats:
         self.xty += x.T @ (w * y)
 
 
+@dataclass
+class CudaProbeRidgeStats:
+    """Float64 ridge sufficient statistics that are never staged through CPU."""
+
+    sum_weight: torch.Tensor
+    sum_x: torch.Tensor
+    sum_x2: torch.Tensor
+    xtx: torch.Tensor
+    sum_y: torch.Tensor
+    xty: torch.Tensor
+
+    @classmethod
+    def zeros(
+        cls,
+        *,
+        device: torch.device | str,
+        width: int = PROBE_FEATURE_WIDTH,
+    ) -> "CudaProbeRidgeStats":
+        resolved = torch.device(device)
+        if resolved.type != "cuda":
+            raise RuntimeError("branch5 production ridge statistics require CUDA")
+        vector = lambda: torch.zeros(width, dtype=torch.float64, device=resolved)
+        return cls(
+            sum_weight=torch.zeros((), dtype=torch.float64, device=resolved),
+            sum_x=vector(),
+            sum_x2=vector(),
+            xtx=torch.zeros((width, width), dtype=torch.float64, device=resolved),
+            sum_y=torch.zeros((), dtype=torch.float64, device=resolved),
+            xty=vector(),
+        )
+
+    @property
+    def device(self) -> torch.device:
+        return self.sum_x.device
+
+    def add_rows(
+        self,
+        features: torch.Tensor,
+        residual: torch.Tensor,
+        weight: torch.Tensor,
+    ) -> None:
+        x = _require_cuda_tensor(
+            features,
+            name="ridge feature matrix",
+            device=self.device,
+            dtype=torch.float64,
+        )
+        y = _require_cuda_tensor(
+            residual,
+            name="ridge residual",
+            device=self.device,
+            dtype=torch.float64,
+        )
+        w = _require_cuda_tensor(
+            weight,
+            name="ridge weight",
+            device=self.device,
+            dtype=torch.float64,
+        )
+        if x.ndim != 2 or x.shape[1] != len(self.sum_x):
+            raise ValueError("branch5 ridge feature matrix has invalid shape")
+        if y.shape != (len(x),) or w.shape != (len(x),):
+            raise ValueError("branch5 ridge residual or weight is misaligned")
+        if (
+            not bool(torch.isfinite(x).all())
+            or not bool(torch.isfinite(y).all())
+            or not bool(torch.isfinite(w).all())
+            or bool((w <= 0).any())
+        ):
+            raise ValueError("branch5 ridge rows must be finite with positive weight")
+        wx = w[:, None] * x
+        self.sum_weight.add_(w.sum())
+        self.sum_x.add_(wx.sum(dim=0))
+        self.sum_x2.add_((wx * x).sum(dim=0))
+        self.xtx.add_(x.T @ wx)
+        self.sum_y.add_(torch.dot(w, y))
+        self.xty.add_(x.T @ (w * y))
+
+
 def fit_probe_ridge(
     stats: ProbeRidgeStats, *, alpha: float = RIDGE_ALPHA
 ) -> dict[str, np.ndarray | float]:
@@ -263,6 +406,54 @@ def fit_probe_ridge(
     return result
 
 
+def fit_probe_ridge_cuda(
+    stats: CudaProbeRidgeStats, *, alpha: float = RIDGE_ALPHA
+) -> dict[str, torch.Tensor | float]:
+    """Fit the frozen ridge formula entirely on the statistics' CUDA device."""
+
+    if float(alpha) != RIDGE_ALPHA or not bool(stats.sum_weight > 0):
+        raise ValueError("branch5 ridge is frozen to alpha=1 with positive weight")
+    for name in ("sum_weight", "sum_x", "sum_x2", "xtx", "sum_y", "xty"):
+        _require_cuda_tensor(
+            getattr(stats, name),
+            name=f"ridge {name}",
+            device=stats.device,
+            dtype=torch.float64,
+        )
+    mean_x = stats.sum_x / stats.sum_weight
+    variance = torch.clamp(stats.sum_x2 / stats.sum_weight - mean_x.square(), min=0.0)
+    scale_x = torch.sqrt(variance)
+    scale_x = torch.where(scale_x < 1e-8, torch.ones_like(scale_x), scale_x)
+    mean_y = stats.sum_y / stats.sum_weight
+    centered_xtx = stats.xtx - stats.sum_weight * torch.outer(mean_x, mean_x)
+    centered_xty = stats.xty - stats.sum_x * mean_y
+    ztz = centered_xtx / torch.outer(scale_x, scale_x)
+    zty = centered_xty / scale_x
+    coefficient = torch.linalg.solve(
+        ztz
+        + RIDGE_ALPHA
+        * torch.eye(len(mean_x), dtype=torch.float64, device=stats.device),
+        zty,
+    )
+    result: dict[str, torch.Tensor | float] = {
+        "mean_x": mean_x,
+        "scale_x": scale_x,
+        "mean_y": mean_y,
+        "coefficient": coefficient,
+        "alpha": RIDGE_ALPHA,
+    }
+    if not all(
+        (
+            bool(torch.isfinite(value).all())
+            if isinstance(value, torch.Tensor)
+            else np.isfinite(value)
+        )
+        for value in result.values()
+    ):
+        raise RuntimeError("branch5 ridge fit is nonfinite")
+    return result
+
+
 def predict_probe_ridge(
     model: dict[str, np.ndarray | float], features: np.ndarray
 ) -> np.ndarray:
@@ -274,5 +465,30 @@ def predict_probe_ridge(
         model["coefficient"]
     )
     if prediction.shape != (len(x),) or not np.isfinite(prediction).all():
+        raise RuntimeError("branch5 ridge prediction is invalid")
+    return prediction
+
+
+def predict_probe_ridge_cuda(
+    model: dict[str, torch.Tensor | float], features: torch.Tensor
+) -> torch.Tensor:
+    """Apply a CUDA ridge model without transferring features or predictions."""
+
+    x = _require_cuda_tensor(
+        features, name="ridge prediction features", dtype=torch.float64
+    )
+    if x.ndim != 2 or x.shape[1] != PROBE_FEATURE_WIDTH:
+        raise ValueError("branch5 ridge prediction feature width changed")
+    parameters = {}
+    for name in ("mean_x", "scale_x", "mean_y", "coefficient"):
+        parameters[name] = _require_cuda_tensor(
+            model[name],
+            name=f"ridge prediction {name}",
+            device=x.device,
+            dtype=torch.float64,
+        )
+    standardized = (x - parameters["mean_x"]) / parameters["scale_x"]
+    prediction = parameters["mean_y"] + standardized @ parameters["coefficient"]
+    if prediction.shape != (len(x),) or not bool(torch.isfinite(prediction).all()):
         raise RuntimeError("branch5 ridge prediction is invalid")
     return prediction

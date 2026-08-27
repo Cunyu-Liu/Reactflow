@@ -5,11 +5,13 @@ import pytest
 import torch
 
 from scripts.reactflow_delta.post_v14_branch5_route_probe import (
+    CudaProbeRidgeStats,
     MATCHED_NULL_SHIFT,
     PROBE_FEATURE_WIDTH,
     RAW_SUMMARY_WIDTH,
     ProbeRidgeStats,
     fit_probe_ridge,
+    fit_probe_ridge_cuda,
     nonfocal_linear_summary,
     predict_probe_ridge,
     puzzle_method_balanced_weights,
@@ -126,6 +128,74 @@ def test_ridge_has_unpenalized_mean_and_frozen_alpha() -> None:
     assert model["alpha"] == 1.0
     with pytest.raises(ValueError, match="alpha=1"):
         fit_probe_ridge(stats, alpha=0.1)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="requires a real CUDA GPU")
+def test_cuda_ridge_matches_the_cpu_reference_and_solves_on_gpu(
+    monkeypatch,
+) -> None:
+    x = np.asarray(
+        [
+            [-2.0, 0.0, 1.0],
+            [-1.0, 1.0, 0.0],
+            [1.0, -1.0, 2.0],
+            [2.0, 2.0, -1.0],
+            [0.5, -0.25, 0.75],
+        ],
+        dtype=np.float64,
+    )
+    y = 3.0 + x @ np.asarray([2.0, -1.0, 0.5])
+    weight = np.asarray([0.5, 1.0, 2.0, 1.5, 0.75], dtype=np.float64)
+
+    reference_stats = ProbeRidgeStats.zeros(width=3)
+    reference_stats.add_rows(x, y, weight)
+    reference = fit_probe_ridge(reference_stats)
+
+    device = torch.device("cuda:0")
+    cuda_stats = CudaProbeRidgeStats.zeros(device=device, width=3)
+    cuda_stats.add_rows(
+        torch.tensor(x, dtype=torch.float64, device=device),
+        torch.tensor(y, dtype=torch.float64, device=device),
+        torch.tensor(weight, dtype=torch.float64, device=device),
+    )
+    solve_devices = []
+    real_solve = torch.linalg.solve
+
+    def checked_solve(matrix, rhs):
+        solve_devices.append((matrix.device, rhs.device, matrix.dtype, rhs.dtype))
+        return real_solve(matrix, rhs)
+
+    monkeypatch.setattr(torch.linalg, "solve", checked_solve)
+    actual = fit_probe_ridge_cuda(cuda_stats)
+    assert solve_devices == [(device, device, torch.float64, torch.float64)]
+    for name in ("mean_x", "scale_x", "mean_y", "coefficient"):
+        assert isinstance(actual[name], torch.Tensor)
+        assert actual[name].is_cuda
+        assert actual[name].dtype == torch.float64
+        np.testing.assert_allclose(
+            actual[name].detach().cpu().numpy(),
+            np.asarray(reference[name]),
+            atol=1e-11,
+            rtol=1e-11,
+        )
+    expected_prediction = (
+        reference["mean_y"]
+        + ((x - reference["mean_x"]) / reference["scale_x"]) @ reference["coefficient"]
+    )
+    actual_prediction = (
+        actual["mean_y"]
+        + (
+            (torch.tensor(x, dtype=torch.float64, device=device) - actual["mean_x"])
+            / actual["scale_x"]
+        )
+        @ actual["coefficient"]
+    )
+    np.testing.assert_allclose(
+        actual_prediction.detach().cpu().numpy(),
+        expected_prediction,
+        atol=1e-11,
+        rtol=1e-11,
+    )
 
 
 def test_prediction_requires_the_frozen_520d_feature_map() -> None:

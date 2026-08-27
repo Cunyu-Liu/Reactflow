@@ -12,12 +12,25 @@ out=/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0
 merged=${out}/puzzle_set_branch5_probe_complete_unscored_merge.json
 
 if [[ "$#" -lt 1 || "$#" -gt 8 ]]; then
-  printf 'usage: %s PHYSICAL_GPU [PHYSICAL_GPU ...]\n' "$0" >&2
+  printf 'usage: %s CUDA_VISIBLE_DEVICES_VALUE [CUDA_VISIBLE_DEVICES_VALUE ...]\n' "$0" >&2
   exit 2
 fi
 gpus=("$@")
-mkdir -p "${out}/logs" "${out}/interrupted_attempts"
 cd "${repo}"
+
+require_gpu() {
+  local cuda_visible_devices_value=$1
+  local status
+  if CUDA_VISIBLE_DEVICES="${cuda_visible_devices_value}" "${python_bin}" -c \
+    "from scripts.reactflow_delta.gpu_runtime import require_cuda_device; require_cuda_device('cuda:0')"; then
+    return 0
+  else
+    status=$?
+  fi
+  printf 'CUDA_REQUIRED: cuda_visible_devices_value=%s logical_device=cuda:0 preflight_status=%s\n' \
+    "${cuda_visible_devices_value}" "${status}" >&2
+  return "${status}"
+}
 
 fold_result() {
   printf '%s/puzzle_set_branch5_probe_fold%s_seed0.json' "${out}" "$1"
@@ -80,7 +93,7 @@ run_worker() {
   local csv
   csv=$(IFS=,; printf '%s' "${missing[*]}")
   local log="${out}/logs/worker${worker}_gpu${gpu}.log"
-  printf '%s worker=%s physical_gpu=%s folds=%s start\n' \
+  printf '%s worker=%s cuda_visible_devices_value=%s logical_device=cuda:0 folds=%s start\n' \
     "$(date --iso-8601=seconds)" "${worker}" "${gpu}" "${csv}" >> "${log}"
   CUDA_VISIBLE_DEVICES="${gpu}" "${python_bin}" -m \
     scripts.reactflow_delta.run_post_v14_branch5_route_probe \
@@ -95,6 +108,21 @@ run_worker() {
       --folds "${csv}" \
       >> "${log}" 2>&1
 }
+
+has_missing_training=0
+for fold in {0..19}; do
+  if ! fold_is_complete "${fold}"; then
+    has_missing_training=1
+    break
+  fi
+done
+if [[ "${has_missing_training}" -ne 0 ]]; then
+  for gpu in "${gpus[@]}"; do
+    require_gpu "${gpu}"
+  done
+fi
+
+mkdir -p "${out}/logs" "${out}/interrupted_attempts"
 
 pids=()
 worker_count=${#gpus[@]}
