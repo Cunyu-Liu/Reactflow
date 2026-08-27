@@ -464,7 +464,13 @@ def test_dynamic_queue_runs_one_fold_per_process_and_reuses_a_finished_gpu(
         for event in _read_events(event_path)
         if event["event"] == "task_end" and event["task"] == "0:0"
     )
+    fast_end = next(
+        event
+        for event in _read_events(event_path)
+        if event["event"] == "task_end" and event["task"] == "0:1"
+    )
     assert fold2_start["cuda_visible_devices_value"] == case.gpus[1]
+    assert float(fast_end["time"]) < float(fold2_start["time"])
     assert float(fold2_start["time"]) < float(slow_end["time"])
 
 
