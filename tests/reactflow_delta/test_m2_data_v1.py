@@ -12,6 +12,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "reactf
 import m2_data_v1 as m2d
 
 
+def test_m2_source_url_is_release_commit_pinned():
+    assert "/211a90e2b0dcc47d1a0325a6737e3b48bf76da52/" in m2d.M2_SOURCE_URL
+    assert "/main/" not in m2d.M2_SOURCE_URL
+    assert m2d.M2_SOURCE_URL.endswith(
+        "/Data/OK7a_M2_data.v4.5.2.csv"
+    )
+
+
 def _row(seq, puzzle, method, mutA, sub_start, sub_end, react_vals, err_vals):
     """Build one CSV row dict with reactivity/error columns from lists (len<=177)."""
     row = {

@@ -45,7 +45,8 @@ M2_EXPTYPE = "MutateAndMap"
 
 # canonical source of the OpenKnot M2 dataset (media URL bypasses the LFS pointer)
 M2_SOURCE_URL = ("https://media.githubusercontent.com/media/eternagame/"
-                 "OpenKnotAIDesignData/main/Data/OK7a_M2_data.v4.5.2.csv")
+                 "OpenKnotAIDesignData/211a90e2b0dcc47d1a0325a6737e3b48bf76da52/"
+                 "Data/OK7a_M2_data.v4.5.2.csv")
 M2_SCHEMA = "reactflow_delta.m2_data.v1"
 
 
