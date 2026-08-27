@@ -232,6 +232,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--phase", choices=("V14M2", "V14M3", "V14M4"), required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
+    if args.out_json.exists():
+        raise FileExistsError(
+            f"refusing to overwrite existing V14 merge artifact: {args.out_json}"
+        )
     result = merge_folds(args.input_dir, args.phase)
     args.out_json.parent.mkdir(parents=True, exist_ok=True)
     args.out_json.write_text(

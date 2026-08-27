@@ -16,6 +16,60 @@ EXPECTED_V13_STATUS = "TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL"
 EXPECTED_POST_V13_STATUS = (
     "TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY"
 )
+POST_V14_ONCE_ONLY_AUTHORITIES: dict[str, dict[str, Any]] = {
+    "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY": {
+        "next_allowed_action": "RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER",
+        "mapping_name": "post_v14_router_authority",
+        "mapping": {
+            "runtime_authority_token": "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY",
+            "complete_score_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_complete_score.json"
+            ),
+            "qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_qualification.json"
+            ),
+            "router_output_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/post_v14_first_matching_route.json"
+            ),
+        },
+    },
+    "POST_V14_BRANCH6_TAIL_DIAGNOSTIC_ONCE_ONLY": {
+        "next_allowed_action": "RUN_SINGLE_POST_V14_BRANCH6_TAIL_DIAGNOSTIC",
+        "mapping_name": "post_v14_branch6_diagnostic_authority",
+        "mapping": {
+            "runtime_authority_token": (
+                "POST_V14_BRANCH6_TAIL_DIAGNOSTIC_ONCE_ONLY"
+            ),
+            "complete_unscored_merge_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_complete_unscored_merge.json"
+            ),
+            "complete_score_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_complete_score.json"
+            ),
+            "qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_qualification.json"
+            ),
+            "router_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/post_v14_first_matching_route.json"
+            ),
+            "m2_csv_path": (
+                "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/"
+                "reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv"
+            ),
+            "diagnostic_output_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/post_v14_branch6_tail_diagnostic.json"
+            ),
+        },
+    },
+}
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -23,6 +77,30 @@ def _load(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"V14 YAML root must be a mapping: {path}")
     return value
+
+
+def _assert_post_v14_once_only_authority(
+    active: dict[str, Any], authority: dict[str, Any]
+) -> None:
+    if active.get("authority", {}).get("current_phase") != "V14M3":
+        raise RuntimeError("V14 post-terminal once-only authority requires V14M3")
+    if active.get("runnable_phases") != ["V14M3"]:
+        raise RuntimeError(
+            "V14 post-terminal once-only authority must expose only V14M3"
+        )
+    if active.get("training_allowed") is not False or active.get(
+        "candidate_model_training_allowed"
+    ) is not False:
+        raise RuntimeError(
+            "V14 post-terminal once-only authority requires training closed"
+        )
+    if active.get("next_allowed_action") != authority["next_allowed_action"]:
+        raise RuntimeError("V14 post-terminal once-only action changed")
+    mapping_name = authority["mapping_name"]
+    if active.get(mapping_name) != authority["mapping"]:
+        raise RuntimeError(
+            "V14 post-terminal once-only authority mapping or canonical paths changed"
+        )
 
 
 def assert_outcome_authority_is_narrow(active: dict[str, Any]) -> None:
@@ -36,13 +114,22 @@ def assert_outcome_authority_is_narrow(active: dict[str, Any]) -> None:
     held = active.get("held_score_read_allowed")
     if held is False:
         return
+    post_v14_authority = (
+        POST_V14_ONCE_ONLY_AUTHORITIES.get(held)
+        if isinstance(held, str)
+        else None
+    )
+    if post_v14_authority is not None:
+        _assert_post_v14_once_only_authority(active, post_v14_authority)
+        return
     phase = active.get("authority", {}).get("current_phase")
     expected = {
         "V14M3": "V14_COMPLETE_MERGE_SCORE_ONCE_ONLY",
         "V14M4": "V14_FORMAL_COMPLETE_SCORE_ONCE_ONLY",
     }.get(phase)
     if (
-        held != expected
+        expected is None
+        or held != expected
         or active.get("training_allowed") is not False
         or active.get("candidate_model_training_allowed") is not False
         or active.get("runnable_phases") != [phase]

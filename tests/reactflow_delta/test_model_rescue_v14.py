@@ -26,6 +26,7 @@ from scripts.reactflow_delta.merge_model_rescue_v14 import (
     prediction_checks,
     recorded_invariants_pass,
 )
+from scripts.reactflow_delta.merge_model_rescue_v14 import main as merge_main
 from scripts.reactflow_delta.assemble_model_rescue_v14_formal import assemble_fold
 from scripts.reactflow_delta.qualify_model_rescue_v14 import qualify
 from scripts.reactflow_delta.qualify_model_rescue_v14 import main as qualify_main
@@ -188,6 +189,30 @@ def test_v14_prediction_checks_reject_target_bearing_artifact(tmp_path: Path) ->
     np.savez_compressed(path, **payload)
     checks = prediction_checks(path, fold=0, seed=0, expected_rows=2)
     assert checks["target_free"] is False
+
+
+def test_v14_merger_refuses_to_overwrite_before_reading_folds(
+    tmp_path: Path,
+) -> None:
+    out_json = tmp_path / "v14m3_complete_unscored_merge.json"
+    original = b"canonical merge must remain unchanged\n"
+    out_json.write_bytes(original)
+    try:
+        merge_main(
+            [
+                "--input-dir",
+                str(tmp_path / "missing-input-dir"),
+                "--phase",
+                "V14M3",
+                "--out-json",
+                str(out_json),
+            ]
+        )
+    except FileExistsError as error:
+        assert "refusing to overwrite existing V14 merge artifact" in str(error)
+    else:
+        raise AssertionError("V14 merger overwrote an existing canonical merge")
+    assert out_json.read_bytes() == original
 
 
 def test_v14_merge_invariants_require_pretraining_isolation() -> None:
