@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260827-v14-wt-profile
 date: 2026-08-27
-status: SCREEN_SCORE_ONCE_AUTHORIZED
+status: POST_V14_FIRST_MATCHING_ROUTER_ONCE_AUTHORIZED
 parent: orchestrator-260827-post-v13
 ---
 
@@ -49,3 +49,5 @@ The hypothesis is falsified if the candidate misses any frozen V14M3 top-journal
 - 2026-08-27: the reused held-prediction implementation was source-audited and guarded against indirect calls to mutant targets, target matrices or qualified masks; held outcomes remain scorer-only.
 - 2026-08-27: V14M2 folds 0/1 completed the real-data 3+3+3 prediction-only smoke. The frozen merge and qualifier returned `V14M2_ENGINEERING_SMOKE_PASS`; every registered engineering invariant passed, no scientific score was computed and external outcome access remained closed. V14M3 seed-0 twenty-fold 200+40+40 score-blind training is now the sole runnable phase.
 - 2026-08-28: V14M3 seed-0 twenty-fold prediction-only universe and its canonical complete unscored merge are complete. All 20 registered folds are present, with no missing, duplicate or unexpected artifacts, and the controller, runners and persistent session have exited. Training is now closed and the single complete-score-then-qualify authority is open under `V14_COMPLETE_MERGE_SCORE_ONCE_ONLY`; no V14 scientific score, qualification or new external outcome has yet been accessed.
+- 2026-08-28: The single canonical score completed with 20/20 folds, full registered coverage, zero failures and zero unexpected keys. Qualification returned exact `V14M3_TOP_JOURNAL_SCREEN_FAIL` (9/24 frozen Gates passed; V14M4 not authorized). The candidate improved all four headline means over the identical from-scratch null and over feature41, but missed the frozen feature41 margins, lacked robust superiority over the terminal V10-V12 comparators and failed the 95% coverage and influence guardrails. This is post-hoc development evidence only, not formal, SOTA, publication-ready or externally replicated evidence.
+- 2026-08-28: Training, screen reruns, partial-score access and new external outcomes remain closed. Exactly one first-matching router read is authorized over the three canonical bound paths under `POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY`; its output does not yet exist and this authority commit does not itself authorize any downstream branch.

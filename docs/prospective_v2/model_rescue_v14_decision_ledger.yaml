@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-updated_at: '2026-08-28T05:19:01+08:00'
+updated_at: '2026-08-28T05:25:52+08:00'
 
 immutable_parent_verdicts:
   v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -62,7 +62,7 @@ phase_state:
   V14M0: CONTRACT_FROZEN_PASS
   V14M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   V14M2: ENGINEERING_SMOKE_PASS
-  V14M3: COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
+  V14M3: CANONICAL_SCORE_AND_QUALIFICATION_PRESENT_ROUTER_ONCE_AUTHORIZED
   V14M4: NOT_AUTHORIZED
   V14M5: NOT_RUN
 
@@ -167,3 +167,58 @@ events:
     external_outcome_accessed: false
     contract_validation_status: V14_CONTRACT_VALIDATION_PASS
     next_action: RUN_SINGLE_V14M3_COMPLETE_SCORE_THEN_QUALIFY_ONCE
+  - at: '2026-08-28T05:20:31+08:00'
+    phase: V14M3
+    event: COMPLETE_SCORE_AND_QUALIFICATION_TERMINAL
+    score_status: V14M3_COMPLETE_SCORE_PASS
+    qualification_status: V14M3_TOP_JOURNAL_SCREEN_FAIL
+    gate_passed: false
+    gates_passed: 9
+    gates_total: 24
+    v14m4_authorized: false
+    evidence_status: POST_HOC_DEVELOPMENT_SCREEN_ONLY
+    complete_score: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_complete_score.json
+    qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_qualification.json
+    integrity:
+      complete_folds: 20
+      registered_expected: 2473752
+      registered_observed: 2473752
+      qualified_positions: 1383900
+      registered_prediction_coverage: 1.0
+      failure_rate: 0.0
+      unexpected_prediction_keys: 0
+    candidate_means:
+      signed_delta_mae: 0.16984120618708134
+      point_absolute_delta_mae: 0.14237026118321977
+      task_crps: 0.12462560223894903
+      distribution_absolute_delta_mae: 0.1321674801298048
+    relative_gains:
+      versus_feature41: {signed: 0.11152204403520953, point_absolute: 0.06962302071717319, task_crps: 0.04559639166507579, distribution_absolute: 0.13629728638101285}
+      versus_terminal: {signed_v12: 0.0119069169484125, point_absolute_v11: 0.025088265083510808, task_crps_v12: 0.008501003298660166, distribution_absolute_v10: -0.007775270306486045}
+      versus_identical_from_scratch_null: {signed: 0.042119634799137405, point_absolute: 0.041217152834318545, task_crps: 0.020131892780093363, distribution_absolute: 0.02420643741932307}
+    supports: >-
+      COMPLETE_DEVELOPMENT_SCREEN_IMPROVEMENT_OVER_IDENTICAL_FROM_SCRATCH_NULL
+      AND DIRECTIONAL_MEAN_IMPROVEMENT_OVER_FEATURE41
+    does_not_support: >-
+      FROZEN_TOP_JOURNAL_GATE_PASS FORMAL_CONFIRMATION SOTA PUBLICATION_READY
+      EXTERNAL_REPLICATION OR ROBUST_SUPERIORITY_OVER_TERMINAL_V10_TO_V12
+    score_accessed: true
+    partial_score_accessed: false
+    external_outcome_accessed: false
+  - at: '2026-08-28T05:25:52+08:00'
+    phase: V14M3
+    event: CANONICAL_SCORE_AND_QUALIFICATION_PRESENT_FIRST_MATCHING_ROUTER_AUTHORIZED
+    status: V14M3_CANONICAL_SCORE_AND_QUALIFICATION_PRESENT_ROUTER_ONCE_AUTHORIZED
+    complete_score: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_complete_score.json
+    qualification: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_qualification.json
+    router_output: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/post_v14_first_matching_route.json
+    router_output_present_before_execution: false
+    first_matching_order: ['1', '2', '3', '4', '5', '6', 'P3']
+    training_allowed: false
+    candidate_model_training_allowed: false
+    screen_allowed: false
+    held_score_read_allowed: POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY
+    partial_score_read_allowed: false
+    score_accessed: true
+    external_outcome_accessed: false
+    next_action: RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER
