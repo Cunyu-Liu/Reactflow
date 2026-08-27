@@ -2,12 +2,12 @@ schema_version: reactflow_delta.active_contract.v14
 manifest_id: reactflow_delta_model_rescue_v14_active_authority_20260827
 project_task_id: reactflow_delta_model_rescue_v14
 created_at: '2026-08-27T02:30:00+08:00'
-updated_at: '2026-08-27T02:16:00+08:00'
+updated_at: '2026-08-28T05:19:01+08:00'
 
 authority:
   pointer_role: V14_SINGLE_ACTIVE_AUTHORITY
   current_phase: V14M3
-  current_authority_state: TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+  current_authority_state: COMPLETE_UNSCORED_MERGE_SCORE_ONCE_ONLY_TRAINING_CLOSED
   current_runnable_phase: V14M3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v14-20260827
@@ -18,7 +18,7 @@ authority:
   decision_ledger_path: docs/prospective_v2/model_rescue_v14_decision_ledger.yaml
   implementation_plan_path: docs/plans/2026-08-27-model-rescue-v14.md
   research_record_path: autoresearch/orchestrator-260827-v14-wt-profile/research.md
-  binding_status: V14M3_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED_SCORE_CLOSED
+  binding_status: V14M3_COMPLETE_MERGE_SCORE_ONCE_ONLY
 
 parent_state:
   v13_status: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -35,7 +35,7 @@ authorization:
   scope: MEANINGFULLY_DISTINCT_MASKED_WT_PROFILE_PRETRAINING_ONLY
   contract_drafting_allowed: true
   implementation_allowed: true
-  neural_training_allowed: V14_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
+  neural_training_allowed: false
   smoke_allowed: false
   screen_allowed: true
   formal_confirmation_allowed: false
@@ -43,9 +43,9 @@ authorization:
 
 allowed_phases: [V14M0, V14M1, V14M2, V14M3, V14M4, V14M5, M6]
 runnable_phases: [V14M3]
-training_allowed: V14_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
-candidate_model_training_allowed: V14_TWENTY_FOLD_PREDICTION_ONLY_SCREEN_ONLY
-held_score_read_allowed: false
+training_allowed: false
+candidate_model_training_allowed: false
+held_score_read_allowed: V14_COMPLETE_MERGE_SCORE_ONCE_ONLY
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -59,9 +59,9 @@ gate_state:
   V14M0: CONTRACT_FROZEN_PASS
   V14M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   V14M2: ENGINEERING_SMOKE_PASS
-  V14M3: TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
+  V14M3: COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
   V14M4: NOT_AUTHORIZED
   V14M5: NOT_RUN
   M6: BENCHMARK_ROUTE_REMAINS_FALLBACK
 
-next_allowed_action: RUN_SEED_ZERO_FOLDS_ZERO_THROUGH_NINETEEN_TWO_HUNDRED_PLUS_FORTY_PLUS_FORTY_PREDICTION_ONLY_SCREEN
+next_allowed_action: RUN_SINGLE_V14M3_COMPLETE_SCORE_THEN_QUALIFY_ONCE

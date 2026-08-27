@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-updated_at: '2026-08-27T02:16:00+08:00'
+updated_at: '2026-08-28T05:19:01+08:00'
 
 immutable_parent_verdicts:
   v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -62,7 +62,7 @@ phase_state:
   V14M0: CONTRACT_FROZEN_PASS
   V14M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   V14M2: ENGINEERING_SMOKE_PASS
-  V14M3: TWENTY_FOLD_PREDICTION_ONLY_SCREEN_AUTHORIZED
+  V14M3: COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
   V14M4: NOT_AUTHORIZED
   V14M5: NOT_RUN
 
@@ -146,3 +146,24 @@ events:
     complete_universe_required_before_score: true
     score_accessed: false
     external_outcome_accessed: false
+  - at: '2026-08-28T05:19:01+08:00'
+    phase: V14M3
+    event: TWENTY_FOLD_SEED_ZERO_COMPLETE_UNSCORED_MERGE_AND_SCORE_AUTHORITY
+    status: V14M3_COMPLETE_UNSCORED_MERGE_PASS_SCORE_ONCE_AUTHORIZED
+    complete_fold_artifacts: 20
+    missing_folds: []
+    duplicate_artifacts: 0
+    unexpected_artifacts: 0
+    active_controllers_after_completion: 0
+    active_runners_after_completion: 0
+    active_sessions_after_completion: 0
+    merge_status: V14M3_COMPLETE_UNSCORED_MERGE_PASS
+    merged_artifact: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_complete_unscored_merge.json
+    training_allowed: false
+    candidate_model_training_allowed: false
+    held_score_read_allowed: V14_COMPLETE_MERGE_SCORE_ONCE_ONLY
+    partial_score_read_allowed: false
+    score_accessed: false
+    external_outcome_accessed: false
+    contract_validation_status: V14_CONTRACT_VALIDATION_PASS
+    next_action: RUN_SINGLE_V14M3_COMPLETE_SCORE_THEN_QUALIFY_ONCE
