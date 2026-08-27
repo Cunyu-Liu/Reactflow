@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import fields
+from dataclasses import fields, replace
 import random
 
 import numpy as np
 import pytest
 import torch
 
+import scripts.reactflow_delta.post_v14_p2_quantile_residual as p2_core
 from scripts.reactflow_delta.model_rescue_v10 import mixture_cdf_at_point
 from scripts.reactflow_delta.post_v14_p2_quantile_residual import (
     ADAM_LEARNING_RATE,
@@ -108,6 +109,7 @@ def test_frozen_grid_masses_architecture_and_parameter_match() -> None:
 
 
 def test_candidate_is_strictly_monotone_with_exact_detached_median() -> None:
+    assert POINT_REPLAY_ATOL == 1.0e-7
     torch.manual_seed(11)
     candidate = MonotoneQuantileResidual()
     standardized = torch.randn(6, INPUT_WIDTH, dtype=torch.float32)
@@ -175,6 +177,8 @@ def test_equal_puzzle_hierarchy_has_all_four_frozen_levels() -> None:
 
 
 def test_registered_v10_initialization_and_grid_replay_are_exactly_frozen() -> None:
+    assert V10_INITIAL_NARROW_SCALE_RAW_TARGET == 0.08
+    assert V10_INITIAL_WIDE_GAP_RAW_TARGET == 0.20
     candidate, comparator = build_grid_matched_models(seed=17)
     assert torch.count_nonzero(candidate.output_layer.weight) == 0
     assert torch.count_nonzero(comparator.output_layer.weight) == 0
@@ -223,16 +227,23 @@ def test_registered_v10_initialization_and_grid_replay_are_exactly_frozen() -> N
 
 
 def test_grid_replay_rejects_gap_floor_tolerance_drift_and_nonzero_rtol() -> None:
+    assert GAP_FLOOR == 1.0e-4
+    assert INITIAL_GRID_REPLAY_ATOL == 1.0e-6
     candidate = MonotoneQuantileResidual()
     invalid_grid = np.arange(13, dtype=np.float64)
-    invalid_grid[7:] -= 1.0 - GAP_FLOOR
+    invalid_grid[7:] -= 1.0 - 1.0e-4
     with pytest.raises(ValueError, match="strictly greater"):
         initialize_candidate_from_registered_grid(candidate, invalid_grid)
 
-    reference = np.linspace(-1.0, 1.0, 13, dtype=np.float64)[None, :]
+    reference = np.tile(
+        np.linspace(-1.0, 1.0, 13, dtype=np.float64)[None, :], (3, 1)
+    )
     assert_initial_grid_replay(reference.copy(), reference)
+    within_tolerance = reference.copy()
+    within_tolerance[1, 4] += 5.0e-7
+    assert_initial_grid_replay(within_tolerance, reference)
     bad = reference.copy()
-    bad[0, 4] += INITIAL_GRID_REPLAY_ATOL * 1.01
+    bad[2, 4] += 1.01e-6
     with pytest.raises(RuntimeError, match="does not replay"):
         assert_initial_grid_replay(bad, reference)
     with pytest.raises(ValueError, match=INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0):
@@ -263,10 +274,94 @@ def _synthetic_outer_train_rows() -> tuple[P2OuterTrainRows, np.ndarray]:
     return rows, frozen_point
 
 
-def test_minimal_paired_fit_uses_one_rows_stats_seed_order_and_budget() -> None:
+def test_minimal_paired_fit_uses_one_rows_stats_seed_order_and_budget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     rows, frozen_point = _synthetic_outer_train_rows()
     point_snapshot = frozen_point.copy()
     seed = 23
+
+    build_calls: list[tuple[int, str]] = []
+    candidate_batches: list[tuple[np.ndarray, np.ndarray]] = []
+    comparator_batches: list[tuple[np.ndarray, np.ndarray]] = []
+    pinball_calls: list[tuple[np.ndarray, torch.Tensor]] = []
+    comparator_targets: list[np.ndarray] = []
+    hierarchy_calls: list[
+        tuple[torch.Tensor, np.ndarray, np.ndarray, np.ndarray]
+    ] = []
+    real_build = p2_core.build_grid_matched_models
+    real_pinball = p2_core.weighted_pinball_training_surrogate
+    real_comparator_crps = p2_core.gaussian_mixture_crps_torch
+    real_hierarchy = p2_core.equal_puzzle_hierarchy_mean
+
+    def as_numpy(value: torch.Tensor) -> np.ndarray:
+        return value.detach().cpu().numpy().copy()
+
+    def capture_build(
+        build_seed: int, device: str | torch.device = "cpu"
+    ) -> tuple[MonotoneQuantileResidual, torch.nn.Module]:
+        build_calls.append((build_seed, str(device)))
+        candidate, comparator = real_build(build_seed, device)
+        candidate_forward = candidate.forward
+        comparator_forward = comparator.forward
+
+        def capture_candidate_forward(
+            point: torch.Tensor, standardized: torch.Tensor
+        ) -> torch.Tensor:
+            if candidate.training:
+                candidate_batches.append((as_numpy(point), as_numpy(standardized)))
+            return candidate_forward(point, standardized)
+
+        def capture_comparator_forward(
+            point: torch.Tensor, standardized: torch.Tensor
+        ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+            if comparator.training:
+                comparator_batches.append((as_numpy(point), as_numpy(standardized)))
+            return comparator_forward(point, standardized)
+
+        monkeypatch.setattr(candidate, "forward", capture_candidate_forward)
+        monkeypatch.setattr(comparator, "forward", capture_comparator_forward)
+        return candidate, comparator
+
+    def capture_pinball(
+        target: torch.Tensor, quantiles: torch.Tensor
+    ) -> torch.Tensor:
+        pinball = real_pinball(target, quantiles)
+        pinball_calls.append((as_numpy(target), pinball))
+        return pinball
+
+    def capture_comparator_crps(
+        locations: torch.Tensor,
+        scales: torch.Tensor,
+        weights: torch.Tensor,
+        target: torch.Tensor,
+    ) -> torch.Tensor:
+        comparator_targets.append(as_numpy(target))
+        return real_comparator_crps(locations, scales, weights, target)
+
+    def capture_hierarchy(
+        position_values: torch.Tensor,
+        mutant: torch.Tensor,
+        method_cell: torch.Tensor,
+        puzzle: torch.Tensor,
+    ) -> torch.Tensor:
+        hierarchy_calls.append(
+            (
+                position_values,
+                as_numpy(mutant),
+                as_numpy(method_cell),
+                as_numpy(puzzle),
+            )
+        )
+        return real_hierarchy(position_values, mutant, method_cell, puzzle)
+
+    monkeypatch.setattr(p2_core, "build_grid_matched_models", capture_build)
+    monkeypatch.setattr(
+        p2_core, "weighted_pinball_training_surrogate", capture_pinball
+    )
+    monkeypatch.setattr(p2_core, "gaussian_mixture_crps_torch", capture_comparator_crps)
+    monkeypatch.setattr(p2_core, "equal_puzzle_hierarchy_mean", capture_hierarchy)
+
     result = fit_paired_quantile_and_v10(
         rows, frozen_point, seed=seed, epochs=1, device="cpu"
     )
@@ -283,6 +378,13 @@ def test_minimal_paired_fit_uses_one_rows_stats_seed_order_and_budget() -> None:
     expected_scale = np.where(expected_scale >= 1.0e-6, expected_scale, 1.0)
     expected_order = ["p0", "p1", "p2"]
     random.Random(seed * PUZZLE_ORDER_SEED_MULTIPLIER).shuffle(expected_order)
+    expected_standardized = result.standardizer.transform_numpy(raw_input).astype(
+        np.float32
+    )
+    expected_batches = [
+        np.flatnonzero(np.asarray(rows.puzzle) == puzzle_name)
+        for puzzle_name in expected_order
+    ]
 
     assert np.array_equal(frozen_point, point_snapshot)
     assert np.array_equal(result.standardizer.mean, raw_input.mean(axis=0))
@@ -290,6 +392,39 @@ def test_minimal_paired_fit_uses_one_rows_stats_seed_order_and_budget() -> None:
     assert result.seed == seed
     assert result.epochs == 1
     assert result.puzzle_orders == (tuple(expected_order),)
+    assert PUZZLE_ORDER_SEED_MULTIPLIER == 100_003
+    assert build_calls == [(seed, "cpu")]
+    assert len(candidate_batches) == len(comparator_batches) == len(expected_batches)
+    assert len(pinball_calls) == len(comparator_targets) == len(expected_batches)
+    assert len(hierarchy_calls) == 2 * len(expected_batches)
+    hierarchy_labels = (rows.mutant, rows.method_cell, rows.puzzle)
+    for batch_index, row_indices in enumerate(expected_batches):
+        candidate_point, candidate_input = candidate_batches[batch_index]
+        comparator_point, comparator_input = comparator_batches[batch_index]
+        expected_point = point_snapshot[row_indices]
+        expected_target = rows.target_delta[row_indices]
+        assert np.array_equal(candidate_point, expected_point)
+        assert np.array_equal(comparator_point, expected_point)
+        assert np.array_equal(candidate_input, expected_standardized[row_indices])
+        assert np.array_equal(comparator_input, expected_standardized[row_indices])
+        assert np.array_equal(candidate_input, comparator_input)
+        assert np.array_equal(pinball_calls[batch_index][0], expected_target)
+        assert np.array_equal(comparator_targets[batch_index], expected_target)
+
+        candidate_hierarchy = hierarchy_calls[2 * batch_index]
+        comparator_hierarchy = hierarchy_calls[2 * batch_index + 1]
+        assert candidate_hierarchy[0] is pinball_calls[batch_index][1]
+        for candidate_codes, comparator_codes, labels in zip(
+            candidate_hierarchy[1:], comparator_hierarchy[1:], hierarchy_labels
+        ):
+            labels_in_batch = np.asarray(labels)[row_indices]
+            expected_same_group = labels_in_batch[:, None] == labels_in_batch[None, :]
+            assert np.array_equal(candidate_codes, comparator_codes)
+            assert np.array_equal(
+                candidate_codes[:, None] == candidate_codes[None, :],
+                expected_same_group,
+            )
+
     assert len(result.candidate_history) == len(result.comparator_history) == 1
     assert np.isfinite(result.candidate_history).all()
     assert np.isfinite(result.comparator_history).all()
@@ -307,6 +442,15 @@ def test_minimal_paired_fit_uses_one_rows_stats_seed_order_and_budget() -> None:
     assert result.v10_replay_scales.shape == (len(frozen_point), 2)
     assert result.candidate_expected_absolute_delta.shape == (len(frozen_point),)
     assert result.v10_replay_expected_absolute_delta.shape == (len(frozen_point),)
+    for returned_array in (
+        result.candidate_quantiles,
+        result.candidate_expected_absolute_delta,
+        result.v10_replay_weights,
+        result.v10_replay_locations,
+        result.v10_replay_scales,
+        result.v10_replay_expected_absolute_delta,
+    ):
+        assert np.isfinite(returned_array).all()
     assert ADAM_LEARNING_RATE == 1.0e-3
     assert ADAM_WEIGHT_DECAY == 0.0
     assert GRADIENT_CLIP_NORM == 5.0
@@ -314,25 +458,56 @@ def test_minimal_paired_fit_uses_one_rows_stats_seed_order_and_budget() -> None:
     assert not any("score" in name or "verdict" in name for name in result_fields)
 
 
-def test_paired_fit_rejects_nonfinite_or_unaligned_outer_train_rows() -> None:
+@pytest.mark.parametrize(
+    ("field_name", "bad_value"),
+    [
+        pytest.param("feature41", np.nan, id="feature41-nan"),
+        pytest.param("feature41", np.inf, id="feature41-inf"),
+        pytest.param("direct_features", np.nan, id="direct-features-nan"),
+        pytest.param("direct_features", np.inf, id="direct-features-inf"),
+        pytest.param("target_delta", np.nan, id="target-delta-nan"),
+        pytest.param("target_delta", np.inf, id="target-delta-inf"),
+        pytest.param("frozen_point", np.nan, id="frozen-point-nan"),
+        pytest.param("frozen_point", np.inf, id="frozen-point-inf"),
+    ],
+)
+def test_paired_fit_rejects_nonfinite_inputs(
+    field_name: str, bad_value: float
+) -> None:
     rows, frozen_point = _synthetic_outer_train_rows()
-    bad_target = rows.target_delta.copy()
-    bad_target[0] = np.nan
+    bad_rows = rows
+    bad_point = frozen_point.copy()
+    if field_name == "frozen_point":
+        bad_point[0] = bad_value
+    else:
+        bad_array = np.asarray(getattr(rows, field_name)).copy()
+        bad_array.reshape(-1)[0] = bad_value
+        bad_rows = replace(rows, **{field_name: bad_array})
     with pytest.raises(ValueError, match="nonfinite"):
         fit_paired_quantile_and_v10(
-            P2OuterTrainRows(
-                feature41=rows.feature41,
-                direct_features=rows.direct_features,
-                target_delta=bad_target,
-                puzzle=rows.puzzle,
-                method_cell=rows.method_cell,
-                mutant=rows.mutant,
-            ),
-            frozen_point,
-            seed=1,
-            epochs=1,
+            bad_rows, bad_point, seed=1, epochs=1
         )
+
+
+@pytest.mark.parametrize(
+    "field_name",
+    [
+        "feature41",
+        "direct_features",
+        "target_delta",
+        "puzzle",
+        "method_cell",
+        "mutant",
+        "frozen_point",
+    ],
+)
+def test_paired_fit_rejects_unaligned_outer_train_rows(field_name: str) -> None:
+    rows, frozen_point = _synthetic_outer_train_rows()
+    bad_rows = rows
+    bad_point = frozen_point
+    if field_name == "frozen_point":
+        bad_point = frozen_point[:-1]
+    else:
+        bad_rows = replace(rows, **{field_name: getattr(rows, field_name)[:-1]})
     with pytest.raises(ValueError, match="not aligned"):
-        fit_paired_quantile_and_v10(
-            rows, frozen_point[:-1], seed=1, epochs=1
-        )
+        fit_paired_quantile_and_v10(bad_rows, bad_point, seed=1, epochs=1)
