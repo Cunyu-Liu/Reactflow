@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -12,20 +13,103 @@ import numpy as np
 
 from scripts.reactflow_delta.qualify_model_rescue_v10 import paired_summary
 from scripts.reactflow_delta.score_puzzle_set_meta_context import (
+    EXPECTED_PHASE,
+    EXPECTED_SCORE_TOKEN,
     SCHEMA as SCORE_SCHEMA,
+)
+from scripts.reactflow_delta.puzzle_set_score_chain import (
+    assert_active_phase,
+    assert_authority_paths,
+    validate_p1_score_rows,
+    validate_retention_score_protocol,
 )
 
 
 SCHEMA = "reactflow_delta.puzzle_set_meta_context_qualification.proposed.v2"
+EXPECTED_SCORE_TOP_FIELDS = {
+    "schema_version",
+    "phase",
+    "status",
+    "scores",
+    "context_retention_summary",
+    "target_profile_identity",
+    "target_join_after_complete_merge",
+    "v13_parent_and_feature41_replay_at_5e_7",
+    "v13_historical_bundle_protocol_validated",
+    "tic2a_registry_cross_linked_to_merged_provenance",
+    "partial_fold_scores_inspected",
+    "external_outcome_accessed",
+    "model_or_threshold_selection_performed",
+}
+EXPECTED_GATE_FIELDS = {
+    "prediction_integrity",
+    "candidate_pretraining_established_all_runs",
+    "candidate_context_retention_positive_all_runs",
+    "retention_protocol_selection_free_and_outcome_blind",
+    "signed_gain_vs_feature41_ge_12pct",
+    "signed_gain_vs_terminal_v12_ge_2pct",
+    "signed_gain_vs_v13_parent_ge_2pct",
+    "signed_gain_vs_matched_null_ge_1_5pct",
+    "signed_ci_lower_each_gt_zero",
+    "signed_positive_puzzles_ge_16_14_14_14",
+    "point_absolute_gain_vs_feature41_ge_7pct",
+    "point_absolute_gain_vs_terminal_v11_ge_2pct",
+    "point_absolute_gain_vs_v13_parent_ge_2pct",
+    "point_absolute_gain_vs_matched_null_ge_1pct",
+    "point_absolute_ci_lower_each_gt_zero",
+    "point_absolute_positive_puzzles_ge_16_14_14_14",
+    "task_crps_gain_vs_feature41_ge_5pct",
+    "task_crps_gain_vs_terminal_v12_ge_2pct",
+    "task_crps_gain_vs_matched_null_ge_1_5pct",
+    "task_crps_ci_lower_each_gt_zero",
+    "task_crps_positive_puzzles_ge_16_14_14",
+    "distribution_absolute_gain_vs_feature41_ge_15pct",
+    "distribution_absolute_gain_vs_terminal_v10_ge_2pct",
+    "distribution_absolute_gain_vs_matched_null_ge_1pct",
+    "distribution_absolute_ci_lower_each_gt_zero",
+    "distribution_absolute_positive_puzzles_ge_16_14_14",
+    "leave_one_puzzle_out_all_headline_metrics_positive",
+    "max_single_puzzle_effect_fraction_le_0_20",
+    "coverage_error_guardrail",
+}
 
 
-def qualify(scores: dict[str, Any]) -> dict[str, Any]:
-    if scores.get("schema_version") != SCORE_SCHEMA or scores.get("status") != (
-        "PUZZLE_SET_M3_COMPLETE_SCORE_PASS"
+def _validate_complete_score_protocol(scores: dict[str, Any]) -> list[dict[str, Any]]:
+    if (
+        set(scores) != EXPECTED_SCORE_TOP_FIELDS
+        or scores.get("schema_version") != SCORE_SCHEMA
+        or scores.get("phase") != EXPECTED_PHASE
+        or scores.get("status") != "PUZZLE_SET_M3_COMPLETE_SCORE_PASS"
+        or scores.get("target_profile_identity") != "EXACT_PUZZLE_METHOD_MUTATION"
+        or scores.get("target_join_after_complete_merge") is not True
+        or scores.get("v13_parent_and_feature41_replay_at_5e_7") is not True
+        or scores.get("v13_historical_bundle_protocol_validated") is not True
+        or scores.get("tic2a_registry_cross_linked_to_merged_provenance") is not True
+        or scores.get("partial_fold_scores_inspected") is not False
+        or scores.get("external_outcome_accessed") is not False
+        or scores.get("model_or_threshold_selection_performed") is not False
     ):
-        raise ValueError("puzzle-set qualifier requires one complete score artifact")
-    rows = sorted(scores.get("scores", []), key=lambda row: int(row["outer_fold"]))
-    if len(rows) != 20 or [int(row["outer_fold"]) for row in rows] != list(range(20)):
+        raise ValueError("puzzle-set qualifier requires one exact complete score")
+    rows = validate_p1_score_rows(
+        scores.get("scores"), source="Puzzle-Set P1M3 complete score"
+    )
+    validate_retention_score_protocol(
+        scores.get("context_retention_summary"), expected_run_count=20
+    )
+    return rows
+
+
+def qualify(
+    scores: dict[str, Any], *, validate_protocol: bool = True
+) -> dict[str, Any]:
+    rows = (
+        _validate_complete_score_protocol(scores)
+        if validate_protocol
+        else sorted(scores.get("scores", []), key=lambda row: int(row["outer_fold"]))
+    )
+    if not validate_protocol and (
+        len(rows) != 20 or [int(row["outer_fold"]) for row in rows] != list(range(20))
+    ):
         raise ValueError("puzzle-set qualifier requires unique folds0-19")
     integrity = all(
         float(row["registered_prediction_coverage"]) == 1.0
@@ -209,6 +293,8 @@ def qualify(scores: dict[str, Any]) -> dict[str, Any]:
         ),
         "coverage_error_guardrail": calibration_gate,
     }
+    if set(gates) != EXPECTED_GATE_FIELDS:
+        raise AssertionError("Puzzle-Set frozen Gate field universe changed")
     passed = all(gates.values())
     return {
         "schema_version": SCHEMA,
@@ -233,19 +319,43 @@ def qualify(scores: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def assert_qualifier_authority(
+    repo_root: Path, *, score_json: Path, out_json: Path
+) -> dict[str, Any]:
+    active = assert_active_phase(
+        repo_root,
+        phase=EXPECTED_PHASE,
+        score_token=EXPECTED_SCORE_TOKEN,
+        training_must_be_closed=True,
+    )
+    assert_authority_paths(
+        active,
+        {"complete_score_path": score_json, "qualification_path": out_json},
+    )
+    return active
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--score-json", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.out_json.exists():
+    score_json = args.score_json.resolve()
+    out_json = args.out_json.resolve()
+    assert_qualifier_authority(
+        args.repo_root.resolve(), score_json=score_json, out_json=out_json
+    )
+    if out_json.exists():
         raise FileExistsError("puzzle-set refuses to overwrite its qualification")
-    result = qualify(json.loads(args.score_json.read_text(encoding="utf-8")))
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
+    result = qualify(json.loads(score_json.read_text(encoding="utf-8")))
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out_json.with_name(f"{out_json.name}.tmp")
+    temporary.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
+    os.replace(temporary, out_json)
+    print(json.dumps({"status": result["status"], "result": str(out_json)}))
     return 0 if result["gate_passed"] else 1
 
 

@@ -7,6 +7,7 @@ import pytest
 import yaml
 
 from scripts.reactflow_delta.validate_puzzle_set_meta_context_v5_contract import (
+    EXPECTED_BRANCH5_RUNTIME_PATHS,
     EXPECTED_DOCUMENTS,
     EXPECTED_EXECUTABLE_PATHS,
     EXPECTED_ROUTER_PATH,
@@ -30,6 +31,7 @@ def _copy_validation_universe(tmp_path: Path) -> Path:
         EXPECTED_ROUTER_PATH,
         *EXPECTED_DOCUMENTS.values(),
         *EXPECTED_EXECUTABLE_PATHS.values(),
+        *EXPECTED_BRANCH5_RUNTIME_PATHS.values(),
     }
     for relative in relative_paths:
         target = copied / relative
@@ -119,6 +121,36 @@ def test_validator_rejects_changed_active_v14_execution_state(
             ),
             "artifact provenance declaration changed",
         ),
+        (
+            lambda contract: contract["artifact_schemas_and_provenance"].__setitem__(
+                "production_merge_caller_redefinition_allowed", True
+            ),
+            "artifact provenance declaration changed",
+        ),
+        (
+            lambda contract: contract["artifact_schemas_and_provenance"].__setitem__(
+                "training_universe_must_match_authorized_m2_path", False
+            ),
+            "artifact provenance declaration changed",
+        ),
+        (
+            lambda contract: contract["artifact_schemas_and_provenance"].__setitem__(
+                "production_phase_source_manifest_gate", "PENDING_ALLOWED"
+            ),
+            "artifact provenance declaration changed",
+        ),
+        (
+            lambda contract: contract["artifact_schemas_and_provenance"].__setitem__(
+                "fold_source_records_must_match_active_manifest", False
+            ),
+            "artifact provenance declaration changed",
+        ),
+        (
+            lambda contract: contract["frozen_input_sources"][
+                "activation_source_manifest"
+            ].__setitem__("v10_training_source_present", True),
+            "frozen input-source declaration changed",
+        ),
     ],
 )
 def test_validator_rejects_parent_split_or_artifact_identity_change(
@@ -199,6 +231,21 @@ def test_validator_rejects_generic_or_changed_phase_training_token(
         validate_contract(copied)
 
 
+def test_validator_rejects_source_projection_opening_training(
+    tmp_path: Path,
+) -> None:
+    copied = _copy_validation_universe(tmp_path)
+    _tamper_yaml(
+        copied,
+        MACHINE_PATH,
+        lambda contract: contract["future_p1_runtime_authority"][
+            "source_projection"
+        ].__setitem__("training_allowed", True),
+    )
+    with pytest.raises(RuntimeError, match="future runtime authority paths changed"):
+        validate_contract(copied)
+
+
 def test_validator_rejects_puzzle_set_v5_operator_change(tmp_path: Path) -> None:
     copied = _copy_validation_universe(tmp_path)
     _tamper_yaml(
@@ -222,4 +269,59 @@ def test_validator_rejects_puzzle_set_v5_gate_change(tmp_path: Path) -> None:
         ),
     )
     with pytest.raises(RuntimeError, match="screen Gate changed"):
+        validate_contract(copied)
+
+
+@pytest.mark.parametrize(
+    "edit",
+    [
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "raw_nonfocal_summary"
+        ]["source_receiver_concatenation"].__setitem__("total_width", 519),
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "future_runtime_authority"
+        ]["parent_state"].__setitem__("post_v14_first_matching_branch_id", "4"),
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "gates"
+        ].__setitem__("relative_gain_min_each", 0.009),
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "gates"
+        ].__setitem__("relative_gain_formula", "MEAN_OF_PER_PUZZLE_RATIOS"),
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "v14_content_contrast"
+        ].__setitem__("reference_preserved_inputs", ["position"]),
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "outer_fold_fit"
+        ].__setitem__("inactive_std_threshold_lt", 1.0e-6),
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "source_provenance"
+        ]["terminal_safe_manifest"].__setitem__("accepted_or_generated_now", True),
+        lambda contract: contract["branch_5_route_probe_specification"][
+            "source_provenance"
+        ].__setitem__("global_sources_identical_all_folds", ["m2_csv"]),
+    ],
+)
+def test_validator_rejects_changed_branch5_route_probe_specification(
+    tmp_path: Path, edit
+) -> None:
+    copied = _copy_validation_universe(tmp_path)
+    _tamper_yaml(copied, MACHINE_PATH, edit)
+    with pytest.raises(
+        RuntimeError, match="branch-5 route-probe specification changed"
+    ):
+        validate_contract(copied)
+
+
+def test_validator_rejects_ledger_authorizing_branch5_route_probe(
+    tmp_path: Path,
+) -> None:
+    copied = _copy_validation_universe(tmp_path)
+    _tamper_yaml(
+        copied,
+        LEDGER_PATH,
+        lambda ledger: ledger["branch_5_route_probe"]["current_authority"].__setitem__(
+            "route_probe_execution_allowed", True
+        ),
+    )
+    with pytest.raises(RuntimeError, match="ledger branch-5 specification changed"):
         validate_contract(copied)

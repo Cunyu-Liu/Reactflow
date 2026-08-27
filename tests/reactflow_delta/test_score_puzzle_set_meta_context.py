@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 import yaml
+import scripts.reactflow_delta.score_puzzle_set_meta_context as score_module
 
 from scripts.reactflow_delta.puzzle_set_meta_context_data import PREDICTION_SCHEMA
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import MERGED_SCHEMA
@@ -14,10 +16,14 @@ from scripts.reactflow_delta.score_puzzle_set_meta_context import (
     EXPECTED_PROJECT_TASK,
     EXPECTED_SCORE_TOKEN,
     _assert_parent_and_baseline_replay,
+    _validate_tic2a_registry_and_provenance,
     assert_score_authority,
     merged_integrity_pass,
     score_complete,
     score_fold,
+)
+from tests.reactflow_delta.test_puzzle_set_score_chain import (
+    _write_bound_source_manifest,
 )
 
 
@@ -189,9 +195,14 @@ def test_parent_and_feature41_replay_is_mechanical() -> None:
 
 
 def test_score_authority_requires_complete_score_once_token(tmp_path: Path) -> None:
+    source_manifest = _write_bound_source_manifest(tmp_path)
     active = {
         "project_task_id": EXPECTED_PROJECT_TASK,
-        "authority": {"current_phase": EXPECTED_PHASE},
+        "authority": {
+            "current_phase": EXPECTED_PHASE,
+            "source_manifest_path": str(source_manifest),
+            "source_binding_status": "REALIZED_PATHS_ROLES_AND_COUNTS_BOUND",
+        },
         "runnable_phases": [EXPECTED_PHASE],
         "training_allowed": False,
         "candidate_model_training_allowed": False,
@@ -220,6 +231,46 @@ def test_complete_merge_integrity_is_required_as_one_unit() -> None:
     integrity = _integrity()
     integrity["complete_frozen_input_provenance_all_runs"] = False
     assert not merged_integrity_pass(integrity)
+
+
+def test_tic2a_score_registry_cross_links_every_merged_source_record(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    registry = tmp_path / "tic2a_merged.json"
+    safe = {
+        fold: SimpleNamespace(
+            model_path=tmp_path / f"tic2a_corrected_models_fold{fold}.json",
+            row={"prediction_artifact": str(tmp_path / f"prediction{fold}.npz")},
+        )
+        for fold in range(20)
+    }
+    monkeypatch.setattr(
+        score_module, "validate_tic2a_safe_registry", lambda _value: safe
+    )
+    merged = {
+        "folds": [
+            {
+                "outer_fold": fold,
+                "frozen_input_sources": {
+                    "tic2a_merged_registry": {"path": str(registry)},
+                    "tic2a_feature41_model_artifact": {
+                        "path": str(safe[fold].model_path)
+                    },
+                },
+            }
+            for fold in range(20)
+        ]
+    }
+    observed = _validate_tic2a_registry_and_provenance(
+        merged, {}, registry_path=registry
+    )
+    assert observed == safe
+
+    merged["folds"][7]["frozen_input_sources"]["tic2a_merged_registry"]["path"] = str(
+        tmp_path / "other.json"
+    )
+    with pytest.raises(ValueError, match="provenance differs from registry"):
+        _validate_tic2a_registry_and_provenance(merged, {}, registry_path=registry)
 
 
 def test_scorer_cannot_score_smoke_or_nonseedzero_merge(tmp_path: Path) -> None:

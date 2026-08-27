@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-import yaml
 
 from scripts.reactflow_delta.assemble_puzzle_set_meta_context_formal import (
     ASSEMBLY_STATUS,
@@ -25,49 +25,60 @@ from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     PREDICTION_FIELDS,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context_data import PREDICTION_SCHEMA
+from scripts.reactflow_delta.puzzle_set_safe_sources import TIC2A_MERGED_SCHEMA
 from scripts.reactflow_delta.score_model_rescue_v10 import _load_tic2a_absolute
-from scripts.reactflow_delta.score_model_rescue_v9 import TIC2A_MERGED_SCHEMA
 from scripts.reactflow_delta.score_puzzle_set_meta_context import (
     _assert_parent_and_baseline_replay,
+    _validate_tic2a_registry_and_provenance,
     _v13_reference_rows,
     merged_integrity_pass,
     score_fold,
+)
+from scripts.reactflow_delta.puzzle_set_score_chain import (
+    EXPECTED_PROJECT_TASK,
+    assert_active_phase,
+    assert_authority_paths,
 )
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
 SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_score.proposed.v2"
-EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_PHASE = "P1M4"
 EXPECTED_SCORE_TOKEN = "PUZZLE_SET_FORMAL_COMPLETE_SCORE_ONCE_ONLY"
 
 
-def assert_score_authority(repo_root: Path) -> None:
-    active = yaml.safe_load(
-        (repo_root / "configs/reactflow_delta/active_contract.yaml").read_text(
-            encoding="utf-8"
-        )
+def assert_score_authority(
+    repo_root: Path,
+    *,
+    assembly_json: Path | None = None,
+    merged_json: Path | None = None,
+    tic2a_merged_json: Path | None = None,
+    v13_historical_bundle: Path | None = None,
+    m2_csv: Path | None = None,
+    out_json: Path | None = None,
+) -> dict[str, Any]:
+    active = assert_active_phase(
+        repo_root,
+        phase=EXPECTED_PHASE,
+        score_token=EXPECTED_SCORE_TOKEN,
+        training_must_be_closed=True,
     )
-    if active.get("project_task_id") != EXPECTED_PROJECT_TASK:
-        raise RuntimeError("puzzle-set formal scorer is not the active project task")
-    authority = active.get("authority", {})
-    if authority.get("current_phase") != EXPECTED_PHASE or active.get(
-        "runnable_phases"
-    ) != [EXPECTED_PHASE]:
-        raise RuntimeError("puzzle-set formal scorer is closed outside P1M4")
-    if (
-        active.get("training_allowed") is not False
-        or active.get("candidate_model_training_allowed") is not False
-    ):
-        raise RuntimeError("puzzle-set formal training must be closed before scoring")
-    if active.get("held_score_read_allowed") != EXPECTED_SCORE_TOKEN:
-        raise RuntimeError("puzzle-set formal score-once authority is closed")
-    if active.get("partial_fold_score_read_allowed") is not False:
-        raise RuntimeError("puzzle-set formal partial score access must remain closed")
-    if active.get("new_external_outcome_access_allowed") is not False:
-        raise RuntimeError(
-            "puzzle-set formal scoring requires external outcomes locked"
-        )
+    provided = {
+        "formal_assembly_path": assembly_json,
+        "complete_unscored_merge_path": merged_json,
+        "tic2a_merged_registry_path": tic2a_merged_json,
+        "v13_historical_bundle_path": v13_historical_bundle,
+        "m2_csv_path": m2_csv,
+        "complete_score_path": out_json,
+    }
+    present = {name: value for name, value in provided.items() if value is not None}
+    if present:
+        if len(present) != len(provided):
+            raise RuntimeError(
+                "Puzzle-Set formal scorer CLI path binding is incomplete"
+            )
+        assert_authority_paths(active, present)
+    return active
 
 
 def _load_prediction(
@@ -214,6 +225,8 @@ def score_formal(
     tic2a_merged: dict[str, Any],
     v13_score: dict[str, Any],
     m2_csv: Path,
+    *,
+    tic2a_registry_path: Path | None = None,
 ) -> dict[str, Any]:
     if (
         assembly.get("schema_version") != ASSEMBLY_SCHEMA
@@ -243,15 +256,14 @@ def score_formal(
         and assembly.get("external_outcome_accessed") is False
     ):
         raise ValueError("puzzle-set formal assembly violates score blindness")
-    if (
-        tic2a_merged.get("schema_version") != TIC2A_MERGED_SCHEMA
-        or tic2a_merged.get("status") != "TIC2A_COMPLETE_UNSCORED_MERGE_PASS"
-    ):
-        raise ValueError("puzzle-set formal scorer requires corrected TIC2A merge")
-
     assembly_fold_rows = assembly.get("folds", [])
     source_fold_rows = merged.get("folds", [])
-    tic_fold_rows = tic2a_merged.get("folds", [])
+    tic_rows = _validate_tic2a_registry_and_provenance(
+        merged,
+        tic2a_merged,
+        registry_path=tic2a_registry_path,
+    )
+    tic_fold_rows = [tic_rows[fold].row for fold in sorted(tic_rows)]
     if not all(
         isinstance(rows, list)
         for rows in (assembly_fold_rows, source_fold_rows, tic_fold_rows)
@@ -261,7 +273,6 @@ def score_formal(
     source_rows = {
         (int(row["outer_fold"]), int(row["seed"])): row for row in source_fold_rows
     }
-    tic_rows = {int(row["outer_fold"]): row for row in tic_fold_rows}
     expected = {(fold, seed) for fold in range(20) for seed in range(5)}
     if (
         len(assembly_fold_rows) != 20
@@ -301,7 +312,7 @@ def score_formal(
             record for record in records if record.puzzle == fold.held_puzzle
         ]
         absolute = _load_tic2a_absolute(
-            Path(tic_rows[fold_id]["prediction_artifact"]), fold_id
+            Path(tic_rows[fold_id].row["prediction_artifact"]), fold_id
         )
         mixture = score_fold(
             univ,
@@ -334,6 +345,10 @@ def score_formal(
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
         "target_join_after_complete_merge": True,
         "v13_parent_and_feature41_replay_at_5e_7": True,
+        "v13_historical_bundle_protocol_validated": True,
+        "tic2a_registry_cross_linked_to_merged_provenance": (
+            tic2a_registry_path is not None
+        ),
         "feature41_reference_fixed_across_seeds": True,
         "formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources": (
             True
@@ -356,21 +371,38 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--m2-csv", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    assert_score_authority(args.repo_root.resolve())
-    if args.out_json.exists():
+    assembly_json = args.assembly_json.resolve()
+    merged_json = args.merged_json.resolve()
+    tic2a_merged_json = args.tic2a_merged_json.resolve()
+    v13_historical_bundle = args.v13_score_json.resolve()
+    m2_csv = args.m2_csv.resolve()
+    out_json = args.out_json.resolve()
+    assert_score_authority(
+        args.repo_root.resolve(),
+        assembly_json=assembly_json,
+        merged_json=merged_json,
+        tic2a_merged_json=tic2a_merged_json,
+        v13_historical_bundle=v13_historical_bundle,
+        m2_csv=m2_csv,
+        out_json=out_json,
+    )
+    if out_json.exists():
         raise FileExistsError("puzzle-set refuses to overwrite its one formal score")
     result = score_formal(
-        json.loads(args.assembly_json.read_text(encoding="utf-8")),
-        json.loads(args.merged_json.read_text(encoding="utf-8")),
-        json.loads(args.tic2a_merged_json.read_text(encoding="utf-8")),
-        json.loads(args.v13_score_json.read_text(encoding="utf-8")),
-        args.m2_csv,
+        json.loads(assembly_json.read_text(encoding="utf-8")),
+        json.loads(merged_json.read_text(encoding="utf-8")),
+        json.loads(tic2a_merged_json.read_text(encoding="utf-8")),
+        json.loads(v13_historical_bundle.read_text(encoding="utf-8")),
+        m2_csv,
+        tic2a_registry_path=tic2a_merged_json,
     )
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out_json.with_name(f"{out_json.name}.tmp")
+    temporary.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
+    os.replace(temporary, out_json)
+    print(json.dumps({"status": result["status"], "result": str(out_json)}))
     return 0
 
 

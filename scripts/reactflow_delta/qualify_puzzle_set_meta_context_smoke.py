@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -22,6 +23,10 @@ from scripts.reactflow_delta.puzzle_set_meta_context_calibration import (
 from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
     EXPECTED_DECODER_PARAMETERS,
     EXPECTED_PRETRAINING_TRAINABLE_PARAMETERS,
+)
+from scripts.reactflow_delta.puzzle_set_score_chain import (
+    assert_active_phase,
+    assert_authority_paths,
 )
 
 
@@ -285,19 +290,46 @@ def qualify(merged: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def assert_smoke_qualifier_authority(
+    repo_root: Path, *, merged_json: Path, out_json: Path
+) -> dict[str, Any]:
+    active = assert_active_phase(
+        repo_root,
+        phase="P1M2",
+        held_score_must_be_closed=True,
+    )
+    assert_authority_paths(
+        active,
+        {
+            "complete_unscored_merge_path": merged_json,
+            "qualification_path": out_json,
+        },
+    )
+    return active
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--merged-json", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.out_json.exists():
+    repo_root = args.repo_root.resolve()
+    merged_json = args.merged_json.resolve()
+    out_json = args.out_json.resolve()
+    assert_smoke_qualifier_authority(
+        repo_root, merged_json=merged_json, out_json=out_json
+    )
+    if out_json.exists():
         raise FileExistsError("puzzle-set refuses to overwrite its smoke qualification")
-    result = qualify(json.loads(args.merged_json.read_text(encoding="utf-8")))
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
+    result = qualify(json.loads(merged_json.read_text(encoding="utf-8")))
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out_json.with_name(f"{out_json.name}.tmp")
+    temporary.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
+    os.replace(temporary, out_json)
+    print(json.dumps({"status": result["status"], "result": str(out_json)}))
     return 0 if result["gate_passed"] else 1
 
 

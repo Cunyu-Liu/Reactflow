@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import yaml
 
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     MERGED_SCHEMA,
@@ -23,9 +24,40 @@ from scripts.reactflow_delta.qualify_puzzle_set_meta_context_smoke import (
     EXPECTED_TRAINABLE_PARAMETER_COUNT,
     REQUIRED_INTEGRITY_FALSE,
     REQUIRED_INTEGRITY_TRUE,
+    assert_smoke_qualifier_authority,
     main,
     qualify,
 )
+from tests.reactflow_delta.test_puzzle_set_score_chain import (
+    _write_bound_source_manifest,
+)
+
+
+def _authority_repo(tmp_path: Path, *, merged: Path, qualification: Path) -> Path:
+    repo = tmp_path / "repo"
+    source_manifest = _write_bound_source_manifest(repo)
+    active = repo / "configs/reactflow_delta/active_contract.yaml"
+    active.parent.mkdir(parents=True)
+    active.write_text(
+        yaml.safe_dump(
+            {
+                "project_task_id": "reactflow_delta_puzzle_set_meta_context",
+                "authority": {
+                    "current_phase": "P1M2",
+                    "source_manifest_path": str(source_manifest),
+                    "source_binding_status": ("REALIZED_PATHS_ROLES_AND_COUNTS_BOUND"),
+                    "complete_unscored_merge_path": str(merged.resolve()),
+                    "qualification_path": str(qualification.resolve()),
+                },
+                "runnable_phases": ["P1M2"],
+                "held_score_read_allowed": False,
+                "partial_fold_score_read_allowed": False,
+                "new_external_outcome_access_allowed": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return repo
 
 
 def _write_prediction(directory: Path, fold: int) -> Path:
@@ -211,9 +243,12 @@ def test_smoke_qualifier_refuses_to_overwrite(tmp_path: Path) -> None:
     merged_path.write_text(json.dumps(_merged(tmp_path)), encoding="utf-8")
     out_path = tmp_path / "qualification.json"
     out_path.write_text("preserve me", encoding="utf-8")
+    repo = _authority_repo(tmp_path, merged=merged_path, qualification=out_path)
     with pytest.raises(FileExistsError, match="refuses to overwrite"):
         main(
             [
+                "--repo-root",
+                str(repo),
                 "--merged-json",
                 str(merged_path),
                 "--out-json",
@@ -221,6 +256,23 @@ def test_smoke_qualifier_refuses_to_overwrite(tmp_path: Path) -> None:
             ]
         )
     assert out_path.read_text(encoding="utf-8") == "preserve me"
+
+
+def test_smoke_qualifier_binds_active_merge_and_output_paths(tmp_path: Path) -> None:
+    merged = tmp_path / "merged.json"
+    qualification = tmp_path / "qualification.json"
+    repo = _authority_repo(tmp_path, merged=merged, qualification=qualification)
+    assert_smoke_qualifier_authority(
+        repo.resolve(),
+        merged_json=merged.resolve(),
+        out_json=qualification.resolve(),
+    )
+    with pytest.raises(RuntimeError, match="CLI complete_unscored_merge_path differs"):
+        assert_smoke_qualifier_authority(
+            repo.resolve(),
+            merged_json=(tmp_path / "alternate.json").resolve(),
+            out_json=qualification.resolve(),
+        )
 
 
 def test_smoke_qualifier_source_has_no_scientific_scorer_dependency() -> None:

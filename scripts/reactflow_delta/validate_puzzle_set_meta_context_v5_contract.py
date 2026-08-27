@@ -118,6 +118,14 @@ EXPECTED_EXECUTABLE_PATHS = {
     "pretraining": "scripts/reactflow_delta/puzzle_set_meta_context_pretraining.py",
     "retention": "scripts/reactflow_delta/puzzle_set_meta_context_retention.py",
     "calibration": "scripts/reactflow_delta/puzzle_set_meta_context_calibration.py",
+    "source_validator": "scripts/reactflow_delta/puzzle_set_safe_sources.py",
+    "source_preflight": (
+        "scripts/reactflow_delta/preflight_puzzle_set_meta_context_sources.py"
+    ),
+    "source_projector": (
+        "scripts/reactflow_delta/project_puzzle_set_meta_context_sources.py"
+    ),
+    "score_chain": "scripts/reactflow_delta/puzzle_set_score_chain.py",
     "fold_runner": "scripts/reactflow_delta/run_puzzle_set_meta_context_probe.py",
     "smoke_controller": (
         "scripts/reactflow_delta/run_puzzle_set_meta_context_smoke_controller.sh"
@@ -131,6 +139,9 @@ EXPECTED_EXECUTABLE_PATHS = {
     "merge": "scripts/reactflow_delta/merge_puzzle_set_meta_context_probe.py",
     "screen_scorer": "scripts/reactflow_delta/score_puzzle_set_meta_context.py",
     "screen_qualifier": "scripts/reactflow_delta/qualify_puzzle_set_meta_context.py",
+    "screen_score_once_controller": (
+        "scripts/reactflow_delta/run_puzzle_set_meta_context_score_once.sh"
+    ),
     "formal_controller": (
         "scripts/reactflow_delta/run_puzzle_set_meta_context_formal_controller.sh"
     ),
@@ -140,6 +151,9 @@ EXPECTED_EXECUTABLE_PATHS = {
     "formal_scorer": "scripts/reactflow_delta/score_puzzle_set_meta_context_formal.py",
     "formal_qualifier": (
         "scripts/reactflow_delta/qualify_puzzle_set_meta_context_formal.py"
+    ),
+    "formal_score_once_controller": (
+        "scripts/reactflow_delta/run_puzzle_set_meta_context_formal_score_once.sh"
     ),
 }
 
@@ -164,9 +178,9 @@ EXPECTED_INACTIVE_AUTHORITY = {
             "ROUTER_BRANCH_SPECIFIC_PROBE_STATE_BOUND_AS_NOT_APPLICABLE_OR_"
             "REQUIRED_EXACT_PASS"
         ),
-        "ALL_REALIZED_FROZEN_INPUT_PATHS_ROLES_AND_COUNTS_BOUND",
-        "CONTRACT_VALIDATOR_AND_V5_FOCUSED_TESTS_PASS_WITH_TRAINING_CLOSED",
-        "FOCUSED_PUZZLE_SET_V5_ACTIVATION_COMMIT",
+        "EXACT_FUTURE_SOURCE_PATH_UNIVERSE_FROZEN_WITH_BINDING_PENDING",
+        "CONTRACT_VALIDATOR_PASS_WITH_TRAINING_AND_OUTCOME_ACCESS_CLOSED",
+        "FOCUSED_P1M1_SOURCE_PROJECTION_ONLY_AUTHORITY_COMMIT",
     ],
     "v14_exact_pass_routes_only_to_v14m4": True,
     "v14m4_formal_failure_can_activate_p1": False,
@@ -188,6 +202,152 @@ EXPECTED_FUTURE_PHASE_TOKENS = {
     "tokens_issued_now": False,
     **EXPECTED_PHASE_TOKENS,
     "generic_training_token_allowed": False,
+}
+EXPECTED_FUTURE_P1_RUNTIME_AUTHORITY = {
+    "project_task_id": "reactflow_delta_puzzle_set_meta_context",
+    "authority_issued_now": False,
+    "canonical_active_pointer": "configs/reactflow_delta/active_contract.yaml",
+    "active_authority_flattens_common_and_phase_paths": True,
+    "source_projection": {
+        "phase": "P1M1",
+        "authority_state": "SOURCE_MANIFEST_PROJECTION_ONLY",
+        "runnable_phases_exact": ["P1M1"],
+        "source_binding_status_before": ("REALIZED_PATHS_ROLES_AND_COUNTS_PENDING"),
+        "source_binding_status_after": "REALIZED_PATHS_ROLES_AND_COUNTS_BOUND",
+        "projector": (
+            "scripts/reactflow_delta/project_puzzle_set_meta_context_sources.py"
+        ),
+        "projector_cli_authority": "CANONICAL_REPO_ROOT_ACTIVE_POINTER_ONLY",
+        "training_allowed": False,
+        "candidate_model_training_allowed": False,
+        "held_score_read_allowed": False,
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+        "output_finalization": (
+            "ATOMIC_RENAME_AFTER_COMPLETE_TWENTY_FOLD_SEVEN_SOURCE_VALIDATION"
+        ),
+        "post_projection_authority_commit_required": True,
+        "p1m2_training_before_bound_allowed": False,
+    },
+    "common_source_paths": {
+        "source_manifest_path": (
+            "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+            "source_binding/puzzle_set_source_manifest.json"
+        ),
+        "source_binding_status": "REALIZED_PATHS_ROLES_AND_COUNTS_BOUND",
+        "v8_checkpoint_dir": (
+            "/mnt/cunyuliu/reactflow_delta_model_rescue_v8/"
+            "v8m1_corrected_experts_seed0"
+        ),
+        "v13_checkpoint_dir": (
+            "/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0"
+        ),
+        "v14_checkpoint_dir": (
+            "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0"
+        ),
+        "m2_csv_path": (
+            "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/"
+            "openknot_m2/OK7a_M2_data.v4.5.2.csv"
+        ),
+        "tic2a_merged_registry_path": (
+            "/mnt/cunyuliu/reactflow_delta_target_identity_correction/"
+            "tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json"
+        ),
+        "unconstrained_feature_cache_path": (
+            "/mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/"
+            "ensemble_delta_cache.h5"
+        ),
+        "constrained_feature_cache_path": (
+            "/mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/"
+            "constrained_cache.h5"
+        ),
+        "v13_historical_bundle_path": (
+            "/mnt/cunyuliu/reactflow_delta_model_rescue_v13/"
+            "v13m3_screen_seed0/v13m3_complete_score.json"
+        ),
+    },
+    "historical_score_lineage": {
+        "unique_bundle": "V13M3_COMPLETE_SCORE",
+        "direct_v10_v11_v12_result_reads": False,
+        "transitive_metrics": [
+            "V13",
+            "V12_SIGNED_AND_CRPS",
+            "V11_POINT_ABSOLUTE",
+            "V10_DISTRIBUTION_ABSOLUTE",
+        ],
+    },
+    "phase_artifact_paths": {
+        "P1M2": {
+            "prediction_dir": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m2_real_smoke"
+            ),
+            "complete_unscored_merge_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m2_real_smoke/p1m2_complete_unscored_merge.json"
+            ),
+            "qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m2_real_smoke/p1m2_engineering_smoke_qualification.json"
+            ),
+        },
+        "P1M3": {
+            "prediction_dir": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m3_screen_seed0"
+            ),
+            "complete_unscored_merge_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m3_screen_seed0/p1m3_complete_unscored_merge.json"
+            ),
+            "complete_score_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m3_screen_seed0/p1m3_complete_score.json"
+            ),
+            "qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m3_screen_seed0/p1m3_qualification.json"
+            ),
+        },
+        "P1M4": {
+            "prediction_dir": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m4_formal_seeds0_4"
+            ),
+            "complete_unscored_merge_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m4_formal_seeds0_4/p1m4_complete_unscored_merge.json"
+            ),
+            "formal_assembly_prediction_dir": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m4_formal_seeds0_4/assembled"
+            ),
+            "formal_assembly_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m4_formal_seeds0_4/"
+                "p1m4_five_seed_prediction_only_assembly.json"
+            ),
+            "complete_score_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m4_formal_seeds0_4/p1m4_complete_formal_score.json"
+            ),
+            "screen_qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m3_screen_seed0/p1m3_qualification.json"
+            ),
+            "qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "p1m4_formal_seeds0_4/p1m4_formal_qualification.json"
+            ),
+        },
+    },
+    "state_rules": {
+        "prediction_and_merge": ("TRAINING_TOKEN_ACTIVE_HELD_PARTIAL_EXTERNAL_CLOSED"),
+        "engineering_qualification": "P1M2_HELD_PARTIAL_EXTERNAL_CLOSED",
+        "score_once": "TRAINING_CLOSED_EXACT_SCORE_TOKEN_PARTIAL_EXTERNAL_CLOSED",
+        "formal_assembly": "P1M4_HELD_PARTIAL_EXTERNAL_CLOSED",
+        "qualifier": "EXACT_PHASE_SCORE_TOKEN_AND_AUTHORITY_PATHS",
+    },
 }
 
 EXPECTED_SCOPE_IDENTITY = {
@@ -212,23 +372,504 @@ EXPECTED_FROZEN_PARENTS = {
         "trainable": False,
     },
 }
-EXPECTED_ROUTE_PROBE_CRITERIA = {
-    "signed_delta_relative_gain_min": 0.01,
-    "point_absolute_relative_gain_min": 0.01,
-    "signed_delta_paired_ci_lower_gt": 0.0,
-    "point_absolute_paired_ci_lower_gt": 0.0,
-    "signed_delta_positive_puzzles_min": 14,
-    "point_absolute_positive_puzzles_min": 14,
-    "independent_units": "20_PUZZLES",
-    "data_access": "OUTER_TRAIN_ONLY",
+EXPECTED_BRANCH5_RUNTIME_AUTHORITY = {
+    "project_task_id": "reactflow_delta_post_v14_branch5_route_probe",
+    "parent_state": {
+        "v14_status": "TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL",
+        "post_v14_first_matching_branch_id": "5",
+        "post_v14_route_classification": "INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED",
+        "v14m4_path_allowed": False,
+    },
+    "projection_phase": "B5RP0",
+    "projection_manifest_status": (
+        "POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION"
+    ),
+    "prediction_phase": "B5RP1",
+    "prediction_token": (
+        "POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY"
+    ),
+    "score_phase": "B5RP2",
+    "score_token": "POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY",
+    "qualifier_and_terminal_phase": "B5RP3",
+    "project_task_active_now": False,
+    "projection_authority_now": "NOT_AUTHORIZED",
+    "prediction_token_status_now": "NOT_ISSUED",
+    "score_token_status_now": "NOT_ISSUED",
+    "prediction_authority_now": "NOT_AUTHORIZED",
+    "score_authority_now": "NOT_AUTHORIZED",
+    "qualifier_authority_now": "NOT_AUTHORIZED",
+    "source_manifest_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "source_binding/post_v14_branch5_safe_source_manifest.json"
+    ),
+    "source_manifest_status": "POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS",
+    "v13_checkpoint_dir": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0"
+    ),
+    "v14_checkpoint_dir": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0"
+    ),
+    "m2_csv_path": (
+        "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/"
+        "openknot_m2/OK7a_M2_data.v4.5.2.csv"
+    ),
+    "tic2a_merged_registry_path": (
+        "/mnt/cunyuliu/reactflow_delta_target_identity_correction/"
+        "tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json"
+    ),
+    "unconstrained_feature_cache_path": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/"
+        "ensemble_delta_cache.h5"
+    ),
+    "constrained_feature_cache_path": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/"
+        "constrained_cache.h5"
+    ),
+    "prediction_dir": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/" "b5rp1_seed0"
+    ),
+    "complete_unscored_merge_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json"
+    ),
+    "complete_score_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json"
+    ),
+    "qualification_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_qualification.json"
+    ),
+}
+EXPECTED_BRANCH5_RUNTIME_PATHS = {
+    "core": "scripts/reactflow_delta/post_v14_branch5_route_probe.py",
+    "terminal_projector": (
+        "scripts/reactflow_delta/project_post_v14_branch5_safe_sources.py"
+    ),
+    "prediction_runner": (
+        "scripts/reactflow_delta/run_post_v14_branch5_route_probe.py"
+    ),
+    "missing_fold_controller": (
+        "scripts/reactflow_delta/run_post_v14_branch5_route_probe_controller.sh"
+    ),
+    "merger": "scripts/reactflow_delta/merge_post_v14_branch5_route_probe.py",
+    "scorer": "scripts/reactflow_delta/score_post_v14_branch5_route_probe.py",
+    "qualifier": ("scripts/reactflow_delta/qualify_post_v14_branch5_route_probe.py"),
+}
+EXPECTED_BRANCH5_COMPARISONS = [
+    ["SIGNED_DELTA_MAE", "ALIGNED", "V13_PARENT"],
+    ["POINT_ABSOLUTE_DELTA_MAE", "ALIGNED", "V13_PARENT"],
+    ["SIGNED_DELTA_MAE", "ALIGNED", "SHIFT17"],
+    ["POINT_ABSOLUTE_DELTA_MAE", "ALIGNED", "SHIFT17"],
+]
+EXPECTED_BRANCH5_LEDGER_SAFE_MANIFEST = {
+    "schema": "reactflow_delta.post_v14_branch5_safe_source_manifest.v1",
+    "status": "POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS",
+    "accepted_or_generated_now": False,
+    "generated_only_after_complete_v14_terminal_branch5_selection": True,
+    "rows": 20,
+    "row_fields_exact": [
+        "outer_fold",
+        "held_puzzle",
+        "seed",
+        "v13_source_phase",
+        "v13_candidate_checkpoint",
+        "v14_source_phase",
+        "v14_arm",
+        "v14_candidate_checkpoint",
+        "held_score_closed_at_projection",
+        "external_outcome_accessed",
+    ],
+    "canonical_folds_and_held_puzzles_required": True,
+    "fixed_seed": 0,
+    "fixed_v13_source_phase": "V13M3",
+    "fixed_v14_source_phase": "V14M3",
+    "fixed_v14_arm": "CANDIDATE",
+    "held_score_closed_at_projection": True,
+    "external_outcome_accessed": False,
+    "forbidden_fields": [
+        "target",
+        "target_error",
+        "qualified_target_mask",
+        "training_history",
+        "training_histories",
+        "loss",
+        "score",
+        "per_puzzle_effect",
+        "gate",
+    ],
+}
+EXPECTED_BRANCH5_ROUTE_PROBE = {
+    "specification_status": "FROZEN_INACTIVE_NOT_RUN",
+    "applies_only_when_first_matching_router_branch": "5",
+    "v14_complete_terminal_handoff_required_before_run": True,
+    "branches_3_and_4_probe_status": "NOT_APPLICABLE",
+    "execution_authorized_now": False,
+    "prediction_generation_authorized_now": False,
+    "held_score_read_authorized_now": False,
+    "external_outcome_access_authorized_now": False,
+    "execution_token_issued_now": False,
+    "score_token_issued_now": False,
+    "model_or_threshold_selection_allowed": False,
+    "runtime_paths": EXPECTED_BRANCH5_RUNTIME_PATHS,
+    "future_runtime_authority": EXPECTED_BRANCH5_RUNTIME_AUTHORITY,
+    "parents": {
+        "point_anchor": {
+            "model": "V13_CANDIDATE_POINT",
+            "seed": 0,
+            "outer_fold_matched": True,
+            "checkpoint_filename_pattern": (
+                "v13_candidate_point_fold{outer_fold}_seed0.pt"
+            ),
+            "role": "IMMUTABLE_ADDITIVE_POINT_ANCHOR",
+            "trainable_in_route_probe": False,
+        },
+        "representation_anchor": {
+            "model": "V14_CANDIDATE_OUTCOME_BLIND_WT_ENCODER",
+            "seed": 0,
+            "outer_fold_matched": True,
+            "checkpoint_filename_pattern": (
+                "v14_candidate_point_fold{outer_fold}_seed0.pt"
+            ),
+            "role": "IMMUTABLE_NONFOCAL_REPRESENTATION_SOURCE",
+            "trainable_in_route_probe": False,
+        },
+    },
+    "raw_nonfocal_summary": {
+        "exact_nonfocal_constructs_per_focal": 7,
+        "focal_construct_excluded": True,
+        "focal_or_local_feature_in_summary": False,
+        "per_coordinate_width": 260,
+        "components": {
+            "hidden_mean": {
+                "width": 256,
+                "formula": (
+                    "ARITHMETIC_MEAN_OF_SEVEN_ZERO_PRESERVING_V14_CONTENT_" "CONTRASTS"
+                ),
+            },
+            "pooled_safe_wt": {
+                "width": 1,
+                "formula": (
+                    "SUM_FINITE_OBSERVED_WT_REACTIVITY_WITH_UNOBSERVED_ZERO_"
+                    "DIVIDED_BY_7"
+                ),
+            },
+            "observed_reactivity_mean": {
+                "width": 1,
+                "formula": (
+                    "FINITE_OBSERVED_WT_SUM_DIVIDED_BY_CLAMPED_SUPPORT_COUNT_"
+                    "ZERO_IF_NO_SUPPORT"
+                ),
+            },
+            "observed_reactivity_population_std": {
+                "width": 1,
+                "formula": (
+                    "SQRT_NONNEGATIVE_FINITE_OBSERVED_POPULATION_VARIANCE_"
+                    "ZERO_IF_NO_SUPPORT"
+                ),
+            },
+            "observed_support_fraction": {
+                "width": 1,
+                "formula": "FINITE_OBSERVED_NONFOCAL_COUNT_DIVIDED_BY_7",
+            },
+        },
+        "source_receiver_concatenation": {
+            "source_width": 260,
+            "receiver_width": 260,
+            "total_width": 520,
+            "order": ["SOURCE_NONFOCAL_SUMMARY", "RECEIVER_NONFOCAL_SUMMARY"],
+        },
+        "aligned_coordinate": "REGISTERED_SHARED_FULL_CONSTRUCT_POSITION",
+        "shift17_coordinate": (
+            "CIRCULAR_NONFOCAL_POSITION_J_MINUS_17_MOD_SEQUENCE_LENGTH"
+        ),
+        "shift_applied_before_all_summary_components": True,
+    },
+    "v14_content_contrast": {
+        "formula": "V14_ENCODE_REAL_MINUS_V14_ENCODE_COORDINATE_ONLY_REFERENCE",
+        "model": "SAME_FROZEN_SAME_FOLD_V14_CANDIDATE_ENCODER_IN_EVAL_MODE",
+        "actual_inputs": [
+            "sequence",
+            "reactivity",
+            "precision",
+            "observed",
+            "position",
+            "region",
+        ],
+        "reference_preserved_inputs": ["position", "region"],
+        "reference_zeroed_inputs": [
+            "sequence",
+            "reactivity",
+            "precision",
+            "observed",
+        ],
+        "mutant_outcome_accessed": False,
+        "shift17_applied_only_after_contrast": True,
+        "zero_content_invariant": {
+            "arbitrary_position_and_region_allowed": True,
+            "content_contrast_exact_zero": True,
+            "aligned_and_shift17_features_equal_and_zero": True,
+        },
+    },
+    "prohibited_probe_features": [
+        "FOCAL_V14_HIDDEN",
+        "FOCAL_WT_REACTIVITY",
+        "FOCAL_OBSERVED_MASK",
+        "V13_POINT_AS_RIDGE_FEATURE",
+        "FEATURE41",
+        "SIGNED_DISTANCE",
+        "MUTATION_REF_ALT",
+        "METHOD_ID",
+        "PUZZLE_ID",
+        "DATASET_ID",
+        "HELD_MUTANT_TARGET",
+        "HELD_MUTANT_ERROR",
+        "HELD_QUALIFIED_TARGET_MASK",
+        "EXTERNAL_OUTCOME",
+    ],
+    "outer_fold_fit": {
+        "split": "SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE",
+        "fit_target": "SIGNED_DELTA_MINUS_FROZEN_V13_POINT",
+        "fit_target_access": "OUTER_TRAIN_MUTANT_OUTCOMES_ONLY",
+        "held_puzzle_target_access_during_fit_or_prediction": False,
+        "arms_fit_independently": ["ALIGNED", "SHIFT17"],
+        "feature_standardization": (
+            "OUTER_TRAIN_WEIGHTED_MEAN_AND_POPULATION_STD_PER_ARM"
+        ),
+        "zero_variance_standardized_value": 0.0,
+        "inactive_std_threshold_lt": 1.0e-8,
+        "inactive_std_replacement_scale": 1.0,
+        "inactive_feature_standardized_values_must_be_zero_when_constant": True,
+        "regression": "WEIGHTED_RIDGE",
+        "ridge_alpha": 1.0,
+        "intercept": "UNPENALIZED",
+        "sample_weight_hierarchy": (
+            "EQUAL_OUTER_TRAIN_PUZZLE_METHOD_CELLS_THEN_EQUAL_MUTANTS_WITHIN_"
+            "CELL_THEN_EQUAL_QUALIFIED_POSITIONS_WITHIN_MUTANT"
+        ),
+        "sample_weight_normalization": "MEAN_ONE_OVER_OUTER_TRAIN_ROWS",
+        "early_stopping_or_hyperparameter_search_allowed": False,
+        "aligned_prediction": "FROZEN_V13_POINT_PLUS_ALIGNED_RIDGE_RESIDUAL",
+        "shift17_prediction": "FROZEN_V13_POINT_PLUS_SHIFT17_RIDGE_RESIDUAL",
+        "parent_prediction": "FROZEN_V13_POINT",
+    },
+    "prediction_and_score_protocol": {
+        "folds": 20,
+        "fold_ids": list(range(20)),
+        "seed": 0,
+        "prediction_only_fold_artifacts_before_score": True,
+        "complete_twenty_fold_merge_required_before_score": True,
+        "partial_fold_score_read_allowed": False,
+        "score_invocations_after_complete_valid_merge": 1,
+        "evaluator": "METHOD_BALANCED_POSITION_TO_MUTANT_TO_METHOD_TO_PUZZLE",
+        "independent_units": "20_PUZZLES",
+        "unexpected_keys": 0,
+        "registered_prediction_coverage": 1.0,
+        "failure_rate": 0.0,
+    },
+    "source_provenance": {
+        "terminal_safe_manifest": {
+            "schema": "reactflow_delta.post_v14_branch5_safe_source_manifest.v1",
+            "status": "POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS",
+            "accepted_or_generated_now": False,
+            "generated_only_after_complete_v14_terminal_branch5_selection": True,
+            "rows": 20,
+            "row_fields_exact": [
+                "outer_fold",
+                "held_puzzle",
+                "seed",
+                "v13_source_phase",
+                "v13_candidate_checkpoint",
+                "v14_source_phase",
+                "v14_arm",
+                "v14_candidate_checkpoint",
+                "held_score_closed_at_projection",
+                "external_outcome_accessed",
+            ],
+            "exact_values": {
+                "folds": list(range(20)),
+                "canonical_held_puzzle": "P{outer_fold_plus_one_2digit}",
+                "seed": 0,
+                "v13_source_phase": "V13M3",
+                "v14_source_phase": "V14M3",
+                "v14_arm": "CANDIDATE",
+                "held_score_closed_at_projection": True,
+                "external_outcome_accessed": False,
+            },
+            "forbidden_fields": [
+                "target",
+                "target_error",
+                "qualified_target_mask",
+                "training_history",
+                "training_histories",
+                "loss",
+                "score",
+                "per_puzzle_effect",
+                "gate",
+            ],
+        },
+        "exact_records": {
+            "v13_point_checkpoint": ["path", "role", "outer_fold", "seed"],
+            "v14_encoder_checkpoint": ["path", "role", "outer_fold", "seed"],
+            "m2_csv": ["path", "role", "scope"],
+            "tic2a_merged_registry": ["path", "role", "scope"],
+            "unconstrained_feature_cache": ["path", "role", "scope"],
+            "constrained_feature_cache": ["path", "role", "scope"],
+            "tic2a_feature41_model_artifact": [
+                "path",
+                "role",
+                "outer_fold",
+                "source_phase",
+                "held_target_used_for_prediction",
+                "held_score_computed",
+                "partial_score_inspected",
+                "external_outcome_accessed",
+            ],
+            "safe_source_manifest": ["path", "role"],
+        },
+        "roles": {
+            "v13_point_checkpoint": "FROZEN_SAME_OUTER_FOLD_V13_POINT_MODEL",
+            "v14_encoder_checkpoint": (
+                "FROZEN_SAME_OUTER_FOLD_V14_OUTCOME_BLIND_ENCODER"
+            ),
+            "m2_csv": "TRAIN_TARGET_AND_OUTCOME_BLIND_CONTEXT_SOURCE",
+            "tic2a_merged_registry": "STRICT_TARGET_FREE_FEATURE41_REGISTRY",
+            "unconstrained_feature_cache": (
+                "OUTCOME_BLIND_FEATURE41_UNCONSTRAINED_CACHE"
+            ),
+            "constrained_feature_cache": ("OUTCOME_BLIND_FEATURE41_CONSTRAINED_CACHE"),
+            "tic2a_feature41_model_artifact": (
+                "FROZEN_OUTER_FOLD_TIC2A_FEATURE41_MODEL_ONLY"
+            ),
+            "safe_source_manifest": (
+                "POST_V14_BRANCH5_SCORE_PREDICTION_HISTORY_FREE_SOURCE_PROJECTION"
+            ),
+        },
+        "global_sources_identical_all_folds": [
+            "m2_csv",
+            "tic2a_merged_registry",
+            "unconstrained_feature_cache",
+            "constrained_feature_cache",
+            "safe_source_manifest",
+        ],
+        "tic2a_registry_and_model_projection_strict": True,
+        "every_fold_requires_same_outer_fold_and_seed_zero": True,
+        "complete_provenance_required_before_merge_pass": True,
+    },
+    "artifact_schemas": {
+        "fold": "reactflow_delta.puzzle_set_branch5_route_probe_fold.v1",
+        "prediction": ("reactflow_delta.puzzle_set_branch5_route_probe_prediction.v1"),
+        "ridge_model": "reactflow_delta.puzzle_set_branch5_route_probe_ridge.v1",
+        "merged": "reactflow_delta.puzzle_set_branch5_route_probe_merged.v1",
+        "score": "reactflow_delta.puzzle_set_branch5_route_probe_score.v1",
+        "qualification": (
+            "reactflow_delta.puzzle_set_branch5_route_probe_qualification.v1"
+        ),
+        "fold_filename_pattern": (
+            "puzzle_set_branch5_probe_fold{outer_fold}_seed0.json"
+        ),
+        "prediction_filename_pattern": (
+            "puzzle_set_branch5_probe_predictions_fold{outer_fold}_seed0.npz"
+        ),
+        "ridge_filename_pattern": (
+            "puzzle_set_branch5_probe_ridge_fold{outer_fold}_seed0.json"
+        ),
+        "merged_filename": "puzzle_set_branch5_probe_complete_unscored_merge.json",
+        "score_filename": "puzzle_set_branch5_probe_complete_score.json",
+        "qualification_filename": "puzzle_set_branch5_probe_qualification.json",
+        "fold_artifact_finalization": (
+            "ATOMIC_RENAME_AFTER_COMPLETE_PREDICTION_AND_RIDGE_WRITES"
+        ),
+        "source_manifest_finalization": (
+            "ATOMIC_RENAME_AFTER_COMPLETE_FORTY_CHECKPOINT_VALIDATION"
+        ),
+        "projector_active_pointer": (
+            "REPO_ROOT_CONFIGS_REACTFLOW_DELTA_ACTIVE_CONTRACT_YAML_ONLY"
+        ),
+        "merge_artifact_finalization": "ATOMIC_RENAME_AFTER_COMPLETE_VALIDATION",
+        "score_and_qualification_finalization": ("ATOMIC_RENAME_AFTER_COMPLETE_WRITE"),
+        "merge_authority_bound_paths": [
+            "prediction_dir",
+            "complete_unscored_merge_path",
+        ],
+        "per_fold_artifact_paths_must_equal_prediction_dir_filenames": True,
+        "merge_revalidates_frozen_checkpoint_directories": True,
+        "merge_revalidates_frozen_global_source_paths": [
+            "source_manifest_path",
+            "m2_csv_path",
+            "tic2a_merged_registry_path",
+            "unconstrained_feature_cache_path",
+            "constrained_feature_cache_path",
+        ],
+        "prediction_artifact_forbidden_fields": [
+            "held_target",
+            "held_target_error",
+            "held_qualified_target_mask",
+            "score",
+            "per_puzzle_effect",
+        ],
+        "merged_integrity_required_true": [
+            "complete_fold_universe",
+            "unique_fold_ids",
+            "prediction_only_schema",
+            "prediction_key_universe_unique_per_fold",
+            "samefold_parent_provenance_all_folds",
+            "samefold_v14_content_contrast_all_folds",
+            "single_complete_safe_source_registry",
+            "single_complete_tic2a_safe_registry",
+            "global_input_provenance_consistent_all_folds",
+            "tic2a_safe_feature41_projection_all_folds",
+            "ridge_protocol_exact_all_folds",
+            "target_profile_identity_exact",
+        ],
+        "merged_integrity_required_false": [
+            "partial_scores_inspected",
+            "external_outcome_accessed",
+            "model_or_threshold_selection_performed",
+        ],
+    },
+    "gates": {
+        "comparisons": EXPECTED_BRANCH5_COMPARISONS,
+        "relative_gain_formula": (
+            "MEAN_PUZZLE_COMPARATOR_ERROR_MINUS_ALIGNED_ERROR_DIVIDED_BY_"
+            "MEAN_PUZZLE_COMPARATOR_ERROR"
+        ),
+        "relative_gain_min_each": 0.01,
+        "paired_t_ci": {
+            "confidence": 0.95,
+            "independent_units": "20_PUZZLES",
+            "difference": "COMPARATOR_PUZZLE_ERROR_MINUS_ALIGNED_PUZZLE_ERROR",
+            "sample_standard_deviation_ddof": 1,
+            "critical_value_t_0_975_df19": 2.093024054408263,
+            "lower_bound_gt_each": 0.0,
+        },
+        "positive_puzzles_min_each": 14,
+        "positive_puzzle_definition": (
+            "COMPARATOR_PUZZLE_ERROR_MINUS_ALIGNED_PUZZLE_ERROR_GT_ZERO"
+        ),
+    },
+    "exact_decision": {
+        "PASS": "ALL_INTEGRITY_CHECKS_AND_ALL_FOUR_COMPARISON_GATES_PASS",
+        "FAIL": (
+            "COMPLETE_VALID_SCORE_EXISTS_AND_AT_LEAST_ONE_OF_FOUR_COMPARISON_"
+            "GATES_FAILS"
+        ),
+        "INDETERMINATE": (
+            "INCOMPLETE_OR_INVALID_FOLD_UNIVERSE_PROVENANCE_TARGET_IDENTITY_"
+            "AGGREGATION_NONFINITE_SCORE_COVERAGE_OR_FAILURE_INTEGRITY"
+        ),
+        "not_run_before_complete_v14_terminal_and_branch5_selection": "NOT_RUN",
+        "only_exact_pass_can_make_branch5_p1_eligible": True,
+        "fail_or_indeterminate_routes_to": "P3_STOP_MODEL_RESCUE",
+    },
 }
 EXPECTED_POST_V14_ROUTER = {
     "source_path": EXPECTED_ROUTER_PATH,
     "rule": "FIRST_MATCHING_BRANCH_CONTROLS",
     "selected_router_branch_id": "PENDING_COMPLETE_V14_TERMINAL_HANDOFF",
     "current_route_probe": {
-        "requirement": "NOT_EVALUATED",
-        "status": "NOT_EVALUATED",
+        "requirement": "PENDING_COMPLETE_V14_TERMINAL_ROUTER",
+        "status": "NOT_RUN",
     },
     "p1_eligible_branches": {
         "3": {
@@ -249,8 +890,9 @@ EXPECTED_POST_V14_ROUTER = {
             "classification": "INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED",
             "route_probe_at_activation": {
                 "requirement": "REQUIRED",
-                "status": "EXACT_PASS",
-                "exact_pass_criteria": EXPECTED_ROUTE_PROBE_CRITERIA,
+                "current_status": "NOT_RUN",
+                "activation_status_required": "EXACT_PASS",
+                "specification_ref": "branch_5_route_probe_specification",
             },
         },
     },
@@ -270,8 +912,62 @@ EXPECTED_POST_V14_ROUTER = {
 
 EXPECTED_FROZEN_INPUT_SOURCES = {
     "activation_binding_status": "REALIZED_PATHS_ROLES_AND_COUNTS_PENDING",
-    "bind_realized_sources_before_p1m1": True,
+    "project_realized_sources_during_p1m1": True,
     "bind_each_outer_fold_0_through_19": True,
+    "activation_source_manifest": {
+        "schema_version": (
+            "reactflow_delta.puzzle_set_meta_context_source_manifest.v1"
+        ),
+        "status": "PUZZLE_SET_SOURCE_MANIFEST_BOUND",
+        "binding_status": "REALIZED_PATHS_ROLES_AND_COUNTS_BOUND",
+        "expected_absolute_path": (
+            "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+            "source_binding/puzzle_set_source_manifest.json"
+        ),
+        "generated_or_accepted_now": False,
+        "required_before_p1m2_training": True,
+        "top_fields_exact": [
+            "schema_version",
+            "status",
+            "contract_id",
+            "binding_status",
+            "folds",
+        ],
+        "fold_count": 20,
+        "fold_fields_exact": ["outer_fold", "held_puzzle", "seed", "sources"],
+        "source_ids_exact": [
+            "v13_point_checkpoint",
+            "v14_encoder_checkpoint",
+            "v8_meanaligned_checkpoint",
+            "tic2a_feature41_model_artifact",
+            "tic2a_merged_registry",
+            "unconstrained_feature_cache",
+            "constrained_feature_cache",
+        ],
+        "source_record_fields_exact": [
+            "path",
+            "role",
+            "used_in_candidate_prediction",
+            "outer_fold",
+            "seed",
+            "realized_parameter_count",
+            "trainable_in_p1",
+        ],
+        "canonical_folds_and_held_puzzles_required": True,
+        "fixed_parent_seed": 0,
+        "v10_training_source_present": False,
+        "future_active_authority_required_fields": [
+            "source_manifest_path",
+            "source_binding_status",
+        ],
+        "future_active_authority_required_values": {
+            "source_manifest_path": (
+                "/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/"
+                "source_binding/puzzle_set_source_manifest.json"
+            ),
+            "source_binding_status": "REALIZED_PATHS_ROLES_AND_COUNTS_BOUND",
+        },
+    },
     "v13_seed0_point": {
         "role": "IMMUTABLE_POINT_ANCHOR",
         "source": "SAME_OUTER_FOLD_V13_CANDIDATE_SEED0_POINT_CHECKPOINT",
@@ -294,10 +990,10 @@ EXPECTED_FROZEN_INPUT_SOURCES = {
         "expected_checkpoint_filename_pattern": (
             "v8_corrected_mean_fold{outer_fold}_seed0.pt"
         ),
-        "path_source_field": (
-            "v8_corrected_expert_fold_result_fold{outer_fold}_seed0.json:"
-            "meanaligned_checkpoint"
+        "runtime_path_construction": (
+            "DIRECT_FROZEN_V8_DIRECTORY_PLUS_EXPECTED_FILENAME_PATTERN"
         ),
+        "wide_fold_result_content_may_be_read": False,
         "calibration_direct_feature_width": 201,
         "parameter_count": 109_581,
         "trainable_in_p1": False,
@@ -334,16 +1030,6 @@ EXPECTED_FROZEN_INPUT_SOURCES = {
         "realized_path": "PENDING_ACTIVATION_BINDING",
         "trainable_in_p1": False,
     },
-    "v10": {
-        "role": "TERMINAL_HISTORICAL_COMPARATOR_AND_RESIDUAL_FAMILY_PROVENANCE_ONLY",
-        "expected_result_filename_pattern": (
-            "v10_fold_result_fold{outer_fold}_seed0.json"
-        ),
-        "same_fold_result_path": "PENDING_ACTIVATION_BINDING",
-        "learned_checkpoint_imported_into_p1": False,
-        "feature_source": False,
-        "point_anchor": False,
-    },
     "activation_binding_required_fields": [
         "OUTER_FOLD",
         "SOURCE_ID",
@@ -358,6 +1044,31 @@ EXPECTED_FROZEN_INPUT_SOURCES = {
     "full_upstream_parameter_footprint": "PENDING_ACTIVATION_BINDING",
 }
 
+EXPECTED_SCORE_STAGE_HISTORICAL_COMPARATORS = {
+    "unique_historical_bundle": {
+        "role": "SOLE_TRANSITIVE_HISTORICAL_SCORE_REFERENCE",
+        "source_phase": "V13M3",
+        "absolute_path": (
+            "/mnt/cunyuliu/reactflow_delta_model_rescue_v13/"
+            "v13m3_screen_seed0/v13m3_complete_score.json"
+        ),
+        "expected_schema": "reactflow_delta.model_rescue_v13_score.v1",
+        "direct_result_artifacts_read": ["V13M3_COMPLETE_SCORE"],
+        "transitive_lineage_only": [
+            "V12_SIGNED_DELTA_AND_CRPS",
+            "V11_POINT_ABSOLUTE",
+            "V10_DISTRIBUTION_ABSOLUTE",
+        ],
+        "strict_complete_twenty_fold_validation": True,
+        "registered_coverage_required": 1.0,
+        "failure_rate_required": 0.0,
+        "unexpected_keys_required": 0,
+        "training_runner_may_read_or_require": False,
+        "score_stage_only_after_complete_merge_and_score_token": True,
+    },
+    "direct_v10_fold_result_read_by_p1_scorer": False,
+}
+
 _SOURCE_SCOPES = {
     "v13_point_checkpoint": "SAME_OUTER_FOLD",
     "v14_encoder_checkpoint": "SAME_OUTER_FOLD",
@@ -366,18 +1077,42 @@ _SOURCE_SCOPES = {
     "tic2a_merged_registry": "GLOBAL",
     "unconstrained_feature_cache": "GLOBAL",
     "constrained_feature_cache": "GLOBAL",
-    "v10_fold_comparator": "SAME_OUTER_FOLD",
 }
 EXPECTED_SOURCE_RECORDS = {
     name: {
-        **spec,
+        "role": spec["role"],
+        "used_in_candidate_prediction": spec["used_in_candidate_prediction"],
         "outer_fold_scope": _SOURCE_SCOPES[name],
+        "seed": spec["seed"],
     }
     for name, spec in FROZEN_INPUT_SOURCE_SPEC.items()
 }
 EXPECTED_ARTIFACT_PROVENANCE = {
     "fold_schema": FOLD_SCHEMA,
     "merged_schema": MERGED_SCHEMA,
+    "production_cli_authority_binding": ("EXACT_FLAT_ACTIVE_COMMON_AND_PHASE_PATHS"),
+    "training_data_path_authority_binding": "EXACT_ACTIVE_M2_CSV_PATH",
+    "training_universe_must_match_authorized_m2_path": True,
+    "production_phase_source_manifest_gate": (
+        "EXACT_ACTIVE_BOUND_MANIFEST_BEFORE_ARTIFACT_ACCESS"
+    ),
+    "production_merge_phase_universe_binding": (
+        "EXACT_PHASE_FOLDS_SEEDS_EPOCHS_AND_PARAMETER_COUNTS"
+    ),
+    "production_merge_caller_redefinition_allowed": False,
+    "production_fold_artifact_path_binding": (
+        "EXACT_CANONICAL_FILENAMES_WITHIN_ACTIVE_PREDICTION_DIR"
+    ),
+    "fold_source_records_must_match_active_manifest": True,
+    "fold_result_finalization": (
+        "ATOMIC_RENAME_AFTER_ALL_PREDICTION_AND_CHECKPOINT_ARTIFACTS"
+    ),
+    "merge_finalization": "ATOMIC_RENAME_AFTER_COMPLETE_UNIVERSE_VALIDATION",
+    "formal_assembly_finalization": (
+        "ATOMIC_RENAME_AFTER_ALL_TWENTY_ASSEMBLED_PREDICTIONS"
+    ),
+    "score_finalization": "ATOMIC_RENAME_AFTER_COMPLETE_SCORE",
+    "qualification_finalization": ("ATOMIC_RENAME_AFTER_COMPLETE_MECHANICAL_GATE"),
     "fold_frozen_input_sources_field": "frozen_input_sources",
     "source_record_fields_exact": [
         "path",
@@ -567,6 +1302,9 @@ def _assert_declared_paths_exist(repo_root: Path, contract: dict[str, Any]) -> N
     for label, relative_path in EXPECTED_EXECUTABLE_PATHS.items():
         if not (repo_root / relative_path).is_file():
             raise RuntimeError(f"Puzzle-Set V5 declared runtime is missing: {label}")
+    for label, relative_path in EXPECTED_BRANCH5_RUNTIME_PATHS.items():
+        if not (repo_root / relative_path).is_file():
+            raise RuntimeError(f"Puzzle-Set V5 branch-5 runtime is missing: {label}")
 
 
 def _assert_v14_remains_sole_active(repo_root: Path, active: dict[str, Any]) -> None:
@@ -642,8 +1380,16 @@ def _assert_inactive_declaration(contract: dict[str, Any]) -> None:
         raise RuntimeError("Puzzle-Set V5 inactive authority changed")
     if contract.get("post_v14_router") != EXPECTED_POST_V14_ROUTER:
         raise RuntimeError("Puzzle-Set V5 post-V14 route conditions changed")
+    if contract.get("branch_5_route_probe_specification") != (
+        EXPECTED_BRANCH5_ROUTE_PROBE
+    ):
+        raise RuntimeError("Puzzle-Set V5 branch-5 route-probe specification changed")
     if contract.get("future_phase_training_tokens") != EXPECTED_FUTURE_PHASE_TOKENS:
         raise RuntimeError("Puzzle-Set V5 future phase token declaration changed")
+    if contract.get("future_p1_runtime_authority") != (
+        EXPECTED_FUTURE_P1_RUNTIME_AUTHORITY
+    ):
+        raise RuntimeError("Puzzle-Set V5 future runtime authority paths changed")
 
 
 def _assert_scope_parents_inputs_and_artifacts(contract: dict[str, Any]) -> None:
@@ -656,6 +1402,10 @@ def _assert_scope_parents_inputs_and_artifacts(contract: dict[str, Any]) -> None
         raise RuntimeError("Puzzle-Set V5 frozen parent identity changed")
     if contract.get("frozen_input_sources") != EXPECTED_FROZEN_INPUT_SOURCES:
         raise RuntimeError("Puzzle-Set V5 frozen input-source declaration changed")
+    if contract.get("score_stage_historical_comparators") != (
+        EXPECTED_SCORE_STAGE_HISTORICAL_COMPARATORS
+    ):
+        raise RuntimeError("Puzzle-Set V5 score-stage comparator declaration changed")
     if contract.get("artifact_schemas_and_provenance") != (
         EXPECTED_ARTIFACT_PROVENANCE
     ):
@@ -806,7 +1556,9 @@ def _assert_frozen_training(contract: dict[str, Any]) -> None:
 
 def _assert_frozen_universes_and_gates(contract: dict[str, Any]) -> None:
     if contract.get("p1m2_smoke") != {
-        "activation_prerequisite": "FOCUSED_PUZZLE_SET_V5_ACTIVATION_COMMIT",
+        "activation_prerequisite": (
+            "P1M1_SOURCE_MANIFEST_BOUND_AND_FOCUSED_TESTS_PASS_COMMIT"
+        ),
         "training_token": EXPECTED_PHASE_TOKENS["P1M2"],
         "folds": [0, 1],
         "seeds": [0],
@@ -892,12 +1644,9 @@ def _assert_decision_ledger(contract: dict[str, Any], ledger: dict[str, Any]) ->
             "BRANCH_SPECIFIC_ROUTE_PROBE_STATE_BOUND_AS_NOT_APPLICABLE_OR_"
             "REQUIRED_EXACT_PASS"
         ),
-        "ALL_REALIZED_FROZEN_INPUT_PATHS_ROLES_AND_COUNTS_BOUND",
-        (
-            "INACTIVE_MACHINE_CONTRACT_PROMOTED_AND_ACTIVE_POINTER_FROZEN_IN_"
-            "FOCUSED_COMMIT"
-        ),
-        "CONTRACT_VALIDATOR_AND_V5_FOCUSED_TESTS_PASS_WITH_TRAINING_CLOSED",
+        "EXACT_FUTURE_SOURCE_PATH_UNIVERSE_FROZEN_WITH_BINDING_PENDING",
+        "P1M1_SOURCE_PROJECTION_ONLY_ACTIVE_POINTER_FROZEN_IN_FOCUSED_COMMIT",
+        "CONTRACT_VALIDATOR_PASS_WITH_TRAINING_AND_OUTCOME_ACCESS_CLOSED",
     ]:
         raise RuntimeError("Puzzle-Set V5 ledger activation conditions changed")
     if ledger.get("activation_exclusions") != {
@@ -914,20 +1663,132 @@ def _assert_decision_ledger(contract: dict[str, Any], ledger: dict[str, Any]) ->
         or router.get("selected_router_branch_id")
         != "PENDING_COMPLETE_V14_TERMINAL_HANDOFF"
         or router.get("route_probe")
-        != {"requirement": "NOT_EVALUATED", "status": "NOT_EVALUATED"}
+        != {
+            "requirement": "PENDING_COMPLETE_V14_TERMINAL_ROUTER",
+            "status": "NOT_RUN",
+        }
         or set(router.get("activation_cases", {})) != {"3", "4", "5"}
         or set(router.get("non_p1_cases", {})) != {"1", "2", "6", "7"}
     ):
         raise RuntimeError("Puzzle-Set V5 ledger router state changed")
-    branch_5_criteria = router["activation_cases"]["5"]["route_probe"].get(
-        "fixed_complete_outer_train_only_criteria"
-    )
-    if branch_5_criteria != {
-        key: value
-        for key, value in EXPECTED_ROUTE_PROBE_CRITERIA.items()
-        if key != "data_access"
+    if router["activation_cases"]["5"] != {
+        "classification": "INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED",
+        "result": "P1_ELIGIBLE_ONLY_AFTER_ROUTE_PROBE",
+        "route_probe": {
+            "requirement": "REQUIRED",
+            "current_status": "NOT_RUN",
+            "activation_status_required": "EXACT_PASS",
+            "specification_ref": "branch_5_route_probe",
+        },
     }:
         raise RuntimeError("Puzzle-Set V5 ledger branch-5 probe changed")
+    branch_5 = ledger.get("branch_5_route_probe", {})
+    machine_branch_5 = contract["branch_5_route_probe_specification"]
+    if (
+        set(branch_5)
+        != {
+            "status",
+            "specification_only",
+            "runtime_paths",
+            "current_authority",
+            "future_runtime_authority",
+            "applicability",
+            "frozen_parents",
+            "feature_definition",
+            "fit",
+            "complete_before_score",
+            "source_provenance",
+            "artifact_schemas",
+            "exact_gate",
+            "exact_decision",
+        }
+        or branch_5.get("status") != "FROZEN_INACTIVE_NOT_RUN"
+        or branch_5.get("specification_only") is not True
+        or branch_5.get("runtime_paths") != EXPECTED_BRANCH5_RUNTIME_PATHS
+        or branch_5.get("future_runtime_authority")
+        != EXPECTED_BRANCH5_RUNTIME_AUTHORITY
+        or branch_5.get("source_provenance", {}).get("terminal_safe_manifest")
+        != EXPECTED_BRANCH5_LEDGER_SAFE_MANIFEST
+        or branch_5.get("source_provenance", {}).get("records")
+        != machine_branch_5["source_provenance"]["exact_records"]
+        or branch_5.get("source_provenance", {}).get("roles")
+        != machine_branch_5["source_provenance"]["roles"]
+        or branch_5.get("source_provenance", {}).get(
+            "global_sources_identical_all_folds"
+        )
+        != machine_branch_5["source_provenance"]["global_sources_identical_all_folds"]
+        or branch_5.get("source_provenance", {}).get(
+            "tic2a_registry_and_model_projection_strict"
+        )
+        is not True
+        or branch_5.get("artifact_schemas") != machine_branch_5["artifact_schemas"]
+        or branch_5.get("exact_gate")
+        != {
+            "comparisons": EXPECTED_BRANCH5_COMPARISONS,
+            "relative_gain_min_each": 0.01,
+            "relative_gain_formula": (
+                "MEAN_PUZZLE_COMPARATOR_ERROR_MINUS_ALIGNED_ERROR_DIVIDED_BY_"
+                "MEAN_PUZZLE_COMPARATOR_ERROR"
+            ),
+            "paired_t_ci_lower_gt_each": 0.0,
+            "paired_t_ci_confidence": 0.95,
+            "paired_t_ci_df": 19,
+            "positive_puzzles_min_each": 14,
+        }
+        or branch_5.get("current_authority", {}).get("route_probe_execution_allowed")
+        is not False
+        or branch_5.get("current_authority", {}).get("held_score_read_allowed")
+        is not False
+        or branch_5.get("feature_definition", {}).get(
+            "source_receiver_concatenation_width"
+        )
+        != 520
+        or branch_5.get("feature_definition", {}).get("v14_content_contrast")
+        != {
+            "formula": ("V14_ENCODE_REAL_MINUS_V14_ENCODE_COORDINATE_ONLY_REFERENCE"),
+            "reference_preserves": ["position", "region"],
+            "reference_zeros": [
+                "sequence",
+                "reactivity",
+                "precision",
+                "observed",
+            ],
+            "same_frozen_encoder_eval": True,
+            "shift17_only_after_contrast": True,
+            "zero_content_aligned_shift_equal_zero": True,
+        }
+        or branch_5.get("fit", {}).get("model")
+        != "WEIGHTED_RIDGE_ALPHA1_UNPENALIZED_INTERCEPT"
+        or branch_5.get("fit", {}).get("inactive_std_threshold_lt") != 1.0e-8
+        or branch_5.get("fit", {}).get("inactive_std_replacement_scale") != 1.0
+        or branch_5.get("complete_before_score")
+        != {
+            "folds": 20,
+            "seed": 0,
+            "prediction_only_before_complete_merge": True,
+            "partial_score_allowed": False,
+            "complete_merge_then_score_invocations": 1,
+            "independent_units": "20_PUZZLES",
+        }
+        or branch_5.get("exact_decision")
+        != {
+            "PASS": "ALL_INTEGRITY_CHECKS_AND_ALL_FOUR_COMPARISON_GATES_PASS",
+            "FAIL": (
+                "COMPLETE_VALID_SCORE_EXISTS_AND_AT_LEAST_ONE_OF_FOUR_"
+                "COMPARISON_GATES_FAILS"
+            ),
+            "INDETERMINATE": (
+                "INCOMPLETE_OR_INVALID_UNIVERSE_PROVENANCE_IDENTITY_"
+                "AGGREGATION_SCORE_OR_PREDICTION_INTEGRITY"
+            ),
+            "activation_effect": {
+                "PASS": ("BRANCH5_P1_ELIGIBLE_FOR_SEPARATE_FOCUSED_ACTIVATION_COMMIT"),
+                "FAIL": "P3_STOP_MODEL_RESCUE",
+                "INDETERMINATE": "P3_STOP_MODEL_RESCUE",
+            },
+        }
+    ):
+        raise RuntimeError("Puzzle-Set V5 ledger branch-5 specification changed")
     if ledger.get("phase_state") != {
         "P1M0": "DRAFT_FROZEN_INACTIVE",
         "P1M1": "NOT_AUTHORIZED",
@@ -937,6 +1798,12 @@ def _assert_decision_ledger(contract: dict[str, Any], ledger: dict[str, Any]) ->
         "P1M5": "NOT_RUN",
     }:
         raise RuntimeError("Puzzle-Set V5 ledger phase state changed")
+    if ledger.get("future_phase_training_tokens") != EXPECTED_FUTURE_PHASE_TOKENS:
+        raise RuntimeError("Puzzle-Set V5 ledger future phase tokens changed")
+    if ledger.get("future_p1_runtime_authority") != (
+        EXPECTED_FUTURE_P1_RUNTIME_AUTHORITY
+    ):
+        raise RuntimeError("Puzzle-Set V5 ledger future runtime authority changed")
     formal_gate = ledger.get("formal_additional_gates", {})
     if (
         formal_gate.get(
@@ -960,13 +1827,15 @@ def _assert_decision_ledger(contract: dict[str, Any], ledger: dict[str, Any]) ->
             "tic2a_merged_registry",
             "unconstrained_feature_cache",
             "constrained_feature_cache",
-            "v10",
         )
     }
     if (
         ledger_inputs.get("activation_binding_status")
         != "REALIZED_PATHS_ROLES_AND_COUNTS_PENDING"
+        or ledger_inputs.get("project_realized_sources_during_p1m1") is not True
         or ledger_inputs.get("each_outer_fold_0_through_19_must_be_bound") is not True
+        or ledger_inputs.get("activation_source_manifest")
+        != EXPECTED_FROZEN_INPUT_SOURCES["activation_source_manifest"]
         or ledger_inputs.get("sources") != expected_ledger_sources
         or ledger_inputs.get("realized_binding_fields")
         != EXPECTED_FROZEN_INPUT_SOURCES["activation_binding_required_fields"]
@@ -976,6 +1845,10 @@ def _assert_decision_ledger(contract: dict[str, Any], ledger: dict[str, Any]) ->
         != "PENDING_ACTIVATION_BINDING"
     ):
         raise RuntimeError("Puzzle-Set V5 ledger input binding state changed")
+    if ledger.get("score_stage_historical_comparators") != (
+        EXPECTED_SCORE_STAGE_HISTORICAL_COMPARATORS
+    ):
+        raise RuntimeError("Puzzle-Set V5 ledger score-stage comparator changed")
     ledger_artifacts = ledger.get("artifact_schemas_and_provenance", {})
     expected_ledger_records = {
         name: [
@@ -989,6 +1862,32 @@ def _assert_decision_ledger(contract: dict[str, Any], ledger: dict[str, Any]) ->
     if (
         ledger_artifacts.get("fold_schema") != FOLD_SCHEMA
         or ledger_artifacts.get("merged_schema") != MERGED_SCHEMA
+        or ledger_artifacts.get("production_cli_authority_binding")
+        != "EXACT_FLAT_ACTIVE_COMMON_AND_PHASE_PATHS"
+        or ledger_artifacts.get("training_data_path_authority_binding")
+        != "EXACT_ACTIVE_M2_CSV_PATH"
+        or ledger_artifacts.get("training_universe_must_match_authorized_m2_path")
+        is not True
+        or ledger_artifacts.get("production_phase_source_manifest_gate")
+        != "EXACT_ACTIVE_BOUND_MANIFEST_BEFORE_ARTIFACT_ACCESS"
+        or ledger_artifacts.get("production_merge_phase_universe_binding")
+        != "EXACT_PHASE_FOLDS_SEEDS_EPOCHS_AND_PARAMETER_COUNTS"
+        or ledger_artifacts.get("production_merge_caller_redefinition_allowed")
+        is not False
+        or ledger_artifacts.get("production_fold_artifact_path_binding")
+        != "EXACT_CANONICAL_FILENAMES_WITHIN_ACTIVE_PREDICTION_DIR"
+        or ledger_artifacts.get("fold_source_records_must_match_active_manifest")
+        is not True
+        or ledger_artifacts.get("fold_result_finalization")
+        != "ATOMIC_RENAME_AFTER_ALL_PREDICTION_AND_CHECKPOINT_ARTIFACTS"
+        or ledger_artifacts.get("merge_finalization")
+        != "ATOMIC_RENAME_AFTER_COMPLETE_UNIVERSE_VALIDATION"
+        or ledger_artifacts.get("formal_assembly_finalization")
+        != "ATOMIC_RENAME_AFTER_ALL_TWENTY_ASSEMBLED_PREDICTIONS"
+        or ledger_artifacts.get("score_finalization")
+        != "ATOMIC_RENAME_AFTER_COMPLETE_SCORE"
+        or ledger_artifacts.get("qualification_finalization")
+        != "ATOMIC_RENAME_AFTER_COMPLETE_MECHANICAL_GATE"
         or ledger_artifacts.get("required_source_records") != expected_ledger_records
         or ledger_artifacts.get("fold_candidate_specific_trainable_parameter_expected")
         != 1_468_165

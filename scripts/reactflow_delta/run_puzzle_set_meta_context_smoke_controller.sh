@@ -5,12 +5,12 @@ repo=$(cd "$(dirname "$0")/../.." && pwd)
 python_bin=/home/cunyuliu/miniconda3/envs/editflow/bin/python
 m2=/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
 v8_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
-v10_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0
 v13_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
 v14_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
 tic2a=/mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json
 unconstrained=/mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
 constrained=/mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+source_manifest=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json
 out=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m2_real_smoke
 
 if [[ "$#" -ne 1 ]]; then
@@ -65,12 +65,12 @@ if [[ "${#missing[@]}" -gt 0 ]]; then
       --phase P1M2 \
       --m2-csv "${m2}" \
       --v8-dir "${v8_dir}" \
-      --v10-dir "${v10_dir}" \
       --v13-dir "${v13_dir}" \
       --v14-dir "${v14_dir}" \
       --tic2a-merged-json "${tic2a}" \
       --unconstrained-cache "${unconstrained}" \
       --constrained-cache "${constrained}" \
+      --source-manifest "${source_manifest}" \
       --out-dir "${out}" \
       --device cuda:0 \
       --folds "${csv}" \
@@ -82,6 +82,7 @@ if [[ "${#missing[@]}" -gt 0 ]]; then
 fi
 
 "${python_bin}" -m scripts.reactflow_delta.merge_puzzle_set_meta_context_probe \
+  --repo-root "${repo}" \
   --input-dir "${out}" \
   --phase P1M2 \
   --folds 0,1 \
@@ -94,5 +95,6 @@ fi
   --out-json "${out}/p1m2_complete_unscored_merge.json"
 
 "${python_bin}" -m scripts.reactflow_delta.qualify_puzzle_set_meta_context_smoke \
+  --repo-root "${repo}" \
   --merged-json "${out}/p1m2_complete_unscored_merge.json" \
   --out-json "${out}/p1m2_engineering_smoke_qualification.json"

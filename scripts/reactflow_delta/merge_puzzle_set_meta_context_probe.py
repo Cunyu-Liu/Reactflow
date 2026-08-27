@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +15,8 @@ import numpy as np
 from scipy.special import ndtr
 
 from scripts.reactflow_delta.puzzle_set_meta_context import (
+    EXPECTED_TOTAL_PARAMETERS,
+    EXPECTED_TRAINABLE_PARAMETERS,
     FULL_CROSS_CONSTRUCT,
     POINT_CONTEXT_LR,
     POINT_GRADIENT_CLIP,
@@ -38,6 +42,16 @@ from scripts.reactflow_delta.puzzle_set_meta_context_pretraining import (
     EXPECTED_PRETRAINING_TRAINABLE_PARAMETERS,
     PRETRAINING_MASK_FRACTION,
 )
+from scripts.reactflow_delta.puzzle_set_score_chain import (
+    assert_active_phase,
+    assert_authority_paths,
+)
+from scripts.reactflow_delta.puzzle_set_safe_sources import (
+    FROZEN_INPUT_SOURCE_SPEC,
+    SOURCE_MANIFEST_FOLD_FIELDS,
+    SOURCE_MANIFEST_RECORD_FIELDS,
+    validate_source_manifest,
+)
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
     FOLD_SCOPED_INPUT_SOURCES,
     FOLD_SCHEMA,
@@ -49,6 +63,13 @@ MERGED_SCHEMA = "reactflow_delta.puzzle_set_meta_context_merged.proposed.v9"
 FOLD_FILENAME = re.compile(
     r"puzzle_set_fold_result_fold(?P<fold>\d+)_seed(?P<seed>\d+)\.json"
 )
+FOLD_RUNTIME_SOURCE_FIELDS = {
+    "path",
+    "role",
+    "used_in_candidate_prediction",
+    "outer_fold",
+    "seed",
+}
 PREDICTION_FIELDS = {
     "schema_version",
     "keys",
@@ -68,6 +89,129 @@ PREDICTION_FIELDS = {
     "null_locations",
     "null_scales",
     "null_expected_absolute_delta",
+}
+
+
+def _canonical_fold_artifact_paths(
+    input_dir: Path, *, fold: int, seed: int
+) -> dict[str, Path]:
+    root = input_dir.resolve()
+    suffix = f"fold{int(fold)}_seed{int(seed)}"
+    return {
+        "prediction_artifact": root / f"puzzle_set_predictions_{suffix}.npz",
+        "point_candidate": root / f"puzzle_set_candidate_point_{suffix}.pt",
+        "point_null": root / f"puzzle_set_null_point_{suffix}.pt",
+        "decoder_candidate": root / f"puzzle_set_candidate_wt_decoder_{suffix}.pt",
+        "decoder_null": root / f"puzzle_set_null_wt_decoder_{suffix}.pt",
+        "residual_candidate": root / f"puzzle_set_candidate_residual_{suffix}.pt",
+        "residual_null": root / f"puzzle_set_null_residual_{suffix}.pt",
+    }
+
+
+def _fold_artifact_paths(row: Mapping[str, Any]) -> dict[str, Path]:
+    point = row.get("point_checkpoints")
+    decoder = row.get("pretraining_decoder_checkpoints")
+    residual = row.get("residual_checkpoints")
+    if not all(isinstance(value, Mapping) for value in (point, decoder, residual)):
+        raise ValueError("puzzle-set fold checkpoint records are malformed")
+    return {
+        "prediction_artifact": Path(str(row.get("prediction_artifact", ""))),
+        "point_candidate": Path(str(point.get("candidate", ""))),
+        "point_null": Path(str(point.get("null", ""))),
+        "decoder_candidate": Path(str(decoder.get("candidate", ""))),
+        "decoder_null": Path(str(decoder.get("null", ""))),
+        "residual_candidate": Path(str(residual.get("candidate", ""))),
+        "residual_null": Path(str(residual.get("null", ""))),
+    }
+
+
+def _assert_fold_artifact_binding(
+    row: Mapping[str, Any], *, input_dir: Path, fold: int, seed: int
+) -> None:
+    observed = _fold_artifact_paths(row)
+    expected = _canonical_fold_artifact_paths(input_dir, fold=fold, seed=seed)
+    if observed != expected or any(
+        not path.is_absolute() for path in observed.values()
+    ):
+        changed = sorted(
+            name for name in expected if observed.get(name) != expected[name]
+        )
+        raise ValueError(
+            "puzzle-set fold artifacts differ from the authority-bound prediction "
+            f"directory at {changed}"
+        )
+
+
+def _assert_fold_source_manifest_binding(
+    frozen_sources: Mapping[str, Any],
+    *,
+    manifest_rows: Mapping[int, Mapping[str, Any]],
+    fold: int,
+) -> None:
+    manifest_row = manifest_rows.get(int(fold))
+    if (
+        not isinstance(manifest_row, Mapping)
+        or set(manifest_row) != SOURCE_MANIFEST_FOLD_FIELDS
+        or manifest_row.get("outer_fold") != int(fold)
+        or manifest_row.get("held_puzzle") != f"P{int(fold) + 1:02d}"
+        or manifest_row.get("seed") != 0
+        or not isinstance(manifest_row.get("sources"), Mapping)
+        or set(manifest_row["sources"]) != set(FROZEN_INPUT_SOURCE_SPEC)
+    ):
+        raise ValueError(f"puzzle-set active source manifest fold {fold} is malformed")
+    if set(frozen_sources) != set(FROZEN_INPUT_SOURCE_SPEC):
+        raise ValueError(f"puzzle-set fold {fold} source universe changed")
+    for source_id, runtime_source in frozen_sources.items():
+        bound_source = manifest_row["sources"][source_id]
+        expected_spec = FROZEN_INPUT_SOURCE_SPEC[source_id]
+        if (
+            not isinstance(runtime_source, Mapping)
+            or set(runtime_source) != FOLD_RUNTIME_SOURCE_FIELDS
+            or not isinstance(bound_source, Mapping)
+            or set(bound_source) != SOURCE_MANIFEST_RECORD_FIELDS
+            or bound_source.get("realized_parameter_count")
+            != expected_spec["realized_parameter_count"]
+            or bound_source.get("trainable_in_p1")
+            is not expected_spec["trainable_in_p1"]
+            or any(
+                runtime_source.get(field) != bound_source.get(field)
+                for field in FOLD_RUNTIME_SOURCE_FIELDS
+            )
+        ):
+            raise ValueError(
+                f"puzzle-set fold {fold} source {source_id} differs from the "
+                "active source manifest"
+            )
+
+
+PRODUCTION_MERGE_UNIVERSES = {
+    "P1M2": {
+        "folds": (0, 1),
+        "seeds": (0,),
+        "pretraining_epochs": 3,
+        "point_epochs": 3,
+        "calibration_epochs": 3,
+        "parameter_count": EXPECTED_TOTAL_PARAMETERS,
+        "trainable_parameter_count": EXPECTED_TRAINABLE_PARAMETERS,
+    },
+    "P1M3": {
+        "folds": tuple(range(20)),
+        "seeds": (0,),
+        "pretraining_epochs": 200,
+        "point_epochs": 40,
+        "calibration_epochs": 40,
+        "parameter_count": EXPECTED_TOTAL_PARAMETERS,
+        "trainable_parameter_count": EXPECTED_TRAINABLE_PARAMETERS,
+    },
+    "P1M4": {
+        "folds": tuple(range(20)),
+        "seeds": tuple(range(5)),
+        "pretraining_epochs": 200,
+        "point_epochs": 40,
+        "calibration_epochs": 40,
+        "parameter_count": EXPECTED_TOTAL_PARAMETERS,
+        "trainable_parameter_count": EXPECTED_TRAINABLE_PARAMETERS,
+    },
 }
 
 
@@ -314,7 +458,22 @@ def merge_complete_universe(
     expected_calibration_epochs: int,
     expected_parameter_count: int,
     expected_trainable_parameter_count: int,
+    expected_artifact_dir: Path | None = None,
+    expected_source_manifest_rows: Mapping[int, Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    production_binding_supplied = expected_artifact_dir is not None
+    if production_binding_supplied != (expected_source_manifest_rows is not None):
+        raise ValueError(
+            "puzzle-set production artifact and source-manifest bindings must be "
+            "supplied together"
+        )
+    if expected_artifact_dir is not None and (
+        not expected_artifact_dir.is_absolute()
+        or expected_artifact_dir.resolve() != input_dir.resolve()
+    ):
+        raise ValueError(
+            "puzzle-set production artifact binding differs from the merge input"
+        )
     if len(set(expected_folds)) != len(expected_folds) or len(
         set(expected_seeds)
     ) != len(expected_seeds):
@@ -397,6 +556,12 @@ def merge_complete_universe(
             outer_fold=pair[0],
             require_files=True,
         )
+        if expected_source_manifest_rows is not None:
+            _assert_fold_source_manifest_binding(
+                frozen_sources,
+                manifest_rows=expected_source_manifest_rows,
+                fold=pair[0],
+            )
         if Path(frozen_sources["v13_point_checkpoint"]["path"]) != Path(
             parents["v13_point"]
         ) or Path(frozen_sources["v14_encoder_checkpoint"]["path"]) != Path(
@@ -544,6 +709,13 @@ def merge_complete_universe(
         )
         if not recorded_invariants_pass(row.get("invariants", {})):
             raise ValueError(f"puzzle-set fold {pair} lacks required invariants")
+        if expected_artifact_dir is not None:
+            _assert_fold_artifact_binding(
+                row,
+                input_dir=expected_artifact_dir,
+                fold=pair[0],
+                seed=pair[1],
+            )
         checks, prediction_keys = prediction_checks(
             Path(row["prediction_artifact"]),
             fold=pair[0],
@@ -691,8 +863,62 @@ def _csv_ints(value: str) -> list[int]:
     return [int(item) for item in value.split(",") if item.strip()]
 
 
+def assert_production_merge_universe(
+    *,
+    phase: str,
+    folds: list[int],
+    seeds: list[int],
+    pretraining_epochs: int,
+    point_epochs: int,
+    calibration_epochs: int,
+    parameter_count: int,
+    trainable_parameter_count: int,
+) -> dict[str, Any]:
+    """Reject a partial or caller-redefined canonical production merge."""
+
+    expected = PRODUCTION_MERGE_UNIVERSES.get(phase)
+    if expected is None:
+        raise ValueError(f"unsupported Puzzle-Set merge phase: {phase}")
+    observed = {
+        "folds": tuple(folds),
+        "seeds": tuple(seeds),
+        "pretraining_epochs": int(pretraining_epochs),
+        "point_epochs": int(point_epochs),
+        "calibration_epochs": int(calibration_epochs),
+        "parameter_count": int(parameter_count),
+        "trainable_parameter_count": int(trainable_parameter_count),
+    }
+    if observed != expected:
+        raise ValueError(
+            f"Puzzle-Set {phase} production merge universe differs from the "
+            "frozen folds, seeds, epochs, or parameter counts"
+        )
+    return dict(expected)
+
+
+def assert_merge_authority(
+    repo_root: Path, *, phase: str, input_dir: Path, out_json: Path
+) -> dict[str, Any]:
+    """Bind a real prediction-only merge to its active artifact universe."""
+
+    active = assert_active_phase(
+        repo_root,
+        phase=phase,
+        held_score_must_be_closed=True,
+    )
+    assert_authority_paths(
+        active,
+        {
+            "prediction_dir": input_dir,
+            "complete_unscored_merge_path": out_json,
+        },
+    )
+    return active
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--phase", choices=("P1M2", "P1M3", "P1M4"), required=True)
     parser.add_argument("--folds", required=True)
@@ -704,24 +930,51 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--trainable-parameter-count", type=int, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.out_json.exists():
+    input_dir = args.input_dir.resolve()
+    out_json = args.out_json.resolve()
+    active = assert_merge_authority(
+        args.repo_root.resolve(),
+        phase=args.phase,
+        input_dir=input_dir,
+        out_json=out_json,
+    )
+    frozen = assert_production_merge_universe(
+        phase=args.phase,
+        folds=_csv_ints(args.folds),
+        seeds=_csv_ints(args.seeds),
+        pretraining_epochs=args.pretraining_epochs,
+        point_epochs=args.point_epochs,
+        calibration_epochs=args.calibration_epochs,
+        parameter_count=args.parameter_count,
+        trainable_parameter_count=args.trainable_parameter_count,
+    )
+    authority = active.get("authority")
+    if not isinstance(authority, Mapping):
+        raise RuntimeError("Puzzle-Set merge authority is malformed")
+    source_manifest_path = Path(str(authority.get("source_manifest_path", "")))
+    source_manifest_rows = validate_source_manifest(source_manifest_path)
+    if out_json.exists():
         raise FileExistsError("refusing to overwrite puzzle-set complete merge")
     result = merge_complete_universe(
-        args.input_dir,
+        input_dir,
         expected_phase=args.phase,
-        expected_folds=_csv_ints(args.folds),
-        expected_seeds=_csv_ints(args.seeds),
-        expected_pretraining_epochs=args.pretraining_epochs,
-        expected_point_epochs=args.point_epochs,
-        expected_calibration_epochs=args.calibration_epochs,
-        expected_parameter_count=args.parameter_count,
-        expected_trainable_parameter_count=args.trainable_parameter_count,
+        expected_folds=frozen["folds"],
+        expected_seeds=frozen["seeds"],
+        expected_pretraining_epochs=frozen["pretraining_epochs"],
+        expected_point_epochs=frozen["point_epochs"],
+        expected_calibration_epochs=frozen["calibration_epochs"],
+        expected_parameter_count=frozen["parameter_count"],
+        expected_trainable_parameter_count=frozen["trainable_parameter_count"],
+        expected_artifact_dir=input_dir,
+        expected_source_manifest_rows=source_manifest_rows,
     )
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out_json.with_name(f"{out_json.name}.tmp")
+    temporary.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
+    os.replace(temporary, out_json)
+    print(json.dumps({"status": result["status"], "result": str(out_json)}))
     return 0 if result["status"] == "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS" else 1
 
 

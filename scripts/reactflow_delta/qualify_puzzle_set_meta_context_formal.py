@@ -5,11 +5,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 from scripts.reactflow_delta.qualify_model_rescue_v10 import paired_summary
 from scripts.reactflow_delta.qualify_puzzle_set_meta_context import (
+    EXPECTED_GATE_FIELDS as SCREEN_GATE_FIELDS,
     SCHEMA as SCREEN_QUALIFICATION_SCHEMA,
     qualify as qualify_screen,
 )
@@ -17,30 +19,94 @@ from scripts.reactflow_delta.score_puzzle_set_meta_context import (
     SCHEMA as SCREEN_SCORE_SCHEMA,
 )
 from scripts.reactflow_delta.score_puzzle_set_meta_context_formal import (
+    EXPECTED_PHASE,
+    EXPECTED_SCORE_TOKEN,
     SCHEMA as FORMAL_SCORE_SCHEMA,
+)
+from scripts.reactflow_delta.puzzle_set_score_chain import (
+    assert_active_phase,
+    assert_authority_paths,
+    validate_p1_score_rows,
+    validate_retention_score_protocol,
 )
 
 
 SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_qualification.proposed.v2"
+EXPECTED_FORMAL_SCORE_TOP_FIELDS = {
+    "schema_version",
+    "phase",
+    "status",
+    "mixture_scores",
+    "individual_seed_scores",
+    "context_retention_summary",
+    "target_profile_identity",
+    "target_join_after_complete_merge",
+    "v13_parent_and_feature41_replay_at_5e_7",
+    "v13_historical_bundle_protocol_validated",
+    "tic2a_registry_cross_linked_to_merged_provenance",
+    "feature41_reference_fixed_across_seeds",
+    "formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources",
+    "equal_seed_mixture",
+    "best_seed_selection_performed",
+    "partial_fold_scores_inspected",
+    "external_outcome_accessed",
+    "model_or_threshold_selection_performed",
+}
+EXPECTED_SCREEN_QUALIFICATION_FIELDS = {
+    "schema_version",
+    "phase",
+    "status",
+    "gate_passed",
+    "gates",
+    "comparisons",
+    "calibration",
+    "context_retention_summary",
+    "target_profile_identity_exact",
+    "model_or_threshold_selection_performed",
+    "evidence_status",
+    "puzzle_set_m4_authorized",
+    "external_replication",
+    "sota",
+    "publication_ready",
+}
 
 
 def _complete_seed_rows(individual: dict[str, Any], seed: int) -> list[dict[str, Any]]:
-    rows = sorted(individual[str(seed)], key=lambda row: int(row["outer_fold"]))
-    if len(rows) != 20 or [int(row["outer_fold"]) for row in rows] != list(range(20)):
-        raise ValueError(f"puzzle-set formal seed{seed} lacks unique folds0-19")
-    return rows
+    return validate_p1_score_rows(
+        individual[str(seed)], source=f"Puzzle-Set P1M4 seed{seed} score"
+    )
 
 
-def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
+def _validate_screen_qualification(screen: dict[str, Any]) -> None:
+    gates = screen.get("gates")
     if (
-        screen.get("schema_version") != SCREEN_QUALIFICATION_SCHEMA
+        set(screen) != EXPECTED_SCREEN_QUALIFICATION_FIELDS
+        or screen.get("schema_version") != SCREEN_QUALIFICATION_SCHEMA
+        or screen.get("phase") != "P1M3"
         or screen.get("status") != "PUZZLE_SET_M3_TOP_JOURNAL_SCREEN_PASS"
         or screen.get("gate_passed") is not True
         or screen.get("puzzle_set_m4_authorized") is not True
+        or screen.get("target_profile_identity_exact") is not True
+        or screen.get("model_or_threshold_selection_performed") is not False
+        or screen.get("evidence_status") != "POST_HOC_DEVELOPMENT_SCREEN_ONLY"
+        or screen.get("external_replication") != "NOT_ESTABLISHED"
+        or screen.get("sota") != "NOT_ESTABLISHED"
+        or screen.get("publication_ready") is not False
+        or not isinstance(gates, dict)
+        or set(gates) != SCREEN_GATE_FIELDS
+        or any(value is not True for value in gates.values())
+        or not isinstance(screen.get("comparisons"), dict)
+        or not isinstance(screen.get("calibration"), dict)
     ):
         raise ValueError("puzzle-set formal qualifier requires exact P1M3 PASS")
+
+
+def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
+    _validate_screen_qualification(screen)
     if (
-        scores.get("schema_version") != FORMAL_SCORE_SCHEMA
+        set(scores) != EXPECTED_FORMAL_SCORE_TOP_FIELDS
+        or scores.get("schema_version") != FORMAL_SCORE_SCHEMA
+        or scores.get("phase") != EXPECTED_PHASE
         or scores.get("status") != "PUZZLE_SET_M4_COMPLETE_FORMAL_SCORE_PASS"
     ):
         raise ValueError("puzzle-set formal qualifier requires complete formal score")
@@ -48,7 +114,10 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
         scores.get("equal_seed_mixture") is True
         and scores.get("best_seed_selection_performed") is False
         and scores.get("target_profile_identity") == "EXACT_PUZZLE_METHOD_MUTATION"
+        and scores.get("target_join_after_complete_merge") is True
         and scores.get("v13_parent_and_feature41_replay_at_5e_7") is True
+        and scores.get("v13_historical_bundle_protocol_validated") is True
+        and scores.get("tic2a_registry_cross_linked_to_merged_provenance") is True
         and scores.get("feature41_reference_fixed_across_seeds") is True
         and scores.get(
             "formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources"
@@ -60,20 +129,19 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
     ):
         raise ValueError("puzzle-set formal score violates the frozen protocol")
 
-    mixture_rows = sorted(
-        scores.get("mixture_scores", []), key=lambda row: int(row["outer_fold"])
+    mixture_rows = validate_p1_score_rows(
+        scores.get("mixture_scores"), source="Puzzle-Set P1M4 mixture score"
     )
-    if len(mixture_rows) != 20 or [
-        int(row["outer_fold"]) for row in mixture_rows
-    ] != list(range(20)):
-        raise ValueError("puzzle-set formal qualifier requires mixture folds0-19")
+    validate_retention_score_protocol(
+        scores.get("context_retention_summary"), expected_run_count=100
+    )
     screen_equivalent = {
         "schema_version": SCREEN_SCORE_SCHEMA,
         "status": "PUZZLE_SET_M3_COMPLETE_SCORE_PASS",
         "scores": mixture_rows,
         "context_retention_summary": scores.get("context_retention_summary", {}),
     }
-    mixture_result = qualify_screen(screen_equivalent)
+    mixture_result = qualify_screen(screen_equivalent, validate_protocol=False)
 
     individual = scores.get("individual_seed_scores", {})
     if set(individual) != {str(seed) for seed in range(5)}:
@@ -140,25 +208,61 @@ def qualify(scores: dict[str, Any], screen: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def assert_qualifier_authority(
+    repo_root: Path,
+    *,
+    score_json: Path,
+    screen_qualification_json: Path,
+    out_json: Path,
+) -> dict[str, Any]:
+    active = assert_active_phase(
+        repo_root,
+        phase=EXPECTED_PHASE,
+        score_token=EXPECTED_SCORE_TOKEN,
+        training_must_be_closed=True,
+    )
+    assert_authority_paths(
+        active,
+        {
+            "complete_score_path": score_json,
+            "screen_qualification_path": screen_qualification_json,
+            "qualification_path": out_json,
+        },
+    )
+    return active
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--score-json", type=Path, required=True)
     parser.add_argument("--screen-qualification-json", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.out_json.exists():
+    score_json = args.score_json.resolve()
+    screen_qualification_json = args.screen_qualification_json.resolve()
+    out_json = args.out_json.resolve()
+    assert_qualifier_authority(
+        args.repo_root.resolve(),
+        score_json=score_json,
+        screen_qualification_json=screen_qualification_json,
+        out_json=out_json,
+    )
+    if out_json.exists():
         raise FileExistsError(
             "puzzle-set refuses to overwrite its formal qualification"
         )
     result = qualify(
-        json.loads(args.score_json.read_text(encoding="utf-8")),
-        json.loads(args.screen_qualification_json.read_text(encoding="utf-8")),
+        json.loads(score_json.read_text(encoding="utf-8")),
+        json.loads(screen_qualification_json.read_text(encoding="utf-8")),
     )
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out_json.with_name(f"{out_json.name}.tmp")
+    temporary.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
+    os.replace(temporary, out_json)
+    print(json.dumps({"status": result["status"], "result": str(out_json)}))
     return 0 if result["gate_passed"] else 1
 
 

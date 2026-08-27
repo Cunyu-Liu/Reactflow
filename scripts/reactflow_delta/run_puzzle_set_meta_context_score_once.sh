@@ -32,5 +32,6 @@ fi
   --out-json "${score}"
 
 "${python_bin}" -m scripts.reactflow_delta.qualify_puzzle_set_meta_context \
+  --repo-root "${repo}" \
   --score-json "${score}" \
   --out-json "${qualification}"

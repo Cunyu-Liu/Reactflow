@@ -190,6 +190,108 @@ No branch may authorize both P1 and P2. When point and distribution families
 both fail, the upstream point/transfer failure controls and P1 precedes any
 residual experiment.
 
+### Frozen branch-5 route probe
+
+Branch 5 does not authorize P1 from the V14 score alone. It requires one fixed
+linear route probe, whose present status is `NOT_RUN`. The probe is a separate
+future task, `reactflow_delta_post_v14_branch5_route_probe`; projection phase
+`B5RP0` first projects the terminal-safe checkpoint manifest while training,
+held score, partial score and external outcome access remain closed. Its
+manifest status is exactly
+`POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION`; it cannot be called
+`PASS` before the 20-row artifact exists. Prediction phase `B5RP1` would then
+require
+`POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY`, score phase
+`B5RP2` would require
+`POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY`, and qualification/terminal
+phase is `B5RP3`. These tokens and phases are frozen names only: none is issued
+or authorized before the complete V14 terminal handoff and a focused branch-5
+authority commit. Branches 3 and 4 mark this probe `NOT_APPLICABLE`.
+That future authority must bind exact parent state
+`TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL`, first matching branch `'5'` and route
+classification `INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED`; a V14M4 path cannot
+enter this probe.
+
+Before prediction, a terminal-only safe source manifest must bind all 20
+canonical fold/puzzle pairs to the V13M3 and V14M3 candidate seed-0 checkpoint
+paths. It contains no target, training history, loss, score, per-puzzle effect
+or Gate field; the probe runner never opens the wide parent fold-result files.
+The B5RP1 authority and CLI must both point to the exact frozen path
+`/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json`
+with status `POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS`.
+The projector is additionally restricted to the registered V13M3 and V14M3
+checkpoint directories and reads authority only from the selected repository's
+canonical `configs/reactflow_delta/active_contract.yaml`; the runner is
+restricted to the registered M2 CSV,
+TIC2A registry, unconstrained/constrained caches and
+`/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0` output
+directory. B5RP2 and B5RP3 accept only the registered complete merge, complete
+score and qualification paths. A same-schema alternate checkpoint directory,
+input cache, merge or score is not an eligible execution universe.
+Each fold additionally records the exact global M2 CSV, strict target-free
+TIC2A registry, unconstrained cache and constrained cache, plus the same-fold
+TIC2A feature41 model projection. The complete merger requires every global
+path to be identical across folds and revalidates the strict TIC2A projection.
+
+For each LOPO outer fold, freeze the same-fold V13 candidate seed-0 point as an
+additive anchor and the same-fold V14 candidate seed-0 encoder as the only
+representation source. At each coordinate, summarize exactly the other seven
+constructs into 260 raw dimensions: mean zero-preserving V14 content contrast
+(256), pooled safe WT
+reactivity with a fixed denominator of seven (1), finite-observed reactivity
+mean (1), finite-observed population standard deviation (1) and observed
+support fraction (1). Concatenate mutation-source and receiver summaries to
+520 dimensions. No focal/local, feature41, distance, mutation-identity,
+method-ID, puzzle-ID or dataset-ID feature is allowed.
+
+The content contrast is `V14.encode(real) - V14.encode(reference)` under the
+same frozen eval-mode encoder. The reference keeps `position` and `region` but
+zeros `sequence`, `reactivity`, `precision` and `observed`; only the resulting
+contrast is shifted. Zero content under arbitrary coordinates must yield exact
+zero and identical aligned/shift-17 features.
+
+Fit two independent outer-train-only weighted ridge models to
+`signed_delta - frozen_V13_point`. The aligned arm uses registered source and
+receiver coordinates; the matched arm shifts every non-focal stream by exactly
+17 positions before all summary calculations. Each arm uses its own weighted
+outer-train standardization, `alpha=1`, an unpenalized intercept and the exact
+method-balanced hierarchy of equal puzzle×method cells, equal mutants and equal
+qualified positions. Predictions are the frozen V13 point plus the respective
+ridge residual.
+
+Arm-specific weighted standardization assigns scale `1.0` when the observed
+standard deviation is below `1e-8`; truly constant features must standardize to
+zero. Every 1% Gate is the puzzle-macro mean comparator-minus-aligned error
+divided by the puzzle-macro mean comparator error.
+
+All 20 folds must produce prediction-only artifacts, exact same-fold V13/V14
+source provenance and one complete unscored merge before a single held score is
+read. The aligned prediction must improve both signed-delta MAE and point
+absolute-delta MAE against both the V13 parent and the shift-17 ridge. Each of
+these four comparisons independently requires at least 1% relative gain, a
+two-sided 95% paired t-CI lower bound above zero over the 20 puzzles and at
+least 14/20 positive puzzles.
+
+Fold prediction/ridge/result files and the complete merge use atomic final
+rename because remote interruption is a realized failure mode in this project.
+The B5RP1 merger accepts only the authority-bound prediction directory and
+registered merge path, requires every fold artifact to use its fixed filename
+inside that directory, and revalidates the frozen checkpoint directories.
+It also rebinds the fold-recorded manifest, M2 CSV, TIC2A registry and both
+feature caches to the five exact authority paths before accepting the merge.
+
+The 20 LOPO training sets overlap. This t-CI is therefore frozen only as a
+development-routing criterion and cannot be described as independent
+confirmatory inference; publication-level confirmation still requires new
+independent puzzles/studies or a separately frozen retraining-aware analysis.
+
+The qualifier has exactly three outcomes: `PASS` only when the complete
+provenance-qualified universe and all four Gates pass; `FAIL` when a complete
+valid score exists and any Gate fails; and `INDETERMINATE` for incomplete or
+invalid universe, provenance, target identity, aggregation, finite-score,
+coverage or prediction integrity. Only exact `PASS` can make branch 5 eligible
+for a later focused P1 activation commit. `FAIL` and `INDETERMINATE` route to P3.
+
 ## 5. Minimum amendment requirements for P1
 
 If P1 becomes eligible, its amendment must freeze before training:

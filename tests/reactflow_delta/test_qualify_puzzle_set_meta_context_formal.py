@@ -7,6 +7,9 @@ import pytest
 from scripts.reactflow_delta.qualify_puzzle_set_meta_context import (
     SCHEMA as SCREEN_QUALIFICATION_SCHEMA,
 )
+from scripts.reactflow_delta.qualify_puzzle_set_meta_context import (
+    EXPECTED_GATE_FIELDS as SCREEN_GATE_FIELDS,
+)
 from scripts.reactflow_delta.qualify_puzzle_set_meta_context_formal import qualify
 from scripts.reactflow_delta.score_puzzle_set_meta_context_formal import (
     SCHEMA as FORMAL_SCORE_SCHEMA,
@@ -19,7 +22,7 @@ def _context_retention_summary() -> dict[str, object]:
         "candidate_retention_positive_all_runs": True,
         "null_pretraining_established_all_runs": True,
         "null_retention_positive_all_runs": True,
-        "fold_seed_diagnostics": [],
+        "fold_seed_diagnostics": [{} for _ in range(100)],
         "selection_performed": False,
         "mutant_outcome_used": False,
         "held_puzzle_accessed": False,
@@ -29,9 +32,13 @@ def _context_retention_summary() -> dict[str, object]:
 def _row(fold: int, *, candidate: float = 0.80) -> dict:
     return {
         "outer_fold": fold,
+        "held_puzzle": f"P{fold + 1:02d}",
         "registered_prediction_coverage": 1.0,
         "failure_rate": 0.0,
         "n_unexpected_prediction_keys": 0,
+        "n_qualified_positions": 10,
+        "n_registered_expected": 10,
+        "n_registered_observed": 10,
         "feature41_signed_delta_mae": 1.0,
         "terminal_v12_signed_delta_mae": 0.91,
         "parent_signed_delta_mae": 0.90,
@@ -42,6 +49,8 @@ def _row(fold: int, *, candidate: float = 0.80) -> dict:
         "parent_point_absolute_delta_mae": 0.90,
         "null_point_absolute_delta_mae": 0.86,
         "candidate_point_absolute_delta_mae": 0.80,
+        "historical_v13_signed_delta_mae": 0.90,
+        "historical_v13_point_absolute_delta_mae": 0.90,
         "feature41_crps": 1.0,
         "terminal_v12_crps": 0.90,
         "null_crps": 0.86,
@@ -51,17 +60,30 @@ def _row(fold: int, *, candidate: float = 0.80) -> dict:
         "candidate_distribution_absolute_delta_mae": 0.80,
         "feature41_coverage68": 0.68,
         "candidate_coverage68": 0.68,
+        "null_coverage68": 0.68,
         "feature41_coverage95": 0.95,
         "candidate_coverage95": 0.95,
+        "null_coverage95": 0.95,
     }
 
 
 def _screen() -> dict:
     return {
         "schema_version": SCREEN_QUALIFICATION_SCHEMA,
+        "phase": "P1M3",
         "status": "PUZZLE_SET_M3_TOP_JOURNAL_SCREEN_PASS",
         "gate_passed": True,
         "puzzle_set_m4_authorized": True,
+        "gates": {name: True for name in SCREEN_GATE_FIELDS},
+        "comparisons": {},
+        "calibration": {},
+        "context_retention_summary": {},
+        "target_profile_identity_exact": True,
+        "model_or_threshold_selection_performed": False,
+        "evidence_status": "POST_HOC_DEVELOPMENT_SCREEN_ONLY",
+        "external_replication": "NOT_ESTABLISHED",
+        "sota": "NOT_ESTABLISHED",
+        "publication_ready": False,
     }
 
 
@@ -69,13 +91,17 @@ def _formal_score() -> dict:
     rows = [_row(fold) for fold in range(20)]
     return {
         "schema_version": FORMAL_SCORE_SCHEMA,
+        "phase": "P1M4",
         "status": "PUZZLE_SET_M4_COMPLETE_FORMAL_SCORE_PASS",
         "mixture_scores": copy.deepcopy(rows),
         "individual_seed_scores": {str(seed): copy.deepcopy(rows) for seed in range(5)},
         "equal_seed_mixture": True,
         "best_seed_selection_performed": False,
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
+        "target_join_after_complete_merge": True,
         "v13_parent_and_feature41_replay_at_5e_7": True,
+        "v13_historical_bundle_protocol_validated": True,
+        "tic2a_registry_cross_linked_to_merged_provenance": True,
         "feature41_reference_fixed_across_seeds": True,
         "formal_assembly_reconstructed_exactly_from_same_100_run_merged_sources": True,
         "partial_fold_scores_inspected": False,
@@ -103,6 +129,13 @@ def test_formal_gate_rejects_a_screen_without_explicit_m4_authority() -> None:
         qualify(_formal_score(), screen)
 
 
+def test_formal_gate_rejects_a_screen_with_an_incomplete_gate_universe() -> None:
+    screen = _screen()
+    screen["gates"].pop("coverage_error_guardrail")
+    with pytest.raises(ValueError, match="exact P1M3 PASS"):
+        qualify(_formal_score(), screen)
+
+
 def test_three_of_five_positive_seeds_cannot_pass() -> None:
     score = _formal_score()
     for seed in (3, 4):
@@ -116,7 +149,7 @@ def test_three_of_five_positive_seeds_cannot_pass() -> None:
 def test_missing_individual_seed_fold_is_rejected() -> None:
     score = _formal_score()
     score["individual_seed_scores"]["2"].pop()
-    with pytest.raises(ValueError, match="seed2 lacks unique folds0-19"):
+    with pytest.raises(ValueError, match="exactly twenty"):
         qualify(score, _screen())
 
 

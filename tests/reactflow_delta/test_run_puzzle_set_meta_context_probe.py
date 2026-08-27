@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import json
+import inspect
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import pytest
 import torch
 import yaml
 
 from scripts.reactflow_delta.model_rescue_v14 import V14PointModel
+from scripts.reactflow_delta.model_rescue_v6_probe import (
+    CANDIDATE_PROBE_FEATURE_NAMES,
+)
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     merge_complete_universe,
 )
@@ -18,6 +24,15 @@ from scripts.reactflow_delta.puzzle_set_meta_context import (
     POSITION_DERANGEMENT_SHIFT,
     POSITION_DERANGED_NULL,
 )
+from scripts.reactflow_delta.puzzle_set_safe_sources import (
+    FOLD_SCOPED_INPUT_SOURCES,
+    FROZEN_INPUT_SOURCE_SPEC,
+    SOURCE_BINDING_STATUS,
+    SOURCE_MANIFEST_SCHEMA,
+    SOURCE_MANIFEST_STATUS,
+    validate_manifest_fold_runtime_binding,
+    validate_source_manifest,
+)
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
     EXPECTED_PROJECT_TASK,
     FOLD_SCHEMA,
@@ -25,8 +40,10 @@ from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
     _assert_parent_checkpoint_identity,
     assert_real_training_authority,
     frozen_input_sources_for_fold,
+    main as run_probe_main,
     run_prepared_fold,
-    validate_fold_source_rows,
+    run_real_fold,
+    safe_tic2a_source_for_fold,
     validate_tic2a_source_registry,
 )
 
@@ -140,12 +157,92 @@ def _prepared():
     )
 
 
-def _write_active(repo_root: Path, *, authorized: bool, phase: str = "P1M3") -> None:
+def _source_manifest(tmp_path: Path) -> Path:
+    global_paths = {
+        "tic2a_merged_registry": tmp_path / "tic2a_merged.json",
+        "unconstrained_feature_cache": tmp_path / "unconstrained.h5",
+        "constrained_feature_cache": tmp_path / "constrained.h5",
+    }
+    for path in global_paths.values():
+        path.touch()
+    folds = []
+    for fold in range(20):
+        paths = {
+            "v13_point_checkpoint": (
+                tmp_path / f"v13_candidate_point_fold{fold}_seed0.pt"
+            ),
+            "v14_encoder_checkpoint": (
+                tmp_path / f"v14_candidate_point_fold{fold}_seed0.pt"
+            ),
+            "v8_meanaligned_checkpoint": (
+                tmp_path / f"v8_corrected_mean_fold{fold}_seed0.pt"
+            ),
+            "tic2a_feature41_model_artifact": (
+                tmp_path / f"tic2a_corrected_models_fold{fold}.json"
+            ),
+            **global_paths,
+        }
+        for path in paths.values():
+            path.touch(exist_ok=True)
+        sources = {}
+        for source_id, expected in FROZEN_INPUT_SOURCE_SPEC.items():
+            sources[source_id] = {
+                "path": str(paths[source_id]),
+                "role": expected["role"],
+                "used_in_candidate_prediction": expected[
+                    "used_in_candidate_prediction"
+                ],
+                "outer_fold": (
+                    fold if source_id in FOLD_SCOPED_INPUT_SOURCES else None
+                ),
+                "seed": expected["seed"],
+                "realized_parameter_count": expected["realized_parameter_count"],
+                "trainable_in_p1": expected["trainable_in_p1"],
+            }
+        folds.append(
+            {
+                "outer_fold": fold,
+                "held_puzzle": f"P{fold + 1:02d}",
+                "seed": 0,
+                "sources": sources,
+            }
+        )
+    manifest = tmp_path / "puzzle_set_source_manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": SOURCE_MANIFEST_SCHEMA,
+                "status": SOURCE_MANIFEST_STATUS,
+                "contract_id": ("reactflow_delta_puzzle_set_meta_context_v5_20260827"),
+                "binding_status": SOURCE_BINDING_STATUS,
+                "folds": folds,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return manifest
+
+
+def _write_active(
+    repo_root: Path,
+    *,
+    authorized: bool,
+    source_manifest: Path,
+    phase: str = "P1M3",
+) -> None:
     path = repo_root / "configs/reactflow_delta"
     path.mkdir(parents=True)
+    m2_csv = (repo_root / "m2.csv").resolve()
+    m2_csv.write_text("same-shape fixture\n", encoding="utf-8")
     payload = {
         "project_task_id": EXPECTED_PROJECT_TASK if authorized else "v14",
-        "authority": {"current_phase": phase},
+        "authority": {
+            "current_phase": phase,
+            "m2_csv_path": str(m2_csv),
+            "source_manifest_path": str(source_manifest),
+            "source_binding_status": SOURCE_BINDING_STATUS,
+            "prediction_dir": str((repo_root / "predictions").resolve()),
+        },
         "runnable_phases": [phase],
         "training_allowed": PHASE_TRAINING_TOKENS[phase] if authorized else False,
         "candidate_model_training_allowed": (
@@ -171,7 +268,6 @@ def _frozen_input_sources(
         "tic2a_merged_registry": tmp_path / "tic2a_merged.json",
         "unconstrained_feature_cache": tmp_path / "unconstrained.h5",
         "constrained_feature_cache": tmp_path / "constrained.h5",
-        "v10_fold_comparator": tmp_path / f"v10_fold_result_fold{fold}_seed0.json",
     }
     for path in paths.values():
         path.touch()
@@ -183,12 +279,94 @@ def _frozen_input_sources(
     )
 
 
+def _safe_tic2a_merge(tmp_path: Path) -> dict[str, object]:
+    rows = []
+    for fold in range(20):
+        model = tmp_path / f"tic2a_corrected_models_fold{fold}.json"
+        model.write_text(
+            json.dumps(
+                {
+                    "direct18": {},
+                    "direct18_feature_names": [
+                        f"direct_{index}" for index in range(18)
+                    ],
+                    "feature30_feature_names": [
+                        f"feature30_{index}" for index in range(30)
+                    ],
+                    "feature41_feature_names": list(CANDIDATE_PROBE_FEATURE_NAMES),
+                    "ridge_alpha": 1.0,
+                    "v5_feature30": {},
+                    "v6_feature30_replay": {},
+                    "v6_feature41": {
+                        "mean_x": [0.0] * 41,
+                        "scale_x": [1.0] * 41,
+                        "mean_y": [0.0, 0.0],
+                        "coefficient": [[0.0, 0.0] for _ in range(41)],
+                        "alpha": 1.0,
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        rows.append(
+            {
+                "schema_version": (
+                    "reactflow_delta.target_identity_corrected_baseline_fold.v1"
+                ),
+                "phase": "TIC2A",
+                "outer_fold": fold,
+                "held_puzzle": f"P{fold + 1:02d}",
+                "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
+                "held_target_used_for_prediction": False,
+                "held_score_computed": False,
+                "partial_score_inspected": False,
+                "legacy_prediction_reused": False,
+                "external_outcome_accessed": False,
+                "model_artifact": str(model),
+                "prediction_artifact": str(tmp_path / f"prediction_fold{fold}.npz"),
+                "n_registered_prediction_rows": 1,
+                "n_train_cells": 1,
+                "n_train_qualified_positions": 1,
+                "n_train_valid_mutants": 1,
+                "v5_v6_feature30_prediction_replay_pass": True,
+                "v5_v6_feature30_stats_replay_pass": True,
+            }
+        )
+    return {
+        "schema_version": (
+            "reactflow_delta.target_identity_corrected_baseline_merged.v1"
+        ),
+        "phase": "TIC2A",
+        "status": "TIC2A_COMPLETE_UNSCORED_MERGE_PASS",
+        "merge_integrity": {
+            "complete_fold_universe": True,
+            "external_outcome_accessed": False,
+            "held_scores_absent": True,
+            "legacy_prediction_reused": False,
+            "partial_score_inspected": False,
+            "prediction_only_fields": True,
+            "prediction_schema_valid": True,
+            "referenced_artifacts_exist": True,
+            "target_identity_exact": True,
+            "unique_folds": True,
+            "v5_v6_feature30_replay_all_folds": True,
+        },
+        "folds": rows,
+    }
+
+
 def test_current_or_other_authority_cannot_run_real_puzzle_set_training(
     tmp_path: Path,
 ) -> None:
-    _write_active(tmp_path, authorized=False)
+    source_manifest = tmp_path / "absent_source_manifest.json"
+    _write_active(tmp_path, authorized=False, source_manifest=source_manifest)
     try:
-        assert_real_training_authority(tmp_path, "P1M3")
+        assert_real_training_authority(
+            tmp_path,
+            "P1M3",
+            source_manifest,
+            m2_csv=(tmp_path / "m2.csv").resolve(),
+        )
     except RuntimeError as error:
         assert "not the active task" in str(error)
     else:
@@ -198,23 +376,399 @@ def test_current_or_other_authority_cannot_run_real_puzzle_set_training(
 def test_exact_future_authority_shape_is_accepted(tmp_path: Path) -> None:
     for phase in sorted(PHASE_TRAINING_TOKENS):
         phase_root = tmp_path / phase
-        _write_active(phase_root, authorized=True, phase=phase)
-        assert_real_training_authority(phase_root, phase)
+        phase_root.mkdir()
+        source_manifest = _source_manifest(phase_root)
+        _write_active(
+            phase_root,
+            authorized=True,
+            source_manifest=source_manifest,
+            phase=phase,
+        )
+        assert_real_training_authority(
+            phase_root,
+            phase,
+            source_manifest,
+            m2_csv=(phase_root / "m2.csv").resolve(),
+        )
 
 
 def test_training_token_is_phase_specific(tmp_path: Path) -> None:
-    _write_active(tmp_path, authorized=True, phase="P1M3")
+    source_manifest = _source_manifest(tmp_path)
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=source_manifest,
+        phase="P1M3",
+    )
     active_path = tmp_path / "configs/reactflow_delta/active_contract.yaml"
     active = yaml.safe_load(active_path.read_text(encoding="utf-8"))
     active["training_allowed"] = PHASE_TRAINING_TOKENS["P1M2"]
     active["candidate_model_training_allowed"] = PHASE_TRAINING_TOKENS["P1M2"]
     active_path.write_text(yaml.safe_dump(active), encoding="utf-8")
     try:
-        assert_real_training_authority(tmp_path, "P1M3")
+        assert_real_training_authority(
+            tmp_path,
+            "P1M3",
+            source_manifest,
+            m2_csv=(tmp_path / "m2.csv").resolve(),
+        )
     except RuntimeError as error:
         assert "token is absent" in str(error)
     else:
         raise AssertionError("P1M3 accepted the P1M2 training token")
+
+
+def test_training_token_without_bound_manifest_is_rejected(tmp_path: Path) -> None:
+    missing = tmp_path / "missing_manifest.json"
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=missing,
+        phase="P1M3",
+    )
+    with pytest.raises(FileNotFoundError, match="source manifest"):
+        assert_real_training_authority(
+            tmp_path,
+            "P1M3",
+            missing,
+            m2_csv=(tmp_path / "m2.csv").resolve(),
+        )
+
+
+def test_training_authority_rejects_pending_or_different_manifest(
+    tmp_path: Path,
+) -> None:
+    manifest = _source_manifest(tmp_path)
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=manifest,
+        phase="P1M3",
+    )
+    active_path = tmp_path / "configs/reactflow_delta/active_contract.yaml"
+    active = yaml.safe_load(active_path.read_text(encoding="utf-8"))
+    active["authority"][
+        "source_binding_status"
+    ] = "REALIZED_PATHS_ROLES_AND_COUNTS_PENDING"
+    active_path.write_text(yaml.safe_dump(active), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="source-manifest binding is absent"):
+        assert_real_training_authority(
+            tmp_path,
+            "P1M3",
+            manifest,
+            m2_csv=(tmp_path / "m2.csv").resolve(),
+        )
+
+    active["authority"]["source_binding_status"] = SOURCE_BINDING_STATUS
+    active_path.write_text(yaml.safe_dump(active), encoding="utf-8")
+    different = tmp_path / "different_manifest.json"
+    different.write_text(manifest.read_text(encoding="utf-8"), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="source-manifest binding is absent"):
+        assert_real_training_authority(
+            tmp_path,
+            "P1M3",
+            different,
+            m2_csv=(tmp_path / "m2.csv").resolve(),
+        )
+
+
+def test_training_authority_binds_prediction_directory(tmp_path: Path) -> None:
+    manifest = _source_manifest(tmp_path)
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=manifest,
+        phase="P1M3",
+    )
+    prediction_dir = (tmp_path / "predictions").resolve()
+    assert_real_training_authority(
+        tmp_path,
+        "P1M3",
+        manifest,
+        m2_csv=(tmp_path / "m2.csv").resolve(),
+        prediction_dir=prediction_dir,
+    )
+    with pytest.raises(RuntimeError, match="differs from active prediction_dir"):
+        assert_real_training_authority(
+            tmp_path,
+            "P1M3",
+            manifest,
+            m2_csv=(tmp_path / "m2.csv").resolve(),
+            prediction_dir=(tmp_path / "alternate").resolve(),
+        )
+
+
+def test_training_authority_binds_exact_m2_csv_path(tmp_path: Path) -> None:
+    manifest = _source_manifest(tmp_path)
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=manifest,
+        phase="P1M3",
+    )
+    canonical = (tmp_path / "m2.csv").resolve()
+    assert_real_training_authority(
+        tmp_path,
+        "P1M3",
+        manifest,
+        m2_csv=canonical,
+    )
+
+    alternate = (tmp_path / "alternate_m2.csv").resolve()
+    alternate.write_text(canonical.read_text(encoding="utf-8"), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="M2 CSV differs from active m2_csv_path"):
+        assert_real_training_authority(
+            tmp_path,
+            "P1M3",
+            manifest,
+            m2_csv=alternate,
+        )
+
+
+def test_main_rejects_same_shape_alternate_m2_csv_before_loading_data(
+    tmp_path: Path,
+) -> None:
+    manifest = _source_manifest(tmp_path)
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=manifest,
+        phase="P1M2",
+    )
+    canonical = (tmp_path / "m2.csv").resolve()
+    alternate = (tmp_path / "alternate_m2.csv").resolve()
+    alternate.write_text(canonical.read_text(encoding="utf-8"), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="M2 CSV differs from active m2_csv_path"):
+        run_probe_main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--phase",
+                "P1M2",
+                "--m2-csv",
+                str(alternate),
+                "--source-manifest",
+                str(manifest),
+                "--v8-dir",
+                str(tmp_path / "v8"),
+                "--v13-dir",
+                str(tmp_path / "v13"),
+                "--v14-dir",
+                str(tmp_path / "v14"),
+                "--tic2a-merged-json",
+                str(tmp_path / "tic2a.json"),
+                "--unconstrained-cache",
+                str(tmp_path / "unconstrained.h5"),
+                "--constrained-cache",
+                str(tmp_path / "constrained.h5"),
+                "--out-dir",
+                str(tmp_path / "predictions"),
+                "--folds",
+                "0",
+                "--pretraining-epochs",
+                "3",
+                "--point-epochs",
+                "3",
+                "--calibration-epochs",
+                "3",
+                "--seed",
+                "0",
+            ]
+        )
+
+
+def test_run_real_fold_rejects_same_shape_alternate_m2_csv(
+    tmp_path: Path,
+) -> None:
+    manifest = _source_manifest(tmp_path)
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=manifest,
+        phase="P1M3",
+    )
+    canonical = (tmp_path / "m2.csv").resolve()
+    alternate = (tmp_path / "alternate_m2.csv").resolve()
+    alternate.write_text(canonical.read_text(encoding="utf-8"), encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="M2 CSV differs from active m2_csv_path"):
+        run_real_fold(
+            repo_root=tmp_path,
+            m2_csv=alternate,
+            univ=None,
+            records=[],
+            fold=None,
+            feature41_model={},
+            unconstrained=None,
+            constrained=None,
+            v8_model=None,
+            v13_parent_checkpoint=tmp_path / "unused_v13.pt",
+            v14_parent_checkpoint=tmp_path / "unused_v14.pt",
+            frozen_input_sources={},
+            source_manifest=manifest,
+            phase="P1M3",
+            seed=0,
+            pretraining_epochs=200,
+            point_epochs=40,
+            calibration_epochs=40,
+            device="cpu",
+            out_dir=(tmp_path / "predictions").resolve(),
+        )
+
+
+def test_run_real_fold_rejects_universe_loaded_from_alternate_m2_csv(
+    tmp_path: Path,
+) -> None:
+    manifest = _source_manifest(tmp_path)
+    _write_active(
+        tmp_path,
+        authorized=True,
+        source_manifest=manifest,
+        phase="P1M3",
+    )
+    canonical = (tmp_path / "m2.csv").resolve()
+    alternate = (tmp_path / "alternate_m2.csv").resolve()
+    alternate.write_text(canonical.read_text(encoding="utf-8"), encoding="utf-8")
+    universe = type("AlternateUniverse", (), {"csv_path": alternate})()
+
+    with pytest.raises(RuntimeError, match="loaded from a different M2 CSV"):
+        run_real_fold(
+            repo_root=tmp_path,
+            m2_csv=canonical,
+            univ=universe,
+            records=[],
+            fold=None,
+            feature41_model={},
+            unconstrained=None,
+            constrained=None,
+            v8_model=None,
+            v13_parent_checkpoint=tmp_path / "unused_v13.pt",
+            v14_parent_checkpoint=tmp_path / "unused_v14.pt",
+            frozen_input_sources={},
+            source_manifest=manifest,
+            phase="P1M3",
+            seed=0,
+            pretraining_epochs=200,
+            point_epochs=40,
+            calibration_epochs=40,
+            device="cpu",
+            out_dir=(tmp_path / "predictions").resolve(),
+        )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (
+            lambda value: value["folds"][0]["sources"][
+                "v13_point_checkpoint"
+            ].__setitem__("realized_parameter_count", 1),
+            "source v13_point_checkpoint changed",
+        ),
+        (
+            lambda value: value["folds"][3].__setitem__("held_puzzle", "P05"),
+            "fold 3 changed",
+        ),
+        (
+            lambda value: value["folds"][0]["sources"][
+                "unconstrained_feature_cache"
+            ].__setitem__("trainable_in_p1", True),
+            "source unconstrained_feature_cache changed",
+        ),
+        (
+            lambda value: value["folds"][0].__setitem__("score", 0.1),
+            "fold 0 changed",
+        ),
+    ],
+)
+def test_source_manifest_rejects_field_and_count_changes(
+    tmp_path: Path, mutation, message: str
+) -> None:
+    manifest = _source_manifest(tmp_path)
+    value = json.loads(manifest.read_text(encoding="utf-8"))
+    mutation(value)
+    manifest.write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(RuntimeError, match=message):
+        validate_source_manifest(manifest)
+
+
+def test_manifest_and_runtime_cli_paths_must_match(tmp_path: Path) -> None:
+    manifest = _source_manifest(tmp_path)
+    rows = validate_source_manifest(manifest)
+    bound = rows[4]["sources"]
+    runtime = {
+        source_id: {
+            field: value
+            for field, value in record.items()
+            if field
+            in {"path", "role", "used_in_candidate_prediction", "outer_fold", "seed"}
+        }
+        for source_id, record in bound.items()
+    }
+    wrong = tmp_path / "v13_candidate_point_fold4_seed0_wrong.pt"
+    wrong.touch()
+    runtime["v13_point_checkpoint"]["path"] = str(wrong)
+    with pytest.raises(RuntimeError, match="differs from manifest"):
+        validate_manifest_fold_runtime_binding(
+            manifest_rows=rows,
+            outer_fold=4,
+            runtime_sources=runtime,
+        )
+
+
+def test_source_manifest_rejects_missing_realized_path(tmp_path: Path) -> None:
+    manifest = _source_manifest(tmp_path)
+    value = json.loads(manifest.read_text(encoding="utf-8"))
+    value["folds"][7]["sources"]["v14_encoder_checkpoint"]["path"] = str(
+        tmp_path / "v14_candidate_point_fold7_seed0_missing.pt"
+    )
+    manifest.write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(FileNotFoundError, match="absent or misbound"):
+        validate_source_manifest(manifest)
+
+
+def test_source_manifest_requires_one_global_cache_binding(tmp_path: Path) -> None:
+    manifest = _source_manifest(tmp_path)
+    other = tmp_path / "other_constrained.h5"
+    other.touch()
+    value = json.loads(manifest.read_text(encoding="utf-8"))
+    value["folds"][8]["sources"]["constrained_feature_cache"]["path"] = str(other)
+    manifest.write_text(json.dumps(value), encoding="utf-8")
+    with pytest.raises(RuntimeError, match="global source differs across folds"):
+        validate_source_manifest(manifest)
+
+
+def test_training_source_interface_has_no_v10_input(tmp_path: Path) -> None:
+    sentinel = tmp_path / "v10_fold_result_fold4_seed0.json"
+    sentinel.write_text("THIS_IS_NOT_JSON_AND_MUST_NOT_BE_READ", encoding="utf-8")
+    assert (
+        "v10_fold_comparator"
+        not in inspect.signature(frozen_input_sources_for_fold).parameters
+    )
+    assert "v10_dir" not in inspect.signature(run_prepared_fold).parameters
+    assert (
+        sentinel.read_text(encoding="utf-8") == "THIS_IS_NOT_JSON_AND_MUST_NOT_BE_READ"
+    )
+
+
+@pytest.mark.parametrize(
+    "controller",
+    [
+        "run_puzzle_set_meta_context_smoke_controller.sh",
+        "run_puzzle_set_meta_context_screen_controller.sh",
+        "run_puzzle_set_meta_context_formal_controller.sh",
+    ],
+)
+def test_future_controller_does_not_pass_v10_to_training_runner(
+    controller: str,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    source = (root / "scripts/reactflow_delta" / controller).read_text(encoding="utf-8")
+    assert "v10_dir" not in source
+    assert "--v10-dir" not in source
+    assert "source_manifest=" in source
+    assert '--source-manifest "${source_manifest}"' in source
 
 
 def test_parent_checkpoint_identity_is_fixed_to_same_fold_and_seed_zero(
@@ -239,45 +793,30 @@ def test_parent_checkpoint_identity_is_fixed_to_same_fold_and_seed_zero(
         raise AssertionError("puzzle-set runner accepted a wrong-fold parent")
 
 
-def test_fold_source_rows_must_match_outer_fold_and_held_puzzle() -> None:
-    v8 = {
-        "outer_fold": 4,
-        "seed": 0,
-        "held_puzzle": "P05",
-        "held_score_computed": False,
-        "external_outcome_accessed": False,
-    }
-    tic2a = {"outer_fold": 4, "held_puzzle": "P05"}
-    v10 = {"outer_fold": 4, "seed": 0, "held_puzzle": "P05"}
-    validate_fold_source_rows(
-        outer_fold=4,
-        held_puzzle="P05",
-        v8_row=v8,
-        tic2a_row=tic2a,
-        v10_row=v10,
+def test_safe_tic2a_source_must_match_outer_fold_and_held_puzzle(
+    tmp_path: Path,
+) -> None:
+    merged = _safe_tic2a_merge(tmp_path)
+    observed, ridge = safe_tic2a_source_for_fold(
+        outer_fold=4, held_puzzle="P05", tic2a_merged=merged
     )
-    for row_name, field, value in (
-        ("v8", "outer_fold", 3),
-        ("v8", "seed", 1),
-        ("v8", "held_puzzle", "P04"),
-        ("v8", "held_score_computed", True),
-        ("tic2a", "held_puzzle", "P04"),
-        ("v10", "outer_fold", 3),
-    ):
-        rows = {"v8": dict(v8), "tic2a": dict(tic2a), "v10": dict(v10)}
-        rows[row_name][field] = value
-        try:
-            validate_fold_source_rows(
-                outer_fold=4,
-                held_puzzle="P05",
-                v8_row=rows["v8"],
-                tic2a_row=rows["tic2a"],
-                v10_row=rows["v10"],
-            )
-        except RuntimeError as error:
-            assert "does not match the outer fold identity" in str(error)
-        else:
-            raise AssertionError(f"puzzle-set accepted wrong-fold {row_name}.{field}")
+    assert observed["outer_fold"] == 4
+    assert np.asarray(ridge["coefficient"]).shape == (41, 2)
+
+    merged["folds"][4]["held_puzzle"] = "P04"
+    try:
+        safe_tic2a_source_for_fold(outer_fold=4, held_puzzle="P05", tic2a_merged=merged)
+    except RuntimeError as error:
+        assert "safe TIC2A source rejected" in str(error)
+    else:
+        raise AssertionError("puzzle-set accepted wrong held-puzzle identity")
+
+    try:
+        safe_tic2a_source_for_fold(outer_fold=4, held_puzzle="P04", tic2a_merged=merged)
+    except RuntimeError as error:
+        assert "not canonical" in str(error)
+    else:
+        raise AssertionError("puzzle-set accepted noncanonical split-v4 identity")
 
 
 def test_frozen_input_sources_reject_wrong_fold_v8_checkpoint(tmp_path: Path) -> None:
@@ -288,7 +827,6 @@ def test_frozen_input_sources_reject_wrong_fold_v8_checkpoint(tmp_path: Path) ->
     registry = tmp_path / "tic2a_merged.json"
     unconstrained = tmp_path / "unconstrained.h5"
     constrained = tmp_path / "constrained.h5"
-    v10 = tmp_path / "v10_fold_result_fold4_seed0.json"
     for path in (
         v13,
         v14,
@@ -297,7 +835,6 @@ def test_frozen_input_sources_reject_wrong_fold_v8_checkpoint(tmp_path: Path) ->
         registry,
         unconstrained,
         constrained,
-        v10,
     ):
         path.touch()
     try:
@@ -310,7 +847,6 @@ def test_frozen_input_sources_reject_wrong_fold_v8_checkpoint(tmp_path: Path) ->
             tic2a_merged_registry=registry,
             unconstrained_feature_cache=unconstrained,
             constrained_feature_cache=constrained,
-            v10_fold_comparator=v10,
         )
     except RuntimeError as error:
         assert "filename changed: v8_meanaligned_checkpoint" in str(error)
@@ -319,13 +855,13 @@ def test_frozen_input_sources_reject_wrong_fold_v8_checkpoint(tmp_path: Path) ->
 
 
 def test_tic2a_source_registry_requires_unique_folds_zero_through_nineteen() -> None:
+    # The shared validator checks the whole safe registry rather than accepting
+    # a fold-number-only projection.
     rows = [{"outer_fold": fold} for fold in range(20)]
-    validate_tic2a_source_registry({"folds": rows})
-    duplicated = rows + [{"outer_fold": 0}]
     try:
-        validate_tic2a_source_registry({"folds": duplicated})
+        validate_tic2a_source_registry({"folds": rows + [{"outer_fold": 0}]})
     except RuntimeError as error:
-        assert "exactly twenty" in str(error)
+        assert "safe TIC2A registry rejected" in str(error)
     else:
         raise AssertionError("puzzle-set accepted a duplicate TIC2A source fold")
 
@@ -402,12 +938,7 @@ def test_prepared_fold_emits_target_free_artifacts_and_refuses_overwrite(
         ]
         is True
     )
-    assert (
-        result["frozen_input_sources"]["v10_fold_comparator"][
-            "used_in_candidate_prediction"
-        ]
-        is False
-    )
+    assert "v10_fold_comparator" not in result["frozen_input_sources"]
     assert result["outer_train_puzzle_ids"] == ["P01"]
     assert result["held_puzzle"] not in result["pretraining_puzzle_ids"]
     assert result["expected_pretraining_eligible_construct_counts"] == [8]

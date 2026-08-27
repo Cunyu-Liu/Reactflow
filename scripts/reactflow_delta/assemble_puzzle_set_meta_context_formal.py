@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,10 @@ from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     prediction_checks,
 )
 from scripts.reactflow_delta.model_rescue_v9 import expected_absolute_delta
+from scripts.reactflow_delta.puzzle_set_score_chain import (
+    assert_active_phase,
+    assert_authority_paths,
+)
 
 
 SCHEMA = "reactflow_delta.puzzle_set_meta_context_formal_assembly.proposed.v2"
@@ -366,22 +371,57 @@ def assemble(merged: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     }
 
 
+def assert_assembly_authority(
+    repo_root: Path,
+    *,
+    merged_json: Path,
+    out_dir: Path,
+    out_json: Path,
+) -> dict[str, Any]:
+    """Bind the formal mixture assembly to the active 100-run universe."""
+
+    active = assert_active_phase(
+        repo_root,
+        phase=EXPECTED_PHASE,
+        held_score_must_be_closed=True,
+    )
+    assert_authority_paths(
+        active,
+        {
+            "complete_unscored_merge_path": merged_json,
+            "formal_assembly_prediction_dir": out_dir,
+            "formal_assembly_path": out_json,
+        },
+    )
+    return active
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--merged-json", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.out_json.exists():
-        raise FileExistsError("refusing to overwrite puzzle-set formal assembly")
-    result = assemble(
-        json.loads(args.merged_json.read_text(encoding="utf-8")), args.out_dir
+    merged_json = args.merged_json.resolve()
+    out_dir = args.out_dir.resolve()
+    out_json = args.out_json.resolve()
+    assert_assembly_authority(
+        args.repo_root.resolve(),
+        merged_json=merged_json,
+        out_dir=out_dir,
+        out_json=out_json,
     )
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
+    if out_json.exists():
+        raise FileExistsError("refusing to overwrite puzzle-set formal assembly")
+    result = assemble(json.loads(merged_json.read_text(encoding="utf-8")), out_dir)
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out_json.with_name(f"{out_json.name}.tmp")
+    temporary.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
+    os.replace(temporary, out_json)
+    print(json.dumps({"status": result["status"], "result": str(out_json)}))
     return 0
 
 

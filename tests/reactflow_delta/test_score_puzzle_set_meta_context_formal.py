@@ -27,6 +27,9 @@ from scripts.reactflow_delta.score_puzzle_set_meta_context_formal import (
     assert_score_authority,
     score_formal,
 )
+from tests.reactflow_delta.test_puzzle_set_score_chain import (
+    _write_bound_source_manifest,
+)
 
 
 def _write_prediction(path: Path, *, schema: str, fold: int, seed: int) -> None:
@@ -147,9 +150,14 @@ def test_formal_loader_distinguishes_ensemble_from_constituent_seed(
 
 
 def test_formal_score_authority_is_exact_and_training_closed(tmp_path: Path) -> None:
+    source_manifest = _write_bound_source_manifest(tmp_path)
     active = {
         "project_task_id": EXPECTED_PROJECT_TASK,
-        "authority": {"current_phase": EXPECTED_PHASE},
+        "authority": {
+            "current_phase": EXPECTED_PHASE,
+            "source_manifest_path": str(source_manifest),
+            "source_binding_status": "REALIZED_PATHS_ROLES_AND_COUNTS_BOUND",
+        },
         "runnable_phases": [EXPECTED_PHASE],
         "training_allowed": False,
         "candidate_model_training_allowed": False,
@@ -232,6 +240,14 @@ def test_formal_scorer_scores_ten_component_mixture_not_seed_score_average(
         lambda _score: {fold: {"held_puzzle": f"P{fold}"} for fold in range(20)},
     )
     monkeypatch.setattr(formal_module, "_load_tic2a_absolute", lambda *_args: {})
+    monkeypatch.setattr(
+        formal_module,
+        "_validate_tic2a_registry_and_provenance",
+        lambda *_args, **_kwargs: {
+            fold: SimpleNamespace(row={"prediction_artifact": "unused"})
+            for fold in range(20)
+        },
+    )
     monkeypatch.setattr(formal_module, "score_fold", _fake_score)
     monkeypatch.setattr(formal_module, "_add_frozen_references", lambda *_args: None)
 
@@ -265,6 +281,14 @@ def test_formal_scorer_rejects_assembly_from_a_different_legal_rerun_before_targ
             raise AssertionError("target universe opened before source reconstruction")
 
     monkeypatch.setattr(formal_module, "M2Universe", _ForbiddenUniverse)
+    monkeypatch.setattr(
+        formal_module,
+        "_validate_tic2a_registry_and_provenance",
+        lambda *_args, **_kwargs: {
+            fold: SimpleNamespace(row={"prediction_artifact": "unused"})
+            for fold in range(20)
+        },
+    )
 
     with pytest.raises(
         ValueError, match="does not exactly derive from merged source artifacts"

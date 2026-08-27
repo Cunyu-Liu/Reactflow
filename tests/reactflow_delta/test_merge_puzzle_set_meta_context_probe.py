@@ -4,9 +4,14 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
+
+import scripts.reactflow_delta.merge_puzzle_set_meta_context_probe as merger
 
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
     MERGED_SCHEMA,
+    PRODUCTION_MERGE_UNIVERSES,
+    assert_production_merge_universe,
     merge_complete_universe,
 )
 from scripts.reactflow_delta.puzzle_set_meta_context import (
@@ -24,6 +29,7 @@ from scripts.reactflow_delta.puzzle_set_meta_context_retention import (
     RETENTION_DIAGNOSTIC_EPOCH,
     RETENTION_SCHEMA,
 )
+from scripts.reactflow_delta.puzzle_set_safe_sources import FROZEN_INPUT_SOURCE_SPEC
 from scripts.reactflow_delta.run_puzzle_set_meta_context_probe import (
     FOLD_SCHEMA,
     frozen_input_sources_for_fold,
@@ -138,7 +144,6 @@ def _write_fold(
         "tic2a_merged_registry": directory / "tic2a_merged.json",
         "unconstrained_feature_cache": directory / "unconstrained.h5",
         "constrained_feature_cache": directory / "constrained.h5",
-        "v10_fold_comparator": directory / f"v10_fold_result_fold{fold}_seed0.json",
     }
     for path in source_paths.values():
         path.touch()
@@ -292,6 +297,54 @@ def _write_fold(
     path.write_text(json.dumps(row), encoding="utf-8")
 
 
+def _canonicalize_fold_artifacts(
+    directory: Path, *, fold: int, seed: int = 0
+) -> dict[str, object]:
+    row_path = directory / f"puzzle_set_fold_result_fold{fold}_seed{seed}.json"
+    row = json.loads(row_path.read_text(encoding="utf-8"))
+    observed = merger._fold_artifact_paths(row)
+    expected = merger._canonical_fold_artifact_paths(
+        directory.resolve(), fold=fold, seed=seed
+    )
+    for name, source in observed.items():
+        source.replace(expected[name])
+    row["prediction_artifact"] = str(expected["prediction_artifact"])
+    row["point_checkpoints"] = {
+        "candidate": str(expected["point_candidate"]),
+        "null": str(expected["point_null"]),
+    }
+    row["pretraining_decoder_checkpoints"] = {
+        "candidate": str(expected["decoder_candidate"]),
+        "null": str(expected["decoder_null"]),
+    }
+    row["residual_checkpoints"] = {
+        "candidate": str(expected["residual_candidate"]),
+        "null": str(expected["residual_null"]),
+    }
+    row_path.write_text(json.dumps(row), encoding="utf-8")
+    return row
+
+
+def _manifest_rows_from_fold(row: dict[str, object]) -> dict[int, dict[str, object]]:
+    fold = int(row["outer_fold"])
+    sources = {}
+    for source_id, runtime_source in row["frozen_input_sources"].items():
+        spec = FROZEN_INPUT_SOURCE_SPEC[source_id]
+        sources[source_id] = {
+            **runtime_source,
+            "realized_parameter_count": spec["realized_parameter_count"],
+            "trainable_in_p1": spec["trainable_in_p1"],
+        }
+    return {
+        fold: {
+            "outer_fold": fold,
+            "held_puzzle": row["held_puzzle"],
+            "seed": 0,
+            "sources": sources,
+        }
+    }
+
+
 def test_merger_accepts_only_the_exact_complete_prediction_universe(
     tmp_path: Path,
 ) -> None:
@@ -322,6 +375,238 @@ def test_merger_accepts_only_the_exact_complete_prediction_universe(
         result["context_retention_summary"]["candidate_retention_positive_all_runs"]
         is True
     )
+
+
+def test_production_binding_accepts_only_current_canonical_fold_artifacts(
+    tmp_path: Path,
+) -> None:
+    _write_fold(tmp_path, fold=0)
+    row = _canonicalize_fold_artifacts(tmp_path, fold=0)
+    result = merge_complete_universe(
+        tmp_path,
+        expected_phase="P1M3",
+        expected_folds=[0],
+        expected_seeds=[0],
+        expected_pretraining_epochs=1,
+        expected_point_epochs=1,
+        expected_calibration_epochs=1,
+        expected_parameter_count=100,
+        expected_trainable_parameter_count=50,
+        expected_artifact_dir=tmp_path.resolve(),
+        expected_source_manifest_rows=_manifest_rows_from_fold(row),
+    )
+    assert result["status"] == "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS"
+
+
+@pytest.mark.parametrize(
+    "artifact_name",
+    [
+        "prediction_artifact",
+        "point_candidate",
+        "point_null",
+        "decoder_candidate",
+        "decoder_null",
+        "residual_candidate",
+        "residual_null",
+    ],
+)
+def test_production_binding_rejects_compatible_artifact_outside_current_universe(
+    tmp_path: Path, artifact_name: str
+) -> None:
+    _write_fold(tmp_path, fold=0)
+    row = _canonicalize_fold_artifacts(tmp_path, fold=0)
+    manifest_rows = _manifest_rows_from_fold(row)
+    canonical = merger._canonical_fold_artifact_paths(
+        tmp_path.resolve(), fold=0, seed=0
+    )
+    stale_path = tmp_path / "stale_compatible_attempt" / canonical[artifact_name].name
+    stale_path.parent.mkdir()
+    stale_path.write_bytes(canonical[artifact_name].read_bytes())
+    if artifact_name == "prediction_artifact":
+        row["prediction_artifact"] = str(stale_path)
+    else:
+        stage, arm = artifact_name.split("_", maxsplit=1)
+        field = {
+            "point": "point_checkpoints",
+            "decoder": "pretraining_decoder_checkpoints",
+            "residual": "residual_checkpoints",
+        }[stage]
+        row[field][arm] = str(stale_path)
+    row_path = tmp_path / "puzzle_set_fold_result_fold0_seed0.json"
+    row_path.write_text(json.dumps(row), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="authority-bound prediction directory"):
+        merge_complete_universe(
+            tmp_path,
+            expected_phase="P1M3",
+            expected_folds=[0],
+            expected_seeds=[0],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+            expected_artifact_dir=tmp_path.resolve(),
+            expected_source_manifest_rows=manifest_rows,
+        )
+
+
+def test_production_binding_rejects_fold_source_outside_active_manifest(
+    tmp_path: Path,
+) -> None:
+    _write_fold(tmp_path, fold=0)
+    row = _canonicalize_fold_artifacts(tmp_path, fold=0)
+    manifest_rows = _manifest_rows_from_fold(row)
+    runtime_source = row["frozen_input_sources"]["v8_meanaligned_checkpoint"]
+    current_path = Path(runtime_source["path"])
+    stale_path = tmp_path / "stale_sources" / current_path.name
+    stale_path.parent.mkdir()
+    stale_path.write_bytes(current_path.read_bytes())
+    runtime_source["path"] = str(stale_path)
+    row_path = tmp_path / "puzzle_set_fold_result_fold0_seed0.json"
+    row_path.write_text(json.dumps(row), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="differs from the active source manifest"):
+        merge_complete_universe(
+            tmp_path,
+            expected_phase="P1M3",
+            expected_folds=[0],
+            expected_seeds=[0],
+            expected_pretraining_epochs=1,
+            expected_point_epochs=1,
+            expected_calibration_epochs=1,
+            expected_parameter_count=100,
+            expected_trainable_parameter_count=50,
+            expected_artifact_dir=tmp_path.resolve(),
+            expected_source_manifest_rows=manifest_rows,
+        )
+
+
+@pytest.mark.parametrize("phase", ["P1M2", "P1M3", "P1M4"])
+def test_production_merge_universe_is_frozen_per_phase(phase: str) -> None:
+    expected = PRODUCTION_MERGE_UNIVERSES[phase]
+    observed = assert_production_merge_universe(
+        phase=phase,
+        folds=list(expected["folds"]),
+        seeds=list(expected["seeds"]),
+        pretraining_epochs=expected["pretraining_epochs"],
+        point_epochs=expected["point_epochs"],
+        calibration_epochs=expected["calibration_epochs"],
+        parameter_count=expected["parameter_count"],
+        trainable_parameter_count=expected["trainable_parameter_count"],
+    )
+    assert observed == expected
+
+
+@pytest.mark.parametrize(
+    ("phase", "changed_field", "changed_value"),
+    [
+        ("P1M2", "seeds", [0, 1]),
+        ("P1M3", "folds", list(range(19))),
+        ("P1M4", "point_epochs", 39),
+    ],
+)
+def test_production_main_rejects_redefined_universe_before_canonical_write(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    phase: str,
+    changed_field: str,
+    changed_value: object,
+) -> None:
+    monkeypatch.setattr(merger, "assert_merge_authority", lambda *_args, **_kw: {})
+    frozen = dict(PRODUCTION_MERGE_UNIVERSES[phase])
+    frozen[changed_field] = changed_value
+    out_json = tmp_path / "canonical_complete_unscored_merge.json"
+    argv = [
+        "--repo-root",
+        str(tmp_path),
+        "--input-dir",
+        str(tmp_path),
+        "--phase",
+        phase,
+        "--folds",
+        ",".join(map(str, frozen["folds"])),
+        "--seeds",
+        ",".join(map(str, frozen["seeds"])),
+        "--pretraining-epochs",
+        str(frozen["pretraining_epochs"]),
+        "--point-epochs",
+        str(frozen["point_epochs"]),
+        "--calibration-epochs",
+        str(frozen["calibration_epochs"]),
+        "--parameter-count",
+        str(frozen["parameter_count"]),
+        "--trainable-parameter-count",
+        str(frozen["trainable_parameter_count"]),
+        "--out-json",
+        str(out_json),
+    ]
+    with pytest.raises(ValueError, match="production merge universe differs"):
+        merger.main(argv)
+    assert not out_json.exists()
+
+
+def test_production_main_cannot_omit_artifact_and_manifest_binding(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    manifest_path = tmp_path / "source_manifest.json"
+    manifest_rows = {"validated": "manifest rows"}
+    monkeypatch.setattr(
+        merger,
+        "assert_merge_authority",
+        lambda *_args, **_kwargs: {
+            "authority": {"source_manifest_path": str(manifest_path)}
+        },
+    )
+    monkeypatch.setattr(
+        merger,
+        "validate_source_manifest",
+        lambda path: manifest_rows if path == manifest_path else None,
+    )
+    captured = {}
+
+    def fake_merge(input_dir: Path, **kwargs: object) -> dict[str, object]:
+        captured["input_dir"] = input_dir
+        captured.update(kwargs)
+        return {
+            "schema_version": MERGED_SCHEMA,
+            "status": "PUZZLE_SET_COMPLETE_UNSCORED_MERGE_PASS",
+        }
+
+    monkeypatch.setattr(merger, "merge_complete_universe", fake_merge)
+    frozen = PRODUCTION_MERGE_UNIVERSES["P1M2"]
+    out_json = tmp_path / "p1m2_complete_unscored_merge.json"
+    result = merger.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "--input-dir",
+            str(tmp_path),
+            "--phase",
+            "P1M2",
+            "--folds",
+            ",".join(map(str, frozen["folds"])),
+            "--seeds",
+            ",".join(map(str, frozen["seeds"])),
+            "--pretraining-epochs",
+            str(frozen["pretraining_epochs"]),
+            "--point-epochs",
+            str(frozen["point_epochs"]),
+            "--calibration-epochs",
+            str(frozen["calibration_epochs"]),
+            "--parameter-count",
+            str(frozen["parameter_count"]),
+            "--trainable-parameter-count",
+            str(frozen["trainable_parameter_count"]),
+            "--out-json",
+            str(out_json),
+        ]
+    )
+
+    assert result == 0
+    assert captured["input_dir"] == tmp_path.resolve()
+    assert captured["expected_artifact_dir"] == tmp_path.resolve()
+    assert captured["expected_source_manifest_rows"] is manifest_rows
 
 
 def test_merger_rejects_missing_fold(tmp_path: Path) -> None:

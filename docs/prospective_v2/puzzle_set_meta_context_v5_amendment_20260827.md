@@ -43,11 +43,197 @@ tests or observing a near miss in another model does not confer authority.
 The registered router is
 `docs/plans/2026-08-27-post-v14-model-contingency.md`, and its first matching
 branch controls. At draft time `selected_router_branch_id`, route-probe
-requirement and route-probe status are all pending/`NOT_EVALUATED`; this is not
-evidence that P1 will become eligible.
+requirement are pending the complete V14 terminal handoff, and route-probe
+status is exactly `NOT_RUN`; this is not evidence that P1 will become eligible.
 
 No P1 training, target join or scientific score is authorized while the status
 is `DRAFT_FROZEN_INACTIVE_V14_SOLE_ACTIVE`.
+
+### Frozen branch-5 route probe — specification only
+
+This draft now freezes the exact probe required only if the first matching
+post-V14 router branch is branch 5, `INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED`.
+It does not authorize that probe. Before a complete V14 terminal handoff its
+status is `NOT_RUN`; no execution token, prediction authority, held-score
+authority or external-outcome authority has been issued. Branches 3 and 4 use
+`NOT_APPLICABLE/NOT_APPLICABLE` and must not manufacture a probe artifact.
+The future runtime identity is frozen as project task
+`reactflow_delta_post_v14_branch5_route_probe`. A terminal-only `B5RP0` first
+binds the frozen checkpoint directories and manifest path with status
+`POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION`; it keeps training
+and all score access closed. Only after all 40 checkpoint files pass strict
+architecture inspection and the 20-row manifest exists may a focused commit
+set the manifest status to `POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS` and
+open prediction phase `B5RP1` with
+token `POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY`, score
+phase `B5RP2` with token
+`POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY`, and qualifier/terminal phase
+`B5RP3`. Every one of these authorities and both tokens are currently
+`NOT_AUTHORIZED/NOT_ISSUED`; `active_contract.yaml` remains unchanged.
+Any future route-probe active authority must additionally bind the exact parent
+state `v14_status=TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL`,
+`post_v14_first_matching_branch_id='5'` and
+`post_v14_route_classification=INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED`.
+The V14M4 path is explicitly ineligible and must fail closed.
+
+The future authority is also path-bound, not merely schema-bound. It fixes the
+V13 checkpoint directory to
+`/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0`, the V14
+checkpoint directory to
+`/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0`, the M2 CSV,
+strict TIC2A registry and both feature caches to the absolute paths registered
+in the machine contract, and the prediction directory to
+`/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0`.
+The only eligible complete merge, complete score and qualification are the
+three registered files in that directory. Projector, runner, scorer and
+qualifier must reject a CLI path that differs from its active-authority
+binding. This prevents a compatible but differently trained checkpoint or a
+second scored universe from being substituted after the route is selected.
+In particular, B5RP0 must not predeclare the not-yet-created manifest as
+`PASS`; `PENDING_PROJECTION → PASS` requires the manifest artifact and a
+separate authority commit. Its executable projector derives the active pointer
+only from `<repo-root>/configs/reactflow_delta/active_contract.yaml`; an
+operator-supplied alternate YAML cannot authorize projection.
+
+The probe may consume parent checkpoints only through a terminal safe source
+manifest with schema
+`reactflow_delta.post_v14_branch5_safe_source_manifest.v1`. That manifest is
+not generated or accepted now. If branch 5 is later selected, it must contain
+exactly folds 0--19 with canonical `P01`--`P20`, seed 0, V13M3 candidate and
+V14M3 candidate checkpoint paths, and score-closed/external-locked provenance.
+It must not contain targets, masks, training histories, losses, scores,
+per-puzzle effects or Gate values. The route runner may not parse the wide V13
+or V14 fold-result artifacts as a substitute.
+
+For each outer fold, the probe freezes the same-fold V13 candidate seed-0 point
+as an immutable additive anchor and the same-fold V14 candidate seed-0 encoder
+as an immutable outcome-blind representation source. Neither is trained by the
+probe. The regression target on the nineteen outer-train puzzles is
+
+\[
+r_{ui}=\Delta_{ui}-\widehat\Delta^{V13}_{ui}.
+\]
+
+For each focal construct and coordinate, exactly the other seven constructs
+form one raw 260-dimensional non-focal summary:
+
+- the arithmetic mean of their seven zero-preserving V14 content contrasts,
+  width 256;
+- `pooled_safe_wt`, the sum of finite observed WT reactivities with unobserved
+  entries replaced by zero, divided by seven, width 1;
+- the finite-observed WT-reactivity mean, width 1;
+- the finite-observed WT-reactivity population standard deviation, width 1;
+- the finite-observed support fraction, count divided by seven, width 1.
+
+Zero support gives zero pooled value, mean and standard deviation. Concatenating
+the mutation-source and receiver summaries produces the only 520-dimensional
+ridge input. The probe contains no focal hidden/reactivity/mask feature, V13
+point as a ridge feature, feature41, signed distance, mutation identity,
+method ID, puzzle ID or dataset ID. V13 enters only as the frozen additive
+anchor.
+
+Each V14 content contrast is computed in frozen eval mode as
+`encode(real WT context) - encode(coordinate-only reference)`. The reference
+preserves the same `position` and `region` tensors and zeros `sequence`,
+`reactivity`, `precision` and `observed`. The fixed shift is applied only after
+this subtraction. Therefore arbitrary positions and regions with zero
+biological/measurement content must give an exactly zero contrast and
+identical zero aligned/shift-17 features. This prevents a pass caused only by
+raw V14 absolute-position or region encoding.
+
+The aligned arm uses the registered shared full-construct source and receiver
+coordinates. The matched arm circularly shifts every non-focal stream by the
+fixed offset 17 before computing all five summary components. The two arms are
+standardized and fit separately using only their outer-train rows. Each feature
+uses its arm-specific weighted outer-train mean and population standard
+deviation. A standard deviation below `1e-8` is assigned scale `1.0`; a truly
+constant feature must therefore standardize exactly to zero. Each arm fits weighted
+ridge with `alpha=1` and an unpenalized intercept. Sample weights implement the
+frozen hierarchy: equal outer-train puzzle×method cells, equal mutants within a
+cell and equal qualified positions within a mutant, normalized to mean one over
+the fitted rows. No alpha, standardization, feature, intercept, fold or model
+selection is allowed.
+
+The two predictions are
+
+\[
+\widehat\Delta_{aligned}=\widehat\Delta_{V13}+\widehat r_{aligned},\qquad
+\widehat\Delta_{shift17}=\widehat\Delta_{V13}+\widehat r_{shift17}.
+\]
+
+All 20 LOPO folds must first produce prediction-only artifacts. Every fold
+records the exact same-fold V13 checkpoint and V14 encoder checkpoint from the
+terminal safe manifest at
+`/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json`,
+their roles, outer fold and seed 0. The future B5RP1 active authority must bind
+that exact path and status `POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS`, and the
+runner must reject any different CLI manifest path. Every fold additionally
+records the strict same-fold TIC2A feature41 model projection and the global M2 CSV,
+TIC2A target-free registry and two feature caches. The five global source paths
+must be identical across all 20 folds; every path and role is part of fold
+provenance and the merger revalidates the TIC2A registry/model projection
+without opening its prediction artifacts. Each fold also records the fitted
+standardization and ridge-model artifact. Prediction artifacts
+must contain V13, aligned and shift-17 point predictions but no held target,
+target error, qualified target mask, score or per-puzzle effect. Only a complete,
+unique, provenance-qualified 20-fold merge may be scored exactly once under the
+frozen method-balanced position→mutant→method→puzzle evaluator.
+
+The terminal-safe source manifest becomes final only after all forty
+checkpoints pass and a same-directory atomic rename completes. Prediction,
+ridge and fold JSON files become final only through same-directory
+atomic rename after their complete write. The merger itself remains under
+B5RP1 authority: its input directory and output path must equal the registered
+`prediction_dir` and `complete_unscored_merge_path`; every fold's prediction
+and ridge path must equal the fixed filename inside that directory, and the
+merger rechecks the frozen V13/V14 checkpoint parent directories. The complete
+merge also requires the manifest, M2 CSV, TIC2A registry, unconstrained cache
+and constrained cache recorded by every fold to equal the five frozen
+active-authority paths, rather than merely agreeing with one another. The complete
+merge likewise becomes final only after complete validation and atomic rename.
+The one complete score and qualification use the same complete-write then
+atomic-rename rule.
+This prevents a recovered half-file or a compatible alternate fold universe
+from being mistaken for the registered experiment.
+
+The registered schemas are:
+
+- fold: `reactflow_delta.puzzle_set_branch5_route_probe_fold.v1`;
+- prediction: `reactflow_delta.puzzle_set_branch5_route_probe_prediction.v1`;
+- ridge model: `reactflow_delta.puzzle_set_branch5_route_probe_ridge.v1`;
+- merged: `reactflow_delta.puzzle_set_branch5_route_probe_merged.v1`;
+- score: `reactflow_delta.puzzle_set_branch5_route_probe_score.v1`;
+- qualification:
+  `reactflow_delta.puzzle_set_branch5_route_probe_qualification.v1`.
+
+The aligned prediction must pass four separate comparisons: signed-delta MAE
+and point absolute-delta MAE, each versus the frozen V13 parent and versus the
+shift-17 ridge. Every comparison must have relative gain at least 1%, a
+two-sided 95% paired t-CI lower bound strictly above zero across the 20 held
+puzzles, and at least 14/20 puzzles with strictly positive comparator-minus-
+aligned error. The t-CI uses the sample standard deviation with `ddof=1`,
+19 degrees of freedom and `t(0.975,19)=2.093024054408263`.
+Relative gain is the puzzle-macro mean comparator-minus-aligned error divided
+by the puzzle-macro mean comparator error, not a mean of per-puzzle ratios.
+Because the 20 LOPO training sets overlap, this paired t-CI is a strict
+development-routing Gate, not independent confirmatory inference. Any paper-
+level generalization claim still requires a new independent puzzle/study or a
+separately frozen retraining-aware uncertainty analysis.
+
+The exact three-state decision is:
+
+- `PASS`: the complete universe and provenance are valid and all four
+  comparison Gates pass;
+- `FAIL`: a complete valid score exists and at least one of the four Gates
+  fails;
+- `INDETERMINATE`: the universe, source provenance, target identity,
+  aggregation, finite-score, coverage or prediction-integrity qualification is
+  incomplete or invalid.
+
+Only exact `PASS` can make branch 5 eligible for a later focused P1 activation
+commit. `FAIL` and `INDETERMINATE` both route to P3/stop-model-rescue and cannot
+be repaired by changing alpha, shift, features, threshold or Gate. The present
+draft remains `NOT_RUN` and cannot itself create any of these terminal states.
 
 ## 2. Scientific question, hypothesis and falsifier
 
@@ -153,7 +339,8 @@ must exactly replay the V13 parent even after arbitrary head updates.
 ### Frozen input-source registry
 
 Activation must bind the realized path and exact role of every source for each
-outer fold 0--19 before P1M1. The frozen registry is:
+outer fold 0--19 during the score-closed P1M1 source-projection step and before
+P1M2 can open. The frozen registry is:
 
 - same-fold V13 candidate seed-0 point checkpoint: immutable point anchor,
   2,064,737 parameters, never trained by P1;
@@ -163,15 +350,20 @@ outer fold 0--19 before P1M1. The frozen registry is:
 - same-fold V8 seed-0 MeanAligned checkpoint: frozen source of the trained
   201-dimensional direct-feature block used by calibration, 109,581 upstream
   parameters, exact filename
-  `v8_corrected_mean_fold{outer_fold}_seed0.pt`, not the P1 point anchor;
+  `v8_corrected_mean_fold{outer_fold}_seed0.pt`, constructed directly from the
+  frozen V8 directory rather than parsed from the wide V8 fold result, and not
+  the P1 point anchor;
 - TIC2A corrected outer-fold `v6_feature41` weighted ridge and its
   41-dimensional feature basis from
   `tic2a_corrected_models_fold{outer_fold}.json`, together with the frozen
   unconstrained and constrained feature caches used to construct that basis;
-- the same-fold terminal V10 row only as historical-comparator and residual-
-  family provenance under
-  `v10_fold_result_fold{outer_fold}_seed0.json`. No learned V10 checkpoint is a
-  P1 point or feature input.
+- V10 is not a frozen training or prediction input, and the P1 scorer does not
+  open any V10 fold result. After a complete prediction merge and the exact
+  score token, the scorer opens the sole historical bundle
+  `/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0/v13m3_complete_score.json`.
+  That exact 20-fold V13 artifact carries V12/V11/V10 comparator metrics only
+  through its already-frozen transitive lineage. No learned V10 checkpoint or
+  wide V10 result is a P1 point, feature or direct score input.
 
 The realized TIC2A ridge parameter count, both cache paths, all fold-specific
 source paths and the complete upstream parameter footprint are deliberately
@@ -183,18 +375,64 @@ Every fold artifact must use
 `frozen_input_sources` records `v13_point_checkpoint`,
 `v14_encoder_checkpoint`, `v8_meanaligned_checkpoint`,
 `tic2a_feature41_model_artifact`, `tic2a_merged_registry`,
-`unconstrained_feature_cache`, `constrained_feature_cache` and
-`v10_fold_comparator`. Each record contains exactly `path`, `role`,
-`used_in_candidate_prediction`, `outer_fold` and `seed`. The first four learned
-sources and V10 comparator are fold-scoped; the TIC2A registry and two caches
-are global. Roles and candidate-input booleans must exactly match the machine
-contract, in particular V10 is
-`COMPARATOR_PROVENANCE_ONLY_NOT_CANDIDATE_INPUT`.
+`unconstrained_feature_cache` and `constrained_feature_cache`. Each record
+contains exactly `path`, `role`, `used_in_candidate_prediction`, `outer_fold`
+and `seed`. The first four learned sources are fold-scoped; the TIC2A registry
+and two caches are global. Roles and candidate-input booleans must exactly
+match the machine contract. V10 is absent from these records; its distribution
+absolute comparator enters only as a validated transitive field of the sole
+V13M3 historical score bundle.
+
+The terminal binding artifact is fixed at
+`/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json`
+with schema `reactflow_delta.puzzle_set_meta_context_source_manifest.v1`, status
+`PUZZLE_SET_SOURCE_MANIFEST_BOUND`, and binding status
+`REALIZED_PATHS_ROLES_AND_COUNTS_BOUND`. It contains exactly folds 0--19 and
+exactly the seven training/prediction source records above, including realized
+parameter counts and `trainable_in_p1=false`. The initial P1M1 authority binds
+this exact absolute path as `source_manifest_path` with
+`REALIZED_PATHS_ROLES_AND_COUNTS_PENDING`, keeps training and every outcome read
+closed, and permits only the canonical source projector. After the projector
+atomically writes and validates all twenty rows, a separate focused authority
+commit changes only `source_binding_status` to
+`REALIZED_PATHS_ROLES_AND_COUNTS_BOUND`. No P1M2 training authority may be
+issued before that transition, and the runner rejects any CLI path not
+identical to the bound authority path.
+
+The future active authority also freezes the exact output universe for every
+phase. P1M2 is confined to `p1m2_real_smoke`, P1M3 to
+`p1m3_screen_seed0`, and P1M4 to `p1m4_formal_seeds0_4`, including their
+single merge, score, qualification and (for P1M4) assembly paths. Runner,
+merger, assembler, scorer and qualifier each compare their real CLI paths to
+those flat active-authority fields before opening or writing scientific
+artifacts. Before constructing `M2Universe` or reading training data, the
+runner additionally requires its resolved M2 CSV path to equal the active
+`m2_csv_path`; each fold then proves that its actual universe was constructed
+from that same authorized path. A same-content alternate CSV is not an
+equivalent training source. P1M2 engineering qualification remains score-blind
+but is bound in the same way. Every production P1M2/P1M3/P1M4 entry point,
+including merge, assembly, score and qualification, must reject a pending,
+missing, non-absolute or invalid source manifest before opening a phase
+artifact; successful runner validation alone cannot be reused as authority.
 
 Every complete merge must use
 `reactflow_delta.puzzle_set_meta_context_merged.proposed.v9`, preserve all fold
 records, set `complete_frozen_input_provenance_all_runs=true`, and record the
 expected candidate-specific trainable count of 1,468,165 for every run.
+The fold result is the completion sentinel and is atomically renamed only after
+its prediction and checkpoint artifacts exist. Complete merge, formal assembly,
+score and qualification JSON files likewise become visible only through an
+atomic final rename after their entire validated content is written. This is
+required because interrupted remote runs are an observed execution mode, not a
+hypothetical adversarial case.
+Production merge also derives the exact folds, seeds, three epoch counts and
+point-module parameter counts from P1M2/P1M3/P1M4. Caller CLI values cannot
+redefine a canonical phase universe or occupy its merge path with a partial
+run. For every fold-seed, the prediction artifact and six trained checkpoint
+paths must be the frozen canonical filenames inside that phase's active
+`prediction_dir`, and the fold's seven `frozen_input_sources` records must
+match the currently bound source-manifest row. Structurally compatible stale
+or alternate artifacts are not eligible for a production merge.
 
 ### Frozen capacity
 
@@ -305,14 +543,18 @@ Current state: `DRAFT_FROZEN_INACTIVE_V14_SOLE_ACTIVE`.
 
 After a qualifying complete V14 terminal handoff, promote the existing inactive
 machine-contract draft by binding the selected router branch, branch-specific
-probe state, exact frozen-input paths/roles/counts and the full upstream
-footprint. Then rerun contract validation and focused tests and activate P1 in
-one new focused commit. Training remains closed during that commit. If V14
-routing does not select P1, this draft is archived without execution.
+probe state and the exact source-path universe. Activate only
+`P1M1/SOURCE_MANIFEST_PROJECTION_ONLY` in one focused commit with the manifest
+binding still pending; training, held score, partial score and external outcome
+access remain closed. If V14 routing does not select P1, this draft is archived
+without execution.
 
 ### P1M1 — implementation and invariants
 
-Rerun the complete V5 focused test suite from the activated clean checkout.
+Run the canonical source projector from the activated clean checkout, validate
+the exact twenty-fold/seven-source manifest and bind the realized source counts
+and upstream footprint in a separate focused authority commit. Then rerun the
+complete V5 focused test suite.
 Require exact candidate/null counts, parent provenance and replay, focal
 exclusion, 7+1 K/V support, shift-17 matching, raw-zero cross cancellation,
 paired point-head cancellation, finite nonzero Q/K/V gradients, permutation
@@ -465,6 +707,10 @@ publication/study/batch units.
 - `scripts/reactflow_delta/puzzle_set_meta_context.py`
 - `scripts/reactflow_delta/puzzle_set_meta_context_pretraining.py`
 - `scripts/reactflow_delta/puzzle_set_meta_context_retention.py`
+- `scripts/reactflow_delta/puzzle_set_safe_sources.py`
+- `scripts/reactflow_delta/preflight_puzzle_set_meta_context_sources.py`
+- `scripts/reactflow_delta/project_puzzle_set_meta_context_sources.py`
+- `scripts/reactflow_delta/puzzle_set_score_chain.py`
 - `scripts/reactflow_delta/run_puzzle_set_meta_context_probe.py`
 - `scripts/reactflow_delta/merge_puzzle_set_meta_context_probe.py`
 - `scripts/reactflow_delta/qualify_puzzle_set_meta_context_smoke.py`
@@ -473,4 +719,9 @@ publication/study/batch units.
 - `scripts/reactflow_delta/assemble_puzzle_set_meta_context_formal.py`
 - `scripts/reactflow_delta/score_puzzle_set_meta_context_formal.py`
 - `scripts/reactflow_delta/qualify_puzzle_set_meta_context_formal.py`
+- `scripts/reactflow_delta/run_puzzle_set_meta_context_smoke_controller.sh`
+- `scripts/reactflow_delta/run_puzzle_set_meta_context_screen_controller.sh`
+- `scripts/reactflow_delta/run_puzzle_set_meta_context_score_once.sh`
+- `scripts/reactflow_delta/run_puzzle_set_meta_context_formal_controller.sh`
+- `scripts/reactflow_delta/run_puzzle_set_meta_context_formal_score_once.sh`
 - `scripts/reactflow_delta/validate_puzzle_set_meta_context_v5_contract.py`

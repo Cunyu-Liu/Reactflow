@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-import yaml
 
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.merge_puzzle_set_meta_context_probe import (
@@ -21,47 +21,58 @@ from scripts.reactflow_delta.model_rescue_v1 import (
 from scripts.reactflow_delta.puzzle_set_meta_context_data import (
     PREDICTION_SCHEMA,
 )
+from scripts.reactflow_delta.puzzle_set_safe_sources import (
+    SafeTIC2AFold,
+    validate_tic2a_safe_registry,
+)
+from scripts.reactflow_delta.puzzle_set_score_chain import (
+    EXPECTED_PROJECT_TASK,
+    assert_active_phase,
+    assert_authority_paths,
+    validate_v13_historical_bundle,
+)
 from scripts.reactflow_delta.run_p2_v3 import _bio_key
 from scripts.reactflow_delta.score_model_rescue_v10 import _load_tic2a_absolute
 from scripts.reactflow_delta.score_model_rescue_v13 import (
-    SCHEMA as V13_SCORE_SCHEMA,
     _central_covered,
 )
 from scripts.reactflow_delta.score_model_rescue_v6_probe import _puzzle_macro
-from scripts.reactflow_delta.score_model_rescue_v9 import TIC2A_MERGED_SCHEMA
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
 SCHEMA = "reactflow_delta.puzzle_set_meta_context_score.proposed.v2"
-EXPECTED_PROJECT_TASK = "reactflow_delta_puzzle_set_meta_context"
 EXPECTED_PHASE = "P1M3"
 EXPECTED_SCORE_TOKEN = "PUZZLE_SET_COMPLETE_MERGE_SCORE_ONCE_ONLY"
 
 
-def assert_score_authority(repo_root: Path) -> None:
-    active = yaml.safe_load(
-        (repo_root / "configs/reactflow_delta/active_contract.yaml").read_text(
-            encoding="utf-8"
-        )
+def assert_score_authority(
+    repo_root: Path,
+    *,
+    merged_json: Path | None = None,
+    tic2a_merged_json: Path | None = None,
+    v13_historical_bundle: Path | None = None,
+    m2_csv: Path | None = None,
+    out_json: Path | None = None,
+) -> dict[str, Any]:
+    active = assert_active_phase(
+        repo_root,
+        phase=EXPECTED_PHASE,
+        score_token=EXPECTED_SCORE_TOKEN,
+        training_must_be_closed=True,
     )
-    if active.get("project_task_id") != EXPECTED_PROJECT_TASK:
-        raise RuntimeError("puzzle-set scorer is not the active project task")
-    authority = active.get("authority", {})
-    if authority.get("current_phase") != EXPECTED_PHASE or active.get(
-        "runnable_phases"
-    ) != [EXPECTED_PHASE]:
-        raise RuntimeError("puzzle-set scorer is closed outside complete P1M3")
-    if (
-        active.get("training_allowed") is not False
-        or active.get("candidate_model_training_allowed") is not False
-    ):
-        raise RuntimeError("puzzle-set training must be closed before scoring")
-    if active.get("held_score_read_allowed") != EXPECTED_SCORE_TOKEN:
-        raise RuntimeError("puzzle-set complete score-once authority is closed")
-    if active.get("partial_fold_score_read_allowed") is not False:
-        raise RuntimeError("puzzle-set partial score access must remain closed")
-    if active.get("new_external_outcome_access_allowed") is not False:
-        raise RuntimeError("puzzle-set scoring requires external outcomes locked")
+    provided = {
+        "complete_unscored_merge_path": merged_json,
+        "tic2a_merged_registry_path": tic2a_merged_json,
+        "v13_historical_bundle_path": v13_historical_bundle,
+        "m2_csv_path": m2_csv,
+        "complete_score_path": out_json,
+    }
+    present = {name: value for name, value in provided.items() if value is not None}
+    if present:
+        if len(present) != len(provided):
+            raise RuntimeError("Puzzle-Set scorer CLI path binding is incomplete")
+        assert_authority_paths(active, present)
+    return active
 
 
 def merged_integrity_pass(integrity: dict[str, Any]) -> bool:
@@ -255,14 +266,44 @@ def score_fold(
 
 
 def _v13_reference_rows(score: dict[str, Any]) -> dict[int, dict[str, Any]]:
-    if score.get("schema_version") != V13_SCORE_SCHEMA or score.get("status") != (
-        "V13M3_COMPLETE_SCORE_PASS"
-    ):
-        raise ValueError("puzzle-set scorer requires the frozen complete V13 score")
-    rows = {int(row["outer_fold"]): row for row in score.get("scores", [])}
-    if sorted(rows) != list(range(20)):
-        raise ValueError("puzzle-set scorer requires complete V13 folds0-19")
-    return rows
+    return validate_v13_historical_bundle(score)
+
+
+def _validate_tic2a_registry_and_provenance(
+    merged: dict[str, Any],
+    tic2a_merged: dict[str, Any],
+    *,
+    registry_path: Path | None,
+) -> dict[int, SafeTIC2AFold]:
+    """Validate the safe registry before any TIC2A prediction is opened."""
+
+    safe = validate_tic2a_safe_registry(tic2a_merged)
+    if registry_path is None:
+        return safe
+    expected_registry = Path(registry_path)
+    if not expected_registry.is_absolute():
+        raise ValueError("Puzzle-Set TIC2A registry path must be absolute")
+    rows = merged.get("folds")
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("Puzzle-Set merged provenance has no fold rows")
+    for row in rows:
+        fold = int(row.get("outer_fold", -1))
+        sources = row.get("frozen_input_sources")
+        if not isinstance(sources, dict):
+            raise ValueError(f"Puzzle-Set fold {fold} source provenance is absent")
+        registry = sources.get("tic2a_merged_registry")
+        model = sources.get("tic2a_feature41_model_artifact")
+        if (
+            not isinstance(registry, dict)
+            or Path(str(registry.get("path", ""))) != expected_registry
+            or not isinstance(model, dict)
+            or fold not in safe
+            or Path(str(model.get("path", ""))) != safe[fold].model_path
+        ):
+            raise ValueError(
+                f"Puzzle-Set fold {fold} TIC2A provenance differs from registry"
+            )
+    return safe
 
 
 def _assert_parent_and_baseline_replay(
@@ -291,6 +332,8 @@ def score_complete(
     tic2a_merged: dict[str, Any],
     v13_score: dict[str, Any],
     m2_csv: Path,
+    *,
+    tic2a_registry_path: Path | None = None,
 ) -> dict[str, Any]:
     if (
         merged.get("schema_version") != MERGED_SCHEMA
@@ -305,13 +348,12 @@ def score_complete(
         raise ValueError("puzzle-set scorer requires one complete unscored merge")
     if not merged_integrity_pass(merged.get("merge_integrity", {})):
         raise ValueError("puzzle-set merged integrity is not qualified")
-    if (
-        tic2a_merged.get("schema_version") != TIC2A_MERGED_SCHEMA
-        or tic2a_merged.get("status") != "TIC2A_COMPLETE_UNSCORED_MERGE_PASS"
-    ):
-        raise ValueError("puzzle-set scorer requires the corrected TIC2A merge")
     fold_rows = {int(row["outer_fold"]): row for row in merged.get("folds", [])}
-    tic_rows = {int(row["outer_fold"]): row for row in tic2a_merged.get("folds", [])}
+    tic_rows = _validate_tic2a_registry_and_provenance(
+        merged,
+        tic2a_merged,
+        registry_path=tic2a_registry_path,
+    )
     reference_rows = _v13_reference_rows(v13_score)
     if sorted(fold_rows) != list(range(20)) or sorted(tic_rows) != list(range(20)):
         raise ValueError("puzzle-set scorer requires folds0-19 in both universes")
@@ -339,7 +381,7 @@ def score_complete(
             held_records,
             _load_prediction(Path(fold_rows[fold_id]["prediction_artifact"]), fold_id),
             _load_tic2a_absolute(
-                Path(tic_rows[fold_id]["prediction_artifact"]), fold_id
+                Path(tic_rows[fold_id].row["prediction_artifact"]), fold_id
             ),
         )
         _assert_parent_and_baseline_replay(score, reference)
@@ -378,6 +420,10 @@ def score_complete(
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
         "target_join_after_complete_merge": True,
         "v13_parent_and_feature41_replay_at_5e_7": True,
+        "v13_historical_bundle_protocol_validated": True,
+        "tic2a_registry_cross_linked_to_merged_provenance": (
+            tic2a_registry_path is not None
+        ),
         "partial_fold_scores_inspected": False,
         "external_outcome_accessed": False,
         "model_or_threshold_selection_performed": False,
@@ -393,20 +439,35 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--m2-csv", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
     args = parser.parse_args(argv)
-    assert_score_authority(args.repo_root.resolve())
-    if args.out_json.exists():
+    merged_json = args.merged_json.resolve()
+    tic2a_merged_json = args.tic2a_merged_json.resolve()
+    v13_historical_bundle = args.v13_score_json.resolve()
+    m2_csv = args.m2_csv.resolve()
+    out_json = args.out_json.resolve()
+    assert_score_authority(
+        args.repo_root.resolve(),
+        merged_json=merged_json,
+        tic2a_merged_json=tic2a_merged_json,
+        v13_historical_bundle=v13_historical_bundle,
+        m2_csv=m2_csv,
+        out_json=out_json,
+    )
+    if out_json.exists():
         raise FileExistsError("puzzle-set refuses to overwrite its complete score")
     result = score_complete(
-        json.loads(args.merged_json.read_text(encoding="utf-8")),
-        json.loads(args.tic2a_merged_json.read_text(encoding="utf-8")),
-        json.loads(args.v13_score_json.read_text(encoding="utf-8")),
-        args.m2_csv,
+        json.loads(merged_json.read_text(encoding="utf-8")),
+        json.loads(tic2a_merged_json.read_text(encoding="utf-8")),
+        json.loads(v13_historical_bundle.read_text(encoding="utf-8")),
+        m2_csv,
+        tic2a_registry_path=tic2a_merged_json,
     )
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    temporary = out_json.with_name(f"{out_json.name}.tmp")
+    temporary.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
+    os.replace(temporary, out_json)
+    print(json.dumps({"status": result["status"], "result": str(out_json)}))
     return 0
 
 

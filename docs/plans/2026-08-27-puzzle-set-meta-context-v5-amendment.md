@@ -11,10 +11,92 @@ point, use the same-fold V14 encoder, and compare exactly one V5 candidate with
 one position-deranged, parameter-matched shift-17 null.
 
 This plan currently grants no training or score authority. V14 is the sole
-active experiment. The implementation at
-`b5450ff51699cd64f43d7c59481be6362baee247` is design evidence only.
+active experiment. The implementation on this inactive staging branch is
+design evidence only.
 The inactive machine contract already exists; its pending source and router
 bindings are not runtime authority.
+
+## Branch-5 route probe — frozen prerequisite, not current execution
+
+This section applies only if the complete V14 terminal handoff selects router
+branch 5. Branches 3 and 4 bind the probe as
+`NOT_APPLICABLE/NOT_APPLICABLE`. Before V14 is terminal, branch 5 is `NOT_RUN`.
+
+The future route-probe runtime constants are frozen as follows:
+
+- project task: `reactflow_delta_post_v14_branch5_route_probe`;
+- terminal source-projection phase/status: `B5RP0` /
+  `POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION`;
+- prediction phase/token: `B5RP1` /
+  `POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY`;
+- score phase/token: `B5RP2` /
+  `POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY`;
+- qualifier and terminal phase: `B5RP3`.
+
+The future runtime is bound to the registered V13M3/V14M3 checkpoint
+directories, M2 CSV, strict TIC2A registry, both feature caches and the single
+artifact directory
+`/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0`.
+Its projector, runner, scorer and qualifier must match the corresponding
+active-authority path fields exactly; schema compatibility alone cannot
+substitute another checkpoint family or scored universe. The projector resolves
+that authority only from the chosen repository's canonical active pointer, not
+from an arbitrary YAML path.
+The manifest becomes `POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS` only after
+B5RP0 has written and validated the complete 20-row projection; B5RP1 cannot
+open on the pending status.
+
+These constants are not issued authority. This draft does not modify
+`active_contract.yaml`, authorize prediction, open held scoring or allow an
+external outcome.
+The future task must fail closed unless its parent state is exactly
+`v14_status=TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL`,
+`post_v14_first_matching_branch_id='5'` and
+`post_v14_route_classification=INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED`.
+V14M4 is not an eligible parent path.
+
+For each outer fold, bind the same-fold V13 candidate seed-0 checkpoint and
+authoritative point artifact, and the same-fold V14 candidate seed-0 encoder
+checkpoint. Construct two 520-dimensional feature matrices. Each source or
+receiver half is the 260-dimensional raw summary of exactly seven non-focal
+constructs: hidden mean 256, fixed-denominator pooled safe WT value 1,
+finite-observed WT mean 1, finite-observed WT population standard deviation 1
+and support fraction 1. The aligned arm uses registered coordinates; the null
+shifts all non-focal streams by 17 before summary calculation. Neither matrix
+contains a focal/local feature, V13 point, feature41, distance, mutation
+identity, method ID, puzzle ID or dataset ID.
+
+Fit aligned and shift-17 arms separately on the nineteen outer-train puzzles.
+Use arm-specific weighted outer-train standardization, weighted ridge
+`alpha=1`, an unpenalized intercept and the frozen equal-cell→equal-mutant→
+equal-position hierarchy. The target is signed delta minus frozen V13 point;
+the final prediction adds the fitted residual back to that point. There is no
+hyperparameter, feature or model selection.
+
+Generate all 20 prediction-only folds before scoring. Require the registered
+fold/prediction/ridge/merged schemas and complete same-fold V13/V14 provenance,
+then merge once. Only after a future focused authority commit may the complete
+merge be scored once. Qualify four comparisons: aligned versus V13 and aligned
+versus shift 17, for signed-delta MAE and point absolute-delta MAE. Every one
+requires relative gain `>=1%`, paired two-sided 95% t-CI lower `>0` over the 20
+puzzles and at least 14/20 positive puzzles.
+
+Use atomic final writes for the fold three-file set and complete merge. The
+merger remains in B5RP1 and accepts only the registered prediction directory
+and merge output; it rejects artifact paths outside that directory and
+revalidates the frozen checkpoint directories plus the exact frozen manifest,
+M2 CSV, TIC2A registry and two feature-cache paths.
+
+Treat the paired t-CI only as a development-routing Gate because the LOPO
+training sets overlap. It cannot support an independent confirmatory paper
+claim without new puzzles/studies or a separately frozen retraining-aware
+uncertainty analysis.
+
+The exact outcomes are `PASS`, `FAIL` and `INDETERMINATE`. `PASS` requires all
+integrity checks and all four Gates; `FAIL` requires a complete valid score and
+at least one failed Gate; invalid or incomplete evidence is `INDETERMINATE`.
+Only exact `PASS` permits the later P1M0 activation work below. Both other
+outcomes return to P3 and cannot be rescued by changing the probe.
 
 ## P1M0 — terminal V14 handoff and focused activation
 
@@ -26,22 +108,25 @@ bindings are not runtime authority.
   `docs/plans/2026-08-27-post-v14-model-contingency.md`.
 - For branch 3/4 the route-probe requirement/status is exactly
   `NOT_APPLICABLE/NOT_APPLICABLE`; for branch 5 it is exactly
-  `REQUIRED/EXACT_PASS` under the frozen 1%, CI and 14/20 criteria.
+  `REQUIRED/EXACT_PASS` from the frozen
+  `B5RP0→B5RP1→B5RP2→B5RP3` probe above.
 - V14 did not route to V14M4, P2 or model-rescue termination.
 
 ### Tasks
 
 1. Record the exact V14 terminal verdict and the controlling route branch.
-2. Bind the realized path, role, seed and count for the same-fold V13 candidate
+2. Freeze the exact source-path universe for the same-fold V13 candidate
    seed-0 point, V14 candidate seed-0 encoder, V8 seed-0 MeanAligned 201-d
    calibration-feature source, TIC2A outer-fold feature41 ridge and its
-   unconstrained/constrained caches. Bind V10 only as comparator/residual-
-   family provenance and not as a learned P1 input.
-3. Measure and bind the realized TIC2A ridge parameter count and complete
-   upstream footprint; do not infer either value from the P1 point module.
-4. Promote the existing inactive machine-contract draft and set P1 as the
-   project task with training, held scoring, partial scoring and external
-   outcomes closed.
+   unconstrained/constrained caches. Bind one exact V13M3 complete score bundle
+   for later score-time historical comparison; V12/V11/V10 metrics may enter
+   only through its validated transitive lineage, never as learned P1 inputs or
+   direct old fold-result reads.
+3. Promote the existing inactive machine-contract draft and set P1M1 as the
+   sole `SOURCE_MANIFEST_PROJECTION_ONLY` phase, with source binding pending and
+   training, held scoring, partial scoring and external outcomes closed.
+4. Do not measure or assert realized counts in the activation commit; the
+   canonical P1M1 projector must replay all source architectures first.
 5. Freeze the human amendment, machine contract, ledger, active pointer and
    exact V5 implementation in one focused commit.
 6. Validate that V1--V13 terminal verdicts are unchanged and that V14's frozen
@@ -56,8 +141,9 @@ bindings are not runtime authority.
 
 ### Acceptance
 
-All authority documents agree on P1M1, the exact model/count/schedule/Gates and
-closed training/outcome access. Without that focused commit, stop here.
+All authority documents agree on P1M1 source projection, the exact source-path
+universe, pending binding, the frozen model/schedule/Gates and closed
+training/outcome access. Without that focused commit, stop here.
 
 ## P1M1 — executable invariants and clean-checkout replay
 
@@ -68,6 +154,10 @@ closed training/outcome access. Without that focused commit, stop here.
 - `scripts/reactflow_delta/puzzle_set_meta_context_retention.py`
 - `scripts/reactflow_delta/puzzle_set_meta_context_calibration.py`
 - `scripts/reactflow_delta/puzzle_set_meta_context_data.py`
+- `scripts/reactflow_delta/puzzle_set_safe_sources.py`
+- `scripts/reactflow_delta/preflight_puzzle_set_meta_context_sources.py`
+- `scripts/reactflow_delta/project_puzzle_set_meta_context_sources.py`
+- `scripts/reactflow_delta/puzzle_set_score_chain.py`
 - `scripts/reactflow_delta/run_puzzle_set_meta_context_probe.py`
 - merge, scorer, formal assembler and qualifier modules with matching names;
 - `tests/reactflow_delta/test_puzzle_set_meta_context*.py` and the matching
@@ -75,43 +165,86 @@ closed training/outcome access. Without that focused commit, stop here.
 
 ### Tasks
 
-1. Recreate both arms from one initialization and prove identical 6,171,697
+1. Run `project_puzzle_set_meta_context_sources.py` from the canonical active
+   pointer, atomically write the exact 20-fold/seven-source manifest, validate
+   every architecture/path/role/seed/count, then bind
+   `REALIZED_PATHS_ROLES_AND_COUNTS_BOUND` in a focused authority commit. The
+   projector may not read M2 targets, historical scores or external outcomes.
+   The production invocation is exactly
+   `python -m scripts.reactflow_delta.project_puzzle_set_meta_context_sources --repo-root <activated-worktree>`;
+   source paths and an alternate authority file are not CLI inputs.
+2. Recreate both arms from one initialization and prove identical 6,171,697
    P1 point-module and 1,404,417 point-trainable parameter counts; separately
    prove 63,748 residual-trainable and 1,468,165 candidate-specific trainable
    point-plus-distribution parameters. Do not call the point-module count the
    full pipeline footprint.
-2. Prove the focal construct is query-only and each focal position receives
+3. Prove the focal construct is query-only and each focal position receives
    exactly seven non-focal individual K/V tokens plus one non-focal summary.
-3. Prove the null shifts every non-focal hidden/reactivity/observed stream by
+4. Prove the null shifts every non-focal hidden/reactivity/observed stream by
    exactly 17 before both individual and summary construction.
-4. Prove raw-zero reference construction occurs before learned projection,
+5. Prove raw-zero reference construction occurs before learned projection,
    actual/reference traverse the same full block, reuse one dropout draw and
    cancel exactly under arbitrary focal query and learned biases.
-5. Prove `h(base,cross)-h(base,0)` uses one shared head/dropout draw, zero cross
+6. Prove `h(base,cross)-h(base,0)` uses one shared head/dropout draw, zero cross
    exactly replays the V13 parent and both arms replay within `1e-7` before the
    first point update and after masked-WT pretraining.
-6. Prove candidate/null Q/K/V gradients are finite and nonzero, construct-order
+7. Prove candidate/null Q/K/V gradients are finite and nonzero, construct-order
    permutation equivariance holds, and the registered-coordinate
    counterfactual distinguishes candidate from shift-17 null.
-7. Prove the 200-epoch WT stage cannot accept held puzzles, mutant cells or
+8. Prove the 200-epoch WT stage cannot accept held puzzles, mutant cells or
    target-side fields and leaves the frozen V14 encoder and point head
    unchanged.
-8. Prove point epoch 0 freezes context bitwise and that epochs 1--39 use the
+9. Prove point epoch 0 freezes context bitwise and that epochs 1--39 use the
    frozen `1e-3`/`3e-4` head/context learning rates and exact 760/741 updates.
-9. Prove the epoch-200 retention diagnostic is target-free, held-puzzle
+10. Prove the epoch-200 retention diagnostic is target-free, held-puzzle
    rejecting, deterministic and state/gradient/mode preserving.
-10. Prove prediction artifacts are full-output and target-free; merger rejects
+11. Prove prediction artifacts are full-output and target-free; merger rejects
     incomplete/duplicate universes; formal scorer reconstructs its equal-seed
     assembly from the same merged sources before target access.
-11. Prove every fold uses
+12. Prove every fold uses
     `reactflow_delta.puzzle_set_meta_context_fold.proposed.v10` and records all
-    eight frozen sources with the exact path/role/input-use/fold/seed fields;
-    V10 must be provenance-only and not a candidate input.
-12. Prove every merge uses
+    seven frozen training/prediction sources with the exact
+    path/role/input-use/fold/seed fields. V10 must be absent from the training
+    source universe; the complete-merge scorer reads only the exact V13M3
+    historical bundle and never opens a V10 fold result.
+    Source preflight and prediction construct the V8 checkpoint directly from
+    its frozen directory and filename and never parse V8, V10 or V13 wide fold
+    results; terminal same-fold binding is supplied by a separate safe
+    provenance manifest.
+13. Generate and validate exactly one activation manifest at
+    `/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json`
+    with schema `reactflow_delta.puzzle_set_meta_context_source_manifest.v1`,
+    status `PUZZLE_SET_SOURCE_MANIFEST_BOUND`, binding status
+    `REALIZED_PATHS_ROLES_AND_COUNTS_BOUND`, canonical folds0--19 and exactly
+    seven source records per fold. Bind the same path and status in the future
+    active authority before any real-data runner can start.
+14. For the branch-5 route probe, use its separate safe manifest with schema
+    `reactflow_delta.post_v14_branch5_safe_source_manifest.v1`, exactly 20
+    canonical fold rows and no target, training-history, loss, score,
+    per-puzzle-effect or Gate field.
+15. Prove every merge uses
     `reactflow_delta.puzzle_set_meta_context_merged.proposed.v9`, preserves the
     complete per-run provenance, asserts
     `complete_frozen_input_provenance_all_runs=true`, and records 1,468,165 as
     the expected candidate-specific trainable count for every run.
+16. Flatten the contract's common source paths and the selected P1M2/P1M3/P1M4
+    artifact paths into the real active authority. Require runner, merger,
+    smoke qualifier, formal assembler, screen/formal scorer and qualifier to
+    reject any CLI path outside that single phase universe before reading or
+    writing an artifact. The runner must bind the resolved M2 CSV before any
+    data load and prove the constructed universe came from the same active
+    `m2_csv_path`. Every later production entry point must independently
+    validate the exact active manifest and require its binding state to be
+    `REALIZED_PATHS_ROLES_AND_COUNTS_BOUND` before reading phase artifacts.
+17. Write each fold completion sentinel, complete merge, formal assembly,
+    score and qualification through a same-directory temporary file and atomic
+    final rename, so an interrupted remote write cannot be mistaken for a
+    complete phase artifact. Production merge must derive the exact fold, seed,
+    epoch and parameter-count universe from P1M2/P1M3/P1M4 and reject caller
+    redefinition before creating the canonical merge path. It must also bind
+    each prediction/checkpoint to the canonical filename inside the active
+    prediction directory and cross-check every fold source record against the
+    active bound manifest, rejecting compatible stale or alternate artifacts.
 
 ### Required tests
 
@@ -136,8 +269,9 @@ focused authority commit may open P1M2 only.
   calibration features;
 - TIC2A outer-fold feature41 weighted ridge plus frozen unconstrained and
   constrained feature caches;
-- V10 fold artifacts only for historical comparator and residual-family
-  provenance, never as a learned point/feature source.
+- the single V13M3 complete score bundle only after score access opens; V10
+  comparator and residual-family provenance is transitive, and no V10 fold
+  artifact is opened.
 
 ### Tasks
 

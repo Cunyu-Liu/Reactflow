@@ -5,12 +5,12 @@ repo=$(cd "$(dirname "$0")/../.." && pwd)
 python_bin=/home/cunyuliu/miniconda3/envs/editflow/bin/python
 m2=/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
 v8_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
-v10_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0
 v13_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
 v14_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
 tic2a=/mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json
 unconstrained=/mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
 constrained=/mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+source_manifest=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json
 out=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m4_formal_seeds0_4
 
 if [[ "$#" -lt 1 || "$#" -gt 8 ]]; then
@@ -82,12 +82,12 @@ run_worker() {
         --phase P1M4 \
         --m2-csv "${m2}" \
         --v8-dir "${v8_dir}" \
-        --v10-dir "${v10_dir}" \
         --v13-dir "${v13_dir}" \
         --v14-dir "${v14_dir}" \
         --tic2a-merged-json "${tic2a}" \
         --unconstrained-cache "${unconstrained}" \
         --constrained-cache "${constrained}" \
+        --source-manifest "${source_manifest}" \
         --out-dir "${out}" \
         --device cuda:0 \
         --folds "${csv}" \
@@ -121,6 +121,7 @@ merged="${out}/p1m4_complete_unscored_merge.json"
 assembly="${out}/p1m4_five_seed_prediction_only_assembly.json"
 if [[ ! -f "${merged}" ]]; then
   "${python_bin}" -m scripts.reactflow_delta.merge_puzzle_set_meta_context_probe \
+    --repo-root "${repo}" \
     --input-dir "${out}" \
     --phase P1M4 \
     --folds 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 \
@@ -135,6 +136,7 @@ fi
 if [[ ! -f "${assembly}" ]]; then
   "${python_bin}" -m \
     scripts.reactflow_delta.assemble_puzzle_set_meta_context_formal \
+      --repo-root "${repo}" \
       --merged-json "${merged}" \
       --out-dir "${out}/assembled" \
       --out-json "${assembly}"

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -66,14 +67,23 @@ from scripts.reactflow_delta.puzzle_set_meta_context_retention import (
     evaluate_context_retention,
     snapshot_context_for_retention,
 )
+from scripts.reactflow_delta.puzzle_set_safe_sources import (
+    FOLD_SCOPED_INPUT_SOURCES,
+    FROZEN_INPUT_SOURCE_SPEC,
+    FROZEN_PARENT_SEED,
+    SOURCE_BINDING_STATUS,
+    SafeTIC2AFold,
+    load_tic2a_safe_registry,
+    validate_manifest_fold_runtime_binding,
+    validate_source_manifest,
+    validate_tic2a_safe_registry,
+)
 from scripts.reactflow_delta.run_model_rescue_v11 import (
     _feature41_matrix,
-    _fold_sources,
     _load_v8_mean,
     _parse_folds,
     _point_cells,
 )
-from scripts.reactflow_delta.run_model_rescue_v9 import _read_json
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 
 
@@ -85,57 +95,6 @@ PHASE_TRAINING_TOKENS = {
     "P1M4": "PUZZLE_SET_P1M4_FIXED_FIVE_SEED_FORMAL_ONLY",
 }
 RUNNABLE_PHASES = set(PHASE_TRAINING_TOKENS)
-FROZEN_PARENT_SEED = 0
-
-FROZEN_INPUT_SOURCE_SPEC = {
-    "v13_point_checkpoint": {
-        "role": "FROZEN_SAME_FOLD_POINT_ANCHOR",
-        "used_in_candidate_prediction": True,
-        "seed": FROZEN_PARENT_SEED,
-    },
-    "v14_encoder_checkpoint": {
-        "role": "FROZEN_SAME_FOLD_OUTCOME_BLIND_ENCODER",
-        "used_in_candidate_prediction": True,
-        "seed": FROZEN_PARENT_SEED,
-    },
-    "v8_meanaligned_checkpoint": {
-        "role": "FROZEN_SAME_FOLD_201D_CALIBRATION_FEATURE_GENERATOR",
-        "used_in_candidate_prediction": True,
-        "seed": FROZEN_PARENT_SEED,
-    },
-    "tic2a_feature41_model_artifact": {
-        "role": "FROZEN_OUTER_FOLD_FEATURE41_RIDGE_AND_41D_BASIS",
-        "used_in_candidate_prediction": True,
-        "seed": None,
-    },
-    "tic2a_merged_registry": {
-        "role": "FROZEN_COMPLETE_TWENTY_FOLD_SOURCE_REGISTRY",
-        "used_in_candidate_prediction": False,
-        "seed": None,
-    },
-    "unconstrained_feature_cache": {
-        "role": "FROZEN_OUTCOME_BLIND_ENSEMBLE_FEATURE_CACHE",
-        "used_in_candidate_prediction": True,
-        "seed": None,
-    },
-    "constrained_feature_cache": {
-        "role": "FROZEN_OUTCOME_BLIND_CONSTRAINED_FEATURE_CACHE",
-        "used_in_candidate_prediction": True,
-        "seed": None,
-    },
-    "v10_fold_comparator": {
-        "role": "COMPARATOR_PROVENANCE_ONLY_NOT_CANDIDATE_INPUT",
-        "used_in_candidate_prediction": False,
-        "seed": 0,
-    },
-}
-FOLD_SCOPED_INPUT_SOURCES = {
-    "v13_point_checkpoint",
-    "v14_encoder_checkpoint",
-    "v8_meanaligned_checkpoint",
-    "tic2a_feature41_model_artifact",
-    "v10_fold_comparator",
-}
 
 
 def validate_frozen_input_sources(
@@ -181,9 +140,6 @@ def validate_frozen_input_sources(
             "tic2a_feature41_model_artifact": (
                 f"tic2a_corrected_models_fold{int(outer_fold)}.json"
             ),
-            "v10_fold_comparator": (
-                f"v10_fold_result_fold{int(outer_fold)}_seed0.json"
-            ),
         }.get(name)
         if expected_filename is not None and path.name != expected_filename:
             raise RuntimeError(
@@ -201,7 +157,6 @@ def frozen_input_sources_for_fold(
     tic2a_merged_registry: Path,
     unconstrained_feature_cache: Path,
     constrained_feature_cache: Path,
-    v10_fold_comparator: Path,
 ) -> dict[str, dict[str, Any]]:
     paths = {
         "v13_point_checkpoint": v13_point_checkpoint,
@@ -211,7 +166,6 @@ def frozen_input_sources_for_fold(
         "tic2a_merged_registry": tic2a_merged_registry,
         "unconstrained_feature_cache": unconstrained_feature_cache,
         "constrained_feature_cache": constrained_feature_cache,
-        "v10_fold_comparator": v10_fold_comparator,
     }
     result = {}
     for name, path in paths.items():
@@ -229,49 +183,36 @@ def frozen_input_sources_for_fold(
     return result
 
 
-def validate_fold_source_rows(
+def safe_tic2a_source_for_fold(
     *,
     outer_fold: int,
     held_puzzle: str,
-    v8_row: dict[str, Any],
-    tic2a_row: dict[str, Any],
-    v10_row: dict[str, Any],
-) -> None:
-    """Reject learned/comparator sources that are not from the same outer fold."""
+    tic2a_merged: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, np.ndarray | float]]:
+    """Load only the safe TIC2A registry/model projection for one fold."""
 
     expected_fold = int(outer_fold)
     expected_held = str(held_puzzle)
+    if expected_held != f"P{expected_fold + 1:02d}":
+        raise RuntimeError("puzzle-set split-v4 fold identity is not canonical")
     try:
-        identities_match = (
-            int(v8_row.get("outer_fold", -1)) == expected_fold
-            and int(v8_row.get("seed", -1)) == FROZEN_PARENT_SEED
-            and str(v8_row.get("held_puzzle")) == expected_held
-            and v8_row.get("held_score_computed") is False
-            and v8_row.get("external_outcome_accessed") is False
-            and int(tic2a_row.get("outer_fold", -1)) == expected_fold
-            and str(tic2a_row.get("held_puzzle")) == expected_held
-            and int(v10_row.get("outer_fold", -1)) == expected_fold
-            and int(v10_row.get("seed", -1)) == FROZEN_PARENT_SEED
-            and str(v10_row.get("held_puzzle")) == expected_held
-        )
-    except (TypeError, ValueError):
-        identities_match = False
-    if not identities_match:
+        source = validate_tic2a_safe_registry(tic2a_merged)[expected_fold]
+    except (ValueError, FileNotFoundError) as error:
+        raise RuntimeError(f"puzzle-set safe TIC2A source rejected: {error}") from error
+    if source.row["held_puzzle"] != expected_held:
         raise RuntimeError(
-            "puzzle-set frozen source row does not match the outer fold identity"
+            "puzzle-set safe TIC2A source does not match the outer fold identity"
         )
+    return source.row, source.feature41_model
 
 
 def validate_tic2a_source_registry(tic2a_merged: dict[str, Any]) -> None:
-    rows = tic2a_merged.get("folds")
-    if not isinstance(rows, list) or len(rows) != 20:
-        raise RuntimeError("puzzle-set requires exactly twenty TIC2A source rows")
     try:
-        folds = [int(row["outer_fold"]) for row in rows]
-    except (KeyError, TypeError, ValueError):
-        raise RuntimeError("puzzle-set TIC2A source registry is malformed") from None
-    if sorted(folds) != list(range(20)) or len(set(folds)) != 20:
-        raise RuntimeError("puzzle-set TIC2A source registry is not folds0-19")
+        validate_tic2a_safe_registry(tic2a_merged)
+    except (ValueError, FileNotFoundError) as error:
+        raise RuntimeError(
+            f"puzzle-set safe TIC2A registry rejected: {error}"
+        ) from error
 
 
 def _load_frozen_v13_parent(path: Path, *, device: str) -> V13PointModel:
@@ -320,16 +261,31 @@ def _assert_parent_checkpoint_identity(
         raise FileNotFoundError("puzzle-set frozen parent checkpoint is absent")
 
 
-def assert_real_training_authority(repo_root: Path, phase: str) -> None:
+def assert_real_training_authority(
+    repo_root: Path,
+    phase: str,
+    source_manifest: Path,
+    *,
+    m2_csv: Path,
+    prediction_dir: Path | None = None,
+) -> dict[int, dict[str, Any]]:
+    """Require both the future training token and its exact realized binding."""
+
     if phase not in RUNNABLE_PHASES:
         raise ValueError(f"unsupported puzzle-set phase: {phase}")
     active_path = repo_root / "configs/reactflow_delta/active_contract.yaml"
     active = yaml.safe_load(active_path.read_text(encoding="utf-8"))
-    if active.get("project_task_id") != EXPECTED_PROJECT_TASK:
+    if (
+        not isinstance(active, dict)
+        or active.get("project_task_id") != EXPECTED_PROJECT_TASK
+    ):
         raise RuntimeError("puzzle-set real training is not the active task")
-    if active.get("authority", {}).get("current_phase") != phase or active.get(
-        "runnable_phases"
-    ) != [phase]:
+    authority = active.get("authority", {})
+    if (
+        not isinstance(authority, dict)
+        or authority.get("current_phase") != phase
+        or active.get("runnable_phases") != [phase]
+    ):
         raise RuntimeError(f"puzzle-set runner is closed outside active {phase}")
     required_token = PHASE_TRAINING_TOKENS[phase]
     if (
@@ -344,6 +300,31 @@ def assert_real_training_authority(repo_root: Path, phase: str) -> None:
         raise RuntimeError("puzzle-set training requires all held scores closed")
     if active.get("new_external_outcome_access_allowed") is not False:
         raise RuntimeError("puzzle-set training requires external outcomes locked")
+    if not source_manifest.is_absolute():
+        raise RuntimeError("puzzle-set source manifest path must be absolute")
+    if (
+        authority.get("source_manifest_path") != str(source_manifest)
+        or authority.get("source_binding_status") != SOURCE_BINDING_STATUS
+    ):
+        raise RuntimeError("puzzle-set active source-manifest binding is absent")
+    authority_m2_csv = Path(str(authority.get("m2_csv_path", "")))
+    if (
+        not m2_csv.is_absolute()
+        or not authority_m2_csv.is_absolute()
+        or m2_csv != authority_m2_csv
+    ):
+        raise RuntimeError("puzzle-set M2 CSV differs from active m2_csv_path")
+    if prediction_dir is not None:
+        authority_prediction_dir = Path(str(authority.get("prediction_dir", "")))
+        if (
+            not prediction_dir.is_absolute()
+            or not authority_prediction_dir.is_absolute()
+            or prediction_dir != authority_prediction_dir
+        ):
+            raise RuntimeError(
+                "puzzle-set output directory differs from active prediction_dir"
+            )
+    return validate_source_manifest(source_manifest)
 
 
 def prepare_real_fold(
@@ -943,15 +924,18 @@ def run_prepared_fold(
             "external_outcome_accessed": False,
         },
     }
-    fold_path.write_text(
+    temporary_fold_path = fold_path.with_name(f"{fold_path.name}.tmp")
+    temporary_fold_path.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    os.replace(temporary_fold_path, fold_path)
     return result
 
 
 def run_real_fold(
     *,
     repo_root: Path,
+    m2_csv: Path,
     univ: Any,
     records: list[Any],
     fold: Any,
@@ -962,6 +946,7 @@ def run_real_fold(
     v13_parent_checkpoint: Path,
     v14_parent_checkpoint: Path,
     frozen_input_sources: dict[str, dict[str, Any]],
+    source_manifest: Path,
     phase: str,
     seed: int,
     pretraining_epochs: int,
@@ -970,7 +955,21 @@ def run_real_fold(
     device: str,
     out_dir: Path,
 ) -> dict[str, Any]:
-    assert_real_training_authority(repo_root, phase)
+    manifest_rows = assert_real_training_authority(
+        repo_root,
+        phase,
+        source_manifest,
+        m2_csv=m2_csv,
+        prediction_dir=out_dir,
+    )
+    universe_m2_csv = Path(str(getattr(univ, "csv_path", "")))
+    if not universe_m2_csv.is_absolute() or universe_m2_csv != m2_csv:
+        raise RuntimeError("puzzle-set universe was loaded from a different M2 CSV")
+    validate_manifest_fold_runtime_binding(
+        manifest_rows=manifest_rows,
+        outer_fold=int(fold.outer_fold),
+        runtime_sources=frozen_input_sources,
+    )
     _assert_parent_checkpoint_identity(
         v13_checkpoint=v13_parent_checkpoint,
         v14_checkpoint=v14_parent_checkpoint,
@@ -1013,8 +1012,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--phase", choices=sorted(RUNNABLE_PHASES), required=True)
     parser.add_argument("--m2-csv", type=Path, required=True)
+    parser.add_argument("--source-manifest", type=Path, required=True)
     parser.add_argument("--v8-dir", type=Path, required=True)
-    parser.add_argument("--v10-dir", type=Path, required=True)
     parser.add_argument("--v13-dir", type=Path, required=True)
     parser.add_argument("--v14-dir", type=Path, required=True)
     parser.add_argument("--tic2a-merged-json", type=Path, required=True)
@@ -1030,7 +1029,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     repo_root = args.repo_root.resolve()
-    assert_real_training_authority(repo_root, args.phase)
+    args.m2_csv = args.m2_csv.resolve()
+    args.source_manifest = args.source_manifest.resolve()
+    args.out_dir = args.out_dir.resolve()
+    manifest_rows = assert_real_training_authority(
+        repo_root,
+        args.phase,
+        args.source_manifest,
+        m2_csv=args.m2_csv,
+        prediction_dir=args.out_dir,
+    )
     folds = _parse_folds(args.folds)
     schedule = (
         args.pretraining_epochs,
@@ -1068,28 +1076,45 @@ def main(argv: list[str] | None = None) -> int:
     if len(selected) != len(folds):
         raise ValueError("one or more requested puzzle-set folds are absent")
 
-    tic2a_merged = _read_json(args.tic2a_merged_json)
-    validate_tic2a_source_registry(tic2a_merged)
+    tic2a_sources = load_tic2a_safe_registry(args.tic2a_merged_json)
+    runtime_sources_by_fold = {}
+    for fold_id in range(20):
+        tic_source = tic2a_sources[fold_id]
+        runtime_sources = frozen_input_sources_for_fold(
+            outer_fold=fold_id,
+            v13_point_checkpoint=(
+                args.v13_dir
+                / f"v13_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
+            ),
+            v14_encoder_checkpoint=(
+                args.v14_dir
+                / f"v14_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
+            ),
+            v8_meanaligned_checkpoint=(
+                args.v8_dir / f"v8_corrected_mean_fold{fold_id}_seed0.pt"
+            ),
+            tic2a_feature41_model_artifact=tic_source.model_path,
+            tic2a_merged_registry=args.tic2a_merged_json,
+            unconstrained_feature_cache=args.unconstrained_cache,
+            constrained_feature_cache=args.constrained_cache,
+        )
+        validate_manifest_fold_runtime_binding(
+            manifest_rows=manifest_rows,
+            outer_fold=fold_id,
+            runtime_sources=runtime_sources,
+        )
+        runtime_sources_by_fold[fold_id] = runtime_sources
     unconstrained = EnsembleFeatureCache(args.unconstrained_cache)
     constrained = ConstrainedFeatureCache(args.constrained_cache)
     validate_cache_alignment(unconstrained, constrained)
     try:
         for fold in selected:
             fold_id = int(fold.outer_fold)
-            v8_row, tic_row, v10_row, feature41_model = _fold_sources(
-                fold_id,
-                v8_dir=args.v8_dir,
-                v10_dir=args.v10_dir,
-                tic2a_merged=tic2a_merged,
-            )
-            validate_fold_source_rows(
-                outer_fold=fold_id,
-                held_puzzle=str(fold.held_puzzle),
-                v8_row=v8_row,
-                tic2a_row=tic_row,
-                v10_row=v10_row,
-            )
-            v8_checkpoint = Path(v8_row["meanaligned_checkpoint"])
+            tic_source: SafeTIC2AFold = tic2a_sources[fold_id]
+            if tic_source.row["held_puzzle"] != str(fold.held_puzzle):
+                raise RuntimeError("puzzle-set TIC2A and split-v4 identities differ")
+            feature41_model = tic_source.feature41_model
+            v8_checkpoint = args.v8_dir / f"v8_corrected_mean_fold{fold_id}_seed0.pt"
             v13_checkpoint = (
                 args.v13_dir
                 / f"v13_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
@@ -1098,19 +1123,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.v14_dir
                 / f"v14_candidate_point_fold{fold_id}_seed{FROZEN_PARENT_SEED}.pt"
             )
-            frozen_input_sources = frozen_input_sources_for_fold(
-                outer_fold=fold_id,
-                v13_point_checkpoint=v13_checkpoint,
-                v14_encoder_checkpoint=v14_checkpoint,
-                v8_meanaligned_checkpoint=v8_checkpoint,
-                tic2a_feature41_model_artifact=Path(tic_row["model_artifact"]),
-                tic2a_merged_registry=args.tic2a_merged_json,
-                unconstrained_feature_cache=args.unconstrained_cache,
-                constrained_feature_cache=args.constrained_cache,
-                v10_fold_comparator=(
-                    args.v10_dir / f"v10_fold_result_fold{fold_id}_seed0.json"
-                ),
-            )
+            frozen_input_sources = runtime_sources_by_fold[fold_id]
             v8_model = _load_v8_mean(v8_checkpoint, device)
             print(
                 f"[{args.phase}] fold={fold_id} held={fold.held_puzzle} "
@@ -1119,6 +1132,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             result = run_real_fold(
                 repo_root=repo_root,
+                m2_csv=args.m2_csv,
                 univ=univ,
                 records=records,
                 fold=fold,
@@ -1129,6 +1143,7 @@ def main(argv: list[str] | None = None) -> int:
                 v13_parent_checkpoint=v13_checkpoint,
                 v14_parent_checkpoint=v14_checkpoint,
                 frozen_input_sources=frozen_input_sources,
+                source_manifest=args.source_manifest,
                 phase=args.phase,
                 seed=args.seed,
                 pretraining_epochs=args.pretraining_epochs,

@@ -28,9 +28,9 @@ inactive_authority:
     - COMPLETE_V14_TERMINAL_HANDOFF
     - POST_V14_FIRST_MATCHING_ROUTER_EXPLICITLY_SELECTS_P1
     - ROUTER_BRANCH_SPECIFIC_PROBE_STATE_BOUND_AS_NOT_APPLICABLE_OR_REQUIRED_EXACT_PASS
-    - ALL_REALIZED_FROZEN_INPUT_PATHS_ROLES_AND_COUNTS_BOUND
-    - CONTRACT_VALIDATOR_AND_V5_FOCUSED_TESTS_PASS_WITH_TRAINING_CLOSED
-    - FOCUSED_PUZZLE_SET_V5_ACTIVATION_COMMIT
+    - EXACT_FUTURE_SOURCE_PATH_UNIVERSE_FROZEN_WITH_BINDING_PENDING
+    - CONTRACT_VALIDATOR_PASS_WITH_TRAINING_AND_OUTCOME_ACCESS_CLOSED
+    - FOCUSED_P1M1_SOURCE_PROJECTION_ONLY_AUTHORITY_COMMIT
   v14_exact_pass_routes_only_to_v14m4: true
   v14m4_formal_failure_can_activate_p1: false
   training_allowed: false
@@ -47,8 +47,8 @@ post_v14_router:
   rule: FIRST_MATCHING_BRANCH_CONTROLS
   selected_router_branch_id: PENDING_COMPLETE_V14_TERMINAL_HANDOFF
   current_route_probe:
-    requirement: NOT_EVALUATED
-    status: NOT_EVALUATED
+    requirement: PENDING_COMPLETE_V14_TERMINAL_ROUTER
+    status: NOT_RUN
   p1_eligible_branches:
     '3':
       classification: CAPACITY_WITHOUT_PRETRAINING_INCREMENT
@@ -64,16 +64,9 @@ post_v14_router:
       classification: INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED
       route_probe_at_activation:
         requirement: REQUIRED
-        status: EXACT_PASS
-        exact_pass_criteria:
-          signed_delta_relative_gain_min: 0.01
-          point_absolute_relative_gain_min: 0.01
-          signed_delta_paired_ci_lower_gt: 0.0
-          point_absolute_paired_ci_lower_gt: 0.0
-          signed_delta_positive_puzzles_min: 14
-          point_absolute_positive_puzzles_min: 14
-          independent_units: 20_PUZZLES
-          data_access: OUTER_TRAIN_ONLY
+        current_status: NOT_RUN
+        activation_status_required: EXACT_PASS
+        specification_ref: branch_5_route_probe_specification
   excluded_branches:
     '1': V14M4_ONLY
     '2': REPAIR_SAME_FROZEN_V14_UNIVERSE_ONLY
@@ -85,6 +78,295 @@ post_v14_router:
     branch_5_probe_requirement: REQUIRED
     branch_5_probe_status: EXACT_PASS
 
+branch_5_route_probe_specification:
+  specification_status: FROZEN_INACTIVE_NOT_RUN
+  applies_only_when_first_matching_router_branch: '5'
+  v14_complete_terminal_handoff_required_before_run: true
+  branches_3_and_4_probe_status: NOT_APPLICABLE
+  execution_authorized_now: false
+  prediction_generation_authorized_now: false
+  held_score_read_authorized_now: false
+  external_outcome_access_authorized_now: false
+  execution_token_issued_now: false
+  score_token_issued_now: false
+  model_or_threshold_selection_allowed: false
+  runtime_paths:
+    core: scripts/reactflow_delta/post_v14_branch5_route_probe.py
+    terminal_projector: scripts/reactflow_delta/project_post_v14_branch5_safe_sources.py
+    prediction_runner: scripts/reactflow_delta/run_post_v14_branch5_route_probe.py
+    missing_fold_controller: scripts/reactflow_delta/run_post_v14_branch5_route_probe_controller.sh
+    merger: scripts/reactflow_delta/merge_post_v14_branch5_route_probe.py
+    scorer: scripts/reactflow_delta/score_post_v14_branch5_route_probe.py
+    qualifier: scripts/reactflow_delta/qualify_post_v14_branch5_route_probe.py
+  future_runtime_authority:
+    project_task_id: reactflow_delta_post_v14_branch5_route_probe
+    parent_state:
+      v14_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL
+      post_v14_first_matching_branch_id: '5'
+      post_v14_route_classification: INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED
+      v14m4_path_allowed: false
+    projection_phase: B5RP0
+    projection_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION
+    prediction_phase: B5RP1
+    prediction_token: POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY
+    score_phase: B5RP2
+    score_token: POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY
+    qualifier_and_terminal_phase: B5RP3
+    project_task_active_now: false
+    projection_authority_now: NOT_AUTHORIZED
+    prediction_token_status_now: NOT_ISSUED
+    score_token_status_now: NOT_ISSUED
+    prediction_authority_now: NOT_AUTHORIZED
+    score_authority_now: NOT_AUTHORIZED
+    qualifier_authority_now: NOT_AUTHORIZED
+    source_manifest_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
+    source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS
+    v13_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
+    v14_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
+    m2_csv_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+    tic2a_merged_registry_path: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json
+    unconstrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
+    constrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+    prediction_dir: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0
+    complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json
+    complete_score_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json
+    qualification_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_qualification.json
+  parents:
+    point_anchor:
+      model: V13_CANDIDATE_POINT
+      seed: 0
+      outer_fold_matched: true
+      checkpoint_filename_pattern: v13_candidate_point_fold{outer_fold}_seed0.pt
+      role: IMMUTABLE_ADDITIVE_POINT_ANCHOR
+      trainable_in_route_probe: false
+    representation_anchor:
+      model: V14_CANDIDATE_OUTCOME_BLIND_WT_ENCODER
+      seed: 0
+      outer_fold_matched: true
+      checkpoint_filename_pattern: v14_candidate_point_fold{outer_fold}_seed0.pt
+      role: IMMUTABLE_NONFOCAL_REPRESENTATION_SOURCE
+      trainable_in_route_probe: false
+  raw_nonfocal_summary:
+    exact_nonfocal_constructs_per_focal: 7
+    focal_construct_excluded: true
+    focal_or_local_feature_in_summary: false
+    per_coordinate_width: 260
+    components:
+      hidden_mean:
+        width: 256
+        formula: ARITHMETIC_MEAN_OF_SEVEN_ZERO_PRESERVING_V14_CONTENT_CONTRASTS
+      pooled_safe_wt:
+        width: 1
+        formula: SUM_FINITE_OBSERVED_WT_REACTIVITY_WITH_UNOBSERVED_ZERO_DIVIDED_BY_7
+      observed_reactivity_mean:
+        width: 1
+        formula: FINITE_OBSERVED_WT_SUM_DIVIDED_BY_CLAMPED_SUPPORT_COUNT_ZERO_IF_NO_SUPPORT
+      observed_reactivity_population_std:
+        width: 1
+        formula: SQRT_NONNEGATIVE_FINITE_OBSERVED_POPULATION_VARIANCE_ZERO_IF_NO_SUPPORT
+      observed_support_fraction:
+        width: 1
+        formula: FINITE_OBSERVED_NONFOCAL_COUNT_DIVIDED_BY_7
+    source_receiver_concatenation:
+      source_width: 260
+      receiver_width: 260
+      total_width: 520
+      order: [SOURCE_NONFOCAL_SUMMARY, RECEIVER_NONFOCAL_SUMMARY]
+    aligned_coordinate: REGISTERED_SHARED_FULL_CONSTRUCT_POSITION
+    shift17_coordinate: CIRCULAR_NONFOCAL_POSITION_J_MINUS_17_MOD_SEQUENCE_LENGTH
+    shift_applied_before_all_summary_components: true
+  v14_content_contrast:
+    formula: V14_ENCODE_REAL_MINUS_V14_ENCODE_COORDINATE_ONLY_REFERENCE
+    model: SAME_FROZEN_SAME_FOLD_V14_CANDIDATE_ENCODER_IN_EVAL_MODE
+    actual_inputs: [sequence, reactivity, precision, observed, position, region]
+    reference_preserved_inputs: [position, region]
+    reference_zeroed_inputs: [sequence, reactivity, precision, observed]
+    mutant_outcome_accessed: false
+    shift17_applied_only_after_contrast: true
+    zero_content_invariant:
+      arbitrary_position_and_region_allowed: true
+      content_contrast_exact_zero: true
+      aligned_and_shift17_features_equal_and_zero: true
+  prohibited_probe_features:
+    - FOCAL_V14_HIDDEN
+    - FOCAL_WT_REACTIVITY
+    - FOCAL_OBSERVED_MASK
+    - V13_POINT_AS_RIDGE_FEATURE
+    - FEATURE41
+    - SIGNED_DISTANCE
+    - MUTATION_REF_ALT
+    - METHOD_ID
+    - PUZZLE_ID
+    - DATASET_ID
+    - HELD_MUTANT_TARGET
+    - HELD_MUTANT_ERROR
+    - HELD_QUALIFIED_TARGET_MASK
+    - EXTERNAL_OUTCOME
+  outer_fold_fit:
+    split: SPLIT_V4_TWENTY_FOLD_LOPO_PUZZLE
+    fit_target: SIGNED_DELTA_MINUS_FROZEN_V13_POINT
+    fit_target_access: OUTER_TRAIN_MUTANT_OUTCOMES_ONLY
+    held_puzzle_target_access_during_fit_or_prediction: false
+    arms_fit_independently: [ALIGNED, SHIFT17]
+    feature_standardization: OUTER_TRAIN_WEIGHTED_MEAN_AND_POPULATION_STD_PER_ARM
+    zero_variance_standardized_value: 0.0
+    inactive_std_threshold_lt: 1.0e-08
+    inactive_std_replacement_scale: 1.0
+    inactive_feature_standardized_values_must_be_zero_when_constant: true
+    regression: WEIGHTED_RIDGE
+    ridge_alpha: 1.0
+    intercept: UNPENALIZED
+    sample_weight_hierarchy: >-
+      EQUAL_OUTER_TRAIN_PUZZLE_METHOD_CELLS_THEN_EQUAL_MUTANTS_WITHIN_CELL_THEN_EQUAL_QUALIFIED_POSITIONS_WITHIN_MUTANT
+    sample_weight_normalization: MEAN_ONE_OVER_OUTER_TRAIN_ROWS
+    early_stopping_or_hyperparameter_search_allowed: false
+    aligned_prediction: FROZEN_V13_POINT_PLUS_ALIGNED_RIDGE_RESIDUAL
+    shift17_prediction: FROZEN_V13_POINT_PLUS_SHIFT17_RIDGE_RESIDUAL
+    parent_prediction: FROZEN_V13_POINT
+  prediction_and_score_protocol:
+    folds: 20
+    fold_ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    seed: 0
+    prediction_only_fold_artifacts_before_score: true
+    complete_twenty_fold_merge_required_before_score: true
+    partial_fold_score_read_allowed: false
+    score_invocations_after_complete_valid_merge: 1
+    evaluator: METHOD_BALANCED_POSITION_TO_MUTANT_TO_METHOD_TO_PUZZLE
+    independent_units: 20_PUZZLES
+    unexpected_keys: 0
+    registered_prediction_coverage: 1.0
+    failure_rate: 0.0
+  source_provenance:
+    terminal_safe_manifest:
+      schema: reactflow_delta.post_v14_branch5_safe_source_manifest.v1
+      status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS
+      accepted_or_generated_now: false
+      generated_only_after_complete_v14_terminal_branch5_selection: true
+      rows: 20
+      row_fields_exact:
+        - outer_fold
+        - held_puzzle
+        - seed
+        - v13_source_phase
+        - v13_candidate_checkpoint
+        - v14_source_phase
+        - v14_arm
+        - v14_candidate_checkpoint
+        - held_score_closed_at_projection
+        - external_outcome_accessed
+      exact_values:
+        folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        canonical_held_puzzle: P{outer_fold_plus_one_2digit}
+        seed: 0
+        v13_source_phase: V13M3
+        v14_source_phase: V14M3
+        v14_arm: CANDIDATE
+        held_score_closed_at_projection: true
+        external_outcome_accessed: false
+      forbidden_fields:
+        - target
+        - target_error
+        - qualified_target_mask
+        - training_history
+        - training_histories
+        - loss
+        - score
+        - per_puzzle_effect
+        - gate
+    exact_records:
+      v13_point_checkpoint: [path, role, outer_fold, seed]
+      v14_encoder_checkpoint: [path, role, outer_fold, seed]
+      m2_csv: [path, role, scope]
+      tic2a_merged_registry: [path, role, scope]
+      unconstrained_feature_cache: [path, role, scope]
+      constrained_feature_cache: [path, role, scope]
+      tic2a_feature41_model_artifact: [path, role, outer_fold, source_phase,
+        held_target_used_for_prediction, held_score_computed,
+        partial_score_inspected, external_outcome_accessed]
+      safe_source_manifest: [path, role]
+    roles:
+      v13_point_checkpoint: FROZEN_SAME_OUTER_FOLD_V13_POINT_MODEL
+      v14_encoder_checkpoint: FROZEN_SAME_OUTER_FOLD_V14_OUTCOME_BLIND_ENCODER
+      m2_csv: TRAIN_TARGET_AND_OUTCOME_BLIND_CONTEXT_SOURCE
+      tic2a_merged_registry: STRICT_TARGET_FREE_FEATURE41_REGISTRY
+      unconstrained_feature_cache: OUTCOME_BLIND_FEATURE41_UNCONSTRAINED_CACHE
+      constrained_feature_cache: OUTCOME_BLIND_FEATURE41_CONSTRAINED_CACHE
+      tic2a_feature41_model_artifact: FROZEN_OUTER_FOLD_TIC2A_FEATURE41_MODEL_ONLY
+      safe_source_manifest: POST_V14_BRANCH5_SCORE_PREDICTION_HISTORY_FREE_SOURCE_PROJECTION
+    global_sources_identical_all_folds: [m2_csv, tic2a_merged_registry,
+      unconstrained_feature_cache, constrained_feature_cache,
+      safe_source_manifest]
+    tic2a_registry_and_model_projection_strict: true
+    every_fold_requires_same_outer_fold_and_seed_zero: true
+    complete_provenance_required_before_merge_pass: true
+  artifact_schemas:
+    fold: reactflow_delta.puzzle_set_branch5_route_probe_fold.v1
+    prediction: reactflow_delta.puzzle_set_branch5_route_probe_prediction.v1
+    ridge_model: reactflow_delta.puzzle_set_branch5_route_probe_ridge.v1
+    merged: reactflow_delta.puzzle_set_branch5_route_probe_merged.v1
+    score: reactflow_delta.puzzle_set_branch5_route_probe_score.v1
+    qualification: reactflow_delta.puzzle_set_branch5_route_probe_qualification.v1
+    fold_filename_pattern: puzzle_set_branch5_probe_fold{outer_fold}_seed0.json
+    prediction_filename_pattern: puzzle_set_branch5_probe_predictions_fold{outer_fold}_seed0.npz
+    ridge_filename_pattern: puzzle_set_branch5_probe_ridge_fold{outer_fold}_seed0.json
+    merged_filename: puzzle_set_branch5_probe_complete_unscored_merge.json
+    score_filename: puzzle_set_branch5_probe_complete_score.json
+    qualification_filename: puzzle_set_branch5_probe_qualification.json
+    fold_artifact_finalization: ATOMIC_RENAME_AFTER_COMPLETE_PREDICTION_AND_RIDGE_WRITES
+    source_manifest_finalization: ATOMIC_RENAME_AFTER_COMPLETE_FORTY_CHECKPOINT_VALIDATION
+    projector_active_pointer: REPO_ROOT_CONFIGS_REACTFLOW_DELTA_ACTIVE_CONTRACT_YAML_ONLY
+    merge_artifact_finalization: ATOMIC_RENAME_AFTER_COMPLETE_VALIDATION
+    score_and_qualification_finalization: ATOMIC_RENAME_AFTER_COMPLETE_WRITE
+    merge_authority_bound_paths: [prediction_dir, complete_unscored_merge_path]
+    per_fold_artifact_paths_must_equal_prediction_dir_filenames: true
+    merge_revalidates_frozen_checkpoint_directories: true
+    merge_revalidates_frozen_global_source_paths: [source_manifest_path,
+      m2_csv_path, tic2a_merged_registry_path,
+      unconstrained_feature_cache_path, constrained_feature_cache_path]
+    prediction_artifact_forbidden_fields:
+      - held_target
+      - held_target_error
+      - held_qualified_target_mask
+      - score
+      - per_puzzle_effect
+    merged_integrity_required_true: [complete_fold_universe, unique_fold_ids,
+      prediction_only_schema, prediction_key_universe_unique_per_fold,
+      samefold_parent_provenance_all_folds,
+      samefold_v14_content_contrast_all_folds,
+      single_complete_safe_source_registry,
+      single_complete_tic2a_safe_registry,
+      global_input_provenance_consistent_all_folds,
+      tic2a_safe_feature41_projection_all_folds,
+      ridge_protocol_exact_all_folds, target_profile_identity_exact]
+    merged_integrity_required_false: [partial_scores_inspected,
+      external_outcome_accessed, model_or_threshold_selection_performed]
+  gates:
+    comparisons:
+      - [SIGNED_DELTA_MAE, ALIGNED, V13_PARENT]
+      - [POINT_ABSOLUTE_DELTA_MAE, ALIGNED, V13_PARENT]
+      - [SIGNED_DELTA_MAE, ALIGNED, SHIFT17]
+      - [POINT_ABSOLUTE_DELTA_MAE, ALIGNED, SHIFT17]
+    relative_gain_min_each: 0.01
+    relative_gain_formula: >-
+      MEAN_PUZZLE_COMPARATOR_ERROR_MINUS_ALIGNED_ERROR_DIVIDED_BY_MEAN_PUZZLE_COMPARATOR_ERROR
+    paired_t_ci:
+      confidence: 0.95
+      independent_units: 20_PUZZLES
+      difference: COMPARATOR_PUZZLE_ERROR_MINUS_ALIGNED_PUZZLE_ERROR
+      sample_standard_deviation_ddof: 1
+      critical_value_t_0_975_df19: 2.093024054408263
+      lower_bound_gt_each: 0.0
+    positive_puzzles_min_each: 14
+    positive_puzzle_definition: COMPARATOR_PUZZLE_ERROR_MINUS_ALIGNED_PUZZLE_ERROR_GT_ZERO
+  exact_decision:
+    PASS: ALL_INTEGRITY_CHECKS_AND_ALL_FOUR_COMPARISON_GATES_PASS
+    FAIL: COMPLETE_VALID_SCORE_EXISTS_AND_AT_LEAST_ONE_OF_FOUR_COMPARISON_GATES_FAILS
+    INDETERMINATE: >-
+      INCOMPLETE_OR_INVALID_FOLD_UNIVERSE_PROVENANCE_TARGET_IDENTITY_AGGREGATION_NONFINITE_SCORE_COVERAGE_OR_FAILURE_INTEGRITY
+    not_run_before_complete_v14_terminal_and_branch5_selection: NOT_RUN
+    only_exact_pass_can_make_branch5_p1_eligible: true
+    fail_or_indeterminate_routes_to: P3_STOP_MODEL_RESCUE
+
 future_phase_training_tokens:
   tokens_issued_now: false
   P1M2: PUZZLE_SET_P1M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
@@ -92,10 +374,96 @@ future_phase_training_tokens:
   P1M4: PUZZLE_SET_P1M4_FIXED_FIVE_SEED_FORMAL_ONLY
   generic_training_token_allowed: false
 
+future_p1_runtime_authority:
+  project_task_id: reactflow_delta_puzzle_set_meta_context
+  authority_issued_now: false
+  canonical_active_pointer: configs/reactflow_delta/active_contract.yaml
+  active_authority_flattens_common_and_phase_paths: true
+  source_projection:
+    phase: P1M1
+    authority_state: SOURCE_MANIFEST_PROJECTION_ONLY
+    runnable_phases_exact: [P1M1]
+    source_binding_status_before: REALIZED_PATHS_ROLES_AND_COUNTS_PENDING
+    source_binding_status_after: REALIZED_PATHS_ROLES_AND_COUNTS_BOUND
+    projector: scripts/reactflow_delta/project_puzzle_set_meta_context_sources.py
+    projector_cli_authority: CANONICAL_REPO_ROOT_ACTIVE_POINTER_ONLY
+    training_allowed: false
+    candidate_model_training_allowed: false
+    held_score_read_allowed: false
+    partial_fold_score_read_allowed: false
+    new_external_outcome_access_allowed: false
+    output_finalization: ATOMIC_RENAME_AFTER_COMPLETE_TWENTY_FOLD_SEVEN_SOURCE_VALIDATION
+    post_projection_authority_commit_required: true
+    p1m2_training_before_bound_allowed: false
+  common_source_paths:
+    source_manifest_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json
+    source_binding_status: REALIZED_PATHS_ROLES_AND_COUNTS_BOUND
+    v8_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
+    v13_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
+    v14_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
+    m2_csv_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
+    tic2a_merged_registry_path: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json
+    unconstrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
+    constrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
+    v13_historical_bundle_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0/v13m3_complete_score.json
+  historical_score_lineage:
+    unique_bundle: V13M3_COMPLETE_SCORE
+    direct_v10_v11_v12_result_reads: false
+    transitive_metrics: [V13, V12_SIGNED_AND_CRPS, V11_POINT_ABSOLUTE,
+      V10_DISTRIBUTION_ABSOLUTE]
+  phase_artifact_paths:
+    P1M2:
+      prediction_dir: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m2_real_smoke
+      complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m2_real_smoke/p1m2_complete_unscored_merge.json
+      qualification_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m2_real_smoke/p1m2_engineering_smoke_qualification.json
+    P1M3:
+      prediction_dir: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m3_screen_seed0
+      complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m3_screen_seed0/p1m3_complete_unscored_merge.json
+      complete_score_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m3_screen_seed0/p1m3_complete_score.json
+      qualification_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m3_screen_seed0/p1m3_qualification.json
+    P1M4:
+      prediction_dir: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m4_formal_seeds0_4
+      complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m4_formal_seeds0_4/p1m4_complete_unscored_merge.json
+      formal_assembly_prediction_dir: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m4_formal_seeds0_4/assembled
+      formal_assembly_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m4_formal_seeds0_4/p1m4_five_seed_prediction_only_assembly.json
+      complete_score_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m4_formal_seeds0_4/p1m4_complete_formal_score.json
+      screen_qualification_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m3_screen_seed0/p1m3_qualification.json
+      qualification_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m4_formal_seeds0_4/p1m4_formal_qualification.json
+  state_rules:
+    prediction_and_merge: TRAINING_TOKEN_ACTIVE_HELD_PARTIAL_EXTERNAL_CLOSED
+    engineering_qualification: P1M2_HELD_PARTIAL_EXTERNAL_CLOSED
+    score_once: TRAINING_CLOSED_EXACT_SCORE_TOKEN_PARTIAL_EXTERNAL_CLOSED
+    formal_assembly: P1M4_HELD_PARTIAL_EXTERNAL_CLOSED
+    qualifier: EXACT_PHASE_SCORE_TOKEN_AND_AUTHORITY_PATHS
+
 frozen_input_sources:
   activation_binding_status: REALIZED_PATHS_ROLES_AND_COUNTS_PENDING
-  bind_realized_sources_before_p1m1: true
+  project_realized_sources_during_p1m1: true
   bind_each_outer_fold_0_through_19: true
+  activation_source_manifest:
+    schema_version: reactflow_delta.puzzle_set_meta_context_source_manifest.v1
+    status: PUZZLE_SET_SOURCE_MANIFEST_BOUND
+    binding_status: REALIZED_PATHS_ROLES_AND_COUNTS_BOUND
+    expected_absolute_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json
+    generated_or_accepted_now: false
+    required_before_p1m2_training: true
+    top_fields_exact: [schema_version, status, contract_id, binding_status, folds]
+    fold_count: 20
+    fold_fields_exact: [outer_fold, held_puzzle, seed, sources]
+    source_ids_exact: [v13_point_checkpoint, v14_encoder_checkpoint,
+      v8_meanaligned_checkpoint, tic2a_feature41_model_artifact,
+      tic2a_merged_registry, unconstrained_feature_cache,
+      constrained_feature_cache]
+    source_record_fields_exact: [path, role, used_in_candidate_prediction,
+      outer_fold, seed, realized_parameter_count, trainable_in_p1]
+    canonical_folds_and_held_puzzles_required: true
+    fixed_parent_seed: 0
+    v10_training_source_present: false
+    future_active_authority_required_fields: [source_manifest_path,
+      source_binding_status]
+    future_active_authority_required_values:
+      source_manifest_path: /mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json
+      source_binding_status: REALIZED_PATHS_ROLES_AND_COUNTS_BOUND
   v13_seed0_point:
     role: IMMUTABLE_POINT_ANCHOR
     source: SAME_OUTER_FOLD_V13_CANDIDATE_SEED0_POINT_CHECKPOINT
@@ -112,8 +480,8 @@ frozen_input_sources:
     role: FROZEN_TRAINED_DIRECT_FEATURE_SOURCE_FOR_CALIBRATION
     source: SAME_OUTER_FOLD_V8_SEED0_MEANALIGNED_CHECKPOINT
     expected_checkpoint_filename_pattern: v8_corrected_mean_fold{outer_fold}_seed0.pt
-    path_source_field: >-
-      v8_corrected_expert_fold_result_fold{outer_fold}_seed0.json:meanaligned_checkpoint
+    runtime_path_construction: DIRECT_FROZEN_V8_DIRECTORY_PLUS_EXPECTED_FILENAME_PATTERN
+    wide_fold_result_content_may_be_read: false
     calibration_direct_feature_width: 201
     parameter_count: 109581
     trainable_in_p1: false
@@ -142,13 +510,6 @@ frozen_input_sources:
     source: CONSTRAINED_ENSEMBLE_FEATURE_CACHE
     realized_path: PENDING_ACTIVATION_BINDING
     trainable_in_p1: false
-  v10:
-    role: TERMINAL_HISTORICAL_COMPARATOR_AND_RESIDUAL_FAMILY_PROVENANCE_ONLY
-    expected_result_filename_pattern: v10_fold_result_fold{outer_fold}_seed0.json
-    same_fold_result_path: PENDING_ACTIVATION_BINDING
-    learned_checkpoint_imported_into_p1: false
-    feature_source: false
-    point_anchor: false
   activation_binding_required_fields:
     - OUTER_FOLD
     - SOURCE_ID
@@ -161,9 +522,39 @@ frozen_input_sources:
   full_upstream_parameter_footprint_must_be_bound: true
   full_upstream_parameter_footprint: PENDING_ACTIVATION_BINDING
 
+score_stage_historical_comparators:
+  unique_historical_bundle:
+    role: SOLE_TRANSITIVE_HISTORICAL_SCORE_REFERENCE
+    source_phase: V13M3
+    absolute_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0/v13m3_complete_score.json
+    expected_schema: reactflow_delta.model_rescue_v13_score.v1
+    direct_result_artifacts_read: [V13M3_COMPLETE_SCORE]
+    transitive_lineage_only: [V12_SIGNED_DELTA_AND_CRPS,
+      V11_POINT_ABSOLUTE, V10_DISTRIBUTION_ABSOLUTE]
+    strict_complete_twenty_fold_validation: true
+    registered_coverage_required: 1.0
+    failure_rate_required: 0.0
+    unexpected_keys_required: 0
+    training_runner_may_read_or_require: false
+    score_stage_only_after_complete_merge_and_score_token: true
+  direct_v10_fold_result_read_by_p1_scorer: false
+
 artifact_schemas_and_provenance:
   fold_schema: reactflow_delta.puzzle_set_meta_context_fold.proposed.v10
   merged_schema: reactflow_delta.puzzle_set_meta_context_merged.proposed.v9
+  production_cli_authority_binding: EXACT_FLAT_ACTIVE_COMMON_AND_PHASE_PATHS
+  training_data_path_authority_binding: EXACT_ACTIVE_M2_CSV_PATH
+  training_universe_must_match_authorized_m2_path: true
+  production_phase_source_manifest_gate: EXACT_ACTIVE_BOUND_MANIFEST_BEFORE_ARTIFACT_ACCESS
+  production_merge_phase_universe_binding: EXACT_PHASE_FOLDS_SEEDS_EPOCHS_AND_PARAMETER_COUNTS
+  production_merge_caller_redefinition_allowed: false
+  production_fold_artifact_path_binding: EXACT_CANONICAL_FILENAMES_WITHIN_ACTIVE_PREDICTION_DIR
+  fold_source_records_must_match_active_manifest: true
+  fold_result_finalization: ATOMIC_RENAME_AFTER_ALL_PREDICTION_AND_CHECKPOINT_ARTIFACTS
+  merge_finalization: ATOMIC_RENAME_AFTER_COMPLETE_UNIVERSE_VALIDATION
+  formal_assembly_finalization: ATOMIC_RENAME_AFTER_ALL_TWENTY_ASSEMBLED_PREDICTIONS
+  score_finalization: ATOMIC_RENAME_AFTER_COMPLETE_SCORE
+  qualification_finalization: ATOMIC_RENAME_AFTER_COMPLETE_MECHANICAL_GATE
   fold_frozen_input_sources_field: frozen_input_sources
   source_record_fields_exact: [path, role, used_in_candidate_prediction, outer_fold, seed]
   required_source_records:
@@ -202,11 +593,6 @@ artifact_schemas_and_provenance:
       used_in_candidate_prediction: true
       outer_fold_scope: GLOBAL
       seed: null
-    v10_fold_comparator:
-      role: COMPARATOR_PROVENANCE_ONLY_NOT_CANDIDATE_INPUT
-      used_in_candidate_prediction: false
-      outer_fold_scope: SAME_OUTER_FOLD
-      seed: 0
   fold_parameter_provenance:
     point_module_total_field: candidate_parameter_count
     point_module_trainable_field: candidate_trainable_parameter_count
@@ -372,7 +758,7 @@ retention_pre_score_gate:
   held_score_remains_closed_on_failure: true
 
 p1m2_smoke:
-  activation_prerequisite: FOCUSED_PUZZLE_SET_V5_ACTIVATION_COMMIT
+  activation_prerequisite: P1M1_SOURCE_MANIFEST_BOUND_AND_FOCUSED_TESTS_PASS_COMMIT
   training_token: PUZZLE_SET_P1M2_REAL_DATA_ENGINEERING_SMOKE_ONLY
   folds: [0, 1]
   seeds: [0]

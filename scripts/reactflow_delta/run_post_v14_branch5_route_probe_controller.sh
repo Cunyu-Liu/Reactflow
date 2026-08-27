@@ -4,14 +4,12 @@ set -euo pipefail
 repo=$(cd "$(dirname "$0")/../.." && pwd)
 python_bin=/home/cunyuliu/miniconda3/envs/editflow/bin/python
 m2=/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
-v8_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
-v13_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
-v14_dir=/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
 tic2a=/mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json
 unconstrained=/mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
 constrained=/mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
-source_manifest=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/source_binding/puzzle_set_source_manifest.json
-out=/mnt/cunyuliu/reactflow_delta_puzzle_set_meta_context/p1m3_screen_seed0
+source_manifest=/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
+out=/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0
+merged=${out}/puzzle_set_branch5_probe_complete_unscored_merge.json
 
 if [[ "$#" -lt 1 || "$#" -gt 8 ]]; then
   printf 'usage: %s PHYSICAL_GPU [PHYSICAL_GPU ...]\n' "$0" >&2
@@ -21,30 +19,43 @@ gpus=("$@")
 mkdir -p "${out}/logs" "${out}/interrupted_attempts"
 cd "${repo}"
 
+fold_result() {
+  printf '%s/puzzle_set_branch5_probe_fold%s_seed0.json' "${out}" "$1"
+}
+
+fold_prediction() {
+  printf '%s/puzzle_set_branch5_probe_predictions_fold%s_seed0.npz' "${out}" "$1"
+}
+
+fold_ridge() {
+  printf '%s/puzzle_set_branch5_probe_ridge_fold%s_seed0.json' "${out}" "$1"
+}
+
+fold_is_complete() {
+  local fold=$1
+  [[ -f "$(fold_result "${fold}")" && \
+     -f "$(fold_prediction "${fold}")" && \
+     -f "$(fold_ridge "${fold}")" ]]
+}
+
 archive_incomplete_fold() {
   local fold=$1
-  local result="${out}/puzzle_set_fold_result_fold${fold}_seed0.json"
-  if [[ -f "${result}" ]]; then
+  if fold_is_complete "${fold}"; then
     return 0
   fi
-  local partial=(
-    "${out}/puzzle_set_predictions_fold${fold}_seed0.npz"
-    "${out}/puzzle_set_candidate_point_fold${fold}_seed0.pt"
-    "${out}/puzzle_set_null_point_fold${fold}_seed0.pt"
-    "${out}/puzzle_set_candidate_wt_decoder_fold${fold}_seed0.pt"
-    "${out}/puzzle_set_null_wt_decoder_fold${fold}_seed0.pt"
-    "${out}/puzzle_set_candidate_residual_fold${fold}_seed0.pt"
-    "${out}/puzzle_set_null_residual_fold${fold}_seed0.pt"
-  )
   local present=()
   local path
-  for path in "${partial[@]}"; do
+  for path in \
+    "$(fold_result "${fold}")" \
+    "$(fold_prediction "${fold}")" \
+    "$(fold_ridge "${fold}")"; do
     if [[ -e "${path}" ]]; then
       present+=("${path}")
     fi
   done
   if [[ "${#present[@]}" -gt 0 ]]; then
-    local interrupted="${out}/interrupted_attempts/fold${fold}_$(date +%Y%m%dT%H%M%S)"
+    local interrupted
+    interrupted="${out}/interrupted_attempts/fold${fold}_$(date +%Y%m%dT%H%M%S)_$$"
     mkdir -p "${interrupted}"
     mv "${present[@]}" "${interrupted}/"
   fi
@@ -58,7 +69,7 @@ run_worker() {
   local missing=()
   local fold
   for fold in "${requested[@]}"; do
-    if [[ ! -f "${out}/puzzle_set_fold_result_fold${fold}_seed0.json" ]]; then
+    if ! fold_is_complete "${fold}"; then
       archive_incomplete_fold "${fold}"
       missing+=("${fold}")
     fi
@@ -68,29 +79,21 @@ run_worker() {
   fi
   local csv
   csv=$(IFS=,; printf '%s' "${missing[*]}")
+  local log="${out}/logs/worker${worker}_gpu${gpu}.log"
   printf '%s worker=%s physical_gpu=%s folds=%s start\n' \
-    "$(date --iso-8601=seconds)" "${worker}" "${gpu}" "${csv}" \
-    >> "${out}/logs/worker${worker}.log"
+    "$(date --iso-8601=seconds)" "${worker}" "${gpu}" "${csv}" >> "${log}"
   CUDA_VISIBLE_DEVICES="${gpu}" "${python_bin}" -m \
-    scripts.reactflow_delta.run_puzzle_set_meta_context_probe \
+    scripts.reactflow_delta.run_post_v14_branch5_route_probe \
       --repo-root "${repo}" \
-      --phase P1M3 \
       --m2-csv "${m2}" \
-      --v8-dir "${v8_dir}" \
-      --v13-dir "${v13_dir}" \
-      --v14-dir "${v14_dir}" \
+      --source-manifest "${source_manifest}" \
       --tic2a-merged-json "${tic2a}" \
       --unconstrained-cache "${unconstrained}" \
       --constrained-cache "${constrained}" \
-      --source-manifest "${source_manifest}" \
       --out-dir "${out}" \
       --device cuda:0 \
       --folds "${csv}" \
-      --pretraining-epochs 200 \
-      --point-epochs 40 \
-      --calibration-epochs 40 \
-      --seed 0 \
-      >> "${out}/logs/worker${worker}.log" 2>&1
+      >> "${log}" 2>&1
 }
 
 pids=()
@@ -111,19 +114,22 @@ for pid in "${pids[@]}"; do
   fi
 done
 if [[ "${failed}" -ne 0 ]]; then
-  printf 'one or more P1M3 prediction workers failed\n' >&2
+  printf 'one or more branch5 prediction-only workers failed\n' >&2
   exit 1
 fi
 
-"${python_bin}" -m scripts.reactflow_delta.merge_puzzle_set_meta_context_probe \
-  --repo-root "${repo}" \
+for fold in {0..19}; do
+  if ! fold_is_complete "${fold}"; then
+    printf 'branch5 fold %s is incomplete after workers exited\n' "${fold}" >&2
+    exit 1
+  fi
+done
+
+if [[ -e "${merged}" ]]; then
+  printf 'branch5 complete unscored merge already exists; refusing overwrite: %s\n' \
+    "${merged}"
+  exit 0
+fi
+"${python_bin}" -m scripts.reactflow_delta.merge_post_v14_branch5_route_probe \
   --input-dir "${out}" \
-  --phase P1M3 \
-  --folds 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 \
-  --seeds 0 \
-  --pretraining-epochs 200 \
-  --point-epochs 40 \
-  --calibration-epochs 40 \
-  --parameter-count 6171697 \
-  --trainable-parameter-count 1404417 \
-  --out-json "${out}/p1m3_complete_unscored_merge.json"
+  --out-json "${merged}"
