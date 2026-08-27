@@ -80,6 +80,10 @@ CASES = (
     ),
 )
 
+DYNAMIC_CASES = tuple(
+    case for case in CASES if case.name in {"screen", "formal", "branch5"}
+)
+
 
 def _write_fake_python(tmp_path: Path) -> Path:
     fake_python = tmp_path / "fake_python"
@@ -91,6 +95,7 @@ def _write_fake_python(tmp_path: Path) -> Path:
             import os
             from pathlib import Path
             import sys
+            import time
 
 
             args = sys.argv[1:]
@@ -100,7 +105,12 @@ def _write_fake_python(tmp_path: Path) -> Path:
                 with Path(os.environ["FAKE_EVENTS"]).open(
                     "a", encoding="utf-8"
                 ) as stream:
-                    stream.write(json.dumps({"event": event, **fields}) + "\\n")
+                    stream.write(
+                        json.dumps(
+                            {"event": event, "time": time.monotonic(), **fields}
+                        )
+                        + "\\n"
+                    )
 
 
             cuda_visible_devices_value = os.environ.get("CUDA_VISIBLE_DEVICES")
@@ -125,20 +135,45 @@ def _write_fake_python(tmp_path: Path) -> Path:
 
 
             module = option("-m")
-            record(
-                "module",
-                module=module,
-                cuda_visible_devices_value=cuda_visible_devices_value,
-            )
+            module_fields = {
+                "module": module,
+                "cuda_visible_devices_value": cuda_visible_devices_value,
+            }
+            if "--folds" in args:
+                module_fields["folds"] = option("--folds")
+            if "--seed" in args:
+                module_fields["seed"] = option("--seed")
+            record("module", **module_fields)
             if module == "scripts.reactflow_delta.run_puzzle_set_meta_context_probe":
                 out_dir = Path(option("--out-dir"))
                 seed = option("--seed")
+                task = f"{seed}:{option('--folds')}"
+                delay = (
+                    os.environ.get("FAKE_SLOW_SECONDS", "0.30")
+                    if task == os.environ.get("FAKE_SLOW_TASK")
+                    else os.environ.get("FAKE_DEFAULT_SECONDS", "0.01")
+                )
+                time.sleep(float(delay))
+                if os.environ.get("FAKE_FAIL_TASK") == task:
+                    record("task_end", task=task, status="failed")
+                    raise SystemExit(74)
                 for fold in option("--folds").split(","):
                     path = out_dir / f"puzzle_set_fold_result_fold{fold}_seed{seed}.json"
                     path.parent.mkdir(parents=True, exist_ok=True)
                     path.write_text("{}\\n", encoding="utf-8")
+                record("task_end", task=task, status="ok")
             elif module == "scripts.reactflow_delta.run_post_v14_branch5_route_probe":
                 out_dir = Path(option("--out-dir"))
+                task = f"0:{option('--folds')}"
+                delay = (
+                    os.environ.get("FAKE_SLOW_SECONDS", "0.30")
+                    if task == os.environ.get("FAKE_SLOW_TASK")
+                    else os.environ.get("FAKE_DEFAULT_SECONDS", "0.01")
+                )
+                time.sleep(float(delay))
+                if os.environ.get("FAKE_FAIL_TASK") == task:
+                    record("task_end", task=task, status="failed")
+                    raise SystemExit(74)
                 for fold in option("--folds").split(","):
                     paths = (
                         out_dir / f"puzzle_set_branch5_probe_fold{fold}_seed0.json",
@@ -149,6 +184,7 @@ def _write_fake_python(tmp_path: Path) -> Path:
                     for path in paths:
                         path.parent.mkdir(parents=True, exist_ok=True)
                         path.write_text("fake\\n", encoding="utf-8")
+                record("task_end", task=task, status="ok")
             elif module in {
                 "scripts.reactflow_delta.merge_puzzle_set_meta_context_probe",
                 "scripts.reactflow_delta.qualify_puzzle_set_meta_context_smoke",
@@ -209,6 +245,7 @@ def _controller_fixture(
     event_path = tmp_path / f"{case.name}_events.jsonl"
     env = os.environ.copy()
     env["FAKE_EVENTS"] = str(event_path)
+    env["FAKE_DEFAULT_SECONDS"] = "0.01"
     script_copy = _write_controller_copy(
         tmp_path,
         case,
@@ -255,6 +292,16 @@ def _make_first_task_incomplete(case: ControllerCase, out_dir: Path) -> None:
     (out_dir / "puzzle_set_predictions_fold0_seed0.npz").write_text(
         "partial\n", encoding="utf-8"
     )
+
+
+def _make_seed0_tasks_incomplete(
+    case: ControllerCase, out_dir: Path, folds: range
+) -> None:
+    for fold in folds:
+        if case.name == "branch5":
+            (out_dir / f"puzzle_set_branch5_probe_ridge_fold{fold}_seed0.json").unlink()
+        else:
+            (out_dir / f"puzzle_set_fold_result_fold{fold}_seed0.json").unlink()
 
 
 def _read_events(path: Path) -> list[dict[str, object]]:
@@ -376,3 +423,109 @@ def test_all_gpu_preflights_finish_before_fake_training_and_partial_archive(
     ] == list(case.gpus)
     assert max(preflight_indices) < min(module_indices)
     assert list((out_dir / "interrupted_attempts").glob("*/*"))
+
+
+@pytest.mark.parametrize("case", DYNAMIC_CASES, ids=lambda case: case.name)
+def test_dynamic_queue_runs_one_fold_per_process_and_reuses_a_finished_gpu(
+    tmp_path: Path, case: ControllerCase
+) -> None:
+    out_dir = tmp_path / case.name
+    _populate_complete(case, out_dir)
+    _make_seed0_tasks_incomplete(case, out_dir, range(3))
+    env, event_path, script_copy = _controller_fixture(tmp_path, case, out_dir)
+    env["FAKE_SLOW_TASK"] = "0:0"
+    env["FAKE_SLOW_SECONDS"] = "0.30"
+
+    completed = subprocess.run(
+        ["bash", str(script_copy), *case.gpus],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    training_module = (
+        "scripts.reactflow_delta.run_post_v14_branch5_route_probe"
+        if case.name == "branch5"
+        else "scripts.reactflow_delta.run_puzzle_set_meta_context_probe"
+    )
+    training_events = [
+        event
+        for event in _read_events(event_path)
+        if event.get("module") == training_module
+    ]
+    assert len(training_events) == 3
+    assert {event["folds"] for event in training_events} == {"0", "1", "2"}
+    assert all("," not in str(event["folds"]) for event in training_events)
+    fold2_start = next(event for event in training_events if event["folds"] == "2")
+    slow_end = next(
+        event
+        for event in _read_events(event_path)
+        if event["event"] == "task_end" and event["task"] == "0:0"
+    )
+    assert fold2_start["cuda_visible_devices_value"] == case.gpus[1]
+    assert float(fold2_start["time"]) < float(slow_end["time"])
+
+
+@pytest.mark.parametrize("case", DYNAMIC_CASES, ids=lambda case: case.name)
+def test_failed_task_stops_before_merge_or_assembly(
+    tmp_path: Path, case: ControllerCase
+) -> None:
+    out_dir = tmp_path / case.name
+    _populate_complete(case, out_dir)
+    _make_seed0_tasks_incomplete(case, out_dir, range(4))
+    env, event_path, script_copy = _controller_fixture(tmp_path, case, out_dir)
+    env["FAKE_FAIL_TASK"] = "0:0"
+    env["FAKE_SLOW_TASK"] = "0:1"
+    env["FAKE_SLOW_SECONDS"] = "0.30"
+
+    completed = subprocess.run(
+        ["bash", str(script_copy), *case.gpus],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    modules = [
+        event.get("module")
+        for event in _read_events(event_path)
+        if event["event"] == "module"
+    ]
+    assert "scripts.reactflow_delta.merge_puzzle_set_meta_context_probe" not in modules
+    assert "scripts.reactflow_delta.assemble_puzzle_set_meta_context_formal" not in modules
+    assert "scripts.reactflow_delta.merge_post_v14_branch5_route_probe" not in modules
+    training_module = (
+        "scripts.reactflow_delta.run_post_v14_branch5_route_probe"
+        if case.name == "branch5"
+        else "scripts.reactflow_delta.run_puzzle_set_meta_context_probe"
+    )
+    started_folds = {
+        str(event["folds"])
+        for event in _read_events(event_path)
+        if event.get("module") == training_module
+    }
+    assert started_folds == {"0", "1"}
+
+
+def test_screen_controller_preserves_existing_canonical_merge(tmp_path: Path) -> None:
+    case = next(case for case in CASES if case.name == "screen")
+    out_dir = tmp_path / case.name
+    _populate_complete(case, out_dir)
+    merged = out_dir / "p1m3_complete_unscored_merge.json"
+    merged.write_bytes(b"canonical-merge\n")
+    env, event_path, script_copy = _controller_fixture(tmp_path, case, out_dir)
+
+    completed = subprocess.run(
+        ["bash", str(script_copy), *case.gpus],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert merged.read_bytes() == b"canonical-merge\n"
+    assert _read_events(event_path) == []

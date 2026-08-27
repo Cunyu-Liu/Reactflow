@@ -25,7 +25,10 @@ def test_branch5_controller_is_valid_missing_fold_only_unscored_shell() -> None:
     assert "scripts.reactflow_delta.merge_post_v14_branch5_route_probe" in text
     assert "puzzle_set_branch5_probe_complete_unscored_merge.json" in text
     assert "CUDA_VISIBLE_DEVICES" in text
-    assert "fold=worker; fold<20; fold+=worker_count" in text
+    assert "wait -n -p finished_pid" in text
+    assert 'run_task "${gpu}" "${fold}" &' in text
+    assert '--folds "${fold}"' in text
+    assert "fold=worker; fold<20; fold+=worker_count" not in text
     assert "score_post_v14_branch5_route_probe" not in text
     assert "qualify_post_v14_branch5_route_probe" not in text
     assert "held_score_read_allowed" not in text

@@ -63,27 +63,13 @@ archive_incomplete_fold() {
   fi
 }
 
-run_worker() {
-  local worker=$1
-  local gpu=$2
-  shift 2
-  local requested=("$@")
-  local missing=()
-  local fold
-  for fold in "${requested[@]}"; do
-    if [[ ! -f "${out}/puzzle_set_fold_result_fold${fold}_seed0.json" ]]; then
-      archive_incomplete_fold "${fold}"
-      missing+=("${fold}")
-    fi
-  done
-  if [[ "${#missing[@]}" -eq 0 ]]; then
-    return 0
-  fi
-  local csv
-  csv=$(IFS=,; printf '%s' "${missing[*]}")
-  printf '%s worker=%s cuda_visible_devices_value=%s logical_device=cuda:0 folds=%s start\n' \
-    "$(date --iso-8601=seconds)" "${worker}" "${gpu}" "${csv}" \
-    >> "${out}/logs/worker${worker}.log"
+run_task() {
+  local gpu=$1
+  local fold=$2
+  archive_incomplete_fold "${fold}"
+  local log="${out}/logs/fold${fold}_seed0_gpu${gpu}.log"
+  printf '%s cuda_visible_devices_value=%s logical_device=cuda:0 fold=%s start\n' \
+    "$(date --iso-8601=seconds)" "${gpu}" "${fold}" >> "${log}"
   CUDA_VISIBLE_DEVICES="${gpu}" "${python_bin}" -m \
     scripts.reactflow_delta.run_puzzle_set_meta_context_probe \
       --repo-root "${repo}" \
@@ -98,60 +84,110 @@ run_worker() {
       --source-manifest "${source_manifest}" \
       --out-dir "${out}" \
       --device cuda:0 \
-      --folds "${csv}" \
+      --folds "${fold}" \
       --pretraining-epochs 200 \
       --point-epochs 40 \
       --calibration-epochs 40 \
       --seed 0 \
-      >> "${out}/logs/worker${worker}.log" 2>&1
+      >> "${log}" 2>&1
 }
 
-has_missing_training=0
+tasks=()
 for fold in {0..19}; do
   if [[ ! -f "${out}/puzzle_set_fold_result_fold${fold}_seed0.json" ]]; then
-    has_missing_training=1
-    break
+    tasks+=("${fold}")
   fi
 done
-if [[ "${has_missing_training}" -ne 0 ]]; then
+if ((${#tasks[@]} > 0)); then
   for gpu in "${gpus[@]}"; do
     require_gpu "${gpu}"
   done
+  mkdir -p "${out}/logs" "${out}/interrupted_attempts"
 fi
 
-mkdir -p "${out}/logs" "${out}/interrupted_attempts"
+declare -A gpu_by_pid=()
+declare -A task_by_pid=()
+active_pids=()
+next_task=0
 
-pids=()
-worker_count=${#gpus[@]}
-for ((worker=0; worker<worker_count; worker++)); do
-  assigned=()
-  for ((fold=worker; fold<20; fold+=worker_count)); do
-    assigned+=("${fold}")
+launch_next() {
+  local gpu=$1
+  local fold pid
+  while ((next_task < ${#tasks[@]})); do
+    fold=${tasks[$next_task]}
+    ((next_task += 1))
+    if [[ -f "${out}/puzzle_set_fold_result_fold${fold}_seed0.json" ]]; then
+      continue
+    fi
+    run_task "${gpu}" "${fold}" &
+    pid=$!
+    active_pids+=("${pid}")
+    gpu_by_pid["${pid}"]=${gpu}
+    task_by_pid["${pid}"]=${fold}
+    return 0
   done
-  run_worker "${worker}" "${gpus[$worker]}" "${assigned[@]}" &
-  pids+=("$!")
+  return 1
+}
+
+remove_active_pid() {
+  local finished_pid=$1
+  local pid
+  local remaining=()
+  for pid in "${active_pids[@]}"; do
+    if [[ "${pid}" != "${finished_pid}" ]]; then
+      remaining+=("${pid}")
+    fi
+  done
+  active_pids=("${remaining[@]}")
+}
+
+for gpu in "${gpus[@]}"; do
+  if ! launch_next "${gpu}"; then
+    break
+  fi
 done
 
 failed=0
-for pid in "${pids[@]}"; do
-  if ! wait "${pid}"; then
+while ((${#active_pids[@]} > 0)); do
+  finished_pid=
+  if wait -n -p finished_pid "${active_pids[@]}"; then
+    task_status=0
+  else
+    task_status=$?
+  fi
+  gpu=${gpu_by_pid["${finished_pid}"]}
+  fold=${task_by_pid["${finished_pid}"]}
+  remove_active_pid "${finished_pid}"
+  unset "gpu_by_pid[${finished_pid}]"
+  unset "task_by_pid[${finished_pid}]"
+
+  if ((task_status != 0)); then
     failed=1
+    printf 'P1M3 fold %s with cuda_visible_devices_value=%s failed with status %s\n' \
+      "${fold}" "${gpu}" "${task_status}" >&2
+  elif ((failed == 0)); then
+    if launch_next "${gpu}"; then
+      :
+    fi
   fi
 done
 if [[ "${failed}" -ne 0 ]]; then
-  printf 'one or more P1M3 prediction workers failed\n' >&2
+  printf 'one or more P1M3 prediction tasks failed; merge was not run\n' >&2
   exit 1
 fi
 
-"${python_bin}" -m scripts.reactflow_delta.merge_puzzle_set_meta_context_probe \
-  --repo-root "${repo}" \
-  --input-dir "${out}" \
-  --phase P1M3 \
-  --folds 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 \
-  --seeds 0 \
-  --pretraining-epochs 200 \
-  --point-epochs 40 \
-  --calibration-epochs 40 \
-  --parameter-count 6171697 \
-  --trainable-parameter-count 1404417 \
-  --out-json "${out}/p1m3_complete_unscored_merge.json"
+merged="${out}/p1m3_complete_unscored_merge.json"
+if [[ ! -f "${merged}" ]]; then
+  "${python_bin}" -m scripts.reactflow_delta.merge_puzzle_set_meta_context_probe \
+    --repo-root "${repo}" \
+    --input-dir "${out}" \
+    --phase P1M3 \
+    --folds 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 \
+    --seeds 0 \
+    --pretraining-epochs 200 \
+    --point-epochs 40 \
+    --calibration-epochs 40 \
+    --parameter-count 6171697 \
+    --trainable-parameter-count 1404417 \
+    --out-json "${merged}"
+fi
