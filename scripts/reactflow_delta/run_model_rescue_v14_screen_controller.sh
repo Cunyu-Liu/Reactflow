@@ -168,7 +168,10 @@ if [[ "${failed}" -ne 0 ]]; then
   exit 1
 fi
 
-"${python_bin}" -m scripts.reactflow_delta.merge_model_rescue_v14 \
-  --input-dir "${out}" \
-  --phase V14M3 \
-  --out-json "${out}/v14m3_complete_unscored_merge.json"
+merged="${out}/v14m3_complete_unscored_merge.json"
+if [[ ! -f "${merged}" ]]; then
+  "${python_bin}" -m scripts.reactflow_delta.merge_model_rescue_v14 \
+    --input-dir "${out}" \
+    --phase V14M3 \
+    --out-json "${merged}"
+fi

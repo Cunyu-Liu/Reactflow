@@ -171,11 +171,17 @@ if [[ "${failed}" -ne 0 ]]; then
 fi
 
 mkdir -p "${out}/assembled"
-"${python_bin}" -m scripts.reactflow_delta.merge_model_rescue_v14 \
-  --input-dir "${out}" \
-  --phase V14M4 \
-  --out-json "${out}/v14m4_complete_unscored_merge.json"
-"${python_bin}" -m scripts.reactflow_delta.assemble_model_rescue_v14_formal \
-  --merged-json "${out}/v14m4_complete_unscored_merge.json" \
-  --out-dir "${out}/assembled" \
-  --out-json "${out}/v14m4_five_seed_prediction_only_assembly.json"
+merged="${out}/v14m4_complete_unscored_merge.json"
+assembly="${out}/v14m4_five_seed_prediction_only_assembly.json"
+if [[ ! -f "${merged}" ]]; then
+  "${python_bin}" -m scripts.reactflow_delta.merge_model_rescue_v14 \
+    --input-dir "${out}" \
+    --phase V14M4 \
+    --out-json "${merged}"
+fi
+if [[ ! -f "${assembly}" ]]; then
+  "${python_bin}" -m scripts.reactflow_delta.assemble_model_rescue_v14_formal \
+    --merged-json "${merged}" \
+    --out-dir "${out}/assembled" \
+    --out-json "${assembly}"
+fi

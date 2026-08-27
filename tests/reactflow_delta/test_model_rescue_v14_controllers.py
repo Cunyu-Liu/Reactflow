@@ -449,3 +449,52 @@ def test_v14_controller_with_no_missing_tasks_needs_no_gpu_or_preflight(
     assert completed.returncode == 0, completed.stderr
     events = _read_events(event_path)
     assert [event["event"] for event in events] == expected_terminal_events
+
+
+def _populate_v14_results(out_dir: Path, seed_count: int) -> None:
+    out_dir.mkdir()
+    for seed in range(seed_count):
+        for fold in range(20):
+            (out_dir / f"v14_fold_result_fold{fold}_seed{seed}.json").write_text(
+                "{}\n", encoding="utf-8"
+            )
+
+
+def test_screen_controller_preserves_existing_canonical_merge(tmp_path: Path) -> None:
+    out_dir = tmp_path / "screen_complete"
+    _populate_v14_results(out_dir, 1)
+    merged = out_dir / "v14m3_complete_unscored_merge.json"
+    merged.write_bytes(b"canonical-v14m3-merge\n")
+    test_script, env, event_path = _controller_env(tmp_path, SCREEN, out_dir)
+
+    completed = subprocess.run(
+        ["bash", str(test_script)],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert merged.read_bytes() == b"canonical-v14m3-merge\n"
+    assert not event_path.exists()
+
+
+def test_formal_controller_resumes_assembly_without_remerging(tmp_path: Path) -> None:
+    out_dir = tmp_path / "formal_complete"
+    _populate_v14_results(out_dir, 5)
+    merged = out_dir / "v14m4_complete_unscored_merge.json"
+    merged.write_bytes(b"canonical-v14m4-merge\n")
+    test_script, env, event_path = _controller_env(tmp_path, FORMAL, out_dir)
+
+    completed = subprocess.run(
+        ["bash", str(test_script)],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert merged.read_bytes() == b"canonical-v14m4-merge\n"
+    assert [event["event"] for event in _read_events(event_path)] == ["assemble"]
