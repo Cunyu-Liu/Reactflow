@@ -57,8 +57,9 @@ interpretation while they are pending.
 Freeze the input order/widths, taus, weights, weighted-pinball candidate training
 surrogate, exact 13/65-atom scientific CRPS, exact Gaussian-mixture comparator
 CRPS, candidate/comparator parameter formulas and input-independent
-initialization, training phases, artifact schemas, matched-replay Gates, formal
-mixture, integrity rules, forbidden actions, and claim ceiling. Load the
+initialization, `INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0`, training phases, artifact
+schemas, matched-replay Gates, formal mixture, integrity rules, forbidden
+actions, and claim ceiling. Load the
 canonical repo amendment/active pointer rather than accepting a CLI authority
 override. Validate both top-level and nested inactive booleans, exact arrays and
 sums, parameter counts, unique median tau, phase state, parent tokens, pending
@@ -70,8 +71,12 @@ Gate, realized source inserted into the draft, or generic token fails. They must
 also reject labeling weighted pinball as scientific CRPS, nonzero comparator or
 candidate output weights at initialization, wrong V10 output biases, any target
 adjacent gap at or below `1e-4`, and any claim that the two full initial
-distributions are identical. They prove validation reads no artifact and
-creates no output. Do not create or modify
+distributions are identical. Require the exact token/value mapping
+`INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0 -> atol=1.0e-6, rtol=0.0`; reject a missing
+token, any other absolute tolerance, or nonzero relative tolerance. The
+validator must keep point replay separately at `atol=1e-7, rtol=0` and must not
+apply initialization tolerance to score fields. Tests prove validation reads no
+artifact and creates no output. Do not create or modify
 `configs/reactflow_delta/active_contract.yaml`.
 
 **Minimum verification:**
@@ -126,16 +131,24 @@ mixture input-independent. Use bounded float64 inverse-CDF bisection to obtain
 its values at the 13 taus. Require every adjacent target gap to be strictly
 greater than `1e-4`; then zero the complete candidate output weight and set bias
 `j` to `inverse_softplus(target_gap_j - 1e-4)`. Test the bound/tolerance rather
-than adding a runtime recovery loop.
+than adding a runtime recovery loop. Compare the realized candidate float32
+initial grid with the registered comparator float64 inverse-CDF grid only via
+`np.allclose(..., atol=1.0e-6, rtol=0.0)`, exposed under the exact invariant name
+`INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0`.
 
 Focused tests cover exact arrays and `0.45/0.10/0.45` mass; separate
 hand-computable weighted-pinball surrogate, exact 13-atom CRPS, and weighted
 absolute values; strict monotonicity; exact median and absent point gradient;
 both 63,748 counts; identical rows/statistics/seed/epochs/order; zero full output
 weights and exact comparator biases; rejection when any target gap is `<=1e-4`;
-initial-grid equality for multiple distinct arbitrary inputs; explicit
+registered-tolerance initial-grid replay for multiple distinct arbitrary
+inputs; rejection when one candidate node differs from the float64 registered
+grid by more than `1.0e-6`; rejection of any nonzero `rtol`; explicit
 non-equality of the two complete initial distributions; finite/alignment
 rejection; and point immutability after a minimal synthetic optimization step.
+Median tests remain separate: exact candidate-median array equality plus the
+existing point replay `atol=1e-7, rtol=0`. No initialization-tolerance test may
+weaken either median assertion or a scientific-score comparison.
 
 **Minimum verification:**
 
@@ -145,7 +158,8 @@ git diff --check
 ```
 
 **Independent review:** Yes — independently verify quantile algebra,
-quadrature, parameter counts, initialization, V10 fairness, and the point
+quadrature, parameter counts, initialization replay at exactly
+`atol=1.0e-6, rtol=0.0`, V10 fairness, and the separate exact-median/point
 gradient boundary before runtime work.
 
 ### Batch 3: Implement source projection, runtime/controller, and merger

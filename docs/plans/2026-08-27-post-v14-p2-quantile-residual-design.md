@@ -249,6 +249,26 @@ the P2-specific input-independent V10 initialization defined below, evaluated
 at the 13 frozen taus. Fixed float64 bisection computes those quantiles. Do not
 store hand-rounded gaps or add trainable initialization parameters.
 
+The sole executable initial-grid replay criterion is frozen as:
+
+```text
+INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0
+
+np.allclose(
+    candidate_initial_grid_float32,
+    registered_comparator_initial_grid_float64,
+    atol=1.0e-6,
+    rtol=0.0,
+)
+```
+
+This tolerance covers only the fixed float64 inverse-CDF bisection followed by
+the candidate's float32 bias and forward round-trip. It does not apply to the
+frozen V14 median point, any point-prediction replay, the scientific CRPS, or
+any other score. Point replay remains `atol=1e-7, rtol=0`, and focused core
+tests must additionally retain exact array equality for the assigned candidate
+median.
+
 ## 8. Exact parameter-matched V10 replay
 
 The comparator is a newly trained existing `MedianAsymmetricResidual`:
@@ -284,11 +304,11 @@ allocation raw       = 0
 Because the full comparator output weight is zero, its initial mixture is the
 same for every 244-dimensional input. Candidate output weights are also all
 zero, and its biases are computed from this comparator mixture's 13 inverse-CDF
-values. Therefore, for every input, the candidate initial quantile grid equals
-the comparator initial quantile grid at all 13 taus. This is an initial-grid
-equality only: the 13-atom candidate and continuous two-Gaussian comparator are
-different complete predictive distributions and must never be described as
-identical.
+values. Therefore, for every input, the candidate initial quantile grid matches
+the registered comparator float64 inverse-CDF grid at all 13 taus within
+`INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0`. This is registered-tolerance grid replay
+only: the 13-atom candidate and continuous two-Gaussian comparator are different
+complete predictive distributions and must never be described as identical.
 
 ## 9. Training and P2M0-P2M5 lifecycle
 
@@ -453,8 +473,9 @@ added. Smoke, proxy, or training loss is never a scientific result.
 Frozen here are the unique branch-6 PASS entry, inactive status, 244 input,
 frozen V14 point, exact taus/weights, weighted-pinball training surrogate,
 exact predictive-distribution scientific CRPS, exact candidate/comparator
-architectures and counts, P2M0-M5 schedule, Adam/epochs/seeds, new matched replay
-Gates, 65-atom formal mixture, 4-of-5 rules, and claim ceiling.
+architectures and counts, `INITIAL_GRID_REPLAY_ATOL_1E_6_RTOL_0`, P2M0-M5
+schedule, Adam/epochs/seeds, new matched replay Gates, 65-atom formal mixture,
+4-of-5 rules, and claim ceiling.
 
 Still pending—and prohibited from invention—are actual terminal/router/
 diagnostic values and paths, realized source/output paths, future authority
