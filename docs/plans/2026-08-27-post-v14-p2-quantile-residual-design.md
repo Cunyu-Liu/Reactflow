@@ -85,6 +85,15 @@ distribution-derived expected absolute delta. Relative gain is:
 / mean_puzzle_comparator_error
 ```
 
+From P2M3 screen onward, the 13 quantile nodes and their fixed weights define
+the candidate predictive distribution itself: a 13-atom distribution with atom
+values `q_i` and masses `w_i`. Candidate scientific CRPS is the exact CRPS of
+that finite distribution. The matched V10 replay remains its two-Gaussian
+predictive distribution and uses exact Gaussian-mixture CRPS. Thus both arms
+are compared under the same proper scoring rule—CRPS—evaluated exactly for each
+arm's declared predictive distribution. Their training objectives need not be
+the same.
+
 Every canonical V14 feature41 and terminal-comparator distribution Gate is
 repeated unchanged. Signed and point-absolute results are replay invariants, not
 P2-optimized outcomes.
@@ -145,7 +154,7 @@ the 244-dimensional input are context only. The candidate assigns the detached
 float64 raw point directly to tau `0.50`; it never reconstructs the median from
 standardized inputs.
 
-## 6. Quantile grid and fixed quadrature
+## 6. Quantile grid, predictive atoms, and training surrogate
 
 The candidate predicts exactly:
 
@@ -165,23 +174,35 @@ weights = [
 These are fixed full-interval midpoint/Voronoi weights. They sum to `1.0`, with
 mass `0.45` below the median node, `0.10` at it, and `0.45` above it. Exact
 `0.05/0.95` nodes retain the branch-6 90% tail boundary; `0.025/0.975` add the
-minimum extra tail resolution.
+minimum extra tail resolution. Beginning with P2M3 scientific screen, these
+nodes and weights are not merely a numerical integration grid: they define the
+candidate predictive distribution exactly as
+`F_candidate = sum_i w_i delta(q_i)`.
 
 For residual target `y`, quantile `q_i`, and `u_i = y - q_i`:
 
 ```text
 rho_tau(u) = u * (tau - 1[u < 0])
 
-candidate_crps
+candidate_training_surrogate
   = 2 * sum_i weights[i] * rho_taus[i](y - q_i)
 
 candidate_expected_absolute_delta
   = sum_i weights[i] * abs(q_i)
+
+candidate_scientific_crps(y)
+  = sum_i weights[i] * abs(y - q_i)
+    - 0.5 * sum_i sum_j weights[i] * weights[j] * abs(q_i - q_j)
 ```
 
-Training, screen scoring, and formal assembly use the same arrays. Learned
-weights, grid search, interpolation, extrapolation, and result-dependent tail
-refinement are prohibited.
+The `2 x` weighted pinball expression is the candidate training surrogate only.
+It must not be written into a screen/formal score artifact as scientific CRPS,
+used to adjudicate a CRPS Gate, or compared directly with Gaussian-mixture
+CRPS. Screen candidate CRPS uses the exact 13-atom expression above. Matched
+V10 scientific CRPS uses its existing exact Gaussian-mixture expression. The
+weighted absolute value is exact for the declared candidate atom distribution.
+Learned atom masses, grid search, interpolation, extrapolation, and
+result-dependent tail refinement are prohibited.
 
 ## 7. Candidate architecture and exact parameter count
 
@@ -215,11 +236,18 @@ quadrature, and persisted distributions use float64. There is no dropout, batch
 normalization, skip projection, learned global scale, extra tail parameter, or
 auxiliary loss.
 
-Candidate output weights initialize to zero. Its output biases reproduce the
-adjacent quantile gaps of the deterministic existing V10 initial mixture on the
-13 fixed taus. Compute those initial V10 quantiles with fixed float64 bisection;
-the validator checks initial-grid equality. Do not store hand-rounded values or
-add trainable initialization parameters.
+Candidate `output_layer.weight` initializes entirely to zero. Its 12 biases are
+set exactly to:
+
+```text
+inverse_softplus(target_adjacent_gap_j - 1e-4)
+```
+
+Before inverse softplus, the validator requires every
+`target_adjacent_gap_j > 1e-4`. Target gaps come from the float64 inverse CDF of
+the P2-specific input-independent V10 initialization defined below, evaluated
+at the 13 frozen taus. Fixed float64 bisection computes those quantiles. Do not
+store hand-rounded gaps or add trainable initialization parameters.
 
 ## 8. Exact parameter-matched V10 replay
 
@@ -240,6 +268,27 @@ Adam optimizer, and gradient clipping as the candidate. Historical V10
 predictions are not the matched replay; the comparator is trained again around
 the V14 point in every authorized P2 fold and seed. Model/family selection is
 forbidden.
+
+P2 freezes a specific input-independent comparator initialization. Construct
+the existing `MedianAsymmetricResidual`, then zero its complete
+`output_layer.weight` tensor. Keep or set its existing four output biases
+exactly as:
+
+```text
+mixture-weight logit = 0
+narrow-scale raw     = inverse_softplus(0.08)
+wide-gap raw         = inverse_softplus(0.20)
+allocation raw       = 0
+```
+
+Because the full comparator output weight is zero, its initial mixture is the
+same for every 244-dimensional input. Candidate output weights are also all
+zero, and its biases are computed from this comparator mixture's 13 inverse-CDF
+values. Therefore, for every input, the candidate initial quantile grid equals
+the comparator initial quantile grid at all 13 taus. This is an initial-grid
+equality only: the 13-atom candidate and continuous two-Gaussian comparator are
+different complete predictive distributions and must never be described as
+identical.
 
 ## 9. Training and P2M0-P2M5 lifecycle
 
@@ -286,7 +335,10 @@ provenance, nonfinite output, integrity failure, or unauthorized access is
 
 Both models use Adam, learning rate `1e-3`, zero weight decay, gradient clipping
 `5.0`, no early stopping, and no best-epoch selection. Puzzle order uses
-`seed * 100003 + epoch`.
+`seed * 100003 + epoch`. Candidate training minimizes the fixed `2 x` weighted
+pinball surrogate; matched V10 training minimizes exact Gaussian-mixture CRPS.
+Scientific comparison later uses exact CRPS for each declared predictive
+distribution, not either arm's training-loss representation.
 
 ## 10. Prediction and merge boundary
 
@@ -299,6 +351,11 @@ candidate_quantiles, candidate_expected_absolute_delta,
 v10_replay_weights, v10_replay_locations, v10_replay_scales,
 v10_replay_expected_absolute_delta
 ```
+
+For P2M3 scoring, `candidate_quantiles` are the 13 atom values and
+`quadrature_weights` are their predictive masses. The scorer must not reinterpret
+them as samples, interpolate them into another distribution, or substitute the
+training pinball surrogate for exact atom-distribution CRPS.
 
 They must not contain held target/error/mask, score, per-puzzle effect, Gate, or
 external outcome. Fold result metadata may contain paths, standardizers,
@@ -327,6 +384,17 @@ score, and no external outcome.
 At activation, copy every canonical V14 feature41/terminal CRPS,
 distribution-absolute, coverage, and calibration Gate verbatim and repeat them
 without relaxation. All signed/point-absolute V14 Gates replay unchanged.
+
+For every screen row, candidate scientific CRPS is computed exactly as:
+
+```text
+sum_i w_i |y - q_i| - 0.5 sum_i sum_j w_i w_j |q_i - q_j|
+```
+
+Matched V10 scientific CRPS remains the exact Gaussian-mixture CRPS. These are
+two exact evaluations of the same proper-scoring-rule estimand for the two
+declared distributions. Weighted pinball is absent from scientific score and
+Gate fields.
 
 The two new capability Gates are:
 
@@ -362,6 +430,12 @@ V14 median. Compute mixture CRPS as weighted finite-distribution CRPS and
 expected absolute delta as the weighted absolute atom mean. Assemble the five
 V10 Gaussian replays as their equal distribution mixture.
 
+The 65-atom candidate uses the same exact finite-distribution formula as the
+13-atom screen candidate, with the 65 values and masses substituted. This
+repeats the same CRPS estimand; it does not switch back to integrated pinball or
+average per-seed CRPS values. The equal five-seed V10 mixture is likewise scored
+by its exact mixture CRPS.
+
 The formal mixture repeats every screen integrity/scientific Gate. Additionally,
 at least 4 of 5 seeds must have positive candidate-versus-V10 increments for
 CRPS and at least 4 of 5 for distribution-absolute error. All seeds/runs are
@@ -377,7 +451,8 @@ alternative grid, hyperparameter search, or automated contingency selection is
 added. Smoke, proxy, or training loss is never a scientific result.
 
 Frozen here are the unique branch-6 PASS entry, inactive status, 244 input,
-frozen V14 point, exact taus/weights/objectives, exact candidate/comparator
+frozen V14 point, exact taus/weights, weighted-pinball training surrogate,
+exact predictive-distribution scientific CRPS, exact candidate/comparator
 architectures and counts, P2M0-M5 schedule, Adam/epochs/seeds, new matched replay
 Gates, 65-atom formal mixture, 4-of-5 rules, and claim ceiling.
 

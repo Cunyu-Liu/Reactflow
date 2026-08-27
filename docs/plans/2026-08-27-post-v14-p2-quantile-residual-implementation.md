@@ -54,9 +54,11 @@ primary statistic `LOWER_MINUS_UPPER_TAIL_MISS90`, and next action
 Gate values `PENDING_TERMINAL_BINDING`; validator must reject an active/runnable
 interpretation while they are pending.
 
-Freeze the input order/widths, taus, weights, objectives, candidate/comparator
-parameter formulas, training phases, artifact schemas, matched-replay Gates,
-formal mixture, integrity rules, forbidden actions, and claim ceiling. Load the
+Freeze the input order/widths, taus, weights, weighted-pinball candidate training
+surrogate, exact 13/65-atom scientific CRPS, exact Gaussian-mixture comparator
+CRPS, candidate/comparator parameter formulas and input-independent
+initialization, training phases, artifact schemas, matched-replay Gates, formal
+mixture, integrity rules, forbidden actions, and claim ceiling. Load the
 canonical repo amendment/active pointer rather than accepting a CLI authority
 override. Validate both top-level and nested inactive booleans, exact arrays and
 sums, parameter counts, unique median tau, phase state, parent tokens, pending
@@ -64,9 +66,13 @@ bindings, and absence of a generic training token.
 
 Focused tests prove the committed inactive contract passes and that any wrong
 parent field, reopened authority/access, altered number/array/formula/schedule/
-Gate, realized source inserted into the draft, or generic token fails. They also
-prove validation reads no artifact and creates no output. Do not create or
-modify `configs/reactflow_delta/active_contract.yaml`.
+Gate, realized source inserted into the draft, or generic token fails. They must
+also reject labeling weighted pinball as scientific CRPS, nonzero comparator or
+candidate output weights at initialization, wrong V10 output biases, any target
+adjacent gap at or below `1e-4`, and any claim that the two full initial
+distributions are identical. They prove validation reads no artifact and
+creates no output. Do not create or modify
+`configs/reactflow_delta/active_contract.yaml`.
 
 **Minimum verification:**
 
@@ -98,10 +104,12 @@ wrapper.
 Implement `MonotoneQuantileResidual` as
 `Linear(244,248) -> ReLU -> Linear(248,12)`. Keep layers float32; construct
 float64 positive gaps; assign the detached float64 point directly at tau `0.5`;
-and cumulatively subtract/add gaps. Implement fixed weighted pinball CRPS,
-weighted expected absolute delta, parameter count, deterministic
+and cumulatively subtract/add gaps. Implement the fixed `2 x` weighted pinball
+candidate training surrogate, exact 13-atom finite-distribution scientific
+CRPS, weighted expected absolute delta, parameter count, deterministic
 V10-grid-matched initialization, outer-train standardization, and the frozen
-position-to-mutant-to-method-cell-to-puzzle loss.
+position-to-mutant-to-method-cell-to-puzzle aggregation. Keep training-surrogate
+and scientific-score functions distinct in name and call sites.
 
 One paired fitting entry point accepts authorized outer-train rows and a frozen
 point; creates candidate/comparator from the same seed; gives them identical
@@ -110,16 +118,24 @@ clip `5.0`; checks point snapshots/gradients; performs no early stopping,
 selection, held scoring, or artifact I/O; and returns prediction primitives plus
 histories without a verdict.
 
-Initialize candidate output weights to zero. Use bounded float64 bisection to
-obtain the existing V10 initial mixture's fixed-grid quantiles and set the 12
-biases to inverse-softplus adjacent gaps. Test the bound/tolerance rather than
-adding a runtime recovery loop.
+For the P2-specific comparator initialization, construct
+`MedianAsymmetricResidual`, zero the entire `output_layer.weight`, and set its
+four biases to weight logit `0`, `inverse_softplus(0.08)`,
+`inverse_softplus(0.20)`, and allocation `0`. This makes the comparator initial
+mixture input-independent. Use bounded float64 inverse-CDF bisection to obtain
+its values at the 13 taus. Require every adjacent target gap to be strictly
+greater than `1e-4`; then zero the complete candidate output weight and set bias
+`j` to `inverse_softplus(target_gap_j - 1e-4)`. Test the bound/tolerance rather
+than adding a runtime recovery loop.
 
-Focused tests cover exact arrays and `0.45/0.10/0.45` mass; hand-computable loss
-and weighted absolute values; strict monotonicity; exact median and absent point
-gradient; both 63,748 counts; identical rows/statistics/seed/epochs/order;
-initial-grid equality; finite/alignment rejection; and point immutability after
-a minimal synthetic optimization step.
+Focused tests cover exact arrays and `0.45/0.10/0.45` mass; separate
+hand-computable weighted-pinball surrogate, exact 13-atom CRPS, and weighted
+absolute values; strict monotonicity; exact median and absent point gradient;
+both 63,748 counts; identical rows/statistics/seed/epochs/order; zero full output
+weights and exact comparator biases; rejection when any target gap is `<=1e-4`;
+initial-grid equality for multiple distinct arbitrary inputs; explicit
+non-equality of the two complete initial distributions; finite/alignment
+rejection; and point immutability after a minimal synthetic optimization step.
 
 **Minimum verification:**
 
@@ -160,8 +176,10 @@ The runner validates exact phase authority, bound CLI paths, phase universe,
 no-overwrite state, and CUDA before any reader/directory/model creation. It
 builds outer-train calibration rows, uses the V14 checkpoint for frozen
 outer-train points, reads held `candidate_point` directly by biological key,
-and generates candidate quantiles plus V10 replay mixtures. Held-target/scorer
-code is absent from its import/data path.
+and generates candidate quantiles plus V10 replay mixtures. From P2M3 onward,
+the 13 quantiles and fixed weights are persisted as the declared candidate atom
+distribution. Held-target/scorer code is absent from the runner import/data
+path.
 
 The phase-aware controller dispatches only:
 
@@ -178,7 +196,9 @@ The merger revalidates canonical authority, manifest, exact fold/seed universe,
 filenames, schemas, keys, same-fold provenance, parameter counts, taus/weights,
 point replay, monotonicity, finite values, coverage, and forbidden fields. It
 atomically writes one prediction-only merge, refuses overwrite, never joins
-targets, and never reads scores.
+targets, and never reads scores. It records the candidate distribution as exact
+13-atom values/masses and does not precompute either training loss or scientific
+CRPS.
 
 Focused synthetic/mock tests prove that wrong authority/parent/source/fold/
 seed/epoch/path/key/point/count/order, a target field, absent CUDA, or incomplete
@@ -221,6 +241,17 @@ the frozen hierarchical puzzle estimands, and repeat every canonical V14
 feature41/terminal CRPS, distribution-absolute, coverage, and calibration Gate
 unchanged. Signed/point-absolute values replay from the frozen V14 point.
 
+For each held row, candidate scientific CRPS is exactly:
+
+```text
+sum_i w_i |y - q_i| - 0.5 sum_i sum_j w_i w_j |q_i - q_j|
+```
+
+Matched V10 scientific CRPS remains exact Gaussian-mixture CRPS. These are exact
+CRPS evaluations of each declared predictive distribution and the same proper
+scoring-rule estimand. The scorer must not call or serialize the weighted
+pinball training surrogate as CRPS.
+
 Add both paired capability Gates:
 
 ```text
@@ -240,15 +271,21 @@ INDETERMINATE. Smoke, loss, or proxy evidence cannot become PASS.
 Formal assembly accepts exact P2M4 authority and 100 complete prediction-only
 runs. It constructs 65 candidate atoms per row with `weight[tau] / 5`, never
 averages quantile curves, and equally mixes the five V10 replay distributions.
-Formal scoring repeats screen Gates, reports every seed, and requires at least
-4/5 positive individual-seed matched-V10 increments for CRPS and separately
-4/5 for distribution-absolute error. Failed seeds cannot be removed.
+Formal candidate CRPS uses the same exact finite-distribution formula with 65
+atoms, thereby repeating the screen estimand rather than switching to pinball or
+averaging seed CRPS. The equal-seed V10 mixture uses exact mixture CRPS. Formal
+scoring repeats screen Gates, reports every seed, and requires at least 4/5
+positive individual-seed matched-V10 increments for CRPS and separately 4/5 for
+distribution-absolute error. Failed seeds cannot be removed.
 
 All outputs are atomic/no-overwrite, bind exact sources/tokens, and cap PASS at
-`POST_HOC_DEVELOPMENT_FORMAL_PASS`. Tests use hand-computable fixtures for
-pinball CRPS, finite-mixture CRPS, weighted absolute error, hierarchy, paired
-CI, puzzle counts, LOO, influence, boundaries, 65 weights, 4/5 logic,
-PASS/FAIL/INDETERMINATE, score-once, and rejection before target read.
+`POST_HOC_DEVELOPMENT_FORMAL_PASS`. Tests use hand-computable fixtures for the
+weighted-pinball training surrogate, exact 13-atom and 65-atom CRPS, exact
+Gaussian-mixture comparator CRPS, weighted absolute error, hierarchy, paired CI,
+puzzle counts, LOO, influence, boundaries, 65 weights, 4/5 logic,
+PASS/FAIL/INDETERMINATE, score-once, and rejection before target read. One test
+must fail if the screen scorer substitutes weighted pinball for scientific
+candidate CRPS.
 
 **Minimum verification:**
 
