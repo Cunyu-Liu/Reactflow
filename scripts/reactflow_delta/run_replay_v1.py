@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""run_replay_v1: P6 clean-checkout one-click replay driver (contract 12.8).
+"""run_replay_v1: P6 clean-checkout replay driver (contract 12.8).
 
-Replays the prospective-v2 primary results from a clean checkout + artifacts:
+The default route is internal-only and replays P2/P3 from saved development
+artifacts.  P4/P5/P5b/P5_COMBINED are reachable only with ``--external`` and
+only while the canonical active contract explicitly authorizes P6 external
+replay at both permission locations.
+
+Replays the prospective-v2 results from a clean checkout + artifacts:
 
   P2 (artifact replay, no retrain): recompute per-puzzle D_p2 and the 20-puzzle
     CI from the saved held-position rows (p2_held_position_rows.jsonl) using the
     frozen Gaussian CRPS (scale 0.3), then compare to the locked P2 result.
   P3 (artifact replay, no retrain): recompute rank 2/4/8 20-puzzle CIs from the
-    saved per-puzzle rank D (rank_d_p3) and verify NO_INCREMENTAL (CI upper < 0).
+    saved per-puzzle rank D (rank_d_p3) and re-derive the matching locked verdict.
   P4 (fresh replay): re-run the locked external protocol (reg_direct refit +
     frozen component graph + shared-region CRPS) into a fresh output and compare
     verdict + component-macro CI to the locked P4 result.
@@ -34,6 +39,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import yaml
 from scipy import stats as _st
 
 from scripts.reactflow_delta.evaluator_crps_v1 import crps_gaussian
@@ -47,6 +53,115 @@ RTOL = 1e-6
 ATOL = 1e-6
 P2_PUZZLE_RTOL = 0.1  # P20 has ~8% relative difference due to 4100 all-NaN records
 # counted as 0 in original P2 denominator (pre-fix NaN artifact); verdict unchanged
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_ACTIVE_CONTRACT_PATH = _REPO_ROOT / "configs/reactflow_delta/active_contract.yaml"
+_EXTERNAL_REPLAY_PHASE = "P6_EXTERNAL_REPLAY"
+
+
+def _load_active_contract() -> dict:
+    """Load the one canonical, repository-owned authority pointer."""
+    try:
+        doc = yaml.safe_load(_ACTIVE_CONTRACT_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise RuntimeError(
+            f"cannot load canonical active contract {_ACTIVE_CONTRACT_PATH}: {exc}"
+        ) from exc
+    if not isinstance(doc, dict):
+        raise RuntimeError(
+            f"canonical active contract {_ACTIVE_CONTRACT_PATH} is not a mapping"
+        )
+    return doc
+
+
+def _require_external_replay_authority(contract: dict) -> None:
+    """Fail closed unless both permissions and the exact runnable phase agree."""
+    authorization = contract.get("authorization")
+    authority = contract.get("authority")
+    top_allowed = contract.get("new_external_outcome_access_allowed")
+    nested_allowed = (
+        authorization.get("new_external_outcome_access_allowed")
+        if isinstance(authorization, dict) else None
+    )
+    runnable_phase = (
+        authority.get("current_runnable_phase")
+        if isinstance(authority, dict) else None
+    )
+    if not (
+        top_allowed is True
+        and nested_allowed is True
+        and runnable_phase == _EXTERNAL_REPLAY_PHASE
+    ):
+        raise PermissionError(
+            "P6 external replay denied by canonical active contract: "
+            f"top_level_allowed={top_allowed!r}, "
+            f"authorization_allowed={nested_allowed!r}, "
+            f"current_runnable_phase={runnable_phase!r}; requires both permissions "
+            f"to be true and phase {_EXTERNAL_REPLAY_PHASE!r}"
+        )
+
+
+def _validate_replay_mode(
+    *,
+    external: bool,
+    dev_csv: Path | None,
+    rdat_dir: Path | None,
+    components: Path | None,
+    locked_p4: Path | None,
+    locked_p5: Path | None,
+    replay_out: Path | None,
+    locked_p5b: Path | None,
+    p5b_components: Path | None,
+    locked_p5_combined: Path | None,
+) -> None:
+    external_args = {
+        "dev_csv": dev_csv,
+        "rdat_dir": rdat_dir,
+        "components": components,
+        "locked_p4": locked_p4,
+        "locked_p5": locked_p5,
+        "replay_out": replay_out,
+        "locked_p5b": locked_p5b,
+        "p5b_components": p5b_components,
+        "locked_p5_combined": locked_p5_combined,
+    }
+    if not external:
+        provided = sorted(name for name, value in external_args.items() if value is not None)
+        if provided:
+            raise ValueError(
+                "external-only arguments require external=True: " + ", ".join(provided)
+            )
+        return
+
+    required = ("dev_csv", "rdat_dir", "components", "locked_p4", "locked_p5",
+                "replay_out")
+    missing = [name for name in required if external_args[name] is None]
+    if missing:
+        raise ValueError(
+            "external replay is missing required arguments: " + ", ".join(missing)
+        )
+    if (locked_p5b is None) != (p5b_components is None):
+        raise ValueError("locked_p5b and p5b_components must be provided together")
+    if locked_p5_combined is not None and locked_p5b is None:
+        raise ValueError(
+            "locked_p5_combined requires locked_p5b and p5b_components"
+        )
+
+
+def _write_report(*, results: dict, locked_inputs: dict, replay_out: Path | None,
+                  out: Path, replay_mode: str) -> dict:
+    all_ok = all(v["reproduced"] for v in results.values())
+    report = {"schema_version": "reactflow_delta.p6_replay.v1",
+              "replay_mode": replay_mode,
+              "locked_inputs": locked_inputs,
+              "replay_output_dir": str(replay_out) if replay_out is not None else None,
+              "replay": results,
+              "all_reproduced": all_ok,
+              "verdict": "REPLAY_CONSISTENT" if all_ok else "REPLAY_MISMATCH"}
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    print(json.dumps(report, indent=2, default=str))
+    return report
 
 
 def _ci_from_effects(effects: list[float], alpha: float = 0.025) -> dict:
@@ -133,13 +248,37 @@ def _compare(key: str, orig: float | str | None, replayed: float | str | None,
             "match": bool(rel <= tol)}
 
 
-def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
-               locked_p4: Path, locked_p5: Path, locked_p2: Path, locked_p3: Path,
-               p2_held_rows: Path, replay_out: Path, out: Path,
+def run_replay(locked_p2: Path, locked_p3: Path, p2_held_rows: Path, out: Path,
+               *, external: bool = False,
+               dev_csv: Path | None = None,
+               rdat_dir: Path | None = None,
+               components: Path | None = None,
+               locked_p4: Path | None = None,
+               locked_p5: Path | None = None,
+               replay_out: Path | None = None,
                locked_p5b: Path | None = None,
                p5b_components: Path | None = None,
                locked_p5_combined: Path | None = None) -> dict:
-    replay_out.mkdir(parents=True, exist_ok=True)
+    # The canonical authority pointer is deliberately loaded before creating an
+    # output directory or reading any replay input.  Its path is repository-owned
+    # and is not exposed as a CLI or function argument.
+    contract = _load_active_contract()
+    if external:
+        _require_external_replay_authority(contract)
+    _validate_replay_mode(
+        external=external,
+        dev_csv=dev_csv,
+        rdat_dir=rdat_dir,
+        components=components,
+        locked_p4=locked_p4,
+        locked_p5=locked_p5,
+        replay_out=replay_out,
+        locked_p5b=locked_p5b,
+        p5b_components=p5b_components,
+        locked_p5_combined=locked_p5_combined,
+    )
+    if external:
+        replay_out.mkdir(parents=True, exist_ok=True)
     results = {}
 
     # ---- P2 artifact replay ----
@@ -189,6 +328,17 @@ def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
                      "ci": {r: p3[r]["ci"] for r in p3},
                      "checks": p3_cmp, "reproduced": p3_ok}
 
+    locked_inputs = {"locked_p2": str(locked_p2), "locked_p3": str(locked_p3),
+                     "p2_held_rows": str(p2_held_rows)}
+    if not external:
+        return _write_report(
+            results=results,
+            locked_inputs=locked_inputs,
+            replay_out=None,
+            out=out,
+            replay_mode="internal_artifact_only",
+        )
+
     # ---- P4 fresh replay ----
     replay_p4 = replay_out / "p4_replay_result.json"
     run_p4(rdat_dir, dev_csv, components, replay_p4)
@@ -224,7 +374,7 @@ def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
                      "checks": p5_cmp, "reproduced": p5_ok}
 
     # ---- P5b fresh replay (NEW independent component set, access count 2) ----
-    if locked_p5b is not None and p5b_components is not None and p5b_components.exists():
+    if locked_p5b is not None and p5b_components is not None:
         replay_p5b = replay_out / "p5b_replay_result.json"
         run_p5b(rdat_dir, dev_csv, p5b_components, locked_p4, replay_p5b)
         p5b_new = json.loads(replay_p5b.read_text(encoding="utf-8"))
@@ -252,9 +402,7 @@ def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
     # per-set reports. This is an "aggregation replay", not a raw-data replay,
     # so the determinism is exact (same code, same inputs = same verdict).
     p5_for_combined = p5_new if p5_ok else p5_locked
-    have_p5b_for_combined = (locked_p5b is not None
-                             and p5b_components is not None
-                             and p5b_components.exists())
+    have_p5b_for_combined = locked_p5b is not None and p5b_components is not None
     if have_p5b_for_combined:
         p5b_for_combined = p5b_new if (results.get("P5b") or {}).get("reproduced") else p5b_locked
     else:
@@ -335,51 +483,64 @@ def run_replay(dev_csv: Path, rdat_dir: Path, components: Path,
             "reproduced": True,
         }
 
-    all_ok = all(v["reproduced"] for v in results.values())
-    locked_inputs = {"locked_p2": str(locked_p2), "locked_p3": str(locked_p3),
-                     "locked_p4": str(locked_p4), "locked_p5": str(locked_p5),
-                     "p2_held_rows": str(p2_held_rows)}
+    locked_inputs.update({"locked_p4": str(locked_p4), "locked_p5": str(locked_p5)})
     if locked_p5b is not None:
         locked_inputs["locked_p5b"] = str(locked_p5b)
         locked_inputs["p5b_components"] = str(p5b_components)
     if locked_p5_combined is not None:
         locked_inputs["locked_p5_combined"] = str(locked_p5_combined)
-    report = {"schema_version": "reactflow_delta.p6_replay.v1",
-              "locked_inputs": locked_inputs,
-              "replay_output_dir": str(replay_out),
-              "replay": results,
-              "all_reproduced": all_ok,
-              "verdict": "REPLAY_CONSISTENT" if all_ok else "REPLAY_MISMATCH"}
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
-    print(json.dumps(report, indent=2, default=str))
-    return report
+    return _write_report(
+        results=results,
+        locked_inputs=locked_inputs,
+        replay_out=replay_out,
+        out=out,
+        replay_mode="external_authorized",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dev-csv", required=True)
-    ap.add_argument("--rdat-dir", required=True)
-    ap.add_argument("--components", required=True)
+    ap.add_argument(
+        "--external",
+        action="store_true",
+        help=("also run P4/P5 and optional P5b/P5_COMBINED; requires explicit "
+              "authorization in configs/reactflow_delta/active_contract.yaml"),
+    )
     ap.add_argument("--locked-p2", required=True)
     ap.add_argument("--locked-p3", required=True)
-    ap.add_argument("--locked-p4", required=True)
-    ap.add_argument("--locked-p5", required=True)
+    ap.add_argument("--p2-held-rows", required=True)
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--dev-csv", required=False, default=None)
+    ap.add_argument("--rdat-dir", required=False, default=None)
+    ap.add_argument("--components", required=False, default=None)
+    ap.add_argument("--locked-p4", required=False, default=None)
+    ap.add_argument("--locked-p5", required=False, default=None)
     ap.add_argument("--locked-p5b", required=False, default=None)
     ap.add_argument("--p5b-components", required=False, default=None)
     ap.add_argument("--locked-p5-combined", required=False, default=None)
-    ap.add_argument("--p2-held-rows", required=True)
-    ap.add_argument("--replay-out", required=True)
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--replay-out", required=False, default=None)
     args = ap.parse_args(argv)
-    run_replay(
-        Path(args.dev_csv), Path(args.rdat_dir), Path(args.components),
-        Path(args.locked_p4), Path(args.locked_p5), Path(args.locked_p2),
-        Path(args.locked_p3), Path(args.p2_held_rows),
-        Path(args.replay_out), Path(args.out),
-        locked_p5b=Path(args.locked_p5b) if args.locked_p5b else None,
-        p5b_components=Path(args.p5b_components) if args.p5b_components else None,
-        locked_p5_combined=Path(args.locked_p5_combined) if args.locked_p5_combined else None)
+    try:
+        run_replay(
+            Path(args.locked_p2),
+            Path(args.locked_p3),
+            Path(args.p2_held_rows),
+            Path(args.out),
+            external=args.external,
+            dev_csv=Path(args.dev_csv) if args.dev_csv else None,
+            rdat_dir=Path(args.rdat_dir) if args.rdat_dir else None,
+            components=Path(args.components) if args.components else None,
+            locked_p4=Path(args.locked_p4) if args.locked_p4 else None,
+            locked_p5=Path(args.locked_p5) if args.locked_p5 else None,
+            replay_out=Path(args.replay_out) if args.replay_out else None,
+            locked_p5b=Path(args.locked_p5b) if args.locked_p5b else None,
+            p5b_components=Path(args.p5b_components) if args.p5b_components else None,
+            locked_p5_combined=(
+                Path(args.locked_p5_combined) if args.locked_p5_combined else None
+            ),
+        )
+    except (PermissionError, ValueError) as exc:
+        ap.error(str(exc))
     return 0
 
 
