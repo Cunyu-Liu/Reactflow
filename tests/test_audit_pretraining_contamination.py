@@ -40,6 +40,28 @@ class TestKnownModels:
         for m in audit_module.KNOWN_MODELS:
             assert len(m.known_rna_databases) > 0, f"{m.name} missing known_rna_databases"
 
+    def test_rinalmo_audit_uses_the_published_giga_asset(self):
+        model = next(m for m in audit_module.KNOWN_MODELS if m.name == "RiNALMo")
+        assert model.version == "giga-v1"
+        assert model.paper == (
+            "Penič et al., Nature Communications 2025 "
+            "(https://doi.org/10.1038/s41467-025-60872-5)"
+        )
+        assert model.weights_url == (
+            "https://zenodo.org/records/15043668/files/"
+            "rinalmo_giga_pretrained.pt"
+        )
+
+    def test_rna_fm_audit_uses_the_pinned_v4_checkpoint(self):
+        model = next(m for m in audit_module.KNOWN_MODELS if m.name == "RNA-FM")
+        assert model.version == "rna_fm_t12"
+        assert "12 layers, 640 dim" in model.training_data_description
+        assert model.weights_url == (
+            "https://huggingface.co/cuhkaih/rnafm/resolve/"
+            "91d4a46d28d8054a7b429955e8fc0c253ba0afd6/"
+            "RNA-FM_pretrained.pth"
+        )
+
 
 class TestSplitSequences:
     def test_default_empty(self):

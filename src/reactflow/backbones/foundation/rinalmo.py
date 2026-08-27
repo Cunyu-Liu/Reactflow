@@ -1,17 +1,20 @@
 """RiNALMo foundation backbone for ReactFlow Phase C1-3 (manifest-only).
 
-RiNALMo (Tan et al., 2024) is a ribonucleic acid language model that covers a
-wide range of RNA tasks.  This is a **manifest-only** entry: the weights are not
-downloaded yet (``downloaded=False``), so :meth:`RiNALMoBackbone.forward` raises
-:class:`BackboneNotAvailableError` with download instructions.  When the weights
-become available locally, the backbone will support the
-:attr:`BackboneMode.FROZEN`, :attr:`BackboneMode.LORA`, and
-:attr:`BackboneMode.FULL_FINE_TUNE` modes.
+RiNALMo (Penič et al., 2025) is a ribonucleic acid language model that covers
+a wide range of RNA tasks.  This adapter does not yet implement checkpoint
+loading (``downloaded=False``), so :meth:`RiNALMoBackbone.forward` raises
+:class:`BackboneNotAvailableError` with download instructions.  When the loader
+is implemented, the backbone will support the :attr:`BackboneMode.FROZEN`,
+:attr:`BackboneMode.LORA`, and :attr:`BackboneMode.FULL_FINE_TUNE` modes.
 
 Provenance (per C1-1 audit)
 ---------------------------
-- Source: HuggingFace ``lcm-lab/RiNALMo``
-- License: ``MIT``
+- Code: ``lbcb-sci/RiNALMo`` at commit
+  ``2c2c5c14a5ae609d8c560a5d9ca32e51e0288955`` (``Apache-2.0``)
+- Parameters: RiNALMo ``giga-v1`` from Zenodo record ``15043668`` / DOI
+  ``10.5281/zenodo.15043668`` (``CC-BY-4.0``)
+- Citation: Penič et al., *Nature Communications* (2025), DOI
+  ``10.1038/s41467-025-60872-5``
 - Max length: 1024 nucleotides
 - Contamination status: ``unknown_contamination`` (not yet audited against the
   ReactFlow training/eval splits)
@@ -39,9 +42,21 @@ from .base import (
 )
 
 MODEL_NAME = "RiNALMo"
-MODEL_SOURCE = "huggingface:lcm-lab/RiNALMo"
-DOWNLOAD_URL = "https://huggingface.co/lcm-lab/RiNALMo"
-LICENSE = "MIT"
+MODEL_VARIANT = "giga-v1"
+CODE_SOURCE = "github:lbcb-sci/RiNALMo"
+CODE_REVISION = "2c2c5c14a5ae609d8c560a5d9ca32e51e0288955"
+CODE_LICENSE = "Apache-2.0"
+CHECKPOINT_SOURCE = "zenodo:15043668"
+CHECKPOINT_REVISION = "10.5281/zenodo.15043668"
+CHECKPOINT_LICENSE = "CC-BY-4.0"
+MODEL_SOURCE = CHECKPOINT_SOURCE
+MODEL_REVISION = CHECKPOINT_REVISION
+DOWNLOAD_URL = (
+    "https://zenodo.org/records/15043668/files/rinalmo_giga_pretrained.pt"
+)
+LICENSE = CHECKPOINT_LICENSE
+CITATION = "Penič et al., Nature Communications (2025)"
+CITATION_DOI = "10.1038/s41467-025-60872-5"
 MAX_LENGTH = 1024
 CONTAMINATION_STATUS = "unknown_contamination"
 EXPECTED_SINGLE_DIM = 1280
@@ -123,9 +138,10 @@ def default_config() -> BackboneConfig:
     """Return the canonical manifest-only :class:`BackboneConfig` for RiNALMo.
 
     Formula: pins ``downloaded=False``, ``frozen_feature_dim=1280`` (documented
-    RiNALMo embedding size), ``max_length=1024``, ``license="MIT"``, and
-    ``contamination_status="unknown_contamination"`` per the C1-1 audit.
-    Complexity: ``O(1)``.
+    RiNALMo giga embedding size), ``max_length=1024``, the immutable Zenodo
+    checkpoint DOI, its ``CC-BY-4.0`` license, and the official code commit.
+    ``downloaded`` describes this adapter's unavailable loader, not whether a
+    separate experiment has acquired the checkpoint.  Complexity: ``O(1)``.
 
     Returns:
         A :class:`BackboneConfig` with RiNALMo manifest defaults.
@@ -134,10 +150,10 @@ def default_config() -> BackboneConfig:
     return BackboneConfig(
         model_name=MODEL_NAME,
         model_source=MODEL_SOURCE,
-        model_revision="main",
+        model_revision=MODEL_REVISION,
         license=LICENSE,
         weights_sha256="",
-        code_revision="",
+        code_revision=CODE_REVISION,
         tokenizer="rinalmo-bpe",
         max_length=MAX_LENGTH,
         contamination_status=CONTAMINATION_STATUS,

@@ -1,17 +1,19 @@
-"""RNA-FM foundation backbone for ReactFlow Phase C1-3 (manifest-only).
+"""RNA-FM foundation backbone metadata for ReactFlow Phase C1-3.
 
 RNA-FM (Chen et al., 2022; "Interpretable RNA Foundation Model") is a
 transformer-based RNA language model pretrained on 23.7 million ncRNA
-sequences.  This is a **manifest-only** entry: the weights are not downloaded
-yet (``downloaded=False``), so :meth:`RNAFMBackbone.forward` raises
-:class:`BackboneNotAvailableError` with download instructions.  When the weights
-become available locally, the backbone will support the FROZEN / LORA /
-FULL_FINE_TUNE modes.
+sequences.  ReactFlow V4 used the official ``rna_fm_t12`` checkpoint through a
+separate frozen-cache path.  This generic adapter still has no live checkpoint
+loader (``downloaded=False``), so :meth:`RNAFMBackbone.forward` raises
+:class:`BackboneNotAvailableError`.  The availability flag therefore describes
+this adapter, while the provenance below identifies the actual V4 asset.
 
 Provenance (per C1-1 audit)
 ---------------------------
-- Source: HuggingFace ``mailong-rl/RNA-FM``
-- License: ``unknown`` (check the model card before redistribution)
+- Code: ``ml4bio/RNA-FM`` at commit
+  ``348951516e0963d22bbb33b3c9fc18c89081d38e`` (``MIT``)
+- Checkpoint: ``cuhkaih/rnafm`` at revision
+  ``91d4a46d28d8054a7b429955e8fc0c253ba0afd6`` (``Apache-2.0``)
 - Max length: 1024 nucleotides
 - Contamination status: ``unknown`` (not yet audited)
 
@@ -38,16 +40,28 @@ from .base import (
 )
 
 MODEL_NAME = "RNA-FM"
-MODEL_SOURCE = "huggingface:mailong-rl/RNA-FM"
-DOWNLOAD_URL = "https://huggingface.co/mailong-rl/RNA-FM"
-LICENSE = "unknown"
+MODEL_VARIANT = "rna_fm_t12"
+CODE_SOURCE = "github:ml4bio/RNA-FM"
+CODE_REVISION = "348951516e0963d22bbb33b3c9fc18c89081d38e"
+CODE_LICENSE = "MIT"
+CHECKPOINT_SOURCE = "huggingface:cuhkaih/rnafm"
+CHECKPOINT_REVISION = "91d4a46d28d8054a7b429955e8fc0c253ba0afd6"
+CHECKPOINT_LICENSE = "Apache-2.0"
+MODEL_SOURCE = CHECKPOINT_SOURCE
+MODEL_REVISION = CHECKPOINT_REVISION
+DOWNLOAD_URL = (
+    "https://huggingface.co/cuhkaih/rnafm/resolve/"
+    f"{CHECKPOINT_REVISION}/RNA-FM_pretrained.pth"
+)
+LICENSE = CHECKPOINT_LICENSE
 MAX_LENGTH = 1024
 CONTAMINATION_STATUS = "unknown"
-EXPECTED_SINGLE_DIM = 320
+EXPECTED_SINGLE_DIM = 640
 """Documented per-nucleotide embedding dimension of RNA-FM."""
 
 _DOWNLOAD_HINT = (
-    "Download the RNA-FM checkpoint and tokenizer, then construct "
+    "Use the pinned ml4bio/RNA-FM code and cuhkaih/rnafm checkpoint, then "
+    "construct "
     "RNAFMBackbone with downloaded=True (or set BackboneConfig.downloaded=True) "
     "and implement the weight-loading path. Until then the backbone is a "
     "manifest placeholder."
@@ -117,11 +131,14 @@ class RNAFMBackbone(FoundationBackbone):
 
 
 def default_config() -> BackboneConfig:
-    """Return the canonical manifest-only :class:`BackboneConfig` for RNA-FM.
+    """Return the canonical :class:`BackboneConfig` metadata for RNA-FM T12.
 
-    Formula: pins ``downloaded=False``, ``frozen_feature_dim=320`` (documented
-    RNA-FM embedding size), ``max_length=1024``, ``license="unknown"``, and
-    ``contamination_status="unknown"`` per the C1-1 audit.  Complexity: ``O(1)``.
+    Formula: pins the official code and checkpoint commits,
+    ``frozen_feature_dim=640``, ``max_length=1024``, the checkpoint's
+    ``Apache-2.0`` license, and ``contamination_status="unknown"``.  The
+    ``downloaded=False`` value preserves this adapter's fail-closed behavior;
+    V4 acquired the checkpoint through its separate frozen-cache loader.
+    Complexity: ``O(1)``.
 
     Returns:
         A :class:`BackboneConfig` with RNA-FM manifest defaults.
@@ -130,10 +147,10 @@ def default_config() -> BackboneConfig:
     return BackboneConfig(
         model_name=MODEL_NAME,
         model_source=MODEL_SOURCE,
-        model_revision="main",
+        model_revision=MODEL_REVISION,
         license=LICENSE,
         weights_sha256="",
-        code_revision="",
+        code_revision=CODE_REVISION,
         tokenizer="rna-fm-bpe",
         max_length=MAX_LENGTH,
         contamination_status=CONTAMINATION_STATUS,

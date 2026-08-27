@@ -123,8 +123,11 @@ class PretrainedModelSpec:
 KNOWN_MODELS: List[PretrainedModelSpec] = [
     PretrainedModelSpec(
         name="RiNALMo",
-        version="1.0 (2024-02)",
-        paper="Tan et al., Nature Machine Intelligence 2024 (https://www.nature.com/articles/s42256-024-00794-5)",
+        version="giga-v1",
+        paper=(
+            "Penič et al., Nature Communications 2025 "
+            "(https://doi.org/10.1038/s41467-025-60872-5)"
+        ),
         training_data_description=(
             "Trained on all RNA sequences from RNAcentral (36 million sequences "
             "as of 2022).  Includes Rfam, Rfamseq, Ensembl, GENCODE.  No "
@@ -133,22 +136,29 @@ KNOWN_MODELS: List[PretrainedModelSpec] = [
         ),
         training_data_available=True,
         training_data_url="https://rnacentral.org/downloads",
-        weights_url="https://github.com/lmcabos/RiNALMo",
+        weights_url=(
+            "https://zenodo.org/records/15043668/files/"
+            "rinalmo_giga_pretrained.pt"
+        ),
         known_rna_databases=["RNAcentral", "Rfam", "Ensembl", "GENCODE"],
     ),
     PretrainedModelSpec(
         name="RNA-FM",
-        version="1.0 (2023-05)",
+        version="rna_fm_t12",
         paper="Chen et al., bioRxiv 2023 (https://www.biorxiv.org/content/10.1101/2023.05.05.539727)",
         training_data_description=(
             "Trained on 23.7 million ncRNA sequences from RNAcentral (release "
-            "2022).  Architecture: transformer with 24 layers, 480 dim.  "
+            "2022).  Architecture: transformer with 12 layers, 640 dim.  "
             "Training data is the RNAcentral ncRNA subset; exact sequence list "
             "is reconstructable from RNAcentral release tags."
         ),
         training_data_available=True,
         training_data_url="https://rnacentral.org/downloads",
-        weights_url="https://github.com/cmhackjy/RNA-FM",
+        weights_url=(
+            "https://huggingface.co/cuhkaih/rnafm/resolve/"
+            "91d4a46d28d8054a7b429955e8fc0c253ba0afd6/"
+            "RNA-FM_pretrained.pth"
+        ),
         known_rna_databases=["RNAcentral", "Rfam"],
     ),
     PretrainedModelSpec(

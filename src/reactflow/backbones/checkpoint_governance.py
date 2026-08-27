@@ -43,11 +43,14 @@ class CheckpointProvenance:
 
     Attributes:
         model_name: human-readable identifier, e.g. ``"RibonanzaNet2"``.
-        model_source: origin, e.g. ``"huggingface:lcm-lab/RiNALMo"``.
+        model_source: checkpoint origin, e.g. ``"zenodo:15043668"``.
         exact_revision: immutable revision pin (git SHA or HF commit hash).
             A moving tag like ``main`` is flagged by :func:`validate_provenance`.
-        license: SPDX-style license identifier (``"MIT"``, ``"Apache-2.0"``);
-            ``"unknown"`` is permitted but flagged as a warning.
+        license: SPDX-style checkpoint/weight license identifier (``"MIT"``,
+            ``"Apache-2.0"``); ``"unknown"`` is permitted but flagged as a
+            warning.  A separately licensed code repository is identified by
+            ``code_revision`` but its source and license do not fit this legacy
+            single-license schema.
         weights_sha256: SHA-256 of the weight file(s); ``""`` when no weights
             are present (manifest-only entries and from-scratch).
         code_revision: revision of the model-definition code used to export
@@ -245,15 +248,18 @@ BACKBONE_PROVENANCE_REGISTRY: Dict[str, CheckpointProvenance] = {
     ),
     "rinalmo": CheckpointProvenance(
         model_name="RiNALMo",
-        model_source="huggingface:lcm-lab/RiNALMo",
-        exact_revision="",
-        license="MIT",
+        model_source="zenodo:15043668",
+        exact_revision="10.5281/zenodo.15043668",
+        license="CC-BY-4.0",
         weights_sha256="",
-        code_revision="",
+        code_revision="2c2c5c14a5ae609d8c560a5d9ca32e51e0288955",
         tokenizer="rinalmo-bpe",
         max_length=1024,
         contamination_status="unknown_contamination",
-        download_url="https://huggingface.co/lcm-lab/RiNALMo",
+        download_url=(
+            "https://zenodo.org/records/15043668/files/"
+            "rinalmo_giga_pretrained.pt"
+        ),
         downloaded=False,
         download_date="",
     ),
@@ -273,15 +279,19 @@ BACKBONE_PROVENANCE_REGISTRY: Dict[str, CheckpointProvenance] = {
     ),
     "rna_fm": CheckpointProvenance(
         model_name="RNA-FM",
-        model_source="huggingface:mailong-rl/RNA-FM",
-        exact_revision="",
-        license="unknown",
+        model_source="huggingface:cuhkaih/rnafm",
+        exact_revision="91d4a46d28d8054a7b429955e8fc0c253ba0afd6",
+        license="Apache-2.0",
         weights_sha256="",
-        code_revision="",
+        code_revision="348951516e0963d22bbb33b3c9fc18c89081d38e",
         tokenizer="rna-fm-bpe",
         max_length=1024,
         contamination_status="unknown",
-        download_url="https://huggingface.co/mailong-rl/RNA-FM",
+        download_url=(
+            "https://huggingface.co/cuhkaih/rnafm/resolve/"
+            "91d4a46d28d8054a7b429955e8fc0c253ba0afd6/"
+            "RNA-FM_pretrained.pth"
+        ),
         downloaded=False,
         download_date="",
     ),
