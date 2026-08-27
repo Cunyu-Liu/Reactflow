@@ -7,11 +7,85 @@ import pytest
 import yaml
 
 from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
+    assert_outcome_authority_is_narrow,
     validate_contract,
 )
 
 
 ROOT = Path(__file__).resolve().parents[2]
+POST_V14_CASES = (
+    {
+        "id": "router",
+        "token": "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY",
+        "action": "RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER",
+        "mapping_name": "post_v14_router_authority",
+        "mapping": {
+            "runtime_authority_token": "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY",
+            "complete_score_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_complete_score.json"
+            ),
+            "qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_qualification.json"
+            ),
+            "router_output_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/post_v14_first_matching_route.json"
+            ),
+        },
+    },
+    {
+        "id": "branch6",
+        "token": "POST_V14_BRANCH6_TAIL_DIAGNOSTIC_ONCE_ONLY",
+        "action": "RUN_SINGLE_POST_V14_BRANCH6_TAIL_DIAGNOSTIC",
+        "mapping_name": "post_v14_branch6_diagnostic_authority",
+        "mapping": {
+            "runtime_authority_token": (
+                "POST_V14_BRANCH6_TAIL_DIAGNOSTIC_ONCE_ONLY"
+            ),
+            "complete_unscored_merge_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_complete_unscored_merge.json"
+            ),
+            "complete_score_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_complete_score.json"
+            ),
+            "qualification_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/v14m3_qualification.json"
+            ),
+            "router_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/post_v14_first_matching_route.json"
+            ),
+            "m2_csv_path": (
+                "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/"
+                "reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv"
+            ),
+            "diagnostic_output_path": (
+                "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+                "v14m3_screen_seed0/post_v14_branch6_tail_diagnostic.json"
+            ),
+        },
+    },
+)
+
+
+def _post_v14_active(case: dict[str, object]) -> dict[str, object]:
+    return {
+        "authority": {"current_phase": "V14M3"},
+        "runnable_phases": ["V14M3"],
+        "training_allowed": False,
+        "candidate_model_training_allowed": False,
+        "held_score_read_allowed": case["token"],
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+        "parent_terminal_verdict_change_allowed": False,
+        "next_allowed_action": case["action"],
+        str(case["mapping_name"]): copy.deepcopy(case["mapping"]),
+    }
 
 
 def test_frozen_v14_contract_passes() -> None:
@@ -22,6 +96,8 @@ def test_frozen_v14_contract_passes() -> None:
         False,
         "V14_COMPLETE_MERGE_SCORE_ONCE_ONLY",
         "V14_FORMAL_COMPLETE_SCORE_ONCE_ONLY",
+        "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY",
+        "POST_V14_BRANCH6_TAIL_DIAGNOSTIC_ONCE_ONLY",
     }
     assert result["external_outcome_access_allowed"] is False
 
@@ -67,3 +143,94 @@ def test_validator_rejects_broader_v14_score_authority(tmp_path: Path) -> None:
     active_path.write_text(yaml.safe_dump(bad, sort_keys=False))
     with pytest.raises(RuntimeError, match="held-score authority"):
         validate_contract(copied)
+
+
+@pytest.mark.parametrize(
+    "case", POST_V14_CASES, ids=[case["id"] for case in POST_V14_CASES]
+)
+def test_validator_accepts_exact_post_v14_once_only_authority(
+    case: dict[str, object],
+) -> None:
+    assert_outcome_authority_is_narrow(_post_v14_active(case))
+
+
+@pytest.mark.parametrize("replacement", [None, "POST_V14_UNKNOWN_ONCE_ONLY"])
+def test_validator_rejects_missing_or_wrong_post_v14_token(
+    replacement: str | None,
+) -> None:
+    active = _post_v14_active(POST_V14_CASES[0])
+    if replacement is None:
+        active.pop("held_score_read_allowed")
+    else:
+        active["held_score_read_allowed"] = replacement
+    with pytest.raises(RuntimeError, match="held-score authority"):
+        assert_outcome_authority_is_narrow(active)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    (
+        ("training_allowed", True, "training closed"),
+        ("candidate_model_training_allowed", True, "training closed"),
+        ("partial_fold_score_read_allowed", True, "partial score authority"),
+        ("new_external_outcome_access_allowed", True, "external outcome authority"),
+    ),
+)
+def test_validator_rejects_reopened_post_v14_authority(
+    field: str, value: object, message: str
+) -> None:
+    active = _post_v14_active(POST_V14_CASES[0])
+    active[field] = value
+    with pytest.raises(RuntimeError, match=message):
+        assert_outcome_authority_is_narrow(active)
+
+
+@pytest.mark.parametrize("failure", ["phase", "runnable"])
+def test_validator_rejects_non_v14m3_post_v14_authority(failure: str) -> None:
+    active = _post_v14_active(POST_V14_CASES[0])
+    if failure == "phase":
+        active["authority"] = {"current_phase": "V14M4"}
+    else:
+        active["runnable_phases"] = ["V14M3", "V14M4"]
+    with pytest.raises(RuntimeError, match="V14M3"):
+        assert_outcome_authority_is_narrow(active)
+
+
+@pytest.mark.parametrize(
+    "case", POST_V14_CASES, ids=[case["id"] for case in POST_V14_CASES]
+)
+def test_validator_rejects_wrong_post_v14_action(case: dict[str, object]) -> None:
+    active = _post_v14_active(case)
+    active["next_allowed_action"] = "RUN_SOMETHING_ELSE"
+    with pytest.raises(RuntimeError, match="once-only action"):
+        assert_outcome_authority_is_narrow(active)
+
+
+@pytest.mark.parametrize(
+    "case", POST_V14_CASES, ids=[case["id"] for case in POST_V14_CASES]
+)
+@pytest.mark.parametrize(
+    "failure", ["missing", "wrong_token", "wrong_path", "noncanonical", "extra"]
+)
+def test_validator_rejects_wrong_post_v14_mapping(
+    case: dict[str, object], failure: str
+) -> None:
+    active = _post_v14_active(case)
+    mapping_name = str(case["mapping_name"])
+    mapping = active[mapping_name]
+    assert isinstance(mapping, dict)
+    if failure == "missing":
+        active.pop(mapping_name)
+    elif failure == "wrong_token":
+        mapping["runtime_authority_token"] = "POST_V14_UNKNOWN_ONCE_ONLY"
+    elif failure == "extra":
+        mapping["unexpected_path"] = "/mnt/cunyuliu/unexpected.json"
+    else:
+        path_field = next(key for key in mapping if key != "runtime_authority_token")
+        mapping[path_field] = (
+            "/mnt/cunyuliu/wrong.json"
+            if failure == "wrong_path"
+            else f"{mapping[path_field]}/../noncanonical.json"
+        )
+    with pytest.raises(RuntimeError, match="authority mapping or canonical paths"):
+        assert_outcome_authority_is_narrow(active)
