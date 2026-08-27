@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_amendment.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-contract_status: V14M3_CANONICAL_SCORE_AND_QUALIFICATION_PRESENT_ROUTER_ONCE_AUTHORIZED
+contract_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL_BRANCH5_B5RP0_SOURCE_PROJECTION_ONLY
 created_at: '2026-08-27T02:30:00+08:00'
 
 parent:
@@ -255,9 +255,22 @@ phases:
   V14M0: CONTRACT_FROZEN_IMPLEMENTATION_CLOSED
   V14M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
   V14M2: ENGINEERING_SMOKE_PASS
-  V14M3: CANONICAL_SCORE_AND_QUALIFICATION_PRESENT_ROUTER_ONCE_AUTHORIZED
+  V14M3: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL
   V14M4: NOT_AUTHORIZED
   V14M5: NOT_RUN
+
+post_v14_branch5_route_probe:
+  parent_route:
+    v14_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL
+    post_v14_first_matching_branch_id: '5'
+    post_v14_route_classification: INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED
+    v14m4_path_allowed: false
+  B5RP0: SOURCE_PROJECTION_ONLY_AUTHORIZED
+  B5RP1: NOT_AUTHORIZED
+  B5RP2: NOT_AUTHORIZED
+  B5RP3: NOT_RUN
+  source_manifest_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
+  source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION
 
 resource_policy:
   physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]

@@ -16,6 +16,34 @@ EXPECTED_V13_STATUS = "TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL"
 EXPECTED_POST_V13_STATUS = (
     "TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY"
 )
+EXPECTED_V14_PROJECT_TASK = "reactflow_delta_model_rescue_v14"
+EXPECTED_B5RP0_PROJECT_TASK = "reactflow_delta_post_v14_branch5_route_probe"
+EXPECTED_B5RP0_PARENT_STATE = {
+    "v14_status": "TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL",
+    "post_v14_first_matching_branch_id": "5",
+    "post_v14_route_classification": "INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED",
+    "v14m4_path_allowed": False,
+}
+EXPECTED_B5RP0_ACTION = "RUN_SINGLE_POST_V14_BRANCH5_SAFE_SOURCE_PROJECTION"
+EXPECTED_B5RP0_AUTHORITY = {
+    "current_phase": "B5RP0",
+    "current_authority_state": "SOURCE_MANIFEST_PROJECTION_ONLY",
+    "current_runnable_phase": "B5RP0",
+    "v13_checkpoint_dir": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0"
+    ),
+    "v14_checkpoint_dir": (
+        "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0"
+    ),
+    "source_manifest_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "source_binding/post_v14_branch5_safe_source_manifest.json"
+    ),
+    "source_manifest_status": (
+        "POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION"
+    ),
+    "binding_status": "B5RP0_SAFE_SOURCE_PROJECTION_ONLY",
+}
 POST_V14_ONCE_ONLY_AUTHORITIES: dict[str, dict[str, Any]] = {
     "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY": {
         "next_allowed_action": "RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER",
@@ -137,6 +165,38 @@ def assert_outcome_authority_is_narrow(active: dict[str, Any]) -> None:
         raise RuntimeError("V14 held-score authority is not training-closed score-once")
 
 
+def assert_branch5_b5rp0_authority_is_narrow(active: dict[str, Any]) -> None:
+    if active.get("project_task_id") != EXPECTED_B5RP0_PROJECT_TASK:
+        raise RuntimeError("B5RP0 project task changed")
+    if active.get("parent_state") != EXPECTED_B5RP0_PARENT_STATE:
+        raise RuntimeError("B5RP0 terminal parent state changed")
+    authority = active.get("authority")
+    if not isinstance(authority, dict) or any(
+        authority.get(name) != value
+        for name, value in EXPECTED_B5RP0_AUTHORITY.items()
+    ):
+        raise RuntimeError("B5RP0 authority mapping or canonical paths changed")
+    if active.get("runnable_phases") != ["B5RP0"]:
+        raise RuntimeError("B5RP0 must be the sole runnable phase")
+    if any(
+        active.get(name) is not False
+        for name in (
+            "training_allowed",
+            "candidate_model_training_allowed",
+            "held_score_read_allowed",
+            "partial_fold_score_read_allowed",
+            "new_external_outcome_access_allowed",
+        )
+    ):
+        raise RuntimeError("B5RP0 requires training and outcome access closed")
+    if active.get("authorization", {}).get("neural_training_allowed") is not False:
+        raise RuntimeError("B5RP0 neural training authority is open")
+    if active.get("authorization", {}).get("screen_allowed") is not False:
+        raise RuntimeError("B5RP0 screen authority is open")
+    if active.get("next_allowed_action") != EXPECTED_B5RP0_ACTION:
+        raise RuntimeError("B5RP0 action changed")
+
+
 def _assert_frozen_model(contract: dict[str, Any]) -> None:
     models = contract["models"]
     if models["candidate"]["id"] != (
@@ -254,12 +314,18 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         if not (repo_root / authority[key]).is_file():
             raise RuntimeError(f"V14 authority target is missing: {key}")
 
-    if active["parent_state"].get("v13_status") != EXPECTED_V13_STATUS:
-        raise RuntimeError("V14 active authority changed the V13 terminal status")
-    if active["parent_state"].get("post_v13_status") != EXPECTED_POST_V13_STATUS:
-        raise RuntimeError("V14 active authority changed post-V13 terminal status")
-    if active["parent_state"].get("parent_head") != EXPECTED_PARENT_HEAD:
-        raise RuntimeError("V14 parent head changed")
+    project_task_id = active.get("project_task_id")
+    if project_task_id == EXPECTED_B5RP0_PROJECT_TASK:
+        assert_branch5_b5rp0_authority_is_narrow(active)
+    elif project_task_id == EXPECTED_V14_PROJECT_TASK:
+        if active["parent_state"].get("v13_status") != EXPECTED_V13_STATUS:
+            raise RuntimeError("V14 active authority changed the V13 terminal status")
+        if active["parent_state"].get("post_v13_status") != EXPECTED_POST_V13_STATUS:
+            raise RuntimeError("V14 active authority changed post-V13 terminal status")
+        if active["parent_state"].get("parent_head") != EXPECTED_PARENT_HEAD:
+            raise RuntimeError("V14 parent head changed")
+    else:
+        raise RuntimeError("V14 active project task changed")
     if contract["parent"].get("v13_status") != EXPECTED_V13_STATUS:
         raise RuntimeError("V14 contract changed V13 terminal status")
     if contract["parent"].get("post_v13_diagnostic_status") != (
@@ -282,6 +348,7 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     _assert_frozen_gates(contract)
     return {
         "status": "V14_CONTRACT_VALIDATION_PASS",
+        "project_task_id": project_task_id,
         "phase": authority["current_phase"],
         "training_allowed": active["training_allowed"],
         "held_score_read_allowed": active["held_score_read_allowed"],

@@ -1,38 +1,39 @@
 schema_version: reactflow_delta.active_contract.v14
-manifest_id: reactflow_delta_model_rescue_v14_active_authority_20260827
-project_task_id: reactflow_delta_model_rescue_v14
+manifest_id: reactflow_delta_post_v14_branch5_route_probe_active_authority_20260828
+project_task_id: reactflow_delta_post_v14_branch5_route_probe
 created_at: '2026-08-27T02:30:00+08:00'
-updated_at: '2026-08-28T05:25:52+08:00'
+updated_at: '2026-08-28T05:40:37+08:00'
 
 authority:
-  pointer_role: V14_SINGLE_ACTIVE_AUTHORITY
-  current_phase: V14M3
-  current_authority_state: POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY_TRAINING_CLOSED
-  current_runnable_phase: V14M3
+  pointer_role: POST_V14_BRANCH5_ROUTE_PROBE_SINGLE_ACTIVE_AUTHORITY
+  current_phase: B5RP0
+  current_authority_state: SOURCE_MANIFEST_PROJECTION_ONLY
+  current_runnable_phase: B5RP0
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v14-20260827
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v14_20260827
-  artifact_root: /mnt/cunyuliu/reactflow_delta_model_rescue_v14
+  artifact_root: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe
   machine_contract_path: configs/reactflow_delta/model_rescue_v14_amendment.yaml
   human_contract_path: docs/prospective_v2/model_rescue_v14_amendment_20260827.md
   decision_ledger_path: docs/prospective_v2/model_rescue_v14_decision_ledger.yaml
-  implementation_plan_path: docs/plans/2026-08-27-model-rescue-v14.md
+  implementation_plan_path: docs/plans/2026-08-27-post-v14-model-contingency.md
   research_record_path: autoresearch/orchestrator-260827-v14-wt-profile/research.md
-  binding_status: POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY
+  v13_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
+  v14_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
+  source_manifest_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
+  source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PENDING_PROJECTION
+  binding_status: B5RP0_SAFE_SOURCE_PROJECTION_ONLY
 
 parent_state:
-  v13_status: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
-  v13_head: 90a8c6372d354126b49c4406a88c44a59b0427ff
-  v13m4_opened: false
-  exact_mutant_reencoding_family: TERMINATED
-  post_v13_status: TERMINAL_PV13D3_A_AND_C_CLOSED_WT_PROFILE_PRETRAINING_ONLY
-  parent_head: ec38e701f0528f8141e5724f334923dd49c266e4
-  parent_verdict_change_allowed: false
+  v14_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL
+  post_v14_first_matching_branch_id: '5'
+  post_v14_route_classification: INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED
+  v14m4_path_allowed: false
 
 authorization:
   owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION_WITH_AUTONOMOUS_SCIENTIFIC_JUDGMENT
   owner_instruction_date: '2026-08-25'
-  scope: MEANINGFULLY_DISTINCT_MASKED_WT_PROFILE_PRETRAINING_ONLY
+  scope: POST_V14_BRANCH5_SAFE_SOURCE_PROJECTION_ONLY
   contract_drafting_allowed: true
   implementation_allowed: true
   neural_training_allowed: false
@@ -41,11 +42,11 @@ authorization:
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
 
-allowed_phases: [V14M0, V14M1, V14M2, V14M3, V14M4, V14M5, M6]
-runnable_phases: [V14M3]
+allowed_phases: [B5RP0, B5RP1, B5RP2, B5RP3]
+runnable_phases: [B5RP0]
 training_allowed: false
 candidate_model_training_allowed: false
-held_score_read_allowed: POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY
+held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -55,19 +56,10 @@ v13_artifact_overwrite_allowed: false
 post_v13_artifact_overwrite_allowed: false
 parent_terminal_verdict_change_allowed: false
 
-post_v14_router_authority:
-  runtime_authority_token: POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY
-  complete_score_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_complete_score.json
-  qualification_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_qualification.json
-  router_output_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/post_v14_first_matching_route.json
-
 gate_state:
-  V14M0: CONTRACT_FROZEN_PASS
-  V14M1: IMPLEMENTATION_AND_FOCUSED_TESTS_PASS
-  V14M2: ENGINEERING_SMOKE_PASS
-  V14M3: CANONICAL_SCORE_AND_QUALIFICATION_PRESENT_ROUTER_ONCE_AUTHORIZED
-  V14M4: NOT_AUTHORIZED
-  V14M5: NOT_RUN
-  M6: BENCHMARK_ROUTE_REMAINS_FALLBACK
+  B5RP0: SOURCE_PROJECTION_ONLY_AUTHORIZED
+  B5RP1: NOT_AUTHORIZED
+  B5RP2: NOT_AUTHORIZED
+  B5RP3: NOT_RUN
 
-next_allowed_action: RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER
+next_allowed_action: RUN_SINGLE_POST_V14_BRANCH5_SAFE_SOURCE_PROJECTION

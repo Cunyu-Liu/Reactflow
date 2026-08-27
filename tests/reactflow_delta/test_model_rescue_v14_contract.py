@@ -7,6 +7,11 @@ import pytest
 import yaml
 
 from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
+    EXPECTED_B5RP0_ACTION,
+    EXPECTED_B5RP0_AUTHORITY,
+    EXPECTED_B5RP0_PARENT_STATE,
+    EXPECTED_B5RP0_PROJECT_TASK,
+    assert_branch5_b5rp0_authority_is_narrow,
     assert_outcome_authority_is_narrow,
     validate_contract,
 )
@@ -91,7 +96,15 @@ def _post_v14_active(case: dict[str, object]) -> dict[str, object]:
 def test_frozen_v14_contract_passes() -> None:
     result = validate_contract(ROOT)
     assert result["status"] == "V14_CONTRACT_VALIDATION_PASS"
-    assert result["phase"] in {"V14M1", "V14M2", "V14M3", "V14M4", "V14M5", "M6"}
+    assert result["phase"] in {
+        "V14M1",
+        "V14M2",
+        "V14M3",
+        "V14M4",
+        "V14M5",
+        "M6",
+        "B5RP0",
+    }
     assert result["held_score_read_allowed"] in {
         False,
         "V14_COMPLETE_MERGE_SCORE_ONCE_ONLY",
@@ -100,6 +113,78 @@ def test_frozen_v14_contract_passes() -> None:
         "POST_V14_BRANCH6_TAIL_DIAGNOSTIC_ONCE_ONLY",
     }
     assert result["external_outcome_access_allowed"] is False
+
+
+def _b5rp0_active() -> dict[str, object]:
+    return {
+        "project_task_id": EXPECTED_B5RP0_PROJECT_TASK,
+        "parent_state": copy.deepcopy(EXPECTED_B5RP0_PARENT_STATE),
+        "authority": copy.deepcopy(EXPECTED_B5RP0_AUTHORITY),
+        "authorization": {
+            "neural_training_allowed": False,
+            "screen_allowed": False,
+        },
+        "runnable_phases": ["B5RP0"],
+        "training_allowed": False,
+        "candidate_model_training_allowed": False,
+        "held_score_read_allowed": False,
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+        "next_allowed_action": EXPECTED_B5RP0_ACTION,
+    }
+
+
+def test_validator_accepts_exact_branch5_b5rp0_authority() -> None:
+    assert_branch5_b5rp0_authority_is_narrow(_b5rp0_active())
+
+
+@pytest.mark.parametrize(
+    "failure",
+    (
+        "project",
+        "parent",
+        "phase",
+        "runnable",
+        "training",
+        "held",
+        "path",
+        "status",
+        "screen",
+        "action",
+    ),
+)
+def test_validator_rejects_broadened_or_changed_branch5_b5rp0_authority(
+    failure: str,
+) -> None:
+    active = _b5rp0_active()
+    authority = active["authority"]
+    assert isinstance(authority, dict)
+    if failure == "project":
+        active["project_task_id"] = "wrong"
+    elif failure == "parent":
+        parent = active["parent_state"]
+        assert isinstance(parent, dict)
+        parent["unexpected"] = True
+    elif failure == "phase":
+        authority["current_phase"] = "B5RP1"
+    elif failure == "runnable":
+        active["runnable_phases"] = ["B5RP0", "B5RP1"]
+    elif failure == "training":
+        active["training_allowed"] = True
+    elif failure == "held":
+        active["held_score_read_allowed"] = True
+    elif failure == "path":
+        authority["source_manifest_path"] = "/mnt/cunyuliu/wrong.json"
+    elif failure == "status":
+        authority["source_manifest_status"] = "PASS"
+    elif failure == "screen":
+        authorization = active["authorization"]
+        assert isinstance(authorization, dict)
+        authorization["screen_allowed"] = True
+    else:
+        active["next_allowed_action"] = "RUN_SOMETHING_ELSE"
+    with pytest.raises(RuntimeError, match="B5RP0"):
+        assert_branch5_b5rp0_authority_is_narrow(active)
 
 
 def test_v14_freezes_matched_null_and_top_journal_gates() -> None:
@@ -130,6 +215,7 @@ def test_validator_rejects_broader_v14_score_authority(tmp_path: Path) -> None:
         "docs/prospective_v2/model_rescue_v14_amendment_20260827.md",
         "docs/prospective_v2/model_rescue_v14_decision_ledger.yaml",
         "docs/plans/2026-08-27-model-rescue-v14.md",
+        "docs/plans/2026-08-27-post-v14-model-contingency.md",
         "autoresearch/orchestrator-260827-v14-wt-profile/research.md",
     )
     for relative in relative_files:
@@ -141,7 +227,7 @@ def test_validator_rejects_broader_v14_score_authority(tmp_path: Path) -> None:
     bad = copy.deepcopy(active)
     bad["held_score_read_allowed"] = True
     active_path.write_text(yaml.safe_dump(bad, sort_keys=False))
-    with pytest.raises(RuntimeError, match="held-score authority"):
+    with pytest.raises(RuntimeError, match="held-score authority|B5RP0"):
         validate_contract(copied)
 
 
