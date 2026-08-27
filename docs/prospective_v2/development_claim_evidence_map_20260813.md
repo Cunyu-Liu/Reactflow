@@ -2,6 +2,11 @@
 
 > 范围：P0–P3 development benchmark 结论。P4/P5 需外部数据/复现；P6 需 release token。
 > 状态边界：`DEVELOPMENT_ONLY / SOTA_NOT_ESTABLISHED / PUBLICATION_NOT_READY`
+>
+> **SUPERSEDED HISTORICAL MAP — NOT CURRENT CLAIM AUTHORITY.** 20-puzzle development
+> universe已被后续多轮模型选择和审计反复使用，因此下述P2/P3结果当前只能写成
+> `HISTORICAL_POST_HOC_DEVELOPMENT_EVIDENCE`，不能再写成prospective confirmation。
+> V13M3已terminal FAIL；V14尚无terminal scientific verdict。
 
 ## 2026-08-22 Model Rescue v2 终局（覆盖后续模型救援表述）
 
@@ -19,8 +24,8 @@ readiness。证据：`docs/prospective_v2/audit/r2m3_qualification_20260822.json
 ## 主结论（仅 development benchmark）
 | Claim | 状态 | 证据 |
 |---|---|---|
-| P2：direct 前瞻信号存在（outcome-blind, all-mutant, unseen-puzzle） | `DIRECT_DEVELOPMENT_LEARNABILITY_PASS` | 唯一 `Direct*`(reg_direct) vs `T*`：20-puzzle 95% CI lower = **+0.0079 > 0**；20/20 D_p 为正；sign-flip p=2e-6；LOP max shift 0.0011（`p2_direct_v2_result_20260813.json`） |
-| P3：LRSO 增量技能（规范重跑后） | `LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT`（合同 12.5 PASS） | 2026-08-15 规范重跑 `run_p3_lrso_v3.py`（trainable encoder + masked NLL + inner 4-fold validation + 五 seed mixture）：rank2 D_p^P3=+0.0147 [95% CI +0.0119,+0.0175]、rank4 +0.0155 [+0.0113,+0.0196]、rank8 +0.0154 [+0.0122,+0.0185]；ci_low_gt_0=True；20/20 puzzle 正向；sign-flip p=1.9e-6；LOO max shift ≤0.001（`p3_lrso_v3_result_20260815.json`）。v1/v2 的 `NO_INCREMENTAL_LRSO_SKILL` 已撤回（实现失败伪影：encoder detach 成固定特征；missing target 填 0 后误判全部可观测；单 seed/6 epoch/无 inner validation）。 |
+| P2：direct历史development信号 | `HISTORICAL_POST_HOC_DEVELOPMENT_EVIDENCE` | 唯一 `Direct*`(reg_direct) vs `T*`：20-puzzle 95% CI lower = **+0.0079 > 0**；20/20 D_p 为正；sign-flip p=2e-6；LOP max shift 0.0011（`p2_direct_v2_result_20260813.json`）。该universe已被反复消费，不能支持新的prospective claim。 |
+| P3：LRSO历史development增量（规范重跑后） | `HISTORICAL_POST_HOC_DEVELOPMENT_EVIDENCE` | 2026-08-15 规范重跑 `run_p3_lrso_v3.py`（trainable encoder + masked NLL + inner 4-fold validation + 五 seed mixture）：rank2 D_p^P3=+0.0147 [95% CI +0.0119,+0.0175]、rank4 +0.0155 [+0.0113,+0.0196]、rank8 +0.0154 [+0.0122,+0.0185]；ci_low_gt_0=True；20/20 puzzle 正向；sign-flip p=1.9e-6；LOO max shift ≤0.001（`p3_lrso_v3_result_20260815.json`）。v1/v2 的 `NO_INCREMENTAL_LRSO_SKILL` 已撤回；本行不构成external、SOTA或publication qualification。 |
 | 横向对比（development） | `CONFIRMED_FACT`（结果） | reg_direct CRPS 0.2023（+5.92% vs ZeroResponse）；MLP 变体 0.2718（−26.4%，过拟合）（`horizontal_compare_p2_20260813.json`） |
 
 ## 禁止的表述（claim boundary）
@@ -43,5 +48,6 @@ readiness。证据：`docs/prospective_v2/audit/r2m3_qualification_20260822.json
 - 机制（无 external 复现 → `MECHANISM_NOT_ESTABLISHED`）。
 
 ## 下一步
-- P4：owner 提供合格 external（否则 `PUBLIC_EXTERNAL_NOT_QUALIFIED`）。
-- P6：development 结果复现包 + 写稿（需 Phase5-6 token 与 owner 明确请求）。
+- 本节是2026-08-13历史计划，不是当前authority。当前只允许完成V14 canonical
+  terminal流程及冻结router；新external outcome仍被合同拒绝。
+- 代码任务经聚焦验证后按当前用户指令及时push；public release和submission需独立资格。

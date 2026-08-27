@@ -1,22 +1,35 @@
 # ReactFlow-Delta prospective-v2: Declaration Statements
 
 > Auto-generated from locked artifacts. Generated: 2026-08-14.
+>
+> **SUPERSEDED — HISTORICAL RECORD ONLY; NOT SUBMISSION-READY.** This file records
+> the 2026-08-14 package and is not current claim authority. V13M3 terminated with
+> a top-journal screen FAIL. V14 has no terminal scientific qualification yet and
+> may support at most post-hoc development evidence after a complete canonical
+> verdict. External transportability, mechanism, practical importance, SOTA, and
+> publication readiness are not established. P6 external replay is denied by the
+> active contract; retained-artifact replay cannot restore scientific qualification.
 
 ## 1. Data availability
 
-The development dataset is the OpenKnot M2 official release, freely available at
-https://github.com/eternagame/OpenKnotAIDesignData. The external confirmatory
-dataset is sourced from the RNA Mapping DataBase (RMDB, https://rmdb.stanford.edu/)
-Ribonanza M2-style 2A3 datasets (M2SL5_2A3_0000, M3SARS_2A3_0000, 15KLIB_2A3_0000).
-All processed data artifacts are available from the authors upon reasonable request.
-Raw rdat files are available from RMDB.
+The development dataset is the OpenKnot M2 official release, available from
+https://github.com/eternagame/OpenKnotAIDesignData. Historical exploratory external
+datasets were sourced from the RNA Mapping DataBase (RMDB,
+https://rmdb.stanford.edu/) and include Ribonanza M2-style 2A3 datasets
+(M2SL5_2A3_0000, M3SARS_2A3_0000, 15KLIB_2A3_0000). The legacy P4/P5/P5b external
+scores are alignment-invalid and are not confirmatory evidence. No current public
+bundle or processed-data release has been approved; raw RDAT files remain available
+from their upstream sources subject to those sources' terms.
 
 ## 2. Code availability
 
-All code for data processing, model training, evaluation, and reproducibility
-is available at https://github.com/Cunyu-Liu/ReactFlow
-(branch: codex/reactflow-delta-prospective-v2-20260813, commit: 13d34ac).
-A one-click replay script is provided at scripts/reactflow_delta/run_replay_v1.py.
+The engineering repository is available at https://github.com/Cunyu-Liu/ReactFlow.
+An exact submission branch and commit are **NOT_FROZEN** pending a terminal V14
+qualification and a current claim audit; the historical commit `13d34ac` is not a
+submission reference. `scripts/reactflow_delta/run_replay_v1.py` defaults to retained
+P2/P3 artifact replay. External P4/P5/P5b/P5_COMBINED routes require explicit external
+mode and exact active authority; that authority is currently denied. Replay consistency
+does not restore scientific qualification.
 
 ## 3. Competing interests
 
@@ -41,33 +54,29 @@ The authors declare no competing interests.
 
 ## 5. Claim boundary
 
-This study reports a prospective, outcome-blind benchmark of full-spectrum
-single-nucleotide mutation response prediction in 2A3-MaP mRNA structures.
-The following claims are made:
+Current evidence is limited to a repeatedly consumed 20-puzzle development universe.
+Historical P2/P3 analyses may be described only as post-hoc development evidence;
+they are not prospective confirmation. V13 exact-mutant re-encoding terminated with
+`V13M3_TOP_JOURNAL_SCREEN_FAIL`, and V14 has no terminal scientific verdict yet.
 
-**Established**:
-- Direct learnability of mutation response from WT profile + exact SNV on
-  development data (P2, 20-puzzle LOPO).
-- LRSO adds no incremental skill over the strongest direct baseline (P3).
-- External statistical transportability to development-disconnected 2A3-MaP
-  components (P4, 24 components, 3,237 single-SNV, zero sequence overlap).
-- The direct-vs-WT-anchor advantage is feature-dependent (negative control
-  passes) and replicates across biological regions.
+The following are **not established and must not be claimed** until separately
+qualified by current canonical evidence:
 
-**Not established** (explicitly excluded from claims):
-- Edit-site-concentration mechanism (P5: MECHANISM_NOT_ESTABLISHED).
-- Practical/material importance (no independent delta_practical).
-- Domain SOTA (requires fair direct comparators, qualified external exposure,
-  and task-identity alignment not yet completed).
-- Experimental ordering utility (requires practical PASS).
+- external transportability or independent external confirmation;
+- mechanism, feature-dependence, spatial-extension, or “529 independent component”
+  evidence;
+- practical or material importance and experimental ordering utility;
+- domain SOTA, broad generalization, or publication readiness;
+- a V14 method contribution before its complete score and qualification exist.
 
 ## 6. Limitations
 
-- Gaussian predictive with frozen scale 0.3; empirical residual SD (0.61)
-  exceeds nominal scale, indicating systematic underdispersion.
-- Signed-delta point MAE is negative vs no-change anchor; the CRPS advantage
-  is tail-driven, not mean-shift-driven.
-- Single seed at deployment; five-seed ensemble is the deployment target.
-- Development-only held-out: 20 puzzles from a single public dataset.
-  Generalization to other 2A3-MaP datasets, other probes, or other organisms
-  is not established.
+- Historical P2-v2 ridge analyses used a frozen Gaussian scale of 0.3 and exhibited
+  underdispersion and weak signed-delta point behavior. Those observations are
+  ridge-specific and do not describe later rank-0/rank-positive neural models.
+- The development universe has been repeatedly used for model selection and audit;
+  it cannot support a new prospective or external-confirmatory claim.
+- Generalization to other 2A3-MaP datasets, probes, organisms, or independent study
+  clusters is not established.
+- Author contributions, release permissions, the submission commit, and the final
+  V14 scientific verdict remain unresolved.

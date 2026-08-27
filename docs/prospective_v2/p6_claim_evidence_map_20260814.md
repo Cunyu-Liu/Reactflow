@@ -1,13 +1,22 @@
 # ReactFlow-Delta prospective-v2 full-spectrum claim-evidence map (P6, 2026-08-14)
 
+> **SUPERSEDED — HISTORICAL RECORD ONLY; NOT CURRENT CLAIM AUTHORITY AND NOT
+> SUBMISSION-READY.** The P0–P6 tables below preserve the 2026-08-14 package for
+> audit and must not be used as current scientific qualification. V13M3 terminated
+> with a top-journal screen FAIL; V14 has no terminal scientific verdict. Historical
+> P2/P3 are post-hoc development evidence only. Legacy P4/P5/P5b external scores are
+> seqpos-alignment-invalid; external transportability, mechanism, practical
+> importance, SOTA, and publication readiness are not established. Current P6
+> external replay is denied, and retained-artifact consistency cannot restore a
+> withdrawn qualification.
+>
 > 范围：P0–P5 全部正式 claim 与对应证据/裁决。证据均来自 locked 结果与 replay。
 > 2026-08-14 增补：P5_COMBINED 诚实跨集合联合聚合（合同 §12.7 集合级条款）后的 overall P5 gate 裁决。
-> 状态边界：`DEVELOPMENT_REPLICATED / EXTERNAL_TRANSPORTABILITY_ESTABLISHED /
-> PRACTICAL_IMPORTANCE_NOT_ESTABLISHED / MECHANISM_CONCENTRATION_DELETED /
-> MECHANISM_FEATURE_DEPENDENCE_CLEAN_ON_SET_A_TINY_RESIDUAL_ON_SET_B /
-> OVERALL_P5_GATE_MECHANISM_EVIDENCE_PASS / PUBLICATION_NOT_RELEASED`
+> 当前状态边界：`POST_HOC_DEVELOPMENT_ONLY / EXTERNAL_NOT_ESTABLISHED /
+> MECHANISM_NOT_ESTABLISHED / PRACTICAL_IMPORTANCE_NOT_ESTABLISHED /
+> SOTA_NOT_ESTABLISHED / PUBLICATION_NOT_READY`。
 
-## 1. 正式 claims（可发表范围）
+## 1. 历史 claims（已撤销或降级；不可作为当前可发表范围）
 
 | Claim | 裁决 | 证据 |
 |---|---|---|
@@ -59,30 +68,39 @@
 4. 个体 per-set verdicts 保持 fail-closed：P5=MECHANISM_NOT_ESTABLISHED、P5b=MECHANISM_NOT_ESTABLISHED。Combined 裁决仅作 OVERALL P5-gate status。
 
 ## 3. 证据分类与可审计性
-- 所有 C1–C6 数字均可由 `run_replay_v1.py --locked-p5-combined <path>` 从 clean checkout + artifacts 重放复现（`REPLAY_CONSISTENT`；新增 P5_COMBINED replay 行，校验 overall verdict、529 组件数、所有合取标志）。
+- 历史 C1–C6 数字曾由旧 `run_replay_v1.py --locked-p5-combined <path>` 重放为 artifact consistency。当前默认入口只允许 retained P2/P3 internal replay；P4/P5/P5b/P5_COMBINED 属于 authority-gated external route，当前合同拒绝。即使历史 bytes/statistics 一致，也不能恢复已失效的 external/mechanism qualification。
 - 数据溯源：dev=OK7a_M2 Round 3（160/160/13976）；Set A external=Ribonanza M2-style 2A3 via RMDB（24/3237，零 dev 重叠）；Set B external=M2RFOK/M2RFPK DasLab BigLib2 via RMDB（694/505/106,904，零 dev 重叠，零 Set A 重叠）；总计 529 evaluable external components。
 - P5 combined 聚合只在两个 locked per-set 报告上运行（`run_p5_combined_meta_v1.py`），**不产生新 outcome access**（locked_outcome_access_count 保持为 2）。
 - 失败记录：`p6_failure_log_20260814.md`（F1–F9），含 F8（Set B 字面负对照失败）与 F9（P5 overall gate 通过 honest conjunction 解决）。
 - 模型：RFD-Direct（reg_direct）单 seed 为初步；五 seed ensemble 为部署目标（§9.1）。
 
-## 4. 论文允许/禁止表述
-**允许**（合同 §6、§12.7、§16.1 fail-closed transparency）：
-- Development direct-learnability PASS；LRSO 规范训练后在开发集超过 Direct*（`LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT`，P3 gate PASS），但外部可移植性未测（如实声明为未来方向；不得引用 v1/v2 撤回结论）；
-- 外部统计可迁移 PASS（Set A 24 comps） + 独立 Set B 二次确认（505 comps）；
-- 机制 claim 用"**spatial extension of full-spectrum direct-model skill to remote positions on the construct**"表述；
-- 诚实、明显、靠前地陈述：编辑位点集中 claim 已删除；两集各 529 组件独立验证；4 条 caveats 永久附着；
-- Feature-dependence 的 Set-A-clean + Set-B-small-residual 完整叙事，不得删节。
+## 4. 当前论文表述边界（取代本文件的历史“允许”清单）
 
-**严格禁止**：
-- 引用 v1/v2 的 NO_INCREMENTAL_LRSO_SKILL 作为正式 P3 结论（已撤回）；
-- 声称 LRSO 的开发集优势已在外部可移植（未测；外部协议冻结于 direct candidate）；
-- practical/material importance；SOTA；"模型整体失败"；
-- 编辑位点集中机制（已删除）；
-- 将个体 P5 或 P5b verdict 回溯改写为 individually PASS；
-- 淡化或省略 Set-B 字面负对照不独立满足的事实；
-- push/PR/public release/submission 无 explicit owner instruction。
+**当前最多允许**：
 
-## 5. 2026-08-24 Model Rescue v4 补充资格
+- 将 P2/P3 数字明确标为反复使用的20-puzzle development universe上的历史、
+  post-hoc development evidence；
+- 如实报告 V13 exact-mutant re-encoding 的 terminal screen FAIL；
+- 将 V14描述为尚无terminal verdict的独立masked-WT-profile假设；
+- 保留旧 external/mechanism失败及对齐缺陷，作为审计和负面结果。
+
+**当前严格禁止**：
+
+- external transportability、independent confirmation、calibration qualification、
+  spatial-extension mechanism、feature-dependence或“529 independent components”；
+- practical/material importance、SOTA、broad generalization或publication readiness；
+- 把历史 replay consistency 写成重新训练、外部再验证或资格恢复；
+- 把 smoke、proxy、训练集或partial fold结果写成科学结论；
+- 在 V14 canonical terminal verdict前冻结submission commit或宣称V14方法PASS。
+
+代码 push 按当前用户指令在每个聚焦任务验证后执行；PR、public release和submission
+仍需各自的当前资格与权限，不能与代码备份混为一项。
+
+## 5. 后续模型救援补充资格
+
+2026-08-27当前裁决：V13M3为terminal top-journal screen FAIL，V13M4永久关闭；
+V14M3仍处于score-blind screen，尚无terminal结果。下述V4记录只是更早历史结果，
+不能覆盖V13/V14当前状态。
 
 Model Rescue v4 在 development-consumed 20-puzzle seed-0 LOPO 上完成全部五个冻结 families 后，由预冻结 qualifier 裁决为 `MODEL_RESCUE_V4_FAIL`。主候选相对 corrected B1 的 CRPS relative gain 为 `-0.1818%`，signed-delta MAE relative gain 为 `+0.2267%`；两个 CI 均跨 0，且未达到 5% 双指标门槛。Prediction integrity 通过，但 architecture attribution、coverage calibration 和 task-matched published comparator Gates 均失败。V4M4 未运行且不得补跑。
 

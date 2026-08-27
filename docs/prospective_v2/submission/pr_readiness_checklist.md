@@ -1,20 +1,23 @@
 # ReactFlow-Delta prospective-v2: PR Readiness Checklist (auto-check)
 
-> Auto-generated 2026-08-14. Every row below is verified against live remote state
-> (branch codex/reactflow-delta-prospective-v2-20260813 @ 13d34ac + /mnt artifacts).
+> **SUPERSEDED HISTORICAL CHECKLIST — NOT LIVE AND NOT SUBMISSION-READY.** Generated
+> 2026-08-14 against `codex/reactflow-delta-prospective-v2-20260813 @ 13d34ac`.
+> That ref is not current authority. V13M3 is terminal FAIL; V14 has no terminal
+> verdict. Rows below are retained for audit, with current scientific qualification
+> corrections applied where the old status is no longer valid.
 
 ## A. Scientific gates (contract section 12)
 
 | Check | Status | Evidence |
 |-------|--------|----------|
-| A1 P0 authority/truth reconciliation | PASS | epoch21 ACTIVE; authority_epoch_21 sentinel+bundle |
+| A1 P0 authority/truth reconciliation | HISTORICAL_ONLY | epoch21 is superseded; current authority is V14M3 score-closed |
 | A2 P1 data/measurement/evaluator | FAIL_CLOSED_OPEN (non-blocking for P2/P3) | evaluator PASS, held_response_invariance PASS, primary caller exclusion PASS |
-| A3 P2 direct learnability | PASS | 20-puzzle CI lower +0.0079 > 0; sign-flip p=1.9e-6 |
-| A4 P3 LRSO incremental skill | PASS (LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT) | spec-compliant v3 re-run (2026-08-16): rank2/4/8 D_p^P3=+0.0147/+0.0155/+0.0154, all 95% CI lower > 0; 20/20 puzzles positive; sign-flip p=1.9e-6. v1/v2 verdict retracted (implementation failure). |
-| A5 P4 external statistical | PASS | K_eff=24 >= 9; component CI lower +0.0153; FWER pass; leave-dominant-out lower +0.0127 |
-| A6 P4 calibration | PASS | cov95 0.874 in [0.85,0.99] |
+| A3 P2 direct learnability | HISTORICAL_POST_HOC_DEVELOPMENT_EVIDENCE | 20-puzzle development universe has been repeatedly consumed; not prospective confirmation |
+| A4 P3 LRSO incremental skill | HISTORICAL_POST_HOC_DEVELOPMENT_EVIDENCE | v3 is the valid historical implementation, but its development result is not external or publication qualification |
+| A5 P4 external statistical | INVALIDATED_BY_SEQPOS_ALIGNMENT | legacy external features/scoring were misaligned; old PASS is not citable |
+| A6 P4 calibration | NOT_CURRENTLY_QUALIFIED | derived from the same alignment-invalid external run |
 | A7 P5 mechanism | MECHANISM_NOT_ESTABLISHED (reported honestly) | edit-vfar CI lower -0.0199; negative control passes |
-| A8 P6 replay | PASS | REPLAY_CONSISTENT; all_reproduced=true |
+| A8 P6 replay | INTERNAL_RETAINED_ARTIFACT_REPLAY_ONLY; EXTERNAL_DENIED | default P2/P3 replay only; artifact consistency cannot restore qualification |
 
 ## B. Engineering / automated checks
 
@@ -31,7 +34,7 @@
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| C1 P2/P3 primary path external-free | PASS | no rdat/rmdb refs in run_p2_direct_v2.py / run_p3_lrso_v2.py |
+| C1 Historical P2/P3 primary path external-free | PASS (engineering scope only) | no rdat/rmdb refs in run_p2_direct_v2.py / valid run_p3_lrso_v3.py path |
 | C2 Development-external disconnected | PASS | 24 components, zero sequence overlap |
 | C3 Locked outcome access controlled | PASS | P4/P5 single open per frozen protocol |
 
@@ -44,14 +47,15 @@
 | D3 P4 components + result + calibration | PASS |
 | D4 P5 mechanism result | PASS |
 | D5 P6 tables/figures/cards/env | PASS |
-| D6 manuscript/supplement no placeholders | PASS (checked: no TODO/TBD/placeholder markers) |
+| D6 manuscript/supplement no placeholders | FAIL / OPEN | author-contribution placeholders remain; package is not submission-ready |
 
 ## E. Gate verdicts (machine-readable)
 
-- P0: AUTHORITY_RECONCILIATION_COMPLETE_PASS
-- P1: FAIL_CLOSED_OPEN (blocks_phase2/3=false, blocks_phase4=true)
-- P2: PROSPECTIVE_SIGNAL_ESTABLISHED_FOR_DEVELOPMENT
-- P3: LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT (v1/v2 retracted)
-- P4: P4_EXTERNAL_STATISTICAL_PASS + CALIBRATION_ACCEPTABLE
-- P5: MECHANISM_NOT_ESTABLISHED
-- P6: REPLAY_CONSISTENT (P6_REPRODUCIBILITY_DELIVERED)
+- P0/P1: historical authority record only; consult the current active contract.
+- P2/P3: historical post-hoc development evidence; not prospective/external proof.
+- P4: legacy external score invalidated by seqpos alignment; no current calibration
+  or transportability qualification.
+- P5: `MECHANISM_NOT_ESTABLISHED`.
+- P6: retained P2/P3 artifact replay only; external replay denied by current authority.
+- V13M3: terminal top-journal screen FAIL; V13M4 closed.
+- V14M3: terminal verdict pending; submission readiness not established.

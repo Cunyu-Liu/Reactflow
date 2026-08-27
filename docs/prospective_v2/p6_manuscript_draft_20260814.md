@@ -1,14 +1,20 @@
-# ReactFlow-Delta: prospective full-spectrum RNA mutation-response benchmark — manuscript draft
+# ReactFlow-Delta: historical development-consumed full-spectrum RNA mutation-response benchmark — manuscript draft
 
 > Status: DRAFT (P6 internal deliverable, 2026-08-14). Auto-filled from locked results;
 > no placeholder/手工复制 headline. Every number below is traceable to the result artifacts
 > in the replay report. Owner/human-author final approval required before submission.
+>
+> **SUPERSEDED HISTORICAL DRAFT — NOT SUBMISSION-READY.** V13M3 is terminal FAIL;
+> V14 has no terminal scientific verdict. The repeatedly consumed 20-puzzle evidence
+> is post-hoc development evidence, not new prospective confirmation. Current P6
+> external replay is denied; replay consistency cannot restore external/mechanism
+> qualification.
 
 ## Title (draft — downgraded per audit §9.3, 2026-08-18)
 
-**A prospective, outcome-blind benchmark of full-spectrum single-nucleotide mutation
-response in 2A3-MaP RNA structures: the direct chemistry/distance model establishes
-development learnability, and a low-rank source–receiver increment contributes a
+**A development-consumed, post-hoc benchmark of full-spectrum single-nucleotide
+mutation response in 2A3-MaP RNA structures: the direct chemistry/distance model
+shows historical development learnability, and a low-rank source–receiver increment contributes a
 small but significant incremental signal over the same-architecture rank-0 model
 (paired 20-puzzle D_p ≈ +0.0018, CI lower > 0); external replication is exploratory
 only (K_joint = 2 study clusters, underpowered), and the external direct result is
@@ -212,12 +218,15 @@ incremental capability — 见 contract §6 论文逻辑链。)
   leave-dominant-component-out sensitivity; cluster-macro CI + LOSO (external exploratory).
 
 ## 5. Reproducibility
-- Branch `codex/reactflow-delta-prospective-v2-20260813`; one-click replay via
-  `scripts/reactflow_delta/run_replay_v1.py` (see REPRODUCE doc / supplement).
+- Historical branch `codex/reactflow-delta-prospective-v2-20260813`; it is not a
+  current submission ref. The current default `scripts/reactflow_delta/run_replay_v1.py`
+  route only replays retained P2/P3 internal artifacts. P4/P5/P5b/P5_COMBINED require
+  explicit external mode and exact active authority; current authority denies them.
+  Artifact consistency cannot restore scientific qualification.
   P3 uses the locked spec-compliant v3 artifact
   `docs/prospective_v2/p3_lrso_v3_result_20260815.json`
   (v1/v2 are INVALID and excluded from replay); raw numbers also on the remote GPU at
   `/mnt/cunyuliu/prospective_v2_p3_20260815/p3_lrso_v3_result.json`.
-  P5_COMBINED report-level aggregation replay uses `--locked-p5-combined` and verifies the
-  overall verdict, the 529-component count, all six conjunctive flags, the 4-caveat
-  preservation and the per-set fail-closed verdicts.
+  The historical P5_COMBINED report-level aggregation is preserved only as an
+  alignment-invalid audit record. It is not a current reproducibility or mechanism
+  claim and must not be run without a future exact external authority.

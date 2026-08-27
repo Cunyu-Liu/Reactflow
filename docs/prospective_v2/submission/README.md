@@ -1,8 +1,12 @@
 # ReactFlow-Delta prospective-v2: Submission Materials Package
 
-> Auto-generated 2026-08-14 from locked artifacts (branch
-> codex/reactflow-delta-prospective-v2-20260813 @ 13d34ac).
-> P6_REPRODUCIBILITY_DELIVERED; release decision is owner-controlled.
+> **SUPERSEDED — HISTORICAL PACKAGE; NOT SUBMISSION-READY AND NOT CURRENT CLAIM
+> AUTHORITY.** This directory was auto-generated on 2026-08-14 from historical
+> artifacts. The old branch/commit `codex/reactflow-delta-prospective-v2-20260813 @
+> 13d34ac` must not be used as a current submission reference. V13M3 is terminal
+> FAIL; V14 has no terminal scientific qualification. External transportability,
+> mechanism, practical importance, SOTA, and publication readiness are not
+> established.
 
 ## Contents
 
@@ -16,25 +20,27 @@
 | out/cards.md | Model/Data/Code cards |
 | environment.yml | Conda environment spec |
 
-## Gate summary
+## Current qualification summary
 
-P0 PASS | P1 FAIL_CLOSED_OPEN | P2 PROSPECTIVE_SIGNAL | P3 LRSO_EXCEEDS_DIRECT_FOR_DEVELOPMENT (v1/v2 retracted) |
-P4 EXTERNAL_STATISTICAL_PASS + CALIBRATION | P5 MECHANISM_NOT_ESTABLISHED | P6 REPLAY_CONSISTENT
+- Historical P2/P3: post-hoc, development-consumed evidence only.
+- V13M3: terminal top-journal screen FAIL; V13M4 permanently closed.
+- V14M3: terminal verdict pending; no current method PASS or formal confirmation.
+- Historical P4/P5/P5b: external alignment-invalid and not citable as transportability
+  or mechanism evidence.
+- P6: default retained-artifact replay is limited to P2/P3; external replay is denied
+  by current authority. Artifact consistency cannot restore scientific qualification.
 
-## How to verify
+## What remains verifiable
 
-Everything in this package is auto-generated from locked artifacts on branch
-`codex/reactflow-delta-prospective-v2-20260813` and is reproducible:
+This directory is useful as a historical audit record, not as a submission bundle:
 
-1. **Gates** — `pr_readiness_checklist.md` rows A1-A8 and E are checked against the
-   live remote state (authority epoch 21 ACTIVE; P2/P3/P4/P5/P6 verdicts above).
-2. **Replay** — one-click reproducibility via
-   `PYTHONPATH=.:src python scripts/reactflow_delta/run_replay_v1.py`
-   with the locked artifacts (P2/P3 re-derived; P4/P5/P5b fresh re-run; P5_COMBINED
-   report-level aggregation) yields `REPLAY_CONSISTENT`; see
-   `REPRODUCE_p6_20260814.md` for the full command.
-3. **Tests** — the full `reactflow_delta` suite passes on the remote GPU machine,
-   including the P3 spec-compliance fixtures (`test_p3_lrso_v3.py`, 14 tests) and the
-   P5 combined fail-closed fixtures (`test_p5_combined_meta_v1.py`, 11 tests).
-4. **No placeholders** — manuscript/supplement drafts contain no TODO/TBD/placeholder
-   markers.
+1. **Current authority** — use `configs/reactflow_delta/active_contract.yaml` and the
+   V13/V14 decision ledgers, not the historical epoch-21 checklist in this directory.
+2. **Replay** — the default replay route re-derives retained P2/P3 artifacts only.
+   P4/P5/P5b/P5_COMBINED require explicit external mode and an exact active token;
+   current authority denies that access.
+3. **Tests** — historical focused test results are engineering evidence only. They do
+   not make external results scientifically valid and do not qualify V14.
+4. **Open submission work** — author-contribution placeholders remain in
+   `declaration_statements.md`; release permissions, final references, current tables,
+   and the exact submission commit are not frozen.
