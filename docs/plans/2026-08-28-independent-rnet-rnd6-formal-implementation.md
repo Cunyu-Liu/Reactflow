@@ -34,8 +34,9 @@
 
 **Files:**
 - Modify: `scripts/reactflow_delta/run_independent_rnet_distill_downstream.py`
+- Modify: `scripts/reactflow_delta/run_model_rescue_v11.py`
 - Modify: `scripts/reactflow_delta/merge_independent_rnet_distill.py`
-- Modify: `scripts/reactflow_delta/run_independent_rnet_distill_screen_controller.sh`
+- Create: `scripts/reactflow_delta/run_independent_rnet_distill_formal_controller.sh`
 - Create: `scripts/reactflow_delta/assemble_independent_rnet_distill_formal.py`
 - Modify: `tests/reactflow_delta/test_independent_rnet_distill_downstream.py`
 - Modify: `tests/reactflow_delta/test_merge_independent_rnet_distill.py`
@@ -44,7 +45,7 @@
 
 **Risk:** High — a missing/mixed fold, favorable-seed selection, comparator drift, or partial canonical publish would invalidate the formal result.
 
-**Implementation:** Add RND6 exact experiment/schedule/path binding; allow only seeds0–4; force the authoritative Feature41 comparator for every seed; retain result-last fold publication; merge exactly 100 unique pairs with one Git commit; and atomically publish 20 equal-seed assembled predictions while preserving fixed Feature41, V8, and historical-V10 fields.
+**Implementation:** Add RND6 exact experiment/schedule/path binding; allow only seeds0–4; make the shared held-prediction helper's explicitly required authoritative Feature41 replay seed-agnostic while leaving old callers unchanged; force that comparator for every formal seed; retain result-last fold publication; use a dedicated formal dynamic-GPU controller; merge exactly 100 unique pairs with one Git commit; and atomically publish 20 equal-seed assembled predictions while preserving fixed Feature41, V8, and historical-V10 fields.
 
 **Minimum verification:** Focused runner, controller, merger, and assembler tests covering seed/fold/path drift, CUDA evidence fields, exact 100-pair universe, mixed commit rejection, fixed-comparator equality, candidate/null mean and ten-component mixture math, no best-seed flag, target-free schemas, no overwrite, and failure-before-merge behavior. Run `bash -n` and `py_compile` for changed entrypoints.
 
@@ -76,7 +77,7 @@
 
 **Risk:** Medium — independently correct modules may disagree on a basename, status, schema, or authority token.
 
-**Implementation:** Run one combined focused suite across contract, downstream, merger, controller, assembler, scorer, and qualifier; compile changed Python modules; syntax-check changed shell scripts; verify clean diff and exact linear ancestry from `d07f766`; then commit and push the inactive prep branch. Fast-forward the remote `/home` RND6 prep worktree to the pushed commit and keep it non-authoritative. Do not merge into the active RND1 worktree until RND1 terminal conditions are exact.
+**Implementation:** Commit and push each focused batch as soon as it passes its scoped checks. Then run one combined focused suite across contract, downstream, merger, controller, assembler, scorer, and qualifier; compile changed Python modules; syntax-check changed shell scripts; verify clean diff and exact linear ancestry from `d07f766`; and push any integration-only correction as its own focused commit. Fast-forward the remote `/home` RND6 prep worktree after each pushed batch and keep it non-authoritative. Do not merge into the active RND1 worktree until RND1 terminal conditions are exact.
 
 **Minimum verification:** One combined focused pytest invocation, changed-entrypoint compilation/shell syntax, `git diff --check`, clean worktree, upstream `0/0`, and remote branch HEAD equality.
 
