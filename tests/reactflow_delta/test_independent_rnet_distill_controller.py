@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import os
+import re
+import shlex
 import subprocess
 from pathlib import Path
+
+import pytest
 
 
 SCRIPT = Path(
@@ -10,6 +15,69 @@ SCRIPT = Path(
 FORMAL_SCRIPT = Path(
     "scripts/reactflow_delta/run_independent_rnet_distill_formal_controller.sh"
 )
+
+
+def _sandboxed_controller(
+    tmp_path: Path,
+    source: Path,
+    *,
+    preflight_status: int,
+) -> tuple[Path, Path, Path, dict[str, str]]:
+    repo = tmp_path / "repo"
+    artifact_root = tmp_path / "artifacts"
+    bin_dir = tmp_path / "bin"
+    repo.mkdir()
+    bin_dir.mkdir()
+    calls = tmp_path / "python_calls.log"
+    fake_python = bin_dir / "python"
+    fake_python.write_text(
+        """#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\\n' "$*" >> {calls}
+if [[ "$*" == *assert_run_authority* ]]; then
+  exit 0
+fi
+if [[ "$*" == *require_cuda_device* ]]; then
+  printf 'synthetic CUDA probe stderr\\n' >&2
+  exit {preflight_status}
+fi
+printf 'unexpected fake-python command: %s\\n' "$*" >&2
+exit 91
+""".format(
+            calls=shlex.quote(str(calls)),
+            preflight_status=preflight_status,
+        ),
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o755)
+    fake_date = bin_dir / "date"
+    fake_date.write_text(
+        "#!/usr/bin/env bash\nprintf '%s\\n' '2026-08-28T12:34:56+08:00'\n",
+        encoding="utf-8",
+    )
+    fake_date.chmod(0o755)
+
+    text = source.read_text(encoding="utf-8")
+    text = re.sub(r"^repo=.*$", f"repo={shlex.quote(str(repo))}", text, count=1, flags=re.M)
+    text = re.sub(
+        r"^python_bin=.*$",
+        f"python_bin={shlex.quote(str(fake_python))}",
+        text,
+        count=1,
+        flags=re.M,
+    )
+    text = re.sub(
+        r"^artifact_root=.*$",
+        f"artifact_root={shlex.quote(str(artifact_root))}",
+        text,
+        count=1,
+        flags=re.M,
+    )
+    controller = tmp_path / source.name
+    controller.write_text(text, encoding="utf-8")
+    env = os.environ.copy()
+    env["PATH"] = f"{bin_dir}{os.pathsep}{env['PATH']}"
+    return controller, artifact_root, calls, env
 
 
 def test_controller_shell_syntax_and_phase_rejection() -> None:
@@ -22,6 +90,108 @@ def test_controller_shell_syntax_and_phase_rejection() -> None:
     )
     assert completed.returncode == 2
     assert "unsupported independent RNet downstream phase" in completed.stderr
+
+
+@pytest.mark.parametrize(
+    ("source", "arguments", "out_name", "phase", "gpu"),
+    [
+        (SCRIPT, ["RND2", "3"], "rnd2_smoke_seed0", "RND2", "3"),
+        (FORMAL_SCRIPT, ["4"], "rnd6_formal_seeds0_4", "RND6P", "4"),
+    ],
+)
+def test_cuda_preflight_failure_is_persisted_before_any_worker_or_merge(
+    tmp_path: Path,
+    source: Path,
+    arguments: list[str],
+    out_name: str,
+    phase: str,
+    gpu: str,
+) -> None:
+    controller, artifact_root, calls, env = _sandboxed_controller(
+        tmp_path,
+        source,
+        preflight_status=17,
+    )
+
+    completed = subprocess.run(
+        ["bash", str(controller), *arguments],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert completed.returncode == 1
+    assert f"{phase} CUDA preflight failed" in completed.stderr
+    evidence_path = artifact_root / out_name / "logs" / f"cuda_preflight_gpu{gpu}.log"
+    evidence = evidence_path.read_text(encoding="utf-8")
+    assert "2026-08-28T12:34:56+08:00" in evidence
+    assert f"phase={phase}" in evidence
+    assert f"physical_gpu={gpu}" in evidence
+    assert "logical_device=cuda:0" in evidence
+    assert "command=CUDA_VISIBLE_DEVICES=" in evidence
+    assert "require_cuda_device" in evidence
+    assert "stderr=following" in evidence
+    assert "synthetic CUDA probe stderr" in evidence
+    assert "event=cuda_preflight_failed" in evidence
+    assert "status=17" in evidence
+
+    python_calls = calls.read_text(encoding="utf-8")
+    assert "assert_run_authority" in python_calls
+    assert "require_cuda_device" in python_calls
+    assert "run_independent_rnet_distill_downstream" not in python_calls
+    assert "merge_independent_rnet_distill" not in python_calls
+    assert "assemble_independent_rnet_distill_formal" not in python_calls
+
+
+def test_successful_cuda_preflight_remains_nonblocking(tmp_path: Path) -> None:
+    controller, artifact_root, calls, env = _sandboxed_controller(
+        tmp_path,
+        SCRIPT,
+        preflight_status=0,
+    )
+    controller_text = controller.read_text(encoding="utf-8")
+    function_text = controller_text[
+        controller_text.index("preflight_gpu() {") : controller_text.index(
+            "\nresult_path() {"
+        )
+    ]
+    harness = tmp_path / "successful_preflight.sh"
+    harness.write_text(
+        "\n".join(
+            [
+                "#!/usr/bin/env bash",
+                "set -euo pipefail",
+                "phase=RND2",
+                f"out={shlex.quote(str(artifact_root / 'rnd2_smoke_seed0'))}",
+                f"python_bin={shlex.quote(str(tmp_path / 'bin' / 'python'))}",
+                'mkdir -p "${out}/logs"',
+                function_text,
+                'preflight_gpu "3"',
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    completed = subprocess.run(
+        ["bash", str(harness)],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=env,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    evidence = (
+        artifact_root / "rnd2_smoke_seed0" / "logs" / "cuda_preflight_gpu3.log"
+    ).read_text(encoding="utf-8")
+    assert "synthetic CUDA probe stderr" in evidence
+    assert "event=cuda_preflight_pass" in evidence
+    assert "status=0" in evidence
+    python_calls = calls.read_text(encoding="utf-8")
+    assert len(python_calls.splitlines()) == 1
+    assert "require_cuda_device('cuda:0')" in python_calls
 
 
 def test_controller_freezes_schedules_and_cuda_mapping() -> None:

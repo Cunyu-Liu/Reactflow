@@ -40,11 +40,21 @@ fi
 preflight_gpu() {
   local gpu=$1
   local status
+  local log=${out}/logs/cuda_preflight_gpu${gpu}.log
+  local context="from scripts.reactflow_delta.gpu_runtime import require_cuda_device; require_cuda_device('cuda:0')"
+  printf '%s phase=%s event=cuda_preflight_start physical_gpu=%s logical_device=cuda:0 command=CUDA_VISIBLE_DEVICES=%q\\ %q\\ -c\\ %q stderr=following\n' \
+    "$(date --iso-8601=seconds)" "${phase}" "${gpu}" "${gpu}" \
+    "${python_bin}" "${context}" >> "${log}"
   if CUDA_VISIBLE_DEVICES="${gpu}" "${python_bin}" -c \
-    "from scripts.reactflow_delta.gpu_runtime import require_cuda_device; require_cuda_device('cuda:0')"; then
+    "${context}" 2>> "${log}"; then
+    printf '%s phase=%s event=cuda_preflight_pass physical_gpu=%s logical_device=cuda:0 status=0\n' \
+      "$(date --iso-8601=seconds)" "${phase}" "${gpu}" >> "${log}"
     return 0
   else
     status=$?
+    printf '%s phase=%s event=cuda_preflight_failed physical_gpu=%s logical_device=cuda:0 status=%s command=CUDA_VISIBLE_DEVICES=%q\\ %q\\ -c\\ %q stderr=preceding\n' \
+      "$(date --iso-8601=seconds)" "${phase}" "${gpu}" "${status}" \
+      "${gpu}" "${python_bin}" "${context}" >> "${log}"
     printf '%s %s CUDA preflight failed: physical_gpu=%s logical_device=cuda:0 status=%s\n' \
       "$(date --iso-8601=seconds)" "${phase}" "${gpu}" "${status}" >&2
     return "${status}"
@@ -118,6 +128,7 @@ if ((${#tasks[@]} > 0)); then
       "${phase}" >&2
     exit 2
   fi
+  mkdir -p "${out}/logs"
   preflight_failed=0
   for gpu in "${gpus[@]}"; do
     if ! preflight_gpu "${gpu}"; then
@@ -127,7 +138,6 @@ if ((${#tasks[@]} > 0)); then
   if ((preflight_failed != 0)); then
     exit 1
   fi
-  mkdir -p "${out}/logs"
 fi
 
 declare -A gpu_by_pid=()
