@@ -37,12 +37,54 @@ TOKENS = {
     "RND5": "RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY",
     "RND6": "RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_ONLY",
 }
+RND0_TOKEN = "RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY"
+RND1_PASS = "RND1_PAIRED_PRETRAIN_EXACT_PASS"
+RND2_MERGE_PASS = "RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS"
+RND2_SCOPE = "RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY"
+RND2_ACTION = "RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE"
+RND2_DECISION = (
+    "CLOSE_RND1_AND_AUTHORIZE_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE"
+)
+RND2_AUTHORIZATION = {
+    "scope": RND2_SCOPE,
+    "implementation_allowed": False,
+    "neural_training_allowed": True,
+    "smoke_allowed": True,
+    "screen_allowed": False,
+    "score_allowed": False,
+    "qualification_allowed": False,
+    "formal_confirmation_allowed": False,
+    "new_external_outcome_access_allowed": False,
+}
+RND2_GATE_STATE = {
+    "RND0": "RND0_SOURCE_AND_IMPLEMENTATION_EXACT_PASS",
+    "RND1": RND1_PASS,
+    "RND2": "AUTHORIZED_TWO_FOLD_GPU_ENGINEERING_SMOKE",
+    "RND3": "NOT_AUTHORIZED",
+    "RND4": "NOT_AUTHORIZED",
+    "RND5": "NOT_AUTHORIZED",
+    "RND6": "NOT_AUTHORIZED",
+}
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
     value = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
         raise RuntimeError(f"expected a mapping at {path}")
+    return value
+
+
+def _load_research_frontmatter(path: Path) -> dict[str, Any]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0] != "---":
+        raise RuntimeError("research record frontmatter is missing")
+    try:
+        end = lines.index("---", 1)
+    except ValueError as exc:
+        raise RuntimeError("research record frontmatter is unterminated") from exc
+    value = yaml.safe_load("\n".join(lines[1:end]))
+    if not isinstance(value, dict):
+        raise RuntimeError("research record frontmatter must be a mapping")
     return value
 
 
@@ -136,6 +178,86 @@ def _check_frozen_scientific_contract(contract: dict[str, Any]) -> None:
     _require(gpu["training_and_gpu_validation_device_class"] == "CUDA_ONLY", "CUDA-only changed")
     _require(gpu["cpu_model_or_loss_fallback_allowed"] is False, "CPU fallback opened")
     _require(gpu["minimum_free_vram_gate_allowed"] is False, "VRAM gate opened")
+    _require(
+        contract["phase_contract"]["RND3"]["required_predecessor"]
+        == RND2_MERGE_PASS,
+        "RND3 predecessor diverged from canonical RND2 merge status",
+    )
+
+
+def _check_rnd2_authority(
+    active: dict[str, Any],
+    contract: dict[str, Any],
+    ledger: dict[str, Any],
+) -> None:
+    authorization = active["authorization"]
+    observed_authorization = {
+        key: authorization.get(key) for key in RND2_AUTHORIZATION
+    }
+    _require(
+        observed_authorization == RND2_AUTHORIZATION,
+        "RND2 authorization scope or permissions changed",
+    )
+    _require(active["runnable_phases"] == ["RND2"], "RND2 is not solely runnable")
+    _require(active["training_allowed"] is True, "RND2 training is not open")
+    _require(
+        active["candidate_model_training_allowed"] is True,
+        "RND2 candidate training is not open",
+    )
+    _require(active["held_score_read_allowed"] is False, "RND2 held score opened")
+    _require(
+        active["partial_fold_score_read_allowed"] is False,
+        "RND2 partial score opened",
+    )
+    _require(
+        active["new_external_outcome_access_allowed"] is False,
+        "RND2 external outcome opened",
+    )
+    _require(active["gate_state"] == RND2_GATE_STATE, "RND2 gate state changed")
+    _require(active["next_allowed_action"] == RND2_ACTION, "RND2 action changed")
+    _require(ledger["next_action"] == RND2_ACTION, "RND2 ledger action changed")
+    _require(
+        contract["phase_contract"]["RND2"]["required_predecessor"] == RND1_PASS,
+        "RND2 predecessor changed",
+    )
+    decisions = ledger.get("decisions")
+    _require(
+        isinstance(decisions, list) and decisions,
+        "RND2 predecessor event is missing",
+    )
+    event = decisions[-1]
+    _require(isinstance(event, dict), "RND2 predecessor event must be a mapping")
+    _require(event.get("event") == RND1_PASS, "RND2 predecessor event changed")
+    _require(
+        event.get("decision") == RND2_DECISION,
+        "RND2 predecessor decision changed",
+    )
+    _require(
+        event.get("authority_token") == TOKENS["RND2"],
+        "RND2 predecessor token changed",
+    )
+    _require(event.get("exit_code") == 0, "RND1 terminal exit is not zero")
+    _require(event.get("artifact_count") == 3, "RND1 terminal artifact count changed")
+    device_actual = event.get("device_actual")
+    _require(
+        isinstance(device_actual, str) and device_actual.startswith("cuda:"),
+        "RND1 terminal device is not CUDA",
+    )
+    expected_terminal_flags = {
+        "cpu_fallback": False,
+        "outcome_accessed": False,
+        "training_loss_accessed": False,
+        "scientific_metric_accessed": False,
+        "residual_heads_identical": True,
+        "pretrained_encoders_different": True,
+    }
+    observed_terminal_flags = {
+        key: event.get(key) for key in expected_terminal_flags
+    }
+    _require(
+        observed_terminal_flags == expected_terminal_flags,
+        "RND1 terminal evidence changed",
+    )
 
 
 def validate_contract(repo_root: Path) -> dict[str, Any]:
@@ -143,7 +265,9 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     active = _load_yaml(repo_root / ACTIVE_PATH)
     contract = _load_yaml(repo_root / CONTRACT_PATH)
     ledger = _load_yaml(repo_root / LEDGER_PATH)
-    _require((repo_root / RESEARCH_PATH).is_file(), "research record is missing")
+    research_path = repo_root / RESEARCH_PATH
+    _require(research_path.is_file(), "research record is missing")
+    research = _load_research_frontmatter(research_path)
     _require(active["project_task_id"] == PROJECT_TASK_ID, "wrong active project")
     _require(contract["project_task_id"] == PROJECT_TASK_ID, "wrong machine contract")
     _require(ledger["project_task_id"] == PROJECT_TASK_ID, "wrong decision ledger")
@@ -152,6 +276,15 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     _require(phase in PHASES, "unknown active phase")
     _require(authority["current_runnable_phase"] == phase, "runnable phase diverged")
     _require(active["runnable_phases"] == [phase], "exact single runnable phase required")
+    token = RND0_TOKEN if phase == "RND0" else TOKENS[phase]
+    _require(contract["contract_status"] == token, "machine contract status diverged")
+    _require(
+        authority["current_authority_state"] == token,
+        "active authority state diverged",
+    )
+    _require(authority["binding_status"] == token, "active binding status diverged")
+    _require(ledger["current_status"] == token, "ledger status diverged")
+    _require(research["status"] == token, "research status diverged")
     _require(active["allowed_phases"] == list(PHASES), "allowed phase universe changed")
     _require(authority["branch"] == BRANCH, "active branch binding changed")
     _require(Path(authority["worktree"]) == WORKTREE, "active worktree binding changed")
@@ -177,15 +310,13 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     _check_frozen_scientific_contract(contract)
 
     if phase == "RND0":
-        _require(contract["contract_status"] == "RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY", "RND0 contract status changed")
-        _require(authority["current_authority_state"] == "RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY", "RND0 state changed")
         _require(active["authorization"]["implementation_allowed"] is True, "RND0 implementation closed")
         _require(active["training_allowed"] is False, "RND0 training opened")
         _require(active["held_score_read_allowed"] is False, "RND0 score opened")
     else:
-        token = TOKENS[phase]
-        _require(authority["current_authority_state"] == token, f"{phase} token changed")
         _require(contract["phase_contract"][phase]["authority_token"] == token, f"{phase} contract token changed")
+        if phase == "RND2":
+            _check_rnd2_authority(active, contract, ledger)
         if phase in {"RND1", "RND2", "RND3", "RND6"}:
             _require(active["training_allowed"] is True, f"{phase} training not open")
             _require(active["held_score_read_allowed"] is False, f"{phase} held score opened")

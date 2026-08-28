@@ -138,7 +138,7 @@ phase_contract:
     scientific_conclusion_allowed: false
   RND3:
     authority_token: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
-    required_predecessor: RND2_ENGINEERING_SMOKE_EXACT_PASS
+    required_predecessor: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
     held_score_read_allowed: false
   RND4:
     authority_token: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
