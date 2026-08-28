@@ -111,7 +111,17 @@ frozen_schedule:
     calibration_epochs: 40
     complete_before_score: true
   rnd6_formal:
+    lifecycle_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     seeds: [0, 1, 2, 3, 4]
+    expected_fold_seed_pairs: 100
+    point_epochs: 40
+    calibration_epochs: 40
+    equal_seed_mixture: true
+    equal_seed_weight: 0.2
+    best_seed_selection_allowed: false
+    extra_seed_selection_allowed: false
+    complete_prediction_universe_before_score: true
     authorized_only_after_exact_rnd5_pass: true
 
 gpu_policy:
@@ -146,9 +156,72 @@ phase_contract:
   RND5:
     authority_token: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
     required_predecessor: RND4_COMPLETE_SCORE_PASS
-  RND6:
-    authority_token: RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_ONLY
-    required_predecessor: RND5_TOP_JOURNAL_DEVELOPMENT_SCREEN_EXACT_PASS
+  RND6P:
+    authority_token: RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_GPU_PREDICTION_ONLY
+    required_predecessor: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
+    next_action: RUN_SINGLE_RND6P_FIXED_SEEDS_0_TO_4_FORMAL_PREDICTION_ONLY_CONTROLLER
+    outputs: [exact_100_fold_seed_prediction_sets, complete_unscored_merge, equal_seed_prediction_only_assembly]
+    scientific_conclusion_allowed: false
+  RND6S:
+    authority_token: RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_SCORE_ONCE_ONLY
+    required_predecessors:
+      - RND6P_COMPLETE_UNSCORED_FORMAL_MERGE_PASS
+      - RND6P_EQUAL_SEED_PREDICTION_ONLY_ASSEMBLY_PASS
+    next_action: RUN_SINGLE_RND6S_COMPLETE_FORMAL_SCORE_ONCE
+    outputs: [complete_formal_score]
+    scientific_conclusion_allowed: false
+  RND6Q:
+    authority_token: RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_QUALIFIER_ONCE_ONLY
+    required_predecessor: RND6S_COMPLETE_FORMAL_SCORE_PASS
+    next_action: RUN_SINGLE_RND6Q_COMPLETE_FORMAL_QUALIFIER_ONCE
+    outputs: [formal_qualification]
+    scientific_conclusion_allowed: true
+  RND6T:
+    authority_token: RNET_DISTILL_FORMAL_TERMINAL_CLOSED
+    required_predecessor_one_of:
+      - RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_PASS
+      - RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_FAIL
+      - RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_INDETERMINATE
+    next_action: STOP_RND6_FORMAL_ALL_RUNTIME_RIGHTS_CLOSED
+    runnable: false
+
+formal_chain:
+  lifecycle_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
+  activation_allowed: false
+  activation_predecessor: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
+  phase_order: [RND6P, RND6S, RND6Q, RND6T]
+  prediction_score_qualification_permissions_mutually_exclusive: true
+  evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+  canonical_paths:
+    formal_prediction_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4
+    formal_complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_complete_unscored_merge.json
+    formal_assembly_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/assembled
+    formal_assembly_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/assembled/rnet_distill_five_seed_prediction_only_assembly.json
+    formal_complete_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_complete_formal_score.json
+    formal_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_formal_qualification.json
+    screen_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_qualification.json
+  canonical_statuses:
+    screen_pass: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
+    formal_merge_pass: RND6P_COMPLETE_UNSCORED_FORMAL_MERGE_PASS
+    formal_assembly_pass: RND6P_EQUAL_SEED_PREDICTION_ONLY_ASSEMBLY_PASS
+    formal_score_pass: RND6S_COMPLETE_FORMAL_SCORE_PASS
+    formal_qualification_pass: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_PASS
+    formal_qualification_fail: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_FAIL
+    formal_qualification_indeterminate: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_INDETERMINATE
+
+formal_gates:
+  screen_prerequisite_status: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
+  equal_seed_mixture_required: true
+  mixture_must_pass_frozen_screen_gates: true
+  individual_seed_positive_vs_matched_null_minimum:
+    signed_delta: 4
+    point_absolute: 4
+    task_crps: 4
+    distribution_absolute: 4
+  strict_positive_mean_gain_required: true
+  best_seed_selection_allowed: false
+  extra_seed_selection_allowed: false
+  evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
 
 screen_gates:
   completeness:
@@ -191,11 +264,17 @@ outcome_policy:
   partial_fold_score_allowed: false
   complete_score_allowed_only_in_RND4: true
   qualification_allowed_only_in_RND5: true
+  formal_prediction_runner_may_read_held_target: false
+  formal_partial_fold_score_allowed: false
+  formal_complete_score_allowed_only_in_RND6S: true
+  formal_qualification_allowed_only_in_RND6Q: true
+  formal_external_outcome_access_allowed: false
   new_external_outcome_access_allowed: false
 
 artifact_policy:
   code_and_git_worktree_prefix: /home/cunyuliu
   large_artifact_prefix: /mnt/cunyuliu
   overwrite_allowed: false
+  formal_existing_output_rerun_allowed: false
   one_canonical_output_per_phase: true
   focused_task_commit_and_push_required: true

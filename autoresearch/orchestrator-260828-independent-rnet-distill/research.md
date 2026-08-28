@@ -3,6 +3,11 @@ slug: orchestrator-260828-independent-rnet-distill
 date: 2026-08-28
 status: RNET_DISTILL_PAIRED_GPU_PRETRAIN_ONCE_ONLY
 parent: orchestrator-260827-v14-wt-profile
+formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
+formal_phase_order: [RND6P, RND6S, RND6Q, RND6T]
+formal_activation_allowed: false
+formal_score_accessed: false
+formal_qualification_accessed: false
 ---
 
 # Independent RNet2 single-feature distillation
@@ -43,7 +48,32 @@ distillation.
 - RND3: fixed seed-0 twenty-fold prediction-only screen; complete before score.
 - RND4: one canonical complete-score read.
 - RND5: one frozen-Gate qualification.
-- RND6: fixed seeds 0-4 only after exact RND5 PASS.
+- RND6P: fixed seeds 0-4 crossed with folds 0-19, 40+40 epoch CUDA-only
+  prediction, target-free merge and equal-weight assembly; inactive unless RND5
+  has exact canonical PASS.
+- RND6S: one complete five-seed formal score with all training and qualification
+  closed.
+- RND6Q: one formal qualifier with training and scorer closed.
+- RND6T: terminal PASS, FAIL or INDETERMINATE record with no runnable phase and
+  every runtime right closed.
+
+## Frozen inactive formal confirmation
+
+The formal chain is frozen before the RND5 result is known and is not current
+authority. Its only activation predecessor is exact canonical status
+`RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS`; RND5 FAIL or INDETERMINATE
+does not authorize formal work. RND6 uses exactly 100 `(fold, seed)` pairs from
+folds 0-19 and seeds 0-4, the RND3 40+40 schedule, and a fixed equal seed weight
+of 0.2. Prediction, complete scoring and qualification are separate authorities
+and never overlap.
+
+The equal-seed mixture must pass the complete unchanged RND5 `screen_gates`
+mapping. For each of signed delta, point absolute, task CRPS and distribution
+absolute, at least four of five individual seeds must also have positive mean
+gain over the frozen shift17 matched null. No best seed, extra seed, model or
+threshold selection is allowed. Even an exact formal PASS remains
+`EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY`, not clean OOD, external replication,
+SOTA or publication-ready evidence.
 
 ## Falsification
 
@@ -78,3 +108,9 @@ not authorize revival of any closed family.
   teacher inference, read no OpenKnot outcome and did not rehash the 47 GB
   cache. RND0 is closed and exactly one paired CUDA-only RND1 pretraining run
   is authorized; score, smoke and screen access remain closed.
+- 2026-08-28: The inactive RND6 formal contract was frozen as four mutually
+  exclusive phases `RND6P→RND6S→RND6Q→RND6T`, with canonical paths, 100
+  fold-seed pairs, fixed 0.2 equal-seed mixture, unchanged screen Gates and the
+  pre-result four-of-five matched-null seed-stability rule. This preparation did
+  not change the active RND1 token, runnable phase, permissions or next action
+  and did not authorize RND6.
