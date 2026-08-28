@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260827-v14-wt-profile
 date: 2026-08-27
-status: B5RP1_PREDICTION_ONLY_GPU_REQUIRED_AUTHORIZED
+status: B5RP2_COMPLETE_MERGE_SCORE_ONCE_AUTHORIZED
 parent: orchestrator-260827-post-v13
 ---
 
@@ -55,3 +55,5 @@ The hypothesis is falsified if the candidate misses any frozen V14M3 top-journal
 - 2026-08-28: The minimal B5RP0 source-projection dependency closure was integrated at `5660621` and passed 25 focused tests. B5RP0 now authorizes exactly one target-, score-, loss- and history-free projection of the 20 same-fold V13 candidate point checkpoints and 20 V14 candidate checkpoints into the canonical safe-source manifest. Training, held score, partial score and external outcomes remain closed; B5RP1 is not authorized.
 - 2026-08-28: B5RP0 completed once with `POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS`: 20 V13 and 20 V14 same-fold seed-0 checkpoints strictly loaded, the target-free canonical manifest passed its exact schema/path/fold audit, and no scientific performance claim was produced. This was an explicit CPU checkpoint-structure projection, not training or GPU validation.
 - 2026-08-28: The remaining B5RP1 GPU route-probe runtime was integrated at `d9cbf77` and passed 25 focused tests. B5RP1 now authorizes only the fixed seed-0 folds 0-19 prediction universe under `POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY`; controller and runner both require real CUDA, no CPU fallback or minimum-free-memory gate is permitted, and held/partial/external scores remain closed.
+- 2026-08-28: B5RP1 completed its exact seed-0 folds 0-19 universe with 20 fold results, 20 prediction artifacts and 20 ridge artifacts, no missing, duplicate or unexpected artifacts, controller exit code zero and no remaining controller, runner or tmux session. Eight runner PIDs were observed on real NVIDIA devices at launch, no CPU fallback or narrow runtime error was recorded, and the canonical complete unscored merge passed an exact target-free schema, path, fold and invariant audit. No partial scientific content was inspected.
+- 2026-08-28: Training and screen authority are now closed. Exactly one complete held-score read is authorized from the canonical B5RP1 merge under `POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY`; the complete score does not yet exist, partial score and external outcomes remain closed, and B5RP3 qualification is not yet authorized.

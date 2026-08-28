@@ -89,6 +89,47 @@ EXPECTED_B5RP1_AUTHORITY = {
     ),
     "binding_status": "B5RP1_PREDICTION_ONLY_GPU_REQUIRED",
 }
+EXPECTED_B5RP2_ACTION = "RUN_SINGLE_POST_V14_BRANCH5_COMPLETE_SCORE_ONCE"
+EXPECTED_B5RP2_TOKEN = "POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY"
+EXPECTED_B5RP2_AUTHORITY = {
+    "current_phase": "B5RP2",
+    "current_authority_state": "POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY",
+    "current_runnable_phase": "B5RP2",
+    "m2_csv_path": (
+        "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/"
+        "openknot_m2/OK7a_M2_data.v4.5.2.csv"
+    ),
+    "complete_unscored_merge_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json"
+    ),
+    "complete_unscored_merge_status": (
+        "BRANCH5_ROUTE_PROBE_COMPLETE_UNSCORED_MERGE_PASS"
+    ),
+    "complete_score_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json"
+    ),
+    "binding_status": "B5RP2_COMPLETE_MERGE_SCORE_ONCE_ONLY",
+}
+EXPECTED_B5RP3_ACTION = "RUN_SINGLE_POST_V14_BRANCH5_COMPLETE_QUALIFIER_ONCE"
+EXPECTED_B5RP3_AUTHORITY = {
+    "current_phase": "B5RP3",
+    "current_authority_state": (
+        "POST_V14_BRANCH5_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY"
+    ),
+    "current_runnable_phase": "B5RP3",
+    "complete_score_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json"
+    ),
+    "complete_score_status": "BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS",
+    "qualification_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_qualification.json"
+    ),
+    "binding_status": "B5RP3_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY",
+}
 POST_V14_ONCE_ONLY_AUTHORITIES: dict[str, dict[str, Any]] = {
     "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY": {
         "next_allowed_action": "RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER",
@@ -187,6 +228,15 @@ def assert_outcome_authority_is_narrow(active: dict[str, Any]) -> None:
     held = active.get("held_score_read_allowed")
     if held is False:
         return
+    if held == EXPECTED_B5RP2_TOKEN:
+        if (
+            active.get("authority", {}).get("current_phase") != "B5RP2"
+            or active.get("runnable_phases") != ["B5RP2"]
+            or active.get("training_allowed") is not False
+            or active.get("candidate_model_training_allowed") is not False
+        ):
+            raise RuntimeError("B5RP2 held-score authority is not score-once")
+        return
     post_v14_authority = (
         POST_V14_ONCE_ONLY_AUTHORITIES.get(held)
         if isinstance(held, str)
@@ -275,6 +325,71 @@ def assert_branch5_b5rp1_authority_is_narrow(active: dict[str, Any]) -> None:
         raise RuntimeError("B5RP1 prediction-only screen authority is closed")
     if active.get("next_allowed_action") != EXPECTED_B5RP1_ACTION:
         raise RuntimeError("B5RP1 action changed")
+
+
+def assert_branch5_b5rp2_authority_is_narrow(active: dict[str, Any]) -> None:
+    if active.get("project_task_id") != EXPECTED_B5RP0_PROJECT_TASK:
+        raise RuntimeError("B5RP2 project task changed")
+    if active.get("parent_state") != EXPECTED_B5RP0_PARENT_STATE:
+        raise RuntimeError("B5RP2 terminal parent state changed")
+    authority = active.get("authority")
+    if not isinstance(authority, dict) or any(
+        authority.get(name) != value
+        for name, value in EXPECTED_B5RP2_AUTHORITY.items()
+    ):
+        raise RuntimeError("B5RP2 authority mapping or canonical paths changed")
+    if active.get("runnable_phases") != ["B5RP2"]:
+        raise RuntimeError("B5RP2 must be the sole runnable phase")
+    if any(
+        active.get(name) is not False
+        for name in (
+            "training_allowed",
+            "candidate_model_training_allowed",
+            "partial_fold_score_read_allowed",
+            "new_external_outcome_access_allowed",
+        )
+    ):
+        raise RuntimeError("B5RP2 requires training, partial and external access closed")
+    if active.get("held_score_read_allowed") != EXPECTED_B5RP2_TOKEN:
+        raise RuntimeError("B5RP2 complete score-once token changed")
+    if active.get("authorization", {}).get("neural_training_allowed") is not False:
+        raise RuntimeError("B5RP2 neural training authority is open")
+    if active.get("authorization", {}).get("screen_allowed") is not False:
+        raise RuntimeError("B5RP2 screen authority is open")
+    if active.get("next_allowed_action") != EXPECTED_B5RP2_ACTION:
+        raise RuntimeError("B5RP2 action changed")
+
+
+def assert_branch5_b5rp3_authority_is_narrow(active: dict[str, Any]) -> None:
+    if active.get("project_task_id") != EXPECTED_B5RP0_PROJECT_TASK:
+        raise RuntimeError("B5RP3 project task changed")
+    if active.get("parent_state") != EXPECTED_B5RP0_PARENT_STATE:
+        raise RuntimeError("B5RP3 terminal parent state changed")
+    authority = active.get("authority")
+    if not isinstance(authority, dict) or any(
+        authority.get(name) != value
+        for name, value in EXPECTED_B5RP3_AUTHORITY.items()
+    ):
+        raise RuntimeError("B5RP3 authority mapping or canonical paths changed")
+    if active.get("runnable_phases") != ["B5RP3"]:
+        raise RuntimeError("B5RP3 must be the sole runnable phase")
+    if any(
+        active.get(name) is not False
+        for name in (
+            "training_allowed",
+            "candidate_model_training_allowed",
+            "held_score_read_allowed",
+            "partial_fold_score_read_allowed",
+            "new_external_outcome_access_allowed",
+        )
+    ):
+        raise RuntimeError("B5RP3 requires training and outcome access closed")
+    if active.get("authorization", {}).get("neural_training_allowed") is not False:
+        raise RuntimeError("B5RP3 neural training authority is open")
+    if active.get("authorization", {}).get("screen_allowed") is not False:
+        raise RuntimeError("B5RP3 screen authority is open")
+    if active.get("next_allowed_action") != EXPECTED_B5RP3_ACTION:
+        raise RuntimeError("B5RP3 action changed")
 
 
 def _assert_frozen_model(contract: dict[str, Any]) -> None:
@@ -401,6 +516,10 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
             assert_branch5_b5rp0_authority_is_narrow(active)
         elif phase == "B5RP1":
             assert_branch5_b5rp1_authority_is_narrow(active)
+        elif phase == "B5RP2":
+            assert_branch5_b5rp2_authority_is_narrow(active)
+        elif phase == "B5RP3":
+            assert_branch5_b5rp3_authority_is_narrow(active)
         else:
             raise RuntimeError("branch5 active phase is not validated")
     elif project_task_id == EXPECTED_V14_PROJECT_TASK:
