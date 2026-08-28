@@ -6,7 +6,10 @@ from __future__ import annotations
 import argparse
 import io
 import json
+import os
+import shutil
 import sys
+import tempfile
 from contextlib import nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
@@ -344,6 +347,54 @@ def _target_paths(output_dir: Path) -> dict[str, Path]:
     }
 
 
+def _write_exclusive(path: Path, payload: bytes) -> None:
+    with path.open("xb") as handle:
+        handle.write(payload)
+
+
+def _atomic_publish_artifacts(
+    output_dir: Path,
+    *,
+    candidate_bytes: bytes,
+    null_bytes: bytes,
+    audit_bytes: bytes,
+) -> None:
+    """Publish the exact RND1 trio with one same-filesystem directory rename."""
+
+    if output_dir.exists():
+        raise FileExistsError(f"refusing to overwrite distillation output {output_dir}")
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    staging_dir = Path(
+        tempfile.mkdtemp(
+            prefix=f".{output_dir.name}.publishing-",
+            dir=output_dir.parent,
+        )
+    )
+    payloads = {
+        CANDIDATE_CHECKPOINT: candidate_bytes,
+        NULL_CHECKPOINT: null_bytes,
+        AUDIT_NAME: audit_bytes,
+    }
+    try:
+        for name, payload in payloads.items():
+            _write_exclusive(staging_dir / name, payload)
+        observed = {path.name for path in staging_dir.iterdir()}
+        if observed != set(payloads) or any(
+            not (staging_dir / name).is_file()
+            or (staging_dir / name).stat().st_size != len(payload)
+            for name, payload in payloads.items()
+        ):
+            raise RuntimeError("staged RND1 artifact trio is incomplete")
+        if output_dir.exists():
+            raise FileExistsError(
+                f"refusing to overwrite distillation output {output_dir}"
+            )
+        os.replace(staging_dir, output_dir)
+    finally:
+        if staging_dir.exists():
+            shutil.rmtree(staging_dir)
+
+
 def _require_mnt_output(output_dir: Path) -> None:
     absolute = output_dir.expanduser().resolve()
     if absolute == Path("/mnt") or Path("/mnt") not in absolute.parents:
@@ -414,6 +465,8 @@ def run_pretraining(args: argparse.Namespace) -> dict[str, object]:
     source_manifest_path = Path(args.source_manifest)
     output_dir = Path(args.output_dir)
     _require_mnt_output(output_dir)
+    if output_dir.exists():
+        raise FileExistsError(f"refusing to overwrite distillation output {output_dir}")
     authority, source_manifest = validate_rnd1_source_authority(
         repo_root=repo_root,
         source_manifest_path=source_manifest_path,
@@ -421,9 +474,6 @@ def run_pretraining(args: argparse.Namespace) -> dict[str, object]:
         output_dir=output_dir,
     )
     paths = _target_paths(output_dir)
-    existing = [str(path) for path in paths.values() if path.exists()]
-    if existing:
-        raise FileExistsError(f"refusing to overwrite distillation artifacts: {existing}")
     if int(args.seed) != DISTILLATION_SEED:
         raise RuntimeError("distillation seed differs from frozen contract")
     if int(args.batch_size) != FROZEN_BATCH_SIZE:
@@ -499,15 +549,12 @@ def run_pretraining(args: argparse.Namespace) -> dict[str, object]:
         precision=str(training["precision"]),
     )
     audit_bytes = (json.dumps(audit, indent=2, sort_keys=True) + "\n").encode("utf-8")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    # Exclusive creation preserves the refuse-overwrite contract.
-    for path, payload in (
-        (paths["candidate_checkpoint"], candidate_bytes),
-        (paths["null_checkpoint"], null_bytes),
-        (paths["audit"], audit_bytes),
-    ):
-        with path.open("xb") as handle:
-            handle.write(payload)
+    _atomic_publish_artifacts(
+        output_dir,
+        candidate_bytes=candidate_bytes,
+        null_bytes=null_bytes,
+        audit_bytes=audit_bytes,
+    )
     return audit
 
 
