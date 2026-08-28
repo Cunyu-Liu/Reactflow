@@ -1,8 +1,8 @@
 schema_version: reactflow_delta.independent_rnet_distill_decision_ledger.v1
 project_task_id: reactflow_delta_independent_rnet_distill
 created_at: '2026-08-28T10:27:00+08:00'
-current_phase: RND1
-current_status: RNET_DISTILL_PAIRED_GPU_PRETRAIN_ONCE_ONLY
+current_phase: RND2
+current_status: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
 score_accessed: false
 partial_score_accessed: false
 new_external_outcome_accessed: false
@@ -146,4 +146,47 @@ decisions:
     current_rnd1_phase_unchanged: true
     current_rnd1_permissions_unchanged: true
 
-next_action: RUN_SINGLE_RND1_PAIRED_GPU_PRETRAIN_AND_VERIFY_REAL_CUDA_PLACEMENT_ONCE
+  - time: '2026-08-29T02:05:59+08:00'
+    event: RND1_PAIRED_PRETRAIN_EXACT_PASS
+    decision: CLOSE_RND1_AND_AUTHORIZE_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
+    experiment_id: RND1_RNET2_PAIRED_DISTILL_20260828
+    run_branch: codex/reactflow-delta-independent-rnet-distill-20260828
+    run_commit: 71ae9c6ea967a3ffdc40cf74808c73b0d5c2d89d
+    terminal_integration_commit: 5b43e09f29e6faccdb07c947cd83692ef701eba3
+    source_manifest: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source_binding/rnet2_teacher_source_manifest.json
+    pretrain_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd1_pretrain
+    controller_log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd1_rnet_distill_pretrain_20260828T1124.log
+    exit_file: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd1_rnet_distill_pretrain_20260828T1124.exit
+    exit_code: 0
+    artifact_count: 3
+    artifacts:
+      - independent_rnet_distill_candidate.pt
+      - independent_rnet_distill_null_shift17.pt
+      - independent_rnet_distill_pretrain_audit.json
+    distillation_seed: 20260828
+    data_order_seed: 20260828
+    distillation_epochs: 1
+    optimizer: ADAMW
+    learning_rate: 0.0002
+    weight_decay: 0.01
+    batch_size: 16
+    gradient_clip_norm: 1.0
+    physical_gpu: 6
+    device_requested: cuda:0
+    device_actual: cuda:0
+    precision: bfloat16
+    cpu_fallback: false
+    outcome_accessed: false
+    training_loss_accessed: false
+    scientific_metric_accessed: false
+    residual_heads_identical: true
+    pretrained_encoders_different: true
+    changed_encoder_tensor_count: 84
+    distill_head_excluded_from_downstream: true
+    source_manifest_status: RNET2_TEACHER_STRUCTURAL_SOURCE_BINDING_EXACT_PASS
+    terminal_validator_status: RND1_PAIRED_PRETRAIN_EXACT_PASS
+    authority_token: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
+    scientific_conclusion: ENGINEERING_PRETRAIN_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
+    next_step: RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
+
+next_action: RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE

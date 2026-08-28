@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260828-independent-rnet-distill
 date: 2026-08-28
-status: RNET_DISTILL_PAIRED_GPU_PRETRAIN_ONCE_ONLY
+status: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
 parent: orchestrator-260827-v14-wt-profile
 formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
 formal_phase_order: [RND6P, RND6S, RND6Q, RND6T]
@@ -117,3 +117,11 @@ not authorize revival of any closed family.
   pre-result four-of-five matched-null seed-stability rule. This preparation did
   not change the active RND1 token, runnable phase, permissions or next action
   and did not authorize RND6.
+- 2026-08-29: The single frozen RND1 paired CUDA pretraining run exited zero on
+  physical GPU 6 mapped to logical `cuda:0`. The loss-blind terminal validator
+  cross-bound the exact three artifacts, confirmed no CPU fallback or outcome,
+  loss, or scientific-metric access, preserved identical residual heads, and
+  found 84 changed encoder tensors between the aligned and shift17 students.
+  Exact status is `RND1_PAIRED_PRETRAIN_EXACT_PASS`; this is engineering
+  pretraining evidence only. RND1 is closed and exactly one seed-0 folds 0/1,
+  3+3 epoch RND2 CUDA engineering smoke is authorized without score access.
