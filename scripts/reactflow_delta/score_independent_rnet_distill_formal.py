@@ -28,6 +28,7 @@ from scripts.reactflow_delta.assemble_independent_rnet_distill_formal import (
     FORMAL_PREDICTION_SCHEMA,
     MERGED_PATH,
     SCHEMA as ASSEMBLY_SCHEMA,
+    _expected_absolute,
 )
 from scripts.reactflow_delta.m2_universe_v1 import M2Universe
 from scripts.reactflow_delta.merge_independent_rnet_distill import (
@@ -295,6 +296,71 @@ def _validated_assembly_rows(assembly: dict[str, Any]) -> dict[int, dict[str, An
     return by_fold
 
 
+def _validate_assembly_against_sources(
+    *,
+    fold: int,
+    sources: list[dict[str, np.ndarray]],
+    assembled: dict[str, np.ndarray],
+) -> None:
+    """Prove the scored payload is the frozen equal-seed assembly."""
+
+    if len(sources) != len(EXPECTED_SEEDS):
+        raise ScoreIntegrityError(f"RND6P assembly fold{fold} source count changed")
+    reference = sources[0]
+    fixed_fields = (
+        "feature41_point",
+        "v8_point",
+        *(f"feature41_{suffix}" for suffix in ("weights", "locations", "scales", "expected_absolute_delta")),
+        *(f"historical_v10_{suffix}" for suffix in ("weights", "locations", "scales", "expected_absolute_delta")),
+    )
+    for field in fixed_fields:
+        if any(not np.array_equal(source[field], reference[field]) for source in sources[1:]):
+            raise ScoreIntegrityError(
+                f"RND6P assembly fold{fold} fixed source {field} differs by seed"
+            )
+        if not np.array_equal(assembled[field], reference[field]):
+            raise ScoreIntegrityError(
+                f"RND6P assembly fold{fold} fixed field {field} differs from sources"
+            )
+
+    for name in ("candidate", "null"):
+        expected_point = np.mean(
+            [np.asarray(source[f"{name}_point"], dtype=np.float64) for source in sources],
+            axis=0,
+        )
+        expected_weights = np.concatenate(
+            [
+                np.asarray(source[f"{name}_weights"], dtype=np.float64)
+                / len(EXPECTED_SEEDS)
+                for source in sources
+            ],
+            axis=1,
+        )
+        expected_locations = np.concatenate(
+            [np.asarray(source[f"{name}_locations"], dtype=np.float64) for source in sources],
+            axis=1,
+        )
+        expected_scales = np.concatenate(
+            [np.asarray(source[f"{name}_scales"], dtype=np.float64) for source in sources],
+            axis=1,
+        )
+        expected_absolute = _expected_absolute(
+            expected_weights, expected_locations, expected_scales
+        )
+        expected = {
+            f"{name}_point": expected_point,
+            f"{name}_weights": expected_weights,
+            f"{name}_locations": expected_locations,
+            f"{name}_scales": expected_scales,
+            f"{name}_expected_absolute_delta": expected_absolute,
+        }
+        for field, values in expected.items():
+            if not np.array_equal(assembled[field], values):
+                raise ScoreIntegrityError(
+                    f"RND6P assembly fold{fold} {field} is not the exact equal-seed value"
+                )
+
+
 def load_complete_formal_predictions(
     merged: dict[str, Any], assembly: dict[str, Any]
 ) -> tuple[
@@ -350,6 +416,11 @@ def load_complete_formal_predictions(
             map(str, source_predictions[(fold, 0)]["keys"])
         ):
             raise ScoreIntegrityError(f"RND6P assembly fold{fold} keys differ from sources")
+        _validate_assembly_against_sources(
+            fold=fold,
+            sources=[source_predictions[(fold, seed)] for seed in EXPECTED_SEEDS],
+            assembled=prediction,
+        )
         assembled_predictions[fold] = prediction
     return source_predictions, assembled_predictions
 

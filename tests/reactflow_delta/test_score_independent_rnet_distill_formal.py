@@ -7,6 +7,9 @@ import pytest
 import yaml
 
 import scripts.reactflow_delta.score_independent_rnet_distill_formal as scorer
+from scripts.reactflow_delta.assemble_independent_rnet_distill_formal import (
+    _assemble_fold_payload,
+)
 
 
 def _active() -> dict:
@@ -112,4 +115,32 @@ def test_formal_prediction_validation_rejects_non_equal_component_weights() -> N
             fold=3,
             seed=-1,
             source_components=False,
+        )
+
+
+def test_scoring_revalidates_exact_equal_seed_assembly_against_sources() -> None:
+    fold = 3
+    sources = {
+        (fold, seed): _prediction(fold=fold, seed=seed, assembled=False)
+        for seed in range(5)
+    }
+    for seed in range(5):
+        sources[(fold, seed)]["candidate_point"][:] = float(seed)
+        sources[(fold, seed)]["null_point"][:] = float(seed + 10)
+        sources[(fold, seed)]["candidate_locations"][:] = float(seed)
+        sources[(fold, seed)]["null_locations"][:] = float(seed + 10)
+    assembled = _assemble_fold_payload(sources, fold=fold)
+    scorer._validate_assembly_against_sources(
+        fold=fold,
+        sources=[sources[(fold, seed)] for seed in range(5)],
+        assembled=assembled,
+    )
+
+    changed = {name: np.asarray(value).copy() for name, value in assembled.items()}
+    changed["candidate_point"][0] += 0.125
+    with pytest.raises(scorer.ScoreIntegrityError, match="not the exact equal-seed value"):
+        scorer._validate_assembly_against_sources(
+            fold=fold,
+            sources=[sources[(fold, seed)] for seed in range(5)],
+            assembled=changed,
         )
