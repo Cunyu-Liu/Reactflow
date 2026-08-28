@@ -17,7 +17,7 @@ from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
     EXPECTED_EXPERIMENT_ID,
     EXPECTED_PREDICTION_FIELDS,
     EXPECTED_SCHEDULE,
-    EXPECTED_SEED,
+    EXPECTED_SEEDS,
     FOLD_SCHEMA,
     FORBIDDEN_PREDICTION_FIELDS,
     PREDICTION_SCHEMA,
@@ -33,6 +33,7 @@ SCHEMA = "reactflow_delta.independent_rnet_distill_complete_unscored_merge.v1"
 STATUS = {
     "RND2": "RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS",
     "RND3": "RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS",
+    "RND6P": "RND6P_COMPLETE_UNSCORED_FORMAL_MERGE_PASS",
 }
 EXPECTED_MERGED_FIELDS = frozenset(
     {"schema_version", "phase", "status", "folds", "merge_integrity"}
@@ -355,56 +356,79 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
     if not input_dir.is_dir():
         raise FileNotFoundError(f"independent RNet input directory is missing: {input_dir}")
     expected_folds = EXPECTED_FOLDS[phase]
-    expected_seed = EXPECTED_SEED
+    expected_seeds = EXPECTED_SEEDS[phase]
     expected_names: set[str] = set()
-    for fold in expected_folds:
-        expected_names.update(
-            path.name for path in _expected_paths(input_dir, fold, expected_seed).values()
-        )
+    for seed in expected_seeds:
+        for fold in expected_folds:
+            expected_names.update(
+                path.name for path in _expected_paths(input_dir, fold, seed).values()
+            )
     _reject_unexpected_basenames(input_dir, expected_names)
 
     rows: list[dict[str, Any]] = []
-    all_keys: set[str] = set()
-    held_puzzles: set[str] = set()
+    keys_by_seed = {seed: set() for seed in expected_seeds}
+    held_puzzles_by_seed = {seed: set() for seed in expected_seeds}
+    reference_by_fold: dict[int, tuple[str, tuple[str, ...], int]] = {}
     point_parameter_count: int | None = None
     run_git_commit: str | None = None
-    for fold in expected_folds:
-        paths = _expected_paths(input_dir, fold, expected_seed)
-        match = _RESULT_RE.fullmatch(paths["result"].name)
-        if match is None or tuple(map(int, match.groups())) != (fold, expected_seed):
-            raise RuntimeError(f"fold {fold} result basename differs")
-        if not paths["result"].is_file():
-            raise FileNotFoundError(f"missing fold result: {paths['result']}")
-        row = _read_json(paths["result"])
-        keys = _validate_row(
-            row,
-            input_dir=input_dir,
-            phase=phase,
-            fold=fold,
-            seed=expected_seed,
-        )
-        duplicate_keys = all_keys & set(keys)
-        if duplicate_keys:
-            raise RuntimeError(f"biological keys repeat across folds: {len(duplicate_keys)}")
-        all_keys.update(keys)
-        held_puzzle = str(row["held_puzzle"])
-        if held_puzzle in held_puzzles:
-            raise RuntimeError(f"held puzzle repeats across folds: {held_puzzle}")
-        held_puzzles.add(held_puzzle)
-        current_count = int(row["point_parameter_counts"]["candidate"])
-        if point_parameter_count is None:
-            point_parameter_count = current_count
-        elif current_count != point_parameter_count:
-            raise RuntimeError("point parameter count differs across folds")
-        current_git_commit = row["git_commit"]
-        if run_git_commit is None:
-            run_git_commit = current_git_commit
-        elif current_git_commit != run_git_commit:
-            raise RuntimeError("git_commit differs across folds")
-        rows.append(row)
+    for seed in expected_seeds:
+        for fold in expected_folds:
+            paths = _expected_paths(input_dir, fold, seed)
+            match = _RESULT_RE.fullmatch(paths["result"].name)
+            if match is None or tuple(map(int, match.groups())) != (fold, seed):
+                raise RuntimeError(f"fold {fold} seed {seed} result basename differs")
+            if not paths["result"].is_file():
+                raise FileNotFoundError(f"missing fold result: {paths['result']}")
+            row = _read_json(paths["result"])
+            keys = _validate_row(
+                row,
+                input_dir=input_dir,
+                phase=phase,
+                fold=fold,
+                seed=seed,
+            )
 
-    if len(rows) != len(expected_folds):
-        raise RuntimeError("independent RNet fold universe is incomplete")
+            duplicate_keys = keys_by_seed[seed] & set(keys)
+            if duplicate_keys:
+                raise RuntimeError(
+                    "biological keys repeat across folds within "
+                    f"seed {seed}: {len(duplicate_keys)}"
+                )
+            keys_by_seed[seed].update(keys)
+            held_puzzle = str(row["held_puzzle"])
+            if held_puzzle in held_puzzles_by_seed[seed]:
+                raise RuntimeError(
+                    f"held puzzle repeats across folds within seed {seed}: {held_puzzle}"
+                )
+            held_puzzles_by_seed[seed].add(held_puzzle)
+
+            reference = (
+                held_puzzle,
+                keys,
+                int(row["n_registered_prediction_rows"]),
+            )
+            if fold not in reference_by_fold:
+                reference_by_fold[fold] = reference
+            elif reference_by_fold[fold] != reference:
+                raise RuntimeError(
+                    f"fold {fold} held puzzle, key order, or row count differs across seeds"
+                )
+
+            current_count = int(row["point_parameter_counts"]["candidate"])
+            if point_parameter_count is None:
+                point_parameter_count = current_count
+            elif current_count != point_parameter_count:
+                raise RuntimeError("point parameter count differs across fold-seed runs")
+            current_git_commit = row["git_commit"]
+            if run_git_commit is None:
+                run_git_commit = current_git_commit
+            elif current_git_commit != run_git_commit:
+                raise RuntimeError("git_commit differs across fold-seed runs")
+            rows.append(row)
+
+    expected_count = len(expected_folds) * len(expected_seeds)
+    if len(rows) != expected_count:
+        raise RuntimeError("independent RNet fold-seed universe is incomplete")
     result = {
         "schema_version": SCHEMA,
         "phase": phase,
