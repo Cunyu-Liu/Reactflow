@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260828-independent-rnet-distill
 date: 2026-08-28
-status: RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY
+status: RNET_DISTILL_PAIRED_GPU_PRETRAIN_ONCE_ONLY
 parent: orchestrator-260827-v14-wt-profile
 ---
 
@@ -67,3 +67,14 @@ not authorize revival of any closed family.
   verified exactly with the canonical shard reader. The project does not turn a
   47 GB rehash into a scientific Gate: it preserves the raw copy, discloses the
   stale metadata and binds child provenance plus every actual index/NPZ shape.
+- 2026-08-28: The non-destructive `/mnt/cunyuliu` teacher-cache copy completed
+  with 2,425 files, 49,798,728,468 bytes, zero deletions and exit 0. The focused
+  RND0 implementation passed 44 tests, eight Python compilation checks, three
+  shell syntax checks and clean authority validation; commit `d6a15a5` was
+  pushed with upstream 0/0.
+- 2026-08-28: The canonical target-free structural projection bound 208,905
+  records, 409 shards and 384-wide single features with exact status
+  `RNET2_TEACHER_STRUCTURAL_SOURCE_BINDING_EXACT_PASS`. It performed no live
+  teacher inference, read no OpenKnot outcome and did not rehash the 47 GB
+  cache. RND0 is closed and exactly one paired CUDA-only RND1 pretraining run
+  is authorized; score, smoke and screen access remain closed.
