@@ -45,7 +45,13 @@ def _write_pretrain_files(pretrain_dir: Path) -> None:
         (pretrain_dir / name).write_bytes(b"frozen")
 
 
-def _write_fold(input_dir: Path, *, phase: str, fold: int) -> None:
+def _write_fold(
+    input_dir: Path,
+    *,
+    phase: str,
+    fold: int,
+    experiment_id: str | None = None,
+) -> None:
     paths = merger._expected_paths(input_dir, fold, 0)
     _write_prediction(paths["prediction"], fold=fold)
     for name, path in paths.items():
@@ -54,7 +60,9 @@ def _write_fold(input_dir: Path, *, phase: str, fold: int) -> None:
     point_epochs, calibration_epochs = (3, 3) if phase == "RND2" else (40, 40)
     row = {
         "schema_version": FOLD_SCHEMA,
-        "experiment_id": f"{phase}_TEST",
+        "experiment_id": (
+            experiment_id or merger.EXPECTED_EXPERIMENT_ID[phase]
+        ),
         "phase": phase,
         "evidence_status": EVIDENCE_STATUS[phase],
         "metric_eligibility": EVIDENCE_STATUS[phase],
@@ -117,20 +125,30 @@ def _write_fold(input_dir: Path, *, phase: str, fold: int) -> None:
     )
 
 
-def test_rnd2_complete_target_free_merge_passes(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize(
+    ("phase", "expected_folds"),
+    (("RND2", (0, 1)), ("RND3", tuple(range(20)))),
+)
+def test_complete_target_free_merge_passes_with_exact_experiment_id(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    phase: str,
+    expected_folds: tuple[int, ...],
 ) -> None:
-    input_dir = tmp_path / "rnd2"
+    input_dir = tmp_path / phase.lower()
     input_dir.mkdir()
     pretrain_dir = tmp_path / "pretrain"
     _write_pretrain_files(pretrain_dir)
     monkeypatch.setattr(merger, "PRETRAIN_DIR", pretrain_dir)
-    for fold in (0, 1):
-        _write_fold(input_dir, phase="RND2", fold=fold)
-    merged = merger.merge_folds(input_dir, "RND2")
+    for fold in expected_folds:
+        _write_fold(input_dir, phase=phase, fold=fold)
+    merged = merger.merge_folds(input_dir, phase)
     assert frozenset(merged) == merger.EXPECTED_MERGED_FIELDS
-    assert merged["status"] == merger.STATUS["RND2"]
-    assert [row["outer_fold"] for row in merged["folds"]] == [0, 1]
+    assert merged["status"] == merger.STATUS[phase]
+    assert [row["outer_fold"] for row in merged["folds"]] == list(expected_folds)
+    assert {row["experiment_id"] for row in merged["folds"]} == {
+        merger.EXPECTED_EXPERIMENT_ID[phase]
+    }
     assert merged["merge_integrity"] == merger.MERGE_INTEGRITY
 
 
@@ -169,6 +187,42 @@ def test_merge_rejects_prediction_target_field(
     )
     with pytest.raises(RuntimeError, match="prediction checks failed"):
         merger.merge_folds(input_dir, "RND2")
+
+
+def test_main_rejects_mismatched_experiment_id_without_writing_merge(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    input_dir = tmp_path / "rnd2"
+    input_dir.mkdir()
+    pretrain_dir = tmp_path / "pretrain"
+    _write_pretrain_files(pretrain_dir)
+    monkeypatch.setattr(merger, "PRETRAIN_DIR", pretrain_dir)
+    _write_fold(
+        input_dir,
+        phase="RND2",
+        fold=0,
+        experiment_id=merger.EXPECTED_EXPERIMENT_ID["RND3"],
+    )
+    _write_fold(input_dir, phase="RND2", fold=1)
+    monkeypatch.setattr(merger, "assert_run_authority", lambda *_: None)
+    monkeypatch.setattr(merger, "validate_merge_cli_binding", lambda *_: {})
+    out_json = input_dir / merger.MERGE_FILENAME
+
+    with pytest.raises(RuntimeError, match="fold 0 experiment_id differs"):
+        merger.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--input-dir",
+                str(input_dir),
+                "--phase",
+                "RND2",
+                "--out-json",
+                str(out_json),
+            ]
+        )
+
+    assert not out_json.exists()
 
 
 def test_merger_binds_input_and_output_to_active_phase(tmp_path: Path) -> None:

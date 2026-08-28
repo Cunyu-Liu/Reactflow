@@ -14,6 +14,7 @@ import numpy as np
 from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
     EVIDENCE_STATUS,
     EXPECTED_FOLDS,
+    EXPECTED_EXPERIMENT_ID,
     EXPECTED_PREDICTION_FIELDS,
     EXPECTED_SCHEDULE,
     EXPECTED_SEED,
@@ -234,6 +235,12 @@ def _validate_row(
         )
     if row["schema_version"] != FOLD_SCHEMA or row["phase"] != phase:
         raise RuntimeError(f"fold {fold} schema or phase differs")
+    expected_experiment_id = EXPECTED_EXPERIMENT_ID[phase]
+    if row["experiment_id"] != expected_experiment_id:
+        raise RuntimeError(
+            f"fold {fold} experiment_id differs: "
+            f"observed={row['experiment_id']!r} expected={expected_experiment_id!r}"
+        )
     if row["evidence_status"] != EVIDENCE_STATUS[phase] or row[
         "metric_eligibility"
     ] != EVIDENCE_STATUS[phase]:
