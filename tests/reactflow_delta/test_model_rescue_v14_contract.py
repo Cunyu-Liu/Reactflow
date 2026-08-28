@@ -19,10 +19,13 @@ from scripts.reactflow_delta.validate_model_rescue_v14_contract import (
     EXPECTED_B5RP2_TOKEN,
     EXPECTED_B5RP3_ACTION,
     EXPECTED_B5RP3_AUTHORITY,
+    EXPECTED_B5RP3_TERMINAL_ACTION,
+    EXPECTED_B5RP3_TERMINAL_AUTHORITY,
     assert_branch5_b5rp0_authority_is_narrow,
     assert_branch5_b5rp1_authority_is_narrow,
     assert_branch5_b5rp2_authority_is_narrow,
     assert_branch5_b5rp3_authority_is_narrow,
+    assert_branch5_b5rp3_terminal_authority_is_narrow,
     assert_outcome_authority_is_narrow,
     validate_contract,
 )
@@ -425,6 +428,92 @@ def test_validator_rejects_broadened_or_changed_branch5_b5rp3_authority(
         active["next_allowed_action"] = "RUN_SOMETHING_ELSE"
     with pytest.raises(RuntimeError, match="B5RP3"):
         assert_branch5_b5rp3_authority_is_narrow(active)
+
+
+def _b5rp3_terminal_active() -> dict[str, object]:
+    return {
+        "project_task_id": EXPECTED_B5RP0_PROJECT_TASK,
+        "parent_state": copy.deepcopy(EXPECTED_B5RP0_PARENT_STATE),
+        "authority": copy.deepcopy(EXPECTED_B5RP3_TERMINAL_AUTHORITY),
+        "authorization": {
+            "implementation_allowed": False,
+            "neural_training_allowed": False,
+            "screen_allowed": False,
+            "formal_confirmation_allowed": False,
+        },
+        "runnable_phases": [],
+        "training_allowed": False,
+        "candidate_model_training_allowed": False,
+        "held_score_read_allowed": False,
+        "partial_fold_score_read_allowed": False,
+        "new_external_outcome_access_allowed": False,
+        "next_allowed_action": EXPECTED_B5RP3_TERMINAL_ACTION,
+    }
+
+
+def test_validator_accepts_exact_branch5_b5rp3_terminal_authority() -> None:
+    assert_branch5_b5rp3_terminal_authority_is_narrow(_b5rp3_terminal_active())
+
+
+@pytest.mark.parametrize(
+    "failure",
+    (
+        "parent",
+        "state",
+        "runnable",
+        "training",
+        "held",
+        "path",
+        "score_status",
+        "qualification_status",
+        "route",
+        "implementation",
+        "neural_training",
+        "screen",
+        "formal",
+        "action",
+    ),
+)
+def test_validator_rejects_broadened_or_changed_branch5_b5rp3_terminal_authority(
+    failure: str,
+) -> None:
+    active = _b5rp3_terminal_active()
+    authority = active["authority"]
+    authorization = active["authorization"]
+    assert isinstance(authority, dict)
+    assert isinstance(authorization, dict)
+    if failure == "parent":
+        parent = active["parent_state"]
+        assert isinstance(parent, dict)
+        parent["post_v14_first_matching_branch_id"] = "4"
+    elif failure == "state":
+        authority["current_authority_state"] = "NOT_TERMINAL"
+    elif failure == "runnable":
+        active["runnable_phases"] = ["B5RP3"]
+    elif failure == "training":
+        active["candidate_model_training_allowed"] = True
+    elif failure == "held":
+        active["held_score_read_allowed"] = EXPECTED_B5RP2_TOKEN
+    elif failure == "path":
+        authority["qualification_path"] = "/mnt/cunyuliu/wrong.json"
+    elif failure == "score_status":
+        authority["complete_score_status"] = "PASS"
+    elif failure == "qualification_status":
+        authority["qualification_status"] = "PASS"
+    elif failure == "route":
+        authority["route_after_qualification"] = "P1"
+    elif failure == "implementation":
+        authorization["implementation_allowed"] = True
+    elif failure == "neural_training":
+        authorization["neural_training_allowed"] = True
+    elif failure == "screen":
+        authorization["screen_allowed"] = True
+    elif failure == "formal":
+        authorization["formal_confirmation_allowed"] = True
+    else:
+        active["next_allowed_action"] = "RUN_SOMETHING_ELSE"
+    with pytest.raises(RuntimeError, match="B5RP3 terminal"):
+        assert_branch5_b5rp3_terminal_authority_is_narrow(active)
 
 
 def test_v14_freezes_matched_null_and_top_journal_gates() -> None:

@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260827-v14-wt-profile
 date: 2026-08-27
-status: B5RP3_COMPLETE_SCORE_QUALIFIER_ONCE_AUTHORIZED
+status: TERMINAL_POST_V14_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
 parent: orchestrator-260827-post-v13
 ---
 
@@ -59,3 +59,5 @@ The hypothesis is falsified if the candidate misses any frozen V14M3 top-journal
 - 2026-08-28: Training and screen authority are now closed. Exactly one complete held-score read is authorized from the canonical B5RP1 merge under `POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY`; the complete score does not yet exist, partial score and external outcomes remain closed, and B5RP3 qualification is not yet authorized.
 - 2026-08-28: The single B5RP2 scorer completed with exit code zero and canonical `BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS`: all 20 score rows are present, `complete_valid_score=true`, and there are no integrity errors. No metric direction was inspected before qualification; partial score and external outcomes remained closed.
 - 2026-08-28: B5RP2 held-score authority is consumed and closed. B5RP3 now authorizes exactly one qualifier read of the canonical complete score under exact phase, score path and qualification output path bindings; all training, screen, held-score, partial-score and external-outcome authority remains closed.
+- 2026-08-28: The single B5RP3 qualifier completed with canonical `BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3` and intact 20-fold coverage. The aligned route beat the shift-17 control for signed and point-absolute errors by 3.65% and 3.26% with positive paired intervals and 16/20 and 17/20 positive puzzles, establishing that the aligned cross-construct signal is real. It did not improve the frozen V13 parent: point absolute worsened by 1.73% with an interval crossing zero and 7/20 positive puzzles, while signed error worsened by 5.50% with a fully negative interval and 0/20 positive puzzles. Seven of thirteen frozen Gates passed, Puzzle-Set V5 is not eligible, and the exact terminal route is `P3_STOP_MODEL_RESCUE`.
+- 2026-08-28: Every branch-5 training, implementation, screen, held-score, partial-score and external-outcome authority is closed. This result is post-hoc development route-probe evidence only and does not support P1 activation, formal confirmation, SOTA, publication readiness or external replication.

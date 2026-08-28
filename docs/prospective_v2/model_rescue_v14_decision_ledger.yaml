@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-updated_at: '2026-08-28T08:40:01+08:00'
+updated_at: '2026-08-28T08:44:28+08:00'
 
 immutable_parent_verdicts:
   v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -70,7 +70,7 @@ post_v14_branch5_route_probe_state:
   B5RP0: SAFE_SOURCE_MANIFEST_EXACT_PASS
   B5RP1: COMPLETE_UNSCORED_MERGE_EXACT_PASS
   B5RP2: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
-  B5RP3: QUALIFIER_ONCE_AUTHORIZED
+  B5RP3: TERMINAL_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
 
 qualification_rules:
   implementation_or_smoke_pass_is_scientific_pass: false
@@ -374,3 +374,79 @@ events:
     partial_score_read_allowed: false
     external_outcome_accessed: false
     next_action: RUN_SINGLE_POST_V14_BRANCH5_COMPLETE_QUALIFIER_ONCE
+  - at: '2026-08-28T08:39:54+08:00'
+    phase: B5RP3
+    event: BRANCH5_ROUTE_PROBE_QUALIFICATION_TERMINAL
+    status: BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
+    qualifier_exit_code: 1
+    authority_commit: ce93bd8b604716c2aa5ef4b0115c9265cb013372
+    complete_score: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json
+    qualification: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_qualification.json
+    integrity_passed: true
+    integrity_errors: []
+    gate_passed: false
+    gates_passed: 7
+    gates_total: 13
+    puzzle_set_v5_eligible: false
+    coverage:
+      folds: 20
+      registered_expected: 2473752
+      registered_observed: 2473752
+      qualified_positions: 1383900
+      registered_prediction_coverage: 1.0
+      failure_rate: 0.0
+      unexpected_prediction_keys: 0
+    comparisons:
+      point_absolute_aligned_vs_shift17:
+        aligned_mean: 0.147489499163552
+        comparator_mean: 0.15245794474813815
+        relative_gain: 0.03258895817331154
+        ci95: [0.001210232972278528, 0.008726658196893704]
+        positive_puzzles: 17
+        gate_triplet_passed: true
+      point_absolute_aligned_vs_v13_parent:
+        aligned_mean: 0.147489499163552
+        comparator_mean: 0.14498197729029177
+        relative_gain: -0.01729540402280162
+        ci95: [-0.005523597252004483, 0.0005085535054839925]
+        positive_puzzles: 7
+        gate_triplet_passed: false
+      signed_aligned_vs_shift17:
+        aligned_mean: 0.1817455777695749
+        comparator_mean: 0.18862633667409714
+        relative_gain: 0.03647825126567875
+        ci95: [0.0007698405201866836, 0.012991677288857778]
+        positive_puzzles: 16
+        gate_triplet_passed: true
+      signed_aligned_vs_v13_parent:
+        aligned_mean: 0.1817455777695749
+        comparator_mean: 0.17226978785541186
+        relative_gain: -0.05500552378990654
+        ci95: [-0.014628261914081332, -0.0043233179142446905]
+        positive_puzzles: 0
+        gate_triplet_passed: false
+    supports: >-
+      POSITION_ALIGNED_CROSS_CONSTRUCT_PROJECTION_OUTPERFORMS_SHIFT17_CONTROL
+      FOR_SIGNED_AND_POINT_ABSOLUTE_DEVELOPMENT_METRICS
+    does_not_support: >-
+      IMPROVEMENT_OVER_FROZEN_V13_PARENT P1_ACTIVATION FORMAL_CONFIRMATION
+      TOP_JOURNAL_GATE_PASS SOTA PUBLICATION_READY OR EXTERNAL_REPLICATION
+    evidence_status: POST_HOC_DEVELOPMENT_ROUTE_PROBE_ONLY
+    score_accessed: true
+    partial_score_accessed: false
+    external_outcome_accessed: false
+    next_action: P3_STOP_MODEL_RESCUE
+  - at: '2026-08-28T08:44:28+08:00'
+    phase: B5RP3
+    event: P3_TERMINAL_ALL_BRANCH5_AUTHORITIES_CLOSED
+    status: TERMINAL_POST_V14_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
+    training_allowed: false
+    candidate_model_training_allowed: false
+    neural_training_allowed: false
+    implementation_allowed: false
+    screen_allowed: false
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    runnable_phases: []
+    next_action: P3_STOP_MODEL_RESCUE

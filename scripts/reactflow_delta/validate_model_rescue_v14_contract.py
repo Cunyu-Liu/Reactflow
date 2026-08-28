@@ -130,6 +130,26 @@ EXPECTED_B5RP3_AUTHORITY = {
     ),
     "binding_status": "B5RP3_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY",
 }
+EXPECTED_B5RP3_TERMINAL_ACTION = "P3_STOP_MODEL_RESCUE"
+EXPECTED_B5RP3_TERMINAL_AUTHORITY = {
+    "current_phase": "B5RP3",
+    "current_authority_state": (
+        "TERMINAL_POST_V14_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3"
+    ),
+    "current_runnable_phase": "NONE",
+    "complete_score_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json"
+    ),
+    "complete_score_status": "BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS",
+    "qualification_path": (
+        "/mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/"
+        "b5rp1_seed0/puzzle_set_branch5_probe_qualification.json"
+    ),
+    "qualification_status": "BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3",
+    "route_after_qualification": "P3_STOP_MODEL_RESCUE",
+    "binding_status": "B5RP3_TERMINAL_COMPLETE_FAIL_P3_ALL_CLOSED",
+}
 POST_V14_ONCE_ONLY_AUTHORITIES: dict[str, dict[str, Any]] = {
     "POST_V14_FIRST_MATCHING_ROUTER_ONCE_ONLY": {
         "next_allowed_action": "RUN_SINGLE_POST_V14_FIRST_MATCHING_ROUTER",
@@ -392,6 +412,49 @@ def assert_branch5_b5rp3_authority_is_narrow(active: dict[str, Any]) -> None:
         raise RuntimeError("B5RP3 action changed")
 
 
+def assert_branch5_b5rp3_terminal_authority_is_narrow(
+    active: dict[str, Any],
+) -> None:
+    if active.get("project_task_id") != EXPECTED_B5RP0_PROJECT_TASK:
+        raise RuntimeError("B5RP3 terminal project task changed")
+    if active.get("parent_state") != EXPECTED_B5RP0_PARENT_STATE:
+        raise RuntimeError("B5RP3 terminal parent state changed")
+    authority = active.get("authority")
+    if not isinstance(authority, dict) or any(
+        authority.get(name) != value
+        for name, value in EXPECTED_B5RP3_TERMINAL_AUTHORITY.items()
+    ):
+        raise RuntimeError(
+            "B5RP3 terminal authority, result binding or route changed"
+        )
+    if active.get("runnable_phases") != []:
+        raise RuntimeError("B5RP3 terminal state must expose no runnable phase")
+    if any(
+        active.get(name) is not False
+        for name in (
+            "training_allowed",
+            "candidate_model_training_allowed",
+            "held_score_read_allowed",
+            "partial_fold_score_read_allowed",
+            "new_external_outcome_access_allowed",
+        )
+    ):
+        raise RuntimeError("B5RP3 terminal state requires every runtime authority closed")
+    authorization = active.get("authorization", {})
+    if any(
+        authorization.get(name) is not False
+        for name in (
+            "implementation_allowed",
+            "neural_training_allowed",
+            "screen_allowed",
+            "formal_confirmation_allowed",
+        )
+    ):
+        raise RuntimeError("B5RP3 terminal authorization is not fully closed")
+    if active.get("next_allowed_action") != EXPECTED_B5RP3_TERMINAL_ACTION:
+        raise RuntimeError("B5RP3 terminal action changed")
+
+
 def _assert_frozen_model(contract: dict[str, Any]) -> None:
     models = contract["models"]
     if models["candidate"]["id"] != (
@@ -519,7 +582,19 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         elif phase == "B5RP2":
             assert_branch5_b5rp2_authority_is_narrow(active)
         elif phase == "B5RP3":
-            assert_branch5_b5rp3_authority_is_narrow(active)
+            authority_state = active.get("authority", {}).get(
+                "current_authority_state"
+            )
+            if authority_state == EXPECTED_B5RP3_AUTHORITY[
+                "current_authority_state"
+            ]:
+                assert_branch5_b5rp3_authority_is_narrow(active)
+            elif authority_state == EXPECTED_B5RP3_TERMINAL_AUTHORITY[
+                "current_authority_state"
+            ]:
+                assert_branch5_b5rp3_terminal_authority_is_narrow(active)
+            else:
+                raise RuntimeError("B5RP3 authority state is not validated")
         else:
             raise RuntimeError("branch5 active phase is not validated")
     elif project_task_id == EXPECTED_V14_PROJECT_TASK:

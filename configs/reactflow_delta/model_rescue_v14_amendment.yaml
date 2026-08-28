@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_amendment.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-contract_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL_BRANCH5_B5RP3_QUALIFIER_ONCE
+contract_status: TERMINAL_V14M3_AND_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
 created_at: '2026-08-27T02:30:00+08:00'
 
 parent:
@@ -268,7 +268,7 @@ post_v14_branch5_route_probe:
   B5RP0: SAFE_SOURCE_MANIFEST_EXACT_PASS
   B5RP1: COMPLETE_UNSCORED_MERGE_EXACT_PASS
   B5RP2: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
-  B5RP3: QUALIFIER_ONCE_AUTHORIZED
+  B5RP3: TERMINAL_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
   source_manifest_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
   source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS
   prediction_token: POST_V14_BRANCH5_LINEAR_CROSS_CONSTRUCT_ROUTE_PREDICTION_ONLY
@@ -279,6 +279,11 @@ post_v14_branch5_route_probe:
   complete_score_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json
   complete_score_status: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
   qualification_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_qualification.json
+  qualification_status: BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
+  gates_passed: 7
+  gates_total: 13
+  puzzle_set_v5_eligible: false
+  terminal_route: P3_STOP_MODEL_RESCUE
 
 resource_policy:
   physical_gpus_allowed: [0, 1, 2, 3, 4, 5, 6, 7]
