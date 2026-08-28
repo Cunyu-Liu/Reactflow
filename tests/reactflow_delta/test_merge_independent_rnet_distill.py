@@ -51,6 +51,7 @@ def _write_fold(
     phase: str,
     fold: int,
     experiment_id: str | None = None,
+    git_commit: str = "a" * 40,
 ) -> None:
     paths = merger._expected_paths(input_dir, fold, 0)
     _write_prediction(paths["prediction"], fold=fold)
@@ -68,7 +69,7 @@ def _write_fold(
         "metric_eligibility": EVIDENCE_STATUS[phase],
         "started_at_utc": "2026-08-28T00:00:00+00:00",
         "finished_at_utc": "2026-08-28T00:01:00+00:00",
-        "git_commit": "a" * 40,
+        "git_commit": git_commit,
         "command": ["python", "-m", "runner"],
         "outer_fold": fold,
         "held_puzzle": f"P{fold + 1:02d}",
@@ -223,6 +224,55 @@ def test_main_rejects_mismatched_experiment_id_without_writing_merge(
         )
 
     assert not out_json.exists()
+
+
+def test_main_rejects_mixed_git_commits_without_writing_merge(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    input_dir = tmp_path / "rnd2"
+    input_dir.mkdir()
+    pretrain_dir = tmp_path / "pretrain"
+    _write_pretrain_files(pretrain_dir)
+    monkeypatch.setattr(merger, "PRETRAIN_DIR", pretrain_dir)
+    _write_fold(input_dir, phase="RND2", fold=0, git_commit="a" * 40)
+    _write_fold(input_dir, phase="RND2", fold=1, git_commit="b" * 40)
+    monkeypatch.setattr(merger, "assert_run_authority", lambda *_: None)
+    monkeypatch.setattr(merger, "validate_merge_cli_binding", lambda *_: {})
+    out_json = input_dir / merger.MERGE_FILENAME
+
+    with pytest.raises(RuntimeError, match="git_commit differs across folds"):
+        merger.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--input-dir",
+                str(input_dir),
+                "--phase",
+                "RND2",
+                "--out-json",
+                str(out_json),
+            ]
+        )
+
+    assert not out_json.exists()
+
+
+@pytest.mark.parametrize("git_commit", ("", "g" * 40, "a" * 39))
+def test_merge_rejects_invalid_git_commit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, git_commit: str
+) -> None:
+    input_dir = tmp_path / "rnd2"
+    input_dir.mkdir()
+    pretrain_dir = tmp_path / "pretrain"
+    _write_pretrain_files(pretrain_dir)
+    monkeypatch.setattr(merger, "PRETRAIN_DIR", pretrain_dir)
+    _write_fold(input_dir, phase="RND2", fold=0, git_commit=git_commit)
+    _write_fold(input_dir, phase="RND2", fold=1)
+
+    with pytest.raises(
+        RuntimeError, match="git_commit is not a 40-character hex commit"
+    ):
+        merger.merge_folds(input_dir, "RND2")
 
 
 def test_merger_binds_input_and_output_to_active_phase(tmp_path: Path) -> None:

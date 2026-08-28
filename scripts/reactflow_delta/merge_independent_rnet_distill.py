@@ -114,6 +114,7 @@ PRETRAIN_DIR = Path(
 )
 _RESULT_RE = re.compile(r"^rnet_distill_fold_result_fold(\d+)_seed(\d+)\.json$")
 _PREDICTION_RE = re.compile(r"^rnet_distill_predictions_fold(\d+)_seed(\d+)\.npz$")
+_GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 MERGE_FILENAME = "rnet_distill_complete_unscored_merge.json"
 
 
@@ -247,6 +248,9 @@ def _validate_row(
         raise RuntimeError(f"fold {fold} evidence status differs")
     if int(row["outer_fold"]) != fold or int(row["seed"]) != seed:
         raise RuntimeError(f"fold {fold} identity differs")
+    git_commit = row["git_commit"]
+    if not isinstance(git_commit, str) or _GIT_COMMIT_RE.fullmatch(git_commit) is None:
+        raise RuntimeError(f"fold {fold} git_commit is not a 40-character hex commit")
     point_epochs, calibration_epochs = EXPECTED_SCHEDULE[phase]
     if int(row["point_epochs"]) != point_epochs or int(
         row["calibration_epochs"]
@@ -363,6 +367,7 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
     all_keys: set[str] = set()
     held_puzzles: set[str] = set()
     point_parameter_count: int | None = None
+    run_git_commit: str | None = None
     for fold in expected_folds:
         paths = _expected_paths(input_dir, fold, expected_seed)
         match = _RESULT_RE.fullmatch(paths["result"].name)
@@ -391,6 +396,11 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
             point_parameter_count = current_count
         elif current_count != point_parameter_count:
             raise RuntimeError("point parameter count differs across folds")
+        current_git_commit = row["git_commit"]
+        if run_git_commit is None:
+            run_git_commit = current_git_commit
+        elif current_git_commit != run_git_commit:
+            raise RuntimeError("git_commit differs across folds")
         rows.append(row)
 
     if len(rows) != len(expected_folds):
