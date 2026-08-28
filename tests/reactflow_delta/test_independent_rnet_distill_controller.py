@@ -39,14 +39,33 @@ def test_controller_freezes_schedules_and_cuda_mapping() -> None:
 
 def test_controller_is_missing_only_and_never_merges_after_worker_failure() -> None:
     text = SCRIPT.read_text(encoding="utf-8")
+    authority_check = text.index("assert_run_authority")
+    task_discovery = text.index("tasks=()")
+    stale_merge_guard = text.index(
+        'if ((${#tasks[@]} > 0)) && [[ -e "${merged}" ]]'
+    )
     task_block = text.index('if ((${#tasks[@]} > 0)); then')
     no_gpu_check = text.index('if ((${#gpus[@]} == 0)); then')
     merge_call = text.index("scripts.reactflow_delta.merge_independent_rnet_distill")
     failure_exit = text.index("if ((failed != 0)); then")
+    assert authority_check < task_discovery < stale_merge_guard < task_block
     assert task_block < no_gpu_check < failure_exit < merge_call
     assert "if ! task_is_complete" in text
     assert "if task_is_complete" in text
     assert "rnet_distill_complete_unscored_merge.json" in text
+    assert "missing prediction tasks alongside an existing merge" in text
+    assert "--validate-existing" in text
+
+
+def test_screen_controller_binds_requested_phase_before_any_recovery_path() -> None:
+    text = SCRIPT.read_text(encoding="utf-8")
+    assert "assert_run_authority" in text
+    assert "'${phase}'" in text
+    assert "-m scripts.reactflow_delta.validate_independent_rnet_distill_contract" not in text
+    authority_check = text.index("assert_run_authority")
+    task_discovery = text.index("tasks=()")
+    existing_merge_validation = text.rindex("--validate-existing")
+    assert authority_check < task_discovery < existing_merge_validation
 
 
 def test_formal_controller_freezes_exact_hundred_task_cuda_queue() -> None:

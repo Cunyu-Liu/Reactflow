@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -363,6 +365,7 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
             expected_names.update(
                 path.name for path in _expected_paths(input_dir, fold, seed).values()
             )
+    expected_names.add(MERGE_FILENAME)
     _reject_unexpected_basenames(input_dir, expected_names)
 
     rows: list[dict[str, Any]] = []
@@ -441,12 +444,56 @@ def merge_folds(input_dir: Path, phase: str) -> dict[str, Any]:
     return result
 
 
+def validate_existing_merge(
+    input_dir: Path, phase: str, out_json: Path
+) -> dict[str, Any]:
+    """Revalidate an existing canonical merge without rewriting it."""
+
+    if not out_json.is_file():
+        raise FileNotFoundError(
+            f"existing independent RNet merge is not a regular file: {out_json}"
+        )
+    observed = _read_json(out_json)
+    expected = merge_folds(input_dir, phase)
+    if observed != expected:
+        raise RuntimeError(
+            "existing independent RNet merge differs from the exact fold artifacts"
+        )
+    return observed
+
+
+def _write_merge_atomic(out_json: Path, result: dict[str, Any]) -> None:
+    """Publish a fully written merge atomically in its canonical directory."""
+
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        dir=out_json.parent,
+        prefix=f".{out_json.name}.",
+        suffix=".tmp",
+    )
+    os.close(descriptor)
+    temporary_path = Path(temporary_name)
+    try:
+        temporary_path.write_text(
+            json.dumps(result, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary_path.replace(out_json)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--phase", choices=tuple(EXPECTED_FOLDS), required=True)
     parser.add_argument("--out-json", type=Path, required=True)
+    parser.add_argument(
+        "--validate-existing",
+        action="store_true",
+        help="validate an existing canonical merge without rewriting it",
+    )
     return parser
 
 
@@ -455,15 +502,24 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = args.repo_root.resolve()
     assert_run_authority(repo_root, args.phase)
     validate_merge_cli_binding(repo_root, args.phase, args.input_dir, args.out_json)
+    if args.validate_existing:
+        result = validate_existing_merge(args.input_dir, args.phase, args.out_json)
+        print(
+            json.dumps(
+                {
+                    "status": result["status"],
+                    "result": str(args.out_json),
+                    "validation": "EXISTING_MERGE_EXACT_PASS",
+                }
+            )
+        )
+        return 0
     if args.out_json.exists():
         raise FileExistsError(
             f"refusing to overwrite independent RNet merge: {args.out_json}"
         )
     result = merge_folds(args.input_dir, args.phase)
-    args.out_json.parent.mkdir(parents=True, exist_ok=True)
-    args.out_json.write_text(
-        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    _write_merge_atomic(args.out_json, result)
     print(json.dumps({"status": result["status"], "result": str(args.out_json)}))
     return 0
 

@@ -40,10 +40,12 @@ case "${phase}" in
     exit 2
     ;;
 esac
+merged=${out}/rnet_distill_complete_unscored_merge.json
 
 cd "${repo}"
-"${python_bin}" -m scripts.reactflow_delta.validate_independent_rnet_distill_contract \
-  --repo-root "${repo}" >/dev/null
+"${python_bin}" -c \
+  "from pathlib import Path; from scripts.reactflow_delta.validate_independent_rnet_distill_contract import assert_run_authority; assert_run_authority(Path('${repo}'), '${phase}')" \
+  >/dev/null
 
 preflight_gpu() {
   local gpu=$1
@@ -102,6 +104,12 @@ for fold in "${folds[@]}"; do
     tasks+=("${fold}")
   fi
 done
+
+if ((${#tasks[@]} > 0)) && [[ -e "${merged}" ]]; then
+  printf '%s has missing prediction tasks alongside an existing merge; fail closed\n' \
+    "${phase}" >&2
+  exit 2
+fi
 
 if ((${#tasks[@]} > 0)); then
   if ((${#gpus[@]} == 0)); then
@@ -191,8 +199,14 @@ if ((failed != 0)); then
   exit 1
 fi
 
-merged=${out}/rnet_distill_complete_unscored_merge.json
-if [[ ! -f "${merged}" ]]; then
+if [[ -e "${merged}" ]]; then
+  "${python_bin}" -m scripts.reactflow_delta.merge_independent_rnet_distill \
+    --repo-root "${repo}" \
+    --input-dir "${out}" \
+    --phase "${phase}" \
+    --out-json "${merged}" \
+    --validate-existing
+else
   "${python_bin}" -m scripts.reactflow_delta.merge_independent_rnet_distill \
     --repo-root "${repo}" \
     --input-dir "${out}" \

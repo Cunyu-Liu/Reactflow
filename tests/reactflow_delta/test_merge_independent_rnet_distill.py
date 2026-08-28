@@ -408,6 +408,122 @@ def test_main_rejects_mixed_git_commits_without_writing_merge(
     assert not out_json.exists()
 
 
+def test_existing_merge_validation_is_exact_and_never_rewrites(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    input_dir = tmp_path / "rnd2"
+    input_dir.mkdir()
+    pretrain_dir = tmp_path / "pretrain"
+    _write_pretrain_files(pretrain_dir)
+    monkeypatch.setattr(merger, "PRETRAIN_DIR", pretrain_dir)
+    for fold in (0, 1):
+        _write_fold(input_dir, phase="RND2", fold=fold)
+    monkeypatch.setattr(merger, "assert_run_authority", lambda *_: None)
+    monkeypatch.setattr(merger, "validate_merge_cli_binding", lambda *_: {})
+    out_json = input_dir / merger.MERGE_FILENAME
+    args = [
+        "--repo-root",
+        str(tmp_path),
+        "--input-dir",
+        str(input_dir),
+        "--phase",
+        "RND2",
+        "--out-json",
+        str(out_json),
+    ]
+
+    assert merger.main(args) == 0
+    original = out_json.read_bytes()
+    assert merger.main([*args, "--validate-existing"]) == 0
+    assert out_json.read_bytes() == original
+
+    changed = json.loads(out_json.read_text(encoding="utf-8"))
+    changed["status"] = "STALE"
+    out_json.write_text(json.dumps(changed) + "\n", encoding="utf-8")
+    stale_bytes = out_json.read_bytes()
+    with pytest.raises(RuntimeError, match="differs from the exact fold artifacts"):
+        merger.main([*args, "--validate-existing"])
+    assert out_json.read_bytes() == stale_bytes
+
+
+def test_existing_truncated_merge_is_rejected_without_overwrite(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    input_dir = tmp_path / "rnd2"
+    input_dir.mkdir()
+    pretrain_dir = tmp_path / "pretrain"
+    _write_pretrain_files(pretrain_dir)
+    monkeypatch.setattr(merger, "PRETRAIN_DIR", pretrain_dir)
+    for fold in (0, 1):
+        _write_fold(input_dir, phase="RND2", fold=fold)
+    monkeypatch.setattr(merger, "assert_run_authority", lambda *_: None)
+    monkeypatch.setattr(merger, "validate_merge_cli_binding", lambda *_: {})
+    out_json = input_dir / merger.MERGE_FILENAME
+    out_json.write_text('{"schema_version":', encoding="utf-8")
+    original = out_json.read_bytes()
+
+    with pytest.raises(json.JSONDecodeError):
+        merger.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "--input-dir",
+                str(input_dir),
+                "--phase",
+                "RND2",
+                "--out-json",
+                str(out_json),
+                "--validate-existing",
+            ]
+        )
+
+    assert out_json.read_bytes() == original
+
+
+def test_atomic_merge_write_failure_leaves_no_canonical_and_retry_succeeds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    input_dir = tmp_path / "rnd2"
+    input_dir.mkdir()
+    pretrain_dir = tmp_path / "pretrain"
+    _write_pretrain_files(pretrain_dir)
+    monkeypatch.setattr(merger, "PRETRAIN_DIR", pretrain_dir)
+    for fold in (0, 1):
+        _write_fold(input_dir, phase="RND2", fold=fold)
+    monkeypatch.setattr(merger, "assert_run_authority", lambda *_: None)
+    monkeypatch.setattr(merger, "validate_merge_cli_binding", lambda *_: {})
+    out_json = input_dir / merger.MERGE_FILENAME
+    args = [
+        "--repo-root",
+        str(tmp_path),
+        "--input-dir",
+        str(input_dir),
+        "--phase",
+        "RND2",
+        "--out-json",
+        str(out_json),
+    ]
+    original_write_text = Path.write_text
+
+    def fail_temporary_write(
+        path: Path, data: str, *positional: object, **keywords: object
+    ) -> int:
+        if path.name.startswith(f".{merger.MERGE_FILENAME}."):
+            original_write_text(path, data[:16], encoding="utf-8")
+            raise OSError("injected merge write failure")
+        return original_write_text(path, data, *positional, **keywords)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "write_text", fail_temporary_write)
+        with pytest.raises(OSError, match="injected merge write failure"):
+            merger.main(args)
+
+    assert not out_json.exists()
+    assert not list(input_dir.glob(f".{merger.MERGE_FILENAME}.*.tmp"))
+    assert merger.main(args) == 0
+    assert out_json.is_file()
+
+
 @pytest.mark.parametrize("git_commit", ("", "g" * 40, "a" * 39))
 def test_merge_rejects_invalid_git_commit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, git_commit: str
