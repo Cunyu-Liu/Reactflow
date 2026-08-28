@@ -1,6 +1,6 @@
 schema_version: reactflow_delta.model_rescue_v14_decision_ledger.v1
 contract_id: reactflow_delta_model_rescue_v14_masked_wt_profile_pretraining_20260827
-updated_at: '2026-08-28T08:31:03+08:00'
+updated_at: '2026-08-28T08:40:01+08:00'
 
 immutable_parent_verdicts:
   v13: TERMINAL_V13M3_TOP_JOURNAL_SCREEN_FAIL
@@ -69,8 +69,8 @@ phase_state:
 post_v14_branch5_route_probe_state:
   B5RP0: SAFE_SOURCE_MANIFEST_EXACT_PASS
   B5RP1: COMPLETE_UNSCORED_MERGE_EXACT_PASS
-  B5RP2: COMPLETE_MERGE_SCORE_ONCE_AUTHORIZED
-  B5RP3: NOT_RUN
+  B5RP2: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
+  B5RP3: QUALIFIER_ONCE_AUTHORIZED
 
 qualification_rules:
   implementation_or_smoke_pass_is_scientific_pass: false
@@ -341,3 +341,36 @@ events:
     partial_score_read_allowed: false
     external_outcome_accessed: false
     next_action: RUN_SINGLE_POST_V14_BRANCH5_COMPLETE_SCORE_ONCE
+  - at: '2026-08-28T08:37:25+08:00'
+    phase: B5RP2
+    event: BRANCH5_COMPLETE_SCORE_TERMINAL
+    status: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
+    scorer_exit_code: 0
+    authority_commit: 85637f11bcb6a3db55209617cb5d3754777ea939
+    complete_unscored_merge: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json
+    complete_score: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json
+    score_rows: 20
+    complete_valid_score: true
+    integrity_error_count: 0
+    metrics_inspected_before_qualification: false
+    score_accessed: true
+    partial_score_accessed: false
+    external_outcome_accessed: false
+    next_action: AUTHORIZE_B5RP3_COMPLETE_SCORE_QUALIFIER_ONCE
+  - at: '2026-08-28T08:40:01+08:00'
+    phase: B5RP3
+    event: BRANCH5_COMPLETE_SCORE_QUALIFIER_ONCE_AUTHORIZED
+    status: B5RP3_COMPLETE_SCORE_QUALIFIER_ONCE_AUTHORIZED
+    authority_commit_parent: 85637f11bcb6a3db55209617cb5d3754777ea939
+    complete_score: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json
+    complete_score_status: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
+    qualification: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_qualification.json
+    qualification_present_before_execution: false
+    training_allowed: false
+    candidate_model_training_allowed: false
+    neural_training_allowed: false
+    screen_allowed: false
+    held_score_read_allowed: false
+    partial_score_read_allowed: false
+    external_outcome_accessed: false
+    next_action: RUN_SINGLE_POST_V14_BRANCH5_COMPLETE_QUALIFIER_ONCE

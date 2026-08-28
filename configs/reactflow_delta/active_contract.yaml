@@ -2,13 +2,13 @@ schema_version: reactflow_delta.active_contract.v14
 manifest_id: reactflow_delta_post_v14_branch5_route_probe_active_authority_20260828
 project_task_id: reactflow_delta_post_v14_branch5_route_probe
 created_at: '2026-08-27T02:30:00+08:00'
-updated_at: '2026-08-28T08:31:03+08:00'
+updated_at: '2026-08-28T08:40:01+08:00'
 
 authority:
   pointer_role: POST_V14_BRANCH5_ROUTE_PROBE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: B5RP2
-  current_authority_state: POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY
-  current_runnable_phase: B5RP2
+  current_phase: B5RP3
+  current_authority_state: POST_V14_BRANCH5_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+  current_runnable_phase: B5RP3
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-model-rescue-v14-20260827
   worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v14_20260827
@@ -30,7 +30,9 @@ authority:
   complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json
   complete_unscored_merge_status: BRANCH5_ROUTE_PROBE_COMPLETE_UNSCORED_MERGE_PASS
   complete_score_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json
-  binding_status: B5RP2_COMPLETE_MERGE_SCORE_ONCE_ONLY
+  complete_score_status: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
+  qualification_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_qualification.json
+  binding_status: B5RP3_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
 
 parent_state:
   v14_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL
@@ -41,7 +43,7 @@ parent_state:
 authorization:
   owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION_WITH_AUTONOMOUS_SCIENTIFIC_JUDGMENT
   owner_instruction_date: '2026-08-25'
-  scope: POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY
+  scope: POST_V14_BRANCH5_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
   contract_drafting_allowed: true
   implementation_allowed: true
   neural_training_allowed: false
@@ -51,10 +53,10 @@ authorization:
   new_external_outcome_access_allowed: false
 
 allowed_phases: [B5RP0, B5RP1, B5RP2, B5RP3]
-runnable_phases: [B5RP2]
+runnable_phases: [B5RP3]
 training_allowed: false
 candidate_model_training_allowed: false
-held_score_read_allowed: POST_V14_BRANCH5_COMPLETE_MERGE_SCORE_ONCE_ONLY
+held_score_read_allowed: false
 partial_fold_score_read_allowed: false
 new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
@@ -67,7 +69,7 @@ parent_terminal_verdict_change_allowed: false
 gate_state:
   B5RP0: SAFE_SOURCE_MANIFEST_EXACT_PASS
   B5RP1: COMPLETE_UNSCORED_MERGE_EXACT_PASS
-  B5RP2: COMPLETE_MERGE_SCORE_ONCE_AUTHORIZED
-  B5RP3: NOT_RUN
+  B5RP2: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
+  B5RP3: QUALIFIER_ONCE_AUTHORIZED
 
-next_allowed_action: RUN_SINGLE_POST_V14_BRANCH5_COMPLETE_SCORE_ONCE
+next_allowed_action: RUN_SINGLE_POST_V14_BRANCH5_COMPLETE_QUALIFIER_ONCE
