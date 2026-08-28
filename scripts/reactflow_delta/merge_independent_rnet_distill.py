@@ -21,6 +21,7 @@ from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
     FORBIDDEN_PREDICTION_FIELDS,
     PREDICTION_SCHEMA,
     PRETRAIN_FILENAMES,
+    canonical_downstream_paths,
 )
 from scripts.reactflow_delta.validate_independent_rnet_distill_contract import (
     assert_run_authority,
@@ -112,6 +113,7 @@ PRETRAIN_DIR = Path(
 )
 _RESULT_RE = re.compile(r"^rnet_distill_fold_result_fold(\d+)_seed(\d+)\.json$")
 _PREDICTION_RE = re.compile(r"^rnet_distill_predictions_fold(\d+)_seed(\d+)\.npz$")
+MERGE_FILENAME = "rnet_distill_complete_unscored_merge.json"
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -119,6 +121,31 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise RuntimeError(f"expected JSON object: {path}")
     return payload
+
+
+def validate_merge_cli_binding(
+    repo_root: Path, phase: str, input_dir: Path, out_json: Path
+) -> dict[str, str]:
+    """Bind merger input and output to the active phase's canonical paths."""
+
+    canonical = canonical_downstream_paths(repo_root.resolve(), phase)
+    expected_input = canonical["out_dir"]
+    expected_output = expected_input / MERGE_FILENAME
+    observed_input = input_dir.expanduser().resolve()
+    observed_output = out_json.expanduser().resolve()
+    if observed_input != expected_input:
+        raise RuntimeError(
+            f"merge input_dir differs: observed={observed_input} expected={expected_input}"
+        )
+    if observed_output != expected_output:
+        raise RuntimeError(
+            f"merge out_json differs: observed={observed_output} expected={expected_output}"
+        )
+    return {
+        "phase": phase,
+        "input_dir": str(expected_input),
+        "out_json": str(expected_output),
+    }
 
 
 def _expected_paths(input_dir: Path, fold: int, seed: int) -> dict[str, Path]:
@@ -384,7 +411,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    assert_run_authority(args.repo_root.resolve(), args.phase)
+    repo_root = args.repo_root.resolve()
+    assert_run_authority(repo_root, args.phase)
+    validate_merge_cli_binding(repo_root, args.phase, args.input_dir, args.out_json)
     if args.out_json.exists():
         raise FileExistsError(
             f"refusing to overwrite independent RNet merge: {args.out_json}"

@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import yaml
 
 import scripts.reactflow_delta.merge_independent_rnet_distill as merger
 from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
@@ -168,3 +169,37 @@ def test_merge_rejects_prediction_target_field(
     )
     with pytest.raises(RuntimeError, match="prediction checks failed"):
         merger.merge_folds(input_dir, "RND2")
+
+
+def test_merger_binds_input_and_output_to_active_phase(tmp_path: Path) -> None:
+    canonical_input = tmp_path / "artifacts/rnd2"
+    authority = {
+        "current_phase": "RND2",
+        "m2_csv_path": str(tmp_path / "data/m2.csv"),
+        "pretraining_dir": str(tmp_path / "artifacts/rnd1"),
+        "historical_v8_dir": str(tmp_path / "artifacts/v8"),
+        "historical_v10_dir": str(tmp_path / "artifacts/v10"),
+        "tic2a_merged_registry_path": str(tmp_path / "artifacts/tic2a.json"),
+        "unconstrained_feature_cache_path": str(tmp_path / "artifacts/u.h5"),
+        "constrained_feature_cache_path": str(tmp_path / "artifacts/c.h5"),
+        "smoke_prediction_dir": str(canonical_input),
+        "screen_prediction_dir": str(tmp_path / "artifacts/rnd3"),
+    }
+    active_path = tmp_path / "configs/reactflow_delta/active_contract.yaml"
+    active_path.parent.mkdir(parents=True)
+    active_path.write_text(
+        yaml.safe_dump({"authority": authority}, sort_keys=False), encoding="utf-8"
+    )
+    canonical_output = canonical_input / merger.MERGE_FILENAME
+    binding = merger.validate_merge_cli_binding(
+        tmp_path, "RND2", canonical_input, canonical_output
+    )
+    assert binding["out_json"] == str(canonical_output.resolve())
+    with pytest.raises(RuntimeError, match="input_dir differs"):
+        merger.validate_merge_cli_binding(
+            tmp_path, "RND2", tmp_path / "wrong", canonical_output
+        )
+    with pytest.raises(RuntimeError, match="out_json differs"):
+        merger.validate_merge_cli_binding(
+            tmp_path, "RND2", canonical_input, tmp_path / "wrong.json"
+        )

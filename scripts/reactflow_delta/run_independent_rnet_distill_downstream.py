@@ -9,12 +9,14 @@ import json
 import random
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import numpy as np
 import torch
+import yaml
 
 from scripts.reactflow_delta.gpu_runtime import require_cuda_device
 from scripts.reactflow_delta.independent_rnet_distill import (
@@ -52,6 +54,7 @@ from scripts.reactflow_delta.run_model_rescue_v11 import (
 )
 from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 from scripts.reactflow_delta.validate_independent_rnet_distill_contract import (
+    ACTIVE_PATH,
     CONTRACT_PATH,
     LEDGER_PATH,
     assert_run_authority,
@@ -72,6 +75,10 @@ EXPECTED_FOLDS = {
 EXPECTED_SCHEDULE = {
     "RND2": (3, 3),
     "RND3": (40, 40),
+}
+EXPECTED_EXPERIMENT_ID = {
+    "RND2": "RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE",
+    "RND3": "RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY",
 }
 EVIDENCE_STATUS = {
     "RND2": "ENGINEERING_SMOKE_ONLY_NOT_SCIENTIFIC",
@@ -147,6 +154,70 @@ def _require_mnt_artifact_dir(path: Path) -> Path:
     if resolved == Path("/mnt") or Path("/mnt") not in resolved.parents:
         raise RuntimeError("independent RNet downstream artifacts must be under /mnt")
     return resolved
+
+
+def _read_active_contract(repo_root: Path) -> dict[str, Any]:
+    active = yaml.safe_load((repo_root / ACTIVE_PATH).read_text(encoding="utf-8"))
+    if not isinstance(active, dict) or not isinstance(active.get("authority"), dict):
+        raise RuntimeError("independent RNet active contract is not a mapping")
+    return active
+
+
+def canonical_downstream_paths(repo_root: Path, phase: str) -> dict[str, Path]:
+    """Return the active contract's exact downstream paths for one phase."""
+
+    if phase not in EXPECTED_FOLDS:
+        raise ValueError(f"unsupported downstream phase: {phase}")
+    active = _read_active_contract(repo_root.resolve())
+    authority = active["authority"]
+    if authority.get("current_phase") != phase:
+        raise RuntimeError(
+            f"active phase {authority.get('current_phase')!r} does not bind {phase}"
+        )
+    output_key = "smoke_prediction_dir" if phase == "RND2" else "screen_prediction_dir"
+    keys = {
+        "m2_csv": "m2_csv_path",
+        "pretrain_dir": "pretraining_dir",
+        "v8_dir": "historical_v8_dir",
+        "v10_dir": "historical_v10_dir",
+        "tic2a_merged_json": "tic2a_merged_registry_path",
+        "unconstrained_cache": "unconstrained_feature_cache_path",
+        "constrained_cache": "constrained_feature_cache_path",
+        "out_dir": output_key,
+    }
+    missing = [active_key for active_key in keys.values() if not authority.get(active_key)]
+    if missing:
+        raise RuntimeError(f"active downstream path binding is incomplete: {missing}")
+    return {
+        cli_name: Path(str(authority[active_key])).expanduser().resolve()
+        for cli_name, active_key in keys.items()
+    }
+
+
+def validate_downstream_cli_binding(
+    repo_root: Path, args: argparse.Namespace
+) -> dict[str, str]:
+    """Bind every direct-runner input and output to the active authority."""
+
+    phase = str(args.phase)
+    expected_experiment = EXPECTED_EXPERIMENT_ID[phase]
+    if str(args.experiment_id) != expected_experiment:
+        raise RuntimeError(
+            "downstream experiment_id differs: "
+            f"observed={args.experiment_id!r} expected={expected_experiment!r}"
+        )
+    canonical = canonical_downstream_paths(repo_root, phase)
+    for cli_name, expected in canonical.items():
+        observed = Path(getattr(args, cli_name)).expanduser().resolve()
+        if observed != expected:
+            raise RuntimeError(
+                f"downstream {cli_name} path differs: observed={observed} expected={expected}"
+            )
+    return {
+        "phase": phase,
+        "experiment_id": expected_experiment,
+        **{name: str(path) for name, path in canonical.items()},
+    }
 
 
 def _assert_tensor_cuda(value: torch.Tensor, *, label: str) -> None:
@@ -566,6 +637,59 @@ def _refuse_fold_overwrite(paths: dict[str, Path]) -> None:
         raise FileExistsError(f"refusing to overwrite downstream fold artifacts: {existing}")
 
 
+def _canonicalize_fold_result_paths(
+    result: dict[str, Any], canonical_paths: dict[str, Path]
+) -> dict[str, Any]:
+    """Replace staging paths in a completed row with its canonical destinations."""
+
+    output = copy.deepcopy(result)
+    output["point_checkpoints"] = {
+        "candidate": str(canonical_paths["candidate_point"].resolve()),
+        "null": str(canonical_paths["null_point"].resolve()),
+    }
+    output["residual_checkpoints"] = {
+        "feature41": str(canonical_paths["feature41_residual"].resolve()),
+        "candidate": str(canonical_paths["candidate_residual"].resolve()),
+        "null": str(canonical_paths["null_residual"].resolve()),
+    }
+    output["prediction_artifact"] = str(canonical_paths["prediction"].resolve())
+    return output
+
+
+def _publish_fold_artifacts(
+    staging_paths: dict[str, Path], canonical_paths: dict[str, Path]
+) -> None:
+    """Publish a complete seven-file fold, with the result marker last."""
+
+    if set(staging_paths) != set(canonical_paths):
+        raise RuntimeError("staging/canonical fold artifact universes differ")
+    missing = [str(path) for path in staging_paths.values() if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"staged fold payload is incomplete: {missing}")
+    _refuse_fold_overwrite(canonical_paths)
+    publish_order = (
+        "candidate_point",
+        "null_point",
+        "feature41_residual",
+        "candidate_residual",
+        "null_residual",
+        "prediction",
+        "result",
+    )
+    published: list[str] = []
+    try:
+        for name in publish_order:
+            staging_paths[name].replace(canonical_paths[name])
+            published.append(name)
+    except BaseException:
+        # Every published path was absent before this function. Move only those
+        # files back into this run's private staging directory before cleanup.
+        for name in reversed(published):
+            if canonical_paths[name].is_file() and not staging_paths[name].exists():
+                canonical_paths[name].replace(staging_paths[name])
+        raise
+
+
 def _save_point_checkpoint(
     path: Path,
     *,
@@ -934,6 +1058,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     repo_root = args.repo_root.resolve()
     assert_run_authority(repo_root, args.phase)
+    validate_downstream_cli_binding(repo_root, args)
     expected_folds, expected_point_epochs, expected_calibration_epochs = (
         _phase_schedule(args.phase)
     )
@@ -986,31 +1111,39 @@ def main(argv: list[str] | None = None) -> int:
                 f"[{args.phase}] fold={fold_id} held={fold.held_puzzle} seed={args.seed} start",
                 flush=True,
             )
-            result = run_fold(
-                univ=univ,
-                records=records,
-                fold=fold,
-                device=device,
-                out_dir=out_dir,
-                pretrain_dir=pretrain_dir,
-                v8_dir=args.v8_dir,
-                v10_dir=args.v10_dir,
-                tic2a_merged=tic2a_merged,
-                unconstrained=unconstrained,
-                constrained=constrained,
-                point_epochs=args.point_epochs,
-                calibration_epochs=args.calibration_epochs,
-                seed=args.seed,
-                phase=args.phase,
-                experiment_id=args.experiment_id,
-                repo_root=repo_root,
-                git_commit=commit,
-            )
-            result_path = _artifact_paths(out_dir, fold_id, args.seed)["result"]
-            result_path.write_text(
-                json.dumps(result, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8",
-            )
+            canonical_paths = _artifact_paths(out_dir, fold_id, args.seed)
+            with tempfile.TemporaryDirectory(
+                prefix=f".rnet_distill_fold{fold_id}_seed{args.seed}_",
+                dir=out_dir,
+            ) as staging_name:
+                staging_dir = Path(staging_name)
+                result = run_fold(
+                    univ=univ,
+                    records=records,
+                    fold=fold,
+                    device=device,
+                    out_dir=staging_dir,
+                    pretrain_dir=pretrain_dir,
+                    v8_dir=args.v8_dir,
+                    v10_dir=args.v10_dir,
+                    tic2a_merged=tic2a_merged,
+                    unconstrained=unconstrained,
+                    constrained=constrained,
+                    point_epochs=args.point_epochs,
+                    calibration_epochs=args.calibration_epochs,
+                    seed=args.seed,
+                    phase=args.phase,
+                    experiment_id=args.experiment_id,
+                    repo_root=repo_root,
+                    git_commit=commit,
+                )
+                staging_paths = _artifact_paths(staging_dir, fold_id, args.seed)
+                result = _canonicalize_fold_result_paths(result, canonical_paths)
+                staging_paths["result"].write_text(
+                    json.dumps(result, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+                _publish_fold_artifacts(staging_paths, canonical_paths)
             print(f"[{args.phase}] fold={fold_id} complete", flush=True)
             torch.cuda.empty_cache()
     finally:

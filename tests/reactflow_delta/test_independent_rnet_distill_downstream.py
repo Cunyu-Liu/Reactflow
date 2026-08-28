@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 import torch
+import yaml
 
 from scripts.reactflow_delta.independent_rnet_distill import (
     IndependentRNetDistillStudent,
@@ -15,10 +17,13 @@ from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
     PRETRAIN_CHECKPOINT_SCHEMA,
     _artifact_paths,
     _assert_tensor_cuda,
+    _canonicalize_fold_result_paths,
     _downstream_epoch_order,
+    _publish_fold_artifacts,
     _refuse_fold_overwrite,
     _rename_v11_prediction,
     _reset_downstream_rng,
+    validate_downstream_cli_binding,
     validate_pretrained_pair,
 )
 
@@ -137,3 +142,132 @@ def test_downstream_encoder_preserves_unobserved_edit_query_state() -> None:
         )
     assert hidden.shape == (length, 256)
     assert not torch.equal(hidden[1], torch.zeros_like(hidden[1]))
+
+
+def _write_active_binding(repo_root: Path, *, phase: str = "RND2") -> dict[str, Path]:
+    paths = {
+        "m2_csv": repo_root / "data" / "m2.csv",
+        "pretrain_dir": repo_root / "artifacts" / "rnd1",
+        "v8_dir": repo_root / "artifacts" / "v8",
+        "v10_dir": repo_root / "artifacts" / "v10",
+        "tic2a_merged_json": repo_root / "artifacts" / "tic2a.json",
+        "unconstrained_cache": repo_root / "artifacts" / "unconstrained.h5",
+        "constrained_cache": repo_root / "artifacts" / "constrained.h5",
+        "out_dir": repo_root / "artifacts" / ("rnd2" if phase == "RND2" else "rnd3"),
+    }
+    authority = {
+        "current_phase": phase,
+        "m2_csv_path": str(paths["m2_csv"]),
+        "pretraining_dir": str(paths["pretrain_dir"]),
+        "historical_v8_dir": str(paths["v8_dir"]),
+        "historical_v10_dir": str(paths["v10_dir"]),
+        "tic2a_merged_registry_path": str(paths["tic2a_merged_json"]),
+        "unconstrained_feature_cache_path": str(paths["unconstrained_cache"]),
+        "constrained_feature_cache_path": str(paths["constrained_cache"]),
+        "smoke_prediction_dir": str(repo_root / "artifacts" / "rnd2"),
+        "screen_prediction_dir": str(repo_root / "artifacts" / "rnd3"),
+    }
+    active_path = repo_root / "configs/reactflow_delta/active_contract.yaml"
+    active_path.parent.mkdir(parents=True)
+    active_path.write_text(
+        yaml.safe_dump({"authority": authority}, sort_keys=False), encoding="utf-8"
+    )
+    return paths
+
+
+def test_direct_runner_binds_every_path_and_experiment_to_active(tmp_path: Path) -> None:
+    paths = _write_active_binding(tmp_path)
+    args = SimpleNamespace(
+        phase="RND2",
+        experiment_id="RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE",
+        **paths,
+    )
+    binding = validate_downstream_cli_binding(tmp_path, args)
+    assert binding["out_dir"] == str(paths["out_dir"].resolve())
+    args.m2_csv = tmp_path / "wrong.csv"
+    with pytest.raises(RuntimeError, match="m2_csv path differs"):
+        validate_downstream_cli_binding(tmp_path, args)
+    args.m2_csv = paths["m2_csv"]
+    args.experiment_id = "RND2_WRONG"
+    with pytest.raises(RuntimeError, match="experiment_id differs"):
+        validate_downstream_cli_binding(tmp_path, args)
+
+    rnd3_root = tmp_path / "rnd3_repo"
+    rnd3_paths = _write_active_binding(rnd3_root, phase="RND3")
+    rnd3_args = SimpleNamespace(
+        phase="RND3",
+        experiment_id="RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY",
+        **rnd3_paths,
+    )
+    rnd3_binding = validate_downstream_cli_binding(rnd3_root, rnd3_args)
+    assert rnd3_binding["out_dir"] == str(rnd3_paths["out_dir"].resolve())
+
+
+def _write_staged_fold(paths: dict[str, Path]) -> None:
+    for name, path in paths.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(name.encode("utf-8"))
+
+
+def test_complete_fold_publishes_result_last_without_overwrite(tmp_path: Path) -> None:
+    staging_paths = _artifact_paths(tmp_path / "staging", fold=0, seed=0)
+    canonical_paths = _artifact_paths(tmp_path / "canonical", fold=0, seed=0)
+    _write_staged_fold(staging_paths)
+    canonical_paths["result"].parent.mkdir(parents=True)
+    _publish_fold_artifacts(staging_paths, canonical_paths)
+    assert all(path.is_file() for path in canonical_paths.values())
+    assert not any(path.exists() for path in staging_paths.values())
+    assert canonical_paths["result"].read_bytes() == b"result"
+
+    staged_again = _artifact_paths(tmp_path / "staging_again", fold=0, seed=0)
+    _write_staged_fold(staged_again)
+    with pytest.raises(FileExistsError, match="refusing to overwrite"):
+        _publish_fold_artifacts(staged_again, canonical_paths)
+    assert canonical_paths["candidate_point"].read_bytes() == b"candidate_point"
+
+
+def test_publication_failure_rolls_back_every_canonical_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    staging_paths = _artifact_paths(tmp_path / "staging", fold=0, seed=0)
+    canonical_paths = _artifact_paths(tmp_path / "canonical", fold=0, seed=0)
+    _write_staged_fold(staging_paths)
+    canonical_paths["result"].parent.mkdir(parents=True)
+    original_replace = Path.replace
+    staging_root = staging_paths["result"].parent
+    forward_moves = 0
+    failed = False
+
+    def fail_once_during_publish(source: Path, target: Path) -> Path:
+        nonlocal forward_moves, failed
+        if source.parent == staging_root:
+            forward_moves += 1
+            if forward_moves == 3 and not failed:
+                failed = True
+                raise OSError("injected publish failure")
+        return original_replace(source, target)
+
+    monkeypatch.setattr(Path, "replace", fail_once_during_publish)
+    with pytest.raises(OSError, match="injected publish failure"):
+        _publish_fold_artifacts(staging_paths, canonical_paths)
+    assert not any(path.exists() for path in canonical_paths.values())
+    assert all(path.is_file() for path in staging_paths.values())
+
+
+def test_completed_row_records_only_canonical_paths(tmp_path: Path) -> None:
+    canonical = _artifact_paths(tmp_path / "canonical", fold=1, seed=0)
+    result = {
+        "point_checkpoints": {"candidate": "temp", "null": "temp"},
+        "residual_checkpoints": {
+            "feature41": "temp",
+            "candidate": "temp",
+            "null": "temp",
+        },
+        "prediction_artifact": "temp",
+    }
+    bound = _canonicalize_fold_result_paths(result, canonical)
+    assert bound["point_checkpoints"]["candidate"] == str(
+        canonical["candidate_point"].resolve()
+    )
+    assert bound["prediction_artifact"] == str(canonical["prediction"].resolve())
+    assert result["prediction_artifact"] == "temp"
