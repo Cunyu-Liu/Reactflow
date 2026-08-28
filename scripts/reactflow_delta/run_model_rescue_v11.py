@@ -697,8 +697,6 @@ def _held_prediction(
         output[name] = np.concatenate(values).astype(np.float64)
 
     if require_v10_feature41_replay:
-        if seed != 0:
-            raise RuntimeError("V11 V10 feature41 replay is defined only for seed0")
         authoritative = {
             f"feature41_{suffix}": historical[f"feature41_{suffix}"][
                 historical_rows

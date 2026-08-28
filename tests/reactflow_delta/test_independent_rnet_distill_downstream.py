@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -12,7 +13,12 @@ from scripts.reactflow_delta.independent_rnet_distill import (
     IndependentRNetDistillStudent,
 )
 from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
+    EVIDENCE_STATUS,
+    EXPECTED_EXPERIMENT_ID,
+    EXPECTED_FOLDS,
     EXPECTED_PREDICTION_FIELDS,
+    EXPECTED_SCHEDULE,
+    EXPECTED_SEEDS,
     PREDICTION_SCHEMA,
     PRETRAIN_CHECKPOINT_SCHEMA,
     _artifact_paths,
@@ -22,10 +28,13 @@ from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
     _publish_fold_artifacts,
     _refuse_fold_overwrite,
     _rename_v11_prediction,
+    _requires_authoritative_feature41_replay,
     _reset_downstream_rng,
+    _validate_phase_request,
     validate_downstream_cli_binding,
     validate_pretrained_pair,
 )
+from scripts.reactflow_delta.run_model_rescue_v11 import _held_prediction
 
 
 def _checkpoint_payload(
@@ -145,6 +154,11 @@ def test_downstream_encoder_preserves_unobserved_edit_query_state() -> None:
 
 
 def _write_active_binding(repo_root: Path, *, phase: str = "RND2") -> dict[str, Path]:
+    output_leaf = {
+        "RND2": "rnd2",
+        "RND3": "rnd3",
+        "RND6P": "rnd6_formal",
+    }[phase]
     paths = {
         "m2_csv": repo_root / "data" / "m2.csv",
         "pretrain_dir": repo_root / "artifacts" / "rnd1",
@@ -153,7 +167,7 @@ def _write_active_binding(repo_root: Path, *, phase: str = "RND2") -> dict[str, 
         "tic2a_merged_json": repo_root / "artifacts" / "tic2a.json",
         "unconstrained_cache": repo_root / "artifacts" / "unconstrained.h5",
         "constrained_cache": repo_root / "artifacts" / "constrained.h5",
-        "out_dir": repo_root / "artifacts" / ("rnd2" if phase == "RND2" else "rnd3"),
+        "out_dir": repo_root / "artifacts" / output_leaf,
     }
     authority = {
         "current_phase": phase,
@@ -166,6 +180,7 @@ def _write_active_binding(repo_root: Path, *, phase: str = "RND2") -> dict[str, 
         "constrained_feature_cache_path": str(paths["constrained_cache"]),
         "smoke_prediction_dir": str(repo_root / "artifacts" / "rnd2"),
         "screen_prediction_dir": str(repo_root / "artifacts" / "rnd3"),
+        "formal_prediction_dir": str(repo_root / "artifacts" / "rnd6_formal"),
     }
     active_path = repo_root / "configs/reactflow_delta/active_contract.yaml"
     active_path.parent.mkdir(parents=True)
@@ -201,6 +216,58 @@ def test_direct_runner_binds_every_path_and_experiment_to_active(tmp_path: Path)
     )
     rnd3_binding = validate_downstream_cli_binding(rnd3_root, rnd3_args)
     assert rnd3_binding["out_dir"] == str(rnd3_paths["out_dir"].resolve())
+
+    rnd6_root = tmp_path / "rnd6_repo"
+    rnd6_paths = _write_active_binding(rnd6_root, phase="RND6P")
+    rnd6_args = SimpleNamespace(
+        phase="RND6P",
+        experiment_id=(
+            "RND6P_RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_PREDICTION_ONLY"
+        ),
+        **rnd6_paths,
+    )
+    rnd6_binding = validate_downstream_cli_binding(rnd6_root, rnd6_args)
+    assert rnd6_binding["out_dir"] == str(rnd6_paths["out_dir"].resolve())
+
+
+def test_rnd6p_freezes_formal_universe_and_replays_feature41_for_every_seed() -> None:
+    assert EXPECTED_FOLDS["RND6P"] == tuple(range(20))
+    assert EXPECTED_SEEDS["RND6P"] == tuple(range(5))
+    assert EXPECTED_SCHEDULE["RND6P"] == (40, 40)
+    assert EXPECTED_EXPERIMENT_ID["RND6P"] == (
+        "RND6P_RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_PREDICTION_ONLY"
+    )
+    assert EVIDENCE_STATUS["RND6P"] == (
+        "EXPOSURE_DISCLOSED_DEVELOPMENT_FORMAL_PREDICTION_ONLY"
+    )
+    for seed in range(5):
+        _validate_phase_request(
+            phase="RND6P",
+            folds=(0, 19),
+            point_epochs=40,
+            calibration_epochs=40,
+            seed=seed,
+        )
+        assert _requires_authoritative_feature41_replay("RND6P", seed) is True
+    with pytest.raises(ValueError, match="seed or epoch schedule changed"):
+        _validate_phase_request(
+            phase="RND6P",
+            folds=(0,),
+            point_epochs=40,
+            calibration_epochs=40,
+            seed=5,
+        )
+    with pytest.raises(ValueError, match="outside the frozen universe"):
+        _validate_phase_request(
+            phase="RND6P",
+            folds=(20,),
+            point_epochs=40,
+            calibration_epochs=40,
+            seed=0,
+        )
+    assert _requires_authoritative_feature41_replay("RND3", 0) is True
+    assert _requires_authoritative_feature41_replay("RND2", 0) is False
+    assert "defined only for seed0" not in inspect.getsource(_held_prediction)
 
 
 def _write_staged_fold(paths: dict[str, Path]) -> None:

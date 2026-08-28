@@ -68,21 +68,30 @@ POINT_CHECKPOINT_SCHEMA = (
 )
 PRETRAIN_CHECKPOINT_SCHEMA = "reactflow_delta.independent_rnet_distill_checkpoint.v1"
 EXPECTED_SEED = 0
+EXPECTED_SEEDS = {
+    "RND2": (0,),
+    "RND3": (0,),
+    "RND6P": tuple(range(5)),
+}
 EXPECTED_FOLDS = {
     "RND2": (0, 1),
     "RND3": tuple(range(20)),
+    "RND6P": tuple(range(20)),
 }
 EXPECTED_SCHEDULE = {
     "RND2": (3, 3),
     "RND3": (40, 40),
+    "RND6P": (40, 40),
 }
 EXPECTED_EXPERIMENT_ID = {
     "RND2": "RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE",
     "RND3": "RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY",
+    "RND6P": "RND6P_RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_PREDICTION_ONLY",
 }
 EVIDENCE_STATUS = {
     "RND2": "ENGINEERING_SMOKE_ONLY_NOT_SCIENTIFIC",
     "RND3": "EXPOSURE_DISCLOSED_DEVELOPMENT_PREDICTION_ONLY",
+    "RND6P": "EXPOSURE_DISCLOSED_DEVELOPMENT_FORMAL_PREDICTION_ONLY",
 }
 PRETRAIN_FILENAMES = {
     "candidate": "independent_rnet_distill_candidate.pt",
@@ -174,7 +183,11 @@ def canonical_downstream_paths(repo_root: Path, phase: str) -> dict[str, Path]:
         raise RuntimeError(
             f"active phase {authority.get('current_phase')!r} does not bind {phase}"
         )
-    output_key = "smoke_prediction_dir" if phase == "RND2" else "screen_prediction_dir"
+    output_key = {
+        "RND2": "smoke_prediction_dir",
+        "RND3": "screen_prediction_dir",
+        "RND6P": "formal_prediction_dir",
+    }[phase]
     keys = {
         "m2_csv": "m2_csv_path",
         "pretrain_dir": "pretraining_dir",
@@ -218,6 +231,14 @@ def validate_downstream_cli_binding(
         "experiment_id": expected_experiment,
         **{name: str(path) for name, path in canonical.items()},
     }
+
+
+def _requires_authoritative_feature41_replay(phase: str, seed: int) -> bool:
+    """Return whether this run must replay the frozen V10 Feature41 comparator."""
+
+    return (phase == "RND3" and seed == 0) or (
+        phase == "RND6P" and seed in EXPECTED_SEEDS["RND6P"]
+    )
 
 
 def _assert_tensor_cuda(value: torch.Tensor, *, label: str) -> None:
@@ -864,11 +885,14 @@ def run_fold(
     standardizers: dict[str, Any] = {}
     calibration_inputs: dict[str, list[np.ndarray]] = {}
     histories: dict[str, list[float]] = {}
+    require_feature41_replay = _requires_authoritative_feature41_replay(
+        phase, seed
+    )
     for name in V11_POINT_NAMES:
         standardizers[name], calibration_inputs[name] = _prepare_calibration_inputs(
             calibration_cells, name
         )
-        if name == "feature41" and phase == "RND3" and seed == 0:
+        if name == "feature41" and require_feature41_replay:
             head, standardizer, history = _load_authoritative_v10_feature41(
                 v10_row, device
             )
@@ -939,7 +963,7 @@ def run_fold(
             v8_prediction_path=Path(v8_row["expert_prediction_artifact"]),
             tic2a_prediction_path=Path(tic_row["prediction_artifact"]),
             historical_v10_path=Path(v10_row["prediction_artifact"]),
-            require_v10_feature41_replay=(phase == "RND3" and seed == 0),
+            require_v10_feature41_replay=require_feature41_replay,
         )
     )
     np.savez_compressed(paths["prediction"], **prediction)
@@ -1033,6 +1057,26 @@ def _phase_schedule(phase: str) -> tuple[tuple[int, ...], int, int]:
     return EXPECTED_FOLDS[phase], point_epochs, calibration_epochs
 
 
+def _validate_phase_request(
+    *,
+    phase: str,
+    folds: tuple[int, ...],
+    point_epochs: int,
+    calibration_epochs: int,
+    seed: int,
+) -> None:
+    expected_folds, expected_point_epochs, expected_calibration_epochs = (
+        _phase_schedule(phase)
+    )
+    if not set(folds) <= set(expected_folds):
+        raise ValueError(f"{phase} requested folds outside the frozen universe")
+    if seed not in EXPECTED_SEEDS[phase] or (
+        point_epochs,
+        calibration_epochs,
+    ) != (expected_point_epochs, expected_calibration_epochs):
+        raise ValueError(f"{phase} seed or epoch schedule changed")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
@@ -1059,17 +1103,14 @@ def main(argv: list[str] | None = None) -> int:
     repo_root = args.repo_root.resolve()
     assert_run_authority(repo_root, args.phase)
     validate_downstream_cli_binding(repo_root, args)
-    expected_folds, expected_point_epochs, expected_calibration_epochs = (
-        _phase_schedule(args.phase)
-    )
     folds = _parse_folds(args.folds)
-    if not set(folds) <= set(expected_folds):
-        raise ValueError(f"{args.phase} requested folds outside the frozen universe")
-    if args.seed != EXPECTED_SEED or (
-        args.point_epochs,
-        args.calibration_epochs,
-    ) != (expected_point_epochs, expected_calibration_epochs):
-        raise ValueError(f"{args.phase} seed or epoch schedule changed")
+    _validate_phase_request(
+        phase=args.phase,
+        folds=folds,
+        point_epochs=args.point_epochs,
+        calibration_epochs=args.calibration_epochs,
+        seed=args.seed,
+    )
 
     # CUDA validation deliberately occurs before creating any fold artifact.
     device = require_cuda_device(args.device)
