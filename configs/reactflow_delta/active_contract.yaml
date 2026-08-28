@@ -73,6 +73,18 @@ inactive_formal_chain:
     extra_seed_selection_allowed: false
     evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
 
+result_finalization:
+  production_entry: scripts/reactflow_delta/finalize_independent_rnet_distill_result.py
+  screen_report_path: docs/prospective_v2/independent_rnet_distill_screen_result.md
+  formal_report_path: docs/prospective_v2/independent_rnet_distill_formal_result.md
+  result_registry_location: docs/prospective_v2/independent_rnet_distill_decision_ledger.yaml#result_registry
+  overwrite_allowed: false
+  evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+  clean_ood: NOT_ESTABLISHED
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
+
 formal_output_state:
   complete_unscored_merge_exists: false
   equal_seed_assembly_exists: false
@@ -99,7 +111,7 @@ authorization:
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
 
-allowed_phases: [RND0, RND1, RND2, RND3, RND4, RND5, RND6P, RND6S, RND6Q, RND6T]
+allowed_phases: [RND0, RND1, RND2, RND3, RND4, RND5, RND5T, RND6P, RND6S, RND6Q, RND6T]
 runnable_phases: [RND1]
 training_allowed: true
 candidate_model_training_allowed: true
@@ -119,6 +131,7 @@ gate_state:
   RND3: NOT_AUTHORIZED
   RND4: NOT_AUTHORIZED
   RND5: NOT_AUTHORIZED
+  RND5T: NOT_AUTHORIZED
   RND6P: NOT_AUTHORIZED
   RND6S: NOT_AUTHORIZED
   RND6Q: NOT_AUTHORIZED

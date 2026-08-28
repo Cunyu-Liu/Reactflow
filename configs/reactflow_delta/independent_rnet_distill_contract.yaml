@@ -156,6 +156,13 @@ phase_contract:
   RND5:
     authority_token: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
     required_predecessor: RND4_COMPLETE_SCORE_PASS
+  RND5T:
+    authority_token: RNET_DISTILL_SCREEN_TERMINAL_CLOSED
+    required_predecessor_one_of:
+      - RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
+      - RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_INDETERMINATE
+    next_action: STOP_RND5_SCREEN_NONPASS_ALL_RUNTIME_RIGHTS_CLOSED
+    runnable: false
   RND6P:
     authority_token: RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_GPU_PREDICTION_ONLY
     required_predecessor: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
@@ -222,6 +229,22 @@ formal_gates:
   best_seed_selection_allowed: false
   extra_seed_selection_allowed: false
   evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+
+result_finalization:
+  production_entry: scripts/reactflow_delta/finalize_independent_rnet_distill_result.py
+  screen_report_path: docs/prospective_v2/independent_rnet_distill_screen_result.md
+  formal_report_path: docs/prospective_v2/independent_rnet_distill_formal_result.md
+  result_registry_location: docs/prospective_v2/independent_rnet_distill_decision_ledger.yaml#result_registry
+  rnd5_pass_next_phase: RND6P
+  rnd5_nonpass_terminal_phase: RND5T
+  rnd6_qualification_terminal_phase: RND6T
+  rnd5_nonpass_formal_registry_status: NOT_RUN_RND5_NONPASS
+  overwrite_allowed: false
+  evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+  clean_ood: NOT_ESTABLISHED
+  external_replication: NOT_ESTABLISHED
+  sota: NOT_ESTABLISHED
+  publication_ready: false
 
 screen_gates:
   completeness:

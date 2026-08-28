@@ -30,6 +30,75 @@ def _read_yaml(path: Path) -> dict:
     return value
 
 
+def _screen_registry(status: str = validator.RND5_SCREEN_PASS) -> dict:
+    gate_passed, integrity_passed = {
+        validator.RND5_SCREEN_PASS: (True, True),
+        validator.RND5_SCREEN_FAIL: (False, True),
+        validator.RND5_SCREEN_INDETERMINATE: (False, False),
+    }[status]
+    return {
+        "phase": "RND5",
+        "status": status,
+        "experiment_id": validator.RESULT_EXPERIMENT_IDS["screen"],
+        "authority_branch": validator.BRANCH,
+        "recorded_at": "2026-08-28T17:00:00+08:00",
+        "report_path": str(validator.SCREEN_REPORT_PATH),
+        "report_exists": True,
+        "canonical_merge_path": str(validator.RND3_MERGED_PATH),
+        "canonical_score_path": str(validator.RND4_SCORE_PATH),
+        "canonical_qualification_path": str(validator.RND5_QUALIFICATION_PATH),
+        "folds": list(range(20)),
+        "seeds": [0],
+        "point_epochs": 40,
+        "calibration_epochs": 40,
+        "training_devices": ["cuda:0"],
+        "gpu_names": ["Fixture GPU"],
+        "started_at_utc": "2026-08-28T08:00:00Z",
+        "finished_at_utc": "2026-08-28T09:00:00Z",
+        "source_commits": ["a" * 40],
+        "gate_passed": gate_passed,
+        "integrity_passed": integrity_passed,
+        "failed_gates": [] if gate_passed or not integrity_passed else ["fixture_gate"],
+        "integrity_errors": [] if integrity_passed else ["fixture_integrity"],
+        "evidence_status": "EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY",
+        "clean_ood": "NOT_ESTABLISHED",
+        "external_replication": "NOT_ESTABLISHED",
+        "sota": "NOT_ESTABLISHED",
+        "publication_ready": False,
+        "finalizer_source_commit": "b" * 40,
+    }
+
+
+def _formal_registry(status: str) -> dict:
+    gate_passed, integrity_passed = {
+        validator.RND6_QUALIFICATION_PASS: (True, True),
+        validator.RND6_QUALIFICATION_FAIL: (False, True),
+        validator.RND6_QUALIFICATION_INDETERMINATE: (False, False),
+    }[status]
+    return {
+        **_screen_registry(status=validator.RND5_SCREEN_PASS),
+        "phase": "RND6Q",
+        "status": status,
+        "experiment_id": validator.RESULT_EXPERIMENT_IDS["formal"],
+        "recorded_at": "2026-08-28T18:20:00+08:00",
+        "report_path": str(validator.FORMAL_REPORT_PATH),
+        "canonical_merge_path": str(validator.RND6_MERGED_PATH),
+        "canonical_assembly_path": str(validator.RND6_ASSEMBLY_MANIFEST_PATH),
+        "canonical_score_path": str(validator.RND6_SCORE_PATH),
+        "canonical_qualification_path": str(validator.RND6_QUALIFICATION_PATH),
+        "seeds": list(range(5)),
+        "source_commits": ["c" * 40],
+        "gate_passed": gate_passed,
+        "integrity_passed": integrity_passed,
+        "failed_gates": (
+            [] if gate_passed or not integrity_passed else ["fixture_formal_gate"]
+        ),
+        "integrity_errors": [] if integrity_passed else ["fixture_formal_integrity"],
+        "expected_fold_seed_pairs": 100,
+        "equal_seed_weight": 0.2,
+    }
+
+
 def _write_shard(root: Path, *, bad_length: bool = False, outcome_key: bool = False) -> tuple[Path, dict]:
     shard = root / "shard_00000"
     shard.mkdir()
@@ -107,6 +176,49 @@ def _persist_authority_fixture(fixture: dict) -> None:
         + "---\n\n# Authority fixture\n",
         encoding="utf-8",
     )
+    phase = fixture["active"]["authority"]["current_phase"]
+    registry = fixture["ledger"].get("result_registry", {})
+    if phase in {"RND5T", "RND6P", "RND6S", "RND6Q", "RND6T"}:
+        _write_result_report_fixture(repo_root, registry["screen"])
+    formal_report = repo_root / validator.FORMAL_REPORT_PATH
+    if phase == "RND6T":
+        _write_result_report_fixture(repo_root, registry["formal"])
+    elif formal_report.exists():
+        formal_report.unlink()
+
+
+def _write_result_report_fixture(repo_root: Path, entry: dict) -> None:
+    report_path = repo_root / Path(entry["report_path"])
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        "\n".join(
+            [
+                "# Result fixture",
+                "",
+                f"- Qualification status: `{entry['status']}`",
+                "- Evidence ceiling: `EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY`",
+                "- Publication ready: `false`",
+                f"- Experiment ID: `{entry['experiment_id']}`",
+                f"- Authority branch: `{validator.BRANCH}`",
+                (
+                    "- Exact per-fold runner commands: recorded in the canonical merge "
+                    f"`{entry['canonical_merge_path']}` under `folds[*].command`; "
+                    "not duplicated into the decision ledger."
+                ),
+                "",
+                "## Canonical calibration",
+                "",
+                "## Claim boundary",
+                "",
+                "- Clean out-of-distribution evidence is not established.",
+                "- Independent external replication is not established.",
+                "- State of the art is not established.",
+                "- Publication readiness is false.",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
 
 
 def _authority_fixture(
@@ -115,6 +227,7 @@ def _authority_fixture(
     *,
     phase: str,
     terminal_status: str = validator.RND6_QUALIFICATION_PASS,
+    screen_terminal_status: str = validator.RND5_SCREEN_FAIL,
 ) -> dict:
     token = validator.TOKENS[phase]
     active = copy.deepcopy(_read_yaml(ROOT / validator.ACTIVE_PATH))
@@ -130,15 +243,29 @@ def _authority_fixture(
         "formal_activation_allowed": False,
         "formal_score_accessed": False,
         "formal_qualification_accessed": False,
+        "screen_result_status": "NOT_FINALIZED",
+        "formal_result_status": "NOT_FINALIZED",
+        "publication_ready": False,
     }
-    if phase in {"RND2", "RND3", "RND4", "RND5", *validator.FORMAL_PHASES}:
+    if phase in {
+        "RND2",
+        "RND3",
+        "RND4",
+        "RND5",
+        "RND5T",
+        *validator.FORMAL_PHASES,
+    }:
         contract["contract_status"] = token
         authority = active["authority"]
         authority["current_phase"] = phase
-        authority["current_runnable_phase"] = "NONE" if phase == "RND6T" else phase
+        authority["current_runnable_phase"] = (
+            "NONE" if phase in validator.TERMINAL_PHASES else phase
+        )
         authority["current_authority_state"] = token
         authority["binding_status"] = token
-        active["runnable_phases"] = [] if phase == "RND6T" else [phase]
+        active["runnable_phases"] = (
+            [] if phase in validator.TERMINAL_PHASES else [phase]
+        )
         active["partial_fold_score_read_allowed"] = False
         active["new_external_outcome_access_allowed"] = False
         ledger["current_phase"] = phase
@@ -164,6 +291,45 @@ def _authority_fixture(
         research["formal_qualification_accessed"] = formal_qualification_accessed
         for name, path in validator.RND6_CANONICAL_PATHS.items():
             authority[name] = str(path)
+        ledger["result_registry"] = {
+            "screen": _screen_registry(),
+            "formal": (
+                _formal_registry(terminal_status)
+                if phase == "RND6T"
+                else copy.deepcopy(validator._PENDING_FORMAL_REGISTRY)
+            ),
+        }
+        research["screen_result_status"] = validator.RND5_SCREEN_PASS
+        research["formal_result_status"] = (
+            terminal_status
+            if phase == "RND6T"
+            else validator.FORMAL_PENDING_STATUS
+        )
+    if phase == "RND5T":
+        lifecycle_status, activation_allowed = validator._formal_lifecycle(phase)
+        contract["formal_chain"] = validator._expected_contract_formal_chain(phase)
+        active["inactive_formal_chain"] = validator._expected_active_formal_chain(phase)
+        ledger["formal_chain_status"] = lifecycle_status
+        research["formal_chain_status"] = lifecycle_status
+        research["formal_activation_allowed"] = activation_allowed
+        active["formal_output_state"] = copy.deepcopy(
+            validator.INACTIVE_FORMAL_OUTPUT_STATE
+        )
+        ledger["score_accessed"] = True
+        ledger["formal_score_accessed"] = False
+        ledger["formal_qualification_accessed"] = False
+        research["screen_result_status"] = screen_terminal_status
+        research["formal_result_status"] = validator.FORMAL_NOT_RUN_STATUS
+        ledger["result_registry"] = {
+            "screen": _screen_registry(screen_terminal_status),
+            "formal": {
+                "status": validator.FORMAL_NOT_RUN_STATUS,
+                "reason": screen_terminal_status,
+                "report_path": str(validator.FORMAL_REPORT_PATH),
+                "report_exists": False,
+                "publication_ready": False,
+            },
+        }
     if phase == "RND2":
         active["authorization"].update(validator.RND2_AUTHORIZATION)
         active["training_allowed"] = True
@@ -277,6 +443,50 @@ def _authority_fixture(
                 "partial_score_accessed": False,
                 "new_external_outcome_accessed": False,
                 "model_or_threshold_selection_performed": False,
+                "authority_token": token,
+            }
+        )
+    elif phase == "RND5T":
+        assert screen_terminal_status in validator.RND5_NONPASS_STATUSES
+        active["authorization"].update(validator.RND5T_AUTHORIZATION)
+        active["training_allowed"] = False
+        active["candidate_model_training_allowed"] = False
+        active["held_score_read_allowed"] = False
+        active["gate_state"] = {
+            **validator.RND5_GATE_STATE,
+            "RND5": screen_terminal_status,
+            "RND5T": f"TERMINAL_{screen_terminal_status}",
+        }
+        active["next_allowed_action"] = validator.RND5T_ACTION
+        ledger["next_action"] = validator.RND5T_ACTION
+        for name, path in validator.RND5T_AUTHORITY_PATHS.items():
+            authority[name] = str(path)
+        exit_code, gate_passed, integrity_passed, complete_valid = {
+            validator.RND5_SCREEN_FAIL: (1, False, True, True),
+            validator.RND5_SCREEN_INDETERMINATE: (2, False, False, False),
+        }[screen_terminal_status]
+        ledger["decisions"].append(
+            {
+                "time": "2026-08-28T16:20:00+08:00",
+                "event": screen_terminal_status,
+                "decision": validator.RND5T_DECISION,
+                "canonical_qualification_path": str(
+                    validator.RND5_QUALIFICATION_PATH
+                ),
+                "canonical_qualification_status": screen_terminal_status,
+                "exit_code": exit_code,
+                "gate_passed": gate_passed,
+                "integrity_passed": integrity_passed,
+                "complete_valid_qualification": complete_valid,
+                "rnd6_authorized": False,
+                "formal_result_status": validator.FORMAL_NOT_RUN_STATUS,
+                "score_accessed": True,
+                "formal_score_accessed": False,
+                "formal_qualification_accessed": False,
+                "partial_score_accessed": False,
+                "new_external_outcome_accessed": False,
+                "model_or_threshold_selection_performed": False,
+                "evidence_status": "EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY",
                 "authority_token": token,
             }
         )
@@ -539,6 +749,206 @@ def test_authority_validator_accepts_exact_formal_terminal_fixture(
     assert result["status"] == "INDEPENDENT_RNET_DISTILL_AUTHORITY_EXACT_PASS"
     assert result["phase"] == "RND6T"
     assert fixture["active"]["runnable_phases"] == []
+
+
+@pytest.mark.parametrize("terminal_status", validator.RND5_NONPASS_STATUSES)
+def test_authority_validator_accepts_exact_screen_nonpass_terminal_fixture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    terminal_status: str,
+) -> None:
+    fixture = _authority_fixture(
+        tmp_path,
+        monkeypatch,
+        phase="RND5T",
+        screen_terminal_status=terminal_status,
+    )
+    result = validator.validate_contract(fixture["repo_root"])
+    assert result["status"] == "INDEPENDENT_RNET_DISTILL_AUTHORITY_EXACT_PASS"
+    assert result["phase"] == "RND5T"
+    assert fixture["active"]["runnable_phases"] == []
+    assert fixture["ledger"]["result_registry"]["formal"]["status"] == (
+        "NOT_RUN_RND5_NONPASS"
+    )
+
+
+@pytest.mark.parametrize("field", ("experiment_id", "authority_branch"))
+def test_terminal_registry_rejects_missing_provenance_binding(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND5T")
+    fixture["ledger"]["result_registry"]["screen"].pop(field)
+    ledger_path = fixture["repo_root"] / validator.LEDGER_PATH
+    ledger_path.write_text(
+        yaml.safe_dump(fixture["ledger"], sort_keys=False), encoding="utf-8"
+    )
+    with pytest.raises(RuntimeError, match="result-registry fields changed"):
+        validator.validate_contract(fixture["repo_root"])
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    (
+        ("experiment_id", "WRONG", "experiment id changed"),
+        ("authority_branch", "wrong/branch", "authority branch changed"),
+        ("source_commits", ["a" * 40, "b" * 40], "source commits are invalid"),
+        ("training_devices", ["cuda:1"], "CUDA provenance changed"),
+    ),
+)
+def test_terminal_registry_rejects_nonexact_provenance(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: object,
+    message: str,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND5T")
+    fixture["ledger"]["result_registry"]["screen"][field] = value
+    ledger_path = fixture["repo_root"] / validator.LEDGER_PATH
+    ledger_path.write_text(
+        yaml.safe_dump(fixture["ledger"], sort_keys=False), encoding="utf-8"
+    )
+    with pytest.raises(RuntimeError, match=message):
+        validator.validate_contract(fixture["repo_root"])
+
+
+def test_terminal_registry_rejects_missing_screen_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND5T")
+    (fixture["repo_root"] / validator.SCREEN_REPORT_PATH).unlink()
+    with pytest.raises(RuntimeError, match="screen canonical report file is missing"):
+        validator.validate_contract(fixture["repo_root"])
+
+
+@pytest.mark.parametrize(
+    ("original", "replacement"),
+    (
+        (
+            "- Qualification status: "
+            f"`{validator.RND5_SCREEN_FAIL}`",
+            "- Qualification status: `WRONG`",
+        ),
+        (
+            "- Clean out-of-distribution evidence is not established.",
+            "- Clean out-of-distribution evidence is established.",
+        ),
+    ),
+)
+def test_terminal_registry_rejects_tampered_screen_report(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    original: str,
+    replacement: str,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND5T")
+    report_path = fixture["repo_root"] / validator.SCREEN_REPORT_PATH
+    report_path.write_text(
+        report_path.read_text(encoding="utf-8").replace(original, replacement),
+        encoding="utf-8",
+    )
+    with pytest.raises(RuntimeError, match="screen canonical report binding changed"):
+        validator.validate_contract(fixture["repo_root"])
+
+
+@pytest.mark.parametrize(
+    "contradiction",
+    (
+        "- Qualification status: `WRONG`",
+        "- Publication ready: `true`",
+        "- Publication readiness is true.",
+        "- Clean out-of-distribution evidence is established.",
+    ),
+)
+def test_terminal_registry_rejects_appended_contradictory_report_anchor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    contradiction: str,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND5T")
+    report_path = fixture["repo_root"] / validator.SCREEN_REPORT_PATH
+    report_path.write_text(
+        report_path.read_text(encoding="utf-8") + contradiction + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(RuntimeError, match="screen canonical report binding changed"):
+        validator.validate_contract(fixture["repo_root"])
+
+
+def test_rnd5t_registry_status_must_match_terminal_authority(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND5T")
+    divergent = validator.RND5_SCREEN_INDETERMINATE
+    fixture["ledger"]["result_registry"] = {
+        "screen": _screen_registry(divergent),
+        "formal": {
+            "status": validator.FORMAL_NOT_RUN_STATUS,
+            "reason": divergent,
+            "report_path": str(validator.FORMAL_REPORT_PATH),
+            "report_exists": False,
+            "publication_ready": False,
+        },
+    }
+    fixture["research"]["screen_result_status"] = divergent
+    _persist_authority_fixture(fixture)
+    with pytest.raises(RuntimeError, match="RND5T registry status diverged"):
+        validator.validate_contract(fixture["repo_root"])
+
+
+def test_rnd6t_registry_status_must_match_terminal_authority(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND6T")
+    divergent = validator.RND6_QUALIFICATION_FAIL
+    fixture["ledger"]["result_registry"]["formal"] = _formal_registry(divergent)
+    fixture["research"]["formal_result_status"] = divergent
+    _persist_authority_fixture(fixture)
+    with pytest.raises(RuntimeError, match="RND6T registry status diverged"):
+        validator.validate_contract(fixture["repo_root"])
+
+
+def test_terminal_registry_rejects_missing_formal_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND6T")
+    (fixture["repo_root"] / validator.FORMAL_REPORT_PATH).unlink()
+    with pytest.raises(RuntimeError, match="formal canonical report file is missing"):
+        validator.validate_contract(fixture["repo_root"])
+
+
+@pytest.mark.parametrize("phase", ("RND5T", "RND6P", "RND6S", "RND6Q"))
+def test_nonfinal_formal_registry_requires_formal_report_absent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    phase: str,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase=phase)
+    report_path = fixture["repo_root"] / validator.FORMAL_REPORT_PATH
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text("premature formal report\n", encoding="utf-8")
+    message = "not run" if phase == "RND5T" else "pending"
+    with pytest.raises(RuntimeError, match=message):
+        validator.validate_contract(fixture["repo_root"])
+
+
+@pytest.mark.parametrize(
+    "report_path",
+    (validator.SCREEN_REPORT_PATH, validator.FORMAL_REPORT_PATH),
+)
+def test_prefinalization_authority_requires_result_reports_absent(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    report_path: Path,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase="RND5")
+    premature = fixture["repo_root"] / report_path
+    premature.parent.mkdir(parents=True, exist_ok=True)
+    premature.write_text("premature result report\n", encoding="utf-8")
+    with pytest.raises(RuntimeError, match="report exists before RND5 finalization"):
+        validator.validate_contract(fixture["repo_root"])
 
 
 @pytest.mark.parametrize(

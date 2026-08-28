@@ -8,6 +8,9 @@ formal_phase_order: [RND6P, RND6S, RND6Q, RND6T]
 formal_activation_allowed: false
 formal_score_accessed: false
 formal_qualification_accessed: false
+screen_result_status: NOT_FINALIZED
+formal_result_status: NOT_FINALIZED
+publication_ready: false
 ---
 
 # Independent RNet2 single-feature distillation

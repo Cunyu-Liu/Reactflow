@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -35,6 +36,7 @@ PHASES = (
     "RND3",
     "RND4",
     "RND5",
+    "RND5T",
     "RND6P",
     "RND6S",
     "RND6Q",
@@ -47,6 +49,7 @@ TOKENS = {
     "RND3": "RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY",
     "RND4": "RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY",
     "RND5": "RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY",
+    "RND5T": "RNET_DISTILL_SCREEN_TERMINAL_CLOSED",
     "RND6P": "RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_GPU_PREDICTION_ONLY",
     "RND6S": "RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_SCORE_ONCE_ONLY",
     "RND6Q": "RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_QUALIFIER_ONCE_ONLY",
@@ -58,6 +61,11 @@ RND2_MERGE_PASS = "RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS"
 RND3_MERGE_PASS = "RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS"
 RND4_SCORE_PASS = "RND4_COMPLETE_SCORE_PASS"
 RND5_SCREEN_PASS = "RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS"
+RND5_SCREEN_FAIL = "RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL"
+RND5_SCREEN_INDETERMINATE = (
+    "RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_INDETERMINATE"
+)
+RND5_NONPASS_STATUSES = (RND5_SCREEN_FAIL, RND5_SCREEN_INDETERMINATE)
 RND6_MERGE_PASS = "RND6P_COMPLETE_UNSCORED_FORMAL_MERGE_PASS"
 RND6_ASSEMBLY_PASS = "RND6P_EQUAL_SEED_PREDICTION_ONLY_ASSEMBLY_PASS"
 RND6_SCORE_PASS = "RND6S_COMPLETE_FORMAL_SCORE_PASS"
@@ -79,12 +87,14 @@ FORMAL_POINT_EPOCHS = 40
 FORMAL_CALIBRATION_EPOCHS = 40
 FORMAL_EQUAL_SEED_WEIGHT = 0.2
 FORMAL_INACTIVE_STATUS = "FROZEN_INACTIVE_PENDING_RND5_RESULT"
+FORMAL_NOT_RUN_RND5_NONPASS_STATUS = "TERMINAL_RND5_NONPASS_RND6_NOT_RUN"
 FORMAL_LIFECYCLE_BY_PHASE = {
     "RND6P": "ACTIVE_RND6P",
     "RND6S": "ACTIVE_RND6S",
     "RND6Q": "ACTIVE_RND6Q",
     "RND6T": "TERMINAL_RND6_CLOSED",
 }
+TERMINAL_PHASES = ("RND5T", "RND6T")
 RND1_ACTION = "RUN_SINGLE_RND1_PAIRED_GPU_PRETRAIN"
 RND1_LEDGER_ACTION = "RUN_SINGLE_RND1_PAIRED_GPU_PRETRAIN_AND_VERIFY_REAL_CUDA_PLACEMENT_ONCE"
 RND1_AUTHORIZATION = {
@@ -105,6 +115,7 @@ RND1_GATE_STATE = {
     "RND3": "NOT_AUTHORIZED",
     "RND4": "NOT_AUTHORIZED",
     "RND5": "NOT_AUTHORIZED",
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": "NOT_AUTHORIZED",
     "RND6S": "NOT_AUTHORIZED",
     "RND6Q": "NOT_AUTHORIZED",
@@ -133,6 +144,7 @@ RND2_GATE_STATE = {
     "RND3": "NOT_AUTHORIZED",
     "RND4": "NOT_AUTHORIZED",
     "RND5": "NOT_AUTHORIZED",
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": "NOT_AUTHORIZED",
     "RND6S": "NOT_AUTHORIZED",
     "RND6Q": "NOT_AUTHORIZED",
@@ -161,6 +173,7 @@ RND3_GATE_STATE = {
     "RND3": "AUTHORIZED_COMPLETE_SEED0_PREDICTION_ONLY",
     "RND4": "NOT_AUTHORIZED",
     "RND5": "NOT_AUTHORIZED",
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": "NOT_AUTHORIZED",
     "RND6S": "NOT_AUTHORIZED",
     "RND6Q": "NOT_AUTHORIZED",
@@ -187,6 +200,7 @@ RND4_GATE_STATE = {
     "RND3": RND3_MERGE_PASS,
     "RND4": "AUTHORIZED_COMPLETE_SCORE_ONCE",
     "RND5": "NOT_AUTHORIZED",
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": "NOT_AUTHORIZED",
     "RND6S": "NOT_AUTHORIZED",
     "RND6Q": "NOT_AUTHORIZED",
@@ -213,10 +227,26 @@ RND5_GATE_STATE = {
     "RND3": RND3_MERGE_PASS,
     "RND4": RND4_SCORE_PASS,
     "RND5": "AUTHORIZED_COMPLETE_QUALIFIER_ONCE",
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": "NOT_AUTHORIZED",
     "RND6S": "NOT_AUTHORIZED",
     "RND6Q": "NOT_AUTHORIZED",
     "RND6T": "NOT_AUTHORIZED",
+}
+
+RND5T_SCOPE = "RND5T_SCREEN_TERMINAL_CLOSED"
+RND5T_ACTION = "STOP_RND5_SCREEN_NONPASS_ALL_RUNTIME_RIGHTS_CLOSED"
+RND5T_DECISION = "CLOSE_RND5_AND_RECORD_SCREEN_NONPASS_WITHOUT_RND6"
+RND5T_AUTHORIZATION = {
+    "scope": RND5T_SCOPE,
+    "implementation_allowed": False,
+    "neural_training_allowed": False,
+    "smoke_allowed": False,
+    "screen_allowed": False,
+    "score_allowed": False,
+    "qualification_allowed": False,
+    "formal_confirmation_allowed": False,
+    "new_external_outcome_access_allowed": False,
 }
 
 RND6P_SCOPE = "RND6P_FIXED_SEEDS_0_TO_4_FORMAL_GPU_PREDICTION_ONLY"
@@ -242,6 +272,7 @@ RND6P_GATE_STATE = {
     "RND3": RND3_MERGE_PASS,
     "RND4": RND4_SCORE_PASS,
     "RND5": RND5_SCREEN_PASS,
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": "AUTHORIZED_FIXED_SEEDS_0_TO_4_FORMAL_PREDICTION_ONLY",
     "RND6S": "NOT_AUTHORIZED",
     "RND6Q": "NOT_AUTHORIZED",
@@ -268,6 +299,7 @@ RND6S_GATE_STATE = {
     "RND3": RND3_MERGE_PASS,
     "RND4": RND4_SCORE_PASS,
     "RND5": RND5_SCREEN_PASS,
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": RND6_ASSEMBLY_PASS,
     "RND6S": "AUTHORIZED_COMPLETE_FORMAL_SCORE_ONCE",
     "RND6Q": "NOT_AUTHORIZED",
@@ -296,6 +328,7 @@ RND6Q_GATE_STATE = {
     "RND3": RND3_MERGE_PASS,
     "RND4": RND4_SCORE_PASS,
     "RND5": RND5_SCREEN_PASS,
+    "RND5T": "NOT_AUTHORIZED",
     "RND6P": RND6_ASSEMBLY_PASS,
     "RND6S": RND6_SCORE_PASS,
     "RND6Q": "AUTHORIZED_COMPLETE_FORMAL_QUALIFIER_ONCE",
@@ -331,6 +364,24 @@ RND6_ASSEMBLY_MANIFEST_PATH = (
 )
 RND6_SCORE_PATH = RND6_FORMAL_DIR / "rnet_distill_complete_formal_score.json"
 RND6_QUALIFICATION_PATH = RND6_FORMAL_DIR / "rnet_distill_formal_qualification.json"
+SCREEN_REPORT_PATH = Path(
+    "docs/prospective_v2/independent_rnet_distill_screen_result.md"
+)
+FORMAL_REPORT_PATH = Path(
+    "docs/prospective_v2/independent_rnet_distill_formal_result.md"
+)
+FINALIZER_PATH = Path(
+    "scripts/reactflow_delta/finalize_independent_rnet_distill_result.py"
+)
+RESULT_REGISTRY_LOCATION = (
+    "docs/prospective_v2/independent_rnet_distill_decision_ledger.yaml#result_registry"
+)
+FORMAL_PENDING_STATUS = "PENDING_RND6_FORMAL"
+FORMAL_NOT_RUN_STATUS = "NOT_RUN_RND5_NONPASS"
+RESULT_EXPERIMENT_IDS = {
+    "screen": "RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY",
+    "formal": "RND6P_RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_PREDICTION_ONLY",
+}
 M2_PATH = Path(
     "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/"
     "reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv"
@@ -382,6 +433,7 @@ RND5_AUTHORITY_PATHS = {
     "complete_score_path": RND4_SCORE_PATH,
     "qualification_path": RND5_QUALIFICATION_PATH,
 }
+RND5T_AUTHORITY_PATHS = RND5_AUTHORITY_PATHS
 RND6_CANONICAL_PATHS = {
     "formal_prediction_dir": RND6_FORMAL_DIR,
     "formal_complete_unscored_merge_path": RND6_MERGED_PATH,
@@ -414,6 +466,34 @@ FORMAL_GATES = {
     "best_seed_selection_allowed": False,
     "extra_seed_selection_allowed": False,
     "evidence_ceiling": "EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY",
+}
+ACTIVE_RESULT_FINALIZATION = {
+    "production_entry": str(FINALIZER_PATH),
+    "screen_report_path": str(SCREEN_REPORT_PATH),
+    "formal_report_path": str(FORMAL_REPORT_PATH),
+    "result_registry_location": RESULT_REGISTRY_LOCATION,
+    "overwrite_allowed": False,
+    "evidence_ceiling": "EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY",
+    "clean_ood": "NOT_ESTABLISHED",
+    "external_replication": "NOT_ESTABLISHED",
+    "sota": "NOT_ESTABLISHED",
+    "publication_ready": False,
+}
+CONTRACT_RESULT_FINALIZATION = {
+    "production_entry": str(FINALIZER_PATH),
+    "screen_report_path": str(SCREEN_REPORT_PATH),
+    "formal_report_path": str(FORMAL_REPORT_PATH),
+    "result_registry_location": RESULT_REGISTRY_LOCATION,
+    "rnd5_pass_next_phase": "RND6P",
+    "rnd5_nonpass_terminal_phase": "RND5T",
+    "rnd6_qualification_terminal_phase": "RND6T",
+    "rnd5_nonpass_formal_registry_status": FORMAL_NOT_RUN_STATUS,
+    "overwrite_allowed": False,
+    "evidence_ceiling": "EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY",
+    "clean_ood": "NOT_ESTABLISHED",
+    "external_replication": "NOT_ESTABLISHED",
+    "sota": "NOT_ESTABLISHED",
+    "publication_ready": False,
 }
 FORMAL_OUTPUT_STATE_BY_PHASE = {
     "RND6P": {
@@ -588,6 +668,10 @@ def _check_frozen_scientific_contract(contract: dict[str, Any]) -> None:
         artifact_policy["one_canonical_output_per_phase"] is True,
         "canonical formal output uniqueness changed",
     )
+    _require(
+        contract.get("result_finalization") == CONTRACT_RESULT_FINALIZATION,
+        "result-finalization contract changed",
+    )
     gpu = contract["gpu_policy"]
     _require(gpu["training_and_gpu_validation_device_class"] == "CUDA_ONLY", "CUDA-only changed")
     _require(gpu["cpu_model_or_loss_fallback_allowed"] is False, "CPU fallback opened")
@@ -610,11 +694,22 @@ def _check_frozen_scientific_contract(contract: dict[str, Any]) -> None:
         "RND6S predecessors diverged from canonical statuses",
     )
     _require(
+        contract["phase_contract"]["RND5T"]["required_predecessor_one_of"]
+        == list(RND5_NONPASS_STATUSES),
+        "RND5T predecessor statuses changed",
+    )
+    _require(
         contract["phase_contract"]["RND6T"]["required_predecessor_one_of"]
         == list(RND6_QUALIFICATION_STATUSES),
         "RND6T predecessor statuses changed",
     )
     expected_formal_contracts = {
+        "RND5T": {
+            "authority_token": TOKENS["RND5T"],
+            "required_predecessor_one_of": list(RND5_NONPASS_STATUSES),
+            "next_action": RND5T_ACTION,
+            "runnable": False,
+        },
         "RND6P": {
             "authority_token": TOKENS["RND6P"],
             "required_predecessor": RND5_SCREEN_PASS,
@@ -655,6 +750,8 @@ def _check_frozen_scientific_contract(contract: dict[str, Any]) -> None:
 
 
 def _formal_lifecycle(phase: str) -> tuple[str, bool]:
+    if phase == "RND5T":
+        return FORMAL_NOT_RUN_RND5_NONPASS_STATUS, False
     if phase not in FORMAL_PHASES:
         return FORMAL_INACTIVE_STATUS, False
     return FORMAL_LIFECYCLE_BY_PHASE[phase], phase != "RND6T"
@@ -792,6 +889,365 @@ def _check_formal_design_state(
                 active["gate_state"].get(formal_phase) == "NOT_AUTHORIZED",
                 f"{formal_phase} activated before exact RND5 PASS",
             )
+
+
+_SCREEN_REGISTRY_FIELDS = {
+    "phase",
+    "status",
+    "experiment_id",
+    "authority_branch",
+    "recorded_at",
+    "report_path",
+    "report_exists",
+    "canonical_merge_path",
+    "canonical_score_path",
+    "canonical_qualification_path",
+    "folds",
+    "seeds",
+    "point_epochs",
+    "calibration_epochs",
+    "training_devices",
+    "gpu_names",
+    "started_at_utc",
+    "finished_at_utc",
+    "source_commits",
+    "gate_passed",
+    "integrity_passed",
+    "failed_gates",
+    "integrity_errors",
+    "evidence_status",
+    "clean_ood",
+    "external_replication",
+    "sota",
+    "publication_ready",
+    "finalizer_source_commit",
+}
+_FORMAL_REGISTRY_FIELDS = {
+    *_SCREEN_REGISTRY_FIELDS,
+    "canonical_assembly_path",
+    "expected_fold_seed_pairs",
+    "equal_seed_weight",
+}
+_PENDING_FORMAL_REGISTRY = {
+    "status": FORMAL_PENDING_STATUS,
+    "reason": "RND5_EXACT_PASS_AUTHORIZED_RND6P",
+    "report_path": str(FORMAL_REPORT_PATH),
+    "report_exists": False,
+    "publication_ready": False,
+}
+
+
+def _check_registry_provenance(
+    entry: dict[str, Any],
+    *,
+    label: str,
+    expected_fields: set[str],
+    expected_folds: list[int],
+    expected_seeds: list[int],
+    expected_experiment_id: str,
+) -> None:
+    _require(set(entry) == expected_fields, f"{label} result-registry fields changed")
+    _require(entry["folds"] == expected_folds, f"{label} fold universe changed")
+    _require(entry["seeds"] == expected_seeds, f"{label} seed universe changed")
+    _require(
+        entry["experiment_id"] == expected_experiment_id,
+        f"{label} experiment id changed",
+    )
+    _require(entry["authority_branch"] == BRANCH, f"{label} authority branch changed")
+    _require(
+        entry["evidence_status"] == "EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY",
+        f"{label} evidence ceiling changed",
+    )
+    for key in ("clean_ood", "external_replication", "sota"):
+        _require(entry[key] == "NOT_ESTABLISHED", f"{label} {key} claim widened")
+    _require(entry["publication_ready"] is False, f"{label} publication claim widened")
+    _require(
+        isinstance(entry["recorded_at"], str) and bool(entry["recorded_at"]),
+        f"{label} recorded time is missing",
+    )
+    _require(
+        isinstance(entry["started_at_utc"], str) and bool(entry["started_at_utc"]),
+        f"{label} start time is missing",
+    )
+    _require(
+        isinstance(entry["finished_at_utc"], str) and bool(entry["finished_at_utc"]),
+        f"{label} finish time is missing",
+    )
+    commits = entry["source_commits"]
+    _require(
+        isinstance(commits, list)
+        and bool(commits)
+        and len(commits) == 1
+        and commits == sorted(set(commits))
+        and all(
+            isinstance(value, str)
+            and re.fullmatch(r"[0-9a-f]{40}", value) is not None
+            for value in commits
+        ),
+        f"{label} source commits are invalid",
+    )
+    finalizer_commit = entry["finalizer_source_commit"]
+    _require(
+        isinstance(finalizer_commit, str)
+        and re.fullmatch(r"[0-9a-f]{40}", finalizer_commit) is not None,
+        f"{label} finalizer source commit is invalid",
+    )
+    devices = entry["training_devices"]
+    _require(
+        devices == ["cuda:0"],
+        f"{label} CUDA provenance changed",
+    )
+    gpu_names = entry["gpu_names"]
+    _require(
+        isinstance(gpu_names, list)
+        and bool(gpu_names)
+        and gpu_names == sorted(set(gpu_names))
+        and all(isinstance(value, str) and bool(value) for value in gpu_names),
+        f"{label} GPU names are missing",
+    )
+    for name in ("failed_gates", "integrity_errors"):
+        value = entry[name]
+        _require(
+            isinstance(value, list)
+            and value == sorted(set(value))
+            and all(isinstance(item, str) and bool(item) for item in value),
+            f"{label} {name} changed",
+        )
+
+
+def _check_result_report(
+    repo_root: Path, entry: dict[str, Any], *, label: str
+) -> None:
+    report_path = repo_root / Path(entry["report_path"])
+    _require(report_path.is_file(), f"{label} canonical report file is missing")
+    text = report_path.read_text(encoding="utf-8")
+    controlled_lines = {
+        "- Qualification status:": f"- Qualification status: `{entry['status']}`",
+        "- Evidence ceiling:": (
+            "- Evidence ceiling: `EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY`"
+        ),
+        "- Publication ready:": "- Publication ready: `false`",
+        "- Experiment ID:": f"- Experiment ID: `{entry['experiment_id']}`",
+        "- Authority branch:": f"- Authority branch: `{BRANCH}`",
+        "- Clean out-of-distribution evidence": (
+            "- Clean out-of-distribution evidence is not established."
+        ),
+        "- Independent external replication": (
+            "- Independent external replication is not established."
+        ),
+        "- State of the art": "- State of the art is not established.",
+        "- Publication readiness": "- Publication readiness is false.",
+        "## Canonical calibration": "## Canonical calibration",
+        "- Exact per-fold runner commands:": (
+            "- Exact per-fold runner commands: recorded in the canonical merge "
+            f"`{entry['canonical_merge_path']}` under `folds[*].command`; "
+            "not duplicated into the decision ledger."
+        ),
+    }
+    lines = text.splitlines()
+    for prefix, expected in controlled_lines.items():
+        matches = [line for line in lines if line.startswith(prefix)]
+        _require(
+            matches == [expected],
+            f"{label} canonical report binding changed: {prefix}",
+        )
+
+
+def _check_result_registry(
+    repo_root: Path,
+    active: dict[str, Any],
+    ledger: dict[str, Any],
+    research: dict[str, Any],
+    *,
+    phase: str,
+) -> None:
+    _require(
+        active.get("result_finalization") == ACTIVE_RESULT_FINALIZATION,
+        "active result-finalization binding changed",
+    )
+    _require(research.get("publication_ready") is False, "research publication claim widened")
+    registry = ledger.get("result_registry")
+    _require(isinstance(registry, dict), "canonical result registry is missing")
+    if phase in {"RND0", "RND1", "RND2", "RND3", "RND4", "RND5"}:
+        _require(registry == {}, "result registry populated before RND5 finalization")
+        _require(
+            research.get("screen_result_status") == "NOT_FINALIZED"
+            and research.get("formal_result_status") == "NOT_FINALIZED",
+            "research result state advanced before finalization",
+        )
+        _require(
+            not (repo_root / SCREEN_REPORT_PATH).exists()
+            and not (repo_root / FORMAL_REPORT_PATH).exists(),
+            "canonical result report exists before RND5 finalization",
+        )
+        return
+
+    _require(set(registry) == {"screen", "formal"}, "result registry sections changed")
+    screen = registry["screen"]
+    _require(isinstance(screen, dict), "screen result registry is malformed")
+    _check_registry_provenance(
+        screen,
+        label="screen",
+        expected_fields=_SCREEN_REGISTRY_FIELDS,
+        expected_folds=FORMAL_FOLDS,
+        expected_seeds=[0],
+        expected_experiment_id=RESULT_EXPERIMENT_IDS["screen"],
+    )
+    _require(screen["phase"] == "RND5", "screen registry phase changed")
+    _require(screen["report_path"] == str(SCREEN_REPORT_PATH), "screen report path changed")
+    _require(screen["report_exists"] is True, "screen canonical report is not recorded")
+    _require(
+        screen["canonical_merge_path"] == str(RND3_MERGED_PATH)
+        and screen["canonical_score_path"] == str(RND4_SCORE_PATH)
+        and screen["canonical_qualification_path"] == str(RND5_QUALIFICATION_PATH),
+        "screen registry canonical paths changed",
+    )
+    _require(
+        screen["point_epochs"] == FORMAL_POINT_EPOCHS
+        and screen["calibration_epochs"] == FORMAL_CALIBRATION_EPOCHS,
+        "screen registry schedule changed",
+    )
+    status = screen["status"]
+    _require(
+        status in (RND5_SCREEN_PASS, *RND5_NONPASS_STATUSES),
+        "screen registry status is not canonical",
+    )
+    expected_screen_semantics = {
+        RND5_SCREEN_PASS: (True, True),
+        RND5_SCREEN_FAIL: (False, True),
+        RND5_SCREEN_INDETERMINATE: (False, False),
+    }[status]
+    _require(
+        screen["gate_passed"] is expected_screen_semantics[0]
+        and screen["integrity_passed"] is expected_screen_semantics[1],
+        "screen registry verdict semantics changed",
+    )
+    expected_screen_reasons = {
+        RND5_SCREEN_PASS: (False, False),
+        RND5_SCREEN_FAIL: (True, False),
+        RND5_SCREEN_INDETERMINATE: (False, True),
+    }[status]
+    _require(
+        (bool(screen["failed_gates"]), bool(screen["integrity_errors"]))
+        == expected_screen_reasons,
+        "screen registry reason semantics changed",
+    )
+    _require(
+        research.get("screen_result_status") == status,
+        "research screen result diverged from registry",
+    )
+    _check_result_report(repo_root, screen, label="screen")
+
+    formal = registry["formal"]
+    _require(isinstance(formal, dict), "formal result registry is malformed")
+    if phase == "RND5T":
+        _require(status in RND5_NONPASS_STATUSES, "RND5T requires screen nonpass")
+        decisions = ledger.get("decisions")
+        _require(
+            isinstance(decisions, list)
+            and bool(decisions)
+            and isinstance(decisions[-1], dict)
+            and decisions[-1].get("canonical_qualification_status") == status
+            and active.get("gate_state", {}).get("RND5") == status,
+            "RND5T registry status diverged from terminal authority",
+        )
+        expected_formal = {
+            "status": FORMAL_NOT_RUN_STATUS,
+            "reason": status,
+            "report_path": str(FORMAL_REPORT_PATH),
+            "report_exists": False,
+            "publication_ready": False,
+        }
+        _require(formal == expected_formal, "RND5T formal-not-run registry changed")
+        _require(
+            research.get("formal_result_status") == FORMAL_NOT_RUN_STATUS,
+            "research formal-not-run status changed",
+        )
+        _require(
+            not (repo_root / FORMAL_REPORT_PATH).exists(),
+            "formal report exists even though RND6 was not run",
+        )
+        return
+
+    _require(status == RND5_SCREEN_PASS, f"{phase} requires exact screen PASS registry")
+    if phase in {"RND6P", "RND6S", "RND6Q"}:
+        _require(formal == _PENDING_FORMAL_REGISTRY, "pending formal registry changed")
+        _require(
+            research.get("formal_result_status") == FORMAL_PENDING_STATUS,
+            "research pending formal status changed",
+        )
+        _require(
+            not (repo_root / FORMAL_REPORT_PATH).exists(),
+            "formal report exists while formal result is pending",
+        )
+        return
+
+    _require(phase == "RND6T", "unexpected result-registry phase")
+    _check_registry_provenance(
+        formal,
+        label="formal",
+        expected_fields=_FORMAL_REGISTRY_FIELDS,
+        expected_folds=FORMAL_FOLDS,
+        expected_seeds=FORMAL_SEEDS,
+        expected_experiment_id=RESULT_EXPERIMENT_IDS["formal"],
+    )
+    _require(formal["phase"] == "RND6Q", "formal registry phase changed")
+    _require(formal["report_path"] == str(FORMAL_REPORT_PATH), "formal report path changed")
+    _require(formal["report_exists"] is True, "formal canonical report is not recorded")
+    _require(
+        formal["canonical_merge_path"] == str(RND6_MERGED_PATH)
+        and formal["canonical_assembly_path"] == str(RND6_ASSEMBLY_MANIFEST_PATH)
+        and formal["canonical_score_path"] == str(RND6_SCORE_PATH)
+        and formal["canonical_qualification_path"] == str(RND6_QUALIFICATION_PATH),
+        "formal registry canonical paths changed",
+    )
+    _require(
+        formal["point_epochs"] == FORMAL_POINT_EPOCHS
+        and formal["calibration_epochs"] == FORMAL_CALIBRATION_EPOCHS
+        and formal["expected_fold_seed_pairs"] == FORMAL_PAIR_COUNT
+        and formal["equal_seed_weight"] == FORMAL_EQUAL_SEED_WEIGHT,
+        "formal registry schedule changed",
+    )
+    formal_status = formal["status"]
+    _require(
+        formal_status in RND6_QUALIFICATION_STATUSES,
+        "formal registry status is not canonical",
+    )
+    decisions = ledger.get("decisions")
+    _require(
+        isinstance(decisions, list)
+        and bool(decisions)
+        and isinstance(decisions[-1], dict)
+        and decisions[-1].get("canonical_formal_qualification_status")
+        == formal_status
+        and active.get("gate_state", {}).get("RND6Q") == formal_status,
+        "RND6T registry status diverged from terminal authority",
+    )
+    expected_formal_semantics = {
+        RND6_QUALIFICATION_PASS: (True, True),
+        RND6_QUALIFICATION_FAIL: (False, True),
+        RND6_QUALIFICATION_INDETERMINATE: (False, False),
+    }[formal_status]
+    _require(
+        formal["gate_passed"] is expected_formal_semantics[0]
+        and formal["integrity_passed"] is expected_formal_semantics[1],
+        "formal registry verdict semantics changed",
+    )
+    expected_formal_reasons = {
+        RND6_QUALIFICATION_PASS: (False, False),
+        RND6_QUALIFICATION_FAIL: (True, False),
+        RND6_QUALIFICATION_INDETERMINATE: (False, True),
+    }[formal_status]
+    _require(
+        (bool(formal["failed_gates"]), bool(formal["integrity_errors"]))
+        == expected_formal_reasons,
+        "formal registry reason semantics changed",
+    )
+    _require(
+        research.get("formal_result_status") == formal_status,
+        "research formal result diverged from registry",
+    )
+    _check_result_report(repo_root, formal, label="formal")
 
 
 def _check_rnd1_authority(active: dict[str, Any], ledger: dict[str, Any]) -> None:
@@ -1104,6 +1560,88 @@ def _check_rnd5_authority(
     _require(observed_event == expected_event, "RND4 terminal score evidence changed")
 
 
+def _check_rnd5t_authority(
+    active: dict[str, Any],
+    contract: dict[str, Any],
+    ledger: dict[str, Any],
+) -> None:
+    decisions = ledger.get("decisions")
+    _require(isinstance(decisions, list) and decisions, "RND5T terminal event is missing")
+    event = decisions[-1]
+    _require(isinstance(event, dict), "RND5T terminal event must be a mapping")
+    qualification_status = event.get("canonical_qualification_status")
+    _require(
+        qualification_status in RND5_NONPASS_STATUSES,
+        "RND5T qualification status is not canonical",
+    )
+    terminal_gate_state = {
+        **RND5_GATE_STATE,
+        "RND5": qualification_status,
+        "RND5T": f"TERMINAL_{qualification_status}",
+    }
+    authorization = active["authorization"]
+    observed_authorization = {
+        key: authorization.get(key) for key in RND5T_AUTHORIZATION
+    }
+    _require(
+        observed_authorization == RND5T_AUTHORIZATION,
+        "RND5T authorization scope or permissions changed",
+    )
+    _require(active["runnable_phases"] == [], "RND5T must have no runnable phase")
+    _require(active["training_allowed"] is False, "RND5T training reopened")
+    _require(
+        active["candidate_model_training_allowed"] is False,
+        "RND5T candidate training reopened",
+    )
+    _require(active["held_score_read_allowed"] is False, "RND5T score rerun opened")
+    _require(active["gate_state"] == terminal_gate_state, "RND5T gate state changed")
+    _require(active["next_allowed_action"] == RND5T_ACTION, "RND5T action changed")
+    _require(ledger["next_action"] == RND5T_ACTION, "RND5T ledger action changed")
+    _require(ledger["score_accessed"] is True, "RND5T score access is not recorded")
+    _require(
+        ledger["formal_score_accessed"] is False
+        and ledger["formal_qualification_accessed"] is False,
+        "RND5T formal artifacts were accessed",
+    )
+    _require_authority_paths(
+        active["authority"], RND5T_AUTHORITY_PATHS, phase="RND5T"
+    )
+    _require(
+        contract["phase_contract"]["RND5T"]["required_predecessor_one_of"]
+        == list(RND5_NONPASS_STATUSES),
+        "RND5T predecessor changed",
+    )
+    expected_semantics = {
+        RND5_SCREEN_FAIL: (1, False, True, True),
+        RND5_SCREEN_INDETERMINATE: (2, False, False, False),
+    }
+    exit_code, gate_passed, integrity_passed, complete_valid = expected_semantics[
+        qualification_status
+    ]
+    expected_event = {
+        "event": qualification_status,
+        "decision": RND5T_DECISION,
+        "canonical_qualification_path": str(RND5_QUALIFICATION_PATH),
+        "canonical_qualification_status": qualification_status,
+        "exit_code": exit_code,
+        "gate_passed": gate_passed,
+        "integrity_passed": integrity_passed,
+        "complete_valid_qualification": complete_valid,
+        "rnd6_authorized": False,
+        "formal_result_status": FORMAL_NOT_RUN_STATUS,
+        "score_accessed": True,
+        "formal_score_accessed": False,
+        "formal_qualification_accessed": False,
+        "partial_score_accessed": False,
+        "new_external_outcome_accessed": False,
+        "model_or_threshold_selection_performed": False,
+        "evidence_status": "EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY",
+        "authority_token": TOKENS["RND5T"],
+    }
+    observed_event = {key: event.get(key) for key in expected_event}
+    _require(observed_event == expected_event, "RND5 terminal qualification evidence changed")
+
+
 def _check_formal_common_authority(
     active: dict[str, Any],
     ledger: dict[str, Any],
@@ -1356,8 +1894,8 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     authority = active["authority"]
     phase = str(authority["current_phase"])
     _require(phase in PHASES, "unknown active phase")
-    expected_runnable_phase = "NONE" if phase == "RND6T" else phase
-    expected_runnable_phases = [] if phase == "RND6T" else [phase]
+    expected_runnable_phase = "NONE" if phase in TERMINAL_PHASES else phase
+    expected_runnable_phases = [] if phase in TERMINAL_PHASES else [phase]
     _require(
         authority["current_runnable_phase"] == expected_runnable_phase,
         "runnable phase diverged",
@@ -1388,7 +1926,7 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     _require(ledger["current_phase"] == phase, "ledger phase diverged")
     _require(
         ledger["score_accessed"] is False
-        or phase in {"RND5", "RND6P", "RND6S", "RND6Q", "RND6T"},
+        or phase in {"RND5", "RND5T", "RND6P", "RND6S", "RND6Q", "RND6T"},
         "score flag widened early",
     )
     _require(ledger["partial_score_accessed"] is False, "partial score was accessed")
@@ -1405,6 +1943,7 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
     _check_formal_design_state(
         active, contract, ledger, research, phase=phase
     )
+    _check_result_registry(repo_root, active, ledger, research, phase=phase)
 
     if phase == "RND0":
         _require(active["authorization"]["implementation_allowed"] is True, "RND0 implementation closed")
@@ -1422,6 +1961,8 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
             _check_rnd4_authority(active, contract, ledger)
         elif phase == "RND5":
             _check_rnd5_authority(active, contract, ledger)
+        elif phase == "RND5T":
+            _check_rnd5t_authority(active, contract, ledger)
         elif phase == "RND6P":
             _check_rnd6p_authority(active, contract, ledger)
         elif phase == "RND6S":
@@ -1436,7 +1977,7 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         elif phase in {"RND4", "RND6S"}:
             _require(active["training_allowed"] is False, "RND4 training remained open")
             _require(active["held_score_read_allowed"] is True, f"{phase} score not open")
-        elif phase in {"RND5", "RND6Q", "RND6T"}:
+        elif phase in {"RND5", "RND5T", "RND6Q", "RND6T"}:
             _require(active["training_allowed"] is False, f"{phase} training remained open")
             _require(active["held_score_read_allowed"] is False, f"{phase} scorer rerun opened")
 

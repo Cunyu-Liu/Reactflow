@@ -9,6 +9,7 @@ new_external_outcome_accessed: false
 formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
 formal_score_accessed: false
 formal_qualification_accessed: false
+result_registry: {}
 
 decisions:
   - time: '2026-08-28T09:40:00+08:00'
