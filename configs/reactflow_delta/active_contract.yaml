@@ -1,61 +1,58 @@
-schema_version: reactflow_delta.active_contract.v14
-manifest_id: reactflow_delta_post_v14_branch5_route_probe_active_authority_20260828
-project_task_id: reactflow_delta_post_v14_branch5_route_probe
-created_at: '2026-08-27T02:30:00+08:00'
-updated_at: '2026-08-28T08:44:28+08:00'
+schema_version: reactflow_delta.active_contract.independent_rnet_distill.v1
+manifest_id: reactflow_delta_independent_rnet_distill_active_authority_20260828
+project_task_id: reactflow_delta_independent_rnet_distill
+created_at: '2026-08-28T10:27:00+08:00'
+updated_at: '2026-08-28T10:27:00+08:00'
 
 authority:
-  pointer_role: POST_V14_BRANCH5_ROUTE_PROBE_SINGLE_ACTIVE_AUTHORITY
-  current_phase: B5RP3
-  current_authority_state: TERMINAL_POST_V14_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
-  current_runnable_phase: NONE
+  pointer_role: INDEPENDENT_RNET_DISTILL_SINGLE_ACTIVE_AUTHORITY
+  current_phase: RND0
+  current_authority_state: RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY
+  current_runnable_phase: RND0
   conflict_policy: FAIL_CLOSED
-  branch: codex/reactflow-delta-model-rescue-v14-20260827
-  worktree: /home/cunyuliu/reactflow_delta_worktrees/model_rescue_v14_20260827
-  artifact_root: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe
-  machine_contract_path: configs/reactflow_delta/model_rescue_v14_amendment.yaml
-  human_contract_path: docs/prospective_v2/model_rescue_v14_amendment_20260827.md
-  decision_ledger_path: docs/prospective_v2/model_rescue_v14_decision_ledger.yaml
-  implementation_plan_path: docs/plans/2026-08-27-post-v14-model-contingency.md
-  research_record_path: autoresearch/orchestrator-260827-v14-wt-profile/research.md
-  v13_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v13/v13m3_screen_seed0
-  v14_checkpoint_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0
-  source_manifest_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/source_binding/post_v14_branch5_safe_source_manifest.json
-  source_manifest_status: POST_V14_BRANCH5_SAFE_SOURCE_MANIFEST_PASS
+  branch: codex/reactflow-delta-independent-rnet-distill-20260828
+  worktree: /home/cunyuliu/reactflow_delta_worktrees/independent_rnet_distill_20260828
+  artifact_root: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill
+  machine_contract_path: configs/reactflow_delta/independent_rnet_distill_contract.yaml
+  decision_ledger_path: docs/prospective_v2/independent_rnet_distill_decision_ledger.yaml
+  research_record_path: autoresearch/orchestrator-260828-independent-rnet-distill/research.md
+  teacher_cache_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source/ribonanzanet2_sharded_full
+  teacher_source_manifest_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source_binding/rnet2_teacher_source_manifest.json
+  teacher_source_manifest_status: PENDING_RND0_SOURCE_BINDING
+  pretraining_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd1_pretrain
+  smoke_prediction_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0
+  screen_prediction_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0
   m2_csv_path: /mnt/cunyuliu/reactflow_delta_artifacts_20260729/reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv
   tic2a_merged_registry_path: /mnt/cunyuliu/reactflow_delta_target_identity_correction/tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json
   unconstrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v5/v5m1_full/ensemble_delta_cache.h5
   constrained_feature_cache_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v6/v6m1_full/constrained_cache.h5
-  prediction_dir: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0
-  complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_unscored_merge.json
-  complete_unscored_merge_status: BRANCH5_ROUTE_PROBE_COMPLETE_UNSCORED_MERGE_PASS
-  complete_score_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_complete_score.json
-  complete_score_status: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
-  qualification_path: /mnt/cunyuliu/reactflow_delta_post_v14_branch5_route_probe/b5rp1_seed0/puzzle_set_branch5_probe_qualification.json
-  qualification_status: BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
-  route_after_qualification: P3_STOP_MODEL_RESCUE
-  binding_status: B5RP3_TERMINAL_COMPLETE_FAIL_P3_ALL_CLOSED
+  historical_v8_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
+  historical_v10_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0
+  historical_v14_score_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_complete_score.json
+  binding_status: RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY
 
 parent_state:
-  v14_status: TERMINAL_V14M3_TOP_JOURNAL_SCREEN_FAIL
-  post_v14_first_matching_branch_id: '5'
-  post_v14_route_classification: INDEPENDENT_CONSTRUCT_TRANSFER_LIMITED
-  v14m4_path_allowed: false
+  terminal_parent_commit: 4702d2cf5feaa50bef0f5f5e447eae5b54ead34b
+  terminal_parent_status: TERMINAL_POST_V14_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
+  old_route_revival_allowed: false
+  old_artifact_rerun_allowed: false
 
 authorization:
-  owner_instruction: CONTINUE_IMPROVING_MODEL_PERFORMANCE_BEFORE_SUBMISSION_WITH_AUTONOMOUS_SCIENTIFIC_JUDGMENT
-  owner_instruction_date: '2026-08-25'
-  scope: TERMINAL_P3_STOP_MODEL_RESCUE_ALL_CLOSED
+  owner_instruction: AUTONOMOUS_RAPID_MODEL_ITERATION_WITH_COMPLETE_EXPERIMENT_RECORDS
+  owner_instruction_date: '2026-08-27'
+  scope: RND0_IMPLEMENTATION_AND_TARGET_FREE_SOURCE_BINDING_ONLY
   contract_drafting_allowed: true
-  implementation_allowed: false
+  implementation_allowed: true
   neural_training_allowed: false
   smoke_allowed: false
   screen_allowed: false
+  score_allowed: false
+  qualification_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
 
-allowed_phases: [B5RP0, B5RP1, B5RP2, B5RP3]
-runnable_phases: []
+allowed_phases: [RND0, RND1, RND2, RND3, RND4, RND5, RND6]
+runnable_phases: [RND0]
 training_allowed: false
 candidate_model_training_allowed: false
 held_score_read_allowed: false
@@ -64,14 +61,16 @@ new_external_outcome_access_allowed: false
 new_external_metadata_access_allowed: true
 new_split_allowed: false
 unrelated_job_interference_allowed: false
-v13_artifact_overwrite_allowed: false
-post_v13_artifact_overwrite_allowed: false
+terminal_parent_artifact_overwrite_allowed: false
 parent_terminal_verdict_change_allowed: false
 
 gate_state:
-  B5RP0: SAFE_SOURCE_MANIFEST_EXACT_PASS
-  B5RP1: COMPLETE_UNSCORED_MERGE_EXACT_PASS
-  B5RP2: BRANCH5_ROUTE_PROBE_COMPLETE_SCORE_PASS
-  B5RP3: TERMINAL_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
+  RND0: IN_PROGRESS_IMPLEMENTATION_AND_SOURCE_BINDING
+  RND1: NOT_AUTHORIZED
+  RND2: NOT_AUTHORIZED
+  RND3: NOT_AUTHORIZED
+  RND4: NOT_AUTHORIZED
+  RND5: NOT_AUTHORIZED
+  RND6: NOT_AUTHORIZED
 
-next_allowed_action: P3_STOP_MODEL_RESCUE
+next_allowed_action: COMPLETE_RND0_SOURCE_BINDING_IMPLEMENTATION_AND_FOCUSED_TESTS

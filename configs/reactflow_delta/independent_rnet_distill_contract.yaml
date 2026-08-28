@@ -1,0 +1,201 @@
+schema_version: reactflow_delta.independent_rnet_distill_contract.v1
+contract_id: reactflow_delta_independent_rnet_distill_20260828
+project_task_id: reactflow_delta_independent_rnet_distill
+created_at: '2026-08-28T10:27:00+08:00'
+contract_status: RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY
+
+scope:
+  hypothesis: >-
+    Correctly aligned frozen RibonanzaNet2 single-nucleotide representations
+    contain transferable chemical context that improves unseen-puzzle mutant
+    response prediction beyond an otherwise identical student distilled from
+    the same representations after a fixed within-sequence coordinate shift.
+  result_class: EXPOSURE_DISCLOSED_DEVELOPMENT_CANDIDATE
+  evidence_ceiling: >-
+    RibonanzaNet2 training-family near-neighbor exposure to OpenKnot cannot be
+    excluded, OpenKnot M2 has already been repeatedly consumed for development,
+    and no new sealed external outcome is authorized. Even an exact screen or
+    formal PASS is not clean OOD, SOTA, publication-ready, or external evidence.
+  old_routes_closed:
+    - V14_MASKED_WT_PROFILE_PRETRAINING
+    - POST_V14_BRANCH5_ROUTE_PROBE
+    - P1_PROJECTION
+    - P2_QUANTILE_RESIDUAL
+    - P3_MODEL_RESCUE
+
+source_binding:
+  source_cache: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source/ribonanzanet2_sharded_full
+  source_manifest: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source_binding/rnet2_teacher_source_manifest.json
+  expected_layout: reactflow-sharded-frozen-v1
+  expected_model_name: RibonanzaNet2
+  expected_model_version: alpha-v1
+  expected_weights_sha256: c94031719c8a1c70a9068d5de861f65083cdf0555a15570b3724a8d6d7750e35
+  expected_record_count: 208905
+  expected_shard_count: 409
+  expected_full_shard_size: 512
+  expected_last_shard_records: 9
+  expected_single_feature_dim: 384
+  exact_sequence_overlap_with_registered_openknot_mutants: 0
+  registered_openknot_mutant_sequence_count: 14136
+  overlap_audit_interpretation: EXACT_SEQUENCE_ONLY_NEAR_NEIGHBOR_EXPOSURE_NOT_EXCLUDED
+  license: MIT
+  source_integrity_repair:
+    issue: LEGACY_PARENT_MANIFEST_CONTENT_BINDINGS_STALE_FOR_388_OF_409_SHARDS
+    expected_parent_child_content_binding_mismatches: 388
+    parent_content_hashes_authoritative: false
+    verified_child_content_sha256: 22a25b9db6b4e46951bd412708ab1d75644222793b4e31c62e1d3e0db0378f30
+    verification_method: reactflow.frozen.read_frozen_shard_verify_true
+    verification_exit_code: 0
+    binding_basis: CHILD_PROVENANCE_SCHEMA_COUNT_WEIGHTS_PLUS_ACTUAL_INDEX_AND_NPZ_SHAPE_READ
+    repair_scope: PRESERVE_RAW_COPY_AND_PROJECT_SEPARATE_STRUCTURAL_SOURCE_BINDING
+    full_cache_rehash_allowed: false
+
+attribution:
+  candidate_id: RNET2_ALIGNED_SINGLE_FEATURE_DISTILLATION
+  matched_null_id: RNET2_SHIFT17_SINGLE_FEATURE_DISTILLATION
+  only_arm_difference: TEACHER_COORDINATE_ALIGNMENT
+  candidate_teacher_target: ALIGNED_PER_NUCLEOTIDE_SINGLE_FEATURE
+  null_teacher_target: CYCLIC_SHIFT_MIN_17_L_MINUS_1_WITHIN_EACH_SEQUENCE
+  null_target_index_mapping: TEACHER_AT_I_MINUS_MIN_17_L_MINUS_1_MOD_L
+  same_initial_state: exact
+  same_architecture: exact
+  same_record_universe: exact
+  same_shard_and_batch_order: exact
+  same_dropout_random_stream: exact
+  same_optimizer_and_schedule: exact
+  same_downstream_training_and_calibration: exact
+  teacher_pair_feature_use_allowed: false
+  live_ribonanzanet_inference_allowed: false
+
+student:
+  input_channels: 11
+  context_width: 256
+  attention_heads: 8
+  context_blocks: 6
+  ffn_width: 1024
+  relative_distance_window: 256
+  dropout: 0.1
+  distillation_head: LAYERNORM_256_LINEAR_384
+  downstream_head: FEATURE41_ANCHORED_V14_RESIDUAL_HEAD
+  pretraining_inputs:
+    sequence: ONE_HOT_A_C_G_U
+    reactivity: ZERO
+    precision: ZERO
+    observed: TRUE_FOR_VALID_TOKENS
+    position: REGISTERED_ZERO_BASED_INDEX
+    region: ZERO
+    corruption: FALSE
+  strict_length_identity: INDEX_LENGTH_EQUALS_SEQUENCE_LENGTH_EQUALS_TEACHER_L_EQUALS_STUDENT_TOKEN_LENGTH
+  silent_resize_or_padding_allowed: false
+
+frozen_schedule:
+  distillation_seed: 20260828
+  data_order_seed: 20260828
+  distillation_epochs: 1
+  optimizer: ADAMW
+  learning_rate: 0.0002
+  weight_decay: 0.01
+  batch_size: 16
+  gradient_clip_norm: 1.0
+  mixed_precision: BFLOAT16_ON_SUPPORTED_CUDA_ELSE_FLOAT32_CUDA
+  rnd2_engineering_smoke:
+    seed: 0
+    folds: [0, 1]
+    point_epochs: 3
+    calibration_epochs: 3
+    scientific_score_allowed: false
+  rnd3_complete_screen:
+    seed: 0
+    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    point_epochs: 40
+    calibration_epochs: 40
+    complete_before_score: true
+  rnd6_formal:
+    seeds: [0, 1, 2, 3, 4]
+    authorized_only_after_exact_rnd5_pass: true
+
+gpu_policy:
+  training_and_gpu_validation_device_class: CUDA_ONLY
+  cpu_teacher_disk_io_allowed: true
+  cpu_model_or_loss_fallback_allowed: false
+  minimum_free_vram_gate_allowed: false
+  any_gpu_with_available_memory_allowed: true
+  actual_model_input_target_output_loss_and_optimizer_state_must_be_cuda: true
+  failure_action: STOP_RETAIN_TIME_COMMAND_DEVICE_STDERR_LOG_EXIT_CODE
+
+phase_contract:
+  RND0:
+    authority: IMPLEMENTATION_AND_TARGET_FREE_SOURCE_BINDING_ONLY
+    training_allowed: false
+    score_allowed: false
+  RND1:
+    authority_token: RNET_DISTILL_PAIRED_GPU_PRETRAIN_ONCE_ONLY
+    required_predecessor: RND0_SOURCE_AND_IMPLEMENTATION_EXACT_PASS
+    outputs: [candidate_checkpoint, null_checkpoint, pretraining_audit]
+  RND2:
+    authority_token: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
+    required_predecessor: RND1_PAIRED_PRETRAIN_EXACT_PASS
+    scientific_conclusion_allowed: false
+  RND3:
+    authority_token: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
+    required_predecessor: RND2_ENGINEERING_SMOKE_EXACT_PASS
+    held_score_read_allowed: false
+  RND4:
+    authority_token: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
+    required_predecessor: RND3_COMPLETE_UNSCORED_MERGE_EXACT_PASS
+  RND5:
+    authority_token: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+    required_predecessor: RND4_COMPLETE_SCORE_EXACT_PASS
+  RND6:
+    authority_token: RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_ONLY
+    required_predecessor: RND5_TOP_JOURNAL_DEVELOPMENT_SCREEN_EXACT_PASS
+
+screen_gates:
+  completeness:
+    exact_fold_count: 20
+    registered_prediction_coverage: 1.0
+    failed_rows: 0
+    duplicate_or_unexpected_artifacts: 0
+  matched_null_relative_gain_minimum:
+    signed_delta: 0.03
+    point_absolute: 0.03
+    task_crps: 0.015
+    distribution_absolute: 0.015
+  matched_null_paired_ci_lower_must_exceed_zero: true
+  matched_null_positive_puzzles_minimum: 14
+  feature41_relative_gain_minimum:
+    signed_delta: 0.10
+    point_absolute: 0.05
+    task_crps: 0.05
+    distribution_absolute: 0.05
+  historical_parent_relative_gain_minimum:
+    signed_delta: 0.02
+    point_absolute: 0.02
+    task_crps: 0.01
+    distribution_absolute: 0.01
+  historical_parent_by_metric:
+    signed_delta: V14_CANDIDATE
+    point_absolute: V14_CANDIDATE
+    task_crps: V14_CANDIDATE
+    distribution_absolute: V10_HISTORICAL_DISTRIBUTION
+  historical_parent_paired_ci_lower_must_exceed_zero: true
+  historical_parent_positive_puzzles_minimum: 14
+  coverage_95_interval: [0.94, 0.96]
+  single_puzzle_influence_maximum: 0.20
+  gate_lowering_after_score_access_allowed: false
+  extra_seed_selection_allowed: false
+
+outcome_policy:
+  pretraining_may_read_openknot_mutant_outcome: false
+  prediction_runner_may_read_held_target: false
+  partial_fold_score_allowed: false
+  complete_score_allowed_only_in_RND4: true
+  qualification_allowed_only_in_RND5: true
+  new_external_outcome_access_allowed: false
+
+artifact_policy:
+  code_and_git_worktree_prefix: /home/cunyuliu
+  large_artifact_prefix: /mnt/cunyuliu
+  overwrite_allowed: false
+  one_canonical_output_per_phase: true
+  focused_task_commit_and_push_required: true

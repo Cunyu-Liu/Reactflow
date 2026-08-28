@@ -1,0 +1,51 @@
+schema_version: reactflow_delta.independent_rnet_distill_decision_ledger.v1
+project_task_id: reactflow_delta_independent_rnet_distill
+created_at: '2026-08-28T10:27:00+08:00'
+current_phase: RND0
+current_status: RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY
+score_accessed: false
+partial_score_accessed: false
+new_external_outcome_accessed: false
+
+decisions:
+  - time: '2026-08-28T09:40:00+08:00'
+    event: INDEPENDENT_HYPOTHESIS_TRIANGULATION_COMPLETE
+    decision: SELECT_RNET2_ALIGNED_DISTILLATION_VS_SHIFT17_MATCHED_NULL
+    evidence:
+      - RNet2 cache supplies an independent 384-dimensional chemical representation source.
+      - Group-DRO would revive the closed V13 family and was rejected.
+      - Joint source-receiver fields have strong negative prior evidence and higher implementation risk.
+      - Statistical audit warns that the 20-puzzle M2 development universe is heavily consumed.
+    scientific_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+    score_accessed: false
+    external_outcome_accessed: false
+
+  - time: '2026-08-28T10:27:00+08:00'
+    event: INDEPENDENT_WORKTREE_CREATED
+    decision: OPEN_RND0_IMPLEMENTATION_AND_SOURCE_BINDING_ONLY
+    branch: codex/reactflow-delta-independent-rnet-distill-20260828
+    base_commit: 4702d2cf5feaa50bef0f5f5e447eae5b54ead34b
+    worktree: /home/cunyuliu/reactflow_delta_worktrees/independent_rnet_distill_20260828
+    artifact_root: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill
+    training_allowed: false
+    score_accessed: false
+    external_outcome_accessed: false
+
+  - time: '2026-08-28T10:39:00+08:00'
+    event: RNET2_LEGACY_PARENT_MANIFEST_STALENESS_DIAGNOSED
+    decision: DO_NOT_USE_PARENT_CONTENT_HASHES_AS_GATE_PROJECT_STRICT_STRUCTURAL_BINDING
+    parent_child_content_binding_mismatches: 388
+    parent_manifest_shard_entries: 409
+    legacy_parent_entry_content_sha256: f0cac181910a5bf52df20b19da642b97932027242f547944b26d9338b24ca424
+    verified_child_provenance_hash: 22a25b9db6b4e46951bd412708ab1d75644222793b4e31c62e1d3e0db0378f30
+    verification_method: reactflow.frozen.read_frozen_shard_verify_true
+    verification_exit_code: 0
+    interpretation: LEGACY_PARENT_MANIFEST_IS_SYSTEMICALLY_STALE_WHILE_CHILD_SCHEMA_COUNT_WEIGHTS_AND_PHYSICAL_FILES_REMAIN_CONSISTENT
+    project_binding_basis: CHILD_PROVENANCE_PLUS_ACTUAL_INDEX_AND_NPZ_SHAPE_READ
+    full_cache_rehash_performed: false
+    historical_source_modified: false
+    training_allowed: false
+    score_accessed: false
+    external_outcome_accessed: false
+
+next_action: COMPLETE_MNT_COPY_PROJECT_STRUCTURAL_SOURCE_BINDING_AND_FOCUSED_IMPLEMENTATION_TESTS
