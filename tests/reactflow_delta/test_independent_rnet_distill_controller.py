@@ -67,6 +67,8 @@ def test_formal_controller_freezes_exact_hundred_task_cuda_queue() -> None:
     assert "nvidia-smi" not in text
     assert "free_vram" not in text.lower()
     assert "run_model_rescue_v14" not in text
+    assert "assert_run_authority" in text
+    assert "'${phase}'" in text
 
 
 def test_formal_controller_is_missing_only_and_fail_closed_at_terminal_states() -> None:
@@ -105,4 +107,5 @@ def test_formal_controller_uses_exact_canonical_terminal_paths() -> None:
     assert '--phase "${phase}"' in text
     assert '--out-dir "${assembled_dir}"' in text
     assert '--out-json "${assembly}"' in text
+    assert '--repo-root "${repo}"' in text
     assert 'mkdir -p "${assembled_dir}"' not in text

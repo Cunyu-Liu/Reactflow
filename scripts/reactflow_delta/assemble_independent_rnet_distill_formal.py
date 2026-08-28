@@ -27,6 +27,9 @@ from scripts.reactflow_delta.run_independent_rnet_distill_downstream import (
     FORBIDDEN_PREDICTION_FIELDS,
     PREDICTION_SCHEMA,
 )
+from scripts.reactflow_delta.validate_independent_rnet_distill_contract import (
+    assert_run_authority,
+)
 
 
 SCHEMA = "reactflow_delta.independent_rnet_distill_formal_assembly.v1"
@@ -399,8 +402,10 @@ def assemble(
 
 
 def validate_cli_binding(
-    merged_json: Path, out_dir: Path, out_json: Path
+    repo_root: Path, merged_json: Path, out_dir: Path, out_json: Path
 ) -> dict[str, str]:
+    repo_root = repo_root.expanduser().resolve()
+    assert_run_authority(repo_root, PHASE)
     observed = {
         "merged_json": merged_json.expanduser().resolve(),
         "out_dir": out_dir.expanduser().resolve(),
@@ -422,6 +427,7 @@ def validate_cli_binding(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--merged-json", type=Path, required=True)
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--out-json", type=Path, required=True)
@@ -430,7 +436,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    validate_cli_binding(args.merged_json, args.out_dir, args.out_json)
+    validate_cli_binding(
+        args.repo_root,
+        args.merged_json,
+        args.out_dir,
+        args.out_json,
+    )
     if args.out_dir.exists() or args.out_json.exists():
         raise FileExistsError("RND6P refuses to overwrite its canonical assembly")
     merged = json.loads(args.merged_json.read_text(encoding="utf-8"))

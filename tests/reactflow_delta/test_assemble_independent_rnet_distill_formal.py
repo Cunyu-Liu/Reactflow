@@ -131,9 +131,17 @@ def test_rnd6p_atomic_assembly_uses_exact100_and_fixed_equal_seed_mixture(
     monkeypatch.setattr(assembler, "MERGED_PATH", merged_path)
     monkeypatch.setattr(assembler, "ASSEMBLY_DIR", assembly_dir)
     monkeypatch.setattr(assembler, "ASSEMBLY_PATH", assembly_path)
+    authority_calls: list[tuple[Path, str]] = []
+    monkeypatch.setattr(
+        assembler,
+        "assert_run_authority",
+        lambda root, phase: authority_calls.append((root, phase)),
+    )
 
     assert assembler.main(
         [
+            "--repo-root",
+            str(tmp_path),
             "--merged-json",
             str(merged_path),
             "--out-dir",
@@ -142,6 +150,7 @@ def test_rnd6p_atomic_assembly_uses_exact100_and_fixed_equal_seed_mixture(
             str(assembly_path),
         ]
     ) == 0
+    assert authority_calls == [(tmp_path.resolve(), "RND6P")]
 
     assert assembly_dir.is_dir()
     assert len(list(assembly_dir.glob("*.npz"))) == 20
@@ -218,6 +227,8 @@ def test_rnd6p_atomic_assembly_uses_exact100_and_fixed_equal_seed_mixture(
     with pytest.raises(FileExistsError, match="refuses to overwrite"):
         assembler.main(
             [
+                "--repo-root",
+                str(tmp_path),
                 "--merged-json",
                 str(merged_path),
                 "--out-dir",
@@ -267,22 +278,34 @@ def test_rnd6p_assembler_requires_fixed_comparators_exact_across_seeds(
         assembler._assemble_fold_payload(sources, fold=0)
 
 
-def test_rnd6p_assembler_rejects_noncanonical_cli_paths(tmp_path: Path) -> None:
+def test_rnd6p_assembler_rejects_noncanonical_cli_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[Path, str]] = []
+    monkeypatch.setattr(
+        assembler,
+        "assert_run_authority",
+        lambda root, phase: calls.append((root, phase)),
+    )
     with pytest.raises(RuntimeError, match="merged_json differs"):
         assembler.validate_cli_binding(
+            tmp_path,
             tmp_path / "wrong-merge.json",
             assembler.ASSEMBLY_DIR,
             assembler.ASSEMBLY_PATH,
         )
     with pytest.raises(RuntimeError, match="out_dir differs"):
         assembler.validate_cli_binding(
+            tmp_path,
             assembler.MERGED_PATH,
             tmp_path / "wrong-assembled",
             assembler.ASSEMBLY_PATH,
         )
     with pytest.raises(RuntimeError, match="out_json differs"):
         assembler.validate_cli_binding(
+            tmp_path,
             assembler.MERGED_PATH,
             assembler.ASSEMBLY_DIR,
             tmp_path / "wrong-assembly.json",
         )
+    assert calls == [(tmp_path.resolve(), "RND6P")] * 3

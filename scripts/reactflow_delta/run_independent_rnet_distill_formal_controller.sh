@@ -27,8 +27,9 @@ fi
 gpus=("$@")
 
 cd "${repo}"
-"${python_bin}" -m scripts.reactflow_delta.validate_independent_rnet_distill_contract \
-  --repo-root "${repo}" >/dev/null
+"${python_bin}" -c \
+  "from pathlib import Path; from scripts.reactflow_delta.validate_independent_rnet_distill_contract import assert_run_authority; assert_run_authority(Path('${repo}'), '${phase}')" \
+  >/dev/null
 
 if [[ -e "${formal_score}" || -e "${formal_qualification}" ]]; then
   printf '%s has an existing formal score or qualification; prediction controller rerun refused\n' \
@@ -220,6 +221,7 @@ if [[ ! -f "${merged}" ]]; then
 fi
 if [[ ! -f "${assembly}" ]]; then
   "${python_bin}" -m scripts.reactflow_delta.assemble_independent_rnet_distill_formal \
+    --repo-root "${repo}" \
     --merged-json "${merged}" \
     --out-dir "${assembled_dir}" \
     --out-json "${assembly}"
