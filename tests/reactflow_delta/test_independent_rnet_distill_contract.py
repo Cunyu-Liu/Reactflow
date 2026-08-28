@@ -11,6 +11,7 @@ import yaml
 from scripts.reactflow_delta import validate_independent_rnet_distill_contract as validator
 from scripts.reactflow_delta.merge_independent_rnet_distill import STATUS as MERGE_STATUS
 from scripts.reactflow_delta.project_independent_rnet_distill_source import inspect_shard
+from scripts.reactflow_delta.score_independent_rnet_distill import SCORE_STATUS
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -117,24 +118,25 @@ def _authority_fixture(
         "status": token,
         "parent": "orchestrator-260827-v14-wt-profile",
     }
-    if phase == "RND2":
+    if phase in {"RND2", "RND3", "RND4", "RND5"}:
         contract["contract_status"] = token
         authority = active["authority"]
         authority["current_phase"] = phase
         authority["current_runnable_phase"] = phase
         authority["current_authority_state"] = token
         authority["binding_status"] = token
-        active["authorization"].update(validator.RND2_AUTHORIZATION)
         active["runnable_phases"] = [phase]
+        active["partial_fold_score_read_allowed"] = False
+        active["new_external_outcome_access_allowed"] = False
+        ledger["current_phase"] = phase
+        ledger["current_status"] = token
+    if phase == "RND2":
+        active["authorization"].update(validator.RND2_AUTHORIZATION)
         active["training_allowed"] = True
         active["candidate_model_training_allowed"] = True
         active["held_score_read_allowed"] = False
-        active["partial_fold_score_read_allowed"] = False
-        active["new_external_outcome_access_allowed"] = False
         active["gate_state"] = copy.deepcopy(validator.RND2_GATE_STATE)
         active["next_allowed_action"] = validator.RND2_ACTION
-        ledger["current_phase"] = phase
-        ledger["current_status"] = token
         ledger["next_action"] = validator.RND2_ACTION
         ledger["decisions"].append(
             {
@@ -150,6 +152,97 @@ def _authority_fixture(
                 "scientific_metric_accessed": False,
                 "residual_heads_identical": True,
                 "pretrained_encoders_different": True,
+                "authority_token": token,
+            }
+        )
+    elif phase == "RND3":
+        active["authorization"].update(validator.RND3_AUTHORIZATION)
+        active["training_allowed"] = True
+        active["candidate_model_training_allowed"] = True
+        active["held_score_read_allowed"] = False
+        active["gate_state"] = copy.deepcopy(validator.RND3_GATE_STATE)
+        active["next_allowed_action"] = validator.RND3_ACTION
+        ledger["next_action"] = validator.RND3_ACTION
+        ledger["score_accessed"] = False
+        for name, path in validator.RND3_AUTHORITY_PATHS.items():
+            authority[name] = str(path)
+        ledger["decisions"].append(
+            {
+                "time": "2026-08-28T14:10:00+08:00",
+                "event": validator.RND2_MERGE_PASS,
+                "decision": validator.RND3_DECISION,
+                "experiment_id": "RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE",
+                "folds": [0, 1],
+                "seed": 0,
+                "point_epochs": 3,
+                "calibration_epochs": 3,
+                "controller_exit_code": 0,
+                "runner_exit_codes": [0, 0],
+                "cuda_only": True,
+                "cpu_fallback": False,
+                "held_target_accessed": False,
+                "score_accessed": False,
+                "partial_score_accessed": False,
+                "new_external_outcome_accessed": False,
+                "canonical_merge_path": str(validator.RND2_MERGED_PATH),
+                "canonical_merge_status": validator.RND2_MERGE_PASS,
+                "authority_token": token,
+            }
+        )
+    elif phase == "RND4":
+        active["authorization"].update(validator.RND4_AUTHORIZATION)
+        active["training_allowed"] = False
+        active["candidate_model_training_allowed"] = False
+        active["held_score_read_allowed"] = True
+        active["gate_state"] = copy.deepcopy(validator.RND4_GATE_STATE)
+        active["next_allowed_action"] = validator.RND4_ACTION
+        ledger["next_action"] = validator.RND4_ACTION
+        ledger["score_accessed"] = False
+        for name, path in validator.RND4_AUTHORITY_PATHS.items():
+            authority[name] = str(path)
+        ledger["decisions"].append(
+            {
+                "time": "2026-08-28T16:00:00+08:00",
+                "event": validator.RND3_MERGE_PASS,
+                "decision": validator.RND4_DECISION,
+                "experiment_id": "RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY",
+                "folds": list(range(20)),
+                "seed": 0,
+                "artifact_count": 20,
+                "held_target_accessed": False,
+                "score_accessed": False,
+                "partial_score_accessed": False,
+                "new_external_outcome_accessed": False,
+                "canonical_merge_path": str(validator.RND3_MERGED_PATH),
+                "canonical_merge_status": validator.RND3_MERGE_PASS,
+                "authority_token": token,
+            }
+        )
+    elif phase == "RND5":
+        active["authorization"].update(validator.RND5_AUTHORIZATION)
+        active["training_allowed"] = False
+        active["candidate_model_training_allowed"] = False
+        active["held_score_read_allowed"] = False
+        active["gate_state"] = copy.deepcopy(validator.RND5_GATE_STATE)
+        active["next_allowed_action"] = validator.RND5_ACTION
+        ledger["next_action"] = validator.RND5_ACTION
+        ledger["score_accessed"] = True
+        for name, path in validator.RND5_AUTHORITY_PATHS.items():
+            authority[name] = str(path)
+        ledger["decisions"].append(
+            {
+                "time": "2026-08-28T16:10:00+08:00",
+                "event": validator.RND4_SCORE_PASS,
+                "decision": validator.RND5_DECISION,
+                "canonical_score_path": str(validator.RND4_SCORE_PATH),
+                "canonical_score_status": validator.RND4_SCORE_PASS,
+                "exit_code": 0,
+                "complete_valid_score": True,
+                "actual_fold_count": 20,
+                "score_accessed": True,
+                "partial_score_accessed": False,
+                "new_external_outcome_accessed": False,
+                "model_or_threshold_selection_performed": False,
                 "authority_token": token,
             }
         )
@@ -196,6 +289,18 @@ def test_authority_validator_accepts_exact_rnd2_fixture(
     result = validator.validate_contract(fixture["repo_root"])
     assert result["status"] == "INDEPENDENT_RNET_DISTILL_AUTHORITY_EXACT_PASS"
     assert result["phase"] == "RND2"
+
+
+@pytest.mark.parametrize("phase", ("RND3", "RND4", "RND5"))
+def test_authority_validator_accepts_exact_later_phase_fixture(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    phase: str,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase=phase)
+    result = validator.validate_contract(fixture["repo_root"])
+    assert result["status"] == "INDEPENDENT_RNET_DISTILL_AUTHORITY_EXACT_PASS"
+    assert result["phase"] == phase
 
 
 @pytest.mark.parametrize(
@@ -270,12 +375,68 @@ def test_authority_validator_rejects_incomplete_rnd2_authority(
         validator.validate_contract(fixture["repo_root"])
 
 
-def test_rnd3_predecessor_is_canonical_rnd2_merge_status() -> None:
+@pytest.mark.parametrize(
+    ("phase", "path", "value"),
+    (
+        ("RND3", ("active", "authorization", "score_allowed"), True),
+        ("RND3", ("active", "gate_state", "RND2"), "WRONG"),
+        ("RND3", ("active", "next_allowed_action"), "WRONG"),
+        ("RND3", ("ledger", "next_action"), "WRONG"),
+        ("RND3", ("ledger", "decisions", -1, "experiment_id"), "WRONG"),
+        ("RND3", ("ledger", "decisions", -1, "controller_exit_code"), 1),
+        ("RND3", ("ledger", "decisions", -1, "canonical_merge_status"), "WRONG"),
+        ("RND3", ("active", "authority", "screen_prediction_dir"), "/wrong"),
+        ("RND4", ("active", "authorization", "score_allowed"), False),
+        ("RND4", ("active", "gate_state", "RND3"), "WRONG"),
+        ("RND4", ("active", "next_allowed_action"), "WRONG"),
+        ("RND4", ("ledger", "next_action"), "WRONG"),
+        ("RND4", ("ledger", "decisions", -1, "artifact_count"), 19),
+        ("RND4", ("ledger", "decisions", -1, "partial_score_accessed"), True),
+        ("RND4", ("ledger", "decisions", -1, "canonical_merge_path"), "/wrong"),
+        ("RND4", ("active", "authority", "complete_score_path"), "/wrong"),
+        ("RND5", ("active", "authorization", "qualification_allowed"), False),
+        ("RND5", ("active", "gate_state", "RND4"), "WRONG"),
+        ("RND5", ("active", "next_allowed_action"), "WRONG"),
+        ("RND5", ("ledger", "next_action"), "WRONG"),
+        ("RND5", ("ledger", "score_accessed"), False),
+        ("RND5", ("ledger", "decisions", -1, "complete_valid_score"), False),
+        ("RND5", ("ledger", "decisions", -1, "actual_fold_count"), 19),
+        ("RND5", ("ledger", "decisions", -1, "canonical_score_path"), "/wrong"),
+        (
+            "RND5",
+            ("ledger", "decisions", -1, "model_or_threshold_selection_performed"),
+            True,
+        ),
+    ),
+)
+def test_authority_validator_rejects_incomplete_later_phase_authority(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    phase: str,
+    path: tuple[object, ...],
+    value: object,
+) -> None:
+    fixture = _authority_fixture(tmp_path, monkeypatch, phase=phase)
+    _set_nested(fixture, path, value)
+    _persist_authority_fixture(fixture)
+    with pytest.raises(RuntimeError):
+        validator.validate_contract(fixture["repo_root"])
+
+
+@pytest.mark.parametrize(
+    ("phase", "runtime_status", "validator_status"),
+    (
+        ("RND3", MERGE_STATUS["RND2"], validator.RND2_MERGE_PASS),
+        ("RND4", MERGE_STATUS["RND3"], validator.RND3_MERGE_PASS),
+        ("RND5", SCORE_STATUS, validator.RND4_SCORE_PASS),
+    ),
+)
+def test_later_phase_predecessor_is_canonical_runtime_status(
+    phase: str, runtime_status: str, validator_status: str
+) -> None:
     contract = copy.deepcopy(_read_yaml(ROOT / validator.CONTRACT_PATH))
-    predecessor = contract["phase_contract"]["RND3"]["required_predecessor"]
-    assert predecessor == MERGE_STATUS["RND2"] == validator.RND2_MERGE_PASS
-    contract["phase_contract"]["RND3"]["required_predecessor"] = (
-        "RND2_ENGINEERING_SMOKE_EXACT_PASS"
-    )
-    with pytest.raises(RuntimeError, match="canonical RND2 merge status"):
+    predecessor = contract["phase_contract"][phase]["required_predecessor"]
+    assert predecessor == runtime_status == validator_status
+    contract["phase_contract"][phase]["required_predecessor"] = "WRONG"
+    with pytest.raises(RuntimeError, match=f"{phase} predecessor"):
         validator._check_frozen_scientific_contract(contract)

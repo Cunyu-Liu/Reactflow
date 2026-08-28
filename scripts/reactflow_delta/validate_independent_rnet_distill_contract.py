@@ -40,6 +40,8 @@ TOKENS = {
 RND0_TOKEN = "RND0_IMPLEMENTATION_SOURCE_BINDING_ONLY"
 RND1_PASS = "RND1_PAIRED_PRETRAIN_EXACT_PASS"
 RND2_MERGE_PASS = "RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS"
+RND3_MERGE_PASS = "RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS"
+RND4_SCORE_PASS = "RND4_COMPLETE_SCORE_PASS"
 RND2_SCOPE = "RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY"
 RND2_ACTION = "RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE"
 RND2_DECISION = (
@@ -64,6 +66,136 @@ RND2_GATE_STATE = {
     "RND4": "NOT_AUTHORIZED",
     "RND5": "NOT_AUTHORIZED",
     "RND6": "NOT_AUTHORIZED",
+}
+RND3_SCOPE = "RND3_COMPLETE_SEED0_PREDICTION_ONLY"
+RND3_ACTION = "RUN_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER"
+RND3_DECISION = (
+    "CLOSE_RND2_AND_AUTHORIZE_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER"
+)
+RND3_AUTHORIZATION = {
+    "scope": RND3_SCOPE,
+    "implementation_allowed": False,
+    "neural_training_allowed": True,
+    "smoke_allowed": False,
+    "screen_allowed": True,
+    "score_allowed": False,
+    "qualification_allowed": False,
+    "formal_confirmation_allowed": False,
+    "new_external_outcome_access_allowed": False,
+}
+RND3_GATE_STATE = {
+    "RND0": "RND0_SOURCE_AND_IMPLEMENTATION_EXACT_PASS",
+    "RND1": RND1_PASS,
+    "RND2": RND2_MERGE_PASS,
+    "RND3": "AUTHORIZED_COMPLETE_SEED0_PREDICTION_ONLY",
+    "RND4": "NOT_AUTHORIZED",
+    "RND5": "NOT_AUTHORIZED",
+    "RND6": "NOT_AUTHORIZED",
+}
+RND4_SCOPE = "RND4_COMPLETE_MERGE_SCORE_ONCE_ONLY"
+RND4_ACTION = "RUN_SINGLE_RND4_COMPLETE_SCORE_ONCE"
+RND4_DECISION = "CLOSE_RND3_AND_AUTHORIZE_SINGLE_RND4_COMPLETE_SCORE_ONCE"
+RND4_AUTHORIZATION = {
+    "scope": RND4_SCOPE,
+    "implementation_allowed": False,
+    "neural_training_allowed": False,
+    "smoke_allowed": False,
+    "screen_allowed": False,
+    "score_allowed": True,
+    "qualification_allowed": False,
+    "formal_confirmation_allowed": False,
+    "new_external_outcome_access_allowed": False,
+}
+RND4_GATE_STATE = {
+    "RND0": "RND0_SOURCE_AND_IMPLEMENTATION_EXACT_PASS",
+    "RND1": RND1_PASS,
+    "RND2": RND2_MERGE_PASS,
+    "RND3": RND3_MERGE_PASS,
+    "RND4": "AUTHORIZED_COMPLETE_SCORE_ONCE",
+    "RND5": "NOT_AUTHORIZED",
+    "RND6": "NOT_AUTHORIZED",
+}
+RND5_SCOPE = "RND5_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY"
+RND5_ACTION = "RUN_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE"
+RND5_DECISION = "CLOSE_RND4_AND_AUTHORIZE_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE"
+RND5_AUTHORIZATION = {
+    "scope": RND5_SCOPE,
+    "implementation_allowed": False,
+    "neural_training_allowed": False,
+    "smoke_allowed": False,
+    "screen_allowed": False,
+    "score_allowed": False,
+    "qualification_allowed": True,
+    "formal_confirmation_allowed": False,
+    "new_external_outcome_access_allowed": False,
+}
+RND5_GATE_STATE = {
+    "RND0": "RND0_SOURCE_AND_IMPLEMENTATION_EXACT_PASS",
+    "RND1": RND1_PASS,
+    "RND2": RND2_MERGE_PASS,
+    "RND3": RND3_MERGE_PASS,
+    "RND4": RND4_SCORE_PASS,
+    "RND5": "AUTHORIZED_COMPLETE_QUALIFIER_ONCE",
+    "RND6": "NOT_AUTHORIZED",
+}
+
+RND1_PRETRAIN_DIR = ARTIFACT_ROOT / "rnd1_pretrain"
+RND2_PREDICTION_DIR = ARTIFACT_ROOT / "rnd2_smoke_seed0"
+RND3_PREDICTION_DIR = ARTIFACT_ROOT / "rnd3_screen_seed0"
+RND2_MERGED_PATH = RND2_PREDICTION_DIR / "rnet_distill_complete_unscored_merge.json"
+RND3_MERGED_PATH = RND3_PREDICTION_DIR / "rnet_distill_complete_unscored_merge.json"
+RND4_SCORE_PATH = RND3_PREDICTION_DIR / "rnet_distill_complete_score.json"
+RND5_QUALIFICATION_PATH = RND3_PREDICTION_DIR / "rnet_distill_qualification.json"
+M2_PATH = Path(
+    "/mnt/cunyuliu/reactflow_delta_artifacts_20260729/"
+    "reactflow_delta/openknot_m2/OK7a_M2_data.v4.5.2.csv"
+)
+TIC2A_PATH = Path(
+    "/mnt/cunyuliu/reactflow_delta_target_identity_correction/"
+    "tic2a_corrected_baselines/tic2a_corrected_merged_unscored.json"
+)
+UNCONSTRAINED_CACHE_PATH = Path(
+    "/mnt/cunyuliu/reactflow_delta_model_rescue_v5/"
+    "v5m1_full/ensemble_delta_cache.h5"
+)
+CONSTRAINED_CACHE_PATH = Path(
+    "/mnt/cunyuliu/reactflow_delta_model_rescue_v6/"
+    "v6m1_full/constrained_cache.h5"
+)
+HISTORICAL_V8_DIR = Path(
+    "/mnt/cunyuliu/reactflow_delta_model_rescue_v8/"
+    "v8m1_corrected_experts_seed0"
+)
+HISTORICAL_V10_DIR = Path(
+    "/mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0"
+)
+HISTORICAL_V14_SCORE_PATH = Path(
+    "/mnt/cunyuliu/reactflow_delta_model_rescue_v14/"
+    "v14m3_screen_seed0/v14m3_complete_score.json"
+)
+RND3_AUTHORITY_PATHS = {
+    "pretraining_dir": RND1_PRETRAIN_DIR,
+    "screen_prediction_dir": RND3_PREDICTION_DIR,
+    "m2_csv_path": M2_PATH,
+    "tic2a_merged_registry_path": TIC2A_PATH,
+    "unconstrained_feature_cache_path": UNCONSTRAINED_CACHE_PATH,
+    "constrained_feature_cache_path": CONSTRAINED_CACHE_PATH,
+    "historical_v8_dir": HISTORICAL_V8_DIR,
+    "historical_v10_dir": HISTORICAL_V10_DIR,
+}
+RND4_AUTHORITY_PATHS = {
+    "screen_prediction_dir": RND3_PREDICTION_DIR,
+    "complete_unscored_merge_path": RND3_MERGED_PATH,
+    "m2_csv_path": M2_PATH,
+    "historical_v14_score_path": HISTORICAL_V14_SCORE_PATH,
+    "complete_score_path": RND4_SCORE_PATH,
+    "qualification_path": RND5_QUALIFICATION_PATH,
+}
+RND5_AUTHORITY_PATHS = {
+    "screen_prediction_dir": RND3_PREDICTION_DIR,
+    "complete_unscored_merge_path": RND3_MERGED_PATH,
+    "complete_score_path": RND4_SCORE_PATH,
+    "qualification_path": RND5_QUALIFICATION_PATH,
 }
 
 
@@ -178,11 +310,16 @@ def _check_frozen_scientific_contract(contract: dict[str, Any]) -> None:
     _require(gpu["training_and_gpu_validation_device_class"] == "CUDA_ONLY", "CUDA-only changed")
     _require(gpu["cpu_model_or_loss_fallback_allowed"] is False, "CPU fallback opened")
     _require(gpu["minimum_free_vram_gate_allowed"] is False, "VRAM gate opened")
-    _require(
-        contract["phase_contract"]["RND3"]["required_predecessor"]
-        == RND2_MERGE_PASS,
-        "RND3 predecessor diverged from canonical RND2 merge status",
-    )
+    expected_predecessors = {
+        "RND3": RND2_MERGE_PASS,
+        "RND4": RND3_MERGE_PASS,
+        "RND5": RND4_SCORE_PASS,
+    }
+    for phase, expected in expected_predecessors.items():
+        _require(
+            contract["phase_contract"][phase]["required_predecessor"] == expected,
+            f"{phase} predecessor diverged from canonical status {expected}",
+        )
 
 
 def _check_rnd2_authority(
@@ -260,6 +397,220 @@ def _check_rnd2_authority(
     )
 
 
+def _require_authority_paths(
+    authority: dict[str, Any], expected: dict[str, Path], *, phase: str
+) -> None:
+    for name, expected_path in expected.items():
+        observed = authority.get(name)
+        _require(
+            isinstance(observed, str)
+            and Path(observed).expanduser().resolve() == expected_path.resolve(),
+            f"{phase} canonical authority path changed: {name}",
+        )
+
+
+def _check_rnd3_authority(
+    active: dict[str, Any],
+    contract: dict[str, Any],
+    ledger: dict[str, Any],
+) -> None:
+    authorization = active["authorization"]
+    observed_authorization = {
+        key: authorization.get(key) for key in RND3_AUTHORIZATION
+    }
+    _require(
+        observed_authorization == RND3_AUTHORIZATION,
+        "RND3 authorization scope or permissions changed",
+    )
+    _require(active["runnable_phases"] == ["RND3"], "RND3 is not solely runnable")
+    _require(active["training_allowed"] is True, "RND3 training is not open")
+    _require(
+        active["candidate_model_training_allowed"] is True,
+        "RND3 candidate training is not open",
+    )
+    _require(active["held_score_read_allowed"] is False, "RND3 held score opened")
+    _require(
+        active["partial_fold_score_read_allowed"] is False,
+        "RND3 partial score opened",
+    )
+    _require(
+        active["new_external_outcome_access_allowed"] is False,
+        "RND3 external outcome opened",
+    )
+    _require(active["gate_state"] == RND3_GATE_STATE, "RND3 gate state changed")
+    _require(active["next_allowed_action"] == RND3_ACTION, "RND3 action changed")
+    _require(ledger["next_action"] == RND3_ACTION, "RND3 ledger action changed")
+    _require(ledger["score_accessed"] is False, "RND3 score was accessed")
+    _require(
+        contract["phase_contract"]["RND3"]["required_predecessor"]
+        == RND2_MERGE_PASS,
+        "RND3 predecessor changed",
+    )
+    _require_authority_paths(
+        active["authority"], RND3_AUTHORITY_PATHS, phase="RND3"
+    )
+    decisions = ledger.get("decisions")
+    _require(
+        isinstance(decisions, list) and decisions,
+        "RND3 predecessor event is missing",
+    )
+    event = decisions[-1]
+    _require(isinstance(event, dict), "RND3 predecessor event must be a mapping")
+    expected_event = {
+        "event": RND2_MERGE_PASS,
+        "decision": RND3_DECISION,
+        "experiment_id": "RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE",
+        "folds": [0, 1],
+        "seed": 0,
+        "point_epochs": 3,
+        "calibration_epochs": 3,
+        "controller_exit_code": 0,
+        "runner_exit_codes": [0, 0],
+        "cuda_only": True,
+        "cpu_fallback": False,
+        "held_target_accessed": False,
+        "score_accessed": False,
+        "partial_score_accessed": False,
+        "new_external_outcome_accessed": False,
+        "canonical_merge_path": str(RND2_MERGED_PATH),
+        "canonical_merge_status": RND2_MERGE_PASS,
+        "authority_token": TOKENS["RND3"],
+    }
+    observed_event = {key: event.get(key) for key in expected_event}
+    _require(observed_event == expected_event, "RND2 terminal merge evidence changed")
+
+
+def _check_rnd4_authority(
+    active: dict[str, Any],
+    contract: dict[str, Any],
+    ledger: dict[str, Any],
+) -> None:
+    authorization = active["authorization"]
+    observed_authorization = {
+        key: authorization.get(key) for key in RND4_AUTHORIZATION
+    }
+    _require(
+        observed_authorization == RND4_AUTHORIZATION,
+        "RND4 authorization scope or permissions changed",
+    )
+    _require(active["runnable_phases"] == ["RND4"], "RND4 is not solely runnable")
+    _require(active["training_allowed"] is False, "RND4 training remained open")
+    _require(
+        active["candidate_model_training_allowed"] is False,
+        "RND4 candidate training remained open",
+    )
+    _require(active["held_score_read_allowed"] is True, "RND4 score is not open")
+    _require(
+        active["partial_fold_score_read_allowed"] is False,
+        "RND4 partial score opened",
+    )
+    _require(
+        active["new_external_outcome_access_allowed"] is False,
+        "RND4 external outcome opened",
+    )
+    _require(active["gate_state"] == RND4_GATE_STATE, "RND4 gate state changed")
+    _require(active["next_allowed_action"] == RND4_ACTION, "RND4 action changed")
+    _require(ledger["next_action"] == RND4_ACTION, "RND4 ledger action changed")
+    _require(ledger["score_accessed"] is False, "RND4 score was already accessed")
+    _require(
+        contract["phase_contract"]["RND4"]["required_predecessor"]
+        == RND3_MERGE_PASS,
+        "RND4 predecessor changed",
+    )
+    _require_authority_paths(
+        active["authority"], RND4_AUTHORITY_PATHS, phase="RND4"
+    )
+    decisions = ledger.get("decisions")
+    _require(
+        isinstance(decisions, list) and decisions,
+        "RND4 predecessor event is missing",
+    )
+    event = decisions[-1]
+    _require(isinstance(event, dict), "RND4 predecessor event must be a mapping")
+    expected_event = {
+        "event": RND3_MERGE_PASS,
+        "decision": RND4_DECISION,
+        "experiment_id": "RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY",
+        "folds": list(range(20)),
+        "seed": 0,
+        "artifact_count": 20,
+        "held_target_accessed": False,
+        "score_accessed": False,
+        "partial_score_accessed": False,
+        "new_external_outcome_accessed": False,
+        "canonical_merge_path": str(RND3_MERGED_PATH),
+        "canonical_merge_status": RND3_MERGE_PASS,
+        "authority_token": TOKENS["RND4"],
+    }
+    observed_event = {key: event.get(key) for key in expected_event}
+    _require(observed_event == expected_event, "RND3 terminal merge evidence changed")
+
+
+def _check_rnd5_authority(
+    active: dict[str, Any],
+    contract: dict[str, Any],
+    ledger: dict[str, Any],
+) -> None:
+    authorization = active["authorization"]
+    observed_authorization = {
+        key: authorization.get(key) for key in RND5_AUTHORIZATION
+    }
+    _require(
+        observed_authorization == RND5_AUTHORIZATION,
+        "RND5 authorization scope or permissions changed",
+    )
+    _require(active["runnable_phases"] == ["RND5"], "RND5 is not solely runnable")
+    _require(active["training_allowed"] is False, "RND5 training reopened")
+    _require(
+        active["candidate_model_training_allowed"] is False,
+        "RND5 candidate training reopened",
+    )
+    _require(active["held_score_read_allowed"] is False, "RND5 scorer rerun opened")
+    _require(
+        active["partial_fold_score_read_allowed"] is False,
+        "RND5 partial score opened",
+    )
+    _require(
+        active["new_external_outcome_access_allowed"] is False,
+        "RND5 external outcome opened",
+    )
+    _require(active["gate_state"] == RND5_GATE_STATE, "RND5 gate state changed")
+    _require(active["next_allowed_action"] == RND5_ACTION, "RND5 action changed")
+    _require(ledger["next_action"] == RND5_ACTION, "RND5 ledger action changed")
+    _require(ledger["score_accessed"] is True, "RND5 score access is not recorded")
+    _require(
+        contract["phase_contract"]["RND5"]["required_predecessor"]
+        == RND4_SCORE_PASS,
+        "RND5 predecessor changed",
+    )
+    _require_authority_paths(
+        active["authority"], RND5_AUTHORITY_PATHS, phase="RND5"
+    )
+    decisions = ledger.get("decisions")
+    _require(
+        isinstance(decisions, list) and decisions,
+        "RND5 predecessor event is missing",
+    )
+    event = decisions[-1]
+    _require(isinstance(event, dict), "RND5 predecessor event must be a mapping")
+    expected_event = {
+        "event": RND4_SCORE_PASS,
+        "decision": RND5_DECISION,
+        "canonical_score_path": str(RND4_SCORE_PATH),
+        "canonical_score_status": RND4_SCORE_PASS,
+        "exit_code": 0,
+        "complete_valid_score": True,
+        "actual_fold_count": 20,
+        "score_accessed": True,
+        "partial_score_accessed": False,
+        "new_external_outcome_accessed": False,
+        "model_or_threshold_selection_performed": False,
+        "authority_token": TOKENS["RND5"],
+    }
+    observed_event = {key: event.get(key) for key in expected_event}
+    _require(observed_event == expected_event, "RND4 terminal score evidence changed")
+
+
 def validate_contract(repo_root: Path) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     active = _load_yaml(repo_root / ACTIVE_PATH)
@@ -317,6 +668,12 @@ def validate_contract(repo_root: Path) -> dict[str, Any]:
         _require(contract["phase_contract"][phase]["authority_token"] == token, f"{phase} contract token changed")
         if phase == "RND2":
             _check_rnd2_authority(active, contract, ledger)
+        elif phase == "RND3":
+            _check_rnd3_authority(active, contract, ledger)
+        elif phase == "RND4":
+            _check_rnd4_authority(active, contract, ledger)
+        elif phase == "RND5":
+            _check_rnd5_authority(active, contract, ledger)
         if phase in {"RND1", "RND2", "RND3", "RND6"}:
             _require(active["training_allowed"] is True, f"{phase} training not open")
             _require(active["held_score_read_allowed"] is False, f"{phase} held score opened")

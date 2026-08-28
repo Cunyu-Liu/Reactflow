@@ -142,10 +142,10 @@ phase_contract:
     held_score_read_allowed: false
   RND4:
     authority_token: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
-    required_predecessor: RND3_COMPLETE_UNSCORED_MERGE_EXACT_PASS
+    required_predecessor: RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS
   RND5:
     authority_token: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
-    required_predecessor: RND4_COMPLETE_SCORE_EXACT_PASS
+    required_predecessor: RND4_COMPLETE_SCORE_PASS
   RND6:
     authority_token: RNET_DISTILL_FIXED_SEEDS_0_TO_4_FORMAL_ONLY
     required_predecessor: RND5_TOP_JOURNAL_DEVELOPMENT_SCREEN_EXACT_PASS
