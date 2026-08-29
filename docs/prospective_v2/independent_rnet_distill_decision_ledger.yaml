@@ -1,255 +1,403 @@
 schema_version: reactflow_delta.independent_rnet_distill_decision_ledger.v1
 project_task_id: reactflow_delta_independent_rnet_distill
 created_at: '2026-08-28T10:27:00+08:00'
-current_phase: RND5
-current_status: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+current_phase: RND5T
+current_status: RNET_DISTILL_SCREEN_TERMINAL_CLOSED
 score_accessed: true
 partial_score_accessed: false
 new_external_outcome_accessed: false
-formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
+formal_chain_status: TERMINAL_RND5_NONPASS_RND6_NOT_RUN
 formal_score_accessed: false
 formal_qualification_accessed: false
-result_registry: {}
-
-decisions:
-  - time: '2026-08-28T09:40:00+08:00'
-    event: INDEPENDENT_HYPOTHESIS_TRIANGULATION_COMPLETE
-    decision: SELECT_RNET2_ALIGNED_DISTILLATION_VS_SHIFT17_MATCHED_NULL
-    evidence:
-      - RNet2 cache supplies an independent 384-dimensional chemical representation source.
-      - Group-DRO would revive the closed V13 family and was rejected.
-      - Joint source-receiver fields have strong negative prior evidence and higher implementation risk.
-      - Statistical audit warns that the 20-puzzle M2 development universe is heavily consumed.
-    scientific_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
-    score_accessed: false
-    external_outcome_accessed: false
-
-  - time: '2026-08-28T10:27:00+08:00'
-    event: INDEPENDENT_WORKTREE_CREATED
-    decision: OPEN_RND0_IMPLEMENTATION_AND_SOURCE_BINDING_ONLY
-    branch: codex/reactflow-delta-independent-rnet-distill-20260828
-    base_commit: 4702d2cf5feaa50bef0f5f5e447eae5b54ead34b
-    worktree: /home/cunyuliu/reactflow_delta_worktrees/independent_rnet_distill_20260828
-    artifact_root: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill
-    training_allowed: false
-    score_accessed: false
-    external_outcome_accessed: false
-
-  - time: '2026-08-28T10:39:00+08:00'
-    event: RNET2_LEGACY_PARENT_MANIFEST_STALENESS_DIAGNOSED
-    decision: DO_NOT_USE_PARENT_CONTENT_HASHES_AS_GATE_PROJECT_STRICT_STRUCTURAL_BINDING
-    parent_child_content_binding_mismatches: 388
-    parent_manifest_shard_entries: 409
-    legacy_parent_entry_content_sha256: f0cac181910a5bf52df20b19da642b97932027242f547944b26d9338b24ca424
-    verified_child_provenance_hash: 22a25b9db6b4e46951bd412708ab1d75644222793b4e31c62e1d3e0db0378f30
-    verification_method: reactflow.frozen.read_frozen_shard_verify_true
-    verification_exit_code: 0
-    interpretation: LEGACY_PARENT_MANIFEST_IS_SYSTEMICALLY_STALE_WHILE_CHILD_SCHEMA_COUNT_WEIGHTS_AND_PHYSICAL_FILES_REMAIN_CONSISTENT
-    project_binding_basis: CHILD_PROVENANCE_PLUS_ACTUAL_INDEX_AND_NPZ_SHAPE_READ
-    full_cache_rehash_performed: false
-    historical_source_modified: false
-    training_allowed: false
-    score_accessed: false
-    external_outcome_accessed: false
-
-  - time: '2026-08-28T10:46:00+08:00'
-    event: RNET2_TEACHER_CACHE_MNT_COPY_COMPLETE
-    decision: PRESERVE_HISTORICAL_SOURCE_AND_BIND_PROJECT_COPY
-    source: /home/cunyuliu/reactflow/artifacts/full_runs/full_ablation_20260709_003012/frozen/ribonanzanet2_sharded_full
-    destination: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source/ribonanzanet2_sharded_full
-    file_count: 2425
-    regular_file_count: 2014
-    directory_count: 411
-    bytes: 49798728468
-    deletion_count: 0
-    exit_code: 0
-    log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd0_teacher_cache_copy_20260828.log
-    historical_source_modified: false
-    training_allowed: false
-    score_accessed: false
-    external_outcome_accessed: false
-
-  - time: '2026-08-28T11:16:00+08:00'
-    event: RND0_IMPLEMENTATION_AND_SOURCE_BINDING_EXACT_PASS
-    decision: CLOSE_RND0_AND_AUTHORIZE_SINGLE_RND1_PAIRED_GPU_PRETRAIN
-    implementation_commit: d6a15a5fc4a64ee10af95e8b98df7acd5f577d08
-    implementation_commit_pushed: true
-    focused_tests: 44
-    focused_tests_status: PASS
-    python_modules_compiled: 8
-    shell_scripts_syntax_checked: 3
-    authority_validator_status: INDEPENDENT_RNET_DISTILL_AUTHORITY_EXACT_PASS
-    source_manifest: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source_binding/rnet2_teacher_source_manifest.json
-    source_manifest_status: RNET2_TEACHER_STRUCTURAL_SOURCE_BINDING_EXACT_PASS
-    source_record_count: 208905
-    source_shard_count: 409
-    source_single_feature_dim: 384
-    source_binding_basis: CHILD_PROVENANCE_SCHEMA_COUNT_WEIGHTS_PLUS_ACTUAL_INDEX_AND_NPZ_SHAPE_READ
-    full_cache_rehash_performed: false
-    live_teacher_used: false
-    openknot_mutant_outcome_accessed: false
-    new_external_outcome_accessed: false
-    training_allowed: true
-    authority_token: RNET_DISTILL_PAIRED_GPU_PRETRAIN_ONCE_ONLY
-    score_accessed: false
-    partial_score_accessed: false
-
-  - time: '2026-08-28T13:09:52+08:00'
-    event: RND6_FORMAL_CHAIN_FROZEN_INACTIVE
-    decision: FREEZE_FOUR_MUTUALLY_EXCLUSIVE_RND6_PHASES_PENDING_UNKNOWN_RND5_RESULT
-    lifecycle_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
-    activation_allowed: false
-    activation_predecessor: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
-    phase_order: [RND6P, RND6S, RND6Q, RND6T]
-    prediction_score_qualification_permissions_mutually_exclusive: true
-    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-    seeds: [0, 1, 2, 3, 4]
-    expected_fold_seed_pairs: 100
+result_registry:
+  screen:
+    phase: RND5
+    status: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
+    recorded_at: '2026-08-29T15:30:00+08:00'
+    report_path: docs/prospective_v2/independent_rnet_distill_screen_result.md
+    report_exists: true
+    canonical_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_unscored_merge.json
+    canonical_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_score.json
+    canonical_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_qualification.json
+    experiment_id: RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
+    authority_branch: codex/reactflow-delta-independent-rnet-distill-20260828
+    folds:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    seeds:
+    - 0
     point_epochs: 40
     calibration_epochs: 40
-    equal_seed_weight: 0.2
+    training_devices:
+    - cuda:0
+    gpu_names:
+    - NVIDIA A100-PCIE-40GB
+    - NVIDIA A100-PCIE-40GB MIG 1g.5gb
+    started_at_utc: '2026-08-29T02:37:10.424717+00:00'
+    finished_at_utc: '2026-08-29T05:03:39.889222+00:00'
+    source_commits:
+    - fe8c36ccb63de89e0383baccf453a3b6cb6413cf
+    gate_passed: false
+    integrity_passed: true
+    failed_gates:
+    - candidate_coverage95_in_frozen_interval
+    - distribution_absolute_gain_vs_feature41_ge_frozen_minimum
+    - distribution_absolute_gain_vs_historical_parent_ge_frozen_minimum
+    - distribution_absolute_gain_vs_matched_null_ge_frozen_minimum
+    - historical_parent_ci_lower_each_gt_zero
+    - historical_parent_positive_puzzles_each_ge_14
+    - matched_null_ci_lower_each_gt_zero
+    - matched_null_positive_puzzles_each_ge_14
+    - max_single_puzzle_effect_fraction_all_comparisons_le_0_20
+    - point_absolute_gain_vs_feature41_ge_frozen_minimum
+    - point_absolute_gain_vs_historical_parent_ge_frozen_minimum
+    - point_absolute_gain_vs_matched_null_ge_frozen_minimum
+    - signed_delta_gain_vs_feature41_ge_frozen_minimum
+    - signed_delta_gain_vs_historical_parent_ge_frozen_minimum
+    - signed_delta_gain_vs_matched_null_ge_frozen_minimum
+    - task_crps_gain_vs_feature41_ge_frozen_minimum
+    - task_crps_gain_vs_historical_parent_ge_frozen_minimum
+    - task_crps_gain_vs_matched_null_ge_frozen_minimum
+    integrity_errors: []
+    evidence_status: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+    clean_ood: NOT_ESTABLISHED
+    external_replication: NOT_ESTABLISHED
+    sota: NOT_ESTABLISHED
+    publication_ready: false
+    finalizer_source_commit: 14b83d98fdfdefd1e1e819ad181d5380f09104a9
+  formal:
+    status: NOT_RUN_RND5_NONPASS
+    reason: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
+    report_path: docs/prospective_v2/independent_rnet_distill_formal_result.md
+    report_exists: false
+    publication_ready: false
+decisions:
+- time: '2026-08-28T09:40:00+08:00'
+  event: INDEPENDENT_HYPOTHESIS_TRIANGULATION_COMPLETE
+  decision: SELECT_RNET2_ALIGNED_DISTILLATION_VS_SHIFT17_MATCHED_NULL
+  evidence:
+  - RNet2 cache supplies an independent 384-dimensional chemical representation source.
+  - Group-DRO would revive the closed V13 family and was rejected.
+  - Joint source-receiver fields have strong negative prior evidence and higher implementation
+    risk.
+  - Statistical audit warns that the 20-puzzle M2 development universe is heavily
+    consumed.
+  scientific_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+  score_accessed: false
+  external_outcome_accessed: false
+- time: '2026-08-28T10:27:00+08:00'
+  event: INDEPENDENT_WORKTREE_CREATED
+  decision: OPEN_RND0_IMPLEMENTATION_AND_SOURCE_BINDING_ONLY
+  branch: codex/reactflow-delta-independent-rnet-distill-20260828
+  base_commit: 4702d2cf5feaa50bef0f5f5e447eae5b54ead34b
+  worktree: /home/cunyuliu/reactflow_delta_worktrees/independent_rnet_distill_20260828
+  artifact_root: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill
+  training_allowed: false
+  score_accessed: false
+  external_outcome_accessed: false
+- time: '2026-08-28T10:39:00+08:00'
+  event: RNET2_LEGACY_PARENT_MANIFEST_STALENESS_DIAGNOSED
+  decision: DO_NOT_USE_PARENT_CONTENT_HASHES_AS_GATE_PROJECT_STRICT_STRUCTURAL_BINDING
+  parent_child_content_binding_mismatches: 388
+  parent_manifest_shard_entries: 409
+  legacy_parent_entry_content_sha256: f0cac181910a5bf52df20b19da642b97932027242f547944b26d9338b24ca424
+  verified_child_provenance_hash: 22a25b9db6b4e46951bd412708ab1d75644222793b4e31c62e1d3e0db0378f30
+  verification_method: reactflow.frozen.read_frozen_shard_verify_true
+  verification_exit_code: 0
+  interpretation: LEGACY_PARENT_MANIFEST_IS_SYSTEMICALLY_STALE_WHILE_CHILD_SCHEMA_COUNT_WEIGHTS_AND_PHYSICAL_FILES_REMAIN_CONSISTENT
+  project_binding_basis: CHILD_PROVENANCE_PLUS_ACTUAL_INDEX_AND_NPZ_SHAPE_READ
+  full_cache_rehash_performed: false
+  historical_source_modified: false
+  training_allowed: false
+  score_accessed: false
+  external_outcome_accessed: false
+- time: '2026-08-28T10:46:00+08:00'
+  event: RNET2_TEACHER_CACHE_MNT_COPY_COMPLETE
+  decision: PRESERVE_HISTORICAL_SOURCE_AND_BIND_PROJECT_COPY
+  source: /home/cunyuliu/reactflow/artifacts/full_runs/full_ablation_20260709_003012/frozen/ribonanzanet2_sharded_full
+  destination: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source/ribonanzanet2_sharded_full
+  file_count: 2425
+  regular_file_count: 2014
+  directory_count: 411
+  bytes: 49798728468
+  deletion_count: 0
+  exit_code: 0
+  log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd0_teacher_cache_copy_20260828.log
+  historical_source_modified: false
+  training_allowed: false
+  score_accessed: false
+  external_outcome_accessed: false
+- time: '2026-08-28T11:16:00+08:00'
+  event: RND0_IMPLEMENTATION_AND_SOURCE_BINDING_EXACT_PASS
+  decision: CLOSE_RND0_AND_AUTHORIZE_SINGLE_RND1_PAIRED_GPU_PRETRAIN
+  implementation_commit: d6a15a5fc4a64ee10af95e8b98df7acd5f577d08
+  implementation_commit_pushed: true
+  focused_tests: 44
+  focused_tests_status: PASS
+  python_modules_compiled: 8
+  shell_scripts_syntax_checked: 3
+  authority_validator_status: INDEPENDENT_RNET_DISTILL_AUTHORITY_EXACT_PASS
+  source_manifest: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source_binding/rnet2_teacher_source_manifest.json
+  source_manifest_status: RNET2_TEACHER_STRUCTURAL_SOURCE_BINDING_EXACT_PASS
+  source_record_count: 208905
+  source_shard_count: 409
+  source_single_feature_dim: 384
+  source_binding_basis: CHILD_PROVENANCE_SCHEMA_COUNT_WEIGHTS_PLUS_ACTUAL_INDEX_AND_NPZ_SHAPE_READ
+  full_cache_rehash_performed: false
+  live_teacher_used: false
+  openknot_mutant_outcome_accessed: false
+  new_external_outcome_accessed: false
+  training_allowed: true
+  authority_token: RNET_DISTILL_PAIRED_GPU_PRETRAIN_ONCE_ONLY
+  score_accessed: false
+  partial_score_accessed: false
+- time: '2026-08-28T13:09:52+08:00'
+  event: RND6_FORMAL_CHAIN_FROZEN_INACTIVE
+  decision: FREEZE_FOUR_MUTUALLY_EXCLUSIVE_RND6_PHASES_PENDING_UNKNOWN_RND5_RESULT
+  lifecycle_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
+  activation_allowed: false
+  activation_predecessor: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
+  phase_order:
+  - RND6P
+  - RND6S
+  - RND6Q
+  - RND6T
+  prediction_score_qualification_permissions_mutually_exclusive: true
+  folds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  expected_fold_seed_pairs: 100
+  point_epochs: 40
+  calibration_epochs: 40
+  equal_seed_weight: 0.2
+  best_seed_selection_allowed: false
+  extra_seed_selection_allowed: false
+  formal_score_accessed: false
+  formal_qualification_accessed: false
+  partial_score_accessed: false
+  new_external_outcome_accessed: false
+  canonical_paths:
+    formal_prediction_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4
+    formal_complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_complete_unscored_merge.json
+    formal_assembly_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/assembled
+    formal_assembly_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/assembled/rnet_distill_five_seed_prediction_only_assembly.json
+    formal_complete_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_complete_formal_score.json
+    formal_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_formal_qualification.json
+    screen_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_qualification.json
+  canonical_statuses:
+    screen_pass: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
+    formal_merge_pass: RND6P_COMPLETE_UNSCORED_FORMAL_MERGE_PASS
+    formal_assembly_pass: RND6P_EQUAL_SEED_PREDICTION_ONLY_ASSEMBLY_PASS
+    formal_score_pass: RND6S_COMPLETE_FORMAL_SCORE_PASS
+    formal_qualification_pass: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_PASS
+    formal_qualification_fail: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_FAIL
+    formal_qualification_indeterminate: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_INDETERMINATE
+  formal_gates:
+    screen_prerequisite_status: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
+    equal_seed_mixture_required: true
+    mixture_must_pass_frozen_screen_gates: true
+    individual_seed_positive_vs_matched_null_minimum:
+      signed_delta: 4
+      point_absolute: 4
+      task_crps: 4
+      distribution_absolute: 4
+    strict_positive_mean_gain_required: true
     best_seed_selection_allowed: false
     extra_seed_selection_allowed: false
-    formal_score_accessed: false
-    formal_qualification_accessed: false
-    partial_score_accessed: false
-    new_external_outcome_accessed: false
-    canonical_paths:
-      formal_prediction_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4
-      formal_complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_complete_unscored_merge.json
-      formal_assembly_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/assembled
-      formal_assembly_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/assembled/rnet_distill_five_seed_prediction_only_assembly.json
-      formal_complete_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_complete_formal_score.json
-      formal_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd6_formal_seeds0_4/rnet_distill_formal_qualification.json
-      screen_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_qualification.json
-    canonical_statuses:
-      screen_pass: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
-      formal_merge_pass: RND6P_COMPLETE_UNSCORED_FORMAL_MERGE_PASS
-      formal_assembly_pass: RND6P_EQUAL_SEED_PREDICTION_ONLY_ASSEMBLY_PASS
-      formal_score_pass: RND6S_COMPLETE_FORMAL_SCORE_PASS
-      formal_qualification_pass: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_PASS
-      formal_qualification_fail: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_FAIL
-      formal_qualification_indeterminate: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_FORMAL_INDETERMINATE
-    formal_gates:
-      screen_prerequisite_status: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
-      equal_seed_mixture_required: true
-      mixture_must_pass_frozen_screen_gates: true
-      individual_seed_positive_vs_matched_null_minimum:
-        signed_delta: 4
-        point_absolute: 4
-        task_crps: 4
-        distribution_absolute: 4
-      strict_positive_mean_gain_required: true
-      best_seed_selection_allowed: false
-      extra_seed_selection_allowed: false
-      evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
-    current_rnd1_phase_unchanged: true
-    current_rnd1_permissions_unchanged: true
-
-  - time: '2026-08-29T02:05:59+08:00'
-    event: RND1_PAIRED_PRETRAIN_EXACT_PASS
-    decision: CLOSE_RND1_AND_AUTHORIZE_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
-    experiment_id: RND1_RNET2_PAIRED_DISTILL_20260828
-    run_branch: codex/reactflow-delta-independent-rnet-distill-20260828
-    run_commit: 71ae9c6ea967a3ffdc40cf74808c73b0d5c2d89d
-    terminal_integration_commit: 5b43e09f29e6faccdb07c947cd83692ef701eba3
-    source_manifest: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source_binding/rnet2_teacher_source_manifest.json
-    pretrain_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd1_pretrain
-    controller_log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd1_rnet_distill_pretrain_20260828T1124.log
-    exit_file: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd1_rnet_distill_pretrain_20260828T1124.exit
-    exit_code: 0
-    artifact_count: 3
-    artifacts:
-      - independent_rnet_distill_candidate.pt
-      - independent_rnet_distill_null_shift17.pt
-      - independent_rnet_distill_pretrain_audit.json
-    distillation_seed: 20260828
-    data_order_seed: 20260828
-    distillation_epochs: 1
-    optimizer: ADAMW
-    learning_rate: 0.0002
-    weight_decay: 0.01
-    batch_size: 16
-    gradient_clip_norm: 1.0
-    physical_gpu: 6
-    device_requested: cuda:0
-    device_actual: cuda:0
-    precision: bfloat16
-    cpu_fallback: false
-    outcome_accessed: false
-    training_loss_accessed: false
-    scientific_metric_accessed: false
-    residual_heads_identical: true
-    pretrained_encoders_different: true
-    changed_encoder_tensor_count: 84
-    distill_head_excluded_from_downstream: true
-    source_manifest_status: RNET2_TEACHER_STRUCTURAL_SOURCE_BINDING_EXACT_PASS
-    terminal_validator_status: RND1_PAIRED_PRETRAIN_EXACT_PASS
-    authority_token: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
-    scientific_conclusion: ENGINEERING_PRETRAIN_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
-    next_step: RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
-
-  - time: '2026-08-29T04:47:06+08:00'
-    event: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
-    decision: CLOSE_RND2_AND_AUTHORIZE_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER
-    experiment_id: RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE
-    authority_commit: 35da76d7a182277af2fd55844965a86a3bb7b527
-    folds: [0, 1]
-    seed: 0
-    point_epochs: 3
-    calibration_epochs: 3
-    controller_session: rnd2_rnet_distill_gpu_20260829
-    controller_log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/logs/rnd2_controller_20260829T0208.log
-    controller_exit_file: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/logs/rnd2_controller_20260829T0208.log.exit
-    controller_exit_code: 0
-    runner_exit_codes: [0, 0]
-    cuda_visible_devices: [6, 7]
-    actual_devices: [cuda:0, cuda:0]
-    observed_compute_uuid: GPU-1bbaf049-a78e-a985-19d4-02448974ccf8
-    cuda_only: true
-    cpu_fallback: false
-    held_target_accessed: false
-    score_accessed: false
-    partial_score_accessed: false
-    new_external_outcome_accessed: false
-    exact_fold_artifact_count: 14
-    duplicate_or_unexpected_top_level_artifacts: 0
-    canonical_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/rnet_distill_complete_unscored_merge.json
-    canonical_merge_status: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
-    existing_merge_validator_status: EXISTING_MERGE_EXACT_PASS
-    authority_token: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
-    scientific_conclusion: ENGINEERING_SMOKE_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
-    next_step: RUN_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER
-
-  - time: '2026-08-29T15:09:00+08:00'
-    event: RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS
-    decision: CLOSE_RND3_AND_AUTHORIZE_SINGLE_RND4_COMPLETE_SCORE_ONCE
-    experiment_id: RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
-    folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-    seed: 0
-    artifact_count: 20
-    held_target_accessed: false
-    score_accessed: false
-    partial_score_accessed: false
-    new_external_outcome_accessed: false
-    canonical_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_unscored_merge.json
-    canonical_merge_status: RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS
-    authority_token: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
-    scientific_conclusion: ENGINEERING_MERGE_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
-    next_step: RUN_SINGLE_RND4_COMPLETE_SCORE_ONCE
-  - time: "2026-08-29T15:21:18+08:00"
-    event: RND4_COMPLETE_SCORE_PASS
-    decision: CLOSE_RND4_AND_AUTHORIZE_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
-    canonical_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_score.json
-    canonical_score_status: RND4_COMPLETE_SCORE_PASS
-    exit_code: 0
-    complete_valid_score: true
-    actual_fold_count: 20
-    score_accessed: true
-    partial_score_accessed: false
-    new_external_outcome_accessed: false
-    model_or_threshold_selection_performed: false
-    authority_token: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
-    next_step: RUN_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
-
-next_action: RUN_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
+    evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+  current_rnd1_phase_unchanged: true
+  current_rnd1_permissions_unchanged: true
+- time: '2026-08-29T02:05:59+08:00'
+  event: RND1_PAIRED_PRETRAIN_EXACT_PASS
+  decision: CLOSE_RND1_AND_AUTHORIZE_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
+  experiment_id: RND1_RNET2_PAIRED_DISTILL_20260828
+  run_branch: codex/reactflow-delta-independent-rnet-distill-20260828
+  run_commit: 71ae9c6ea967a3ffdc40cf74808c73b0d5c2d89d
+  terminal_integration_commit: 5b43e09f29e6faccdb07c947cd83692ef701eba3
+  source_manifest: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/source_binding/rnet2_teacher_source_manifest.json
+  pretrain_dir: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd1_pretrain
+  controller_log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd1_rnet_distill_pretrain_20260828T1124.log
+  exit_file: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/logs/rnd1_rnet_distill_pretrain_20260828T1124.exit
+  exit_code: 0
+  artifact_count: 3
+  artifacts:
+  - independent_rnet_distill_candidate.pt
+  - independent_rnet_distill_null_shift17.pt
+  - independent_rnet_distill_pretrain_audit.json
+  distillation_seed: 20260828
+  data_order_seed: 20260828
+  distillation_epochs: 1
+  optimizer: ADAMW
+  learning_rate: 0.0002
+  weight_decay: 0.01
+  batch_size: 16
+  gradient_clip_norm: 1.0
+  physical_gpu: 6
+  device_requested: cuda:0
+  device_actual: cuda:0
+  precision: bfloat16
+  cpu_fallback: false
+  outcome_accessed: false
+  training_loss_accessed: false
+  scientific_metric_accessed: false
+  residual_heads_identical: true
+  pretrained_encoders_different: true
+  changed_encoder_tensor_count: 84
+  distill_head_excluded_from_downstream: true
+  source_manifest_status: RNET2_TEACHER_STRUCTURAL_SOURCE_BINDING_EXACT_PASS
+  terminal_validator_status: RND1_PAIRED_PRETRAIN_EXACT_PASS
+  authority_token: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
+  scientific_conclusion: ENGINEERING_PRETRAIN_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
+  next_step: RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
+- time: '2026-08-29T04:47:06+08:00'
+  event: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
+  decision: CLOSE_RND2_AND_AUTHORIZE_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER
+  experiment_id: RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE
+  authority_commit: 35da76d7a182277af2fd55844965a86a3bb7b527
+  folds:
+  - 0
+  - 1
+  seed: 0
+  point_epochs: 3
+  calibration_epochs: 3
+  controller_session: rnd2_rnet_distill_gpu_20260829
+  controller_log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/logs/rnd2_controller_20260829T0208.log
+  controller_exit_file: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/logs/rnd2_controller_20260829T0208.log.exit
+  controller_exit_code: 0
+  runner_exit_codes:
+  - 0
+  - 0
+  cuda_visible_devices:
+  - 6
+  - 7
+  actual_devices:
+  - cuda:0
+  - cuda:0
+  observed_compute_uuid: GPU-1bbaf049-a78e-a985-19d4-02448974ccf8
+  cuda_only: true
+  cpu_fallback: false
+  held_target_accessed: false
+  score_accessed: false
+  partial_score_accessed: false
+  new_external_outcome_accessed: false
+  exact_fold_artifact_count: 14
+  duplicate_or_unexpected_top_level_artifacts: 0
+  canonical_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/rnet_distill_complete_unscored_merge.json
+  canonical_merge_status: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
+  existing_merge_validator_status: EXISTING_MERGE_EXACT_PASS
+  authority_token: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
+  scientific_conclusion: ENGINEERING_SMOKE_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
+  next_step: RUN_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER
+- time: '2026-08-29T15:09:00+08:00'
+  event: RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS
+  decision: CLOSE_RND3_AND_AUTHORIZE_SINGLE_RND4_COMPLETE_SCORE_ONCE
+  experiment_id: RND3_RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
+  folds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  seed: 0
+  artifact_count: 20
+  held_target_accessed: false
+  score_accessed: false
+  partial_score_accessed: false
+  new_external_outcome_accessed: false
+  canonical_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_unscored_merge.json
+  canonical_merge_status: RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS
+  authority_token: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
+  scientific_conclusion: ENGINEERING_MERGE_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
+  next_step: RUN_SINGLE_RND4_COMPLETE_SCORE_ONCE
+- time: '2026-08-29T15:21:18+08:00'
+  event: RND4_COMPLETE_SCORE_PASS
+  decision: CLOSE_RND4_AND_AUTHORIZE_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
+  canonical_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_score.json
+  canonical_score_status: RND4_COMPLETE_SCORE_PASS
+  exit_code: 0
+  complete_valid_score: true
+  actual_fold_count: 20
+  score_accessed: true
+  partial_score_accessed: false
+  new_external_outcome_accessed: false
+  model_or_threshold_selection_performed: false
+  authority_token: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+  next_step: RUN_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
+- time: '2026-08-29T15:30:00+08:00'
+  event: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
+  decision: CLOSE_RND5_AND_RECORD_SCREEN_NONPASS_WITHOUT_RND6
+  canonical_qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_qualification.json
+  canonical_qualification_status: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
+  exit_code: 1
+  gate_passed: false
+  integrity_passed: true
+  complete_valid_qualification: true
+  rnd6_authorized: false
+  formal_result_status: NOT_RUN_RND5_NONPASS
+  score_accessed: true
+  formal_score_accessed: false
+  formal_qualification_accessed: false
+  partial_score_accessed: false
+  new_external_outcome_accessed: false
+  model_or_threshold_selection_performed: false
+  evidence_status: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
+  canonical_screen_report_path: docs/prospective_v2/independent_rnet_distill_screen_result.md
+  authority_token: RNET_DISTILL_SCREEN_TERMINAL_CLOSED
+next_action: STOP_RND5_SCREEN_NONPASS_ALL_RUNTIME_RIGHTS_CLOSED

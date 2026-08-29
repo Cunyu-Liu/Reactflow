@@ -1,15 +1,19 @@
 ---
 slug: orchestrator-260828-independent-rnet-distill
 date: 2026-08-28
-status: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+status: RNET_DISTILL_SCREEN_TERMINAL_CLOSED
 parent: orchestrator-260827-v14-wt-profile
-formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
-formal_phase_order: [RND6P, RND6S, RND6Q, RND6T]
+formal_chain_status: TERMINAL_RND5_NONPASS_RND6_NOT_RUN
+formal_phase_order:
+- RND6P
+- RND6S
+- RND6Q
+- RND6T
 formal_activation_allowed: false
 formal_score_accessed: false
 formal_qualification_accessed: false
-screen_result_status: NOT_FINALIZED
-formal_result_status: NOT_FINALIZED
+screen_result_status: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
+formal_result_status: NOT_RUN_RND5_NONPASS
 publication_ready: false
 ---
 
@@ -135,3 +139,4 @@ not authorize revival of any closed family.
   no score or qualification access is authorized.
 
 - 2026-08-29: RND4 complete unbiased scoring over the frozen 20-fold screen read the canonical merge once, returned full valid scores with actual fold count 20, exit 0, exact status `RND4_COMPLETE_SCORE_PASS` and recorded no partial score or external outcome access. No model or threshold was selected. RND4 is closed and exactly one RND5 top-journal development-screen qualifier run is authorized; score read and scorer rerun are now closed.
+- 2026-08-29T15:30:00+08:00: The production finalizer recorded canonical RND5 status `RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL` at `docs/prospective_v2/independent_rnet_distill_screen_result.md` and transitioned to `RND5T`. Evidence remains `EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY`; publication readiness is false.

@@ -2,13 +2,12 @@ schema_version: reactflow_delta.active_contract.independent_rnet_distill.v1
 manifest_id: reactflow_delta_independent_rnet_distill_active_authority_20260828
 project_task_id: reactflow_delta_independent_rnet_distill
 created_at: '2026-08-28T10:27:00+08:00'
-updated_at: 2026-08-29T15:20:00+08:00
-
+updated_at: '2026-08-29T15:30:00+08:00'
 authority:
   pointer_role: INDEPENDENT_RNET_DISTILL_SINGLE_ACTIVE_AUTHORITY
-  current_phase: RND5
-  current_authority_state: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
-  current_runnable_phase: RND5
+  current_phase: RND5T
+  current_authority_state: RNET_DISTILL_SCREEN_TERMINAL_CLOSED
+  current_runnable_phase: NONE
   conflict_policy: FAIL_CLOSED
   branch: codex/reactflow-delta-independent-rnet-distill-20260828
   worktree: /home/cunyuliu/reactflow_delta_worktrees/independent_rnet_distill_20260828
@@ -29,19 +28,47 @@ authority:
   historical_v8_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v8/v8m1_corrected_experts_seed0
   historical_v10_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0
   historical_v14_score_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_complete_score.json
-  binding_status: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+  binding_status: RNET_DISTILL_SCREEN_TERMINAL_CLOSED
   complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_unscored_merge.json
   complete_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_score.json
   qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_qualification.json
-
 inactive_formal_chain:
-  lifecycle_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
+  lifecycle_status: TERMINAL_RND5_NONPASS_RND6_NOT_RUN
   activation_allowed: false
   activation_predecessor: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_PASS
-  phase_order: [RND6P, RND6S, RND6Q, RND6T]
+  phase_order:
+  - RND6P
+  - RND6S
+  - RND6Q
+  - RND6T
   prediction_score_qualification_permissions_mutually_exclusive: true
-  folds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-  seeds: [0, 1, 2, 3, 4]
+  folds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  seeds:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
   expected_fold_seed_pairs: 100
   point_epochs: 40
   calibration_epochs: 40
@@ -75,7 +102,6 @@ inactive_formal_chain:
     best_seed_selection_allowed: false
     extra_seed_selection_allowed: false
     evidence_ceiling: EXPOSURE_DISCLOSED_DEVELOPMENT_ONLY
-
 result_finalization:
   production_entry: scripts/reactflow_delta/finalize_independent_rnet_distill_result.py
   screen_report_path: docs/prospective_v2/independent_rnet_distill_screen_result.md
@@ -87,35 +113,42 @@ result_finalization:
   external_replication: NOT_ESTABLISHED
   sota: NOT_ESTABLISHED
   publication_ready: false
-
 formal_output_state:
   complete_unscored_merge_exists: false
   equal_seed_assembly_exists: false
   complete_formal_score_exists: false
   formal_qualification_exists: false
-
 parent_state:
   terminal_parent_commit: 4702d2cf5feaa50bef0f5f5e447eae5b54ead34b
   terminal_parent_status: TERMINAL_POST_V14_BRANCH5_ROUTE_PROBE_COMPLETE_FAIL_P3
   old_route_revival_allowed: false
   old_artifact_rerun_allowed: false
-
 authorization:
   owner_instruction: AUTONOMOUS_RAPID_MODEL_ITERATION_WITH_COMPLETE_EXPERIMENT_RECORDS
   owner_instruction_date: '2026-08-27'
-  scope: RND5_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+  scope: RND5T_SCREEN_TERMINAL_CLOSED
   contract_drafting_allowed: true
   implementation_allowed: false
   neural_training_allowed: false
   smoke_allowed: false
   screen_allowed: false
   score_allowed: false
-  qualification_allowed: true
+  qualification_allowed: false
   formal_confirmation_allowed: false
   new_external_outcome_access_allowed: false
-
-allowed_phases: [RND0, RND1, RND2, RND3, RND4, RND5, RND5T, RND6P, RND6S, RND6Q, RND6T]
-runnable_phases: [RND5]
+allowed_phases:
+- RND0
+- RND1
+- RND2
+- RND3
+- RND4
+- RND5
+- RND5T
+- RND6P
+- RND6S
+- RND6Q
+- RND6T
+runnable_phases: []
 training_allowed: false
 candidate_model_training_allowed: false
 held_score_read_allowed: false
@@ -126,18 +159,16 @@ new_split_allowed: false
 unrelated_job_interference_allowed: false
 terminal_parent_artifact_overwrite_allowed: false
 parent_terminal_verdict_change_allowed: false
-
 gate_state:
   RND0: RND0_SOURCE_AND_IMPLEMENTATION_EXACT_PASS
   RND1: RND1_PAIRED_PRETRAIN_EXACT_PASS
   RND2: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
   RND3: RND3_COMPLETE_UNSCORED_PREDICTION_MERGE_PASS
   RND4: RND4_COMPLETE_SCORE_PASS
-  RND5: AUTHORIZED_COMPLETE_QUALIFIER_ONCE
-  RND5T: NOT_AUTHORIZED
+  RND5: RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
+  RND5T: TERMINAL_RNET_DISTILL_TOP_JOURNAL_DEVELOPMENT_SCREEN_FAIL
   RND6P: NOT_AUTHORIZED
   RND6S: NOT_AUTHORIZED
   RND6Q: NOT_AUTHORIZED
   RND6T: NOT_AUTHORIZED
-
-next_allowed_action: RUN_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
+next_allowed_action: STOP_RND5_SCREEN_NONPASS_ALL_RUNTIME_RIGHTS_CLOSED
