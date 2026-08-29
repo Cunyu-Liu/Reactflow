@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260828-independent-rnet-distill
 date: 2026-08-28
-status: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
+status: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
 parent: orchestrator-260827-v14-wt-profile
 formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
 formal_phase_order: [RND6P, RND6S, RND6Q, RND6T]
@@ -125,3 +125,11 @@ not authorize revival of any closed family.
   Exact status is `RND1_PAIRED_PRETRAIN_EXACT_PASS`; this is engineering
   pretraining evidence only. RND1 is closed and exactly one seed-0 folds 0/1,
   3+3 epoch RND2 CUDA engineering smoke is authorized without score access.
+- 2026-08-29: The single RND2 seed-0 folds 0/1, 3+3 epoch CUDA engineering
+  smoke exited zero with both exact seven-artifact fold bundles and one canonical
+  target-free merge. The existing-merge validator returned
+  `RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS` and
+  `EXISTING_MERGE_EXACT_PASS`; no held target, score, partial score or external
+  outcome was accessed. RND2 is closed as engineering evidence only. Exactly
+  one RND3 seed-0 20-fold, 40+40 epoch prediction-only screen is authorized;
+  no score or qualification access is authorized.

@@ -1,8 +1,8 @@
 schema_version: reactflow_delta.independent_rnet_distill_decision_ledger.v1
 project_task_id: reactflow_delta_independent_rnet_distill
 created_at: '2026-08-28T10:27:00+08:00'
-current_phase: RND2
-current_status: RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE_ONLY
+current_phase: RND3
+current_status: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
 score_accessed: false
 partial_score_accessed: false
 new_external_outcome_accessed: false
@@ -189,4 +189,36 @@ decisions:
     scientific_conclusion: ENGINEERING_PRETRAIN_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
     next_step: RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
 
-next_action: RUN_SINGLE_RND2_TWO_FOLD_GPU_ENGINEERING_SMOKE
+  - time: '2026-08-29T04:47:06+08:00'
+    event: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
+    decision: CLOSE_RND2_AND_AUTHORIZE_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER
+    experiment_id: RND2_RNET_DISTILL_TWO_FOLD_GPU_ENGINEERING_SMOKE
+    authority_commit: 35da76d7a182277af2fd55844965a86a3bb7b527
+    folds: [0, 1]
+    seed: 0
+    point_epochs: 3
+    calibration_epochs: 3
+    controller_session: rnd2_rnet_distill_gpu_20260829
+    controller_log: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/logs/rnd2_controller_20260829T0208.log
+    controller_exit_file: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/logs/rnd2_controller_20260829T0208.log.exit
+    controller_exit_code: 0
+    runner_exit_codes: [0, 0]
+    cuda_visible_devices: [6, 7]
+    actual_devices: [cuda:0, cuda:0]
+    observed_compute_uuid: GPU-1bbaf049-a78e-a985-19d4-02448974ccf8
+    cuda_only: true
+    cpu_fallback: false
+    held_target_accessed: false
+    score_accessed: false
+    partial_score_accessed: false
+    new_external_outcome_accessed: false
+    exact_fold_artifact_count: 14
+    duplicate_or_unexpected_top_level_artifacts: 0
+    canonical_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd2_smoke_seed0/rnet_distill_complete_unscored_merge.json
+    canonical_merge_status: RND2_COMPLETE_UNSCORED_ENGINEERING_SMOKE_MERGE_PASS
+    existing_merge_validator_status: EXISTING_MERGE_EXACT_PASS
+    authority_token: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
+    scientific_conclusion: ENGINEERING_SMOKE_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
+    next_step: RUN_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER
+
+next_action: RUN_SINGLE_RND3_COMPLETE_SEED0_PREDICTION_ONLY_CONTROLLER
