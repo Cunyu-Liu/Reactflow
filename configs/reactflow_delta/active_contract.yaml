@@ -30,6 +30,9 @@ authority:
   historical_v10_dir: /mnt/cunyuliu/reactflow_delta_model_rescue_v10/v10m2_screen_seed0
   historical_v14_score_path: /mnt/cunyuliu/reactflow_delta_model_rescue_v14/v14m3_screen_seed0/v14m3_complete_score.json
   binding_status: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
+  complete_unscored_merge_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_unscored_merge.json
+  complete_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_score.json
+  qualification_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_qualification.json
 
 inactive_formal_chain:
   lifecycle_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
