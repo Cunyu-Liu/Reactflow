@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260828-independent-rnet-distill
 date: 2026-08-28
-status: RNET_DISTILL_COMPLETE_SEED0_PREDICTION_ONLY
+status: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
 parent: orchestrator-260827-v14-wt-profile
 formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
 formal_phase_order: [RND6P, RND6S, RND6Q, RND6T]
