@@ -2,7 +2,7 @@ schema_version: reactflow_delta.independent_rnet_distill_contract.v1
 contract_id: reactflow_delta_independent_rnet_distill_20260828
 project_task_id: reactflow_delta_independent_rnet_distill
 created_at: '2026-08-28T10:27:00+08:00'
-contract_status: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
+contract_status: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
 
 scope:
   hypothesis: >-

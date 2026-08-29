@@ -1,9 +1,9 @@
 schema_version: reactflow_delta.independent_rnet_distill_decision_ledger.v1
 project_task_id: reactflow_delta_independent_rnet_distill
 created_at: '2026-08-28T10:27:00+08:00'
-current_phase: RND4
-current_status: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
-score_accessed: false
+current_phase: RND5
+current_status: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+score_accessed: true
 partial_score_accessed: false
 new_external_outcome_accessed: false
 formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
@@ -237,5 +237,19 @@ decisions:
     authority_token: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
     scientific_conclusion: ENGINEERING_MERGE_EXACT_PASS_ONLY_NO_MODEL_PERFORMANCE_CLAIM
     next_step: RUN_SINGLE_RND4_COMPLETE_SCORE_ONCE
+  - time: "2026-08-29T15:21:18+08:00"
+    event: RND4_COMPLETE_SCORE_PASS
+    decision: CLOSE_RND4_AND_AUTHORIZE_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
+    canonical_score_path: /mnt/cunyuliu/reactflow_delta_independent_rnet_distill/rnd3_screen_seed0/rnet_distill_complete_score.json
+    canonical_score_status: RND4_COMPLETE_SCORE_PASS
+    exit_code: 0
+    complete_valid_score: true
+    actual_fold_count: 20
+    score_accessed: true
+    partial_score_accessed: false
+    new_external_outcome_accessed: false
+    model_or_threshold_selection_performed: false
+    authority_token: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
+    next_step: RUN_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE
 
-next_action: RUN_SINGLE_RND4_COMPLETE_SCORE_ONCE
+next_action: RUN_SINGLE_RND5_COMPLETE_QUALIFIER_ONCE

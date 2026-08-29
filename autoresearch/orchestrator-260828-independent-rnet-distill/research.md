@@ -1,7 +1,7 @@
 ---
 slug: orchestrator-260828-independent-rnet-distill
 date: 2026-08-28
-status: RNET_DISTILL_COMPLETE_MERGE_SCORE_ONCE_ONLY
+status: RNET_DISTILL_COMPLETE_SCORE_QUALIFIER_ONCE_ONLY
 parent: orchestrator-260827-v14-wt-profile
 formal_chain_status: FROZEN_INACTIVE_PENDING_RND5_RESULT
 formal_phase_order: [RND6P, RND6S, RND6Q, RND6T]
@@ -133,3 +133,5 @@ not authorize revival of any closed family.
   outcome was accessed. RND2 is closed as engineering evidence only. Exactly
   one RND3 seed-0 20-fold, 40+40 epoch prediction-only screen is authorized;
   no score or qualification access is authorized.
+
+- 2026-08-29: RND4 complete unbiased scoring over the frozen 20-fold screen read the canonical merge once, returned full valid scores with actual fold count 20, exit 0, exact status `RND4_COMPLETE_SCORE_PASS` and recorded no partial score or external outcome access. No model or threshold was selected. RND4 is closed and exactly one RND5 top-journal development-screen qualifier run is authorized; score read and scorer rerun are now closed.
