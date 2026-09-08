@@ -2,11 +2,13 @@
 """DeltaFlow conditional flow-matching residual-profile generator (Stage 2).
 
 The candidate denoiser models the joint distribution of the full residual
-profile ``r = target_delta - stage1_point`` conditioned on outcome-blind
-context.  The matched null keeps the identical parameter universe, operator
-family, initialization, and training protocol while restricting every
-position-mixing operator to the diagonal, which makes it a per-position
-generator at unchanged capacity.
+profile ``r = target_delta - stage1_point`` conditioned on the frozen
+condition vector c (WT sequence, WT 2A3-MaP profile with error/missing
+mask, SNV ref/alt/source-position context, RNet2 teacher embedding, and
+the Stage-1 per-position mean ``m``).  The matched null keeps the
+identical parameter universe, operator family, initialization, and
+training protocol while restricting every position-mixing operator to the
+diagonal, which makes it a per-position generator at unchanged capacity.
 """
 
 from __future__ import annotations
@@ -224,6 +226,12 @@ class DeltaFlowDenoiser(nn.Module):
     dependence the ODE trajectories would be independent of the initial
     noise, and the sampler could not represent the conditional distribution
     p(r | c).
+
+    The condition vector c follows the frozen spec (§4.1): WT sequence and
+    2A3-MaP profile (error/missing mask), SNV ref/alt/source-position
+    context (point_in), WT pair context (pair_in, derived from the same
+    frozen 18 channels), RNet2 teacher embedding, and the Stage-1
+    per-position mean ``stage1`` (m_i), each with a dedicated projection.
     """
 
     def __init__(self, *, diagonal: bool = False) -> None:
@@ -231,6 +239,7 @@ class DeltaFlowDenoiser(nn.Module):
         self.diagonal = bool(diagonal)
         self.state_in = nn.Linear(OUT_CHANNELS, SINGLE_WIDTH)
         self.point_in = nn.Linear(POINT_CHANNELS, SINGLE_WIDTH)
+        self.stage1_in = nn.Linear(OUT_CHANNELS, SINGLE_WIDTH)
         self.teacher_in = nn.Linear(TEACHER_WIDTH, SINGLE_WIDTH)
         self.time_in = nn.Sequential(
             nn.Linear(TIME_DIMS, FFN_WIDTH),
@@ -257,6 +266,7 @@ class DeltaFlowDenoiser(nn.Module):
         point_in: torch.Tensor,
         pair_in: torch.Tensor,
         teacher: torch.Tensor,
+        stage1: torch.Tensor,
         mask: torch.Tensor,
         t: torch.Tensor,
     ) -> torch.Tensor:
@@ -269,12 +279,15 @@ class DeltaFlowDenoiser(nn.Module):
             raise ValueError("flow pair inputs must have shape [B,28,L,L]")
         if teacher.shape != (batch, length, TEACHER_WIDTH):
             raise ValueError("flow teacher inputs must have shape [B,L,384]")
+        if stage1.ndim != 2 or stage1.shape != (batch, length):
+            raise ValueError("stage1 conditioning must have shape [B,L]")
         if mask.shape != (batch, length) or mask.dtype != torch.bool:
             raise ValueError("flow mask must have shape [B,L] and bool dtype")
         if t.shape != (batch,):
             raise ValueError("flow time must have shape [B]")
         single = self.point_in(point_in) + self.teacher_in(teacher)
         single = single + self.state_in(state.unsqueeze(-1))
+        single = single + self.stage1_in(stage1.unsqueeze(-1))
         single = single + self.time_in(time_features(t))[:, None, :]
         pair = self.pair_in(pair_in)
         for block in self.blocks:
@@ -460,6 +473,7 @@ def euler_flow_sample(
     point_in: torch.Tensor,
     pair_in: torch.Tensor,
     teacher: torch.Tensor,
+    stage1: torch.Tensor,
     mask: torch.Tensor,
     steps: int,
     generator: torch.Generator,
@@ -483,7 +497,7 @@ def euler_flow_sample(
     with torch.no_grad():
         for step in range(int(steps)):
             t = torch.full((point_in.shape[0],), step * dt, device=point_in.device)
-            velocity = model(state, point_in, pair_in, teacher, mask, t)
+            velocity = model(state, point_in, pair_in, teacher, stage1, mask, t)
             state = (state + dt * velocity) * mask.float()
     return state
 

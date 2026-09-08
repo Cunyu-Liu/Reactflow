@@ -66,11 +66,14 @@ def make_inputs(batch: int = 3, length: int = 24) -> dict:
     mask[0, -3:] = False
     point[0, -3:, :] = 0.0
     teacher = torch.randn(batch, length, TEACHER_WIDTH) * 0.05
+    stage1 = torch.randn(batch, length) * 0.1
+    stage1 = stage1 * mask.float()
     pair = build_pair_channels(point, mask)
     return {
         "point": point,
         "pair": pair,
         "teacher": teacher,
+        "stage1": stage1,
         "mask": mask,
         "edit": edit,
     }
@@ -79,10 +82,11 @@ def make_inputs(batch: int = 3, length: int = 24) -> dict:
 def main() -> None:
     device = torch.device("cpu")
     inputs = make_inputs()
-    point, pair, teacher, mask = (
+    point, pair, teacher, stage1, mask = (
         inputs["point"],
         inputs["pair"],
         inputs["teacher"],
+        inputs["stage1"],
         inputs["mask"],
     )
     batch, length = mask.shape
@@ -125,8 +129,8 @@ def main() -> None:
     state_a = torch.randn(batch, length)
     state_b = torch.randn(batch, length)
     with torch.no_grad():
-        vel_a = candidate(state_a, point, pair, teacher, mask, t)
-        vel_b = candidate(state_b, point, pair, teacher, mask, t)
+        vel_a = candidate(state_a, point, pair, teacher, stage1, mask, t)
+        vel_b = candidate(state_b, point, pair, teacher, stage1, mask, t)
     init_diff = (vel_a - vel_b).abs().max().item()
     print(f"velocity init |dV| (zero-init output layer): {init_diff:.2e}")
     assert (vel_a[~mask] == 0).all(), "velocity not masked"
@@ -134,7 +138,7 @@ def main() -> None:
     t = torch.rand(batch)
     residual = torch.randn(batch, length)
     noise = torch.randn(batch, length)
-    velocity = candidate(state_a, point, pair, teacher, mask, t)
+    velocity = candidate(state_a, point, pair, teacher, stage1, mask, t)
     loss = masked_flow_loss(velocity, residual, noise, mask)
     assert torch.isfinite(loss), "flow loss non-finite"
     loss.backward()
@@ -154,6 +158,7 @@ def main() -> None:
         point_in=point,
         pair_in=pair,
         teacher=teacher,
+        stage1=stage1,
         mask=mask,
         steps=10,
         generator=generator,
@@ -164,6 +169,7 @@ def main() -> None:
         point_in=point,
         pair_in=pair,
         teacher=teacher,
+        stage1=stage1,
         mask=mask,
         steps=10,
         generator=generator,
@@ -175,6 +181,7 @@ def main() -> None:
         point_in=point,
         pair_in=pair,
         teacher=teacher,
+        stage1=stage1,
         mask=mask,
         steps=10,
         generator=generator,
@@ -195,6 +202,7 @@ def main() -> None:
                 point_in=point,
                 pair_in=pair,
                 teacher=teacher,
+                stage1=stage1,
                 mask=mask,
                 steps=10,
                 generator=generator,
@@ -221,31 +229,54 @@ def main() -> None:
     trained = DeltaFlowDenoiser(diagonal=False)
     with torch.no_grad():
         trained.load_state_dict(candidate.state_dict())
-    optimizer = torch.optim.AdamW(trained.parameters(), lr=2e-4, weight_decay=0.01)
-    first = None
-    for epoch in range(30):
+
+    t_eval = torch.rand(batch)
+    noise_eval = torch.randn(batch, length)
+    state_eval = interpolate_flow_state(noise_eval, residual, t_eval, mask)
+
+    def fixed_draw_loss(model: DeltaFlowDenoiser) -> float:
+        with torch.no_grad():
+            velocity_eval = model(
+                state_eval, point, pair, teacher, stage1, mask, t_eval
+            )
+            return masked_flow_loss(velocity_eval, residual, noise_eval, mask).item()
+
+    before = fixed_draw_loss(trained)
+    optimizer = torch.optim.AdamW(trained.parameters(), lr=5e-3, weight_decay=0.01)
+    for epoch in range(200):
         optimizer.zero_grad(set_to_none=True)
         t = torch.rand(batch)
         noise = torch.randn(batch, length)
         query_state = interpolate_flow_state(noise, residual, t, mask)
-        velocity = trained(query_state, point, pair, teacher, mask, t)
+        velocity = trained(query_state, point, pair, teacher, stage1, mask, t)
         loss = masked_flow_loss(velocity, residual, noise, mask)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(trained.parameters(), 1.0)
         optimizer.step()
-        if first is None:
-            first = loss.item()
-    print(f"training smoke: loss {first:.4f} -> {loss.item():.4f} over 30 steps")
-    assert loss.item() < first, "training loss did not decrease"
+    after = fixed_draw_loss(trained)
+    print(
+        f"training smoke: fixed-draw loss {before:.4f} -> {after:.4f} over 200 steps"
+        " (smoke lr 5e-3 for CPU reachability; production lr 2e-4 per spec 4.4)"
+    )
+    assert after < 0.85 * before, "training did not reduce the fixed-draw flow loss"
     assert torch.isfinite(loss)
 
     t_check = torch.rand(batch)
     with torch.no_grad():
-        trained_vel_a = trained(state_a, point, pair, teacher, mask, t_check)
-        trained_vel_b = trained(state_b, point, pair, teacher, mask, t_check)
+        trained_vel_a = trained(state_a, point, pair, teacher, stage1, mask, t_check)
+        trained_vel_b = trained(state_b, point, pair, teacher, stage1, mask, t_check)
     trained_diff = (trained_vel_a - trained_vel_b).abs().max().item()
     print(f"velocity state sensitivity after training: {trained_diff:.6f}")
     assert trained_diff > 1e-4, "velocity network is not state-sensitive after training"
+
+    stage1_shifted = stage1 + 0.05
+    with torch.no_grad():
+        trained_vel_s = trained(
+            state_a, point, pair, teacher, stage1_shifted, mask, t_check
+        )
+    stage1_effect = (trained_vel_a - trained_vel_s).abs().max().item()
+    print(f"velocity stage1 sensitivity after training: {stage1_effect:.6f}")
+    assert stage1_effect > 1e-6, "stage1 conditioning does not reach the network"
 
     null_model = DeltaFlowDenoiser(diagonal=True)
     with torch.no_grad():
@@ -260,13 +291,13 @@ def main() -> None:
     t_fixed = torch.full((batch,), 0.5)
     state_fixed = torch.zeros(batch, length)
     with torch.no_grad():
-        base_cand = trained(state_fixed, point, pair, teacher, mask, t_fixed)
+        base_cand = trained(state_fixed, point, pair, teacher, stage1, mask, t_fixed)
         swap_cand = trained(
-            state_fixed, point_swapped, pair_swapped, teacher, mask, t_fixed
+            state_fixed, point_swapped, pair_swapped, teacher, stage1, mask, t_fixed
         )
-        base_null = null_model(state_fixed, point, pair, teacher, mask, t_fixed)
+        base_null = null_model(state_fixed, point, pair, teacher, stage1, mask, t_fixed)
         swap_null = null_model(
-            state_fixed, point_swapped, pair_swapped, teacher, mask, t_fixed
+            state_fixed, point_swapped, pair_swapped, teacher, stage1, mask, t_fixed
         )
     cand_row_change = (base_cand - swap_cand).abs()[b0]
     cand_rows = set(torch.nonzero(cand_row_change > 1e-6).flatten().tolist())
