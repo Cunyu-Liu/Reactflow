@@ -403,12 +403,25 @@ def build_pair_channels(
 def make_flow_pair(
     *, seed: int, device: str | torch.device
 ) -> tuple[DeltaFlowDenoiser, DeltaFlowDenoiser]:
-    """Create the candidate/diagonal-null pair from one initialization."""
+    """Create the candidate/diagonal-null pair from one initialization.
+
+    deepcopy preserves every parameter bitwise, but it also carries over
+    the candidate's non-diagonal operator flags, so the copy must flip the
+    diagonal restriction back on explicitly (the flag is plain Python
+    state, not a parameter, so the parameter universe stays identical).
+    """
 
     torch.manual_seed(int(seed))
     candidate = DeltaFlowDenoiser(diagonal=False).to(device)
     null = copy.deepcopy(candidate)
+    null.diagonal = True
+    for block in null.blocks:
+        block.diagonal = True
     assert_flow_pair_initial_match(candidate, null)
+    if candidate.diagonal or any(block.diagonal for block in candidate.blocks):
+        raise RuntimeError("candidate lost its non-diagonal operators")
+    if not null.diagonal or any(not block.diagonal for block in null.blocks):
+        raise RuntimeError("matched null is not diagonal")
     return candidate, null
 
 
