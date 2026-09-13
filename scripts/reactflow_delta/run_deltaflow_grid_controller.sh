@@ -78,7 +78,7 @@ IFS=',' read -r -a GPU_LIST <<< "$GPUS"
 USABLE_GPUS=()
 for gpu in "${GPU_LIST[@]}"; do
     free_gb=$(
-        CUDA_VISIBLE_DEVICES="$gpu" "$PYTHON" - <<'PY' 2>/dev/null || echo "0"
+        CUDA_VISIBLE_DEVICES="$gpu" "$PYTHON" - <<'PY' 2>/dev/null || echo "-1"
 import torch
 if not torch.cuda.is_available():
     raise SystemExit(1)
@@ -86,7 +86,7 @@ free, _total = torch.cuda.mem_get_info()
 print(f"{free / 2**30:.1f}")
 PY
     ) || true
-    if (( $(echo "$free_gb >= 10.0" | bc -l 2>/dev/null || echo 0) )); then
+    if awk "BEGIN {exit !($free_gb >= 10.0)}" 2>/dev/null; then
         USABLE_GPUS+=("$gpu")
     else
         echo "[controller] GPU $gpu skipped (free=${free_gb}GiB < 10 or CUDA unavailable)"
