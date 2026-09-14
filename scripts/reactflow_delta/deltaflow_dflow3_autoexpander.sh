@@ -16,7 +16,7 @@ CONTROLLER="$REPO_ROOT/scripts/reactflow_delta/run_deltaflow_grid_controller.sh"
 OUT_DIR="/mnt/cunyuliu/reactflow_delta_deltaflow_dflow3_formal"
 PYTHON="/home/cunyuliu/miniconda3/envs/editflow/bin/python"
 EXPANDER_LOG="/home/cunyuliu/deltaflow_dflow3_expander.log"
-THRESH_GB=20
+THRESH_GB=11
 CYCLE_SECONDS=1800
 
 grid_complete() {
