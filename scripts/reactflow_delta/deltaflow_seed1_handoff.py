@@ -55,6 +55,10 @@ def stage1_verify(dflow3_dir: Path, n_folds: int = 20) -> None:
 
 
 def stage2_merge(dflow3_dir: Path) -> None:
+    marker = dflow3_dir / "deltaflow_merged_predictions_seed1.npz"
+    if marker.exists():
+        print("[handoff] MERGE skipped (canonical merge already published)")
+        return
     cmd = [
         sys.executable,
         str(Path(__file__).resolve().parent / "merge_deltaflow_predictions.py"),
@@ -167,6 +171,19 @@ def stage3_preview(seed0_npz: Path, seed1_npz: Path, out_dir: Path) -> dict:
             row_frac_equal=float(np.mean(e_c[m] == e_n[m])),
             folds_candidate_scale_below=int(np.sum(fold_c < fold_n)),
         )
+    flow_ord = {}
+    for name, d in (("seed0", d0), ("seed1", d1)):
+        sc = np.ravel(d["flow_candidate_scales"].astype(np.float64))
+        sn = np.ravel(d["flow_null_scales"].astype(np.float64))
+        ec = np.ravel(d["flow_candidate_expected_absolute_delta"])
+        en = np.ravel(d["flow_null_expected_absolute_delta"])
+        m_s = np.isfinite(sc) & np.isfinite(sn)
+        m_e = np.isfinite(ec) & np.isfinite(en)
+        flow_ord[name] = dict(
+            flow_row_frac_scale_c_and_below=float(np.mean(sc[m_s] <= sn[m_s])),
+            flow_row_frac_ead_c_and_below=float(np.mean(ec[m_e] <= en[m_e])),
+        )
+    report["arm_ordering_flow"] = flow_ord
     report["arm_ordering"] = ord_report
 
     if out_dir is not None:
@@ -224,7 +241,15 @@ def _render_md(r: dict) -> str:
         o = r["arm_ordering"][seed]
         lines.append(f"| {seed} | {o['row_frac_candidate_below']:.3f} | "
                      f"{o['folds_candidate_scale_below']} |")
-    lines += ["", "> Interpretation: this preview only checks that the two "
+    lines += ["", "## flow-level arm ordering (the hypothesis-relevant layer)", "",
+              "| seed | row-frac flow candidate scale ≤ null | row-frac flow candidate E\|Δ\| ≤ null |",
+              "|---|---|---|"]
+    for seed in ("seed0", "seed1"):
+        o = r.get("arm_ordering_flow", {}).get(seed, {})
+        lines.append(f"| {seed} | {o.get('flow_row_frac_scale_c_and_below', float('nan')):.3f} | "
+                     f"{o.get('flow_row_frac_ead_c_and_below', float('nan')):.3f} |")
+    lines += ["", ": warning: `point-level arm ordering` above is expected to be 0/0 — stage1 point outputs are arm-identical by construction; the arms diverge only at the flow layer.", "",
+              "> Interpretation: this preview only checks that the two "
               "seeds agree on *predictive* statistics (locations, scales) and "
               "that the candidate/null arm ordering is stable. It reads no "
               "targets.", ""]
