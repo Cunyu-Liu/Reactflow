@@ -9,11 +9,11 @@ commit (7bc771e) and the Phase 1 freeze table F2/F3.
 F2 primary-gate conditions (all four metrics, candidate vs null):
   1. assembly-level paired 95% CI of the per-fold improvement direction
      (N=20 folds, t-distribution df=19, t_0.975 = 2.093024);
-  2. >= 4/5 seeds individually positive (per-seed 20-fold aggregate);
+  2. 2/2 seeds individually positive (per-seed 20-fold aggregate; amended 2026-09-19);
   3. assembly-level aggregate improvement percent >= MDE tier.
 
 Both MDE tiers are computed and registered: independent tier
-(sigma_assembly = sigma_d / sqrt(5), primary) and conservative tier
+(sigma_assembly = sigma_d / sqrt(2), primary; amended 2026-09-19) and conservative tier
 (rho=1 audit); Step 2 measures realized rho/sigma_assembly and the
 realized-tier MDE; Step 3 grades PASS (strong) / PASS with caveat /
 FAIL.
@@ -38,15 +38,17 @@ import numpy as np
 SCHEMA = "reactflow_delta.deltaflow_qualification.v1"
 SCORE_SCHEMA = "reactflow_delta.deltaflow_score.v1"
 T975_DF19 = 2.093024
-SEED_UNIVERSE = (0, 1, 2, 3, 4)
+SEED_UNIVERSE = (0, 1)  # 2-seed final per amendment 2026-09-19 (no further seeds will be run)
 K_INDEPENDENT = 1.0 / math.sqrt(len(SEED_UNIVERSE))
 K_CONSERVATIVE = 1.0
 
+# independent-tier MDE amended for 2 seeds: frozen values x sqrt(5/2) = 1.58114
+# (deltaflow_amendment_2seed_final.md, 2026-09-19); conservative tier (rho=1) unchanged.
 PRIMARY_METRICS = (
-    ("signed_delta_mae", 1.17, 2.61),
-    ("point_absolute_delta_mae", 1.73, 3.86),
-    ("crps", 0.72, 1.62),
-    ("distribution_absolute_delta_mae", 0.81, 1.80),
+    ("signed_delta_mae", 1.85, 2.61),
+    ("point_absolute_delta_mae", 2.74, 3.86),
+    ("crps", 1.14, 1.62),
+    ("distribution_absolute_delta_mae", 1.28, 1.80),
 )
 CANDIDATE_PREFIX = "flow_candidate"
 NULL_PREFIX = "flow_null"
@@ -122,8 +124,8 @@ def _primary_gate(
     def conditions(mde: float) -> dict[str, Any]:
         return {
             "ci_lower_positive": bool(low > 0.0),
-            "seeds_positive": f"{n_positive}/5",
-            "seeds_positive_pass": bool(n_positive >= 4),
+            "seeds_positive": f"{n_positive}/{len(SEED_UNIVERSE)}",
+            "seeds_positive_pass": bool(n_positive >= len(SEED_UNIVERSE)),
             "aggregate_improvement_percent": mean,
             "mde_percent": mde,
             "mde_pass": bool(mean >= mde),
@@ -225,7 +227,7 @@ def qualify(score_path: Path) -> dict[str, Any]:
             "F3 joint-structure metrics are reported per the frozen scorer; "
             "they are separate from the primary gate and MARGINAL never counts."
         ),
-        "rule_source": "Task 7 freeze commit 7bc771e / Phase 1 freeze table F2-F3",
+        "rule_source": "Task 7 freeze commit 7bc771e / Phase 1 freeze table F2-F3 / 2-seed amendment deltaflow_amendment_2seed_final (2026-09-19)",
         "thresholds_frozen": True,
     }
 

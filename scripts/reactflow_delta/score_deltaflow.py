@@ -56,9 +56,10 @@ from scripts.reactflow_delta.split_v4_lopo_puzzle import build_split_v4
 SCHEMA = "reactflow_delta.deltaflow_score.v1"
 MERGED_SCHEMA = "reactflow_delta.deltaflow_merged_prediction.v1"
 SPLIT_SEED = 20260813
-SEED_UNIVERSE = (0, 1, 2, 3, 4)
+FROZEN_SEED_UNIVERSE = (0, 1, 2, 3, 4)
+ACTIVE_SEEDS = FROZEN_SEED_UNIVERSE  # runtime override to (0, 1) per amendment 2026-09-19
 FOLD_UNIVERSE = tuple(range(20))
-ASSEMBLY_WEIGHT = 0.2
+ASSEMBLY_WEIGHT_FROZEN_5SEED = 0.2  # frozen F1 value; 2-seed amendment uses 1/len(ACTIVE_SEEDS)
 FLOW_ARMS = ("flow_candidate", "flow_null")
 REFERENCE_ARMS = ("feature41", "v8", "historical_v10")
 METRIC_SUFFIXES = (
@@ -186,29 +187,29 @@ def _assembly_mixtures(views: dict[int, dict[str, Any]]) -> dict[str, dict[str, 
     assembly: dict[str, dict[str, np.ndarray]] = {}
     for arm in FLOW_ARMS:
         locations = np.stack(
-            [views[seed][f"{arm}_locations"].astype(np.float64) for seed in SEED_UNIVERSE],
+            [views[seed][f"{arm}_locations"].astype(np.float64) for seed in ACTIVE_SEEDS],
             axis=1,
         )
         scales = np.stack(
-            [views[seed][f"{arm}_scales"].astype(np.float64) for seed in SEED_UNIVERSE],
+            [views[seed][f"{arm}_scales"].astype(np.float64) for seed in ACTIVE_SEEDS],
             axis=1,
         )
         expected = np.sum(
             np.stack(
                 [
                     views[seed][f"{arm}_expected_absolute_delta"].astype(np.float64)
-                    for seed in SEED_UNIVERSE
+                    for seed in ACTIVE_SEEDS
                 ],
                 axis=0,
             )
-            * ASSEMBLY_WEIGHT,
+            * (1.0 / len(ACTIVE_SEEDS)),
             axis=0,
         )
         assembly[arm] = {
-            "weights": np.full((locations.shape[0], len(SEED_UNIVERSE)), ASSEMBLY_WEIGHT),
+            "weights": np.full((locations.shape[0], len(ACTIVE_SEEDS)), 1.0 / len(ACTIVE_SEEDS)),
             "locations": locations,
             "scales": scales,
-            "point": np.sum(ASSEMBLY_WEIGHT * locations, axis=1),
+            "point": np.sum((1.0 / len(ACTIVE_SEEDS)) * locations, axis=1),
             "expected": expected,
         }
     return assembly
@@ -396,18 +397,18 @@ def score_fold(
         record for record in univ.get_records() if record.puzzle == fold.held_puzzle
     ]
     rows = _position_table(univ, held_records)
-    expected_keys = set(views[SEED_UNIVERSE[0]]["keys"])
-    for seed in SEED_UNIVERSE:
+    expected_keys = set(views[ACTIVE_SEEDS[0]]["keys"])
+    for seed in ACTIVE_SEEDS:
         if set(views[seed]["keys"]) != expected_keys:
             raise ValueError(f"fold {fold_id} seed {seed} key universe mismatch")
-    flow_index = views[SEED_UNIVERSE[0]]["flow_index"]
-    for seed in SEED_UNIVERSE[1:]:
+    flow_index = views[ACTIVE_SEEDS[0]]["flow_index"]
+    for seed in ACTIVE_SEEDS[1:]:
         if views[seed]["flow_index"] != flow_index:
             raise ValueError(f"fold {fold_id} seed {seed} flow key mismatch")
 
     assembly = _assembly_mixtures(views)
     seed_mixtures = {}
-    for seed in SEED_UNIVERSE:
+    for seed in ACTIVE_SEEDS:
         for label, mixture in _seed_mixtures(views[seed]).items():
             seed_mixtures[f"{label}{seed}"] = mixture
     result: dict[str, Any] = {}
@@ -416,7 +417,7 @@ def score_fold(
         for suffix in METRIC_SUFFIXES:
             result[f"{label}_{suffix}"] = _puzzle_macro(values[suffix])
     for name in REFERENCE_ARMS:
-        values = _reference_values(rows, views[SEED_UNIVERSE[0]], name)
+        values = _reference_values(rows, views[ACTIVE_SEEDS[0]], name)
         for suffix in METRIC_SUFFIXES:
             if values[suffix]:
                 result[f"{name}_{suffix}"] = _puzzle_macro(values[suffix])
@@ -426,7 +427,7 @@ def score_fold(
     result["held_puzzle"] = str(fold.held_puzzle)
 
     joint_summary: dict[str, Any] = {}
-    for seed in SEED_UNIVERSE:
+    for seed in ACTIVE_SEEDS:
         joint_seed = joint_seed_override if joint_seed_override is not None else seed
         joint_dir = experiment_dirs[joint_seed]
         candidate_mutants = _joint_mutants(
@@ -463,18 +464,21 @@ def main(argv: list[str] | None = None) -> int:
     experiment_dirs = {
         seed: path for seed, path in map(parse_seed_dir, args.experiment_dir)
     }
-    if tuple(sorted(experiment_dirs)) != SEED_UNIVERSE:
+    global ACTIVE_SEEDS
+    active = tuple(sorted(experiment_dirs))
+    if active != (0, 1):
         raise ValueError(
-            f"score-once requires exactly seeds 0-4, got {sorted(experiment_dirs)}"
+            f"amended 2-seed protocol (2026-09-19) requires exactly seeds 0,1; got {active}"
         )
+    ACTIVE_SEEDS = active
     merged_by_seed = {
-        seed: load_merged(experiment_dirs[seed], seed) for seed in SEED_UNIVERSE
+        seed: load_merged(experiment_dirs[seed], seed) for seed in ACTIVE_SEEDS
     }
     audits = {
-        seed: load_merge_audit(experiment_dirs[seed], seed) for seed in SEED_UNIVERSE
+        seed: load_merge_audit(experiment_dirs[seed], seed) for seed in ACTIVE_SEEDS
     }
-    boundaries = fold_slices(audits[SEED_UNIVERSE[0]])
-    for seed in SEED_UNIVERSE[1:]:
+    boundaries = fold_slices(audits[ACTIVE_SEEDS[0]])
+    for seed in ACTIVE_SEEDS[1:]:
         if fold_slices(audits[seed]) != boundaries:
             raise ValueError(f"fold boundaries differ across seeds at seed {seed}")
 
@@ -496,7 +500,7 @@ def main(argv: list[str] | None = None) -> int:
     for fold_id in FOLD_UNIVERSE:
         views = {
             seed: fold_view(merged_by_seed[seed], fold_id, boundaries)
-            for seed in SEED_UNIVERSE
+            for seed in ACTIVE_SEEDS
         }
         scores.append(
             score_fold(univ, folds[fold_id], views, experiment_dirs)
@@ -506,9 +510,10 @@ def main(argv: list[str] | None = None) -> int:
         "status": "DELTAFLOW_COMPLETE_SCORE_PASS",
         "scores": scores,
         "target_profile_identity": "EXACT_PUZZLE_METHOD_MUTATION",
-        "seeds": list(SEED_UNIVERSE),
-        "assembly_weight": ASSEMBLY_WEIGHT,
+        "seeds": list(ACTIVE_SEEDS),
+        "assembly_weight": 1.0 / len(ACTIVE_SEEDS),
         "held_score_computed_once": True,
+        "protocol_amendment": "deltaflow_amendment_2seed_final (2026-09-19): 2-seed final, no further seeds",
         "partial_fold_scores_inspected": False,
         "external_outcome_accessed": False,
         "model_or_threshold_selection_performed": False,
